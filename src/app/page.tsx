@@ -40,7 +40,7 @@ export default function Home() {
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Mobile UI Context
-  const { isSearchOpen, isMenuOpen, setSearchOpen, setMenuOpen } = useMobileUI();
+  const { isSearchOpen, isMenuOpen, setSearchOpen, setMenuOpen, theme, toggleTheme } = useMobileUI();
 
   // Fetch popular anime
   const fetchPopular = async () => {
@@ -121,7 +121,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white selection:bg-purple-500/30 overflow-x-hidden font-sans">
+    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">
       {/* No JavaScript Fallback */}
       <noscript>
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6">
@@ -153,63 +153,80 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm"
             onClick={() => setMenuOpen(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto"
+              className="w-full md:max-w-md bg-[var(--bg-card)] border-t md:border border-[var(--border-color)] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
             >
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors z-10"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="h-32 md:h-40 bg-gradient-to-r from-purple-900 via-blue-900 to-black relative">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30"></div>
-                <div className="absolute -bottom-10 md:-bottom-12 left-4 md:left-8">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-zinc-800 border-4 border-[#0a0a0a] flex items-center justify-center text-2xl md:text-3xl font-bold text-white shadow-xl">
-                    AK
-                  </div>
-                </div>
+              {/* Handle Bar for Mobile Swipe Feel */}
+              <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
+                <div className="w-12 h-1.5 bg-[var(--text-muted)]/30 rounded-full"></div>
               </div>
 
-              <div className="pt-14 md:pt-16 pb-6 md:pb-8 px-4 md:px-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-white">Aman Kumar</h2>
-                <p className="text-purple-400 font-medium text-xs md:text-sm mt-1">Web Developer | Cloud & Security Enthusiast</p>
+              <div className="p-6 overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-[var(--text-main)]">Menu</h2>
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    className="p-2 bg-[var(--bg-main)] hover:bg-[var(--border-color)] rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-[var(--text-main)]" />
+                  </button>
+                </div>
 
-                <div className="mt-4 md:mt-6 space-y-3 md:space-y-4 text-zinc-400 text-xs md:text-sm leading-relaxed">
-                  <p>
-                    I am a results-driven web developer with a proven track record of delivering responsive, high-performance digital solutions. With expertise in WordPress, React, and Java, I combine technical excellence with a security-first mindset (Secure by Design) to build scalable applications.
-                  </p>
+                {/* Settings Section */}
+                <div className="space-y-4 mb-8">
+                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Settings</h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
-                    <div className="p-3 bg-white/5 rounded-lg border border-white/5">
-                      <h3 className="font-bold text-white mb-2 flex items-center gap-2 text-xs md:text-sm"><Globe className="w-3 h-3 md:w-4 md:h-4 text-cyan-400" /> Core Skills</h3>
-                      <p className="text-[10px] md:text-xs">Web Dev, WordPress, Java, HTML/CSS, React, API Integration</p>
+                  {/* Theme Toggle */}
+                  <div className="flex items-center justify-between p-4 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-purple-500/20 text-purple-400' : 'bg-yellow-500/20 text-yellow-600'}`}>
+                        {theme === 'dark' ? <div className="w-5 h-5">🌙</div> : <div className="w-5 h-5">☀️</div>}
+                      </div>
+                      <div>
+                        <p className="font-bold text-[var(--text-main)]">App Theme</p>
+                        <p className="text-xs text-[var(--text-muted)]">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+                      </div>
                     </div>
-                    <div className="p-3 bg-white/5 rounded-lg border border-white/5">
-                      <h3 className="font-bold text-white mb-2 flex items-center gap-2 text-xs md:text-sm"><TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-pink-400" /> Growth Focus</h3>
-                      <p className="text-[10px] md:text-xs">AWS Cloud, DevOps CI/CD, Cybersecurity & Ethical Hacking</p>
-                    </div>
+                    <button
+                      onClick={toggleTheme}
+                      className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-purple-600' : 'bg-zinc-300'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${theme === 'dark' ? 'left-7' : 'left-1'}`}></div>
+                    </button>
                   </div>
                 </div>
 
-                <div className="mt-6 md:mt-8 flex flex-wrap gap-2 md:gap-4 pt-4 border-t border-white/5">
-                  <a href="mailto:Er.amankumar@hotmail.com" className="flex items-center gap-2 px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs md:text-sm font-bold transition-colors">
-                    <Mail className="w-3 h-3 md:w-4 md:h-4" /> Contact
-                  </a>
-                  <a href="https://github.com/iamTechieAman" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-xs md:text-sm font-medium transition-colors">
-                    <Github className="w-3 h-3 md:w-4 md:h-4" /> GitHub
-                  </a>
-                  <a href="https://www.linkedin.com/in/aman-kumar-a8792a206/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#0077b5] hover:bg-[#006097] text-white rounded-lg text-xs md:text-sm font-medium transition-colors">
-                    <Linkedin className="w-3 h-3 md:w-4 md:h-4" /> LinkedIn
-                  </a>
+                {/* Profile Section */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Developer</h3>
+                  <div className="p-4 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-xl border border-purple-500/20">
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">AK</div>
+                      <div>
+                        <h4 className="font-bold text-[var(--text-main)]">Aman Kumar</h4>
+                        <p className="text-xs text-[var(--text-muted)]">Full Stack Developer</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
+                      Built with Next.js 15, React 19, and Tailwind CSS. Focused on high-performance mobile web experiences.
+                    </p>
+                    <div className="flex gap-2">
+                      <a href="https://github.com/iamTechieAman" target="_blank" className="flex-1 py-2 text-center bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg text-xs font-bold text-[var(--text-main)] hover:bg-[var(--border-color)] transition-colors">
+                        GitHub
+                      </a>
+                      <a href="https://linkedin.com" target="_blank" className="flex-1 py-2 text-center bg-[#0077b5] text-white rounded-lg text-xs font-bold hover:bg-[#006097] transition-colors">
+                        LinkedIn
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -319,7 +336,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="pt-[max(6rem,calc(5rem+env(safe-area-inset-top)))] md:pt-20 relative z-10 pb-20 md:pb-0">
+      <div className="pt-20 md:pt-24 relative z-10 pb-24 md:pb-0">
 
         {/* Search Results */}
         {searchResults.length > 0 && (
