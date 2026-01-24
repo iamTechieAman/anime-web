@@ -1,14 +1,14 @@
 "use client";
 
 import { Home, Search, Menu } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useMobileUI } from "@/context/MobileUIContext";
 
 export default function MobileNav() {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
     const router = useRouter();
-    const currentView = searchParams.get('view');
+    const { isSearchOpen, isMenuOpen, toggleSearch, toggleMenu, closeAll } = useMobileUI();
 
     const [isScrolledDown, setIsScrolledDown] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
@@ -29,18 +29,21 @@ export default function MobileNav() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [lastScrollY]);
 
+    // Handle Home Click
+    const handleHomeClick = () => {
+        if (pathname === '/') {
+            closeAll();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            closeAll();
+            router.push('/');
+        }
+    };
+
     // Only show on mobile
     if (typeof window !== "undefined" && window.innerWidth >= 768) {
         return null;
     }
-
-    const handleNavigation = (view: string | null) => {
-        if (!view) {
-            router.push('/');
-        } else {
-            router.push(`/?view=${view}`);
-        }
-    };
 
     return (
         <div
@@ -53,24 +56,24 @@ export default function MobileNav() {
         >
             <div className="flex justify-around items-center h-16">
                 <button
-                    onClick={() => handleNavigation(null)}
-                    className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !currentView ? 'text-purple-500' : 'text-zinc-500'}`}
+                    onClick={handleHomeClick}
+                    className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !isSearchOpen && !isMenuOpen ? 'text-purple-500' : 'text-zinc-500'}`}
                 >
                     <Home className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Home</span>
                 </button>
 
                 <button
-                    onClick={() => handleNavigation('search')}
-                    className={`flex flex-col items-center gap-1 p-2 ${currentView === 'search' ? 'text-purple-500' : 'text-zinc-500'}`}
+                    onClick={toggleSearch}
+                    className={`flex flex-col items-center gap-1 p-2 ${isSearchOpen ? 'text-purple-500' : 'text-zinc-500'}`}
                 >
                     <Search className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Search</span>
                 </button>
 
                 <button
-                    onClick={() => handleNavigation('about')}
-                    className={`flex flex-col items-center gap-1 p-2 ${currentView === 'about' ? 'text-purple-500' : 'text-zinc-500'}`}
+                    onClick={toggleMenu}
+                    className={`flex flex-col items-center gap-1 p-2 ${isMenuOpen ? 'text-purple-500' : 'text-zinc-500'}`}
                 >
                     <Menu className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Menu</span>

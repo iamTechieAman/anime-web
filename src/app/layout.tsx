@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   themeColor: "#050505",
 };
 
+import { MobileUIProvider } from "@/context/MobileUIContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,38 +40,40 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100dvh]`}
         suppressHydrationWarning
       >
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            // Default options
-            duration: 3000,
-            style: {
-              background: '#18181b',
-              color: '#fff',
-              border: '1px solid rgba(168, 85, 247, 0.2)',
-              borderRadius: '12px',
-              padding: '12px 16px',
-            },
-            // Success
-            success: {
+        <MobileUIProvider>
+          {children}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              // Default options
               duration: 3000,
-              iconTheme: {
-                primary: '#a855f7',
-                secondary: '#18181b',
+              style: {
+                background: '#18181b',
+                color: '#fff',
+                border: '1px solid rgba(168, 85, 247, 0.2)',
+                borderRadius: '12px',
+                padding: '12px 16px',
               },
-            },
-            // Error
-            error: {
-              duration: 4000,
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#18181b',
+              // Success
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: '#a855f7',
+                  secondary: '#18181b',
+                },
               },
-            },
-          }}
-        />
-        <MobileNav />
+              // Error
+              error: {
+                duration: 4000,
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#18181b',
+                },
+              },
+            }}
+          />
+          <MobileNav />
+        </MobileUIProvider>
       </body>
     </html>
   );

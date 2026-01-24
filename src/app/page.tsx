@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Filter, Trophy } from "lucide-react";
+import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMobileUI } from "@/context/MobileUIContext";
 
 interface Show {
   _id: string;
@@ -37,8 +37,10 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<Show[]>([]);
   const [loading, setLoading] = useState({ popular: true, recent: true, top: true });
   const [isSearching, setIsSearching] = useState(false);
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile UI Context
+  const { isSearchOpen, isMenuOpen, setSearchOpen, setMenuOpen } = useMobileUI();
 
   // Fetch popular anime
   const fetchPopular = async () => {
@@ -75,22 +77,6 @@ export default function Home() {
       setLoading(prev => ({ ...prev, top: false }));
     }
   };
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const viewParam = searchParams.get('view');
-
-  // Handle URL View Params
-  useEffect(() => {
-    if (viewParam === 'about') {
-      setIsAboutOpen(true);
-    } else if (viewParam === 'search') {
-      // Focus on search or show mobile search view
-      // We will implement a dedicated mobile search overlay below
-    } else {
-      setIsAboutOpen(false);
-    }
-  }, [viewParam]);
 
   // Fetch data on mount and set up auto-refresh
   useEffect(() => {
@@ -136,7 +122,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-purple-500/30 overflow-x-hidden font-sans">
-
       {/* No JavaScript Fallback */}
       <noscript>
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6">
@@ -160,24 +145,17 @@ export default function Home() {
         </div>
       </noscript>
 
-      {/* About Modal */}
+      {/* About/Menu Modal (Triggered by MobileNav Context) */}
       <AnimatePresence>
-        {/* About Modal */}
-        {isAboutOpen && (
+        {isMenuOpen && (
           <motion.div
             key="about-modal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-            onClick={() => {
-              setIsAboutOpen(false);
-              const params = new URLSearchParams(window.location.search);
-              params.delete('view');
-              router.push(`/?${params.toString()}`);
-            }}
+            onClick={() => setMenuOpen(false)}
           >
-            {/* ... content setup same as before but usingstopPropagation ... */}
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -186,12 +164,7 @@ export default function Home() {
               className="w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto"
             >
               <button
-                onClick={() => {
-                  setIsAboutOpen(false);
-                  const params = new URLSearchParams(window.location.search);
-                  params.delete('view');
-                  router.push(`/?${params.toString()}`);
-                }}
+                onClick={() => setMenuOpen(false)}
                 className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors z-10"
               >
                 <X className="w-5 h-5" />
@@ -243,8 +216,8 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* Mobile Search Overlay */}
-        {viewParam === 'search' && (
+        {/* Mobile Search Overlay (Triggered by MobileNav Context) */}
+        {isSearchOpen && (
           <motion.div
             key="search-overlay"
             initial={{ opacity: 0, y: 50 }}
@@ -266,11 +239,7 @@ export default function Home() {
                 />
               </div>
               <button
-                onClick={() => {
-                  const params = new URLSearchParams(window.location.search);
-                  params.delete('view');
-                  router.push(`/?${params.toString()}`);
-                }}
+                onClick={() => setSearchOpen(false)}
                 className="text-zinc-400 font-medium"
               >
                 Cancel
@@ -279,17 +248,12 @@ export default function Home() {
 
             <div className="py-4 overflow-y-auto h-[calc(100vh-80px)]">
               {isSearching ? (
-                <div className="flex justify-center pt-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>
+                <div className="flex justify-center pt-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>
               ) : searchResults.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4 pb-20">
                   {/* Reuse AnimeCard structure simplified for search results */}
                   {searchResults.map(show => (
-                    <Link href={`/watch/${show._id}`} key={show._id} onClick={() => {
-                      // clear search view on click
-                      const params = new URLSearchParams(window.location.search);
-                      params.delete('view');
-                      router.push(`/?${params.toString()}`);
-                    }}>
+                    <Link href={`/watch/${show._id}`} key={show._id} onClick={() => setSearchOpen(false)}>
                       <div className="bg-zinc-900 rounded-lg overflow-hidden border border-white/5">
                         <img src={show.thumbnail} alt={show.name} className="w-full aspect-[2/3] object-cover" />
                         <div className="p-2">
@@ -318,8 +282,6 @@ export default function Home() {
       </div>
 
       {/* Navbar */}
-      {/* Navbar - Safe Area respect */}
-      {/* Navbar - Safe Area respect */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5 pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={clearSearch}>
@@ -348,12 +310,11 @@ export default function Home() {
             </div>
           </form>
 
-          {/* Quick Search Button for Mobile - REMOVED since bottom nav handles it */}
           <div className="md:hidden flex-1 flex justify-end"></div>
 
           <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-zinc-400">
             <button className="hover:text-white transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
-            <button className="hover:text-purple-400 transition-colors text-white" onClick={() => setIsAboutOpen(true)}>About</button>
+            <button className="hover:text-purple-400 transition-colors text-white" onClick={() => setMenuOpen(true)}>About</button>
           </div>
         </div>
       </nav>
