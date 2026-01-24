@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import MobileNav from "@/components/MobileNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ToonPlayer - Watch Anime Online",
   description: "Stream anime in HD on ToonPlayer. The best place for anime fans.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+  },
+  themeColor: "#050505",
 };
 
 export default function RootLayout({
@@ -60,6 +69,7 @@ export default function RootLayout({
             },
           }}
         />
+        <MobileNav />
       </body>
     </html>
   );

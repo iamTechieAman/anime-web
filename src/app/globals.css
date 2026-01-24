@@ -20,15 +20,38 @@
 }
 
 body {
-  background: #050505; /* Match app background to fix rubber-band glitch */
+  background: #050505;
+  /* Match app background to fix rubber-band glitch */
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  overflow-x: hidden; /* Prevent horizontal wobble */
+  overflow-x: hidden;
+  /* Prevent horizontal wobble */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Mobile App Optimizations */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  -webkit-user-select: none;
+  /* Disable text selection (app feel) */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Remove tap highlight */
 }
 
 html {
-  background: #050505; /* Ensure overscroll area is dark */
+  background: #050505;
+  /* Ensure overscroll area is dark */
   scroll-behavior: smooth;
+}
+
+/* Utilities for Safe Area */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }

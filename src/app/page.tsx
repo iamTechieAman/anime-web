@@ -222,17 +222,18 @@ export default function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5">
+      {/* Navbar - Safe Area respect */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={clearSearch}>
-            <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-tr from-purple-600 to-cyan-500 rounded-lg flex items-center justify-center transform rotate-3 hover:rotate-6 transition-transform shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-              <Play className="w-3 h-3 md:w-4 md:h-4 text-white fill-white" />
+            <div className="w-8 h-8 md:w-10 md:h-10 relative">
+              <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
             </div>
             <span className="text-lg md:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">ToonPlayer</span>
           </Link>
 
-          {/* Search in Navbar */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-md">
+          {/* Search in Navbar - Hide on mobile since we have bottom nav search */}
+          <form onSubmit={handleSearch} className="flex-1 max-w-md hidden md:block">
             <div className="relative flex items-center bg-[#0a0a0a] border border-white/10 rounded-full px-3 py-1.5 md:py-2 focus-within:border-purple-500/50">
               <Search className="w-4 h-4 text-zinc-500" />
               <input
@@ -250,6 +251,11 @@ export default function Home() {
             </div>
           </form>
 
+          {/* Quick Search Button for Mobile (Top Bar) - Optional since we have bottom nav, but good for consistency */}
+          <div className="md:hidden flex-1 flex justify-end">
+            {/* We can hide search here and rely on bottom nav, or keep a small icon */}
+          </div>
+
           <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-zinc-400">
             <button className="hover:text-white transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
             <button className="hover:text-purple-400 transition-colors text-white" onClick={() => setIsAboutOpen(true)}>About</button>
@@ -257,7 +263,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="pt-16 md:pt-20 relative z-10">
+      <div className="pt-[calc(4rem+env(safe-area-inset-top))] md:pt-20 relative z-10 pb-20 md:pb-0">
 
         {/* Search Results */}
         {searchResults.length > 0 && (
