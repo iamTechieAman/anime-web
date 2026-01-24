@@ -65,6 +65,15 @@ We faced several challenges during development, including:
 
 Feel free to fork the project and submit pull requests!
 
+## 🧠 Development Methodology & AI Transparency
+
+This project was built with a focus on **educational growth and professional learning**. Artificial Intelligence (AI) was utilized strictly as a:
+*   **Debugging Assistant**: To identify complex issues like dependency conflicts (React 19 vs 18) and cross-origin resource sharing (CORS) errors.
+*   **Testing Partner**: To generate edge-case scenarios and verify API responses.
+*   **Learning Accelerator**: To understand advanced architectural patterns in Next.js 15.
+
+The core logic, design decisions, and architectural implementation were driven by the developer to master modern web engineering practices.
+
 ## 📄 License
 
 This project is for educational purposes only. Content is scraped from public sources.
