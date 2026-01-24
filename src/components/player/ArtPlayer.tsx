@@ -164,6 +164,7 @@ export default function Player({ option, className, style, getInstance, onEnded,
             const art = playerRef.current;
             art.off('video:ended');
             art.on('video:ended', () => {
+                // STRICT CHECK: Only proceed if autoNext is explicitly TRUE
                 if (autoNext && onEnded && !isDestroyed.current) {
                     setShowCountdown(true);
                     setCountdown(5);
@@ -172,6 +173,7 @@ export default function Player({ option, className, style, getInstance, onEnded,
                             if (prev <= 1) {
                                 if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
                                 setShowCountdown(false);
+                                // Use setTimeout to avoid setState during render
                                 setTimeout(() => {
                                     if (onEnded && !isDestroyed.current) onEnded();
                                 }, 0);
@@ -180,9 +182,9 @@ export default function Player({ option, className, style, getInstance, onEnded,
                             return prev - 1;
                         });
                     }, 1000);
-                } else if (onEnded && !isDestroyed.current) {
-                    setTimeout(() => onEnded(), 0);
                 }
+                // If autoNext is FALSE, do NOTHING. 
+                // The user must manually click to next episode.
             });
         }
 
@@ -192,6 +194,12 @@ export default function Player({ option, className, style, getInstance, onEnded,
             }
         };
     }, [option.url, autoNext, autoPlay, onEnded, getInstance, option.title, option.poster, option.type]);
+
+    useEffect(() => {
+        if (playerRef.current) {
+            playerRef.current.option.autoplay = autoPlay;
+        }
+    }, [autoPlay]);
 
     useEffect(() => {
         return () => {
