@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Filter, Trophy } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Show {
@@ -75,6 +76,22 @@ export default function Home() {
     }
   };
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get('view');
+
+  // Handle URL View Params
+  useEffect(() => {
+    if (viewParam === 'about') {
+      setIsAboutOpen(true);
+    } else if (viewParam === 'search') {
+      // Focus on search or show mobile search view
+      // We will implement a dedicated mobile search overlay below
+    } else {
+      setIsAboutOpen(false);
+    }
+  }, [viewParam]);
+
   // Fetch data on mount and set up auto-refresh
   useEffect(() => {
     fetchPopular();
@@ -145,14 +162,22 @@ export default function Home() {
 
       {/* About Modal */}
       <AnimatePresence>
+        {/* About Modal */}
         {isAboutOpen && (
           <motion.div
+            key="about-modal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-            onClick={() => setIsAboutOpen(false)}
+            onClick={() => {
+              setIsAboutOpen(false);
+              const params = new URLSearchParams(window.location.search);
+              params.delete('view');
+              router.push(`/?${params.toString()}`);
+            }}
           >
+            {/* ... content setup same as before but usingstopPropagation ... */}
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -161,7 +186,12 @@ export default function Home() {
               className="w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto"
             >
               <button
-                onClick={() => setIsAboutOpen(false)}
+                onClick={() => {
+                  setIsAboutOpen(false);
+                  const params = new URLSearchParams(window.location.search);
+                  params.delete('view');
+                  router.push(`/?${params.toString()}`);
+                }}
                 className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors z-10"
               >
                 <X className="w-5 h-5" />
@@ -210,6 +240,72 @@ export default function Home() {
                 </div>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+
+        {/* Mobile Search Overlay */}
+        {viewParam === 'search' && (
+          <motion.div
+            key="search-overlay"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed inset-0 z-[55] bg-[#050505] pt-safe px-4"
+          >
+            <div className="flex items-center gap-4 py-4 border-b border-white/10">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
+                  placeholder="Search..."
+                  className="w-full bg-zinc-900 rounded-lg py-2 pl-9 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams(window.location.search);
+                  params.delete('view');
+                  router.push(`/?${params.toString()}`);
+                }}
+                className="text-zinc-400 font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="py-4 overflow-y-auto h-[calc(100vh-80px)]">
+              {isSearching ? (
+                <div className="flex justify-center pt-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>
+              ) : searchResults.length > 0 ? (
+                <div className="grid grid-cols-2 gap-4 pb-20">
+                  {/* Reuse AnimeCard structure simplified for search results */}
+                  {searchResults.map(show => (
+                    <Link href={`/watch/${show._id}`} key={show._id} onClick={() => {
+                      // clear search view on click
+                      const params = new URLSearchParams(window.location.search);
+                      params.delete('view');
+                      router.push(`/?${params.toString()}`);
+                    }}>
+                      <div className="bg-zinc-900 rounded-lg overflow-hidden border border-white/5">
+                        <img src={show.thumbnail} alt={show.name} className="w-full aspect-[2/3] object-cover" />
+                        <div className="p-2">
+                          <h3 className="text-xs font-bold line-clamp-1">{show.name}</h3>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-zinc-600 mt-20">
+                  <Search className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                  <p>Search for your favorite anime...</p>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

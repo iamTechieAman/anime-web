@@ -1,12 +1,15 @@
 "use client";
 
 import { Home, Search, Menu } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function MobileNav() {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const currentView = searchParams.get('view');
+
     const [isScrolledDown, setIsScrolledDown] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -28,17 +31,16 @@ export default function MobileNav() {
 
     // Only show on mobile
     if (typeof window !== "undefined" && window.innerWidth >= 768) {
-        return null; // Don't render on desktop (handled by CSS primarily but this is a backup)
+        return null;
     }
 
-    const navItems = [
-        { name: "Home", href: "/", icon: Home },
-        { name: "Search", href: "/?search=true", icon: Search },
-        // We can add more here like "Library" or "My List" later
-        // For now using a trigger for the About/Menu modal which is handled via URL hash or state in parent
-        // Since we're in a separate component, let's just stick to navigation links for now.
-        // Ideally, "About" triggers the modal. We'll link to #about for now or keep it simple.
-    ];
+    const handleNavigation = (view: string | null) => {
+        if (!view) {
+            router.push('/');
+        } else {
+            router.push(`/?view=${view}`);
+        }
+    };
 
     return (
         <div
@@ -50,29 +52,29 @@ export default function MobileNav() {
       `}
         >
             <div className="flex justify-around items-center h-16">
-                <Link href="/" className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !pathname.includes('search') ? 'text-purple-500' : 'text-zinc-500'}`}>
+                <button
+                    onClick={() => handleNavigation(null)}
+                    className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !currentView ? 'text-purple-500' : 'text-zinc-500'}`}
+                >
                     <Home className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Home</span>
-                </Link>
+                </button>
 
-                {/* Helper to focus search on home page */}
                 <button
-                    onClick={() => {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        // Dispatch custom event or query param to focus search
-                        const searchInput = document.querySelector('input[type="text"]');
-                        if (searchInput instanceof HTMLElement) searchInput.focus();
-                    }}
-                    className="flex flex-col items-center gap-1 p-2 text-zinc-500 hover:text-purple-500"
+                    onClick={() => handleNavigation('search')}
+                    className={`flex flex-col items-center gap-1 p-2 ${currentView === 'search' ? 'text-purple-500' : 'text-zinc-500'}`}
                 >
                     <Search className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Search</span>
                 </button>
 
-                <Link href="/about" className="flex flex-col items-center gap-1 p-2 text-zinc-500 hover:text-purple-500">
+                <button
+                    onClick={() => handleNavigation('about')}
+                    className={`flex flex-col items-center gap-1 p-2 ${currentView === 'about' ? 'text-purple-500' : 'text-zinc-500'}`}
+                >
                     <Menu className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Menu</span>
-                </Link>
+                </button>
             </div>
         </div>
     );
