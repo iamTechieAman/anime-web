@@ -214,15 +214,15 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Background Ambience */}
-      <div className="fixed inset-0 z-0 pointer-events-none bg-[#050505]">
+      {/* Background Ambience - Hidden on mobile for performance */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[#050505] hidden md:block">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/10 blur-[150px] mix-blend-screen" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-600/10 blur-[150px] mix-blend-screen" />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
       </div>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-xl border-b border-white/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={clearSearch}>
             <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-tr from-purple-600 to-cyan-500 rounded-lg flex items-center justify-center transform rotate-3 hover:rotate-6 transition-transform shadow-[0_0_15px_rgba(168,85,247,0.5)]">
@@ -396,7 +396,7 @@ function AnimeCard({ show }: { show: Show }) {
     <Link href={`/watch/${show._id}`}>
       <motion.div
         whileHover={{ y: -8, scale: 1.02 }}
-        className="group relative aspect-[3/4.5] rounded-xl overflow-hidden cursor-pointer bg-zinc-900 border border-white/5 hover:border-purple-500/50 transition-colors shadow-xl will-change-transform"
+        className="group relative aspect-[3/4.5] rounded-xl overflow-hidden cursor-pointer bg-zinc-900 border border-white/5 hover:border-purple-500/50 transition-colors shadow-xl"
       >
         {/* Image */}
         {show.thumbnail && !imageError ? (

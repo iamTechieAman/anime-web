@@ -221,8 +221,8 @@ export default function WatchPage({ params }: { params: Promise<{ id: string }> 
                 </div>
             </noscript>
 
-            {/* Background Glow */}
-            <div className="fixed inset-0 pointer-events-none z-0">
+            {/* Background Glow - Hidden on mobile for performance */}
+            <div className="fixed inset-0 pointer-events-none z-0 hidden md:block">
                 <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-purple-900/10 rounded-full blur-[120px] mix-blend-screen opacity-20"></div>
             </div>
 
