@@ -1,95 +1,65 @@
-# Anime Web - Next.js Anime Streaming Platform
+# 📺 ToonPlayer - Premium Anime Streaming App
 
-A high-performance, modern anime streaming application built with Next.js 14, TailwindCSS, and ArtPlayer. Features include a robust video player with HLS support, persistent playback state, and a responsive glassmorphism UI.
+### 🔴 **Live Demo:** [https://anime-web-neon-one.vercel.app](https://anime-web-neon-one.vercel.app/)
 
-## 🚀 Features
+ToonPlayer is a modern, ad-free anime streaming application built with **Next.js 15** and **React 19**. It features a sleek, responsive UI, real-time search, and a robust video player that aggregates sources from multiple providers.
 
--   **High-Performance Player**: Custom implementation of `ArtPlayer` with `hls.js` for adaptive bitrate streaming.
--   **Persistent Playback**: Seamless episode switching without reloading the player component.
--   **Smart Buffering**: Tuning for 30MB buffer to balance speed and stability.
--   **Proxy System**: Custom Next.js API proxy to bypass CORS and headers for video segments.
--   **Modern UI**: Glassmorphism design, responsive grid layouts, and smooth animations.
--   **Auto-Next & Auto-Play**: LocalStorage-backed settings for binge-watching.
+![ToonPlayer Home](/public/window.svg)
+*(Note: Replace with actual screenshot)*
+
+## ✨ Key Features
+
+- **🎬 Smart Video Player**: Auto-selects the best streaming source (HLS vs MP4) and bypasses CORS restrictions using a smart proxy.
+- **🚀 High Performance**: Built on Next.js 15 for server-side rendering and lightning-fast page loads.
+- **📱 Fully Responsive**: Optimized for Mobile, Tablet, and Desktop with a unified, touch-friendly UI.
+- **🔍 Real-time Search**: Instant search results with thumbnails and dub/sub indicators.
+- **🌙 Modern Design**: Premium dark mode aesthetic with glassmorphism and smooth animations.
+- **💾 Auto-Save**: Remembers your "Auto Play" and "Auto Next" settings.
+- **🛠️ Progressive Enhancement**: Works even without JavaScript enabled (via Noscript fallbacks).
 
 ## 🛠️ Tech Stack
 
--   **Framework**: Next.js 14 (App Router)
--   **Language**: TypeScript
--   **Styling**: TailwindCSS
--   **Video Player**: ArtPlayer + hls.js
--   **Icons**: Lucide React
--   **State Management**: React Hooks (`useState`, `useEffect`, `useRef`)
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Library**: [React 19](https://react.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Video Player**: [ArtPlayer](https://artplayer.org/) & [Vidstack](https://vidstack.io/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Deployment**: [Vercel](https://vercel.com/)
 
-## 📂 Project Structure
+## ⚡ Deployment Journey
 
-```
-anime-web/
-├── src/
-│   ├── app/                # App Router pages
-│   │   ├── api/            # API Routes (Proxy, Anime Info)
-│   │   ├── watch/[id]/     # Video Player Page
-│   │   └── page.tsx        # Home Page
-│   ├── components/         # Reusable Components
-│   │   ├── player/         # ArtPlayer Wrapper
-│   │   └── ...
-│   └── lib/                # Utilities & Providers
-├── public/                 # Static Assets
-└── next.config.js          # Next.js Configuration
-```
+We faced several challenges during development, including:
+1.  **Video Playback**: Fixing "Loading Stream" issues by implementing a smart proxy for SharePoint/GDrive links.
+2.  **React 19 Compatibility**: Resolving peer dependency conflicts between Next.js 15 and video libraries.
+3.  **CORS**: Handling cross-origin resource sharing for third-party video sources.
+
+👉 **[Read the full Dev Journey & Learnings here](./JOURNEY.md)**
 
 ## 🚀 Getting Started
 
-### Prerequisites
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/iamTechieAman/anime-web.git
+   ```
 
--   Node.js 18.x or higher
--   npm or yarn
+2. **Install dependencies:**
+   ```bash
+   npm install --legacy-peer-deps
+   ```
 
-### Installation
+3. **Run development server:**
+   ```bash
+   npm run dev
+   ```
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/your-username/anime-web.git
-    cd anime-web
-    ```
+4. **Open [http://localhost:3000](http://localhost:3000)**
 
-2.  Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-
-3.  Run the development server:
-    ```bash
-    npm run dev
-    ```
-
-4.  Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-## 🚀 Deployment
-
-### Deploy to Vercel (Recommended)
-
-1.  Install Vercel CLI: `npm measure -g vercel`
-2.  Run `vercel` in the project root.
-3.  Follow the prompts. No special configuration is needed as Vercel auto-detects Next.js.
-
-### Git Workflow
-
-1.  Initialize Git: `git init`
-2.  Add files: `git add .`
-3.  Commit: `git commit -m "Initial commit"`
-4.  Push to GitHub:
-    ```bash
-    git remote add origin https://github.com/your-username/repo-name.git
-    git push -u origin main
-    ```
-
-## 🐛 Debugging Common Issues
-
--   **AbortError (Media Removed)**: This happens if the player is unmounted while playing. The current codebase fixes this by persisting the player instance during episode switches.
--   **Buffering Stalls**: Check `ArtPlayer.tsx`. The default buffer is set to 30MB. If you have a gigabit connection, you can try increasing `maxBufferSize`.
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+Feel free to fork the project and submit pull requests!
+
+## 📄 License
+
+This project is for educational purposes only. Content is scraped from public sources.
