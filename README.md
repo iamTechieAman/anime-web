@@ -94,7 +94,18 @@ We faced several challenges during development, including:
 
 ## 🤝 Contributing
 
-Feel free to fork the project and submit pull requests!
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+Please read our [**Contributing Guidelines**](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+We also have a [**Code of Conduct**](CODE_OF_CONDUCT.md) to ensure a welcoming community for everyone.
+
+### Quick steps:
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 🧠 Development Methodology & AI Transparency
 
@@ -104,6 +115,20 @@ This project was built with a focus on **educational growth and professional lea
 *   **Learning Accelerator**: To understand advanced architectural patterns in Next.js 15.
 
 The core logic, design decisions, and architectural implementation were driven by the developer to master modern web engineering practices.
+
+## 👨‍💻 About Me
+
+Hey there! I'm **Aman Kumar**, a developer who loves building things and learning in public.
+
+This project started as a personal challenge to understand full-stack development with Next.js, and it turned into something I'm really proud of. Along the way, I learned that debugging is 80% of coding, CORS errors are inevitable, and React 19 doesn't always play nice with older libraries 😅
+
+When I'm not coding, I'm probably watching anime (which is why this project exists), debugging something that worked yesterday, or drinking way too much coffee.
+
+**Connect with me:**
+- 💼 GitHub: [@iamTechieAman](https://github.com/iamTechieAman)
+- 💬 Let's chat about web dev, anime, or your latest CORS nightmare
+
+---
 
 ## 📄 License
 
