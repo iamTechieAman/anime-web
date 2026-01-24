@@ -4,8 +4,13 @@
 
 ToonPlayer is a modern, ad-free anime streaming application built with **Next.js 15** and **React 19**. It features a sleek, responsive UI, real-time search, and a robust video player that aggregates sources from multiple providers.
 
-![ToonPlayer Home](/public/window.svg)
-*(Note: Replace with actual screenshot)*
+![ToonPlayer Home](/public/screenshots/home.png)
+
+## 📸 Screenshots
+
+| Search Page | Watch Page |
+|:---:|:---:|
+| ![](/public/screenshots/search.png) | ![](/public/screenshots/watch.png) |
 
 ## ✨ Key Features
 
