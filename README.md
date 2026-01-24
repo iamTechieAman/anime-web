@@ -24,12 +24,42 @@ ToonPlayer is a modern, ad-free anime streaming application built with **Next.js
 
 ## 🛠️ Tech Stack
 
+### Frontend
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
 - **Library**: [React 19](https://react.dev/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Video Player**: [ArtPlayer](https://artplayer.org/) & [Vidstack](https://vidstack.io/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Video Player**: [ArtPlayer](https://artplayer.org/) with HLS.js
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **Deployment**: [Vercel](https://vercel.com/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **Notifications**: [React Hot Toast](https://react-hot-toast.com/)
+
+### Backend & Data Sources
+- **API Library**: [@consumet/extensions](https://github.com/consumet/consumet.ts) - Anime data aggregation
+- **Providers**:
+  - **AllAnime** ([allanime.to](https://allanime.to)) - Primary anime episodes & metadata
+  - **HiAnime** ([hianime.to](https://hianime.to)) - Fallback provider
+  - **AniList API** ([anilist.co](https://anilist.co)) - Anime metadata & cover images
+- **Video Sources**: Aggregated from SharePoint, Google Drive, and HLS streams
+- **CORS Proxy**: Custom Next.js API route for bypassing SharePoint/GDrive restrictions
+
+### Deployment
+- **Hosting**: [Vercel](https://vercel.com/)
+- **CI/CD**: Automatic deployment on push to `main` branch
+
+## 🎨 Design Inspiration
+
+ToonPlayer's UI/UX draws inspiration from leading streaming platforms:
+
+- **[Zoro.to](https://zoro.to)**: Server toggle system, minimal dark theme, episode grid layout
+- **[Netflix](https://netflix.com)**: Featured hero section, hover animations on cards
+- **[Crunchyroll](https://crunchyroll.com)**: Anime-focused color palette (purple/cyan accents)
+- **[Spotify](https://spotify.com)**: Glassmorphism effects on modals and overlays
+
+**Color Palette:**
+- Primary: Electric Purple (`#a855f7`) - Energy and excitement
+- Accent: Cyan (`#06b6d4`) - Modern tech feel
+- Background: Near-Black (`#050505`) - Premium dark mode
 
 ## ⚡ Deployment Journey
 
@@ -37,6 +67,7 @@ We faced several challenges during development, including:
 1.  **Video Playback**: Fixing "Loading Stream" issues by implementing a smart proxy for SharePoint/GDrive links.
 2.  **React 19 Compatibility**: Resolving peer dependency conflicts between Next.js 15 and video libraries.
 3.  **CORS**: Handling cross-origin resource sharing for third-party video sources.
+4.  **Mobile Performance**: Optimizing scroll lag by reducing GPU-heavy blur effects on mobile devices.
 
 👉 **[Read the full Dev Journey & Learnings here](./JOURNEY.md)**
 
