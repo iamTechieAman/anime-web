@@ -223,7 +223,8 @@ export default function Home() {
 
       {/* Navbar */}
       {/* Navbar - Safe Area respect */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      {/* Navbar - Safe Area respect */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5 pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={clearSearch}>
             <div className="w-8 h-8 md:w-10 md:h-10 relative">
@@ -251,10 +252,8 @@ export default function Home() {
             </div>
           </form>
 
-          {/* Quick Search Button for Mobile (Top Bar) - Optional since we have bottom nav, but good for consistency */}
-          <div className="md:hidden flex-1 flex justify-end">
-            {/* We can hide search here and rely on bottom nav, or keep a small icon */}
-          </div>
+          {/* Quick Search Button for Mobile - REMOVED since bottom nav handles it */}
+          <div className="md:hidden flex-1 flex justify-end"></div>
 
           <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-zinc-400">
             <button className="hover:text-white transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
@@ -263,7 +262,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="pt-[calc(4rem+env(safe-area-inset-top))] md:pt-20 relative z-10 pb-20 md:pb-0">
+      <div className="pt-[max(6rem,calc(5rem+env(safe-area-inset-top)))] md:pt-20 relative z-10 pb-20 md:pb-0">
 
         {/* Search Results */}
         {searchResults.length > 0 && (
