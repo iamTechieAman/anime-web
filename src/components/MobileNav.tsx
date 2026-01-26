@@ -3,6 +3,7 @@
 import { Home, Search, Menu } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 
 export default function MobileNav() {
@@ -62,29 +63,32 @@ export default function MobileNav() {
       `}
         >
             <div className="flex justify-around items-center h-16">
-                <button
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
                     onClick={handleHomeClick}
-                    className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !isSearchOpen && !isMenuOpen ? 'text-purple-600' : 'text-[var(--text-muted)]'}`}
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${pathname === '/' && !isSearchOpen && !isMenuOpen ? 'text-purple-500' : 'text-[var(--text-muted)]'}`}
                 >
-                    <Home className="w-6 h-6" />
-                    <span className="text-[10px] font-medium">Home</span>
-                </button>
+                    <Home className="w-5 h-5" />
+                    <span className="text-[10px] font-bold">Home</span>
+                </motion.button>
 
-                <button
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
                     onClick={toggleSearch}
-                    className={`flex flex-col items-center gap-1 p-2 ${isSearchOpen ? 'text-purple-600' : 'text-[var(--text-muted)]'}`}
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${isSearchOpen ? 'text-purple-500' : 'text-[var(--text-muted)]'}`}
                 >
-                    <Search className="w-6 h-6" />
-                    <span className="text-[10px] font-medium">Search</span>
-                </button>
+                    <Search className="w-5 h-5" />
+                    <span className="text-[10px] font-bold">Search</span>
+                </motion.button>
 
-                <button
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
                     onClick={toggleMenu}
-                    className={`flex flex-col items-center gap-1 p-2 ${isMenuOpen ? 'text-purple-600' : 'text-[var(--text-muted)]'}`}
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${isMenuOpen ? 'text-purple-500' : 'text-[var(--text-muted)]'}`}
                 >
-                    <Menu className="w-6 h-6" />
-                    <span className="text-[10px] font-medium">Menu</span>
-                </button>
+                    <Menu className="w-5 h-5" />
+                    <span className="text-[10px] font-bold">Menu</span>
+                </motion.button>
             </div>
         </div>
     );

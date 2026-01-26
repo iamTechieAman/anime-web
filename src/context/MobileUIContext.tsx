@@ -88,13 +88,21 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
     }, [isSearchOpen, isMenuOpen]);
 
     const toggleSearch = () => {
-        setIsSearchOpen(prev => !prev);
-        if (!isSearchOpen) setIsMenuOpen(false); // Close menu if opening search
+        if (!isSearchOpen) {
+            setIsMenuOpen(false);
+            setIsSearchOpen(true);
+        } else {
+            setIsSearchOpen(false);
+        }
     };
 
     const toggleMenu = () => {
-        setIsMenuOpen(prev => !prev);
-        if (!isMenuOpen) setIsSearchOpen(false); // Close search if opening menu
+        if (!isMenuOpen) {
+            setIsSearchOpen(false);
+            setIsMenuOpen(true);
+        } else {
+            setIsMenuOpen(false);
+        }
     };
 
     const closeAll = () => {
