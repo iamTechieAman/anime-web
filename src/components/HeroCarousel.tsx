@@ -148,6 +148,9 @@ export default function HeroCarousel() {
                             className="w-full h-full object-cover object-center opacity-80 dark:opacity-60"
                             loading="eager" // Prioritize loading the hero image
                         />
+                        {/* Pre-fetch next slide image for lag-free transition */}
+                        <link rel="prefetch" href={slides[(current + 1) % slides.length]?.image} />
+
                         {/* Gradient Overlay for Text Readability - Adjusted for Light Mode visibility */}
                         <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent dark:via-[var(--bg-main)]/80" />
                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent dark:via-[var(--bg-main)]/80" />
