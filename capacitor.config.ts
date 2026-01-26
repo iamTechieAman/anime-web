@@ -13,8 +13,16 @@ const config: CapacitorConfig = {
       style: 'DARK',
       overlaysWebView: true,
       backgroundColor: '#05050500' // Transparent
-    }
-  }
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      backgroundColor: "#050505",
+      showSpinner: false,
+      androidScaleType: "CENTER_CROP",
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+  },
 };
 
 export default config;

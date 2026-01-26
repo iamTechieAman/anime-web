@@ -1,36 +1,43 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy } from "lucide-react";
 import axios from "axios";
 import Link from "next/link";
+import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
+import AZFilter from "@/components/AZFilter";
+import { AnimeGrid, type Show } from "@/components/AnimeCard";
+import { useDebounce } from "@/hooks/useDebounce";
+import HeroCarousel from "@/components/HeroCarousel";
 
-interface Show {
-  _id: string;
-  name: string;
-  availableEpisodes: {
-    sub: number;
-    dub: number;
-    raw: number;
-  };
-  thumbnail?: string;
-  __typename: string;
+// AniList GraphQL Query
+const SEARCH_QUERY = `
+query($search: String) {
+  Page(page: 1, perPage: 5) {
+    media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
+      id
+        title {
+        romaji
+        english
+        native
+      }
+        coverImage {
+        medium
+      }
+      format
+      seasonYear
+    }
+  }
 }
-
-// Featured anime (manually curated)
-const FEATURED = {
-  _id: "PEQjWP25keRPXEt4f",
-  name: "Re:Zero − Starting Life in Another World Season 3",
-  description: "When Subaru Natsuki leaves the convenience store, the last thing he expects is to be wrenched from his everyday life and dropped into a fantasy world.",
-  episodes: { sub: 8, dub: 0 },
-  image: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163134-yieRFbvUOH9a.jpg",
-  rating: "9.1"
-};
+`;
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 500);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const [popular, setPopular] = useState<Show[]>([]);
   const [recent, setRecent] = useState<Show[]>([]);
   const [top, setTop] = useState<Show[]>([]);
@@ -41,6 +48,29 @@ export default function Home() {
 
   // Mobile UI Context
   const { isSearchOpen, isMenuOpen, setSearchOpen, setMenuOpen, theme, toggleTheme } = useMobileUI();
+
+  // Fetch suggestions from AniList
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!debouncedSearch.trim() || debouncedSearch.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const response = await axios.post('https://graphql.anilist.co', {
+          query: SEARCH_QUERY,
+          variables: { search: debouncedSearch }
+        });
+        setSuggestions(response.data.data.Page.media || []);
+      } catch (error) {
+        console.warn("AniList/Search failed:", error);
+        setSuggestions([]);
+      }
+    };
+
+    fetchSuggestions();
+  }, [debouncedSearch]);
 
   // Fetch popular anime
   const fetchPopular = async () => {
@@ -100,13 +130,20 @@ export default function Home() {
     };
   }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  const handleSearch = async (e: React.FormEvent | null, queryOverride?: string) => {
+    if (e) e.preventDefault();
+    const query = queryOverride || searchQuery;
+
+    if (!query.trim()) return;
 
     setIsSearching(true);
+    setShowSuggestions(false); // Hide suggestions on search
+
+    // Update input if using override
+    if (queryOverride) setSearchQuery(queryOverride);
+
     try {
-      const res = await axios.get(`/api/anime/search?query=${encodeURIComponent(searchQuery)}`);
+      const res = await axios.get(`/api/anime/search?query=${encodeURIComponent(query)}`);
       setSearchResults(res.data.shows || []);
     } catch (error) {
       console.error("Search failed", error);
@@ -118,22 +155,24 @@ export default function Home() {
   const clearSearch = () => {
     setSearchQuery("");
     setSearchResults([]);
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
 
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">
       {/* No JavaScript Fallback */}
       <noscript>
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-6">
-          <div className="max-w-md bg-zinc-900 border border-purple-500/30 rounded-2xl p-8 text-center">
+        <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-xl flex items-center justify-center p-6">
+          <div className="max-w-md bg-[var(--bg-card)] border border-purple-500/30 rounded-2xl p-8 text-center">
             <div className="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
               <Play className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold mb-3">JavaScript Required</h2>
-            <p className="text-zinc-400 mb-6">
+            <p className="text-[var(--text-muted)] mb-6">
               ToonPlayer requires JavaScript to provide the best streaming experience. Please enable JavaScript in your browser settings to continue.
             </p>
-            <div className="text-sm text-zinc-500">
+            <div className="text-sm text-[var(--text-muted)]">
               <p className="mb-2">Without JavaScript:</p>
               <ul className="text-left space-y-1">
                 <li>• Video playback will not work</li>
@@ -164,7 +203,6 @@ export default function Home() {
               onClick={(e) => e.stopPropagation()}
               className="w-full md:max-w-md bg-[var(--bg-card)] border-t md:border border-[var(--border-color)] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
             >
-              {/* Handle Bar for Mobile Swipe Feel */}
               <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
                 <div className="w-12 h-1.5 bg-[var(--text-muted)]/30 rounded-full"></div>
               </div>
@@ -240,11 +278,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed inset-0 z-[55] bg-[#050505] pt-safe px-4"
+            className="fixed inset-0 z-[55] bg-[var(--bg-main)] pt-safe px-4"
           >
-            <div className="flex items-center gap-4 py-4 border-b border-white/10">
+            <div className="flex items-center gap-4 py-4 border-b border-[var(--border-color)]">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <input
                   autoFocus
                   type="text"
@@ -252,12 +290,12 @@ export default function Home() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
                   placeholder="Search..."
-                  className="w-full bg-zinc-900 rounded-lg py-2 pl-9 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg py-2 pl-9 pr-4 text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
               <button
                 onClick={() => setSearchOpen(false)}
-                className="text-zinc-400 font-medium"
+                className="text-[var(--text-muted)] font-medium"
               >
                 Cancel
               </button>
@@ -267,11 +305,10 @@ export default function Home() {
               {isSearching ? (
                 <div className="flex justify-center pt-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>
               ) : searchResults.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4 pb-20">
-                  {/* Reuse AnimeCard structure simplified for search results */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-20">
                   {searchResults.map(show => (
                     <Link href={`/watch/${show._id}`} key={show._id} onClick={() => setSearchOpen(false)}>
-                      <div className="bg-zinc-900 rounded-lg overflow-hidden border border-white/5">
+                      <div className="bg-[var(--bg-card)] rounded-lg overflow-hidden border border-[var(--border-color)]">
                         <img src={show.thumbnail} alt={show.name} className="w-full aspect-[2/3] object-cover" />
                         <div className="p-2">
                           <h3 className="text-xs font-bold line-clamp-1">{show.name}</h3>
@@ -281,7 +318,7 @@ export default function Home() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center text-zinc-600 mt-20">
+                <div className="text-center text-[var(--text-muted)] mt-20">
                   <Search className="w-12 h-12 mx-auto mb-2 opacity-20" />
                   <p>Search for your favorite anime...</p>
                 </div>
@@ -291,47 +328,74 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Background Ambience - Hidden on mobile for performance */}
-      <div className="fixed inset-0 z-0 pointer-events-none bg-[#050505] hidden md:block">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/10 blur-[150px] mix-blend-screen" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-600/10 blur-[150px] mix-blend-screen" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      {/* Background Ambience - Highly optimized */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
+        <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/10 to-transparent opacity-50 transition-opacity duration-300" />
       </div>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-black/50 backdrop-blur-md md:backdrop-blur-xl border-b border-white/5 pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={clearSearch}>
             <div className="w-8 h-8 md:w-10 md:h-10 relative">
               <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
             </div>
-            <span className="text-lg md:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">ToonPlayer</span>
+            <span className="text-lg md:text-xl font-bold tracking-tight text-[var(--text-main)]">ToonPlayer</span>
           </Link>
 
-          {/* Search in Navbar - Hide on mobile since we have bottom nav search */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-md hidden md:block">
-            <div className="relative flex items-center bg-[#0a0a0a] border border-white/10 rounded-full px-3 py-1.5 md:py-2 focus-within:border-purple-500/50">
-              <Search className="w-4 h-4 text-zinc-500" />
+          <div className="flex-1 max-w-md hidden md:block relative group"
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}>
+            <form onSubmit={(e) => handleSearch(e)} className="relative flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full px-3 py-1.5 md:py-2 focus-within:border-purple-500/50 transition-colors">
+              <Search className="w-4 h-4 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search anime..."
-                className="w-full bg-transparent border-none focus:outline-none px-2 md:px-3 text-sm text-white placeholder-zinc-600"
+                className="w-full bg-transparent border-none focus:outline-none px-2 md:px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)]"
+                autoComplete="off"
               />
               {searchQuery && (
-                <button type="button" onClick={clearSearch} className="p-1 hover:bg-white/10 rounded-full">
-                  <X className="w-3 h-3 text-zinc-500" />
+                <button type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full">
+                  <X className="w-3 h-3 text-[var(--text-muted)]" />
                 </button>
               )}
-            </div>
-          </form>
+            </form>
+
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden shadow-2xl z-50">
+                {suggestions.map((show) => (
+                  <button
+                    key={show.id}
+                    onClick={() => handleSearch(null, show.title.english || show.title.romaji)}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-[var(--bg-main)] transition-colors text-left border-b border-[var(--border-color)] last:border-0"
+                  >
+                    <img
+                      src={show.coverImage.medium}
+                      alt=""
+                      className="w-8 h-12 object-cover rounded bg-[var(--bg-main)]"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium text-[var(--text-main)] truncate">
+                        {show.title.english || show.title.romaji}
+                      </h4>
+                      <p className="text-xs text-[var(--text-muted)] truncate">
+                        {show.seasonYear ? `${show.seasonYear} • ` : ''}{show.format}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="md:hidden flex-1 flex justify-end"></div>
 
-          <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-zinc-400">
-            <button className="hover:text-white transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
-            <button className="hover:text-purple-400 transition-colors text-white" onClick={() => setMenuOpen(true)}>About</button>
+          <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-[var(--text-muted)]">
+            <button className="hover:text-[var(--text-main)] transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
+            <button className="hover:text-purple-400 transition-colors text-[var(--text-main)]" onClick={() => setMenuOpen(true)}>About</button>
           </div>
         </div>
       </nav>
@@ -349,70 +413,21 @@ export default function Home() {
           </div>
         )}
 
-        {/* Featured Section */}
+        {/* Hero Carousel Section */}
         {searchResults.length === 0 && (
           <>
-            <div className="relative h-[400px] md:h-[500px] overflow-hidden">
-              {/* Background */}
-              <div className="absolute inset-0">
-                <img
-                  src={FEATURED.image}
-                  alt={FEATURED.name}
-                  className="w-full h-full object-cover blur-2xl scale-110 opacity-30"
-                  fetchPriority="high"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-              </div>
-
-              {/* Content */}
-              <div className="relative max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center">
-                <div className="grid md:grid-cols-2 gap-8 items-center w-full">
-                  {/* Left: Details */}
-                  <div className="space-y-4 md:space-y-6">
-                    <div className="inline-block px-3 py-1 bg-green-600 text-white text-xs font-bold rounded">
-                      SPOTLIGHT
-                    </div>
-                    <h1 className="text-3xl md:text-5xl font-black leading-tight">{FEATURED.name}</h1>
-                    <p className="text-zinc-400 text-sm md:text-base line-clamp-3">{FEATURED.description}</p>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="font-bold">{FEATURED.rating}</span>
-                      </div>
-                      <span className="px-2 py-0.5 bg-green-600 text-white text-xs font-bold rounded">SUB {FEATURED.episodes.sub}</span>
-                      {FEATURED.episodes.dub > 0 && (
-                        <span className="px-2 py-0.5 bg-purple-600 text-white text-xs font-bold rounded">DUB {FEATURED.episodes.dub}</span>
-                      )}
-                    </div>
-                    <div className="flex gap-3">
-                      <Link href={`/watch/${FEATURED._id}`}>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-zinc-200 text-black font-bold rounded-lg transition-all">
-                          <Play className="w-4 h-4 fill-current" /> Watch Now
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Right: Poster */}
-                  <div className="hidden md:flex justify-end">
-                    <Link href={`/watch/${FEATURED._id}`}>
-                      <div className="relative group cursor-pointer">
-                        <img
-                          src={FEATURED.image}
-                          alt={FEATURED.name}
-                          className="w-64 h-96 object-cover rounded-2xl shadow-2xl border border-white/10 group-hover:scale-105 transition-transform duration-300"
-                          fetchPriority="high"
-                          loading="eager"
-                        />
-                        <div className="absolute inset-0 bg-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <HeroCarousel />
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-12">
+
+              {/* A-Z Filter Bar */}
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-1 h-5 bg-purple-500 rounded-full"></span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">Browse by Letter</h3>
+                </div>
+                <AZFilter />
+              </section>
 
               {/* Popular Today */}
               <section>
@@ -452,89 +467,12 @@ function SectionHeader({ icon: Icon, title }: { icon: any; title: string }) {
   );
 }
 
-// Anime Grid Component
-function AnimeGrid({ shows }: { shows: Show[] }) {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-      {shows.map((show) => (
-        <AnimeCard key={show._id} show={show} />
-      ))}
-    </div>
-  );
-}
-
-// Anime Card Component
-function AnimeCard({ show }: { show: Show }) {
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
-
-  return (
-    <Link href={`/watch/${show._id}`}>
-      <motion.div
-        whileHover={{ y: -8, scale: 1.02 }}
-        className="group relative aspect-[3/4.5] rounded-xl overflow-hidden cursor-pointer bg-zinc-900 border border-white/5 hover:border-purple-500/50 transition-colors shadow-xl"
-      >
-        {/* Image */}
-        {show.thumbnail && !imageError ? (
-          <img
-            src={show.thumbnail}
-            alt={show.name}
-            onError={handleImageError}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-[0.7] group-hover:brightness-100"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-zinc-900 to-cyan-900/30 flex flex-col items-center justify-center p-4">
-            <Play className="w-16 h-16 text-purple-500/40 mb-3" />
-            <p className="text-white text-xs font-bold text-center line-clamp-3 opacity-60">{show.name}</p>
-          </div>
-        )}
-
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {show.availableEpisodes?.sub > 0 && (
-            <span className="px-2 py-0.5 bg-green-600 text-white text-[10px] font-bold rounded shadow-lg">
-              SUB
-            </span>
-          )}
-          {show.availableEpisodes?.dub > 0 && (
-            <span className="px-2 py-0.5 bg-purple-600 text-white text-[10px] font-bold rounded shadow-lg">
-              DUB
-            </span>
-          )}
-        </div>
-
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.3)] transform scale-0 group-hover:scale-100 transition-transform duration-300">
-            <Play className="w-5 h-5 text-black fill-black ml-0.5" />
-          </div>
-        </div>
-
-        {/* Info */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3 text-left z-10">
-          <div className="flex items-center gap-1.5 mb-1 text-[10px] font-bold text-zinc-300">
-            <span className="px-1.5 py-0.5 rounded bg-white/10">
-              {show.availableEpisodes?.sub || show.availableEpisodes?.dub} EPS
-            </span>
-          </div>
-          <h3 className="font-bold text-white text-sm line-clamp-2 group-hover:text-purple-400 transition-colors">
-            {show.name}
-          </h3>
-        </div>
-      </motion.div>
-    </Link>
-  );
-}
-
 // Loading Skeleton
 function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
       {[...Array(10)].map((_, i) => (
-        <div key={i} className="aspect-[3/4.5] rounded-xl bg-zinc-900 animate-pulse border border-white/5"></div>
+        <div key={i} className="aspect-[3/4.5] rounded-xl bg-[var(--bg-card)] animate-pulse border border-[var(--border-color)]"></div>
       ))}
     </div>
   );

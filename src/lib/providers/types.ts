@@ -4,6 +4,7 @@ export interface AnimeSearchResult {
     image?: string;
     releaseDate?: string;
     subOrDub?: string;
+    provider?: string;
 }
 
 export interface AnimeEpisode {
@@ -25,6 +26,11 @@ export interface AnimeDetails {
         sub: number;
         dub: number;
         raw?: number;
+    };
+    availableEpisodesDetail?: {
+        sub: string[];
+        dub: string[];
+        raw?: string[];
     };
     malId?: number;
     anilistId?: number;
@@ -54,8 +60,9 @@ export interface AnimeProvider {
      * @param id - Anime ID
      * @param episodeId - Episode ID (provider-specific)
      * @param mode - 'sub' | 'dub' | 'raw'
+     * @param serverId - Optional specific server ID
      */
-    getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw'): Promise<VideoSource[]>;
+    getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw', serverId?: string): Promise<VideoSource[]>;
 
     /**
      * Get popular anime (optional)
@@ -74,4 +81,24 @@ export interface AnimeProvider {
      * @param page - Page number for pagination
      */
     getTop?(page?: number): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get A-Z list (optional)
+     * @param letter - Letter to filter by (or 'all', '0-9')
+     * @param page - Page number
+     */
+    getAZList?(letter: string, page?: number): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get anime by genre (optional)
+     * @param genre - Genre ID/slug
+     * @param page - Page number
+     */
+    getGenre?(genre: string, page?: number): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get servers for an episode (optional, if provider exposes them)
+     * @param episodeId - Episode ID
+     */
+    getServers?(episodeId: string): Promise<any[]>;
 }

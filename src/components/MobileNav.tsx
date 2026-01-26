@@ -49,7 +49,7 @@ export default function MobileNav() {
         <div
             className={`
         fixed bottom-0 left-0 right-0 z-50 
-        bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-white/5 
+        bg-[var(--bg-overlay)] backdrop-blur-xl border-t border-[var(--border-color)]
         pb-[env(safe-area-inset-bottom)] transition-transform duration-300 md:hidden
         ${isScrolledDown ? "translate-y-full" : "translate-y-0"}
       `}
@@ -57,7 +57,7 @@ export default function MobileNav() {
             <div className="flex justify-around items-center h-16">
                 <button
                     onClick={handleHomeClick}
-                    className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !isSearchOpen && !isMenuOpen ? 'text-purple-500' : 'text-zinc-500'}`}
+                    className={`flex flex-col items-center gap-1 p-2 ${pathname === '/' && !isSearchOpen && !isMenuOpen ? 'text-purple-600' : 'text-[var(--text-muted)]'}`}
                 >
                     <Home className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Home</span>
@@ -65,7 +65,7 @@ export default function MobileNav() {
 
                 <button
                     onClick={toggleSearch}
-                    className={`flex flex-col items-center gap-1 p-2 ${isSearchOpen ? 'text-purple-500' : 'text-zinc-500'}`}
+                    className={`flex flex-col items-center gap-1 p-2 ${isSearchOpen ? 'text-purple-600' : 'text-[var(--text-muted)]'}`}
                 >
                     <Search className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Search</span>
@@ -73,7 +73,7 @@ export default function MobileNav() {
 
                 <button
                     onClick={toggleMenu}
-                    className={`flex flex-col items-center gap-1 p-2 ${isMenuOpen ? 'text-purple-500' : 'text-zinc-500'}`}
+                    className={`flex flex-col items-center gap-1 p-2 ${isMenuOpen ? 'text-purple-600' : 'text-[var(--text-muted)]'}`}
                 >
                     <Menu className="w-6 h-6" />
                     <span className="text-[10px] font-medium">Menu</span>

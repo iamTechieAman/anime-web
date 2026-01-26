@@ -15,8 +15,49 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ToonPlayer - Watch Anime Online",
-  description: "Stream anime in HD on ToonPlayer. The best place for anime fans.",
+  metadataBase: new URL('https://anime-web-neon-one.vercel.app'),
+  title: {
+    default: "ToonPlayer - Watch Anime Online Free HD",
+    template: "%s | ToonPlayer",
+  },
+  description: "Stream anime in HD on ToonPlayer. No ads, high quality, and fast streaming. Watch Naruto, One Piece, Attack on Titan, and more for free.",
+  keywords: ["anime", "watch anime", "anime streaming", "free anime", "hd anime", "naruto", "one piece", "demon slayer", "online anime"],
+  authors: [{ name: "ToonPlayer Team" }],
+  creator: "ToonPlayer",
+  publisher: "ToonPlayer",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://anime-web-neon-one.vercel.app',
+    title: 'ToonPlayer - Watch Anime Online Free HD',
+    description: 'Stream your favorite anime in HD for free. No ads, just pure anime.',
+    siteName: 'ToonPlayer',
+    images: [
+      {
+        url: '/og-image.jpg', // You should ensure this image exists or use a remote URL
+        width: 1200,
+        height: 630,
+        alt: 'ToonPlayer - Watch Anime Online',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ToonPlayer - Watch Anime Online',
+    description: 'Stream anime in HD for free.',
+    images: ['/og-image.jpg'], // Same here
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,
@@ -25,6 +66,9 @@ export const metadata: Metadata = {
     viewportFit: "cover",
   },
   themeColor: "#050505",
+  verification: {
+    google: 'your-google-verification-code', // User needs to provide this or I can leave a placeholder
+  },
 };
 
 import { MobileUIProvider } from "@/context/MobileUIContext";

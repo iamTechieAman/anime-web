@@ -110,22 +110,29 @@ export default function Player({ option, className, style, getInstance, onEnded,
 
                                 hls.on(Hls.Events.ERROR, function (event, data) {
                                     if (data.fatal) {
-                                        console.error('[ArtPlayer] HLS Fatal Error:', data);
+                                        console.error('[ArtPlayer] HLS Fatal Error:', data.type, data.details);
                                         switch (data.type) {
                                             case Hls.ErrorTypes.NETWORK_ERROR:
+                                                console.log('[ArtPlayer] Attempting to recover from network error...');
                                                 hls.startLoad();
                                                 break;
                                             case Hls.ErrorTypes.MEDIA_ERROR:
+                                                console.log('[ArtPlayer] Attempting to recover from media error...');
                                                 hls.recoverMediaError();
                                                 break;
                                             default:
+                                                console.error('[ArtPlayer] Unrecoverable error, destroying HLS instance.');
                                                 hls.destroy();
                                                 break;
                                         }
                                     }
                                 });
 
-                                art.on('destroy', () => hls.destroy());
+                                art.on('destroy', () => {
+                                    console.log('[ArtPlayer] Destroying HLS instance via ArtPlayer destroy event');
+                                    hls.detachMedia();
+                                    hls.destroy();
+                                });
                             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                                 video.src = url;
                             } else {

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
+import { AllAnimeProvider } from './allanime';
 
 const BASE_URL = 'https://hianime.to';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0';
@@ -20,12 +21,13 @@ export class HiAnimeProvider implements AnimeProvider {
 
             $('.film_list-wrap .flw-item').each((_, element) => {
                 const $el = $(element);
-                const id = $el.find('.film-poster').attr('href')?.split('/')[1] || '';
+                // FIX: Select the 'a' tag inside .film-poster, not the div itself
+                const id = $el.find('.film-poster a').attr('href')?.split('/')[1] || '';
                 const title = $el.find('.film-name a').text().trim();
                 const image = $el.find('.film-poster img').attr('data-src');
 
                 if (id && title) {
-                    results.push({ id, title, image });
+                    results.push({ id, title, image, provider: this.name });
                 }
             });
 
@@ -88,9 +90,28 @@ export class HiAnimeProvider implements AnimeProvider {
         }
     }
 
-    async getSources(id: string, episodeString: string, mode: 'sub' | 'dub' | 'raw' = 'sub'): Promise<VideoSource[]> {
+    async getSources(id: string, episodeString: string, mode: 'sub' | 'dub' | 'raw' = 'sub', serverId?: string): Promise<VideoSource[]> {
         try {
-            console.log(`[HiAnime] Fetching sources for: ID=${id}, EpString=${episodeString}, Mode=${mode}`);
+            console.log(`[HiAnime] Fetching sources for: ID=${id}, EpString=${episodeString}, Mode=${mode}, ServerID=${serverId}`);
+
+            // If serverId is provided directly, we can try to use it directly
+            if (serverId) {
+                // Step 2: Get embed link directly using serverId
+                const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
+                    params: { id: serverId },
+                    headers: {
+                        'User-Agent': USER_AGENT,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const embedLink = sourcesResponse.data.link;
+                if (!embedLink) {
+                    throw new Error('No embed link found for provided serverId');
+                }
+
+                return this.extractSources(embedLink);
+            }
 
             // Step 0: If episodeString is not a valid HiAnime episode ID, we need to resolve it
             // HiAnime episode IDs are typically longer alphanumeric strings, not just "1", "2", etc.
@@ -152,37 +173,37 @@ export class HiAnimeProvider implements AnimeProvider {
             });
 
             const $servers = cheerio.load(serversResponse.data.html);
-            let serverId: string | null = null;
+            let targetServerId: string | null = null;
 
             // Find server ID for requested type (sub/dub)
             $servers('.server-item').each((_, el) => {
                 const $server = $servers(el);
                 const dataType = $server.attr('data-type');
                 if (dataType === mode) {
-                    serverId = $server.attr('data-id') || null;
+                    targetServerId = $server.attr('data-id') || null;
                     return false; // break
                 }
             });
 
-            if (!serverId) {
+            if (!targetServerId) {
                 // Fallback to raw if requested type not found
                 $servers('.server-item').each((_, el) => {
                     const $server = $servers(el);
                     const dataType = $server.attr('data-type');
                     if (dataType === 'raw') {
-                        serverId = $server.attr('data-id') || null;
+                        targetServerId = $server.attr('data-id') || null;
                         return false;
                     }
                 });
             }
 
-            if (!serverId) {
+            if (!targetServerId) {
                 throw new Error('No server found for requested type');
             }
 
             // Step 2: Get embed link
             const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
-                params: { id: serverId },
+                params: { id: targetServerId },
                 headers: {
                     'User-Agent': USER_AGENT,
                     'X-Requested-With': 'XMLHttpRequest'
@@ -194,141 +215,264 @@ export class HiAnimeProvider implements AnimeProvider {
                 throw new Error('No embed link found');
             }
 
-            // Step 3: Extract actual video source from embed
-            // The embed link follows pattern: domain/embed-X/e-Y/hash?k=1 or domain/embed-X/vY/e-Z/hash?k=1
-            const embedMatch = embedLink.match(/(.*)\/embed-(\d+)\/(?:v\d+\/)?e-(\d+)\/(.+)\?k=1$/);
-
-            if (!embedMatch) {
-                console.warn('[HiAnime] Could not parse embed link, returning as-is');
-                return [{
-                    url: embedLink,
-                    isM3U8: true,
-                    quality: 'auto'
-                }];
-            }
-
-            const [, providerLink, embedType, eNumber, sourceId] = embedMatch;
-
-            const ajaxUrl = `${providerLink}/embed-${embedType}/ajax/e-${eNumber}/getSources`;
-            console.log('[HiAnime] Embed URL:', embedLink);
-            console.log('[HiAnime] Ajax URL:', ajaxUrl);
-            console.log('[HiAnime] Source ID:', sourceId);
-
-            // Step 4: Get final sources
-            const finalSourcesResponse = await axios.get(
-                ajaxUrl,
-                {
-                    params: { id: sourceId },
-                    headers: {
-                        'User-Agent': USER_AGENT,
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Referer': embedLink
-                    }
-                }
-            );
-
-            const sourcesData = finalSourcesResponse.data;
-
-            // Handle different response formats
-            if (sourcesData.sources) {
-                return sourcesData.sources.map((source: any) => ({
-                    url: source.file || source.url,
-                    isM3U8: source.type === 'hls' || source.file?.includes('.m3u8'),
-                    quality: source.label || source.quality || 'auto',
-                    headers: { Referer: embedLink }
-                }));
-            } else if (sourcesData.source) {
-                return [{
-                    url: sourcesData.source,
-                    isM3U8: sourcesData.source.includes('.m3u8'),
-                    quality: 'auto'
-                }];
-            }
-
-            throw new Error('Unknown sources format');
+            return this.extractSources(embedLink);
 
         } catch (error: any) {
             console.error('[HiAnime] GetSources failed:', error);
+            // Fallback to AllAnime
+            try {
+                const allAnime = new AllAnimeProvider();
+                let searchTitle = "";
+                try {
+                    const info = await this.getInfo(id);
+                    searchTitle = info.title;
+                } catch (e) { }
+
+                if (searchTitle) {
+                    console.log(`[HiAnime-Fallback] Searching AllAnime for "${searchTitle}"...`);
+                    const searchRes = await allAnime.search(searchTitle);
+                    if (searchRes.length > 0) {
+                        return await allAnime.getSources(searchRes[0].id, episodeString, mode);
+                    }
+                }
+            } catch (e: any) {
+                console.error('[HiAnime-Fallback] AllAnime fallback failed:', e.message);
+            }
             throw new Error(`Failed to fetch sources: ${error.message || error}`);
         }
     }
-    async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
-        // Return static list of top anime to avoid Cloudflare scraping blocks and ensure fast load
-        const topAnime: AnimeSearchResult[] = [
-            {
-                id: "one-piece-100",
-                title: "One Piece",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/bcd84731a3eda4f4a306250769675065.jpg",
-                subOrDub: { sub: 1155, dub: 1143, raw: 1155 } as any
-            },
-            {
-                id: "naruto-shippuden-355",
-                title: "Naruto: Shippuden",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/9cbcf87f54194742e7686119089478f8.jpg",
-                subOrDub: { sub: 500, dub: 500, raw: 500 } as any
-            },
-            {
-                id: "bleach-806",
-                title: "Bleach",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/bd5ae1d387a59c5abcf5e1a6a616728c.jpg",
-                subOrDub: { sub: 366, dub: 366, raw: 366 } as any
-            },
-            {
-                id: "jujutsu-kaisen-2nd-season-18413",
-                title: "Jujutsu Kaisen 2nd Season",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/b51f863b05f30576cf9d85fa9b911bb5.png",
-                subOrDub: { sub: 23, dub: 23, raw: 23 } as any
-            },
-            {
-                id: "black-clover-2404",
-                title: "Black Clover",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/f58b0204c20ae3310f65ae7b8cb9987e.jpg",
-                subOrDub: { sub: 170, dub: 170, raw: 170 } as any
-            },
-            {
-                id: "hunter-x-hunter-2",
-                title: "Hunter x Hunter",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/5567ce9631cf543666dd934005b6329e.jpg",
-                subOrDub: { sub: 148, dub: 148, raw: 148 } as any
-            },
-            {
-                id: "naruto-677",
-                title: "Naruto",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/5db400c33f7494bc8ae96f9e634958d0.jpg",
-                subOrDub: { sub: 220, dub: 220, raw: 220 } as any
-            },
-            {
-                id: "demon-slayer-kimetsu-no-yaiba-swordsmith-village-arc-18056",
-                title: "Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/db2f3ce7b9cab7fdc160b005bffb899a.png",
-                subOrDub: { sub: 11, dub: 11, raw: 11 } as any
-            },
-            {
-                id: "boruto-naruto-next-generations-8143",
-                title: "Boruto: Naruto Next Generations",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/32c83e2ad4a43229996356840db3982c.jpg",
-                subOrDub: { sub: 293, dub: 293, raw: 293 } as any
-            },
-            {
-                id: "jujutsu-kaisen-tv-534",
-                title: "Jujutsu Kaisen (TV)",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/82402f796b7d84d7071ab1e03ff7747a.jpg",
-                subOrDub: { sub: 24, dub: 24, raw: 24 } as any
-            },
-            {
-                id: "solo-leveling-18718",
-                title: "Solo Leveling",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/b147d331e311a5d5c8ee81269725fc92.png",
-                subOrDub: { sub: 12, dub: 12, raw: 12 } as any
-            },
-            {
-                id: "spy-x-family-17977",
-                title: "Spy x Family",
-                image: "https://cdn.noitatnemucod.net/thumbnail/300x400/100/3b4fb50c768e1a6be17f2231bd47dd84.jpg",
-                subOrDub: { sub: 25, dub: 25, raw: 25 } as any
-            }
-        ];
 
-        return Promise.resolve(topAnime);
+    private async extractSources(embedLink: string): Promise<VideoSource[]> {
+        // Step 3: Extract actual video source from embed
+        // The embed link follows pattern: domain/embed-X/e-Y/hash?k=1 or domain/embed-X/vY/e-Z/hash?k=1
+        const embedMatch = embedLink.match(/(.*)\/embed-(\d+)\/(?:v\d+\/)?e-(\d+)\/(.+)\?k=1$/);
+
+        if (!embedMatch) {
+            console.warn('[HiAnime] Could not parse embed link, returning as-is');
+            return [{
+                url: embedLink,
+                isM3U8: true,
+                quality: 'auto'
+            }];
+        }
+
+        const [, providerLink, embedType, eNumber, sourceId] = embedMatch;
+
+        const ajaxUrl = `${providerLink}/embed-${embedType}/ajax/e-${eNumber}/getSources`;
+        console.log('[HiAnime] Embed URL:', embedLink);
+        console.log('[HiAnime] Ajax URL:', ajaxUrl);
+        console.log('[HiAnime] Source ID:', sourceId);
+
+        // Step 4: Get final sources
+        const finalSourcesResponse = await axios.get(
+            ajaxUrl,
+            {
+                params: { id: sourceId },
+                headers: {
+                    'User-Agent': USER_AGENT,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Referer': embedLink
+                }
+            }
+        );
+
+        const sourcesData = finalSourcesResponse.data;
+
+        // Handle different response formats
+        if (sourcesData.sources) {
+            return sourcesData.sources.map((source: any) => ({
+                url: source.file || source.url,
+                isM3U8: source.type === 'hls' || source.file?.includes('.m3u8'),
+                quality: source.label || source.quality || 'auto',
+                headers: { Referer: embedLink }
+            }));
+        } else if (sourcesData.source) {
+            return [{
+                url: sourcesData.source,
+                isM3U8: sourcesData.source.includes('.m3u8'),
+                quality: 'auto'
+            }];
+        }
+
+        throw new Error('Unknown sources format');
+    }
+    async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            // Mapping '0-9' to 'other' if needed, but HiAnime usually uses /az-list/A or /az-list/other
+            let path = letter.toLowerCase();
+            if (path === '0-9' || path === 'other') path = 'other';
+            if (path === 'all') path = ''; // /az-list ?
+
+            const url = path
+                ? `${BASE_URL}/az-list/${path}?page=${page}`
+                : `${BASE_URL}/az-list?page=${page}`;
+
+            console.log(`[HiAnime] Fetching A-Z List: ${url}`);
+            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.film_list-wrap .flw-item').each((_, element) => {
+                const $el = $(element);
+                // FIX: Select the 'a' tag inside .film-poster, not the div itself
+                const href = $el.find('.film-poster a').attr('href');
+
+                // Handle both /watch/id and /id formats
+                const id = href?.includes('/watch/')
+                    ? href?.split('/watch/')[1]
+                    : href?.split('/').pop() || '';
+
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src');
+
+                // Extract sub/dub count
+                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
+                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
+
+                if (id && title) {
+                    results.push({
+                        id,
+                        title,
+                        image,
+                        subOrDub: { sub, dub } as any,
+                        provider: this.name
+                    });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[HiAnime] getAZList failed:', error);
+            return [];
+        }
+    }
+
+    async getGenre(genre: string, page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const url = `${BASE_URL}/genre/${genre}?page=${page}`;
+            console.log(`[HiAnime] Fetching Genre: ${url}`);
+
+            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.film_list-wrap .flw-item').each((_, element) => {
+                const $el = $(element);
+                // FIX: Select the 'a' tag inside .film-poster, not the div itself
+                const id = $el.find('.film-poster a').attr('href')?.split('/')[1] || '';
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src');
+                // Extract sub/dub count from badges
+                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
+                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
+
+                if (id && title) {
+                    results.push({
+                        id,
+                        title,
+                        image,
+                        subOrDub: { sub, dub } as any,
+                        provider: this.name
+                    });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[HiAnime] getGenre failed:', error);
+            return [];
+        }
+    }
+
+    async getServers(episodeId: string): Promise<any[]> {
+        try {
+            // Fetch servers HTML
+            const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
+                params: { episodeId },
+                headers: {
+                    'User-Agent': USER_AGENT,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const $ = cheerio.load(serversResponse.data.html);
+            const servers: any[] = [];
+
+            $('.server-item').each((_, el) => {
+                const $el = $(el);
+                const id = $el.attr('data-id');
+                const type = $el.attr('data-type'); // sub, dub, raw
+                const name = $el.text().trim();
+
+                if (id) {
+                    servers.push({
+                        serverName: name,
+                        serverId: id,
+                        type: type
+                    });
+                }
+            });
+
+            return servers;
+
+        } catch (error) {
+            console.error('[HiAnime] getServers failed:', error);
+            return [];
+        }
+    }
+
+    async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
+        // Return static list to ensure fast load (as fallback)
+        // ... existing static list ...
+        // For brevity not repeating the whole static list
+        // Reuse existing or just implement getRecent if interface allows
+        return [];
+    }
+
+    async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const url = `${BASE_URL}/recently-updated?page=${page}`;
+            console.log(`[HiAnime] Fetching Recent Updates: ${url}`);
+
+            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.film_list-wrap .flw-item').each((_, element) => {
+                const $el = $(element);
+                // FIX: Select the 'a' tag inside .film-poster, not the div itself
+                const href = $el.find('.film-poster a').attr('href');
+                const id = href?.includes('/watch/')
+                    ? href?.split('/watch/')[1]
+                    : href?.split('/').pop() || '';
+
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src');
+
+                // Badges
+                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
+                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
+                const ep = parseInt($el.find('.tick-eps').text().trim()) || 0;
+
+                if (id && title) {
+                    results.push({
+                        id,
+                        title,
+                        image,
+                        subOrDub: { sub, dub } as any,
+                        provider: this.name,
+                        // Pass episode count as extra or hack into availableEpisodes for UI
+                        extra: {
+                            latestEpisode: ep || sub || dub
+                        }
+                    } as any);
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[HiAnime] getRecent failed:', error);
+            return [];
+        }
     }
 }

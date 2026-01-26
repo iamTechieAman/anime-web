@@ -95,7 +95,8 @@ export class AllAnimeProvider implements AnimeProvider {
                     id: show._id,
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
-                    subOrDub: show.availableEpisodes
+                    subOrDub: show.availableEpisodes,
+                    provider: this.name
                 };
             });
         } catch (error) {
@@ -139,6 +140,10 @@ export class AllAnimeProvider implements AnimeProvider {
                 availableEpisodes: {
                     sub: episodesSub.length,
                     dub: episodesDub.length
+                },
+                availableEpisodesDetail: {
+                    sub: episodesSub,
+                    dub: episodesDub
                 },
                 totalEpisodes: Math.max(episodesSub.length, episodesDub.length)
             };
@@ -281,7 +286,8 @@ export class AllAnimeProvider implements AnimeProvider {
                     id: show._id,
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
-                    subOrDub: show.availableEpisodes
+                    subOrDub: show.availableEpisodes,
+                    provider: this.name
                 };
             });
         } catch (error) {
@@ -315,7 +321,8 @@ export class AllAnimeProvider implements AnimeProvider {
                     id: show._id,
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
-                    subOrDub: show.availableEpisodes
+                    subOrDub: show.availableEpisodes,
+                    provider: this.name
                 };
             });
         } catch (error) {
@@ -348,7 +355,8 @@ export class AllAnimeProvider implements AnimeProvider {
                     id: show._id,
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
-                    subOrDub: show.availableEpisodes
+                    subOrDub: show.availableEpisodes,
+                    provider: this.name
                 };
             });
         } catch (error) {

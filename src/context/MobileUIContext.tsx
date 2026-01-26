@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
+import { App } from '@capacitor/app';
+
 interface MobileUIContextType {
     isSearchOpen: boolean;
     isMenuOpen: boolean;
@@ -20,6 +22,31 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+    // Handle Android Back Button
+    useEffect(() => {
+        const handleBackButton = async () => {
+            await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+                if (isSearchOpen || isMenuOpen) {
+                    setIsSearchOpen(false);
+                    setIsMenuOpen(false);
+                } else if (canGoBack) {
+                    window.history.back();
+                } else {
+                    App.exitApp();
+                }
+            });
+        };
+
+        // Only run on client
+        if (typeof window !== 'undefined') {
+            handleBackButton();
+        }
+
+        return () => {
+            App.removeAllListeners();
+        };
+    }, [isSearchOpen, isMenuOpen]);
 
     // Initialize theme from local storage or system preference
     useEffect(() => {
