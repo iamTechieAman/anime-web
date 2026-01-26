@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
+import useSWR from 'swr';
 import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
@@ -72,6 +73,25 @@ export default function Home() {
     fetchSuggestions();
   }, [debouncedSearch]);
 
+  // Fetcher helper
+  const fetcher = (url: string) => axios.get(url).then(res => res.data);
+
+  // Use SWR for Recent Anime (Auto-update every 2 minutes)
+  const { data: recentData, error: recentError } = useSWR('/api/anime/recent', fetcher, {
+    refreshInterval: 30000, // 30 seconds
+    revalidateOnFocus: true
+  });
+
+  useEffect(() => {
+    if (recentData?.shows) {
+      setRecent(recentData.shows);
+      setLoading(prev => ({ ...prev, recent: false }));
+    } else if (recentError) {
+      console.error("Failed to fetch recent anime", recentError);
+      setLoading(prev => ({ ...prev, recent: false }));
+    }
+  }, [recentData, recentError]);
+
   // Fetch popular anime
   const fetchPopular = async () => {
     try {
@@ -81,18 +101,6 @@ export default function Home() {
       console.error("Failed to fetch popular anime", error);
     } finally {
       setLoading(prev => ({ ...prev, popular: false }));
-    }
-  };
-
-  // Fetch recent anime
-  const fetchRecent = async () => {
-    try {
-      const res = await axios.get("/api/anime/recent");
-      setRecent(res.data.shows || []);
-    } catch (error) {
-      console.error("Failed to fetch recent anime", error);
-    } finally {
-      setLoading(prev => ({ ...prev, recent: false }));
     }
   };
 
@@ -111,16 +119,14 @@ export default function Home() {
   // Fetch data on mount and set up auto-refresh
   useEffect(() => {
     fetchPopular();
-    fetchRecent();
     fetchTop();
 
-    // Auto-refresh every 1 minute (60000ms) for real-time updates
+    // Auto-refresh every 30 seconds for real-time updates
     refreshIntervalRef.current = setInterval(() => {
       console.log('[ToonPlayer] Auto-refreshing anime data...');
       fetchPopular();
-      fetchRecent();
       fetchTop();
-    }, 60000); // 1 minute
+    }, 30000); // 30 seconds
 
     // Cleanup interval on unmount
     return () => {

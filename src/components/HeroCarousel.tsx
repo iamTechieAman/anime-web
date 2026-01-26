@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
+import useSWR from 'swr';
 import { Play, ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 import axios from "axios";
 
@@ -25,80 +27,75 @@ export default function HeroCarousel() {
     const [slides, setSlides] = useState<Slide[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch Home Data (Slides from Anikai via API)
+    // Use SWR for real-time updates and auto-revalidation
+    const fetcher = (url: string) => axios.get(url).then(res => res.data);
+
+    // Poll every 5 minutes (300000ms) to check for new trending anime
+    const { data, error, isLoading: isSwrLoading } = useSWR('/api/anime/home', fetcher, {
+        refreshInterval: 60000,
+        revalidateOnFocus: true,
+        dedupingInterval: 60000,
+    });
+
     useEffect(() => {
-        const fetchHome = async () => {
-            try {
-                // Fetch from our new scraper endpoint which scrapes anikai.to/home
-                console.log("[HeroCarousel] Fetching real-time Anikai slides...");
-                const response = await axios.get('/api/anime/home');
-                const rawSlides = response.data.slides || [];
+        if (data?.slides) {
+            processSlides(data.slides);
+        } else if (error) {
+            console.error("Failed to fetch home slides:", error);
+            // Optional: fallback logic here
+        }
+    }, [data, error]);
 
-                if (rawSlides.length === 0) {
-                    // Fallback to old Trending query if scraper fails
-                    console.warn("No slides from Anikai scraper, falling back to AniList trending.");
-                    // (Fallback logic could go here, but let's assume scraper works or API handles it)
-                    // For now, let's just return empty and let the loading/error state handle or fetch trending as fallback.
+    const processSlides = async (rawSlides: any[]) => {
+        console.log("[HeroCarousel] Processing slides from SWR...");
+        try {
+            const formattedSlides: Slide[] = await Promise.all(rawSlides.map(async (item: any) => {
+                let image = item.image;
+                let cover = item.extra?.cover;
+                let banner = null;
+                let rating = "?";
+                let year = "2026"; // Dynamic year ideally
+
+                // If we have AniList ID, fetch high-res metadata
+                if (item.extra?.aniListId) {
+                    try {
+                        const alRes = await axios.post('https://graphql.anilist.co', {
+                            query: `query($id: Int) { Media(id:$id) { bannerImage coverImage{extraLarge} averageScore seasonYear genres format } }`,
+                            variables: { id: item.extra.aniListId }
+                        });
+                        const media = alRes.data.data.Media;
+                        banner = media.bannerImage;
+                        cover = media.coverImage.extraLarge;
+                        if (media.averageScore) rating = `${media.averageScore}%`;
+                        if (media.seasonYear) year = media.seasonYear.toString();
+                    } catch (e) { /* ignore */ }
                 }
 
-                // Map to UI format
-                // We need to fetch AniList details for images if not present
-                const formattedSlides: Slide[] = await Promise.all(rawSlides.map(async (item: any) => {
-                    let image = item.image;
-                    let cover = item.extra?.cover;
-                    let banner = null;
-                    let rating = "?";
-                    let year = "2026";
+                return {
+                    id: item.id,
+                    title: item.title,
+                    description: item.extra?.description || "No description.",
+                    image: banner || cover || item.image,
+                    cover: cover || item.image,
+                    tags: ["Anime", "HD", "New"],
+                    rating,
+                    release: year,
+                    quality: "HD",
+                    type: "TV",
+                    link: `/watch/${item.id}?provider=anikai`
+                };
+            }));
 
-                    // If we have AniList ID, fetch high-res metadata
-                    if (item.extra?.aniListId) {
-                        try {
-                            const alRes = await axios.post('https://graphql.anilist.co', {
-                                query: `query($id: Int) { Media(id:$id) { bannerImage coverImage{extraLarge} averageScore seasonYear genres format } }`,
-                                variables: { id: item.extra.aniListId }
-                            });
-                            const media = alRes.data.data.Media;
-                            banner = media.bannerImage;
-                            cover = media.coverImage.extraLarge;
-                            if (media.averageScore) rating = `${media.averageScore}%`;
-                            if (media.seasonYear) year = media.seasonYear.toString();
-                        } catch (e) { /* ignore */ }
-                    }
-
-                    return {
-                        id: item.id, // This is the Anikai ID (slug)
-                        title: item.title,
-                        description: item.extra?.description || "No description.",
-                        image: banner || cover || item.image, // Prefer banner
-                        cover: cover || item.image,
-                        tags: ["Anime", "HD", "New"], // Generic for now
-                        rating,
-                        release: year,
-                        quality: "HD",
-                        type: "TV",
-                        // CRITICAL: Use the ID provided by the provider (Slug) for reliable source fetching.
-                        // While AniList ID is useful for metadata, the Anikai provider requires the slug for playback.
-                        link: `/watch/${item.id}?provider=anikai`
-                    };
-                }));
-
-                const validSlides = formattedSlides.filter(s => s.image && !s.image.includes('undefined'));
-
-                if (validSlides.length > 0) {
-                    setSlides(validSlides);
-                } else {
-                    // Fallback to fetch trending directly if no valid slides
-                    // fetchTrending(); 
-                }
-            } catch (error) {
-                console.error("Failed to fetch home slides:", error);
-            } finally {
+            const validSlides = formattedSlides.filter(s => s.image && !s.image.includes('undefined'));
+            if (validSlides.length > 0) {
+                setSlides(validSlides);
                 setIsLoading(false);
             }
-        };
-
-        fetchHome();
-    }, []);
+        } catch (err) {
+            console.error("Error processing slides:", err);
+            setIsLoading(false);
+        }
+    };
 
     // Auto-rotate
     useEffect(() => {
@@ -142,18 +139,25 @@ export default function HeroCarousel() {
                 >
                     {/* Background Image */}
                     <div className="absolute inset-0">
-                        <img
+                        <Image
                             src={activeSlide.image}
                             alt={activeSlide.title}
-                            onError={(e) => {
-                                // Fallback if Anikai/AniList image fails
-                                (e.target as HTMLImageElement).src = 'https://s4.anilist.co/file/anilistcdn/media/anime/banner/1.jpg';
-                            }}
-                            className="w-full h-full object-cover object-center opacity-80 dark:opacity-60"
-                            loading="eager"
+                            fill
+                            className="object-cover object-center opacity-80 dark:opacity-60"
+                            priority
+                            quality={90}
+                            sizes="(max-width: 768px) 100vw, 100vw"
                         />
                         {/* Pre-fetch next slide image for lag-free transition */}
-                        <link rel="prefetch" href={slides[(current + 1) % slides.length]?.image} />
+                        <div className="hidden">
+                            <Image
+                                src={slides[(current + 1) % slides.length]?.image}
+                                alt="preload"
+                                width={10}
+                                height={10}
+                                priority
+                            />
+                        </div>
 
                         {/* Gradient Overlay for Text Readability - Adjusted for Light Mode visibility */}
                         <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent dark:via-[var(--bg-main)]/80" />
