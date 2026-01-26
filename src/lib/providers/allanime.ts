@@ -193,67 +193,62 @@ export class AllAnimeProvider implements AnimeProvider {
                 return 0;
             });
 
-            // Try sources in priority order - return FIRST working one immediately
-            for (const source of sortedSources) {
-                try {
-                    console.log(`[AllAnime] Trying source: ${source.sourceName}`);
-                    const rawSourceUrl = source.sourceUrl || "";
+            // Try top 3 sources in parallel for maximum speed
+            const sourcesToTry = sortedSources.slice(0, 3);
+            console.log(`[AllAnime] Trying top ${sourcesToTry.length} sources in parallel...`);
 
-                    if (!rawSourceUrl) {
-                        console.warn(`[AllAnime] Empty sourceUrl for ${source.sourceName}`);
-                        continue;
-                    }
+            const validateSource = async (source: any): Promise<VideoSource> => {
+                const rawSourceUrl = source.sourceUrl || "";
+                if (!rawSourceUrl) throw new Error("Empty sourceUrl");
 
-                    const encryptedUrl = rawSourceUrl.replace(/^--/, "");
-                    const decryptedPath = decryptSource(encryptedUrl);
+                const encryptedUrl = rawSourceUrl.replace(/^--/, "");
+                const decryptedPath = decryptSource(encryptedUrl);
+                if (!decryptedPath || decryptedPath.length < 5) throw new Error("Decryption failed");
 
-                    if (!decryptedPath || decryptedPath.length < 5) {
-                        console.warn(`[AllAnime] Decryption failed for ${source.sourceName}`);
-                        continue;
-                    }
+                let finalUrl: string;
+                if (decryptedPath.startsWith('http://') || decryptedPath.startsWith('https://')) {
+                    finalUrl = decryptedPath;
+                } else if (decryptedPath.startsWith('/')) {
+                    finalUrl = `https://allanime.day${decryptedPath}`;
+                } else {
+                    finalUrl = `https://${decryptedPath}`;
+                }
 
-                    console.log(`[AllAnime] Decrypted path: ${decryptedPath.slice(0, 100)}...`);
+                // Fetch stream URL with strict timeout
+                const streamResponse = await axios.get(finalUrl, {
+                    headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                    timeout: 4000 // Faster timeout for parallel validation
+                });
 
-                    // Build final URL
-                    let finalUrl: string;
-                    if (decryptedPath.startsWith('http://') || decryptedPath.startsWith('https://')) {
-                        finalUrl = decryptedPath;
-                    } else if (decryptedPath.startsWith('/')) {
-                        finalUrl = `https://allanime.day${decryptedPath}`;
-                    } else {
-                        finalUrl = `https://${decryptedPath}`;
-                    }
+                let videoUrl = streamResponse.data?.links?.[0]?.link || streamResponse.data?.link;
+                if (videoUrl && typeof videoUrl === 'string') {
+                    return {
+                        url: videoUrl,
+                        isM3U8: videoUrl.includes('.m3u8'),
+                        quality: source.sourceName
+                    };
+                }
+                throw new Error("No video URL found");
+            };
 
-                    console.log(`[AllAnime] Fetching stream from: ${finalUrl.slice(0, 100)}...`);
-
-                    // Fetch the actual stream URL
-                    const streamResponse = await axios.get(finalUrl, {
-                        headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
-                        timeout: 10000
-                    });
-
-                    let videoUrl = streamResponse.data?.links?.[0]?.link || streamResponse.data?.link;
-
-                    if (videoUrl && typeof videoUrl === 'string') {
-                        console.log(`[AllAnime] ✓ Found video URL from ${source.sourceName}`);
-                        const isM3U8 = videoUrl.includes('.m3u8');
-
-                        // Return immediately - don't test other sources
-                        return [{
-                            url: videoUrl,
-                            isM3U8,
-                            quality: source.sourceName
-                        }];
-                    } else {
-                        console.warn(`[AllAnime] No video URL in response for ${source.sourceName}`);
-                    }
-                } catch (err: any) {
-                    console.error(`[AllAnime] Source ${source.sourceName} failed:`, err.message);
-                    continue;
+            try {
+                // Use Promise.any to return the FIRST working source immediately
+                const firstSucceeded = await Promise.any(sourcesToTry.map((s: any) => validateSource(s)));
+                console.log(`[AllAnime] ✓ Fastest source found: ${firstSucceeded.quality}`);
+                return [firstSucceeded];
+            } catch (e: any) {
+                console.log(`[AllAnime] Parallel validation failed, trying remaining sources sequentially...`);
+                // Fallback to sequential for the rest if all top 3 failed
+                const remainingSources = sortedSources.slice(3);
+                for (const source of remainingSources) {
+                    try {
+                        const result = await validateSource(source);
+                        return [result];
+                    } catch (err) { continue; }
                 }
             }
 
-            throw new Error(`All ${sortedSources.length} sources failed`);
+            throw new Error(`Failed to find a working source among ${sortedSources.length} options`);
         } catch (error: any) {
             console.error('[AllAnime] GetSources failed:', error);
             throw new Error(`Failed to fetch sources: ${error.message || error}`);

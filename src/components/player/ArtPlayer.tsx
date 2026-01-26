@@ -76,24 +76,28 @@ export default function Player({ option, className, style, getInstance, onEnded,
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
                                 const hls = new Hls({
-                                    // Optimized buffering for faster startup
-                                    maxBufferLength: 20,  // Reduced from 30 for faster start
-                                    maxMaxBufferLength: 40,  // Reduced from 60
-                                    maxBufferSize: 20 * 1000 * 1000, // 20MB - faster initial load
+                                    // Aggressive buffering for near-instant startup
+                                    maxBufferLength: 15,
+                                    maxMaxBufferLength: 30,
+                                    maxBufferSize: 15 * 1000 * 1000,
 
-                                    // Stability settings
+                                    // Faster initial load
+                                    initialLiveManifestSize: 1,
+                                    nudgeMaxRetry: 10,
+
+                                    // Stability and workers
                                     enableWorker: true,
-                                    lowLatencyMode: false,
-                                    backBufferLength: 10,  // Clear old buffer to save memory
+                                    lowLatencyMode: true,
+                                    backBufferLength: 5,
 
-                                    // Faster timeouts for quicker playback
-                                    manifestLoadingTimeOut: 10000,  // Reduced from 20000
-                                    manifestLoadingMaxRetry: 4,  // Reduced from 5
-                                    levelLoadingTimeOut: 10000,  // Reduced from 20000
-                                    levelLoadingMaxRetry: 4,
-                                    fragLoadingTimeOut: 20000,  // Reduced from 30000
-                                    fragLoadingMaxRetry: 5,
-                                    startLevel: -1,  // Auto select best quality
+                                    // Fast timeouts for quick fallback
+                                    manifestLoadingTimeOut: 5000,  // 5s manifest timeout
+                                    manifestLoadingMaxRetry: 2,
+                                    levelLoadingTimeOut: 5000,
+                                    levelLoadingMaxRetry: 2,
+                                    fragLoadingTimeOut: 10000,
+                                    fragLoadingMaxRetry: 3,
+                                    startLevel: -1,  // Auto-quality 
                                 });
 
                                 hls.loadSource(url);

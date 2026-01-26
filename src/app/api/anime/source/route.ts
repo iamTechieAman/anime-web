@@ -68,15 +68,16 @@ export async function GET(request: Request) {
         try {
             console.log(`[SourceAPI] Primary provider ${providerName} failed. Attempting Smart Fallback...`);
 
-            // 1. Resolve Show Title to search on other providers
-            let searchTitle = "";
-            try {
-                // If we don't have a title, try to fetch it from ANY provider that worked for info
-                const infoProvider = getProvider(providerName);
-                const info = await infoProvider.getInfo(showId);
-                searchTitle = info.title;
-            } catch (e) {
-                console.log("[SourceAPI] Could not fetch info from primary provider for title resolution.");
+            // 1. Resolve Show Title to search on other providers (Use passed title if available)
+            let searchTitle = searchParams.get("title") || "";
+            if (!searchTitle) {
+                try {
+                    const infoProvider = getProvider(providerName);
+                    const info = await infoProvider.getInfo(showId);
+                    searchTitle = info.title;
+                } catch (e) {
+                    console.log("[SourceAPI] Could not fetch info from primary provider for title resolution.");
+                }
             }
 
             // 2. Define fallback providers (Prioritize AllAnime as it's most reliable)

@@ -175,6 +175,7 @@ export default function WatchClient({ id }: { id: string }) {
                         id,
                         ep: currentEp,
                         mode,
+                        title: show.name,
                         provider: show.provider || provider, // Pass provider
                         serverId: selectedServer // Pass selected server
                     }
