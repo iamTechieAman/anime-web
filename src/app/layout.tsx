@@ -18,10 +18,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://anime-web-neon-one.vercel.app'),
   title: {
-    default: "ToonPlayer - Watch Anime Online Free HD",
+    default: "ToonPlayer - Best AnimeWatch Alternative for Free HD Anime",
     template: "%s | ToonPlayer",
   },
-  description: "Stream anime in HD on ToonPlayer. No ads, high quality, and fast streaming.",
+  description: "ToonPlayer is the ultimate AnimeWatch alternative. Stream Naruto, One Piece, and latest anime in HD for free. No ads, high speed, and real-time updates.",
+  keywords: ["ToonPlayer", "AnimeWatch", "watch anime free", "HD anime streaming", "ad-free anime", "latest anime episodes", "premium anime player"],
+  openGraph: {
+    title: "ToonPlayer - Premium Free Anime Streaming",
+    description: "The best way to watch anime online for free. Ad-free HD streaming with real-time updates.",
+    url: 'https://anime-web-neon-one.vercel.app',
+    siteName: 'ToonPlayer',
+    images: [{ url: '/icon.png' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ToonPlayer - Watch Anime in HD',
+    description: 'The ultimate AnimeWatch alternative for true fans.',
+    images: ['/icon.png'],
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,

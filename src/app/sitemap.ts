@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const routes = [
         '',
         '/watch',
+        '/az-list',
     ].map((route) => ({
         url: `${BASE_URL}${route}`,
         lastModified: new Date(),
