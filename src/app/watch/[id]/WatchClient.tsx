@@ -18,6 +18,7 @@ interface ShowData {
     malId?: string;
     aniListId?: string;
     provider?: string;
+    thumbnail?: string;
     availableEpisodesDetail: {
         sub: string[];
         dub: string[];
@@ -51,13 +52,46 @@ export default function WatchClient({ id }: { id: string }) {
 
     const processingRef = useRef<string | null>(null);
 
-    // Load settings from localStorage
+    const [isBookmarked, setIsBookmarked] = useState(false);
+
+    // Load Settings & Bookmark
     useEffect(() => {
         const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') === 'true';
         const savedAutoNext = localStorage.getItem('toonplayer_autonext') === 'true';
         setAutoPlay(savedAutoPlay);
         setAutoNext(savedAutoNext);
-    }, []);
+
+        // Check Bookmark
+        const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
+        const exists = watchlist.some((item: any) => item._id === id);
+        setIsBookmarked(exists);
+    }, [id]);
+
+    const toggleBookmark = () => {
+        if (!show) return;
+        const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
+
+        if (isBookmarked) {
+            // Remove
+            const newList = watchlist.filter((item: any) => item._id !== id);
+            localStorage.setItem('toonplayer_watchlist', JSON.stringify(newList));
+            setIsBookmarked(false);
+            toast.success('Removed from Watchlist');
+        } else {
+            // Add
+            const newItem = {
+                _id: show._id,
+                name: show.name,
+                thumbnail: show.thumbnail || ((show as any).image), // Fallback
+                provider: show.provider || provider,
+                addedAt: Date.now()
+            };
+            watchlist.unshift(newItem); // Add to top
+            localStorage.setItem('toonplayer_watchlist', JSON.stringify(watchlist));
+            setIsBookmarked(true);
+            toast.success('Added to Watchlist');
+        }
+    };
 
     // Save auto-play setting
     const toggleAutoPlay = () => {
@@ -86,6 +120,11 @@ export default function WatchClient({ id }: { id: string }) {
                 const res = await axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`);
                 const fetchedShow = res.data.show;
                 setShow(fetchedShow);
+
+                // Check bookmark again with full show data
+                const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
+                const exists = watchlist.some((item: any) => item._id === id);
+                setIsBookmarked(exists);
 
                 let initialMode: "sub" | "dub" = "sub";
                 let episodes = fetchedShow.availableEpisodesDetail?.sub || [];
@@ -464,7 +503,21 @@ export default function WatchClient({ id }: { id: string }) {
 
                         {/* Metadata */}
                         <div className="mt-3 md:mt-4 flex flex-col gap-1 md:gap-2">
-                            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[var(--text-main)]">{show.name}</h2>
+                            <div className="flex items-start justify-between gap-4">
+                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[var(--text-main)] flex-1">{show.name}</h2>
+                                <button
+                                    onClick={toggleBookmark}
+                                    className={`p-2 rounded-full transition-all ${isBookmarked
+                                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                                        : 'bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-color)]'
+                                        }`}
+                                    title={isBookmarked ? "Remove from Watchlist" : "Add to Watchlist"}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </button>
+                            </div>
                             <p className="text-xs md:text-sm text-[var(--text-muted)] line-clamp-2 md:line-clamp-3">
                                 Watching Episode {currentEp} in {mode.toUpperCase()}.
                                 {selectedServer && ` Server: ${servers.find(s => s.serverId === selectedServer)?.serverName || 'Default'}`}

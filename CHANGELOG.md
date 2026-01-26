@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-01-26
+
+### 🎨 Design & Experience Overhaul (The "Premium" Update)
+- **🖤 True Dark Mode**: Updated global theme to "OLED Black" (`#000000`) for a deeper, more professional look that saves battery on mobile.
+- **🏆 Trending Ranks**: Added a Netflix-style "Trending Now" section with large 1-10 numbering to highlight the most popular shows.
+- **🔖 Watchlist Feature**: Implemented a fully functional "Save/Bookmark" system. Users can now save anime to a local Watchlist that persists across sessions.
+- **✨ UI Polish**: Refined glassmorphism effects, increased font contrast, and improved spacing on the Watch Page.
+
+### 🐛 Bug Fixes
+- Fixed the "Save button not working" issue by implementing proper localStorage persistence.
+- Resolved thumbnail aspect ratio inconsistencies on the improved Grid Layout.
+
 ## [1.6.0] - 2026-01-26
 
 ### ✨ Performance & Stabilization (The "AniLab" Update)

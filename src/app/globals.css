@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* Light Mode (Premium High Contrast) */
-  --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-overlay: rgba(255, 255, 255, 0.9);
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-color: rgba(0, 0, 0, 0.06);
-  --accent: #9333ea;
+  /* Light Mode (Refined) */
+  --bg-main: #ffffff;
+  --bg-card: #f4f4f5;
+  --bg-overlay: rgba(255, 255, 255, 0.8);
+  --text-main: #18181b;
+  --text-muted: #71717a;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --accent: #7c3aed;
+  /* Violtet-600 */
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
 
 .dark {
-  /* Dark Mode */
-  --bg-main: #050505;
-  --bg-card: #0a0a0a;
-  --bg-overlay: rgba(0, 0, 0, 0.85);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: rgba(255, 255, 255, 0.08);
+  /* Dark Mode (Premium OLED Black) */
+  --bg-main: #000000;
+  --bg-card: #09090b;
+  /* Zinc-950 */
+  --bg-overlay: rgba(9, 9, 11, 0.8);
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;
+  --border-color: rgba(255, 255, 255, 0.1);
 }
 
 @theme inline {

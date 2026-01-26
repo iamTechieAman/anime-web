@@ -449,6 +449,9 @@ export default function Home() {
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-12">
 
+              {/* Watchlist Section */}
+              <WatchlistSection />
+
               {/* A-Z Filter Bar */}
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -458,10 +461,16 @@ export default function Home() {
                 <AZFilter />
               </section>
 
-              {/* Popular Today */}
+              {/* Trending Now (Ranked) */}
               <section>
-                <SectionHeader icon={TrendingUp} title="Popular Today" />
-                {loading.popular ? <LoadingSkeleton /> : <AnimeGrid shows={popular.slice(0, 15)} />}
+                <SectionHeader icon={TrendingUp} title="Trending Now" />
+                {loading.popular ? <LoadingSkeleton /> : <AnimeGridRanked shows={popular.slice(0, 10)} />}
+              </section>
+
+              {/* Top Airing */}
+              <section>
+                <SectionHeader icon={Star} title="Top Airing" />
+                {loading.popular ? <LoadingSkeleton /> : <AnimeGrid shows={popular.slice(10, 20)} />}
               </section>
 
               {/* Top Anime (All Time) */}
@@ -492,6 +501,88 @@ function SectionHeader({ icon: Icon, title }: { icon: any; title: string }) {
       <div className="w-1 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7]"></div>
       <h2 className="text-xl md:text-2xl font-bold tracking-tight">{title}</h2>
       <Icon className="w-5 h-5 text-purple-400" />
+    </div>
+  );
+}
+
+function WatchlistSection() {
+  const [watchlist, setWatchlist] = useState<Show[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const saved = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
+    setWatchlist(saved);
+  }, []);
+
+  if (!mounted || watchlist.length === 0) return null;
+
+  return (
+    <section>
+      <SectionHeader icon={Star} title="Your Watchlist" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+        {watchlist.map((show) => (
+          <div key={show._id} className="relative group">
+            <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`}>
+              <div className="aspect-[3/4.5] rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all cursor-pointer relative shadow-lg group-hover:shadow-purple-500/20">
+                <img
+                  src={show.thumbnail}
+                  alt={show.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3">
+                  <p className="text-white text-sm font-bold line-clamp-2 leading-tight">{show.name}</p>
+                </div>
+              </div>
+            </Link>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                const newList = watchlist.filter(i => i._id !== show._id);
+                localStorage.setItem('toonplayer_watchlist', JSON.stringify(newList));
+                setWatchlist(newList);
+              }}
+              className="absolute top-2 right-2 p-1.5 bg-black/60 backdrop-blur-md rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+              title="Remove"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AnimeGridRanked({ shows }: { shows: Show[] }) {
+  if (!shows || shows.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <div className="flex overflow-x-auto gap-6 pb-6 pt-2 px-2 snap-x hide-scrollbar">
+        {shows.map((show, index) => (
+          <Link key={show._id} href={`/watch/${show._id}`} className="relative flex-shrink-0 w-[160px] md:w-[200px] snap-start group">
+            <div className="relative aspect-[3/4.5] ml-8 z-10 transition-transform duration-300 group-hover:-translate-y-2">
+              <div className="absolute inset-0 rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl">
+                <img
+                  src={show.thumbnail}
+                  alt={show.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+              </div>
+            </div>
+            {/* Big Ranking Number */}
+            <div className="absolute -left-2 bottom-4 text-[100px] md:text-[140px] font-black text-transparent leading-none z-0 select-none"
+              style={{ WebkitTextStroke: '2px rgba(255,255,255,0.2)' }}>
+              {index + 1}
+            </div>
+            <div className="absolute -left-2 bottom-4 text-[100px] md:text-[140px] font-black text-[var(--accent)] leading-none z-0 select-none opacity-20 transform translate-x-1 translate-y-1">
+              {index + 1}
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
