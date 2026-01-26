@@ -8,19 +8,23 @@ ToonPlayer is a modern, ad-free anime streaming application built with **Next.js
 
 ## 📸 Screenshots
 
-| Search Page | Watch Page |
+| Popular Grid | Search Suggestions |
 |:---:|:---:|
-| ![](/public/screenshots/search.png) | ![](/public/screenshots/watch.png) |
+| ![](/public/screenshots/popular.png) | ![](/public/screenshots/search.png) |
+
+| Filter Results | Watch Page |
+|:---:|:---:|
+| ![](/public/screenshots/filter.png) | ![](/public/screenshots/watch.png) |
 
 ## ✨ Key Features
 
+- **🔄 Real-time Updates**: The platform automatically updates its anime list, latest releases, and trending shows **daily and automatically** via smart web scraping and API integration.
 - **🎬 Smart Video Player**: Auto-selects the best streaming source (HLS vs MP4) and bypasses CORS restrictions using a smart proxy.
 - **🚀 High Performance**: Built on Next.js 15 for server-side rendering and lightning-fast page loads.
 - **📱 Fully Responsive**: Optimized for Mobile, Tablet, and Desktop with a unified, touch-friendly UI.
 - **🔍 Real-time Search**: Instant search results with thumbnails and dub/sub indicators.
 - **🌙 Modern Design**: Premium dark mode aesthetic with glassmorphism and smooth animations.
 - **💾 Auto-Save**: Remembers your "Auto Play" and "Auto Next" settings.
-- **🛠️ Progressive Enhancement**: Works even without JavaScript enabled (via Noscript fallbacks).
 
 ## 🛠️ Tech Stack
 
