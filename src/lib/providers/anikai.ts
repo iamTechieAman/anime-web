@@ -379,13 +379,20 @@ export class AnikaiProvider implements AnimeProvider {
                 const href = $el.find('.watch-btn').attr('href');
                 const id = href?.split('/watch/')[1] || '';
 
+                // Extract the actual image from swiper slide style (background-image)
+                const style = $el.find('.bg-img').attr('style') || "";
+                let image = "";
+                if (style.includes('url(')) {
+                    image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
+                }
+
                 const aniListId = $el.find('.user-bookmark').attr('data-alid');
 
                 if (id && title) {
                     slides.push({
-                        id: id,  // Use SLUG for robust routing
+                        id: id,
                         title,
-                        image: `https://img.anikai.to/i/cache/images/${id}.jpg`, // Placeholder/Fallback
+                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`, // Fallback
                         provider: this.name,
                         extra: {
                             description: desc,

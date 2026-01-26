@@ -50,7 +50,10 @@ body {
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  touch-action: manipulation;
+  /* Eliminate 300ms tap delay */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  will-change: background-color, color;
 }
 
 html {

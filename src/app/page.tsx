@@ -288,10 +288,39 @@ export default function Home() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
                   placeholder="Search..."
                   className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg py-2 pl-9 pr-4 text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
+
+                {/* Mobile Suggestions */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden shadow-2xl z-[60] max-h-60 overflow-y-auto">
+                    {suggestions.map((show) => (
+                      <button
+                        key={show.id}
+                        onClick={() => handleSearch(null, show.title.english || show.title.romaji)}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-[var(--bg-main)] transition-colors text-left border-b border-[var(--border-color)] last:border-0"
+                      >
+                        <img
+                          src={show.coverImage.medium}
+                          alt=""
+                          className="w-8 h-12 object-cover rounded bg-[var(--bg-main)]"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-[var(--text-main)] truncate">
+                            {show.title.english || show.title.romaji}
+                          </h4>
+                          <p className="text-xs text-[var(--text-muted)] truncate">
+                            {show.seasonYear ? `${show.seasonYear} • ` : ''}{show.format}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => setSearchOpen(false)}

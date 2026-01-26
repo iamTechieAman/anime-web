@@ -105,7 +105,7 @@ export default function HeroCarousel() {
         if (slides.length === 0) return;
         const timer = setInterval(() => {
             nextSlide();
-        }, 8000);
+        }, 5000); // Snappier auto-play (was 8000)
         return () => clearInterval(timer);
     }, [current, slides.length]);
 
@@ -137,7 +137,7 @@ export default function HeroCarousel() {
                     initial={{ opacity: 0.5, scale: 1.05 }} // Reduced initial scale to prevent jarring zoom
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }} // Smooth easing
+                    transition={{ duration: 0.4, ease: "easeOut" }} // Snappier duration (was 0.8)
                     className="absolute inset-0"
                 >
                     {/* Background Image */}
@@ -145,8 +145,12 @@ export default function HeroCarousel() {
                         <img
                             src={activeSlide.image}
                             alt={activeSlide.title}
+                            onError={(e) => {
+                                // Fallback if Anikai/AniList image fails
+                                (e.target as HTMLImageElement).src = 'https://s4.anilist.co/file/anilistcdn/media/anime/banner/1.jpg';
+                            }}
                             className="w-full h-full object-cover object-center opacity-80 dark:opacity-60"
-                            loading="eager" // Prioritize loading the hero image
+                            loading="eager"
                         />
                         {/* Pre-fetch next slide image for lag-free transition */}
                         <link rel="prefetch" href={slides[(current + 1) % slides.length]?.image} />

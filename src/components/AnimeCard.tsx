@@ -30,6 +30,8 @@ export function AnimeCard({ show }: { show: Show }) {
         <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`}>
             <motion.div
                 whileHover={{ y: -8, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                layout="position"
                 className="group relative aspect-[3/4.5] rounded-xl overflow-hidden cursor-pointer bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-colors shadow-xl"
             >
                 {/* Image */}

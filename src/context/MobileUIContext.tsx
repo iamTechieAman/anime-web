@@ -25,12 +25,18 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
 
     // Handle Android Back Button
     useEffect(() => {
-        const handleBackButton = async () => {
-            await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+        let backListener: any = null;
+
+        const setupListener = async () => {
+            backListener = await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+                // If any overlay is open, close it instead of going back or exiting
                 if (isSearchOpen || isMenuOpen) {
                     setIsSearchOpen(false);
                     setIsMenuOpen(false);
-                } else if (canGoBack) {
+                    return;
+                }
+
+                if (canGoBack) {
                     window.history.back();
                 } else {
                     App.exitApp();
@@ -38,15 +44,16 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
             });
         };
 
-        // Only run on client
         if (typeof window !== 'undefined') {
-            handleBackButton();
+            setupListener();
         }
 
         return () => {
-            App.removeAllListeners();
+            if (backListener) {
+                backListener.remove();
+            }
         };
-    }, [isSearchOpen, isMenuOpen]);
+    }, [isSearchOpen, isMenuOpen]); // We still need deps because the listener callback closure needs latest state
 
     // Initialize theme from local storage or system preference
     useEffect(() => {

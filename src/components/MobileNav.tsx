@@ -29,6 +29,12 @@ export default function MobileNav() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [lastScrollY]);
 
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     // Handle Home Click
     const handleHomeClick = () => {
         if (pathname === '/') {
@@ -40,6 +46,7 @@ export default function MobileNav() {
         }
     };
 
+    if (!isMounted) return null;
     // Only show on mobile
     if (typeof window !== "undefined" && window.innerWidth >= 768) {
         return null;
