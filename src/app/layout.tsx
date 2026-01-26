@@ -59,6 +59,24 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <MobileUIProvider>
+          {/* JSON-LD Structured Data for Search Engine Optimization */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "ToonPlayer",
+                "alternateName": "AnimeWatch",
+                "url": "https://anime-web-neon-one.vercel.app/",
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": "https://anime-web-neon-one.vercel.app/search?query={search_term_string}",
+                  "query-input": "required name=search_term_string"
+                }
+              })
+            }}
+          />
           {children}
           <MobileNav />
           <Toaster
