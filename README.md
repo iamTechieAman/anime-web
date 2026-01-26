@@ -25,6 +25,34 @@ ToonPlayer is a modern, ad-free anime streaming application built with **Next.js
 - **🔍 Real-time Search**: Instant search results with thumbnails and dub/sub indicators.
 - **🌙 Modern Design**: Premium dark mode aesthetic with glassmorphism and smooth animations.
 - **💾 Auto-Save**: Remembers your "Auto Play" and "Auto Next" settings.
+- **⚡ Android Native**: Built-in support for Android via **Capacitor**, featuring native back-button handling and high-performance WebView.
+
+## 🛠️ Development Process & Automation
+
+ToonPlayer is designed to be a "Zero Maintenance" app. Here is how it updates automatically and handles data:
+
+### 1. 🔄 Real-time Data Syncing
+Instead of relying on static site generation (SSG) which gets stale, ToonPlayer uses **Real-time API Fetching**:
+- **Zero Cache Strategy**: Every request to the `popular`, `recent`, or `trending` APIs bypasses all server-side caches.
+- **Scraper Pipeline**: We built custom scrapers for **Anikai** and **AllAnime** that parse the latest HTML content directly when a user visits.
+- **Auto-Refresh**: The Home page includes a client-side timer that refreshes the data every **60 seconds**, ensuring users never miss a new episode release.
+
+### 2. 🚀 The Parallel Search Engine
+To minimize search lag, we implemented a parallel search pattern:
+```mermaid
+graph LR
+    User([Search Input]) --> API[Search API]
+    API --> P1[AllAnime]
+    API --> P2[AniWatch]
+    API --> P3[HiAnime]
+    P1 & P2 & P3 --> Merge[Result Merger & De-duplicator]
+    Merge --> Res([Instant Results])
+```
+By querying all providers simultaneously, the app's perceived speed is as fast as the single fastest provider.
+
+### 3. Build & Deployment
+- **Web**: Automatically deployed to **Vercel** on every push to `main`.
+- **Mobile**: Compiled to **Android APK** using Gradle and Capacitor. We increment versioning (currently **v1.6**) for every major UI or performance overhaul.
 
 ## 🛠️ Tech Stack
 
