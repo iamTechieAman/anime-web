@@ -1,6 +1,6 @@
 # 📺 ToonPlayer - Premium Anime Streaming App
 
-### 🔴 **Live Demo:** [https://anime-web-neon-one.vercel.app](https://anime-web-neon-one.vercel.app/)
+### 🔴 **Live Demo:** [[https://anime-web-neon-one.vercel.app](https://anime-web-neon-one.vercel.app/)](https://toon-player.netlify.app/)
 
 ToonPlayer is a modern, ad-free anime streaming application (the ultimate **AnimeWatch** alternative) built with **Next.js 15** and **React 19**. It features a sleek, responsive UI, real-time search, and a robust video player that aggregates sources from multiple providers.
 
