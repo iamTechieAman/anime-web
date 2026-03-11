@@ -5,15 +5,17 @@ import { getProvider, type ProviderName } from "@/lib/providers";
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("query");
+    const genre = searchParams.get("genre");
+    const status = searchParams.get("status");
+    const format = searchParams.get("format");
     const requestedProvider = searchParams.get("provider") as ProviderName;
 
-    // Priority: AllAnime (Verified) -> AniWatch (Verified) -> HiAnime (Mirror) -> Anikai (Broken)
     // Priority: AllAnime (Verified) -> AniWatch (Verified) -> HiAnime (Mirror)
     const providersToTry: ProviderName[] = requestedProvider
         ? [requestedProvider]
-        : ["allanime", "aniwatch", "hianime", "anikai"];
+        : ["allanime", "hianime", "aniwatch"];
 
-    if (!query) {
+    if (!query && !genre && !status && !format) {
         return NextResponse.json({ shows: [] });
     }
 
@@ -22,11 +24,22 @@ export async function GET(request: Request) {
         const searchPromises = providersToTry.map(async (provider) => {
             try {
                 const animeProvider = getProvider(provider);
-                // Simple timeout for each provider
-                const results = await Promise.race([
-                    animeProvider.search(query),
-                    new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000))
-                ]);
+                
+                let results: any[] = [];
+                
+                if (query) {
+                    results = await animeProvider.search(query);
+                } else if (genre && animeProvider.getGenre) {
+                    results = await animeProvider.getGenre(genre);
+                } else if (status && animeProvider.getRecent) {
+                    results = await animeProvider.getRecent();
+                }
+
+                // Apply basic format/status filtering if they were passed but provider didn't handle it
+                // (This is a naive filter on search results)
+                if (results && results.length > 0) {
+                     // ... could add filter logic here if results had metadata ...
+                }
 
                 return (results || []).map(result => ({
                     _id: result.id,

@@ -27,9 +27,10 @@ export async function GET(request: Request) {
             if (titles && titles.length > 0) {
                 console.log(`[Episodes] Searching for titles: ${JSON.stringify(titles)}`);
                 
-                // We'll try to find a match on these providers in order
+                // We'll try to find matches on these providers
                 const searchProviders: ProviderName[] = ["allanime", "hianime", "aniwatch"];
-                let foundMatch = null;
+                let bestShow: any = null;
+                let maxEps = -1;
 
                 for (const searchP of searchProviders) {
                     try {
@@ -41,20 +42,28 @@ export async function GET(request: Request) {
                                 // Find best match or take first
                                 const match = findBestMatch(results, title);
                                 if (match) {
-                                    console.log(`[Episodes] Match found on ${searchP}: ${match.title} (${match.id})`);
+                                    console.log(`[Episodes] Potential match found on ${searchP}: ${match.title} (${match.id})`);
                                     const info = await p.getInfo(match.id);
                                     const show = mapInfoToShow(info);
-                                    if (show && (show.availableEpisodesDetail.sub.length > 0 || show.availableEpisodesDetail.dub.length > 0)) {
-                                        return NextResponse.json({
-                                            show: { ...show, provider: searchP }
-                                        });
+                                    const total = (show?.availableEpisodesDetail.sub.length || 0) + (show?.availableEpisodesDetail.dub.length || 0);
+                                    
+                                    if (show && total > maxEps) {
+                                        maxEps = total;
+                                        bestShow = { ...show, provider: searchP };
+                                        console.log(`[Episodes] New best show from ${searchP} with ${total} episodes.`);
                                     }
                                 }
                             }
+                            // If we already found a very good match (e.g. > 100 eps), we might break early to save time, 
+                            // but for Shin Chan we want as many as possible.
                         }
                     } catch (e: any) {
                         console.warn(`[Episodes] Search failed on ${searchP}: ${e.message}`);
                     }
+                }
+
+                if (bestShow) {
+                    return NextResponse.json({ show: bestShow });
                 }
             }
         }

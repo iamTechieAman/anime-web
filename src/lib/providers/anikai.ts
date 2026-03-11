@@ -405,7 +405,7 @@ export class AnikaiProvider implements AnimeProvider {
 
     async getGenre(genre: string, page: number = 1) { return []; }
 
-    async getHome(): Promise<{ slides: AnimeSearchResult[]; trending: AnimeSearchResult[]; latest: AnimeSearchResult[] }> {
+    async getHome(): Promise<{ slides: AnimeSearchResult[]; trending: AnimeSearchResult[]; latest: AnimeSearchResult[]; completed: AnimeSearchResult[]; upcoming: AnimeSearchResult[] }> {
         try {
             console.log(`[Anikai] Fetching Home...`);
             const response = await axios.get(`${BASE_URL}/home`, {
@@ -498,9 +498,16 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
+            // Fetch additional sections from HiAnime for a richer Home page (Completed, Upcoming)
+            const hianime = new HiAnimeProvider();
+            const [completed, upcoming] = await Promise.all([
+                hianime.getCompleted().catch(() => []),
+                hianime.getUpcoming().catch(() => [])
+            ]);
+
             if (slides.length === 0) throw new Error("No slides found on Anikai");
 
-            return { slides, trending, latest };
+            return { slides, trending, latest, completed, upcoming };
         } catch (error) {
             console.error('[Anikai] getHome failed, falling back to HiAnime...', error);
             try {
@@ -514,10 +521,14 @@ export class AnikaiProvider implements AnimeProvider {
                         aniListId: undefined
                     }
                 })) as any[];
-                return { slides: fallbackSlides, trending: trendingRes, latest: trendingRes };
+                const [completed, upcoming] = await Promise.all([
+                    hianime.getCompleted().catch(() => []),
+                    hianime.getUpcoming().catch(() => [])
+                ]);
+                return { slides: fallbackSlides, trending: trendingRes, latest: trendingRes, completed, upcoming };
             } catch (fallbackError) {
                 console.error('[Anikai] Fallback failed:', fallbackError);
-                return { slides: [], trending: [], latest: [] };
+                return { slides: [], trending: [], latest: [], completed: [], upcoming: [] };
             }
         }
     }

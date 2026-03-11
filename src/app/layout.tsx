@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import MobileNav from "@/components/MobileNav";
 import MobileModals from "@/components/MobileModals";
 import DesktopSidebar from "@/components/DesktopSidebar";
+import Header from "@/components/Header";
 import { MobileUIProvider } from "@/context/MobileUIContext";
 
 const sora = Sora({
@@ -80,7 +81,8 @@ export default function RootLayout({
             }}
           />
           <DesktopSidebar />
-          <div className="flex-1 md:pl-[72px] w-full max-w-full">
+          <Header />
+          <div className="flex-1 md:pl-[72px] w-full max-w-full pt-[70px] md:pt-[80px]">
             {children}
           </div>
           <MobileModals />

@@ -10,25 +10,39 @@ import { AnimeGrid, type Show } from "@/components/AnimeCard";
 function SearchContent() {
     const searchParams = useSearchParams();
     const query = searchParams?.get("query") || "";
+    const genre = searchParams?.get("genre") || "";
+    const format = searchParams?.get("format") || "";
+    const status = searchParams?.get("status") || "";
+    
     const [results, setResults] = useState<Show[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!query) {
+        if (!query && !genre && !format && !status) {
             setLoading(false);
             return;
         }
         setLoading(true);
-        axios.get(`/api/anime/search?query=${encodeURIComponent(query)}`)
+        const params = new URLSearchParams();
+        if (query) params.set('query', query);
+        if (genre) params.set('genre', genre);
+        if (format) params.set('format', format);
+        if (status) params.set('status', status);
+
+        axios.get(`/api/anime/search?${params.toString()}`)
             .then(res => setResults(res.data.shows || []))
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
-    }, [query]);
+    }, [query, genre, format, status]);
 
     return (
         <main className="min-h-screen pt-24 px-4 md:px-8 max-w-7xl mx-auto bg-[var(--bg-main)]">
             <h1 className="text-2xl md:text-3xl font-black mb-8 text-[var(--text-main)]">
-                Search Results for <span className="text-purple-400">"{query}"</span>
+                {query ? (
+                    <>Search Results for <span className="text-purple-400">"{query}"</span></>
+                ) : (
+                    <>Filtering Anime: <span className="text-purple-400">{genre || format || status}</span></>
+                )}
             </h1>
 
             {loading ? (

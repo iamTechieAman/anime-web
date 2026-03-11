@@ -515,4 +515,59 @@ export class HiAnimeProvider implements AnimeProvider {
             return [];
         }
     }
+
+    async getCompleted(): Promise<AnimeSearchResult[]> {
+        try {
+            const response = await axios.get(`${BASE_URL}/home`, {
+                headers: { 'User-Agent': USER_AGENT }
+            });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.anif-block-02 .ulclear li').each((_, element) => {
+                const $el = $(element);
+                const href = $el.find('.film-poster a').attr('href');
+                const id = href?.split('/')[1] || '';
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+
+                if (id && title) {
+                    results.push({ id, title, image, provider: this.name });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[HiAnime] getCompleted failed:', error);
+            return [];
+        }
+    }
+
+    async getUpcoming(): Promise<AnimeSearchResult[]> {
+        try {
+            const response = await axios.get(`${BASE_URL}/home`, {
+                headers: { 'User-Agent': USER_AGENT }
+            });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            // The upcoming section is a grid like the others
+            $('.cat-heading:contains("Top Upcoming")').closest('.block_area').find('.flw-item').each((_, element) => {
+                const $el = $(element);
+                const href = $el.find('.film-poster a').attr('href');
+                const id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+
+                if (id && title) {
+                    results.push({ id, title, image, provider: this.name });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[HiAnime] getUpcoming failed:', error);
+            return [];
+        }
+    }
 }

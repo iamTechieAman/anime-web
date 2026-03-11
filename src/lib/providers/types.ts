@@ -108,4 +108,14 @@ export interface AnimeProvider {
      * @param episodeId - Episode ID
      */
     getServers?(episodeId: string): Promise<any[]>;
+
+    /**
+     * Get latest completed anime (optional)
+     */
+    getCompleted?(): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get top upcoming anime (optional)
+     */
+    getUpcoming?(): Promise<AnimeSearchResult[]>;
 }

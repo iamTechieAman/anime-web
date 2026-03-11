@@ -145,103 +145,108 @@ export default function HeroCarousel() {
     const activeSlide = slides[current];
 
     return (
-        <div className="relative w-full aspect-video md:aspect-[21/9] min-h-[450px] md:max-h-[700px] overflow-hidden group bg-[var(--bg-main)]">
+        <div className="relative w-full aspect-video md:aspect-[21/9] min-h-[480px] md:max-h-[750px] overflow-hidden group bg-black">
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={activeSlide.id}
-                    initial={{ opacity: 0, scale: 1.02 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }} // Snappier duration (was 0.8)
+                    transition={{ duration: 0.5 }}
                     className="absolute inset-0"
                 >
-                    {/* Background Image */}
-                    <div className="absolute inset-0">
-                        <Image
-                            src={activeSlide.image}
-                            alt={activeSlide.title}
-                            fill
-                            className="object-cover object-center opacity-80 dark:opacity-60"
-                            priority
-                            quality={90}
-                            sizes="(max-width: 768px) 100vw, 100vw"
-                        />
-                        {/* Pre-fetch next slide image for lag-free transition */}
-                        <div className="hidden">
+                    {/* Background Image with Zoom Effect */}
+                    <div className="absolute inset-0 overflow-hidden">
+                        <motion.div
+                            animate={{ scale: [1, 1.05] }}
+                            transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
+                            className="absolute inset-0"
+                        >
                             <Image
-                                src={slides[(current + 1) % slides.length]?.image}
-                                alt="preload"
-                                width={10}
-                                height={10}
+                                src={activeSlide.image}
+                                alt={activeSlide.title}
+                                fill
+                                className="object-cover object-center opacity-70"
                                 priority
+                                quality={90}
+                                sizes="100vw"
                             />
-                        </div>
-
-                        {/* Gradient Overlay for Text Readability - JustAnime style (dark vignette) */}
-                        <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
-                        <div className="absolute inset-y-0 left-0 w-[70%] bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent" />
+                        </motion.div>
+                        
+                        {/* Premium Vignette & Gradients - justanime.to style */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a]/30 z-10" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent z-10" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#0a0a0a_100%)] opacity-40 z-10" />
                     </div>
                 </motion.div>
             </AnimatePresence>
 
-            {/* Content Container - Separate from image animation to reduce layout thrashing */}
-            <div className="absolute inset-0 flex items-center z-10">
-                <div className="max-w-7xl mx-auto px-4 md:px-6 w-full pt-16 md:pt-0">
+            {/* Countdown Badge (Top Left) */}
+            <div className="absolute top-24 left-4 md:left-24 z-30">
+                <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    key={activeSlide.id + "-countdown"}
+                    className="bg-purple-600 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded-sm shadow-lg flex items-center gap-2 backdrop-blur-md"
+                >
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                    EP {activeSlide.rating.replace('%', '').slice(0,1) || '1'} IN 2d 14h
+                </motion.div>
+            </div>
+
+            {/* Slide Index (Top Right) */}
+            <div className="absolute top-24 right-4 md:right-8 z-30 font-bold text-xs md:text-sm text-white/50">
+                <span className="text-white">{current + 1}</span> / {slides.length}
+            </div>
+
+            {/* Content Container */}
+            <div className="absolute inset-0 flex items-center z-20">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-6 w-full pt-20 md:pt-10">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeSlide.id + "-content"}
-                            initial={{ y: 20, opacity: 0 }}
+                            initial={{ y: 30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0 }} // Smooth exit for text
-                            transition={{ delay: 0.1, duration: 0.4 }}
-                            className="max-w-2xl space-y-4 md:space-y-6"
+                            exit={{ y: -30, opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="max-w-2xl"
                         >
-                            {/* Title */}
-                            <h1 className="text-3xl md:text-5xl lg:text-5xl font-bold leading-tight text-white drop-shadow-xl line-clamp-2 gap-2 font-sora">
-                                {activeSlide.title}
-                            </h1>
-
-                            {/* Metadata Row */}
-                            <div className="flex flex-wrap items-center gap-3 md:gap-4 text-sm font-medium text-[var(--text-muted)]">
-                                <span className="bg-[#FF5722]/10 text-[#FF5722] px-2 py-0.5 rounded border border-[#FF5722]/20 text-xs font-bold uppercase">
+                            {/* Metadata Badges */}
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                                <span className="bg-[#FF5722] text-white px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider">
                                     {activeSlide.type}
                                 </span>
-                                <span className="flex gap-2 text-xs md:text-sm">
-                                    {activeSlide.tags.map((tag, i) => (
-                                        <span key={i} className={i > 0 ? "hidden sm:inline" : ""}>
-                                            {tag}{i < activeSlide.tags.length - 1 && ","}
-                                        </span>
-                                    ))}
+                                <span className="bg-white/10 text-white px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase backdrop-blur-md border border-white/5">
+                                    {activeSlide.quality}
                                 </span>
-                            </div>
-
-                            {/* Description */}
-                            <p className="text-[var(--text-muted)] text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl drop-shadow-md">
-                                {activeSlide.description}
-                            </p>
-
-                            {/* Stats Block */}
-                            <div className="flex items-center gap-3 md:gap-4 py-2 opacity-90">
-                                <span className="text-xs font-semibold text-white bg-white/10 px-2 py-0.5 rounded-sm backdrop-blur-md">
-                                    ⭐ {activeSlide.rating}
-                                </span>
-                                <span className="text-[12px] font-medium text-[var(--text-muted)] flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-white/70 flex items-center gap-1 ml-1">
                                     <Clock className="w-3.5 h-3.5" /> 24m
                                 </span>
-                                <span className="text-[12px] font-medium text-[var(--text-muted)] flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-white/70 flex items-center gap-1">
                                     <Calendar className="w-3.5 h-3.5" /> {activeSlide.release}
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-3 md:gap-4 pt-2">
+                            {/* Title */}
+                            <h1 className="text-4xl md:text-6xl font-black leading-tight text-white mb-4 line-clamp-2 font-sora tracking-tighter">
+                                {activeSlide.title}
+                            </h1>
+
+                            {/* Description */}
+                            <p className="text-white/70 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-8 font-medium">
+                                {activeSlide.description}
+                            </p>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-3 md:gap-4">
                                 <Link href={activeSlide.link}>
-                                    <button className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-3.5 bg-white text-black hover:bg-white/90 font-bold rounded-full transition-all active:scale-95 group/btn">
-                                        <Play className="w-5 h-5 fill-current transition-transform group-hover/btn:scale-110" />
+                                    <button className="flex items-center gap-2.5 px-8 md:px-10 py-3.5 md:py-4 bg-white text-black hover:bg-white/90 font-black rounded-sm transition-all active:scale-95 group/btn shadow-[0_4px_20px_rgba(255,255,255,0.2)]">
+                                        <Play className="w-5 h-5 fill-current" />
                                         WATCH NOW
                                     </button>
                                 </Link>
-                                <button className="flex items-center gap-2 px-6 py-3 md:py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full border border-white/10 transition-colors backdrop-blur-md">
-                                    Details <ChevronRight className="w-4 h-4" />
+                                <button className="flex items-center gap-2.5 px-6 py-3.5 md:py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-sm border border-white/5 transition-all backdrop-blur-xl group/details">
+                                    Details <ChevronRight className="w-4 h-4 transition-transform group-hover/details:translate-x-1" />
                                 </button>
                             </div>
                         </motion.div>
@@ -250,25 +255,30 @@ export default function HeroCarousel() {
             </div>
 
             {/* Navigation Controls */}
-            <div className="absolute bottom-6 right-4 md:bottom-8 md:right-8 flex flex-col items-end gap-3 z-20">
-                <div className="flex items-center gap-1.5 p-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
-                    <button
-                        onClick={prevSlide}
-                        className="p-2 md:p-2.5 hover:bg-white/10 text-white rounded-full transition-all active:scale-90"
-                    >
-                        <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
-                    </button>
-                    <button
-                        onClick={nextSlide}
-                        className="p-2 md:p-2.5 hover:bg-white/10 text-white rounded-full transition-all active:scale-90"
-                    >
-                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    </button>
-                </div>
+            <div className="absolute bottom-10 right-4 md:right-8 flex items-center gap-2 z-30">
+                <button
+                    onClick={prevSlide}
+                    className="p-3 md:p-4 bg-white/5 hover:bg-white/10 text-white rounded-sm border border-white/5 transition-all backdrop-blur-md active:scale-90"
+                >
+                    <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={nextSlide}
+                    className="p-3 md:p-4 bg-white/5 hover:bg-white/10 text-white rounded-sm border border-white/5 transition-all backdrop-blur-md active:scale-90"
+                >
+                    <ChevronRight className="w-5 h-5" />
+                </button>
             </div>
 
-            {/* Progress Bar */}
-            <div className="absolute bottom-0 left-0 h-1 bg-[#FF5722]" style={{ width: `${((current + 1) / slides.length) * 100}%`, transition: 'width 0.5s ease-out' }}></div>
+            {/* Bottom Accent Line */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-30">
+                <motion.div 
+                    className="h-full bg-[#FF5722]" 
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${((current + 1) / slides.length) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                />
+            </div>
         </div>
     );
 }
