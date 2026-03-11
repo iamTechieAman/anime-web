@@ -46,6 +46,13 @@ export default function HeroCarousel() {
         }
     }, [data, error]);
 
+    const normalizeUrl = (url: string | null | undefined): string => {
+        if (!url) return '';
+        if (url.startsWith('//')) return `https:${url}`;
+        if (url.startsWith('/')) return `https://hianime.to${url}`; // Fallback for relative hianime paths
+        return url;
+    };
+
     const processSlides = async (rawSlides: any[]) => {
         console.log("[HeroCarousel] Processing slides from SWR...");
         try {
@@ -76,7 +83,7 @@ export default function HeroCarousel() {
                 let cover = item.extra?.cover;
                 let banner = null;
                 let rating = "?";
-                let year = "2026"; // Dynamic year ideally
+                let year = "2026";
 
                 const alId = item.extra?.aniListId;
                 if (alId && anilistDataMap.has(alId)) {
@@ -91,8 +98,8 @@ export default function HeroCarousel() {
                     id: item.id,
                     title: item.title,
                     description: item.extra?.description || "No description.",
-                    image: banner || cover || item.image,
-                    cover: cover || item.image,
+                    image: normalizeUrl(banner || cover || item.image),
+                    cover: normalizeUrl(cover || item.image),
                     tags: ["Anime", "HD", "New"],
                     rating,
                     release: year,
@@ -102,7 +109,7 @@ export default function HeroCarousel() {
                 };
             });
 
-            const validSlides = formattedSlides.filter(s => s.image && !s.image.includes('undefined'));
+            const validSlides = formattedSlides.filter(s => s.image && s.image !== '');
             if (validSlides.length > 0) {
                 setSlides(validSlides);
             } else {
