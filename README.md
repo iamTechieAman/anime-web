@@ -16,6 +16,16 @@ ToonPlayer is a modern, ad-free anime streaming application (the ultimate **Anim
 |:---:|:---:|
 | ![](/public/screenshots/filter.png) | ![](/public/screenshots/watch.png) |
 
+### 🎬 Featured Sections (Hero Carousels)
+
+| Trending Movies | Popular TV Shows |
+|:---:|:---:|
+| ![](/public/screenshots/movies_trending.png) | ![](/public/screenshots/tv_popular.png) |
+
+| Trending TV Shows | Movies Grid |
+|:---:|:---:|
+| ![](/public/screenshots/tv_trending.png) | ![](/public/screenshots/movies_grid.png) |
+
 ## ✨ Key Features
 
 - **🔄 Real-time Updates**: Automatically pulls live popular, top, and recent lists directly from the fastest providers without stale caching.
