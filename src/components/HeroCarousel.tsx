@@ -42,7 +42,7 @@ export default function HeroCarousel() {
             processSlides(data.slides);
         } else if (error) {
             console.error("Failed to fetch home slides:", error);
-            // Optional: fallback logic here
+            setIsLoading(false);
         }
     }, [data, error]);
 

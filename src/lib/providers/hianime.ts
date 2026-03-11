@@ -475,4 +475,44 @@ export class HiAnimeProvider implements AnimeProvider {
             return [];
         }
     }
+
+    async getTrending(): Promise<AnimeSearchResult[]> {
+        try {
+            const response = await axios.get(`${BASE_URL}/home`, {
+                headers: { 'User-Agent': USER_AGENT }
+            });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            // HiAnime trending items are usually in #trending-home .item
+            $('#trending-home .item').each((_, element) => {
+                const $el = $(element);
+                const id = $el.find('a').attr('href')?.split('/')[1] || '';
+                const title = $el.find('.film-name').text().trim();
+                const image = $el.find('img').attr('data-src') || $el.find('img').attr('src');
+
+                if (id && title) {
+                    results.push({ id, title, image, provider: this.name });
+                }
+            });
+
+            // Fallback to latest records if trending is empty
+            if (results.length === 0) {
+                $('.film_list-wrap .flw-item').each((_, element) => {
+                    const $el = $(element);
+                    const id = $el.find('.film-poster a').attr('href')?.split('/')[1] || '';
+                    const title = $el.find('.film-name a').text().trim();
+                    const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+                    if (id && title && results.length < 10) {
+                        results.push({ id, title, image, provider: this.name });
+                    }
+                });
+            }
+
+            return results;
+        } catch (error) {
+            console.error('[HiAnime] getTrending failed:', error);
+            return [];
+        }
+    }
 }

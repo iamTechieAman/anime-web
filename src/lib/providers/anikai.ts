@@ -498,10 +498,27 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
+            if (slides.length === 0) throw new Error("No slides found on Anikai");
+
             return { slides, trending, latest };
         } catch (error) {
-            console.error('[Anikai] getHome failed:', error);
-            return { slides: [], trending: [], latest: [] };
+            console.error('[Anikai] getHome failed, falling back to HiAnime...', error);
+            try {
+                const hianime = new HiAnimeProvider();
+                const trendingRes = await hianime.getTrending();
+                // Map trending to slides for the hero
+                const fallbackSlides = trendingRes.slice(0, 10).map((item: AnimeSearchResult) => ({
+                    ...item,
+                    extra: {
+                        description: "Trending anime",
+                        aniListId: undefined
+                    }
+                })) as any[];
+                return { slides: fallbackSlides, trending: trendingRes, latest: trendingRes };
+            } catch (fallbackError) {
+                console.error('[Anikai] Fallback failed:', fallbackError);
+                return { slides: [], trending: [], latest: [] };
+            }
         }
     }
 }
