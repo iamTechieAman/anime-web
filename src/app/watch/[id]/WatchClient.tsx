@@ -31,7 +31,6 @@ export default function WatchClient({ id }: { id: string }) {
     const provider = searchParams.get('provider');
 
     const [show, setShow] = useState<ShowData | null>(null);
-    const [loading, setLoading] = useState(true);
 
     const [currentEp, setCurrentEp] = useState<string>("1");
     const [mode, setMode] = useState<"sub" | "dub">("sub");
@@ -49,6 +48,10 @@ export default function WatchClient({ id }: { id: string }) {
     const [servers, setServers] = useState<any[]>([]);
     const [selectedServer, setSelectedServer] = useState<string | null>(null);
     const [loadingServers, setLoadingServers] = useState(false);
+
+    // Show loading and error states
+    const [showError, setShowError] = useState<string | null>(null);
+    const [loadingShow, setLoadingShow] = useState(true);
 
     const processingRef = useRef<string | null>(null);
 
@@ -116,9 +119,16 @@ export default function WatchClient({ id }: { id: string }) {
     // Fetch Show Details
     useEffect(() => {
         const fetchShow = async () => {
+            setLoadingShow(true);
+            setShowError(null);
             try {
                 const res = await axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`);
                 const fetchedShow = res.data.show;
+                
+                if (!fetchedShow) {
+                    throw new Error("No show data received");
+                }
+
                 setShow(fetchedShow);
 
                 // Check bookmark again with full show data
@@ -146,11 +156,11 @@ export default function WatchClient({ id }: { id: string }) {
                     if (episodes.includes("1")) setCurrentEp("1");
                     else setCurrentEp(episodes[0]);
                 }
-            } catch (err) {
-                console.error(err);
-                setError("Failed to load anime details.");
+            } catch (err: any) {
+                console.error("Failed to fetch show", err);
+                setShowError(err.response?.data?.error || "Anime not found or streaming servers are unreachable.");
             } finally {
-                setLoading(false);
+                setLoadingShow(false);
             }
         };
         fetchShow();
@@ -292,23 +302,43 @@ export default function WatchClient({ id }: { id: string }) {
         }
     };
 
-    if (loading) {
+
+    if (loadingShow) {
         return (
-            <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center text-[var(--text-main)]">
-                <Loader2 className="w-10 h-10 animate-spin text-purple-600" />
+            <div className="min-h-screen bg-[var(--bg-main)] flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+                <p className="text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Initializing Experience</p>
             </div>
         );
     }
 
-    if (!show) {
+    if (showError) {
         return (
-            <div className="min-h-screen bg-[var(--bg-main)] flex flex-col items-center justify-center text-[var(--text-main)] gap-4">
-                <AlertTriangle className="w-12 h-12 text-red-500" />
-                <p className="text-xl font-light">Anime not found.</p>
-                <Link href="/" className="px-6 py-2 bg-[var(--bg-card)] hover:bg-[var(--border-color)] rounded-full text-sm">Return Home</Link>
+            <div className="min-h-screen bg-[var(--bg-main)] flex flex-col items-center justify-center p-6 text-center">
+                <div className="max-w-md w-full glass p-8 rounded-3xl border border-red-500/20">
+                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+                    <h2 className="text-2xl font-bold text-[var(--text-main)] mb-4">Anime Not Found</h2>
+                    <p className="text-[var(--text-muted)] mb-8">{showError}</p>
+                    <div className="flex flex-col gap-3">
+                        <Link 
+                            href="/"
+                            className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                        >
+                            <ChevronLeft className="w-4 h-4" /> Return Home
+                        </Link>
+                        <Link 
+                            href="/search"
+                            className="w-full py-3 border border-[var(--border-color)] hover:bg-[var(--bg-card)] text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                        >
+                            <Search className="w-4 h-4" /> Try Searching
+                        </Link>
+                    </div>
+                </div>
             </div>
         );
     }
+
+    if (!show) return null;
 
     const episodes = show.availableEpisodesDetail?.[mode] || [];
 

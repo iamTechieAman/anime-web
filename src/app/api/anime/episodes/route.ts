@@ -2,7 +2,7 @@ export const runtime = "edge";
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 
-export const revalidate = 0; // Ensure fresh data for real-time updates
+export const revalidate = 0;
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -13,248 +13,155 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    // Default provider logic
-    // Even if Anikai is default, if we detect numeric ID, we switch to Smart Resolution
-    const defaultProvider = "anikai";
+    const defaultProvider: ProviderName = "anikai";
     const provider = providerParam || defaultProvider;
 
     try {
-        console.log(`[Episodes] Request for ID: ${id} (Provider: ${provider})`);
+        console.log(`[Episodes] Request: ID=${id}, Provider=${provider}`);
 
-        // ==========================================
-        // SMART RESOLUTION (AniList/MAL Numeric IDs)
-        // ==========================================
+        // 1. SMART RESOLUTION (Numeric AniList/MAL IDs)
         if (/^\d+$/.test(id)) {
-            try {
-                console.log(`[Episodes] Numeric ID detected (${id}). Attempting smart resolution...`);
-                // fetchAniListTitles returns an array of possible titles (English, Romaji, Synonyms)
-                const titles = await fetchAniListTitles(id);
+            console.log(`[Episodes] Numeric ID detected (${id}). Attempting smart resolution...`);
+            const titles = await fetchAniListTitles(id);
 
-                if (titles && titles.length > 0) {
-                    console.log(`[Episodes] Resolved Titles to try: ${JSON.stringify(titles)}. Searching on providers...`);
+            if (titles && titles.length > 0) {
+                console.log(`[Episodes] Searching for titles: ${JSON.stringify(titles)}`);
+                
+                // We'll try to find a match on these providers in order
+                const searchProviders: ProviderName[] = ["allanime", "hianime", "aniwatch"];
+                let foundMatch = null;
 
-                    const allAnime = getProvider("allanime");
-                    const hiAnime = getProvider("hianime");
-                    let bestMatch = null;
-                    let usedProviderName = "";
-
-                    // Helper to prevent taking an OVA/Movie when searching for the main series
-                    const findBestMatch = (results: any[], targetTitle: string) => {
-                        if (!results || results.length === 0) return null;
-                        const exact = results.find(r => r.title.toLowerCase() === targetTitle.toLowerCase());
-                        if (exact) return exact;
-
-                        const startsWith = results.find(r => r.title.toLowerCase().startsWith(targetTitle.toLowerCase()));
-                        return startsWith || results[0];
-                    };
-
-                    // Iterate through all potential titles to find the first exact/good match
-                    for (const title of titles) {
-                        if (!title) continue;
-                        console.log(`[Episodes] Trying title variation: "${title}"`);
-
-                        let searchResults = await allAnime.search(title);
-                        if (searchResults.length > 0) {
-                            bestMatch = findBestMatch(searchResults, title);
-                            usedProviderName = bestMatch.id.length > 15 ? "allanime" : "hianime";
-                            break; // Stop searching once we find a solid match
+                for (const searchP of searchProviders) {
+                    try {
+                        const p = getProvider(searchP);
+                        for (const title of titles) {
+                            console.log(`[Episodes] Searching "${title}" on ${searchP}...`);
+                            const results = await p.search(title);
+                            if (results && results.length > 0) {
+                                // Find best match or take first
+                                const match = findBestMatch(results, title);
+                                if (match) {
+                                    console.log(`[Episodes] Match found on ${searchP}: ${match.title} (${match.id})`);
+                                    const info = await p.getInfo(match.id);
+                                    const show = mapInfoToShow(info);
+                                    if (show && (show.availableEpisodesDetail.sub.length > 0 || show.availableEpisodesDetail.dub.length > 0)) {
+                                        return NextResponse.json({
+                                            show: { ...show, provider: searchP }
+                                        });
+                                    }
+                                }
+                            }
                         }
-
-                        // Fallback to HiAnime with the same title variation
-                        searchResults = await hiAnime.search(title);
-                        if (searchResults.length > 0) {
-                            bestMatch = findBestMatch(searchResults, title);
-                            usedProviderName = bestMatch.id.length > 15 ? "allanime" : "hianime";
-                            break;
-                        }
+                    } catch (e: any) {
+                        console.warn(`[Episodes] Search failed on ${searchP}: ${e.message}`);
                     }
-
-                    if (bestMatch) {
-                        console.log(`[Episodes] Found match: ${bestMatch.title} (${bestMatch.id}) using ${usedProviderName}. Fetching info...`);
-
-                        const infoProvider = getProvider(usedProviderName as any);
-                        const info = await infoProvider.getInfo(bestMatch.id);
-                        return NextResponse.json({
-                            show: mapInfoToShow(info)
-                        });
-                    } else {
-                        console.warn(`[Episodes] No search results found for any title variations on any provider.`);
-                        return NextResponse.json({ error: "Anime not found in database" }, { status: 404 });
-                    }
-                } else {
-                    console.warn(`[Episodes] Could not resolve title for AniList ID: ${id}`);
                 }
-            } catch (resolveError: any) {
-                console.error(`[Episodes] Smart resolution error:`, resolveError);
-                // Continue to standard fallback if resolution crashed
             }
         }
 
-        // ==========================================
-        // STANDARD PROVIDER LOGIC (String IDs)
-        // ==========================================
-        const animeProvider = getProvider(provider);
-        const info = await animeProvider.getInfo(id);
-        const mappedInfo = mapInfoToShow(info);
+        // 2. STANDARD LOOKUP (Direct ID)
+        try {
+            const animeProvider = getProvider(provider);
+            const info = await animeProvider.getInfo(id);
+            const mappedInfo = mapInfoToShow(info);
 
-        if (!mappedInfo || (mappedInfo.availableEpisodesDetail.sub.length === 0 && mappedInfo.availableEpisodesDetail.dub.length === 0)) {
-            throw new Error(`Provider ${provider} returned 0 episodes.`);
+            if (mappedInfo && (mappedInfo.availableEpisodesDetail.sub.length > 0 || mappedInfo.availableEpisodesDetail.dub.length > 0)) {
+                return NextResponse.json({
+                    show: { ...mappedInfo, provider }
+                });
+            }
+        } catch (e: any) {
+            console.warn(`[Episodes] Direct lookup failed for ${provider}: ${e.message}`);
         }
 
-        return NextResponse.json({
-            show: {
-                ...mappedInfo,
-                provider // Ensure the provider used is returned
-            }
-        });
-
-    } catch (error: any) {
-        console.error(`[Episodes] Provider ${provider} failed: ${error.message}`);
-
-        // Fallback Chain (if explicit provider wasn't strictly requested, or even if it was but failed, we should try to recover)
-        const fallbackChain: ProviderName[] = ["allanime", "hianime", "aniwatch"];
-
-        for (const fallback of fallbackChain) {
-            if (fallback === provider) continue;
-
+        // 3. FALLBACK CHAIN (Retry ID on other providers)
+        const fallbacks: ProviderName[] = ["allanime", "hianime", "aniwatch", "anikai"];
+        for (const fb of fallbacks) {
+            if (fb === provider) continue;
             try {
-                console.log(`[Episodes] Retrying with fallback: ${fallback}`);
-                const fbProvider = getProvider(fallback);
-                const info = await fbProvider.getInfo(id);
-                const fbMappedInfo = mapInfoToShow(info);
-
-                if (fbMappedInfo && (fbMappedInfo.availableEpisodesDetail.sub.length > 0 || fbMappedInfo.availableEpisodesDetail.dub.length > 0)) {
-                    console.log(`[Episodes] Fallback ${fallback} succeeded!`);
-                    return NextResponse.json({ 
-                        show: {
-                            ...fbMappedInfo,
-                            provider: fallback
-                        } 
+                console.log(`[Episodes] Trying fallback ID lookup: ${fb}`);
+                const p = getProvider(fb);
+                const info = await p.getInfo(id);
+                const show = mapInfoToShow(info);
+                if (show && (show.availableEpisodesDetail.sub.length > 0 || show.availableEpisodesDetail.dub.length > 0)) {
+                    return NextResponse.json({
+                        show: { ...show, provider: fb }
                     });
                 }
-            } catch (e: any) {
-                console.log(`[Episodes] Fallback ${fallback} failed: ${e.message}`);
-            }
+            } catch (e: any) { /* silent */ }
         }
 
-        // Graceful 500 -> 404 handling check
-        if (error.message.includes("404") || error.message.includes("not found")) {
-            return NextResponse.json({ error: "Anime not found" }, { status: 404 });
+        // 4. LAST RESORT: Title Search resolution if we have a way to get title
+        // (This handles cases where a slug ID was provided but it only works on one provider)
+        // We'll only do this if it's NOT a numeric ID (since we already did numeric resolution above)
+        if (!/^\d+$/.test(id)) {
+             try {
+                 // Try to guess title from slug-id (e.g. "jujutsu-kaisen-tv" -> "jujutsu kaisen")
+                 const guessedTitle = id.split("-").join(" ").replace(/\(.*\)/, "").trim();
+                 console.log(`[Episodes] ID lookup failed. Trying guessed title search: "${guessedTitle}"`);
+                 
+                 const p = getProvider("allanime"); // Use AllAnime as best searcher
+                 const results = await p.search(guessedTitle);
+                 if (results && results.length > 0) {
+                     const match = results[0];
+                     const info = await p.getInfo(match.id);
+                     const show = mapInfoToShow(info);
+                     if (show) {
+                         return NextResponse.json({
+                             show: { ...show, provider: "allanime" }
+                         });
+                     }
+                 }
+             } catch (e) { }
         }
 
-        return NextResponse.json(
-            { error: `Failed to fetch episodes across all providers.` },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Anime not found" }, { status: 404 });
+
+    } catch (error: any) {
+        console.error(`[Episodes] Critical error: ${error.message}`);
+        return NextResponse.json({ error: "Failed to fetch episodes" }, { status: 500 });
     }
 }
 
-// Helper: Fetch Title from AniList with Retry & Caching
-const titleCache = new Map<string, string[]>();
+// Helpers
+const findBestMatch = (results: any[], target: string) => {
+    if (!results || results.length === 0) return null;
+    const exact = results.find(r => r.title.toLowerCase() === target.toLowerCase());
+    if (exact) return exact;
+    return results[0];
+};
 
 async function fetchAniListTitles(id: string): Promise<string[]> {
-    if (titleCache.has(id)) {
-        console.log(`[Episodes] Cache hit for AniList ID: ${id}`);
-        return titleCache.get(id) || [];
+    try {
+        const query = `query ($id: Int) { Media (id: $id, type: ANIME) { title { romaji english } synonyms } }`;
+        const res = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables: { id: parseInt(id) } })
+        });
+        const data = await res.json();
+        const media = data?.data?.Media;
+        if (!media) return [];
+        const titles = [media.title.english, media.title.romaji, ...(media.synonyms || [])].filter(Boolean);
+        return Array.from(new Set(titles));
+    } catch (e) {
+        return [];
     }
-
-    const maxRetries = 3;
-    let attempt = 0;
-
-    while (attempt < maxRetries) {
-        try {
-            const query = `
-            query ($id: Int) {
-                Media (id: $id, type: ANIME) {
-                    title {
-                        romaji
-                        english
-                    }
-                    synonyms
-                }
-            }
-            `;
-            const res = await fetch('https://graphql.anilist.co', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ query, variables: { id: parseInt(id) } })
-            });
-
-            if (res.status === 429) {
-                const retryAfter = res.headers.get('Retry-After') || '2';
-                console.warn(`[Episodes] AniList 429 (Rate Limit). Retrying in ${retryAfter}s...`);
-                await new Promise(r => setTimeout(r, parseInt(retryAfter) * 1000 + 1000));
-                attempt++;
-                continue;
-            }
-
-            const data = await res.json();
-            const media = data?.data?.Media;
-
-            const titlesToTry: string[] = [];
-
-            // Priority 1: English (Usually most standardized across providers)
-            if (media?.title?.english) titlesToTry.push(media.title.english);
-
-            // Priority 2: Romaji (Standard Fallback)
-            if (media?.title?.romaji && media.title.romaji !== media?.title?.english) {
-                titlesToTry.push(media.title.romaji);
-            }
-
-            // Priority 3: Synonyms (Crucial for classic anime with specific alternative names)
-            if (media?.synonyms && Array.isArray(media.synonyms)) {
-                // Take up to 2 popular synonyms to prevent API spamming
-                titlesToTry.push(...media.synonyms.slice(0, 2));
-            }
-
-            // Remove empty/undefined and duplicates
-            const finalTitles = Array.from(new Set(titlesToTry.filter(Boolean)));
-
-            if (finalTitles.length > 0) {
-                titleCache.set(id, finalTitles);
-            }
-            return finalTitles;
-
-        } catch (e: any) {
-            console.error(`[Episodes] AniList fetch attempt ${attempt + 1} failed:`, e.message);
-            attempt++;
-            await new Promise(r => setTimeout(r, 1000)); // Basic backoff
-        }
-    }
-    return [];
 }
 
-// Helper: Map Provider Info to Show Object
 function mapInfoToShow(info: any) {
     if (!info) return null;
-
-    // Safety checks for missing fields
     const episodes = info.episodes || [];
-    const subEps = info.availableEpisodesDetail?.sub
-        ? info.availableEpisodesDetail.sub
-        : (Array.isArray(episodes)
-            ? Array.from(new Set(episodes.map((ep: any) => ep?.number?.toString()).filter(Boolean)))
-            : []);
-
-    const dubEps = info.availableEpisodesDetail?.dub
-        ? info.availableEpisodesDetail.dub
-        : (info.availableEpisodes?.dub
-            ? Array.from({ length: info.availableEpisodes.dub }, (_, i) => (i + 1).toString())
-            : []);
+    const subEps = info.availableEpisodesDetail?.sub || (Array.isArray(episodes) ? episodes.map((ep: any) => ep?.number?.toString()) : []);
+    const dubEps = info.availableEpisodesDetail?.dub || [];
 
     return {
         _id: info.id || "unknown",
-        name: info.title || "Unknown Title",
-        englishName: info.title,
+        name: info.title || "Unknown",
         thumbnail: info.image,
-        aniListId: info.anilistId,
-        malId: info.malId,
         availableEpisodesDetail: {
-            sub: subEps,
-            dub: dubEps
+            sub: subEps.filter(Boolean),
+            dub: dubEps.filter(Boolean)
         }
     };
 }
