@@ -1,8 +1,12 @@
-name = "anime-web"
-compatibility_date = "2024-04-03"
+name = "toon-player"
+main = ".open-next/worker.js"
+compatibility_date = "2024-12-30"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".next"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "toon-player"
 
 [vars]
-# Add any environment variables here
-NEXT_PUBLIC_API_URL = "https://anime-web.pages.dev"
+NEXT_PUBLIC_API_URL = "https://toon-player.pages.dev"
