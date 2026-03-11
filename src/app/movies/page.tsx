@@ -325,6 +325,27 @@ export default function MoviesPage() {
 
                         {/* Content Sections */}
                         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-10">
+                            {/* Loading skeletons when data hasn't arrived */}
+                            {trending.length === 0 && popular.length === 0 && (
+                                <div className="space-y-10">
+                                    {[1, 2, 3].map((i) => (
+                                        <section key={i}>
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-1 h-6 bg-[var(--bg-card)] rounded-full animate-pulse" />
+                                                <div className="h-6 w-40 bg-[var(--bg-card)] rounded-lg animate-pulse" />
+                                            </div>
+                                            <div className="flex overflow-hidden gap-3">
+                                                {[...Array(7)].map((_, j) => (
+                                                    <div key={j} className="flex-shrink-0 w-[155px] md:w-[170px]">
+                                                        <div className="aspect-[2/3] rounded-xl bg-[var(--bg-card)] animate-pulse" />
+                                                        <div className="h-3 w-3/4 mt-2 bg-[var(--bg-card)] rounded animate-pulse" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    ))}
+                                </div>
+                            )}
                             {/* Trending */}
                             {(filter.showAll || filter.showTrendingOnly) && trending.length > 0 && (
                                 <section>

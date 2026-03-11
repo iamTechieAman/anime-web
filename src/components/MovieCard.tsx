@@ -38,7 +38,7 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
             <motion.div
                 whileHover={{ scale: 1.05, y: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="relative rounded-xl overflow-hidden bg-[#141414] border border-white/5 hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
+                className="relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
             >
                 {/* Poster */}
                 <div className="relative aspect-[2/3] overflow-hidden">
@@ -165,13 +165,13 @@ export function MovieRow({ items, type = "movie", title }: { items: MovieItem[];
             {/* Scroll arrows */}
             <button
                 onClick={() => scroll("left")}
-                className="absolute left-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-r from-[#0a0a0a] to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
+                className="absolute left-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-r from-[var(--bg-main)] to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
             >
                 <ChevronLeft className="w-6 h-6 text-white" />
             </button>
             <button
                 onClick={() => scroll("right")}
-                className="absolute right-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-l from-[#0a0a0a] to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
+                className="absolute right-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-l from-[var(--bg-main)] to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
             >
                 <ChevronRight className="w-6 h-6 text-white" />
             </button>

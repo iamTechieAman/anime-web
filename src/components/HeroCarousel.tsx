@@ -128,10 +128,10 @@ export default function HeroCarousel() {
 
     return (
         <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden group bg-[var(--bg-main)]">
-            <AnimatePresence mode="popLayout" initial={false}>
+            <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={activeSlide.id}
-                    initial={{ opacity: 0.5, scale: 1.05 }} // Reduced initial scale to prevent jarring zoom
+                    initial={{ opacity: 0, scale: 1.02 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }} // Snappier duration (was 0.8)

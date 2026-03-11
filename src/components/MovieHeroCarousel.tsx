@@ -36,7 +36,26 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
         return () => clearInterval(timer);
     }, [next]);
 
-    if (!heroItems.length) return null;
+    if (!heroItems.length) {
+        return (
+            <div className="relative w-full h-[55vh] md:h-[70vh] lg:h-[80vh] bg-[var(--bg-main)]">
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
+                <div className="absolute bottom-16 md:bottom-24 left-0 max-w-7xl mx-auto px-4 md:px-6 w-full space-y-4">
+                    <div className="h-10 md:h-14 w-[60%] bg-[var(--bg-card)] rounded-xl animate-pulse" />
+                    <div className="flex gap-3">
+                        <div className="h-5 w-20 bg-[var(--bg-card)] rounded-md animate-pulse" />
+                        <div className="h-5 w-16 bg-[var(--bg-card)] rounded-md animate-pulse" />
+                        <div className="h-5 w-12 bg-[var(--bg-card)] rounded-md animate-pulse" />
+                    </div>
+                    <div className="h-16 w-[80%] max-w-xl bg-[var(--bg-card)] rounded-lg animate-pulse" />
+                    <div className="flex gap-3 pt-2">
+                        <div className="h-12 w-28 bg-[var(--bg-card)] rounded-xl animate-pulse" />
+                        <div className="h-12 w-32 bg-[var(--bg-card)] rounded-xl animate-pulse" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const item = heroItems[current];
     const title = item.title || item.name || "Untitled";
@@ -67,9 +86,9 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
             </AnimatePresence>
 
             {/* Multi-layer gradient overlays for cinematic look */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
 
             {/* Content */}
             <div className="absolute inset-0 flex items-end pb-16 md:pb-24">
@@ -150,7 +169,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                         onClick={() => setCurrent(i)}
                         className={`transition-all duration-300 rounded-full ${i === current
                             ? "w-8 h-2 bg-blue-500 shadow-[0_0_10px_#3b82f6]"
-                            : "w-2 h-2 bg-white/30 hover:bg-[var(--bg-card)]0"
+                            : "w-2 h-2 bg-white/30 hover:bg-white/50"
                             }`}
                     />
                 ))}
