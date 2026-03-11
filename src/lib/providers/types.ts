@@ -39,7 +39,8 @@ export interface AnimeDetails {
 export interface VideoSource {
     url: string;
     isM3U8: boolean;
-    quality?: string;
+    quality: string;
+    isIframe?: boolean;
 }
 
 export interface AnimeProvider {
@@ -69,6 +70,12 @@ export interface AnimeProvider {
      * @param page - Page number for pagination
      */
     getPopular?(page?: number): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get trending anime (optional)
+     * @param page - Page number for pagination
+     */
+    getTrending?(page?: number): Promise<AnimeSearchResult[]>;
 
     /**
      * Get recently updated anime (optional)

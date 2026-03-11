@@ -1,33 +1,62 @@
 import { NextResponse } from "next/server";
-import { getProvider } from "@/lib/providers";
+import { getProvider, type ProviderName } from "@/lib/providers";
 
 export const revalidate = 0;
 
-export async function GET() {
-    try {
-        const provider = getProvider("anikai");
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
 
-        // Safety check: ensure provider supports getPopular
-        if (!provider.getPopular) {
-            console.warn(`[Trending] Provider ${provider.name} does not support getPopular`);
-            return NextResponse.json({ shows: [] });
+    const requestedProvider = searchParams.get("provider") as ProviderName;
+    const providersToTry: ProviderName[] = requestedProvider
+        ? [requestedProvider]
+        : ["anikai", "consumet", "allanime", "aniwatch", "hianime"];
+
+    const errors: any[] = [];
+
+    for (const providerName of providersToTry) {
+        try {
+            console.log(`[Trending] Trying provider: ${providerName}`);
+            const animeProvider = getProvider(providerName);
+
+            const fetchMethod = animeProvider.getTrending || animeProvider.getPopular || animeProvider.getTop;
+
+            if (!fetchMethod) {
+                console.warn(`[Trending] Provider ${providerName} does not support getTrending, skipping.`);
+                continue;
+            }
+
+            const results = await fetchMethod.bind(animeProvider)(page);
+
+            if (results && results.length > 0) {
+                console.log(`[Trending] Successfully fetched ${results.length} items from ${providerName}`);
+                const shows = results.map((result: any) => ({
+                    _id: result.id,
+                    name: result.title,
+                    thumbnail: result.image,
+                    availableEpisodes: result.subOrDub,
+                    provider: result.provider || providerName,
+                    __typename: "Show"
+                }));
+
+                return NextResponse.json({ shows }, {
+                    headers: {
+                        'Cache-Control': 'no-store, max-age=0'
+                    }
+                });
+            } else {
+                console.warn(`[Trending] Provider ${providerName} returned 0 results.`);
+                errors.push({ provider: providerName, error: "No results found" });
+            }
+
+        } catch (error: any) {
+            console.error(`[Trending] Provider ${providerName} failed:`, error.message);
+            errors.push({ provider: providerName, error: error.message });
         }
-
-        const results = await provider.getPopular(1);
-
-        const shows = results.map(result => ({
-            _id: result.id,
-            name: result.title,
-            thumbnail: result.image,
-            availableEpisodes: result.subOrDub,
-            provider: "anikai",
-            rating: 0,
-            __typename: "Show"
-        }));
-
-        return NextResponse.json({ shows });
-    } catch (error) {
-        console.error("[Trending] Failed to fetch trending anime:", error);
-        return NextResponse.json({ shows: [] });
     }
+
+    return NextResponse.json(
+        { error: "All providers failed to fetch trending anime", details: errors },
+        { status: 500 }
+    );
 }

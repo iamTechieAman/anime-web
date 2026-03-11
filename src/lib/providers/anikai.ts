@@ -360,8 +360,50 @@ export class AnikaiProvider implements AnimeProvider {
         // Keeping original stub/implementation but ensuring selectors align if needed
         return []; // Stub for now or keep existing
     }
+    async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const url = `${BASE_URL}/home`;
+            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            // Selector for the trending sidebar items observed in curl
+            $('.sidebar-section .aitem').each((_, element) => {
+                const $el = $(element);
+                const href = $el.attr('href');
+                let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
+                if (id.includes('#')) id = id.split('#')[0];
+
+                const title = $el.find('.title').text().trim();
+                // Image is in the style attribute background-image
+                const style = $el.attr('style') || "";
+                let image = "";
+                if (style.includes('url(')) {
+                    image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
+                }
+
+                if (id && title) {
+                    results.push({
+                        id,
+                        title,
+                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`,
+                        provider: this.name
+                    });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[Anikai] getTrending failed:', error);
+            return [];
+        }
+    }
+
+    async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
+        return this.getTrending(page); // For Anikai, Top and Trending are similar on Home
+    }
+
     async getGenre(genre: string, page: number = 1) { return []; }
-    async getTop(page: number = 1) { return []; }
 
     async getHome(): Promise<{ slides: AnimeSearchResult[]; trending: AnimeSearchResult[]; latest: AnimeSearchResult[] }> {
         try {
@@ -431,7 +473,9 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
-            return { slides, trending: [], latest };
+            const trendingContent = await this.getTrending();
+
+            return { slides, trending: trendingContent, latest };
         } catch (error) {
             console.error('[Anikai] getHome failed:', error);
             return { slides: [], trending: [], latest: [] };

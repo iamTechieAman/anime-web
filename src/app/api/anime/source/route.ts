@@ -52,6 +52,7 @@ export async function GET(request: Request) {
                 link: finalUrl,
                 hls: s.isM3U8,
                 resolutionStr: s.quality || "default",
+                isIframe: s.isIframe || false,
                 fromCache: new Date().toISOString()
             };
         });
@@ -80,7 +81,7 @@ export async function GET(request: Request) {
             }
 
             // 2. Define fallback providers (Prioritize Consumet and AllAnime)
-            const fallbacks: ProviderName[] = ["consumet", "allanime", "anikai", "hianime", "aniwatch"];
+            const fallbacks: ProviderName[] = ["consumet", "allanime", "vidsrc", "anikai", "hianime", "aniwatch"];
             const otherProviders = fallbacks.filter(p => p !== providerName);
 
             for (const fallbackName of otherProviders) {
@@ -120,6 +121,7 @@ export async function GET(request: Request) {
                                 link: finalUrl,
                                 hls: s.isM3U8,
                                 resolutionStr: s.quality || "default",
+                                isIframe: s.isIframe || false,
                                 fromCache: new Date().toISOString()
                             };
                         });

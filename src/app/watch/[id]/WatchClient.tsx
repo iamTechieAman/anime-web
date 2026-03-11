@@ -231,7 +231,7 @@ export default function WatchClient({ id }: { id: string }) {
                         : `${window.location.origin}${selected.link}`;
 
                     setSourceUrl(absoluteUrl);
-                    setVideoType(selected.hls ? "m3u8" : "auto");
+                    setVideoType(selected.isIframe ? "iframe" : selected.hls ? "m3u8" : "auto");
                     toast.success(`Episode ${currentEp} loaded successfully`);
                 } else {
                     setError("No stream links found.");
@@ -394,17 +394,27 @@ export default function WatchClient({ id }: { id: string }) {
                                     </div>
                                 </div>
                             ) : sourceUrl ? (
-                                <ArtPlayer
-                                    key={sourceUrl} // Force remount on URL change
-                                    option={{
-                                        url: sourceUrl,
-                                        type: videoType,
-                                    }}
-                                    onEnded={handleVideoEnded}
-                                    autoPlay={autoPlay}
-                                    autoNext={autoNext}
-                                    className="w-full h-full"
-                                />
+                                videoType === "iframe" ? (
+                                    <iframe
+                                        src={sourceUrl}
+                                        className="w-full h-full border-0 bg-black"
+                                        allowFullScreen
+                                        allow="autoplay; fullscreen"
+                                        sandbox="allow-scripts allow-same-origin allow-presentation"
+                                    ></iframe>
+                                ) : (
+                                    <ArtPlayer
+                                        key={sourceUrl} // Force remount on URL change
+                                        option={{
+                                            url: sourceUrl,
+                                            type: videoType,
+                                        }}
+                                        onEnded={handleVideoEnded}
+                                        autoPlay={autoPlay}
+                                        autoNext={autoNext}
+                                        className="w-full h-full"
+                                    />
+                                )
                             ) : (
                                 <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
                                     <div className="w-10 h-10 rounded-full border-2 border-[var(--border-color)] border-t-purple-500 animate-spin"></div>

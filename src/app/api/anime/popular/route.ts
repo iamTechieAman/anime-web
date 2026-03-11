@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const requestedProvider = searchParams.get("provider") as ProviderName;
     const providersToTry: ProviderName[] = requestedProvider
         ? [requestedProvider]
-        : ["consumet", "allanime", "aniwatch", "hianime"];
+        : ["anikai", "consumet", "allanime", "aniwatch", "hianime"];
 
     const errors: any[] = [];
 

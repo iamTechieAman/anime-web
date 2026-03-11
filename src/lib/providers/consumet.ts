@@ -206,4 +206,27 @@ export class ConsumetProvider implements AnimeProvider {
             return [];
         }
     }
+
+    async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const response = await axios.get(`${BASE_URL}/trending?page=${page}`);
+            const results: AnimeSearchResult[] = [];
+
+            if (response.data.results) {
+                response.data.results.forEach((item: any) => {
+                    results.push({
+                        id: item.id,
+                        title: item.title.english || item.title.romaji || item.title.native,
+                        image: item.image,
+                        provider: this.name
+                    });
+                });
+            }
+
+            return results;
+        } catch (error) {
+            console.error('[Consumet] getTrending failed:', error);
+            return [];
+        }
+    }
 }

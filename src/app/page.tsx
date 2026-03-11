@@ -42,6 +42,7 @@ export default function Home() {
   const [popular, setPopular] = useState<Show[]>([]);
   const [recent, setRecent] = useState<Show[]>([]);
   const [top, setTop] = useState<Show[]>([]);
+  const [trending, setTrending] = useState<Show[]>([]);
   const [searchResults, setSearchResults] = useState<Show[]>([]);
   const [loading, setLoading] = useState({ popular: true, recent: true, top: true });
   const [isSearching, setIsSearching] = useState(false);
@@ -84,65 +85,26 @@ export default function Home() {
   // Fetcher helper
   const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-  // Use SWR for Recent Anime (Auto-update every 2 minutes)
-  const { data: recentData, error: recentError } = useSWR('/api/anime/recent', fetcher, {
-    refreshInterval: 30000, // 30 seconds
-    revalidateOnFocus: true
-  });
+  // Use SWR for all sections with revalidation for real-time updates and instant caching
+  const { data: recentData } = useSWR('/api/anime/recent', fetcher, { refreshInterval: 60000, revalidateOnFocus: true });
+  const { data: popularData } = useSWR('/api/anime/popular', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
+  const { data: topData } = useSWR('/api/anime/top', fetcher, { revalidateOnFocus: false });
+  const { data: trendingData } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
 
+  useEffect(() => { if (recentData?.shows) setRecent(recentData.shows); }, [recentData]);
+  useEffect(() => { if (popularData?.shows) setPopular(popularData.shows); }, [popularData]);
+  useEffect(() => { if (topData?.shows) setTop(topData.shows); }, [topData]);
+  useEffect(() => { if (trendingData?.shows) setTrending(trendingData.shows); }, [trendingData]);
+
+  // Loading state calculations
   useEffect(() => {
-    if (recentData?.shows) {
-      setRecent(recentData.shows);
-      setLoading(prev => ({ ...prev, recent: false }));
-    } else if (recentError) {
-      console.error("Failed to fetch recent anime", recentError);
-      setLoading(prev => ({ ...prev, recent: false }));
-    }
-  }, [recentData, recentError]);
-
-  // Fetch popular anime
-  const fetchPopular = async () => {
-    try {
-      const res = await axios.get("/api/anime/popular");
-      setPopular(res.data.shows || []);
-    } catch (error) {
-      console.error("Failed to fetch popular anime", error);
-    } finally {
-      setLoading(prev => ({ ...prev, popular: false }));
-    }
-  };
-
-  // Fetch top anime
-  const fetchTop = async () => {
-    try {
-      const res = await axios.get("/api/anime/top");
-      setTop(res.data.shows || []);
-    } catch (error) {
-      console.error("Failed to fetch top anime", error);
-    } finally {
-      setLoading(prev => ({ ...prev, top: false }));
-    }
-  };
-
-  // Fetch data on mount and set up auto-refresh
-  useEffect(() => {
-    fetchPopular();
-    fetchTop();
-
-    // Auto-refresh every 30 seconds for real-time updates
-    refreshIntervalRef.current = setInterval(() => {
-      console.log('[ToonPlayer] Auto-refreshing anime data...');
-      fetchPopular();
-      fetchTop();
-    }, 30000); // 30 seconds
-
-    // Cleanup interval on unmount
-    return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
-    };
-  }, []);
+    setLoading({
+      recent: !recentData && recent.length === 0,
+      popular: !popularData && popular.length === 0,
+      top: !topData && top.length === 0,
+      trending: !trendingData && trending.length === 0
+    } as any);
+  }, [recentData, recent, popularData, popular, topData, top, trendingData, trending]);
 
   const handleSearch = async (e: React.FormEvent | null, queryOverride?: string) => {
     if (e) e.preventDefault();
@@ -237,9 +199,9 @@ export default function Home() {
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden shadow-2xl z-50">
                 {suggestions.map((show) => (
-                  <button
+                  <Link
                     key={show.id}
-                    onClick={() => handleSearch(null, show.title.english || show.title.romaji)}
+                    href={`/watch/${show.id}`}
                     className="w-full flex items-center gap-3 p-3 hover:bg-[var(--bg-main)] transition-colors text-left border-b border-[var(--border-color)] last:border-0"
                   >
                     <img
@@ -255,7 +217,7 @@ export default function Home() {
                         {show.seasonYear ? `${show.seasonYear} • ` : ''}{show.format}
                       </p>
                     </div>
-                  </button>
+                  </Link>
                 ))}
               </div>
             )}
@@ -306,13 +268,13 @@ export default function Home() {
               {/* Trending Now (Ranked) */}
               <section>
                 <SectionHeader icon={TrendingUp} title="Trending Now" />
-                {loading.popular ? <LoadingSkeleton /> : <AnimeGridRanked shows={popular.slice(0, 10)} />}
+                {(loading as any).trending ? <LoadingSkeleton /> : <AnimeGridRanked shows={trending.slice(0, 15)} />}
               </section>
 
               {/* Top Airing */}
               <section>
                 <SectionHeader icon={Star} title="Top Airing" />
-                {loading.popular ? <LoadingSkeleton /> : <AnimeGrid shows={popular.slice(10, 20)} />}
+                {loading.popular ? <LoadingSkeleton /> : <AnimeGrid shows={popular.slice(0, 15)} />}
               </section>
 
               {/* Top Anime (All Time) */}
