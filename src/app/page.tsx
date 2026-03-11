@@ -212,10 +212,10 @@ export default function Home() {
         <div className="w-full mx-auto flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0" onClick={clearSearch}>
-            <div className="w-8 h-8 md:w-10 md:h-10 relative">
+            <div className="w-8 h-8 md:w-9 md:h-9 relative">
               <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
             </div>
-            <span className="text-xl md:text-2xl font-black tracking-tight text-[var(--text-main)] font-sora hidden sm:block">ToonPlayer</span>
+            <span className="text-lg md:text-xl font-black tracking-tight text-[var(--text-main)] font-sora block">ToonPlayer</span>
           </Link>
 
           {/* Search Bar + Filter */}

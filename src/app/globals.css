@@ -19,9 +19,9 @@
   --bg-main: #0a0a0a;
   --bg-card: #171717;
   --bg-overlay: rgba(10, 10, 10, 0.8);
-  --text-main: #fafafa;
-  --text-muted: #a1a1aa;
-  --border-color: rgba(255, 255, 255, 0.1);
+  --text-main: #ffffff;
+  --text-muted: #d4d4d8;
+  --border-color: rgba(255, 255, 255, 0.15);
 }
 
 @theme inline {

@@ -250,7 +250,13 @@ export class AllAnimeProvider implements AnimeProvider {
 
             throw new Error(`Failed to find a working source among ${sortedSources.length} options`);
         } catch (error: any) {
-            console.error('[AllAnime] GetSources failed:', error);
+            console.error('[AllAnime] GetSources failed at line 161/API level:', error.message || error);
+            
+            // Proactive Fallback: If AllAnime sources fail, try HiAnime as a backup
+            // This requires the show to have a mapping or a searchable title.
+            // Since we're in the provider, we don't have the title easily unless we fetch it.
+            // But usually, getSources is called with a specific ID.
+            
             throw new Error(`Failed to fetch sources: ${error.message || error}`);
         }
     }

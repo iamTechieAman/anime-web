@@ -115,7 +115,7 @@ export default function MobileNav() {
                             }`}
                         >
                             <Icon className={`${item.active ? "w-5 h-5" : "w-4 h-4"} transition-all`} />
-                            <span className="text-[9px] font-bold">{item.label}</span>
+                            <span className="text-[10px] font-bold">{item.label}</span>
                         </motion.button>
                     );
                 })}
