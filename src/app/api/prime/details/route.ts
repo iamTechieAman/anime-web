@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import { NextResponse } from "next/server";
 
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";

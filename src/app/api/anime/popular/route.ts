@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 

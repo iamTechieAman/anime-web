@@ -1,0 +1,8 @@
+name = "anime-web"
+compatibility_date = "2024-04-03"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".next"
+
+[vars]
+# Add any environment variables here
+NEXT_PUBLIC_API_URL = "https://anime-web.pages.dev"
