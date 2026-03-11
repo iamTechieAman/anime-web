@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
 import useSWR from 'swr';
-import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy } from "lucide-react";
+import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 import AZFilter from "@/components/AZFilter";
-import { AnimeGrid, type Show } from "@/components/AnimeCard";
+import { AnimeCard, AnimeGrid, type Show } from "@/components/AnimeCard";
 import { useDebounce } from "@/hooks/useDebounce";
 import HeroCarousel from "@/components/HeroCarousel";
 
@@ -46,9 +46,17 @@ export default function Home() {
   const [loading, setLoading] = useState({ popular: true, recent: true, top: true });
   const [isSearching, setIsSearching] = useState(false);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Scroll-to-top visibility
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 500);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Mobile UI Context
-  const { isSearchOpen, isMenuOpen, setSearchOpen, setMenuOpen, theme, toggleTheme } = useMobileUI();
+  const { theme, setMenuOpen } = useMobileUI();
 
   // Fetch suggestions from AniList
   useEffect(() => {
@@ -190,179 +198,6 @@ export default function Home() {
         </div>
       </noscript>
 
-      {/* About/Menu Modal (Triggered by MobileNav Context) */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            key="about-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setMenuOpen(false)}
-          >
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full md:max-w-md bg-[var(--bg-card)] border-t md:border border-[var(--border-color)] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
-            >
-              <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
-                <div className="w-12 h-1.5 bg-[var(--text-muted)]/30 rounded-full"></div>
-              </div>
-
-              <div className="p-6 overflow-y-auto">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-[var(--text-main)]">Menu</h2>
-                  <button
-                    onClick={() => setMenuOpen(false)}
-                    className="p-2 bg-[var(--bg-main)] hover:bg-[var(--border-color)] rounded-full transition-colors"
-                  >
-                    <X className="w-5 h-5 text-[var(--text-main)]" />
-                  </button>
-                </div>
-
-                {/* Settings Section */}
-                <div className="space-y-4 mb-8">
-                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Settings</h3>
-
-                  {/* Theme Toggle */}
-                  <div className="flex items-center justify-between p-4 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-purple-500/20 text-purple-400' : 'bg-yellow-500/20 text-yellow-600'}`}>
-                        {theme === 'dark' ? <div className="w-5 h-5">🌙</div> : <div className="w-5 h-5">☀️</div>}
-                      </div>
-                      <div>
-                        <p className="font-bold text-[var(--text-main)]">App Theme</p>
-                        <p className="text-xs text-[var(--text-muted)]">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={toggleTheme}
-                      className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-purple-600' : 'bg-zinc-300'}`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${theme === 'dark' ? 'left-7' : 'left-1'}`}></div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Profile Section */}
-                <div className="space-y-4">
-                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Developer</h3>
-                  <div className="p-4 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-xl border border-purple-500/20">
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">AK</div>
-                      <div>
-                        <h4 className="font-bold text-[var(--text-main)]">Aman Kumar</h4>
-                        <p className="text-xs text-[var(--text-muted)]">Full Stack Developer</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
-                      Built with Next.js 15, React 19, and Tailwind CSS. Focused on high-performance mobile web experiences.
-                    </p>
-                    <div className="flex gap-2">
-                      <a href="https://github.com/iamTechieAman" target="_blank" className="flex-1 py-2 text-center bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg text-xs font-bold text-[var(--text-main)] hover:bg-[var(--border-color)] transition-colors">
-                        GitHub
-                      </a>
-                      <a href="https://linkedin.com" target="_blank" className="flex-1 py-2 text-center bg-[#0077b5] text-white rounded-lg text-xs font-bold hover:bg-[#006097] transition-colors">
-                        LinkedIn
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {/* Mobile Search Overlay (Triggered by MobileNav Context) */}
-        {isSearchOpen && (
-          <motion.div
-            key="search-overlay"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed inset-0 z-[55] bg-[var(--bg-main)] pt-safe px-4"
-          >
-            <div className="flex items-center gap-4 py-4 border-b border-[var(--border-color)]">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                <input
-                  autoFocus
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
-                  placeholder="Search..."
-                  className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg py-2 pl-9 pr-4 text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-purple-500"
-                />
-
-                {/* Mobile Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden shadow-2xl z-[60] max-h-60 overflow-y-auto">
-                    {suggestions.map((show) => (
-                      <button
-                        key={show.id}
-                        onClick={() => handleSearch(null, show.title.english || show.title.romaji)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-[var(--bg-main)] transition-colors text-left border-b border-[var(--border-color)] last:border-0"
-                      >
-                        <img
-                          src={show.coverImage.medium}
-                          alt=""
-                          className="w-8 h-12 object-cover rounded bg-[var(--bg-main)]"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-[var(--text-main)] truncate">
-                            {show.title.english || show.title.romaji}
-                          </h4>
-                          <p className="text-xs text-[var(--text-muted)] truncate">
-                            {show.seasonYear ? `${show.seasonYear} • ` : ''}{show.format}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="text-[var(--text-muted)] font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <div className="py-4 overflow-y-auto h-[calc(100vh-80px)]">
-              {isSearching ? (
-                <div className="flex justify-center pt-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>
-              ) : searchResults.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-20">
-                  {searchResults.map(show => (
-                    <Link href={`/watch/${show._id}`} key={show._id} onClick={() => setSearchOpen(false)}>
-                      <div className="bg-[var(--bg-card)] rounded-lg overflow-hidden border border-[var(--border-color)]">
-                        <img src={show.thumbnail} alt={show.name} className="w-full aspect-[2/3] object-cover" />
-                        <div className="p-2">
-                          <h3 className="text-xs font-bold line-clamp-1">{show.name}</h3>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-[var(--text-muted)] mt-20">
-                  <Search className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                  <p>Search for your favorite anime...</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Background Ambience - Highly optimized */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/10 to-transparent opacity-50 transition-opacity duration-300" />
@@ -430,6 +265,7 @@ export default function Home() {
 
           <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-[var(--text-muted)]">
             <button className="hover:text-[var(--text-main)] transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
+            <Link href="/movies" className="hover:text-blue-400 transition-colors hidden sm:block">Movies</Link>
             <button className="hover:text-purple-400 transition-colors text-[var(--text-main)]" onClick={() => setMenuOpen(true)}>About</button>
           </div>
         </div>
@@ -496,6 +332,21 @@ export default function Home() {
         )}
 
       </div>
+
+      {/* Scroll to Top */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="fixed bottom-6 right-6 z-40 p-3 bg-purple-500/90 hover:bg-purple-500 text-white rounded-full shadow-[0_0_20px_rgba(168,85,247,0.4)] backdrop-blur-sm transition-colors"
+          >
+            <ChevronUp className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
@@ -526,7 +377,7 @@ function WatchlistSection() {
   return (
     <section>
       <SectionHeader icon={Star} title="Your Watchlist" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
         {watchlist.map((show) => (
           <div key={show._id} className="relative group">
             <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`}>
@@ -596,7 +447,7 @@ function AnimeGridRanked({ shows }: { shows: Show[] }) {
 // Loading Skeleton
 function LoadingSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
       {[...Array(10)].map((_, i) => (
         <div key={i} className="aspect-[3/4.5] rounded-xl bg-[var(--bg-card)] animate-pulse border border-[var(--border-color)]"></div>
       ))}

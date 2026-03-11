@@ -5,38 +5,62 @@ export const revalidate = 0;
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const provider = (searchParams.get("provider") as ProviderName) || "allanime";
     const page = parseInt(searchParams.get("page") || "1");
 
-    try {
-        const animeProvider = getProvider(provider);
+    // List of providers to try in order
+    const requestedProvider = searchParams.get("provider") as ProviderName;
+    const providersToTry: ProviderName[] = requestedProvider
+        ? [requestedProvider]
+        : ["consumet", "allanime", "aniwatch", "hianime"];
 
-        if (!animeProvider.getPopular) {
-            return NextResponse.json({ error: "Provider does not support getPopular" }, { status: 400 });
-        }
+    const errors: any[] = [];
 
-        const results = await animeProvider.getPopular(page);
+    for (const providerName of providersToTry) {
+        try {
+            console.log(`[Popular] Trying provider: ${providerName}`);
+            const animeProvider = getProvider(providerName);
 
-        // Convert to old format for backward compatibility
-        const shows = results.map(result => ({
-            _id: result.id,
-            name: result.title,
-            thumbnail: result.image,
-            availableEpisodes: result.subOrDub,
-            provider: result.provider || provider,
-            __typename: "Show"
-        }));
+            // Consumet uses getTop for popular, handle method mapping gracefully
+            const fetchMethod = animeProvider.getPopular || animeProvider.getTop;
 
-        return NextResponse.json({ shows }, {
-            headers: {
-                'Cache-Control': 'no-store, max-age=0'
+            if (!fetchMethod) {
+                console.warn(`[Popular] Provider ${providerName} does not support getPopular or getTop, skipping.`);
+                continue;
             }
-        });
-    } catch (error: any) {
-        console.error(`[Popular] Provider ${provider} failed:`, error);
-        return NextResponse.json(
-            { error: `Failed to fetch popular anime: ${error.message}` },
-            { status: 500 }
-        );
+
+            const results = await fetchMethod.bind(animeProvider)(page);
+
+            if (results && results.length > 0) {
+                console.log(`[Popular] Successfully fetched ${results.length} items from ${providerName}`);
+                // Convert to old format for backward compatibility
+                const shows = results.map((result: any) => ({
+                    _id: result.id,
+                    name: result.title,
+                    thumbnail: result.image,
+                    availableEpisodes: result.subOrDub,
+                    provider: result.provider || providerName,
+                    __typename: "Show"
+                }));
+
+                return NextResponse.json({ shows }, {
+                    headers: {
+                        'Cache-Control': 'no-store, max-age=0'
+                    }
+                });
+            } else {
+                console.warn(`[Popular] Provider ${providerName} returned 0 results.`);
+                errors.push({ provider: providerName, error: "No results found" });
+            }
+
+        } catch (error: any) {
+            console.error(`[Popular] Provider ${providerName} failed:`, error.message);
+            errors.push({ provider: providerName, error: error.message });
+        }
     }
+
+    // If we get here, all providers failed
+    return NextResponse.json(
+        { error: "All providers failed to fetch popular anime", details: errors },
+        { status: 500 }
+    );
 }

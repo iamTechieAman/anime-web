@@ -4,6 +4,8 @@ First off, thanks for taking the time to contribute! ❤️
 
 All types of contributions are encouraged and valued. Whether it's a bug report, feature request, documentation improvement, or code contribution - we appreciate your help in making ToonPlayer better!
 
+These guidelines also cover how to test and implement new features (such as adding alternative Video Servers or integrating new anime source websites to our Consumet-Fallback network).
+
 ## Table of Contents
 
 - [I Have a Question](#i-have-a-question)
@@ -83,14 +85,17 @@ Use the **Feature Request** template and:
    npm install --legacy-peer-deps
    ```
 
-4. **Create a branch** for your changes:
+4. **Prepare Environment Variables**:
+   Our project uses TMDB for TV Shows/Movies metadata and a Consumet API clone for Anime. Ensure these endpoints are accessible. If you add new scrapers, place them inside `src/lib/providers/` and register them in `src/lib/providers/index.ts`.
+
+5. **Create a branch** for your changes:
    ```bash
    git checkout -b feature/your-feature-name
    # or
    git checkout -b fix/bug-description
    ```
 
-5. **Run the development server**:
+6. **Run the development server**:
    ```bash
    npm run dev
    ```

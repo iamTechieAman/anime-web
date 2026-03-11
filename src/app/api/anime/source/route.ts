@@ -18,9 +18,8 @@ export async function GET(request: Request) {
         );
     }
 
-    // Anikai Provider now handles fallback chaining (Anikai -> AllAnime -> HiAnime)
-    // So it's the safest default for most IDs.
-    const defaultProvider = "anikai";
+    // Consumet Provider serves as a highly robust entrypoint
+    const defaultProvider = "consumet";
     const providerName = providerParam || defaultProvider;
     let provider;
 
@@ -80,8 +79,8 @@ export async function GET(request: Request) {
                 }
             }
 
-            // 2. Define fallback providers (Prioritize AllAnime as it's most reliable)
-            const fallbacks: ProviderName[] = ["allanime", "anikai", "hianime", "aniwatch"];
+            // 2. Define fallback providers (Prioritize Consumet and AllAnime)
+            const fallbacks: ProviderName[] = ["consumet", "allanime", "anikai", "hianime", "aniwatch"];
             const otherProviders = fallbacks.filter(p => p !== providerName);
 
             for (const fallbackName of otherProviders) {

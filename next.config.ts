@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'aniwatchtv.to' },
       { protocol: 'https', hostname: 'hianime.to' },
       { protocol: 'https', hostname: 'img.hianime.to' },
+      { protocol: 'https', hostname: 'image.tmdb.org' },
     ],
   }
 };

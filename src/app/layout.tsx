@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import MobileNav from "@/components/MobileNav";
+import MobileModals from "@/components/MobileModals";
 import { MobileUIProvider } from "@/context/MobileUIContext";
 
 const geistSans = Geist({
@@ -55,7 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100dvh] selection:bg-purple-500/30`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100dvh] bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30 overflow-x-hidden`}
         suppressHydrationWarning
       >
         <MobileUIProvider>
@@ -78,6 +79,7 @@ export default function RootLayout({
             }}
           />
           {children}
+          <MobileModals />
           <MobileNav />
           <Toaster
             position="top-center"

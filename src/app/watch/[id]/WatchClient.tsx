@@ -297,7 +297,7 @@ export default function WatchClient({ id }: { id: string }) {
                     <div className="max-w-md bg-[var(--bg-card)] border border-red-500/30 rounded-2xl p-8 text-center">
                         <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold mb-3 text-[var(--text-main)]">JavaScript Required</h2>
-                        <p className="text-zinc-400 mb-6">
+                        <p className="text-[var(--text-muted)] mb-6">
                             Video streaming requires JavaScript to function. Please enable JavaScript in your browser to watch anime.
                         </p>
                         <Link href="/" className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold inline-block">
@@ -384,7 +384,7 @@ export default function WatchClient({ id }: { id: string }) {
                                                     name="search"
                                                     type="text"
                                                     placeholder="Search on other sources..."
-                                                    className="w-full bg-transparent text-white px-4 py-2 outline-none text-sm placeholder:text-zinc-500"
+                                                    className="w-full bg-transparent text-white px-4 py-2 outline-none text-sm placeholder:text-[var(--text-muted)]"
                                                 />
                                                 <button type="submit" className="p-2 bg-purple-600 rounded-md hover:bg-purple-700 transition-colors">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -406,8 +406,8 @@ export default function WatchClient({ id }: { id: string }) {
                                     className="w-full h-full"
                                 />
                             ) : (
-                                <div className="absolute inset-0 text-zinc-500 text-sm flex flex-col items-center justify-center gap-3">
-                                    <div className="w-10 h-10 rounded-full border-2 border-zinc-800 border-t-purple-500 animate-spin"></div>
+                                <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
+                                    <div className="w-10 h-10 rounded-full border-2 border-[var(--border-color)] border-t-purple-500 animate-spin"></div>
                                     <p>Initializing...</p>
                                 </div>
                             )}
@@ -462,7 +462,7 @@ export default function WatchClient({ id }: { id: string }) {
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-white/5 w-full"></div>
+                                <div className="h-px bg-[var(--bg-card)] w-full"></div>
 
                                 <div className="flex items-center justify-between gap-4 text-xs font-bold text-[var(--text-muted)]">
                                     <div className="flex items-center gap-4">

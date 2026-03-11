@@ -1,0 +1,191 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Play, Star, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+
+// Shared movie item type
+export interface MovieItem {
+    id: number;
+    title?: string;
+    name?: string;
+    poster_path: string | null;
+    backdrop_path?: string | null;
+    vote_average: number;
+    release_date?: string;
+    first_air_date?: string;
+    media_type?: string;
+    overview?: string;
+    rank?: number;
+    liveViewers?: number;
+    isMostViewed?: boolean;
+}
+
+const IMG_BASE = "https://image.tmdb.org/t/p";
+
+// === MOVIE CARD ===
+export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: string }) {
+    const [imgError, setImgError] = useState(false);
+    const title = item.title || item.name || "Untitled";
+    const year = (item.release_date || item.first_air_date || "").slice(0, 4);
+    const rating = item.vote_average?.toFixed(1);
+    const mediaType = item.media_type || type;
+    const matchPercent = Math.round((item.vote_average || 0) * 10);
+
+    return (
+        <Link href={`/movies/watch/${mediaType}/${item.id}`} className="block group">
+            <motion.div
+                whileHover={{ scale: 1.05, y: -4 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="relative rounded-xl overflow-hidden bg-[#141414] border border-white/5 hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
+            >
+                {/* Poster */}
+                <div className="relative aspect-[2/3] overflow-hidden">
+                    {item.poster_path && !imgError ? (
+                        <img
+                            src={`${IMG_BASE}/w500${item.poster_path}`}
+                            alt={title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            onError={() => setImgError(true)}
+                            loading="lazy"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                            <span className="text-zinc-600 text-3xl font-bold">{title.charAt(0)}</span>
+                        </div>
+                    )}
+
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Ranking Number */}
+                    {item.rank && (
+                        <div className="absolute bottom-0 -left-1 z-10 pointer-events-none drop-shadow-[0_0_15px_rgba(0,0,0,0.8)]">
+                            <span className="text-[90px] font-black leading-none tracking-tighter" style={{ WebkitTextStroke: "2px white", color: "transparent" }}>
+                                {item.rank}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Most Viewed badge */}
+                    {item.isMostViewed && (
+                        <div className="absolute top-0 left-0 flex items-center gap-1 bg-red-600/90 backdrop-blur-md rounded-br-lg px-1.5 py-0.5 sm:px-2 sm:py-1 z-20 shadow-lg">
+                            <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white fill-white" />
+                            <span className="text-[7px] sm:text-[9px] font-bold text-white uppercase tracking-wider">
+                                Most Viewed
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Live Viewers badge */}
+                    {item.liveViewers && (
+                        <div className="absolute bottom-2 right-2 hidden sm:flex items-center gap-1.5 bg-black/80 backdrop-blur-md rounded-full px-2 py-1 z-20 border border-white/10 shadow-lg group-hover:opacity-0 transition-opacity duration-300">
+                            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+                            <span className="text-[9px] sm:text-[10px] font-bold text-white tracking-wide">
+                                {item.liveViewers.toLocaleString()} watching
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Rating badge */}
+                    <div className={`absolute left-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-md px-2 py-0.5 z-10 ${item.isMostViewed ? 'top-8' : 'top-2'}`}>
+                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                        <span className="text-[11px] font-bold text-white">{rating}</span>
+                    </div>
+
+                    {/* HD badge — hidden on very small screens to prevent overlap */}
+                    <div className="absolute top-2 right-2 hidden sm:block bg-blue-500/80 backdrop-blur-sm rounded px-1.5 py-0.5 z-10">
+                        <span className="text-[9px] font-bold text-white tracking-wider">HD</span>
+                    </div>
+
+                    {/* Play button on hover */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/90 backdrop-blur-sm flex items-center justify-center shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                        </div>
+                    </div>
+
+                    {/* Bottom info on hover */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <div className="flex items-center gap-2 text-[10px] text-[var(--text-main)]">
+                            {matchPercent > 0 && (
+                                <span className={`font-bold ${matchPercent >= 70 ? "text-green-400" : matchPercent >= 50 ? "text-yellow-400" : "text-red-400"}`}>
+                                    {matchPercent}% Match
+                                </span>
+                            )}
+                            {year && <span>• {year}</span>}
+                            <span className="ml-auto uppercase text-[var(--text-muted)] text-[9px] font-medium">{mediaType}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Title */}
+                <div className="p-2.5">
+                    <h3 className="text-xs font-semibold text-[var(--text-main)] truncate group-hover:text-white transition-colors">{title}</h3>
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--text-muted)]">
+                        {year && <span>{year}</span>}
+                        {year && <span>•</span>}
+                        <span className="capitalize">{mediaType}</span>
+                    </div>
+                </div>
+            </motion.div>
+        </Link>
+    );
+}
+
+// === MOVIE GRID ===
+export function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+            {items.map((item) => (
+                <MovieCard key={item.id} item={item} type={item.media_type || type} />
+            ))}
+        </div>
+    );
+}
+
+// === MOVIE ROW (Horizontal Scroll) ===
+export function MovieRow({ items, type = "movie", title }: { items: MovieItem[]; type?: string; title?: string }) {
+    const scrollId = `row-${title?.replace(/\s/g, "-") || Math.random()}`;
+
+    const scroll = (direction: "left" | "right") => {
+        const container = document.getElementById(scrollId);
+        if (container) {
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({
+                left: direction === "left" ? -scrollAmount : scrollAmount,
+                behavior: "smooth",
+            });
+        }
+    };
+
+    return (
+        <div className="relative group/row">
+            {/* Scroll arrows */}
+            <button
+                onClick={() => scroll("left")}
+                className="absolute left-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-r from-[#0a0a0a] to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
+            >
+                <ChevronLeft className="w-6 h-6 text-white" />
+            </button>
+            <button
+                onClick={() => scroll("right")}
+                className="absolute right-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-l from-[#0a0a0a] to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity"
+            >
+                <ChevronRight className="w-6 h-6 text-white" />
+            </button>
+
+            <div
+                id={scrollId}
+                className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar scroll-smooth"
+            >
+                {items.map((item) => (
+                    <div key={item.id} className="flex-shrink-0 w-[130px] sm:w-[155px] md:w-[170px] lg:w-[180px]">
+                        <MovieCard item={item} type={item.media_type || type} />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}

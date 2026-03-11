@@ -16,7 +16,7 @@
     "@capacitor/core": "^8.0.1",
     "@vidstack/react": "1.12.12",
     "artplayer": "^5.3.0",
-    "axios": "^1.13.2",
+    "axios": "^1.13.6",
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.29.0",

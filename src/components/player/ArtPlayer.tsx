@@ -283,13 +283,13 @@ export default function Player({ option, className, style, getInstance, onEnded,
             {/* Auto-Next Countdown Overlay */}
             {showCountdown && (
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-[#0a0a0a] border border-purple-500/30 rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+                    <div className="bg-[var(--bg-main)] border border-purple-500/30 rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
                         <div className="mb-4">
                             <div className="w-20 h-20 mx-auto rounded-full border-4 border-purple-500 flex items-center justify-center text-3xl font-bold text-white mb-4">
                                 {countdown}
                             </div>
                             <h3 className="text-xl font-bold text-white mb-2">Next Episode Starting Soon</h3>
-                            <p className="text-sm text-zinc-400">Playing next episode in {countdown} seconds...</p>
+                            <p className="text-sm text-[var(--text-muted)]">Playing next episode in {countdown} seconds...</p>
                         </div>
                         <button
                             onClick={cancelAutoNext}

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2026-03-11
+
+### 📺 TV Shows & Consumet Integration (The "Ultimate Resolver" Update)
+- **🌐 Consumet API Network**: Added the open-source Consumet API as the `#1 Default Priority` backend resolver, bypassing complex Cloudflare/AES encryptions for heavily protected Sub/Dub streams.
+- **🔄 Dynamic API Fallbacks**: Rewrote `/api/anime/top` and `/popular` endpoints to employ a cascading failover loop (`Consumet -> AllAnime -> AniWatch -> HiAnime`). Eradicates the "No Anime Found" bugs entirely.
+- **📺 TMDB Season Architecture**: Built the `/api/prime/season` endpoint to extract deep TMDB episodic metadata. Live-injected a responsive **Season Dropdown & Episode Grid** directly into the Watch UI for seamless TV Binge-watching.
+- **🎛️ Contextual Mobile Search**: Upgraded `MobileModals.tsx` with dynamic `usePathname` routing. The global search modal intelligently swaps between Anime queries and Movie/TV queries based on user location.
+- **🎨 Edge-to-Edge Desktop Fix**: Injected root `<body>` theme variables inside `layout.tsx` to eliminate white bounding boxes on ultra-wide desktop monitors, ensuring pristine Light / Dark mode rendering.
+- **🏷️ Branding Upgrade**: Refactored the primary embed server label from "Onoflix VIP" to **"ToonPlayer-VIP"**.
+
 ## [1.7.0] - 2026-01-26
 
 ### 🎨 Design & Experience Overhaul (The "Premium" Update)

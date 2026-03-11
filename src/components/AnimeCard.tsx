@@ -32,7 +32,7 @@ export function AnimeCard({ show }: { show: Show }) {
                 whileHover={{ y: -8, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 layout="position"
-                className="group relative aspect-[3/4.5] rounded-xl overflow-hidden cursor-pointer bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-colors shadow-xl"
+                className="group relative aspect-[3/4.5] rounded-xl overflow-hidden cursor-pointer bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all duration-300 shadow-xl hover:shadow-[0_8px_30px_rgba(168,85,247,0.2)]"
             >
                 {/* Image */}
                 {show.thumbnail && !imageError ? (
@@ -96,7 +96,7 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
         )
     }
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
             {shows.map((show) => (
                 <AnimeCard key={show._id} show={show} />
             ))}

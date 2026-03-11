@@ -18,13 +18,13 @@ ToonPlayer is a modern, ad-free anime streaming application (the ultimate **Anim
 
 ## ✨ Key Features
 
-- **🔄 Real-time Updates**: The platform automatically updates its anime list, latest releases, and trending shows **daily and automatically** via smart web scraping and API integration.
-- **🎬 Smart Video Player**: Auto-selects the best streaming source (HLS vs MP4) and bypasses CORS restrictions using a smart proxy.
+- **🔄 Real-time Updates**: Automatically pulls live popular, top, and recent lists directly from the fastest providers without stale caching.
+- **🎬 Smart Video Player**: Auto-selects the best streaming source and bypasses CORS restrictions using a smart proxy.
+- **📺 TV Show Seasons**: Deep integration with TMDB API to natively fetch TV Show seasons, metadata, and episode thumbnails within a dynamic interactive grid.
+- **🔗 Hybrid Fallback Network**: Utilizes the open-source **Consumet API** as the primary source resolver, seamlessly falling back to direct provider queries (AllAnime, AniWatch, HiAnime) if streams are encrypted or missing.
 - **🚀 High Performance**: Built on Next.js 15 for server-side rendering and lightning-fast page loads.
-- **📱 Fully Responsive**: Optimized for Mobile, Tablet, and Desktop with a unified, touch-friendly UI.
-- **🔍 Real-time Search**: Instant search results with thumbnails and dub/sub indicators.
-- **🌙 Modern Design**: Premium dark mode aesthetic with glassmorphism and smooth animations.
-- **💾 Auto-Save**: Remembers your "Auto Play" and "Auto Next" settings.
+- **📱 Responsive Contextual UI**: Intelligent mobile modals that contextually switch between Anime and Movie search engines based on active routes, with a full-bleed OLED Dark Mode desktop layout.
+- **🌙 Modern Design**: Premium dark mode aesthetic with glassmorphism, contextual coloring, and smooth animations using Framer Motion.
 - **⚡ Android Native**: Built-in support for Android via **Capacitor**, featuring native back-button handling and high-performance WebView.
 
 ## 🛠️ Development Process & Automation
@@ -37,18 +37,21 @@ Instead of relying on static site generation (SSG) which gets stale, ToonPlayer 
 - **Scraper Pipeline**: We built custom scrapers for **Anikai** and **AllAnime** that parse the latest HTML content directly when a user visits.
 - **Auto-Refresh**: The Home page includes a client-side timer that refreshes the data every **60 seconds**, ensuring users never miss a new episode release.
 
-### 2. 🚀 The Parallel Search Engine
-To minimize search lag, we implemented a parallel search pattern:
+### 2. 🚀 The Cascading Fallback Network
+To guarantee 99.9% uptime for streams (despite anti-bot protections and AES encryption), ToonPlayer uses a **Dynamic Priority Fallback Pipeline**:
 ```mermaid
 graph LR
-    User([Search Input]) --> API[Search API]
-    API --> P1[AllAnime]
-    API --> P2[AniWatch]
-    API --> P3[HiAnime]
-    P1 & P2 & P3 --> Merge[Result Merger & De-duplicator]
-    Merge --> Res([Instant Results])
+    User([Play Video]) --> Route[API Priority Router]
+    Route --> C[Consumet API]
+    C -- Fails --> A[AllAnime]
+    A -- Fails --> AW[AniWatch]
+    AW -- Fails --> H[HiAnime]
+    H --> Stream{Resolver}
 ```
-By querying all providers simultaneously, the app's perceived speed is as fast as the single fastest provider.
+If the primary AniList ID fails to map properly, the backend automatically drops down the chain, parsing raw HTML to extract highly protected `.m3u8` streams natively.
+
+### 3. 📺 TMDB TV Show Integration
+For non-anime content, the `/api/prime` suite communicates with TheMovieDatabase (TMDB). It pulls complete seasonal metadata and episode arrays, injecting them into a frontend Interactive Glassmorphic Grid so users can flawlessly select any episode across any season.
 
 ### 3. Build & Deployment
 - **Web**: Automatically deployed to **Vercel** on every push to `main`.
@@ -67,13 +70,14 @@ By querying all providers simultaneously, the app's perceived speed is as fast a
 - **Notifications**: [React Hot Toast](https://react-hot-toast.com/)
 
 ### Backend & Data Sources
-- **API Library**: [@consumet/extensions](https://github.com/consumet/consumet.ts) - Anime data aggregation
-- **Providers**:
-  - **AllAnime** ([allanime.to](https://allanime.to)) - Primary anime episodes & metadata
-  - **HiAnime** ([hianime.to](https://hianime.to)) - Fallback provider
-  - **AniList API** ([anilist.co](https://anilist.co)) - Anime metadata & cover images
-- **Video Sources**: Aggregated from SharePoint, Google Drive, and HLS streams
-- **CORS Proxy**: Custom Next.js API route for bypassing SharePoint/GDrive restrictions
+- **Meta Integrations**: [TMDB API](https://developer.themoviedb.org/) (Movies/TV), [AniList GraphQL](https://anilist.co/api/v2/oauth/docs) (Anime Autocomplete)
+- **Primary Source Resolver**: [Consumet API Wrapper](https://docs.consumet.org/)
+- **Fallback Providers**:
+  - **AllAnime** ([allanime.day](https://allanime.to))
+  - **AniWatch/Zoro**
+  - **HiAnime**
+  - **Anikai**
+- **Video Servers**: Aggregated stream extraction via `ToonPlayer-VIP`, `VidLink`, and `AutoEmbed`.
 
 ### Deployment
 - **Hosting**: [Vercel](https://vercel.com/)

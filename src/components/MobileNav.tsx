@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Search, Menu } from "lucide-react";
+import { Home, Search, Menu, Film } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -70,6 +70,15 @@ export default function MobileNav() {
                 >
                     <Home className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Home</span>
+                </motion.button>
+
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => { closeAll(); router.push('/movies'); }}
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${pathname === '/movies' || pathname.startsWith('/movies/') ? 'text-blue-500' : 'text-[var(--text-muted)]'}`}
+                >
+                    <Film className="w-5 h-5" />
+                    <span className="text-[10px] font-bold">Movies</span>
                 </motion.button>
 
                 <motion.button
