@@ -12,13 +12,6 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 // Ad-free / better embed sources — ordered by reliability
 const SERVERS = [
     {
-        id: "redflix",
-        name: "Redflix",
-        badge: "Ultra HD",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://redflix.co/tv/${id}-${s || 1}-${e || 1}/watch` : `https://redflix.co/movie/${id}/watch`,
-    },
-    {
         id: "peachify",
         name: "ToonPlayer-VIP",
         badge: "Multi-Audio",
