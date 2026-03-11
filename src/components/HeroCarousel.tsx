@@ -105,10 +105,12 @@ export default function HeroCarousel() {
             const validSlides = formattedSlides.filter(s => s.image && !s.image.includes('undefined'));
             if (validSlides.length > 0) {
                 setSlides(validSlides);
-                setIsLoading(false);
+            } else {
+                console.warn("[HeroCarousel] No valid slides found after processing.");
             }
         } catch (err) {
             console.error("Error processing slides:", err);
+        } finally {
             setIsLoading(false);
         }
     };

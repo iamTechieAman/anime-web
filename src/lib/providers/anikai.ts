@@ -473,9 +473,32 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
-            const trendingContent = await this.getTrending();
+            // Fetch Trending Updates directly from the same DOM to save another HTTP request!
+            const trending: AnimeSearchResult[] = [];
+            $('.sidebar-section .aitem').each((_, element) => {
+                const $el = $(element);
+                const href = $el.attr('href');
+                let trendingId = href?.split('/watch/')[1] || href?.split('/').pop() || '';
+                if (trendingId.includes('#')) trendingId = trendingId.split('#')[0];
 
-            return { slides, trending: trendingContent, latest };
+                const trendingTitle = $el.find('.title').text().trim();
+                const styleAttr = $el.attr('style') || "";
+                let trendingImage = "";
+                if (styleAttr.includes('url(')) {
+                    trendingImage = styleAttr.split('url(')[1].split(')')[0].replace(/['"]/g, '');
+                }
+
+                if (trendingId && trendingTitle) {
+                    trending.push({
+                        id: trendingId,
+                        title: trendingTitle,
+                        image: trendingImage || `https://img.anikai.to/i/cache/images/${trendingId}.jpg`,
+                        provider: this.name
+                    });
+                }
+            });
+
+            return { slides, trending, latest };
         } catch (error) {
             console.error('[Anikai] getHome failed:', error);
             return { slides: [], trending: [], latest: [] };
