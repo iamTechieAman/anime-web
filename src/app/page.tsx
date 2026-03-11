@@ -4,13 +4,18 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
 import useSWR from 'swr';
-import { Search, Play, Star, Clock, TrendingUp, X, Github, Mail, Linkedin, Globe, Trophy, ChevronUp } from "lucide-react";
+import { Search, Play, Star, Clock, TrendingUp, X, ChevronUp, Bell, Shuffle, SlidersHorizontal, Calendar, Zap, CheckCircle, Circle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 import AZFilter from "@/components/AZFilter";
-import { AnimeCard, AnimeGrid, type Show } from "@/components/AnimeCard";
+import { AnimeCard, AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useRouter } from "next/navigation";
 import HeroCarousel from "@/components/HeroCarousel";
+
+const GENRES = ["Action","Adventure","Comedy","Drama","Fantasy","Horror","Mecha","Mystery","Psychological","Romance","Sci-Fi","Slice of Life","Sports","Supernatural","Thriller"];
+const FORMATS = ["TV","Movie","OVA","ONA","Special"];
+const STATUSES = ["Ongoing","Completed","Upcoming"];
 
 // AniList GraphQL Query
 const SEARCH_QUERY = `
@@ -49,12 +54,56 @@ export default function Home() {
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  // Filter and Notification state
+  const [showFilter, setShowFilter] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [filterGenre, setFilterGenre] = useState("");
+  const [filterFormat, setFilterFormat] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const filterRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const [hasNewNotif] = useState(true);
+
   // Scroll-to-top visibility
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 500);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close panels on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilter(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifications(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleShuffle = () => {
+    const pool = [...trending, ...popular, ...recent];
+    if (pool.length > 0) {
+      const random = pool[Math.floor(Math.random() * pool.length)];
+      router.push(`/watch/${random._id}${random.provider ? `?provider=${random.provider}` : ''}`);
+    }
+  };
+
+  const applyFilter = () => {
+    const params = new URLSearchParams();
+    if (filterGenre) params.set('genre', filterGenre);
+    if (filterFormat) params.set('format', filterFormat.toLowerCase());
+    if (filterStatus) params.set('status', filterStatus.toLowerCase());
+    if (searchQuery) params.set('query', searchQuery);
+    setShowFilter(false);
+    router.push(`/search?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    setFilterGenre('');
+    setFilterFormat('');
+    setFilterStatus('');
+  };
 
   // Mobile UI Context
   const { theme, setMenuOpen } = useMobileUI();
@@ -106,6 +155,8 @@ export default function Home() {
     } as any);
   }, [recentData, recent, popularData, popular, topData, top, trendingData, trending]);
 
+  const router = useRouter();
+
   const handleSearch = async (e: React.FormEvent | null, queryOverride?: string) => {
     if (e) e.preventDefault();
     const query = queryOverride || searchQuery;
@@ -113,19 +164,10 @@ export default function Home() {
     if (!query.trim()) return;
 
     setIsSearching(true);
-    setShowSuggestions(false); // Hide suggestions on search
-
-    // Update input if using override
-    if (queryOverride) setSearchQuery(queryOverride);
-
-    try {
-      const res = await axios.get(`/api/anime/search?query=${encodeURIComponent(query)}`);
-      setSearchResults(res.data.shows || []);
-    } catch (error) {
-      console.error("Search failed", error);
-    } finally {
-      setIsSearching(false);
-    }
+    setShowSuggestions(false);
+    
+    // Redirect to out-of-the-box search page
+    router.push(`/search?query=${encodeURIComponent(query)}`);
   };
 
   const clearSearch = () => {
@@ -166,56 +208,134 @@ export default function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={clearSearch}>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300 md:pl-[72px]">
+        <div className="w-full mx-auto flex items-center justify-between gap-4">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0" onClick={clearSearch}>
             <div className="w-8 h-8 md:w-10 md:h-10 relative">
-              <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+              <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
             </div>
-            <span className="text-lg md:text-xl font-bold tracking-tight text-[var(--text-main)]">ToonPlayer</span>
+            <span className="text-xl md:text-2xl font-black tracking-tight text-[var(--text-main)] font-sora hidden sm:block">ToonPlayer</span>
           </Link>
 
-          <div className="flex-1 max-w-md hidden md:block relative group"
+          {/* Search Bar + Filter */}
+          <div className="flex-1 max-w-xl hidden md:flex items-center gap-2 relative"
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}>
-            <form onSubmit={(e) => handleSearch(e)} className="relative flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full px-3 py-1.5 md:py-2 focus-within:border-purple-500/50 transition-colors">
-              <Search className="w-4 h-4 text-[var(--text-muted)]" />
+            <form onSubmit={(e) => handleSearch(e)} className="relative flex-1 flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-sm px-4 py-2 hover:bg-[var(--bg-card)]/80 focus-within:border-white/20 transition-all">
+              <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search anime..."
-                className="w-full bg-transparent border-none focus:outline-none px-2 md:px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)]"
+                className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
                 autoComplete="off"
               />
               {searchQuery && (
-                <button type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full">
-                  <X className="w-3 h-3 text-[var(--text-muted)]" />
+                <button type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full mr-1">
+                  <X className="w-4 h-4 text-[var(--text-muted)]" />
                 </button>
               )}
             </form>
 
-            {/* Suggestions Dropdown */}
+            {/* Filter Button */}
+            <div ref={filterRef} className="relative">
+              <button
+                onClick={() => { setShowFilter(v => !v); setShowNotifications(false); }}
+                className={`h-full px-3 py-2.5 bg-[var(--bg-card)] border rounded-sm flex items-center gap-1.5 text-xs font-bold transition-all ${
+                  showFilter || filterGenre || filterFormat || filterStatus
+                    ? 'border-purple-500 text-purple-400'
+                    : 'border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20'
+                }`}
+                title="Filter"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden lg:block">Filter</span>
+                {(filterGenre || filterFormat || filterStatus) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {showFilter && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                    className="absolute top-full right-0 mt-2 w-72 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl overflow-hidden z-50"
+                  >
+                    <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
+                      <span className="font-bold text-sm">Filter Anime</span>
+                      <button onClick={clearFilters} className="text-xs text-[var(--text-muted)] hover:text-white">Clear All</button>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      {/* Genre */}
+                      <div>
+                        <p className="text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Genre</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {GENRES.map(g => (
+                            <button key={g} onClick={() => setFilterGenre(filterGenre === g ? '' : g)}
+                              className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${
+                                filterGenre === g ? 'bg-purple-600 text-white' : 'bg-[var(--bg-main)] text-[var(--text-muted)] hover:text-white'
+                              }`}>{g}</button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Format */}
+                      <div>
+                        <p className="text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Format</p>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {FORMATS.map(f => (
+                            <button key={f} onClick={() => setFilterFormat(filterFormat === f ? '' : f)}
+                              className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
+                                filterFormat === f ? 'bg-blue-600 text-white' : 'bg-[var(--bg-main)] text-[var(--text-muted)] hover:text-white'
+                              }`}>{f}</button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Status */}
+                      <div>
+                        <p className="text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Status</p>
+                        <div className="flex gap-1.5">
+                          {STATUSES.map(s => (
+                            <button key={s} onClick={() => setFilterStatus(filterStatus === s ? '' : s)}
+                              className={`px-3 py-1 rounded text-xs font-semibold transition-colors flex items-center gap-1 ${
+                                filterStatus === s ? 'bg-[#FF5722] text-white' : 'bg-[var(--bg-main)] text-[var(--text-muted)] hover:text-white'
+                              }`}>
+                              {filterStatus === s ? <CheckCircle className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 border-t border-[var(--border-color)]">
+                      <button onClick={applyFilter} className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-lg transition-colors">
+                        Apply Filter
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Shuffle */}
+            <button onClick={handleShuffle} className="h-full px-3 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-sm hover:bg-white/5 transition-colors flex items-center justify-center text-[var(--text-muted)] hover:text-white" title="Random Anime">
+              <Shuffle className="w-4 h-4" />
+            </button>
+
+            {/* Suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden shadow-2xl z-50">
+              <div className="absolute top-full left-0 right-[105px] mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-sm overflow-hidden shadow-2xl z-50">
                 {suggestions.map((show) => (
-                  <Link
-                    key={show.id}
-                    href={`/watch/${show.id}`}
+                  <Link key={show.id} href={`/watch/${show.id}`}
                     className="w-full flex items-center gap-3 p-3 hover:bg-[var(--bg-main)] transition-colors text-left border-b border-[var(--border-color)] last:border-0"
                   >
-                    <img
-                      src={show.coverImage.medium}
-                      alt=""
-                      className="w-8 h-12 object-cover rounded bg-[var(--bg-main)]"
-                    />
+                    <img src={show.coverImage.medium} alt="" className="w-10 h-14 object-cover rounded-sm bg-[var(--bg-main)]" />
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-[var(--text-main)] truncate">
-                        {show.title.english || show.title.romaji}
-                      </h4>
-                      <p className="text-xs text-[var(--text-muted)] truncate">
-                        {show.seasonYear ? `${show.seasonYear} • ` : ''}{show.format}
-                      </p>
+                      <h4 className="text-sm font-semibold text-[var(--text-main)] truncate font-sora">{show.title.english || show.title.romaji}</h4>
+                      <p className="text-xs text-[var(--text-muted)] truncate mt-1">{show.seasonYear ? `${show.seasonYear} • ` : ''}{show.format}</p>
                     </div>
                   </Link>
                 ))}
@@ -223,76 +343,114 @@ export default function Home() {
             )}
           </div>
 
-          <div className="md:hidden flex-1 flex justify-end"></div>
+          {/* Right Icons */}
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
+            {/* Mobile search */}
+            <button className="md:hidden p-2 text-[var(--text-muted)] hover:text-white" onClick={() => setMenuOpen(true)}>
+              <Search className="w-5 h-5" />
+            </button>
 
-          <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium text-[var(--text-muted)]">
-            <button className="hover:text-[var(--text-main)] transition-colors hidden sm:block" onClick={clearSearch}>Home</button>
-            <Link href="/movies" className="hover:text-blue-400 transition-colors hidden sm:block">Movies</Link>
-            <button className="hover:text-purple-400 transition-colors text-[var(--text-main)]" onClick={() => setMenuOpen(true)}>About</button>
+            {/* Notifications */}
+            <div ref={notifRef} className="relative">
+              <button
+                onClick={() => { setShowNotifications(v => !v); setShowFilter(false); }}
+                className={`p-2 relative transition-colors hidden sm:flex items-center justify-center rounded-lg hover:bg-[var(--bg-card)] ${
+                  showNotifications ? 'text-white bg-[var(--bg-card)]' : 'text-[var(--text-muted)] hover:text-white'
+                }`}
+              >
+                <Bell className="w-5 h-5" />
+                {hasNewNotif && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-overlay)]" />}
+              </button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                    className="absolute top-full right-0 mt-2 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl overflow-hidden z-50"
+                  >
+                    <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
+                      <span className="font-bold text-sm flex items-center gap-2"><Bell className="w-4 h-4 text-purple-400" />Notifications</span>
+                      <Link href="/schedule" onClick={() => setShowNotifications(false)} className="text-xs text-purple-400 hover:text-purple-300">View Schedule</Link>
+                    </div>
+                    <div className="p-3 space-y-2">
+                      {(trending.slice(0,4) || []).map((show, i) => (
+                        <Link key={`${show._id}-notif-${i}`} href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`}
+                          onClick={() => setShowNotifications(false)}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--bg-main)] transition-colors group"
+                        >
+                          <div className="w-10 h-14 rounded overflow-hidden shrink-0 bg-[var(--bg-main)]">
+                            {show.thumbnail && <img src={show.thumbnail} alt={show.name} className="w-full h-full object-cover" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold line-clamp-1 group-hover:text-white transition-colors">{show.name}</p>
+                            <p className="text-[10px] text-[#FF5722] font-bold mt-0.5 flex items-center gap-1">
+                              <Zap className="w-2.5 h-2.5" /> Trending Now
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                      <Link href="/schedule" onClick={() => setShowNotifications(false)}
+                        className="flex items-center gap-2 w-full mt-1 p-2 rounded-lg bg-purple-600/10 hover:bg-purple-600/20 transition-colors text-purple-400 text-xs font-bold"
+                      >
+                        <Calendar className="w-4 h-4" /> View Full Airing Schedule
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </nav>
 
       <div className="pt-20 md:pt-24 relative z-10 pb-24 md:pb-0">
 
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl md:text-2xl font-bold">Search Results for "{searchQuery}"</h2>
-              <button onClick={clearSearch} className="text-sm text-purple-400 hover:text-purple-300">Clear</button>
-            </div>
-            <AnimeGrid shows={searchResults} />
-          </div>
-        )}
-
-        {/* Hero Carousel Section */}
-        {searchResults.length === 0 && (
-          <>
             <HeroCarousel />
 
-            <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-12">
-
-              {/* Watchlist Section */}
-              <WatchlistSection />
-
-              {/* A-Z Filter Bar */}
-              <section>
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="w-1 h-5 bg-purple-500 rounded-full"></span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">Browse by Letter</h3>
-                </div>
-                <AZFilter />
-              </section>
-
-              {/* Trending Now (Ranked) */}
-              <section>
-                <SectionHeader icon={TrendingUp} title="Trending Now" />
-                {(loading as any).trending ? <LoadingSkeleton /> : <AnimeGridRanked shows={trending.slice(0, 15)} />}
-              </section>
-
-              {/* Top Airing */}
-              <section>
-                <SectionHeader icon={Star} title="Top Airing" />
-                {loading.popular ? <LoadingSkeleton /> : <AnimeGrid shows={popular.slice(0, 15)} />}
-              </section>
-
-              {/* Top Anime (All Time) */}
-              <section>
-                <SectionHeader icon={Trophy} title="Top Anime" />
-                {loading.top ? <LoadingSkeleton /> : <AnimeGrid shows={top.slice(0, 15)} />}
-              </section>
-
-              {/* Latest Releases */}
-              <section>
-                <SectionHeader icon={Clock} title="Latest Releases" />
-                {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 15)} />}
-              </section>
-
+            {/* Genre Bar */}
+            <div className="bg-[var(--bg-card)] border-y border-[var(--border-color)]">
+               <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-3 flex gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
+                   {["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"].map(genre => (
+                       <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
+                   ))}
+               </div>
             </div>
-          </>
-        )}
 
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8 flex flex-col lg:flex-row gap-6 md:gap-8">
+                {/* Left Column (Main Content) */}
+                <div className="flex-1 space-y-10 min-w-0">
+                    <section>
+                       <div className="flex items-center justify-between mb-6">
+                         <h2 className="text-xl md:text-2xl font-bold font-sora text-white">Recently Updated</h2>
+                         <Link href="/recent" className="text-sm text-[var(--text-muted)] hover:text-white transition-colors">View All &gt;</Link>
+                       </div>
+                       {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 24)} />}
+                    </section>
+                </div>
+
+                {/* Right Column (Sidebar) */}
+                <div className="w-full lg:w-[320px] xl:w-[350px] space-y-10 shrink-0">
+                    {/* Top Airing */}
+                    <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
+                       <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
+                         <Star className="w-5 h-5 text-[#FF5722]" /> 
+                         Top Airing
+                       </h2>
+                       {loading.popular ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{popular.slice(0, 10).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} rank={i} />)}</div>}
+                    </section>
+
+                    {/* Trending */}
+                    <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
+                       <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
+                         <TrendingUp className="w-5 h-5 text-purple-500" /> 
+                         Trending Right Now
+                       </h2>
+                       {(loading as any).trending ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{trending.slice(0, 10).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} rank={i} />)}</div>}
+                    </section>
+                </div>
+            </div>
       </div>
 
       {/* Scroll to Top */}
@@ -411,7 +569,17 @@ function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
       {[...Array(10)].map((_, i) => (
-        <div key={i} className="aspect-[3/4.5] rounded-xl bg-[var(--bg-card)] animate-pulse border border-[var(--border-color)]"></div>
+        <div key={i} className="aspect-[3/4.5] rounded-sm bg-[var(--bg-card)] animate-pulse border border-[var(--border-color)]"></div>
+      ))}
+    </div>
+  );
+}
+
+function SidebarLoadingSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="w-full h-20 bg-[var(--bg-card)] animate-pulse rounded-md"></div>
       ))}
     </div>
   );

@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import MobileNav from "@/components/MobileNav";
 import MobileModals from "@/components/MobileModals";
+import DesktopSidebar from "@/components/DesktopSidebar";
 import { MobileUIProvider } from "@/context/MobileUIContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -56,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100dvh] bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30 overflow-x-hidden`}
+        className={`${sora.variable} ${inter.variable} font-inter antialiased min-h-[100dvh] bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30 overflow-x-hidden flex flex-col`}
         suppressHydrationWarning
       >
         <MobileUIProvider>
@@ -78,7 +79,10 @@ export default function RootLayout({
               })
             }}
           />
-          {children}
+          <DesktopSidebar />
+          <div className="flex-1 md:pl-[72px] w-full max-w-full">
+            {children}
+          </div>
           <MobileModals />
           <MobileNav />
           <Toaster

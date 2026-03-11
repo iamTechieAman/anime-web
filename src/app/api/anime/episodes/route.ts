@@ -94,31 +94,45 @@ export async function GET(request: Request) {
         // ==========================================
         const animeProvider = getProvider(provider);
         const info = await animeProvider.getInfo(id);
+        const mappedInfo = mapInfoToShow(info);
+
+        if (!mappedInfo || (mappedInfo.availableEpisodesDetail.sub.length === 0 && mappedInfo.availableEpisodesDetail.dub.length === 0)) {
+            throw new Error(`Provider ${provider} returned 0 episodes.`);
+        }
+
         return NextResponse.json({
             show: {
-                ...mapInfoToShow(info),
+                ...mappedInfo,
                 provider // Ensure the provider used is returned
             }
         });
 
     } catch (error: any) {
-        console.error(`[Episodes] Provider ${provider} failed:`, error.message);
+        console.error(`[Episodes] Provider ${provider} failed: ${error.message}`);
 
-        // Fallback Chain: Anikai -> AllAnime -> HiAnime (for non-numeric IDs)
-        if (!providerParam) {
-            const fallbackChain: ProviderName[] = ["allanime", "hianime"];
+        // Fallback Chain (if explicit provider wasn't strictly requested, or even if it was but failed, we should try to recover)
+        const fallbackChain: ProviderName[] = ["allanime", "hianime", "aniwatch"];
 
-            for (const fallback of fallbackChain) {
-                if (fallback === provider) continue;
+        for (const fallback of fallbackChain) {
+            if (fallback === provider) continue;
 
-                try {
-                    console.log(`[Episodes] Retrying with fallback: ${fallback}`);
-                    const fbProvider = getProvider(fallback);
-                    const info = await fbProvider.getInfo(id);
-                    return NextResponse.json({ show: mapInfoToShow(info) });
-                } catch (e: any) {
-                    console.log(`[Episodes] Fallback ${fallback} failed: ${e.message}`);
+            try {
+                console.log(`[Episodes] Retrying with fallback: ${fallback}`);
+                const fbProvider = getProvider(fallback);
+                const info = await fbProvider.getInfo(id);
+                const fbMappedInfo = mapInfoToShow(info);
+
+                if (fbMappedInfo && (fbMappedInfo.availableEpisodesDetail.sub.length > 0 || fbMappedInfo.availableEpisodesDetail.dub.length > 0)) {
+                    console.log(`[Episodes] Fallback ${fallback} succeeded!`);
+                    return NextResponse.json({ 
+                        show: {
+                            ...fbMappedInfo,
+                            provider: fallback
+                        } 
+                    });
                 }
+            } catch (e: any) {
+                console.log(`[Episodes] Fallback ${fallback} failed: ${e.message}`);
             }
         }
 
@@ -128,7 +142,7 @@ export async function GET(request: Request) {
         }
 
         return NextResponse.json(
-            { error: `Failed to fetch episodes: ${error.message}` },
+            { error: `Failed to fetch episodes across all providers.` },
             { status: 500 }
         );
     }

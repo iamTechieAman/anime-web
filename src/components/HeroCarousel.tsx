@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-import { Play, ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Clock, Calendar } from "lucide-react";
 import axios from "axios";
 
 interface Slide {
@@ -134,8 +134,8 @@ export default function HeroCarousel() {
 
     if (isLoading) {
         return (
-            <div className="relative w-full h-[500px] md:h-[600px] bg-[var(--bg-main)] flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="relative w-full aspect-video md:aspect-[21/9] min-h-[450px] md:max-h-[700px] bg-[var(--bg-main)] flex items-center justify-center border-b border-[var(--border-color)]">
+                <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -145,7 +145,7 @@ export default function HeroCarousel() {
     const activeSlide = slides[current];
 
     return (
-        <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden group bg-[var(--bg-main)]">
+        <div className="relative w-full aspect-video md:aspect-[21/9] min-h-[450px] md:max-h-[700px] overflow-hidden group bg-[var(--bg-main)]">
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={activeSlide.id}
@@ -177,9 +177,9 @@ export default function HeroCarousel() {
                             />
                         </div>
 
-                        {/* Gradient Overlay for Text Readability - Adjusted for Light Mode visibility */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent dark:via-[var(--bg-main)]/80" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent dark:via-[var(--bg-main)]/80" />
+                        {/* Gradient Overlay for Text Readability - JustAnime style (dark vignette) */}
+                        <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
+                        <div className="absolute inset-y-0 left-0 w-[70%] bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent" />
                     </div>
                 </motion.div>
             </AnimatePresence>
@@ -197,7 +197,7 @@ export default function HeroCarousel() {
                             className="max-w-2xl space-y-4 md:space-y-6"
                         >
                             {/* Title */}
-                            <h1 className="text-3xl md:text-5xl lg:text-5xl font-black leading-tight text-[var(--text-main)] drop-shadow-xl line-clamp-2">
+                            <h1 className="text-3xl md:text-5xl lg:text-5xl font-bold leading-tight text-white drop-shadow-xl line-clamp-2 gap-2 font-sora">
                                 {activeSlide.title}
                             </h1>
 
@@ -221,32 +221,27 @@ export default function HeroCarousel() {
                             </p>
 
                             {/* Stats Block */}
-                            <div className="flex items-center gap-6 md:gap-8 py-2">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] md:text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">Score</span>
-                                    <div className="flex items-center gap-1 text-[var(--text-main)]">
-                                        <span className="font-black text-lg">{activeSlide.rating}</span>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] md:text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">Release</span>
-                                    <span className="font-bold text-[var(--text-main)] text-lg">{activeSlide.release}</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] md:text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">Quality</span>
-                                    <span className="font-bold text-green-600 text-lg">{activeSlide.quality}</span>
-                                </div>
+                            <div className="flex items-center gap-3 md:gap-4 py-2 opacity-90">
+                                <span className="text-xs font-semibold text-white bg-white/10 px-2 py-0.5 rounded-sm backdrop-blur-md">
+                                    ⭐ {activeSlide.rating}
+                                </span>
+                                <span className="text-[12px] font-medium text-[var(--text-muted)] flex items-center gap-1.5">
+                                    <Clock className="w-3.5 h-3.5" /> 24m
+                                </span>
+                                <span className="text-[12px] font-medium text-[var(--text-muted)] flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5" /> {activeSlide.release}
+                                </span>
                             </div>
 
-                            <div className="flex items-center gap-4 pt-2">
+                            <div className="flex items-center gap-3 md:gap-4 pt-2">
                                 <Link href={activeSlide.link}>
-                                    <button className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-3.5 bg-[#FF5722] hover:bg-[#F4511E] text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(255,87,34,0.3)] hover:shadow-[0_0_30px_rgba(255,87,34,0.5)] active:scale-95 group-hover:animate-pulse">
-                                        <Play className="w-5 h-5 fill-current" />
+                                    <button className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-3.5 bg-white text-black hover:bg-white/90 font-bold rounded-full transition-all active:scale-95 group/btn">
+                                        <Play className="w-5 h-5 fill-current transition-transform group-hover/btn:scale-110" />
                                         WATCH NOW
                                     </button>
                                 </Link>
-                                <button className="p-3 md:p-3.5 bg-[var(--bg-card)] hover:bg-[var(--bg-main)] text-[var(--text-main)] rounded-lg border border-[var(--border-color)] transition-colors backdrop-blur-sm">
-                                    <Bookmark className="w-5 h-5" />
+                                <button className="flex items-center gap-2 px-6 py-3 md:py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full border border-white/10 transition-colors backdrop-blur-md">
+                                    Details <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
                         </motion.div>
@@ -255,24 +250,19 @@ export default function HeroCarousel() {
             </div>
 
             {/* Navigation Controls */}
-            <div className="absolute bottom-6 right-4 md:bottom-8 md:right-8 flex items-center gap-4 z-20">
-                {/* Slide Counter */}
-                <span className="text-xl md:text-2xl font-bold text-[var(--text-main)]/20 select-none font-mono">
-                    {(current + 1).toString().padStart(2, '0')} <span className="text-base text-[var(--text-main)]/10">/ {slides.length.toString().padStart(2, '0')}</span>
-                </span>
-
-                <div className="flex gap-2">
+            <div className="absolute bottom-6 right-4 md:bottom-8 md:right-8 flex flex-col items-end gap-3 z-20">
+                <div className="flex items-center gap-1.5 p-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
                     <button
                         onClick={prevSlide}
-                        className="p-2 md:p-3 bg-[var(--bg-card)]/40 hover:bg-[#FF5722] text-[var(--text-main)] hover:text-white rounded-full backdrop-blur-md border border-[var(--border-color)] transition-all active:scale-90"
+                        className="p-2 md:p-2.5 hover:bg-white/10 text-white rounded-full transition-all active:scale-90"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                     <button
                         onClick={nextSlide}
-                        className="p-2 md:p-3 bg-[var(--bg-card)]/40 hover:bg-[#FF5722] text-[var(--text-main)] hover:text-white rounded-full backdrop-blur-md border border-[var(--border-color)] transition-all active:scale-90"
+                        className="p-2 md:p-2.5 hover:bg-white/10 text-white rounded-full transition-all active:scale-90"
                     >
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                 </div>
             </div>

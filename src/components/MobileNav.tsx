@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Search, Menu, Film } from "lucide-react";
+import { Home, Search, Menu, Film, Calendar, Clock } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -13,6 +13,11 @@ export default function MobileNav() {
 
     const [isScrolledDown, setIsScrolledDown] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Hide nav on scroll down, show on scroll up (app-like feel)
     useEffect(() => {
@@ -30,12 +35,6 @@ export default function MobileNav() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [lastScrollY]);
 
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
     // Handle Home Click
     const handleHomeClick = () => {
         if (pathname === '/') {
@@ -48,10 +47,51 @@ export default function MobileNav() {
     };
 
     if (!isMounted) return null;
-    // Only show on mobile
-    if (typeof window !== "undefined" && window.innerWidth >= 768) {
-        return null;
-    }
+
+    const navItems = [
+        {
+            label: "Home",
+            icon: Home,
+            color: "text-purple-500",
+            active: pathname === '/' && !isSearchOpen && !isMenuOpen,
+            onClick: handleHomeClick,
+        },
+        {
+            label: "Movies",
+            icon: Film,
+            color: "text-blue-500",
+            active: pathname === '/movies' || pathname.startsWith('/movies/'),
+            onClick: () => { closeAll(); router.push('/movies'); },
+        },
+        {
+            label: "Schedule",
+            icon: Calendar,
+            color: "text-green-500",
+            active: pathname === '/schedule',
+            onClick: () => { closeAll(); router.push('/schedule'); },
+        },
+        {
+            label: "History",
+            icon: Clock,
+            color: "text-orange-500",
+            active: pathname === '/history',
+            onClick: () => { closeAll(); router.push('/history'); },
+        },
+        {
+            label: "Search",
+            icon: Search,
+            color: "text-purple-500",
+            active: isSearchOpen,
+            onClick: toggleSearch,
+        },
+        {
+            label: "Menu",
+            icon: Menu,
+            color: "text-purple-500",
+            active: isMenuOpen,
+            onClick: toggleMenu,
+        },
+    ];
 
     return (
         <div
@@ -62,42 +102,23 @@ export default function MobileNav() {
         ${isScrolledDown ? "translate-y-full" : "translate-y-0"}
       `}
         >
-            <div className="flex justify-around items-center h-16">
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleHomeClick}
-                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${pathname === '/' && !isSearchOpen && !isMenuOpen ? 'text-purple-500' : 'text-[var(--text-muted)]'}`}
-                >
-                    <Home className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Home</span>
-                </motion.button>
-
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => { closeAll(); router.push('/movies'); }}
-                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${pathname === '/movies' || pathname.startsWith('/movies/') ? 'text-blue-500' : 'text-[var(--text-muted)]'}`}
-                >
-                    <Film className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Movies</span>
-                </motion.button>
-
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={toggleSearch}
-                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${isSearchOpen ? 'text-purple-500' : 'text-[var(--text-muted)]'}`}
-                >
-                    <Search className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Search</span>
-                </motion.button>
-
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={toggleMenu}
-                    className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${isMenuOpen ? 'text-purple-500' : 'text-[var(--text-muted)]'}`}
-                >
-                    <Menu className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Menu</span>
-                </motion.button>
+            <div className="flex justify-around items-center h-16 px-1">
+                {navItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                        <motion.button
+                            key={item.label}
+                            whileTap={{ scale: 0.85 }}
+                            onClick={item.onClick}
+                            className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${
+                                item.active ? item.color : "text-[var(--text-muted)]"
+                            }`}
+                        >
+                            <Icon className={`${item.active ? "w-5 h-5" : "w-4 h-4"} transition-all`} />
+                            <span className="text-[9px] font-bold">{item.label}</span>
+                        </motion.button>
+                    );
+                })}
             </div>
         </div>
     );

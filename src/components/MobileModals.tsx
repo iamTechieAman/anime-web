@@ -3,11 +3,12 @@
 import { X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function MobileModals() {
     const { isMenuOpen, setMenuOpen, isSearchOpen, setSearchOpen, theme, toggleTheme } = useMobileUI();
     const pathname = usePathname();
+    const router = useRouter();
 
     const isMovies = pathname?.startsWith('/movies');
     const searchAction = isMovies ? "/movies/search" : "/search";
@@ -117,7 +118,15 @@ export default function MobileModals() {
                         <div className="flex items-center gap-4 py-4 border-b border-[var(--border-color)]">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                                <form action={searchAction} method="GET" onSubmit={() => setSearchOpen(false)}>
+                                <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const form = e.target as HTMLFormElement;
+                                    const input = form.elements.namedItem('query') as HTMLInputElement;
+                                    if (input.value.trim()) {
+                                        setSearchOpen(false);
+                                        router.push(`${searchAction}?query=${encodeURIComponent(input.value.trim())}`);
+                                    }
+                                }}>
                                     <input
                                         type="text"
                                         name="query"

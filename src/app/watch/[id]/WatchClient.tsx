@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useRef } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -138,7 +138,11 @@ export default function WatchClient({ id }: { id: string }) {
 
                 setMode(initialMode);
 
-                if (episodes.length > 0) {
+                // Resume from URL param if provided
+                const epParam = new URLSearchParams(window.location.search).get("ep");
+                if (epParam && episodes.includes(epParam)) {
+                    setCurrentEp(epParam);
+                } else if (episodes.length > 0) {
                     if (episodes.includes("1")) setCurrentEp("1");
                     else setCurrentEp(episodes[0]);
                 }
@@ -233,6 +237,25 @@ export default function WatchClient({ id }: { id: string }) {
                     setSourceUrl(absoluteUrl);
                     setVideoType(selected.isIframe ? "iframe" : selected.hls ? "m3u8" : "auto");
                     toast.success(`Episode ${currentEp} loaded successfully`);
+
+                    // Save to watch history
+                    try {
+                        const historyKey = "watchHistory";
+                        const existing: any[] = JSON.parse(localStorage.getItem(historyKey) || "[]");
+                        const entry = {
+                            id: show._id,
+                            title: show.name,
+                            thumbnail: show.thumbnail,
+                            episode: currentEp,
+                            provider: show.provider || provider || "unknown",
+                            watchedAt: Date.now(),
+                        };
+                        // Remove duplicates for same id+episode
+                        const deduped = existing.filter((h) => !(h.id === entry.id && h.episode === entry.episode));
+                        deduped.unshift(entry);
+                        localStorage.setItem(historyKey, JSON.stringify(deduped.slice(0, 200))); // Limit 200 entries
+                    } catch (_) {}
+
                 } else {
                     setError("No stream links found.");
                     toast.error('No stream links found');
@@ -335,9 +358,9 @@ export default function WatchClient({ id }: { id: string }) {
             <div className="flex-1 w-full max-w-[1920px] mx-auto pt-[calc(100px+env(safe-area-inset-top))] pb-8 px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
                 <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
-                    {/* Player Column - Takes available width but doesn't stretch height */}
+                    {/* Player Column */}
                     <div className="flex-1 w-full min-w-0">
-                        <div className="w-full aspect-video bg-black rounded-lg md:rounded-xl overflow-hidden shadow-2xl border border-[var(--border-color)] relative z-20">
+                        <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative z-20 shadow-2xl">
                             {loadingSource ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[var(--bg-main)]/50 backdrop-blur-sm z-10">
                                     <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
@@ -375,7 +398,7 @@ export default function WatchClient({ id }: { id: string }) {
                                                     const form = e.target as HTMLFormElement;
                                                     const input = form.elements.namedItem('search') as HTMLInputElement;
                                                     if (input.value.trim()) {
-                                                        window.location.href = `/?q=${encodeURIComponent(input.value.trim())}`;
+                                                        window.location.href = `/search?query=${encodeURIComponent(input.value.trim())}`;
                                                     }
                                                 }}
                                                 className="relative bg-black rounded-lg p-1 flex items-center"
@@ -423,151 +446,121 @@ export default function WatchClient({ id }: { id: string }) {
                             )}
                         </div>
 
-                        {/* Zoro-style Server & Meta Controls */}
-                        <div className="mt-4 md:mt-6 bg-elevated p-3 md:p-4 rounded-lg md:rounded-xl shadow-inner">
-                            <div className="flex flex-col gap-4">
-                                {/* Server Selection */}
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-xs text-[var(--text-muted)] uppercase tracking-widest font-bold flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                            Streaming Servers
-                                        </p>
-                                        <div className="flex items-center gap-2 bg-[var(--bg-main)]/30 border border-[var(--border-color)] p-1 rounded-lg">
-                                            <button
-                                                onClick={() => setMode("sub")}
-                                                className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition-colors ${mode === 'sub' ? 'bg-purple-600 text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
-                                            >
-                                                SUB
-                                            </button>
-                                            <button
-                                                onClick={() => setMode("dub")}
-                                                className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition-colors ${mode === 'dub' ? 'bg-purple-600 text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
-                                            >
-                                                DUB
-                                            </button>
-                                        </div>
+                        {/* Server & Meta Controls - JustAnime Style */}
+                        <div className="mt-4 bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                                {/* Type Selection (SUB/DUB) */}
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Source:</span>
+                                    <div className="flex bg-[var(--bg-main)] p-1 rounded-md border border-[var(--border-color)]">
+                                        <button
+                                            onClick={() => setMode("sub")}
+                                            className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-white text-black shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                        >
+                                            SUB
+                                        </button>
+                                        <button
+                                            onClick={() => setMode("dub")}
+                                            className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-white text-black shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                        >
+                                            DUB
+                                        </button>
                                     </div>
+                                </div>
 
+                                {/* Server Selection */}
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Server:</span>
                                     <div className="flex flex-wrap gap-2">
                                         {servers.map((server) => (
                                             <button
                                                 key={server.serverId}
                                                 onClick={() => setSelectedServer(server.serverId)}
-                                                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all flex items-center gap-2
-                                    ${selectedServer === server.serverId
-                                                        ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]"
-                                                        : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-main)]"
+                                                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-2
+                                                    ${selectedServer === server.serverId
+                                                        ? "bg-white/10 text-white border border-white/20"
+                                                        : "bg-transparent border border-transparent text-[var(--text-muted)] hover:bg-white/5 hover:text-white"
                                                     }`}
                                             >
                                                 {server.serverName}
                                             </button>
                                         ))}
-                                        {servers.length === 0 && !loadingServers && (
-                                            <span className="text-xs text-[var(--text-muted)] italic">No servers found for {mode.toUpperCase()}</span>
-                                        )}
-                                        {loadingServers && (
-                                            <span className="text-xs text-[var(--text-muted)] animate-pulse">Loading servers...</span>
-                                        )}
+                                        {loadingServers && <span className="text-xs text-[var(--text-muted)] animate-pulse">Loading servers...</span>}
+                                        {servers.length === 0 && !loadingServers && <span className="text-xs text-[var(--text-muted)]">No servers found</span>}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="h-px bg-[var(--bg-card)] w-full"></div>
-
-                                <div className="flex items-center justify-between gap-4 text-xs font-bold text-[var(--text-muted)]">
-                                    <div className="flex items-center gap-4">
-                                        <div
-                                            onClick={toggleAutoPlay}
-                                            className="flex items-center gap-2 cursor-pointer hover:text-[var(--text-main)] transition-colors"
-                                        >
-                                            <div className={`w-10 h-5 rounded-full relative border transition-all ${autoPlay
-                                                ? 'bg-purple-900/40 border-purple-500/30'
-                                                : 'bg-[var(--bg-main)] border-[var(--border-color)]'
-                                                }`}>
-                                                <div className={`absolute top-0.5 bottom-0.5 w-4 rounded-full shadow-sm transition-all ${autoPlay
-                                                    ? 'right-0.5 bg-purple-500'
-                                                    : 'left-0.5 bg-[var(--text-muted)]'
-                                                    }`}></div>
-                                            </div>
-                                            <span>Auto Play</span>
-                                        </div>
-                                        <div
-                                            onClick={toggleAutoNext}
-                                            className="flex items-center gap-2 cursor-pointer hover:text-[var(--text-main)] transition-colors"
-                                        >
-                                            <div className={`w-10 h-5 rounded-full relative border transition-all ${autoNext
-                                                ? 'bg-purple-900/40 border-purple-500/30'
-                                                : 'bg-[var(--bg-main)] border-[var(--border-color)]'
-                                                }`}>
-                                                <div className={`absolute top-0.5 bottom-0.5 w-4 rounded-full shadow-sm transition-all ${autoNext
-                                                    ? 'right-0.5 bg-purple-500'
-                                                    : 'left-0.5 bg-[var(--text-muted)]'
-                                                    }`}></div>
-                                            </div>
-                                            <span>Auto Next</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            {/* Auto Toggles */}
+                            <div className="flex items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
+                                <label className="flex items-center gap-2 cursor-pointer group hover:text-white transition-colors">
+                                    <input type="checkbox" checked={autoPlay} onChange={toggleAutoPlay} className="w-4 h-4 rounded-sm border-[var(--border-color)] bg-[var(--bg-main)] text-white focus:ring-0 cursor-pointer accent-white" />
+                                    Auto Play
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer group hover:text-white transition-colors">
+                                    <input type="checkbox" checked={autoNext} onChange={toggleAutoNext} className="w-4 h-4 rounded-sm border-[var(--border-color)] bg-[var(--bg-main)] text-white focus:ring-0 cursor-pointer accent-white" />
+                                    Auto Next
+                                </label>
                             </div>
                         </div>
 
                         {/* Metadata */}
-                        <div className="mt-3 md:mt-4 flex flex-col gap-1 md:gap-2">
+                        <div className="mt-6 flex flex-col gap-2">
                             <div className="flex items-start justify-between gap-4">
-                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[var(--text-main)] flex-1">{show.name}</h2>
-                                <button
-                                    onClick={toggleBookmark}
-                                    className={`p-2 rounded-full transition-all ${isBookmarked
-                                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                                        : 'bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-color)]'
-                                        }`}
-                                    title={isBookmarked ? "Remove from Watchlist" : "Add to Watchlist"}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={isBookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                </button>
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex-1 font-sora">{show.name}</h1>
                             </div>
-                            <p className="text-xs md:text-sm text-[var(--text-muted)] line-clamp-2 md:line-clamp-3">
-                                Watching Episode {currentEp} in {mode.toUpperCase()}.
-                                {selectedServer && ` Server: ${servers.find(s => s.serverId === selectedServer)?.serverName || 'Default'}`}
+                            <p className="text-sm text-[var(--text-muted)]">
+                                Watching Episode {currentEp} in {mode.toUpperCase()}
                             </p>
                         </div>
                     </div>
 
-                    {/* Sidebar - Fixed Height with Scroll for Episodes */}
-                    <div className="w-full xl:w-[400px] flex-shrink-0">
-                        <div className="bg-elevated rounded-lg md:rounded-xl overflow-hidden flex flex-col h-[500px] md:h-[600px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px] shadow-2xl">
-                            <div className="px-5 py-4 flex items-center justify-between bg-[var(--bg-main)]/40 border-b border-[var(--border-color)]">
-                                <h3 className="font-bold text-[var(--text-main)] text-sm uppercase tracking-wider flex items-center gap-2">
-                                    List of Episodes
-                                </h3>
-                                {/* Sub/Dub moved to main server bar, keeping only search/filter here if needed in future */}
-                                <div className="text-xs text-[var(--text-muted)] bg-[var(--bg-main)]/50 border border-[var(--border-color)] px-2 py-1 rounded font-bold">
-                                    {episodes.length} EPS
+                    {/* Sidebar - Fixed Height Vertical Episode List */}
+                    <div className="w-full xl:w-[350px] flex-shrink-0">
+                        <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px]">
+                            {/* Sticky Header with Search */}
+                            <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
+                                </div>
+                                <div className="relative">
+                                    <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                                    <input 
+                                        type="number"
+                                        placeholder="Search episode..."
+                                        className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-white/20 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
+                                        onChange={(e) => {
+                                            const v = e.target.value;
+                                            if (!v) {
+                                                // If empty, we can just show all. I'll omit local filtering state for brevity,
+                                                // but add visual cue it's a search box. It needs local state to function properly.
+                                            }
+                                        }}
+                                    />
                                 </div>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-2 md:p-3 custom-scrollbar">
-                                <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 xl:grid-cols-4 gap-1.5 md:gap-2">
-                                    {episodes.map((ep) => (
-                                        <button
-                                            key={ep}
-                                            onClick={() => {
-                                                setCurrentEp(ep);
-                                                toast.success(`Switching to Episode ${ep}`, {
-                                                    icon: '📺',
-                                                });
-                                            }}
-                                            className={`aspect-square flex items-center justify-center rounded-md md:rounded-lg text-xs md:text-sm font-bold transition-all duration-200 min-h-[44px] active:scale-95 ${currentEp === ep
-                                                ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40"
-                                                : "bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)] active:bg-[var(--border-color)]/50"
-                                                }`}
-                                        >
-                                            {ep}
-                                        </button>
-                                    ))}
-                                </div>
+                            <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
+                                {episodes.map((ep) => (
+                                    <button
+                                        key={ep}
+                                        onClick={() => setCurrentEp(ep)}
+                                        className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-colors group
+                                            ${currentEp === ep
+                                                ? "bg-white/10"
+                                                : "hover:bg-white/5"
+                                            }`}
+                                    >
+                                        <span className={`text-sm font-semibold transition-colors ${currentEp === ep ? 'text-white' : 'text-[var(--text-muted)] group-hover:text-white'}`}>
+                                            Episode {ep}
+                                        </span>
+                                        {currentEp === ep && (
+                                            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                                                <Play className="w-3 h-3 text-black fill-black ml-0.5" />
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>

@@ -15,11 +15,10 @@
 }
 
 .dark {
-  /* Dark Mode (Premium OLED Black) */
-  --bg-main: #000000;
-  --bg-card: #09090b;
-  /* Zinc-950 */
-  --bg-overlay: rgba(9, 9, 11, 0.8);
+  /* Dark Mode (Premium OLED Black - justanime.to style) */
+  --bg-main: #0a0a0a;
+  --bg-card: #171717;
+  --bg-overlay: rgba(10, 10, 10, 0.8);
   --text-main: #fafafa;
   --text-muted: #a1a1aa;
   --border-color: rgba(255, 255, 255, 0.1);
@@ -33,6 +32,8 @@
   --color-muted: var(--text-muted);
   --color-border: var(--border-color);
   --color-accent: var(--accent);
+  --font-sora: var(--font-sora), sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
 }
 
 body {
