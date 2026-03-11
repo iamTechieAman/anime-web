@@ -19,67 +19,53 @@ const SERVERS = [
             type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
     },
     {
-        id: "embed",
-        name: "Embed",
-        badge: "Recommended",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}` : `https://embed.su/embed/movie/${id}`,
-    },
-    {
         id: "vidlink",
         name: "VidLink",
-        badge: null,
+        badge: "Recommended",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
     {
-        id: "embedmaster",
-        name: "EmbedMaster",
-        badge: "Fallback",
+        id: "vidsrc_me",
+        name: "VidSrc US",
+        badge: "Fast",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}` : `https://embedmaster.link/movie/${id}`,
+            type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    },
+    {
+        id: "vidsrc_pro",
+        name: "VidSrc Pro",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pro/embed/movie/${id}`,
+    },
+    {
+        id: "superembed",
+        name: "SuperEmbed",
+        badge: "Stable",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     },
     {
         id: "autoembed",
         name: "AutoEmbed",
-        badge: "Stable",
+        badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://player.autoembed.cc/embed/tv/${id}/${s || 1}/${e || 1}` : `https://player.autoembed.cc/embed/movie/${id}`,
     },
     {
-        id: "vidsrc_net",
-        name: "VidSrc",
+        id: "smashy",
+        name: "SmashyStream",
         badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
+            type === "tv" ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
     },
     {
         id: "vidfast",
         name: "VidFast",
-        badge: "Fast",
+        badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}` : `https://vidfast.pro/movie/${id}`,
-    },
-    {
-        id: "vidify",
-        name: "Vidify",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://player.vidify.top/embed/tv/${id}/${s || 1}/${e || 1}` : `https://player.vidify.top/embed/movie/${id}`,
-    },
-    {
-        id: "vidrock",
-        name: "VidRock",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidrock.net/tv/${id}/${s || 1}/${e || 1}` : `https://vidrock.net/movie/${id}`,
-    },
-    {
-        id: "multiembed",
-        name: "Multi",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/?video_id=${id}&tmdb=1`,
     },
 ];
 
