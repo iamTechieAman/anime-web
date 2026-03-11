@@ -49,26 +49,42 @@ export default function HeroCarousel() {
     const processSlides = async (rawSlides: any[]) => {
         console.log("[HeroCarousel] Processing slides from SWR...");
         try {
-            const formattedSlides: Slide[] = await Promise.all(rawSlides.map(async (item: any) => {
+            const idsToFetch = rawSlides
+                .map(item => item.extra?.aniListId)
+                .filter(id => id != null);
+
+            let anilistDataMap = new Map();
+
+            if (idsToFetch.length > 0) {
+                try {
+                    const alRes = await axios.post('https://graphql.anilist.co', {
+                        query: `query($ids: [Int]) { Page(page: 1, perPage: 50) { media(id_in: $ids) { id bannerImage coverImage{extraLarge} averageScore seasonYear genres format } } }`,
+                        variables: { ids: idsToFetch }
+                    });
+                    
+                    const mediaList = alRes.data?.data?.Page?.media || [];
+                    mediaList.forEach((media: any) => {
+                        anilistDataMap.set(media.id, media);
+                    });
+                } catch (e) {
+                    console.error("Batched AniList fetch failed:", e);
+                }
+            }
+
+            const formattedSlides: Slide[] = rawSlides.map((item: any) => {
                 let image = item.image;
                 let cover = item.extra?.cover;
                 let banner = null;
                 let rating = "?";
                 let year = "2026"; // Dynamic year ideally
 
-                // If we have AniList ID, fetch high-res metadata
-                if (item.extra?.aniListId) {
-                    try {
-                        const alRes = await axios.post('https://graphql.anilist.co', {
-                            query: `query($id: Int) { Media(id:$id) { bannerImage coverImage{extraLarge} averageScore seasonYear genres format } }`,
-                            variables: { id: item.extra.aniListId }
-                        });
-                        const media = alRes.data.data.Media;
-                        banner = media.bannerImage;
-                        cover = media.coverImage.extraLarge;
-                        if (media.averageScore) rating = `${media.averageScore}%`;
-                        if (media.seasonYear) year = media.seasonYear.toString();
-                    } catch (e) { /* ignore */ }
+                const alId = item.extra?.aniListId;
+                if (alId && anilistDataMap.has(alId)) {
+                    const media = anilistDataMap.get(alId);
+                    banner = media.bannerImage;
+                    cover = media.coverImage?.extraLarge || cover;
+                    if (media.averageScore) rating = `${media.averageScore}%`;
+                    if (media.seasonYear) year = media.seasonYear.toString();
                 }
 
                 return {
@@ -84,7 +100,7 @@ export default function HeroCarousel() {
                     type: "TV",
                     link: `/watch/${item.id}?provider=anikai`
                 };
-            }));
+            });
 
             const validSlides = formattedSlides.filter(s => s.image && !s.image.includes('undefined'));
             if (validSlides.length > 0) {
