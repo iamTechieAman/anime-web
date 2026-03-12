@@ -113,7 +113,7 @@ export default function WatchClient({ id }: { id: string }) {
 
     // Server State
     const [servers, setServers] = useState<any[]>([]);
-    const [selectedServer, setSelectedServer] = useState<string | null>(null);
+    const [selectedServer, setSelectedServer] = useState<string | null>("peachify");
     const [loadingServers, setLoadingServers] = useState(false);
 
     // Show loading and error states
@@ -121,6 +121,7 @@ export default function WatchClient({ id }: { id: string }) {
     const [loadingShow, setLoadingShow] = useState(true);
 
     const processingRef = useRef<string | null>(null);
+    const failedServersRef = useRef<Set<string>>(new Set());
 
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [tmdbId, setTmdbId] = useState<string | null>(null);
@@ -234,7 +235,7 @@ export default function WatchClient({ id }: { id: string }) {
         fetchShow();
     }, [id, provider]);
 
-    // Fetch TMDB ID for Movie Servers
+    // Fetch TMDB ID for Movie Servers - with retry and fallback
     useEffect(() => {
         if (!show?.name) return;
 
@@ -244,9 +245,14 @@ export default function WatchClient({ id }: { id: string }) {
                 const results = res.data.results;
                 if (results && results.length > 0) {
                     setTmdbId(results[0].id.toString());
+                } else {
+                    // Even without TMDB ID, set a fallback so movie servers still display
+                    console.warn("[WatchClient] No TMDB results, movie servers will use name-based search");
+                    setTmdbId("0"); // sentinel value — movie servers will still mount
                 }
             } catch (err) {
-                console.error("Failed to fetch TMDB ID", err);
+                console.error("Failed to fetch TMDB ID, using fallback", err);
+                setTmdbId("0"); // Always allow movie servers to show
             }
         };
 
@@ -256,58 +262,68 @@ export default function WatchClient({ id }: { id: string }) {
     // Fetch Servers when Episode/Mode Changes
     useEffect(() => {
         if (!show?._id) return;
+        // Reset failed servers when episode changes
+        failedServersRef.current = new Set();
+
+        const movieServersList = MOVIE_SERVERS.map(ms => ({
+            serverId: ms.id,
+            serverName: ms.name,
+            type: mode,
+            badge: ms.badge,
+            isMovieServer: true,
+            getUrl: ms.getUrl
+        }));
 
         const fetchServers = async () => {
             setLoadingServers(true);
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}`);
-                const validServers = res.data.servers.filter((s: any) => s.type === mode);
-                const allServers = [...validServers];
-                
-                if (tmdbId) {
-                    // Prepend movie servers to prioritize them
-                    allServers.unshift(...MOVIE_SERVERS.map(ms => ({
-                        serverId: ms.id,
-                        serverName: ms.name,
-                        type: mode,
-                        badge: ms.badge,
-                        isMovieServer: true,
-                        getUrl: ms.getUrl
-                    })));
-                }
+                const validServers = (res.data.servers || []).filter((s: any) => s.type === mode);
+                // Always prepend movie servers — they are the most reliable
+                const allServers = [...movieServersList, ...validServers];
 
                 setServers(allServers);
 
-                // If current selectedServer is not in the new valid list, reset it or select first
+                // Default to ToonPlayer-VIP (peachify) if available
                 if (allServers.length > 0) {
-                    const exists = allServers.find((s: any) => s.serverId === selectedServer);
-                    if (!exists) {
-                        setSelectedServer(allServers[0].serverId);
+                    const peachify = allServers.find((s: any) => s.serverId === "peachify");
+                    const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
+                    if (!currentExists) {
+                        setSelectedServer(peachify ? "peachify" : allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);
                 }
             } catch (err) {
-                console.error("Failed to fetch servers", err);
-                setServers(tmdbId ? MOVIE_SERVERS.map(ms => ({
-                        serverId: ms.id,
-                        serverName: ms.name,
-                        type: mode,
-                        badge: ms.badge,
-                        isMovieServer: true,
-                        getUrl: ms.getUrl
-                    })) : []);
+                console.error("Failed to fetch anime servers, using movie servers only", err);
+                // Always show movie servers even if anime API fails
+                setServers(movieServersList);
+                const peachify = movieServersList.find(s => s.serverId === "peachify");
+                setSelectedServer(peachify ? "peachify" : movieServersList[0]?.serverId || null);
             } finally {
                 setLoadingServers(false);
             }
         };
 
         fetchServers();
-    }, [currentEp, mode, show, tmdbId]);
+    }, [currentEp, mode, show]);
+
+    // Auto-switch to next server on failure
+    const autoSwitchServer = (failedServerId: string) => {
+        failedServersRef.current.add(failedServerId);
+        const nextServer = servers.find(s => !failedServersRef.current.has(s.serverId));
+        if (nextServer) {
+            toast(`Switching to ${nextServer.serverName}...`, { icon: '🔄' });
+            setSelectedServer(nextServer.serverId);
+        } else {
+            setError("All servers failed. Please try again later.");
+            toast.error("All servers failed");
+        }
+    };
 
     // Fetch Source
     useEffect(() => {
-        if (!show?.availableEpisodesDetail) return;
+        if (!show || !selectedServer || servers.length === 0) return;
 
         const fetchSource = async () => {
             // Include selectedServer in key to trigger re-fetch when it changes
@@ -315,12 +331,34 @@ export default function WatchClient({ id }: { id: string }) {
             if (processingRef.current === key) return;
             processingRef.current = key;
 
-            // Check if episode exists in current mode
-            if (show?.availableEpisodesDetail) {
+            const selectedServerObj = servers.find(s => s.serverId === selectedServer);
+            if (!selectedServerObj) return;
+
+            // For movie servers — always load iframe directly, skip episode check
+            if (selectedServerObj.isMovieServer) {
+                setLoadingSource(true);
+                setSourceUrl(null);
+                setError(null);
+
+                const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
+                const tmdbIdToUse = tmdbId && tmdbId !== "0" ? tmdbId : "0";
+                const iframeUrl = serverWithUrl.getUrl("tv", tmdbIdToUse, 1, parseInt(String(currentEp) || "1"));
+                setSourceUrl(iframeUrl);
+                setVideoType("iframe");
+                setLoadingSource(false);
+                toast.success(`EP ${currentEp} loaded on ${selectedServerObj.serverName}`);
+                processingRef.current = null;
+                return;
+            }
+
+            // For native anime servers — check episode availability
+            if (show.availableEpisodesDetail) {
                 const availableEps = show.availableEpisodesDetail[mode] || [];
                 if (!availableEps.includes(currentEp)) {
-                    setError(`Episode ${currentEp} not available in ${mode.toUpperCase()}.`);
-                    setLoadingSource(false);
+                    // Auto-switch to a movie server instead of showing error
+                    console.warn(`EP ${currentEp} not in ${mode}, auto-switching to movie server`);
+                    autoSwitchServer(selectedServer);
+                    processingRef.current = null;
                     return;
                 }
             }
@@ -329,28 +367,16 @@ export default function WatchClient({ id }: { id: string }) {
             setSourceUrl(null);
             setError(null);
 
-            const selectedServerObj = servers.find(s => s.serverId === selectedServer);
-
-            if (selectedServerObj?.isMovieServer && tmdbId) {
-                 const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
-                 const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
-                 setSourceUrl(iframeUrl);
-                 setVideoType("iframe");
-                 setLoadingSource(false);
-                 toast.success(`Episode ${currentEp} loaded successfully on ${selectedServerObj.serverName}`);
-                 return;
-            }
-
             try {
-                console.log('[WatchPage] Fetching source...');
+                console.log('[WatchPage] Fetching source from native server...');
                 const res = await axios.get(`/api/anime/source`, {
                     params: {
                         id,
                         ep: currentEp,
                         mode,
                         title: show.name,
-                        provider: show.provider || provider, // Pass provider
-                        serverId: selectedServer // Pass selected server
+                        provider: show.provider || provider,
+                        serverId: selectedServer
                     }
                 });
 
@@ -380,22 +406,21 @@ export default function WatchClient({ id }: { id: string }) {
                             provider: show.provider || provider || "unknown",
                             watchedAt: Date.now(),
                         };
-                        // Remove duplicates for same id+episode
                         const deduped = existing.filter((h) => !(h.id === entry.id && h.episode === entry.episode));
                         deduped.unshift(entry);
-                        localStorage.setItem(historyKey, JSON.stringify(deduped.slice(0, 200))); // Limit 200 entries
+                        localStorage.setItem(historyKey, JSON.stringify(deduped.slice(0, 200)));
                     } catch (_) {}
 
                 } else {
-                    setError("No stream links found.");
-                    toast.error('No stream links found');
+                    // No links found — auto-switch to next server
+                    console.warn('[WatchPage] No links from native server, auto-switching...');
+                    autoSwitchServer(selectedServer);
                 }
             } catch (err: any) {
                 if (processingRef.current !== key) return;
-                console.error(err);
-                const errorMsg = err.response?.data?.error || "Failed to load stream.";
-                setError(errorMsg);
-                toast.error(errorMsg);
+                console.error('[WatchPage] Native server failed:', err.message);
+                // Auto-switch instead of showing error
+                autoSwitchServer(selectedServer);
             } finally {
                 if (processingRef.current === key) {
                     setLoadingSource(false);
@@ -406,7 +431,7 @@ export default function WatchClient({ id }: { id: string }) {
 
         fetchSource();
 
-    }, [id, currentEp, mode, show, selectedServer, provider]);
+    }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
 
     const handleVideoEnded = () => {
         const currentEpNum = Number(currentEp);
