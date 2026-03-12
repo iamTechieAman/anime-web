@@ -200,7 +200,7 @@ export default function MoviesPage() {
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Top Navigation Bar — ToonPlayer Movies style */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
-                <div className="max-w-7xl mx-auto px-4 md:px-6">
+                <div className="w-full max-w-[2000px] mx-auto px-4 md:px-6">
                     <div className="flex items-center justify-between h-14">
                         {/* Logo */}
                         <div className="flex items-center gap-6">
@@ -296,7 +296,7 @@ export default function MoviesPage() {
             <div className="pt-[104px] md:pt-14">
                 {/* Search Results */}
                 {searchQuery.trim() ? (
-                    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+                    <div className="w-full max-w-[2000px] mx-auto px-4 md:px-6 py-8">
                         <h2 className="text-xl font-bold mb-6">
                             {isSearching ? (
                                 <span className="flex items-center gap-2">
@@ -324,7 +324,7 @@ export default function MoviesPage() {
                         <MovieHeroCarousel items={trending.length > 0 ? trending : popular} />
 
                         {/* Content Sections */}
-                        <div className="max-w-7xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
+                        <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
                             {/* Loading skeletons when data hasn't arrived */}
                             {trending.length === 0 && popular.length === 0 && (
                                 <div className="space-y-10">
@@ -423,7 +423,7 @@ export default function MoviesPage() {
 
             {/* Footer */}
             <footer className="border-t border-[var(--border-color)] py-8 px-4 mt-10">
-                <div className="max-w-7xl mx-auto text-center text-zinc-600 text-xs">
+                <div className="w-full max-w-[2000px] mx-auto text-center text-zinc-600 text-xs">
                     <p className="font-medium mb-1">
                         <span className="text-[var(--text-main)]">ToonPlayer</span>
                         <span className="text-[var(--text-muted)] ml-1">Movies</span>

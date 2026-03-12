@@ -132,14 +132,14 @@ export default function Home() {
 
             {/* Genre Bar */}
             <div className="bg-[var(--bg-card)] border-y border-[var(--border-color)]">
-               <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-2.5 flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
+               <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-2.5 flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
                    {["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"].map(genre => (
                        <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-xs sm:text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
                    ))}
                </div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
+            <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
                 {/* Left Column (Main Content) */}
                 <div className="flex-1 space-y-8 min-w-0">
                     <section>

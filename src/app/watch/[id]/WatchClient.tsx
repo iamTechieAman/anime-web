@@ -14,6 +14,14 @@ const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: 
 
 const MOVIE_SERVERS = [
     {
+        id: "onoflix",
+        name: "OnoFlix",
+        badge: null,
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://onoflix.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://onoflix.live/embed/movie/${id}`,
+    },
+    {
         id: "peachify",
         name: "ToonPlayer-VIP",
         badge: "Multi-Audio",
