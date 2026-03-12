@@ -1,8 +1,9 @@
 [build]
-  command = "npx next build"
+  command = "node_modules/.bin/next build"
   publish = ".next"
 
 [build.environment]
+  NEXT_PRIVATE_TURBOPACK = "false"
   NODE_OPTIONS = "--max-old-space-size=4096"
   NODE_VERSION = "22.16.0"
   NPM_FLAGS = "--legacy-peer-deps"
