@@ -43,3 +43,7 @@ android/
 
 # android builds
 *.apk
+
+# cloudflare opennext
+.open-next/
+.wrangler/
