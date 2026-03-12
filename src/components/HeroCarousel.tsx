@@ -208,14 +208,19 @@ export default function HeroCarousel() {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeSlide.id + "-content"}
-                            initial={{ y: 30, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -30, opacity: 0 }}
-                            transition={{ duration: 0.4 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
                             className="max-w-2xl"
                         >
-                            {/* Metadata Badges */}
-                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                            {/* Metadata Badges - Stagger 1 */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.4, delay: 0.1 }}
+                                className="flex flex-wrap items-center gap-2 mb-4"
+                            >
                                 <span className="bg-[#FF5722] text-white px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider">
                                     {activeSlide.type}
                                 </span>
@@ -228,20 +233,35 @@ export default function HeroCarousel() {
                                 <span className="text-xs font-bold text-white/70 flex items-center gap-1">
                                     <Calendar className="w-3.5 h-3.5" /> {activeSlide.release}
                                 </span>
-                            </div>
+                            </motion.div>
 
-                            {/* Title */}
-                            <h1 className="text-4xl md:text-6xl font-black leading-tight text-white mb-4 line-clamp-2 font-sora tracking-tighter">
+                            {/* Title - Stagger 2 */}
+                            <motion.h1
+                                initial={{ y: 25, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                                className="text-4xl md:text-6xl font-black leading-tight text-white mb-4 line-clamp-2 font-sora tracking-tighter"
+                            >
                                 {activeSlide.title}
-                            </h1>
+                            </motion.h1>
 
-                            {/* Description */}
-                            <p className="text-white/70 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-8 font-medium">
+                            {/* Description - Stagger 3 */}
+                            <motion.p
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.5, delay: 0.35 }}
+                                className="text-white/70 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-8 font-medium"
+                            >
                                 {activeSlide.description}
-                            </p>
+                            </motion.p>
 
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-3 md:gap-4">
+                            {/* Action Buttons - Stagger 4 */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="flex items-center gap-3 md:gap-4"
+                            >
                                 <Link href={activeSlide.link}>
                                     <button className="flex items-center gap-2.5 px-8 md:px-10 py-3.5 md:py-4 bg-white text-black hover:bg-white/90 font-black rounded-sm transition-all active:scale-95 group/btn shadow-[0_4px_20px_rgba(255,255,255,0.2)]">
                                         <Play className="w-5 h-5 fill-current" />
@@ -251,7 +271,7 @@ export default function HeroCarousel() {
                                 <button className="flex items-center gap-2.5 px-6 py-3.5 md:py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-sm border border-white/5 transition-all backdrop-blur-xl group/details">
                                     Details <ChevronRight className="w-4 h-4 transition-transform group-hover/details:translate-x-1" />
                                 </button>
-                            </div>
+                            </motion.div>
                         </motion.div>
                     </AnimatePresence>
                 </div>

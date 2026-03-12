@@ -101,6 +101,38 @@ const MOVIE_SERVERS = [
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
     },
+    {
+        id: "vidstream_anime",
+        name: "Vidstream",
+        badge: "Anime",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidstreaming.io/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidstreaming.io/embed/movie/${id}`,
+    },
+    {
+        id: "aniwave",
+        name: "AniWave",
+        badge: "HD",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidplay.online/e/${id}?season=${s || 1}&episode=${e || 1}` : `https://vidplay.online/e/${id}`,
+    },
+    {
+        id: "animex",
+        name: "AnimeX Stream",
+        badge: "Sub/Dub",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://anime.autoembed.cc/embed/${id}-episode-${e || 1}` : `https://anime.autoembed.cc/embed/${id}-episode-1`,
+    },
+    {
+        id: "animesauce",
+        name: "Anime Sauce",
+        badge: "Fast",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://animesauce.org/embed/tv/${id}/${s || 1}/${e || 1}` : `https://animesauce.org/embed/movie/${id}`,
+    },
 ];
 
 interface ShowData {
