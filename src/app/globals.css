@@ -99,3 +99,24 @@ html {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Page Transition Animation */
+.page-transition-wrapper {
+  animation: pageReveal 0.5s cubic-bezier(0.2, 0, 0.2, 1) both;
+}
+
+@keyframes pageReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Profile Icon Glow */
+.profile-glow {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}

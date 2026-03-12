@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, SlidersHorizontal, Bell, Play } from "lucide-react";
+import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import { useRef as useReactRef } from 'react';
 
 const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"];
 const FORMATS = ["TV", "Movie", "OVA", "ONA", "Special"];
@@ -34,6 +35,7 @@ export default function Header() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [hasNewNotif] = useState(true);
   const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
 
@@ -43,6 +45,7 @@ export default function Header() {
 
   const filterRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const q = searchParams?.get("query") || "";
@@ -53,6 +56,7 @@ export default function Header() {
     const handler = (e: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilter(false);
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifications(false);
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setShowProfileDropdown(false);
     };
     document.addEventListener('mousedown', handler);
 
@@ -138,13 +142,25 @@ export default function Header() {
     <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300 md:pl-[72px]">
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0" onClick={clearSearch}>
-          <div className="w-8 h-8 md:w-10 md:h-10 relative">
-            <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+        <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform" onClick={clearSearch}>
+          <div className="w-9 h-9 md:w-11 md:h-11 relative flex items-center justify-center">
+            <div className="absolute inset-0 bg-white/10 rounded-xl rotate-6 group-hover:rotate-12 transition-transform"></div>
+            <img 
+              src="/logo.png" 
+              alt="ToonPlayer Logo" 
+              className="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,255,255,0.5)]" 
+              onError={(e) => {
+                // Fallback icon if logo fails
+                e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=TP&backgroundColor=a855f7';
+              }}
+            />
           </div>
-          <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]">
-            ToonPlayer
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] leading-tight">
+              ToonPlayer
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-purple-400/80 -mt-0.5 ml-0.5">Premium</span>
+          </div>
         </Link>
 
         {/* Search Bar + Filter */}
@@ -303,17 +319,61 @@ export default function Header() {
             </AnimatePresence>
           </div>
 
-          <div className="flex items-center gap-3">
-            {profile && (
-              <span className="hidden md:inline-block text-sm font-bold text-[var(--text-muted)]">
-                Hi, {profile.name}
-              </span>
-            )}
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 p-[2px] transition-transform hover:scale-105 cursor-pointer">
-              <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
-                 <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" />
+          <div ref={profileRef} className="relative">
+            <button 
+              onClick={() => setShowProfileDropdown(v => !v)}
+              className="flex items-center gap-3 p-1 pr-3 hover:bg-[var(--bg-card)] rounded-full transition-all border border-transparent hover:border-[var(--border-color)] group"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-purple-500/20">
+                <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
+                  <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
+                </div>
               </div>
-            </div>
+              <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 ${showProfileDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {showProfileDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  className="absolute top-full right-0 mt-3 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+                >
+                  <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
+                    <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Account</p>
+                    <p className="text-sm font-bold text-white truncate">{profile?.name || "Guest Account"}</p>
+                  </div>
+                  <div className="p-2">
+                    <Link href="/history" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                        <HistoryIcon className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-white">Watch History</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Continue where you left off</p>
+                      </div>
+                    </Link>
+                    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                        <User className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-bold text-white">Profile Settings</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Customize your experience</p>
+                      </div>
+                    </button>
+                    <div className="my-2 border-t border-[var(--border-color)] mx-2" />
+                    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl transition-colors group text-red-400">
+                      <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                        <LogOut className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-bold">Sign Out</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

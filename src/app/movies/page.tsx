@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp } from "lucide-react";
+import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp, SlidersHorizontal, User, History, LogOut } from "lucide-react";
 import MovieHeroCarousel from "@/components/MovieHeroCarousel";
 import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
 
@@ -54,6 +54,7 @@ export default function MoviesPage() {
     const [showSearch, setShowSearch] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+    const [showProfile, setShowProfile] = useState(false);
 
     // Fetch user profile
     useEffect(() => {
@@ -227,18 +228,43 @@ export default function MoviesPage() {
                             </a>
 
                             {/* Desktop tabs */}
-                            <div className="hidden md:flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1">
                                 {TABS.map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
-                                            ? "bg-blue-500/15 text-blue-400"
-                                            : "text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-card)]"
+                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.id
+                                            ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                                            : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
                                             }`}
                                     >
                                         <tab.icon className="w-4 h-4" />
                                         {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Filter Bar */}
+                        <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md">
+                            <span className="text-[10px] items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md uppercase tracking-wider font-black text-[var(--text-muted)] flex shrink-0">
+                                <SlidersHorizontal className="w-3 h-3" />
+                                Genres
+                            </span>
+                            <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar max-w-2xl px-2">
+                                {GENRE_ROWS.map((g) => (
+                                    <button
+                                        key={g.genreId}
+                                        onClick={() => {
+                                            // Scroll to the row or filter search
+                                            const element = document.getElementById(`genre-${g.genreId}`);
+                                            if (element) {
+                                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            }
+                                        }}
+                                        className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white transition-all whitespace-nowrap"
+                                    >
+                                        {g.title}
                                     </button>
                                 ))}
                             </div>
@@ -280,18 +306,62 @@ export default function MoviesPage() {
                                 {showSearch ? <X className="w-5 h-5 text-[var(--text-main)]" /> : <Search className="w-5 h-5 text-[var(--text-main)]" />}
                             </button>
                             
-                            {/* Profile Avatar */}
-                            {profile && (
-                                <span className="hidden md:inline-block text-sm font-bold text-[var(--text-muted)] ml-2">
-                                    Hi, {profile.name}
-                                </span>
-                            )}
-                            <div className="flex items-center gap-3 ml-2 border-l border-[var(--border-color)] pl-3 md:pl-4">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-[2px] transition-transform hover:scale-105 cursor-pointer flex-shrink-0 shadow-lg shadow-blue-500/20">
-                                    <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
-                                        <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
+                            {/* Profile Section */}
+                            <div className="relative">
+                                <button 
+                                    onClick={() => setShowProfile(!showProfile)}
+                                    className="flex items-center gap-3 p-1 pr-3 hover:bg-white/5 rounded-full transition-all border border-transparent hover:border-white/10 group ml-2"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-blue-500/20 flex-shrink-0">
+                                        <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
+                                            <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
+                                        </div>
                                     </div>
-                                </div>
+                                    <ChevronUp className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 hidden md:block ${showProfile ? 'rotate-180' : 'rotate-180 opacity-50'}`} />
+                                </button>
+
+                                <AnimatePresence>
+                                    {showProfile && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                            className="absolute top-full right-0 mt-3 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+                                        >
+                                            <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
+                                                <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Account</p>
+                                                <p className="text-sm font-bold text-white truncate">{profile?.name || "Guest Account"}</p>
+                                            </div>
+                                            <div className="p-2">
+                                                <Link href="/history" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
+                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                                                        <History className="w-4 h-4 text-blue-400" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-bold text-white">Watch History</p>
+                                                        <p className="text-[10px] text-[var(--text-muted)]">Continue watching</p>
+                                                    </div>
+                                                </Link>
+                                                <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
+                                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                                                        <User className="w-4 h-4 text-indigo-400" />
+                                                    </div>
+                                                    <div className="flex-1 text-left">
+                                                        <p className="text-sm font-bold text-white">Settings</p>
+                                                        <p className="text-[10px] text-[var(--text-muted)]">Manage account</p>
+                                                    </div>
+                                                </button>
+                                                <div className="my-2 border-t border-[var(--border-color)] mx-2" />
+                                                <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl transition-colors group text-red-400">
+                                                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                                                        <LogOut className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="text-sm font-bold">Sign Out</span>
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     </div>

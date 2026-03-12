@@ -295,6 +295,39 @@ export default function WatchClient({ id }: { id: string }) {
             getUrl: ms.getUrl
         })) : [];
 
+        // Emergency AniList ID-based embeds — ALWAYS available since we always have the show ID
+        const anilistId = show?.aniListId || show?._id || id;
+        const malId = show?.malId || "";
+        const emergencyEmbeds = [
+            {
+                serverId: "emergency_vidsrc",
+                serverName: "VidSrc Anime",
+                type: mode,
+                badge: "Anime",
+                isMovieServer: true,
+                isEmergency: true,
+                getUrl: () => `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${currentEp}`
+            },
+            {
+                serverId: "emergency_2embed_anime",
+                serverName: "2Embed Anime",
+                type: mode,
+                badge: "Backup",
+                isMovieServer: true,
+                isEmergency: true,
+                getUrl: () => `https://2anime.xyz/embed/${anilistId}-episode-${currentEp}`
+            },
+            ...(malId ? [{
+                serverId: "emergency_mal",
+                serverName: "MAL Stream",
+                type: mode,
+                badge: "MAL",
+                isMovieServer: true,
+                isEmergency: true,
+                getUrl: () => `https://vidsrc.me/embed/anime?mal=${malId}&episode=${currentEp}`
+            }] : []),
+        ];
+
         const fetchServers = async () => {
             setLoadingServers(true);
             try {
@@ -302,26 +335,28 @@ export default function WatchClient({ id }: { id: string }) {
                 const nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
                 
                 // ALWAYS include movie servers — they are the guaranteed fallback
-                const allServers = [...nativeServers, ...movieServersList];
+                const allServers = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
 
                 setServers(allServers);
 
-                // Default to ToonPlayer VIP for guaranteed playback, native servers as alternatives
+                // Default to first native server if available, else ToonPlayer VIP, else emergency
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists) {
+                        const firstNative = nativeServers[0];
                         const peachify = allServers.find((s: any) => s.serverId === "peachify");
-                        setSelectedServer(peachify?.serverId || allServers[0].serverId);
+                        setSelectedServer(firstNative?.serverId || peachify?.serverId || allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);
                 }
             } catch (err) {
-                console.error("Failed to fetch anime servers, using movie servers as fallback", err);
-                // Always show movie servers even if native API completely fails
-                setServers(movieServersList);
-                const peachify = movieServersList.find(s => s.serverId === "peachify");
-                setSelectedServer(peachify?.serverId || movieServersList[0]?.serverId || null);
+                console.error("Failed to fetch anime servers, using all fallbacks", err);
+                // Always show movie servers + emergency embeds even if native API completely fails
+                const fallbackList = [...movieServersList, ...emergencyEmbeds];
+                setServers(fallbackList);
+                const peachify = fallbackList.find(s => s.serverId === "peachify");
+                setSelectedServer(peachify?.serverId || fallbackList[0]?.serverId || null);
             } finally {
                 setLoadingServers(false);
             }
@@ -379,22 +414,29 @@ export default function WatchClient({ id }: { id: string }) {
             const selectedServerObj = servers.find(s => s.serverId === selectedServer);
             if (!selectedServerObj) return;
 
-            // For movie servers — load iframe directly
+            // For movie/emergency servers — load iframe directly
             if (selectedServerObj.isMovieServer) {
                 setLoadingSource(true);
                 setSourceUrl(null);
                 setError(null);
 
-                const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
-                // Guard: never generate an embed URL with ID "0"
-                if (!tmdbId || tmdbId === "0") {
-                    console.warn('[WatchClient] No valid TMDB ID, skipping movie server');
-                    autoSwitchServer(selectedServer);
-                    processingRef.current = null;
-                    return;
+                const serverWithUrl = selectedServerObj as any;
+                
+                // If it's an emergency server, it has its own logic that doesn't need TMDB ID
+                if (serverWithUrl.isEmergency) {
+                    setSourceUrl(serverWithUrl.getUrl());
+                } else {
+                    // Regular movie server requires TMDB ID
+                    if (!tmdbId || tmdbId === "0") {
+                        console.warn('[WatchClient] No valid TMDB ID, skipping movie server');
+                        autoSwitchServer(selectedServer);
+                        processingRef.current = null;
+                        return;
+                    }
+                    const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                    setSourceUrl(iframeUrl);
                 }
-                const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
-                setSourceUrl(iframeUrl);
+
                 setVideoType("iframe");
                 setLoadingSource(false);
                 toast.success(`EP ${currentEp} loaded on ${selectedServerObj.serverName}`);

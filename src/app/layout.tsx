@@ -84,26 +84,28 @@ export default function RootLayout({
             }}
           />
           <ProfileGate />
-          <DesktopSidebar />
-          <Suspense fallback={<div className="h-[70px] md:h-[80px] w-full bg-[var(--bg-overlay)] border-b border-[var(--border-color)] fixed top-0 left-0 z-50"></div>}>
-            <Header />
-          </Suspense>
-          <div className="flex-1 md:pl-[72px] w-full min-w-0 max-w-[100vw] overflow-x-hidden pt-[70px] md:pt-[80px] flex flex-col">
-            {children}
+          <div className="flex flex-col md:flex-row min-h-screen bg-[var(--bg-main)]">
+            <DesktopSidebar />
+            <div className="flex-1 flex flex-col">
+              <Suspense fallback={<div className="h-16 w-full animate-pulse bg-white/5" />}>
+                <Header />
+              </Suspense>
+              <main className="flex-1">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-[50vh]">
+                    <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                }>
+                  <div className="page-transition-wrapper">
+                    {children}
+                  </div>
+                </Suspense>
+              </main>
+              <MobileNav />
+            </div>
+            <MobileModals />
           </div>
-          <MobileModals />
-          <MobileNav />
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: '#18181b',
-                color: '#fff',
-                border: '1px solid rgba(168, 85, 247, 0.2)',
-                borderRadius: '12px',
-              }
-            }}
-          />
+          <Toaster position="bottom-center" />
         </MobileUIProvider>
       </body>
     </html>
