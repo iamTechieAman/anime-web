@@ -274,31 +274,21 @@ export default function WatchClient({ id }: { id: string }) {
             getUrl: ms.getUrl
         }));
 
-        const hasTmdb = tmdbId && tmdbId !== "0";
-
         const fetchServers = async () => {
             setLoadingServers(true);
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}`);
                 const nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
                 
-                // Native anime servers FIRST, movie servers as fallback (only if we have a real TMDB ID)
-                const allServers = hasTmdb 
-                    ? [...nativeServers, ...movieServersList]
-                    : [...nativeServers];
-
-                // If no native servers and no TMDB, still show movie servers as last resort
-                if (allServers.length === 0) {
-                    allServers.push(...movieServersList);
-                }
+                // ALWAYS include movie servers — they are the guaranteed fallback
+                const allServers = [...nativeServers, ...movieServersList];
 
                 setServers(allServers);
 
-                // Default to first available native server, or first movie server
+                // Default selection: first native server if available, else ToonPlayer VIP
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists) {
-                        // Prefer first native server, fall back to peachify
                         const firstNative = allServers.find((s: any) => !s.isMovieServer);
                         const peachify = allServers.find((s: any) => s.serverId === "peachify");
                         setSelectedServer(firstNative?.serverId || peachify?.serverId || allServers[0].serverId);
@@ -307,11 +297,11 @@ export default function WatchClient({ id }: { id: string }) {
                     setSelectedServer(null);
                 }
             } catch (err) {
-                console.error("Failed to fetch anime servers", err);
-                // Fallback: show movie servers if we have TMDB, otherwise empty
-                const fallback = hasTmdb ? movieServersList : movieServersList;
-                setServers(fallback);
-                setSelectedServer(fallback[0]?.serverId || null);
+                console.error("Failed to fetch anime servers, using movie servers as fallback", err);
+                // Always show movie servers even if native API completely fails
+                setServers(movieServersList);
+                const peachify = movieServersList.find(s => s.serverId === "peachify");
+                setSelectedServer(peachify?.serverId || movieServersList[0]?.serverId || null);
             } finally {
                 setLoadingServers(false);
             }
@@ -346,23 +336,15 @@ export default function WatchClient({ id }: { id: string }) {
             const selectedServerObj = servers.find(s => s.serverId === selectedServer);
             if (!selectedServerObj) return;
 
-            // For movie servers — only load iframe if we have a real TMDB ID
+            // For movie servers — load iframe directly
             if (selectedServerObj.isMovieServer) {
-                const hasTmdb = tmdbId && tmdbId !== "0";
-                if (!hasTmdb) {
-                    // Skip this movie server — can't play without real TMDB ID
-                    console.warn('[WatchPage] Movie server selected but no valid TMDB ID, auto-switching...');
-                    autoSwitchServer(selectedServer);
-                    processingRef.current = null;
-                    return;
-                }
-
                 setLoadingSource(true);
                 setSourceUrl(null);
                 setError(null);
 
                 const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
-                const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                const idToUse = (tmdbId && tmdbId !== "0") ? tmdbId : "0";
+                const iframeUrl = serverWithUrl.getUrl("tv", idToUse, 1, parseInt(String(currentEp) || "1"));
                 setSourceUrl(iframeUrl);
                 setVideoType("iframe");
                 setLoadingSource(false);
@@ -531,7 +513,7 @@ export default function WatchClient({ id }: { id: string }) {
             </div>
 
             {/* Navbar with Safe Area Support */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all pt-[max(1rem,env(safe-area-inset-top))] h-auto min-h-[calc(70px+env(safe-area-inset-top))]">
+            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all pt-[max(1rem,env(safe-area-inset-top))] h-auto min-h-[calc(70px+env(safe-area-inset-top))]">
                 <div className="flex items-center gap-4">
                     <Link href="/" className="p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
                         <ChevronLeft className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />

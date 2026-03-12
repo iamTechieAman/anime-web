@@ -247,7 +247,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
             {/* Top Navigation Bar */}
-            <div className="fixed top-0 left-0 right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                     <Link href="/movies" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
