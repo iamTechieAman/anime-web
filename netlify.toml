@@ -1,8 +1,9 @@
 [build]
-  command = "npm run build"
+  command = "npx next build"
   publish = ".next"
 
 [build.environment]
+  NODE_OPTIONS = "--max-old-space-size=4096"
   NODE_VERSION = "22.16.0"
   NPM_FLAGS = "--legacy-peer-deps"
 
