@@ -14,20 +14,20 @@ const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: 
 
 const MOVIE_SERVERS = [
     {
-        id: "onoflix",
-        name: "OnoFlix",
-        badge: null,
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://onoflix.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://onoflix.live/embed/movie/${id}`,
-    },
-    {
         id: "peachify",
-        name: "ToonPlayer-VIP",
+        name: "ToonPlayer VIP",
         badge: "Multi-Audio",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
+    },
+    {
+        id: "onoflix",
+        name: "ToonPlayer VIP 2",
+        badge: "Backup",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://onoflix.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://onoflix.live/embed/movie/${id}`,
     },
     {
         id: "fmovies",
@@ -249,7 +249,13 @@ export default function WatchClient({ id }: { id: string }) {
 
         const fetchTmdbId = async () => {
             try {
-                const res = await axios.get(`/api/prime/search?q=${encodeURIComponent(show.name || "")}`);
+                // Defensive parsing: in case show.name is a massive concatenated string (scraper error), take the first line or first 100 chars
+                let sanitizedName = (show.name || "").split('\n')[0].trim();
+                if (sanitizedName.length > 150) {
+                    sanitizedName = sanitizedName.substring(0, 150).split('-')[0].trim();
+                }
+
+                const res = await axios.get(`/api/prime/search?q=${encodeURIComponent(sanitizedName)}`);
                 const results = res.data.results;
                 if (results && results.length > 0) {
                     setTmdbId(results[0].id.toString());

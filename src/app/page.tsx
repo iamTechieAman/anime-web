@@ -145,7 +145,6 @@ export default function Home() {
                     <section>
                        <div className="flex items-center justify-between mb-4">
                          <h2 className="text-xl md:text-2xl font-bold font-sora text-white">Recently Updated</h2>
-                         <Link href="/recent" className="text-sm text-[var(--text-muted)] hover:text-white transition-colors">View All &gt;</Link>
                        </div>
                        {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 24)} />}
                     </section>

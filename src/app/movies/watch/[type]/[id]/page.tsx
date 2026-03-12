@@ -13,18 +13,18 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
-        id: "onoflix",
-        name: "OnoFlix",
-        badge: "Recommended",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://onoflix.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://onoflix.live/embed/movie/${id}`,
-    },
-    {
         id: "peachify",
-        name: "ToonPlayer-VIP",
+        name: "ToonPlayer VIP",
         badge: "Multi-Audio",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
+    },
+    {
+        id: "onoflix",
+        name: "ToonPlayer VIP 2",
+        badge: "Backup",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://onoflix.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://onoflix.live/embed/movie/${id}`,
     },
     {
         id: "fmovies",
