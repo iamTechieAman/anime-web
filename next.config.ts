@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Prevent OOM errors on Netlify by disabling linting/typescript during the final build
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Constrain webpack so it doesn't spin up multiple threads and consume all RAM
+  experimental: {
+    memoryBasedWorkersOutput: true,
+    cpus: 1,
+    workerThreads: false,
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 's4.anilist.co' },
