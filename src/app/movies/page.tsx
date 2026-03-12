@@ -206,7 +206,7 @@ export default function MoviesPage() {
                         <div className="flex items-center gap-6">
                             <a href="/movies" className="flex items-center gap-2 text-xl font-black tracking-tight">
                                 <div className="w-6 h-6 relative hidden sm:block">
-                                    <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+                                    <img src="/icon.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
                                 </div>
                                 <span className="text-[var(--text-main)]">ToonPlayer</span>
                                 <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase tracking-widest -ml-1 mt-1">Movies</span>

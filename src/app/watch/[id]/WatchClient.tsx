@@ -27,7 +27,7 @@ const MOVIE_SERVERS = [
         badge: "Backup",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://onoflix.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://onoflix.live/embed/movie/${id}`,
+            type === "tv" ? `https://vidsrc.me/embed/${id}/${s || 1}-${e || 1}` : `https://vidsrc.me/embed/${id}`,
     },
     {
         id: "fmovies",

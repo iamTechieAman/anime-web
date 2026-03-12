@@ -92,7 +92,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
 
             {/* Content */}
             <div className="absolute inset-0 flex items-end pb-16 md:pb-24">
-                <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
+                <div className="w-full max-w-[2000px] mx-auto px-4 md:px-6 w-full">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={current}

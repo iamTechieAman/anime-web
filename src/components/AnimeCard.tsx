@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
+import { Play, Star } from "lucide-react";
 
 export interface Show {
     _id: string;
@@ -18,30 +18,66 @@ export interface Show {
     __typename: string;
 }
 
-// Anime Card Component
-export function AnimeCard({ show }: { show: Show }) {
+export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { show: any, showScore?: boolean, isBanner?: boolean, rank?: number }) {
     const [imageError, setImageError] = useState(false);
+    const isHD = show.availableEpisodes?.sub > 0 || show.availableEpisodes?.dub > 0;
 
     const handleImageError = () => {
         setImageError(true);
     };
 
     return (
-        <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`}>
-            <div className="group flex flex-col gap-2 w-full cursor-pointer">
-                <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative aspect-[3/4.5] rounded-sm overflow-hidden bg-[var(--bg-card)] transition-all duration-300 shadow-lg"
-                >
-                    {/* Image */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}
+        >
+            <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="block w-full h-full">
+                {/* Ranking Number */}
+                {rank !== undefined && (
+                    <div className="absolute top-0 right-0 z-20 pointer-events-none drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
+                        <div className={`
+                            w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-bl-xl backdrop-blur-md border-b border-l border-white/10
+                            ${rank === 0 ? 'bg-gradient-to-br from-yellow-400/90 to-amber-600/90' : 
+                              rank === 1 ? 'bg-gradient-to-br from-gray-300/90 to-gray-500/90' :
+                              rank === 2 ? 'bg-gradient-to-br from-amber-700/90 to-amber-900/90' :
+                              'bg-black/60'}
+                        `}>
+                            <span className="text-sm md:text-lg font-black text-white shadow-sm">
+                                #{rank + 1}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Score badge */}
+                {showScore && show.score && (
+                    <div className="absolute top-2 left-2 z-20 flex items-center gap-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md text-white/90 border border-white/10 shadow-lg">
+                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                        <span className="text-xs font-bold tracking-tight">{Math.round(show.score * 10)}%</span>
+                    </div>
+                )}
+
+                {/* HD badge */}
+                {isHD && (
+                    <div className="absolute top-2 right-2 z-20 hidden md:block">
+                        <div className="px-1.5 py-0.5 bg-blue-500/80 backdrop-blur-sm rounded text-[9px] font-black tracking-wider text-white shadow-lg border border-blue-400/30">
+                            HD
+                        </div>
+                    </div>
+                )}
+
+                <div className="relative w-full h-full">
+                    {/* Thumbnail Image */}
                     {show.thumbnail && !imageError ? (
                         <img
                             src={show.thumbnail}
                             alt={show.name}
                             onError={handleImageError}
                             loading="lazy"
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 flex flex-col items-center justify-center p-4">
@@ -50,48 +86,47 @@ export function AnimeCard({ show }: { show: Show }) {
                         </div>
                     )}
 
-                    {/* Format/Type Badge (Top right) */}
-                    <div className="absolute top-2 right-2 z-10">
-                         <span className="px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-white border border-white/10 text-[9px] font-bold rounded-sm uppercase">
-                            TV
-                         </span>
-                    </div>
+                    {/* Gradient Overlays */}
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-300" />
 
-                    {/* Episode Badges (Bottom left) */}
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1 z-10">
-                        {show.availableEpisodes?.sub > 0 && (
-                            <span className="px-1.5 py-0.5 bg-[#FF5722] text-white text-[10px] font-bold rounded-sm shadow-lg border border-white/10">
-                                SUB {show.availableEpisodes.sub}
-                            </span>
-                        )}
-                        {show.availableEpisodes?.dub > 0 && (
-                            <span className="px-1.5 py-0.5 bg-[#FF5722]/80 text-white text-[10px] font-bold rounded-sm shadow-lg border border-white/10">
-                                DUB {show.availableEpisodes.dub}
-                            </span>
-                        )}
-                        {(!show.availableEpisodes?.sub && !show.availableEpisodes?.dub) && (
-                            <span className="px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold rounded-sm border border-white/10">
-                                EP ?
-                            </span>
-                        )}
-                    </div>
+                    {/* Info Container */}
+                    <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 flex flex-col justify-end transform transition-transform duration-300">
+                        {/* Title */}
+                        <h3 className="text-white font-bold text-sm md:text-base leading-tight line-clamp-2 md:line-clamp-1 group-hover:line-clamp-2 transition-all duration-300 text-shadow-sm font-sora">
+                            {show.name}
+                        </h3>
 
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] transform scale-50 group-hover:scale-100 transition-transform duration-300 border border-white/30">
-                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                        {/* Metadata Row */}
+                        <div className="flex items-center gap-2 mt-1.5 md:mt-2 text-[10px] md:text-xs text-white/70 overflow-hidden">
+                            {(show.availableEpisodes?.sub > 0 || show.availableEpisodes?.dub > 0) && (
+                                <div className="flex gap-1 items-center shrink-0 border border-white/20 rounded-sm bg-black/40 overflow-hidden">
+                                    {show.availableEpisodes?.sub > 0 && (
+                                        <span className="px-1 md:px-1.5 py-0.5 font-medium border-r border-white/20 flex items-center gap-1 text-[#4ade80]">
+                                            <span className="hidden sm:inline">CC</span> {show.availableEpisodes.sub}
+                                        </span>
+                                    )}
+                                    {show.availableEpisodes?.dub > 0 && (
+                                        <span className="px-1 md:px-1.5 py-0.5 font-medium text-[#c084fc] flex items-center gap-1">
+                                            <span className="hidden sm:inline">MIC</span> {show.availableEpisodes.dub}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            <span className="w-1 h-1 rounded-full bg-white/30 shrink-0"></span>
+                            <span className="font-medium shrink-0 uppercase tracking-wider">{show.type || "TV"}</span>
                         </div>
                     </div>
-                </motion.div>
 
-                {/* Info Below Image */}
-                <div className="flex flex-col gap-1 px-1">
-                    <h3 className="font-semibold text-[var(--text-main)] text-sm line-clamp-1 group-hover:text-white transition-colors font-sora" title={show.name}>
-                        {show.name}
-                    </h3>
+                    {/* Hover overlay with play button */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-purple-500 text-white flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_20px_rgba(168,85,247,0.6)]">
+                            <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </Link>
+            </Link>
+        </motion.div>
     );
 }
 
@@ -116,9 +151,17 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
 // Horizontal Anime Card for Sidebars
 export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number }) {
     const [imageError, setImageError] = useState(false);
-
+    const showWithScore = show as any;
+    const matchScore = showWithScore.score ? Math.round(showWithScore.score * 10) : null;
+    
     return (
-        <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="group flex items-center gap-3 p-2 -mx-2 rounded-md hover:bg-[var(--bg-card)] transition-colors">
+        <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-20px" }}
+            transition={{ duration: 0.3 }}
+        >
+        <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
             {/* Rank Number (if provided) */}
             {rank !== undefined && (
                 <div className="w-6 text-center shrink-0">
@@ -164,5 +207,6 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                 </div>
             </div>
         </Link>
+        </motion.div>
     );
 }

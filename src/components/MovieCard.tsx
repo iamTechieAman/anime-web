@@ -34,12 +34,14 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
     const matchPercent = Math.round((item.vote_average || 0) * 10);
 
     return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+        >
         <Link href={`/movies/watch/${mediaType}/${item.id}`} className="block group">
-            <motion.div
-                whileHover={{ scale: 1.05, y: -4 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
-            >
+            <div className="relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
                 {/* Poster */}
                 <div className="relative aspect-[2/3] overflow-hidden">
                     {item.poster_path && !imgError ? (
@@ -129,8 +131,9 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
                         <span className="capitalize">{mediaType}</span>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </Link>
+        </motion.div>
     );
 }
 
