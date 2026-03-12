@@ -12,6 +12,73 @@ import { useSearchParams } from "next/navigation";
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
 
+const MOVIE_SERVERS = [
+    {
+        id: "peachify",
+        name: "ToonPlayer-VIP",
+        badge: "Multi-Audio",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
+    },
+    {
+        id: "fmovies",
+        name: "FMovies",
+        badge: "New",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://fmovies.gd/embed/tv/${id}/${s || 1}/${e || 1}` : `https://fmovies.gd/embed/movie/${id}`,
+    },
+    {
+        id: "vidlink",
+        name: "VidLink",
+        badge: "Recommended",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
+    },
+    {
+        id: "vidsrc_me",
+        name: "VidSrc US",
+        badge: "Fast",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    },
+    {
+        id: "vidsrc_pro",
+        name: "VidSrc Pro",
+        badge: null,
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pro/embed/movie/${id}`,
+    },
+    {
+        id: "superembed",
+        name: "SuperEmbed",
+        badge: "Stable",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
+    },
+    {
+        id: "autoembed",
+        name: "AutoEmbed",
+        badge: null,
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://player.autoembed.cc/embed/tv/${id}/${s || 1}/${e || 1}` : `https://player.autoembed.cc/embed/movie/${id}`,
+    },
+    {
+        id: "smashy",
+        name: "SmashyStream",
+        badge: null,
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+    },
+];
+
 interface ShowData {
     _id: string;
     name?: string;
@@ -56,6 +123,7 @@ export default function WatchClient({ id }: { id: string }) {
     const processingRef = useRef<string | null>(null);
 
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [tmdbId, setTmdbId] = useState<string | null>(null);
 
     // Load Settings & Bookmark
     useEffect(() => {
@@ -166,6 +234,25 @@ export default function WatchClient({ id }: { id: string }) {
         fetchShow();
     }, [id, provider]);
 
+    // Fetch TMDB ID for Movie Servers
+    useEffect(() => {
+        if (!show?.name) return;
+
+        const fetchTmdbId = async () => {
+            try {
+                const res = await axios.get(`/api/prime/search?q=${encodeURIComponent(show.name || "")}`);
+                const results = res.data.results;
+                if (results && results.length > 0) {
+                    setTmdbId(results[0].id.toString());
+                }
+            } catch (err) {
+                console.error("Failed to fetch TMDB ID", err);
+            }
+        };
+
+        fetchTmdbId();
+    }, [show?.name]);
+
     // Fetch Servers when Episode/Mode Changes
     useEffect(() => {
         if (!show?._id) return;
@@ -175,27 +262,48 @@ export default function WatchClient({ id }: { id: string }) {
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}`);
                 const validServers = res.data.servers.filter((s: any) => s.type === mode);
-                setServers(validServers);
+                const allServers = [...validServers];
+                
+                if (tmdbId) {
+                    // Append movie servers with mapped properties to match anime server interface
+                    allServers.push(...MOVIE_SERVERS.map(ms => ({
+                        serverId: ms.id,
+                        serverName: ms.name,
+                        type: mode,
+                        badge: ms.badge,
+                        isMovieServer: true,
+                        getUrl: ms.getUrl
+                    })));
+                }
+
+                setServers(allServers);
 
                 // If current selectedServer is not in the new valid list, reset it or select first
-                if (validServers.length > 0) {
-                    const exists = validServers.find((s: any) => s.serverId === selectedServer);
+                if (allServers.length > 0) {
+                    const exists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!exists) {
-                        setSelectedServer(validServers[0].serverId);
+                        setSelectedServer(allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);
                 }
             } catch (err) {
                 console.error("Failed to fetch servers", err);
-                setServers([]);
+                setServers(tmdbId ? MOVIE_SERVERS.map(ms => ({
+                        serverId: ms.id,
+                        serverName: ms.name,
+                        type: mode,
+                        badge: ms.badge,
+                        isMovieServer: true,
+                        getUrl: ms.getUrl
+                    })) : []);
             } finally {
                 setLoadingServers(false);
             }
         };
 
         fetchServers();
-    }, [currentEp, mode, show]);
+    }, [currentEp, mode, show, tmdbId]);
 
     // Fetch Source
     useEffect(() => {
@@ -220,6 +328,18 @@ export default function WatchClient({ id }: { id: string }) {
             setLoadingSource(true);
             setSourceUrl(null);
             setError(null);
+
+            const selectedServerObj = servers.find(s => s.serverId === selectedServer);
+
+            if (selectedServerObj?.isMovieServer && tmdbId) {
+                 const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
+                 const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                 setSourceUrl(iframeUrl);
+                 setVideoType("iframe");
+                 setLoadingSource(false);
+                 toast.success(`Episode ${currentEp} loaded successfully on ${selectedServerObj.serverName}`);
+                 return;
+            }
 
             try {
                 console.log('[WatchPage] Fetching source...');
@@ -453,7 +573,6 @@ export default function WatchClient({ id }: { id: string }) {
                                         className="w-full h-full border-0 bg-black"
                                         allowFullScreen
                                         allow="autoplay; fullscreen"
-                                        sandbox="allow-scripts allow-same-origin allow-presentation"
                                     ></iframe>
                                 ) : (
                                     <ArtPlayer

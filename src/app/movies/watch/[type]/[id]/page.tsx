@@ -11,7 +11,6 @@ import { MovieRow, type MovieItem } from "@/components/MovieCard";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
-// Ad-free / better embed sources — ordered by reliability
 const SERVERS = [
     {
         id: "peachify",
@@ -19,6 +18,13 @@ const SERVERS = [
         badge: "Multi-Audio",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
+    },
+    {
+        id: "fmovies",
+        name: "FMovies",
+        badge: "New",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://fmovies.gd/embed/tv/${id}/${s || 1}/${e || 1}` : `https://fmovies.gd/embed/movie/${id}`,
     },
     {
         id: "vidlink",
@@ -272,7 +278,6 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 allowFullScreen
                                 allow="autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="origin"
-                                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                                 onLoad={() => setPlayerLoaded(true)}
                             />
                         </div>
@@ -292,11 +297,16 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 <button
                                     key={server.id}
                                     onClick={() => setActiveServer(server)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeServer.id === server.id
+                                    className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeServer.id === server.id
                                         ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
                                         : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)]"
                                         }`}
                                 >
+                                    {activeServer.id === server.id ? (
+                                        <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
+                                    ) : (
+                                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mr-2" />
+                                    )}
                                     {server.name}
                                     {server.badge && (
                                         <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold ${server.badge === "Recommended" ? "bg-green-500/20 text-green-400" :
@@ -328,7 +338,14 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                             className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-card)] transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
                                                 }`}
                                         >
-                                            {server.name}
+                                            <div className="flex items-center">
+                                                {activeServer.id === server.id ? (
+                                                    <Play className="w-4 h-4 mr-2 fill-current" />
+                                                ) : (
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mx-1.5 mr-2.5" />
+                                                )}
+                                                {server.name}
+                                            </div>
                                             {server.badge && (
                                                 <span className="text-[10px] text-[var(--text-muted)]">{server.badge}</span>
                                             )}

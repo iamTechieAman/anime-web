@@ -243,58 +243,16 @@ export class HiAnimeProvider implements AnimeProvider {
     }
 
     private async extractSources(embedLink: string): Promise<VideoSource[]> {
-        // Step 3: Extract actual video source from embed
-        // The embed link follows pattern: domain/embed-X/e-Y/hash?k=1 or domain/embed-X/vY/e-Z/hash?k=1
-        const embedMatch = embedLink.match(/(.*)\/embed-(\d+)\/(?:v\d+\/)?e-(\d+)\/(.+)\?k=1$/);
-
-        if (!embedMatch) {
-            console.warn('[HiAnime] Could not parse embed link, returning as-is');
-            return [{
-                url: embedLink,
-                isM3U8: true,
-                quality: 'auto'
-            }];
-        }
-
-        const [, providerLink, embedType, eNumber, sourceId] = embedMatch;
-
-        const ajaxUrl = `${providerLink}/embed-${embedType}/ajax/e-${eNumber}/getSources`;
-        console.log('[HiAnime] Embed URL:', embedLink);
-        console.log('[HiAnime] Ajax URL:', ajaxUrl);
-        console.log('[HiAnime] Source ID:', sourceId);
-
-        // Step 4: Get final sources
-        const finalSourcesResponse = await axios.get(
-            ajaxUrl,
-            {
-                params: { id: sourceId },
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Referer': embedLink
-                }
-            }
-        );
-
-        const sourcesData = finalSourcesResponse.data;
-
-        // Handle different response formats
-        if (sourcesData.sources) {
-            return sourcesData.sources.map((source: any) => ({
-                url: source.file || source.url,
-                isM3U8: source.type === 'hls' || source.file?.includes('.m3u8'),
-                quality: source.label || source.quality || 'auto',
-                headers: { Referer: embedLink }
-            }));
-        } else if (sourcesData.source) {
-            return [{
-                url: sourcesData.source,
-                isM3U8: sourcesData.source.includes('.m3u8'),
-                quality: 'auto'
-            }];
-        }
-
-        throw new Error('Unknown sources format');
+        console.log('[HiAnime] Returning embed link as iframe source:', embedLink);
+        
+        // Return the embed link directly as an iframe to avoid CORS/Referer issues
+        // that occur when trying to play the extracted m3u8 directly in the browser.
+        return [{
+            url: embedLink,
+            isM3U8: false,
+            isIframe: true,
+            quality: 'auto'
+        }];
     }
     async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
         try {

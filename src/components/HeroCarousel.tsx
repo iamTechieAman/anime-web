@@ -169,14 +169,10 @@ export default function HeroCarousel() {
                             transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
                             className="absolute inset-0"
                         >
-                            <Image
+                            <img
                                 src={activeSlide.image}
                                 alt={activeSlide.title}
-                                fill
-                                className="object-cover object-center opacity-70"
-                                priority
-                                quality={90}
-                                sizes="100vw"
+                                className="w-full h-full object-cover object-center opacity-70"
                             />
                         </motion.div>
                         

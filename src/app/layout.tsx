@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
 import MobileNav from "@/components/MobileNav";
 import MobileModals from "@/components/MobileModals";
 import DesktopSidebar from "@/components/DesktopSidebar";
@@ -17,6 +18,15 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#050505",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://anime-web-neon-one.vercel.app'),
@@ -40,14 +50,6 @@ export const metadata: Metadata = {
     description: 'The ultimate AnimeWatch alternative for true fans.',
     images: ['/icon.png'],
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
-  themeColor: "#050505",
 };
 
 export default function RootLayout({
@@ -81,7 +83,9 @@ export default function RootLayout({
             }}
           />
           <DesktopSidebar />
-          <Header />
+          <Suspense fallback={<div className="h-[70px] md:h-[80px] w-full bg-[var(--bg-overlay)] border-b border-[var(--border-color)] fixed top-0 left-0 z-50"></div>}>
+            <Header />
+          </Suspense>
           <div className="flex-1 md:pl-[72px] w-full max-w-full pt-[70px] md:pt-[80px]">
             {children}
           </div>

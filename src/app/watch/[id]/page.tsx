@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import WatchClient from "./WatchClient";
 
 export const runtime = 'edge';
@@ -50,5 +51,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function WatchPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    return <WatchClient id={id} />;
+    return (
+        <Suspense fallback={<div className="min-h-screen pt-24 text-center text-purple-400 font-bold bg-[var(--bg-main)]">Loading Player...</div>}>
+            <WatchClient id={id} />
+        </Suspense>
+    );
 }
