@@ -285,13 +285,12 @@ export default function WatchClient({ id }: { id: string }) {
 
                 setServers(allServers);
 
-                // Default selection: first native server if available, else ToonPlayer VIP
+                // Default to ToonPlayer VIP for guaranteed playback, native servers as alternatives
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists) {
-                        const firstNative = allServers.find((s: any) => !s.isMovieServer);
                         const peachify = allServers.find((s: any) => s.serverId === "peachify");
-                        setSelectedServer(firstNative?.serverId || peachify?.serverId || allServers[0].serverId);
+                        setSelectedServer(peachify?.serverId || allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);

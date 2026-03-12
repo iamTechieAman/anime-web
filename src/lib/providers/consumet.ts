@@ -11,7 +11,7 @@ export class ConsumetProvider implements AnimeProvider {
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/${encodeURIComponent(query)}`);
+            const response = await axios.get(`${BASE_URL}/${encodeURIComponent(query)}`, { timeout: 8000 });
             const results: AnimeSearchResult[] = [];
 
             if (response.data.results) {
@@ -34,7 +34,7 @@ export class ConsumetProvider implements AnimeProvider {
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const response = await axios.get(`${BASE_URL}/info/${id}`);
+            const response = await axios.get(`${BASE_URL}/info/${id}`, { timeout: 8000 });
             const data = response.data;
 
             const episodes = (data.episodes || []).map((ep: any) => ({
@@ -93,7 +93,7 @@ export class ConsumetProvider implements AnimeProvider {
 
             try {
                 // Try the primary anilist meta endpoint
-                const response = await axios.get(`${BASE_URL}/watch/${watchId}`);
+                const response = await axios.get(`${BASE_URL}/watch/${watchId}`, { timeout: 8000 });
                 if (response.data && response.data.sources) {
                     return response.data.sources.map((src: any) => ({
                         url: src.url,
@@ -107,17 +107,17 @@ export class ConsumetProvider implements AnimeProvider {
                 try {
                     const info = await this.getInfo(id);
                     const title = info.title;
-                    const gogoSearch = await axios.get(`https://consumet-api-clone.vercel.app/anime/gogoanime/${encodeURIComponent(title)}`);
+                    const gogoSearch = await axios.get(`https://consumet-api-clone.vercel.app/anime/gogoanime/${encodeURIComponent(title)}`, { timeout: 8000 });
                     if (gogoSearch.data.results && gogoSearch.data.results.length > 0) {
                         const gogoId = mode === 'dub' && gogoSearch.data.results.find((r: any) => r.id.includes('-dub'))
                             ? gogoSearch.data.results.find((r: any) => r.id.includes('-dub')).id
                             : gogoSearch.data.results[0].id;
 
-                        const gogoInfo = await axios.get(`https://consumet-api-clone.vercel.app/anime/gogoanime/info/${gogoId}`);
+                        const gogoInfo = await axios.get(`https://consumet-api-clone.vercel.app/anime/gogoanime/info/${gogoId}`, { timeout: 8000 });
                         const targetEp = gogoInfo.data.episodes.find((ep: any) => ep.number === parseInt(episodeString));
 
                         if (targetEp && targetEp.id) {
-                            const gogoWatch = await axios.get(`https://consumet-api-clone.vercel.app/anime/gogoanime/watch/${targetEp.id}`);
+                            const gogoWatch = await axios.get(`https://consumet-api-clone.vercel.app/anime/gogoanime/watch/${targetEp.id}`, { timeout: 8000 });
                             if (gogoWatch.data && gogoWatch.data.sources) {
                                 return gogoWatch.data.sources.map((src: any) => ({
                                     url: src.url,
@@ -160,7 +160,7 @@ export class ConsumetProvider implements AnimeProvider {
 
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/recent-episodes?page=${page}`);
+            const response = await axios.get(`${BASE_URL}/recent-episodes?page=${page}`, { timeout: 8000 });
             const results: AnimeSearchResult[] = [];
 
             if (response.data.results) {
@@ -186,7 +186,7 @@ export class ConsumetProvider implements AnimeProvider {
 
     async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/popular?page=${page}`);
+            const response = await axios.get(`${BASE_URL}/popular?page=${page}`, { timeout: 8000 });
             const results: AnimeSearchResult[] = [];
 
             if (response.data.results) {
@@ -209,7 +209,7 @@ export class ConsumetProvider implements AnimeProvider {
 
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/trending?page=${page}`);
+            const response = await axios.get(`${BASE_URL}/trending?page=${page}`, { timeout: 8000 });
             const results: AnimeSearchResult[] = [];
 
             if (response.data.results) {
