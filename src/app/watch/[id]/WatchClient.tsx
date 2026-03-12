@@ -310,16 +310,39 @@ export default function WatchClient({ id }: { id: string }) {
         fetchServers();
     }, [currentEp, mode, show, tmdbId]);
 
-    // Auto-switch to next server on failure
+    // Auto-switch to next server on failure — smart: skip to movie servers after 2 native failures
     const autoSwitchServer = (failedServerId: string) => {
         failedServersRef.current.add(failedServerId);
-        const nextServer = servers.find(s => !failedServersRef.current.has(s.serverId));
+        
+        // Count how many native servers have failed
+        const failedNativeCount = servers.filter(s => !s.isMovieServer && failedServersRef.current.has(s.serverId)).length;
+        
+        let nextServer;
+        if (failedNativeCount >= 2) {
+            // After 2 native failures, jump directly to movie servers
+            nextServer = servers.find(s => s.isMovieServer && !failedServersRef.current.has(s.serverId));
+        }
+        if (!nextServer) {
+            nextServer = servers.find(s => !failedServersRef.current.has(s.serverId));
+        }
+        
         if (nextServer) {
+            setError(null); // Clear any previous errors
             toast(`Switching to ${nextServer.serverName}...`, { icon: '🔄' });
             setSelectedServer(nextServer.serverId);
         } else {
-            setError("All servers failed. Please try again later.");
-            toast.error("All servers failed");
+            // All servers exhausted — try forcing ToonPlayer VIP one more time
+            const peachify = servers.find(s => s.serverId === "peachify");
+            if (peachify && failedServersRef.current.has("peachify")) {
+                // Reset and try peachify again as absolute last resort
+                failedServersRef.current.delete("peachify");
+                setError(null);
+                toast('Retrying ToonPlayer VIP...', { icon: '🔄' });
+                setSelectedServer("peachify");
+            } else {
+                setError("All servers are currently unavailable. Try switching servers manually below.");
+                toast.error("Servers unavailable — try switching manually");
+            }
         }
     };
 
@@ -544,53 +567,51 @@ export default function WatchClient({ id }: { id: string }) {
                                     <p className="text-sm text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Loading Stream</p>
                                 </div>
                             ) : error ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 md:gap-6 text-red-500 p-4 md:p-8 text-center bg-[var(--bg-card)]/80 backdrop-blur-lg">
-                                    <AlertCircle className="w-10 h-10 md:w-12 md:h-12 text-red-600/80" />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-[var(--bg-card)]/80 backdrop-blur-lg">
+                                    <AlertCircle className="w-8 h-8 md:w-10 md:h-10 text-red-600/80" />
                                     <div className="max-w-md">
-                                        <p className="font-bold text-[var(--text-main)] text-lg md:text-xl">Playback Error</p>
-                                        <p className="text-xs md:text-sm opacity-70 mt-2">{error}</p>
-                                        {error.includes("not be available") && (
-                                            <p className="text-xs md:text-sm text-purple-400 mt-3">
-                                                💡 Tip: Search for "{show.name}" on the home page to find an alternative version
-                                            </p>
-                                        )}
+                                        <p className="font-bold text-[var(--text-main)] text-base md:text-lg">Stream Unavailable</p>
+                                        <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1">Native sources failed. Try a movie server below.</p>
                                     </div>
-                                    <div className="flex flex-col gap-3 w-full max-w-sm">
+                                    <div className="flex flex-wrap justify-center gap-2 w-full max-w-sm">
+                                        {/* Quick switch to ToonPlayer VIP */}
+                                        {servers.find(s => s.serverId === "peachify") && (
+                                            <button
+                                                onClick={() => {
+                                                    failedServersRef.current.clear();
+                                                    setError(null);
+                                                    setSelectedServer("peachify");
+                                                }}
+                                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
+                                            >
+                                                <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
+                                            </button>
+                                        )}
+                                        {/* Quick switch to FMovies */}
+                                        {servers.find(s => s.serverId === "fmovies") && (
+                                            <button
+                                                onClick={() => {
+                                                    failedServersRef.current.clear();
+                                                    setError(null);
+                                                    setSelectedServer("fmovies");
+                                                }}
+                                                className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-purple-500/50"
+                                            >
+                                                FMovies
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => {
+                                                failedServersRef.current.clear();
                                                 setError(null);
-                                                setLoadingSource(true);
-                                                processingRef.current = null;
+                                                setSourceUrl(null);
+                                                const firstNative = servers.find(s => !s.isMovieServer);
+                                                setSelectedServer(firstNative?.serverId || servers[0]?.serverId || null);
                                             }}
-                                            className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2"
+                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-purple-500/50 flex items-center gap-1.5"
                                         >
-                                            <RefreshCw className="w-4 h-4" /> Retry Connection
+                                            <RefreshCw className="w-3.5 h-3.5" /> Retry All
                                         </button>
-
-                                        <div className="relative group">
-                                            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
-                                            <form
-                                                onSubmit={(e) => {
-                                                    e.preventDefault();
-                                                    const form = e.target as HTMLFormElement;
-                                                    const input = form.elements.namedItem('search') as HTMLInputElement;
-                                                    if (input.value.trim()) {
-                                                        window.location.href = `/search?query=${encodeURIComponent(input.value.trim())}`;
-                                                    }
-                                                }}
-                                                className="relative bg-black rounded-lg p-1 flex items-center"
-                                            >
-                                                <input
-                                                    name="search"
-                                                    type="text"
-                                                    placeholder="Search on other sources..."
-                                                    className="w-full bg-transparent text-white px-4 py-2 outline-none text-sm placeholder:text-[var(--text-muted)]"
-                                                />
-                                                <button type="submit" className="p-2 bg-purple-600 rounded-md hover:bg-purple-700 transition-colors">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                                                </button>
-                                            </form>
-                                        </div>
                                     </div>
                                 </div>
                             ) : sourceUrl ? (
