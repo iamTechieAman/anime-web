@@ -53,6 +53,20 @@ export default function MoviesPage() {
     const [isSearching, setIsSearching] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+
+    // Fetch user profile
+    useEffect(() => {
+        const updateProfile = () => {
+            const p = localStorage.getItem("toonplayer_profile");
+            if (p) {
+                try { setProfile(JSON.parse(p)); } catch(e) {}
+            }
+        };
+        updateProfile();
+        window.addEventListener('profileUpdated', updateProfile);
+        return () => window.removeEventListener('profileUpdated', updateProfile);
+    }, []);
 
     // Scroll-to-top visibility
     useEffect(() => {
@@ -265,6 +279,20 @@ export default function MoviesPage() {
                             >
                                 {showSearch ? <X className="w-5 h-5 text-[var(--text-main)]" /> : <Search className="w-5 h-5 text-[var(--text-main)]" />}
                             </button>
+                            
+                            {/* Profile Avatar */}
+                            {profile && (
+                                <span className="hidden md:inline-block text-sm font-bold text-[var(--text-muted)] ml-2">
+                                    Hi, {profile.name}
+                                </span>
+                            )}
+                            <div className="flex items-center gap-3 ml-2 border-l border-[var(--border-color)] pl-3 md:pl-4">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-[2px] transition-transform hover:scale-105 cursor-pointer flex-shrink-0 shadow-lg shadow-blue-500/20">
+                                    <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
+                                        <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -22,20 +22,12 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
     },
     {
-        id: "onoflix",
-        name: "ToonPlayer VIP 2",
-        badge: "Backup",
+        id: "vidbinge",
+        name: "VidBinge",
+        badge: "4K/HD",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.me/embed/${id}/${s || 1}-${e || 1}` : `https://vidsrc.me/embed/${id}`,
-    },
-    {
-        id: "fmovies",
-        name: "FMovies",
-        badge: "New",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://fmovies.gd/embed/tv/${id}/${s || 1}/${e || 1}` : `https://fmovies.gd/embed/movie/${id}`,
+            type === "tv" ? `https://vidbinge.dev/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.dev/embed/movie/${id}`,
     },
     {
         id: "vidlink",
@@ -46,12 +38,28 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
     {
+        id: "onoflix",
+        name: "ToonPlayer VIP 2",
+        badge: "Backup",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
+    },
+    {
         id: "vidsrc_me",
         name: "VidSrc US",
         badge: "Fast",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    },
+    {
+        id: "fmovies",
+        name: "FMovies",
+        badge: "New",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://fmovies.gd/embed/tv/${id}/${s || 1}/${e || 1}` : `https://fmovies.gd/embed/movie/${id}`,
     },
     {
         id: "vidsrc_pro",
@@ -84,6 +92,14 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+    },
+    {
+        id: "2embed",
+        name: "2Embed",
+        badge: null,
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
     },
 ];
 
@@ -249,11 +265,16 @@ export default function WatchClient({ id }: { id: string }) {
 
         const fetchTmdbId = async () => {
             try {
-                // Defensive parsing: in case show.name is a massive concatenated string (scraper error), take the first line or first 100 chars
+                // Defensive parsing: Strip out huge whitespace-separated blocks if it's a scraper error
                 let sanitizedName = (show.name || "").split('\n')[0].trim();
-                if (sanitizedName.length > 150) {
-                    sanitizedName = sanitizedName.substring(0, 150).split('-')[0].trim();
+                
+                // Limit to max 50 characters to prevent 431/404 URI errors
+                if (sanitizedName.length > 50) {
+                    sanitizedName = sanitizedName.substring(0, 50).trim();
                 }
+                
+                // Remove weird URL breaking characters
+                sanitizedName = sanitizedName.replace(/[^a-zA-Z0-9 ':!,-]/g, '').trim();
 
                 const res = await axios.get(`/api/prime/search?q=${encodeURIComponent(sanitizedName)}`);
                 const results = res.data.results;

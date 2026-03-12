@@ -30,7 +30,8 @@ export async function GET(request: Request) {
                 if (query) {
                     results = await animeProvider.search(query);
                 } else if (genre && animeProvider.getGenre) {
-                    results = await animeProvider.getGenre(genre);
+                    const genreSlug = genre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    results = await animeProvider.getGenre(genreSlug);
                 } else if (status && animeProvider.getRecent) {
                     results = await animeProvider.getRecent();
                 }
