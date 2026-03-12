@@ -195,7 +195,10 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
             setLoadingEpisodes(true);
             try {
                 const res = await axios.get(`/api/prime/season?id=${id}&season=${selectedSeason}`);
-                setEpisodes(res.data.episodes || []);
+                const eps = res.data.episodes || [];
+                // Sort episodes by episode number ascending
+                eps.sort((a: EpisodeInfo, b: EpisodeInfo) => a.episode_number - b.episode_number);
+                setEpisodes(eps);
             } catch (err) {
                 console.error("Failed to fetch episodes:", err);
             } finally {
@@ -412,6 +415,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                     <img
                                         src={`${IMG_BASE}/w500${details.poster_path}`}
                                         alt={title}
+                                        loading="lazy"
                                         className="w-full rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]"
                                     />
                                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -510,6 +514,11 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 <div className="flex items-center gap-3">
                                     <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
                                     <h2 className="text-xl font-bold">Episodes</h2>
+                                    {episodes.length > 0 && (
+                                        <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">
+                                            {episodes.length} EP{episodes.length !== 1 ? 's' : ''}
+                                        </span>
+                                    )}
                                 </div>
 
                                 {/* Season Selector */}
@@ -518,15 +527,16 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                         value={selectedSeason}
                                         onChange={(e) => {
                                             setSelectedSeason(Number(e.target.value));
-                                            setSelectedEpisode(1); // Reset episode when season changes
+                                            setSelectedEpisode(1);
                                         }}
-                                        className="appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                        className="appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm"
                                     >
                                         {details.seasons
-                                            .filter(s => s.season_number > 0) // Skip Specials (season 0)
+                                            .filter(s => s.season_number > 0)
+                                            .sort((a, b) => a.season_number - b.season_number)
                                             .map((season) => (
                                                 <option key={season.id} value={season.season_number}>
-                                                    Season {season.season_number}
+                                                    Season {season.season_number} ({season.episode_count} eps)
                                                 </option>
                                             ))}
                                     </select>
@@ -534,62 +544,126 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 </div>
                             </div>
 
-                            {/* Episodes Grid */}
+                            {/* Episodes */}
                             {loadingEpisodes ? (
                                 <div className="flex justify-center items-center py-12">
                                     <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {episodes.map((ep) => (
-                                        <button
-                                            key={ep.id}
-                                            onClick={() => {
-                                                setSelectedEpisode(ep.episode_number);
-                                                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to player
-                                            }}
-                                            className={`text-left group relative overflow-hidden rounded-xl border transition-all duration-300 ${selectedEpisode === ep.episode_number
-                                                ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                                                : 'border-[var(--border-color)] hover:border-blue-500/50 hover:shadow-lg'
+                                <>
+                                    {/* Mobile: Compact List View */}
+                                    <div className="flex flex-col gap-2 sm:hidden">
+                                        {episodes.map((ep) => (
+                                            <button
+                                                key={ep.id}
+                                                onClick={() => {
+                                                    setSelectedEpisode(ep.episode_number);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                                                    selectedEpisode === ep.episode_number
+                                                        ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_12px_rgba(59,130,246,0.2)]'
+                                                        : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-blue-500/40'
                                                 }`}
-                                        >
-                                            <div className="aspect-video bg-[var(--bg-card)] relative overflow-hidden">
-                                                {ep.still_path ? (
-                                                    <img
-                                                        src={`${IMG_BASE}/w300${ep.still_path}`}
-                                                        alt={ep.name}
-                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] bg-black/20">
-                                                        No Image
-                                                    </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-
-                                                {/* Play Icon Overlay */}
-                                                <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${selectedEpisode === ep.episode_number ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                                                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                                                        <Play className="w-4 h-4 text-white fill-current ml-0.5" />
-                                                    </div>
+                                            >
+                                                {/* Thumbnail */}
+                                                <div className="w-24 h-14 rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative">
+                                                    {ep.still_path ? (
+                                                        <img
+                                                            src={`${IMG_BASE}/w185${ep.still_path}`}
+                                                            alt={ep.name}
+                                                            loading="lazy"
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>
+                                                    )}
+                                                    {selectedEpisode === ep.episode_number && (
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                                            <Play className="w-5 h-5 text-white fill-current" />
+                                                        </div>
+                                                    )}
                                                 </div>
 
-                                                <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow">
-                                                    E{ep.episode_number}
+                                                {/* Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`text-sm font-semibold line-clamp-1 ${
+                                                        selectedEpisode === ep.episode_number ? 'text-blue-400' : 'text-[var(--text-main)]'
+                                                    }`}>
+                                                        E{ep.episode_number}. {ep.name}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        {ep.air_date && <span className="text-[10px] text-[var(--text-muted)]">{ep.air_date}</span>}
+                                                        {ep.runtime > 0 && <span className="text-[10px] text-[var(--text-muted)]">{ep.runtime}m</span>}
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </button>
+                                        ))}
+                                    </div>
 
-                                            <div className="p-3 bg-[var(--bg-main)]">
-                                                <h3 className={`font-semibold text-sm line-clamp-1 mb-1 ${selectedEpisode === ep.episode_number ? 'text-blue-400' : 'text-[var(--text-main)] group-hover:text-blue-400'} transition-colors`}>
-                                                    {ep.episode_number}. {ep.name}
-                                                </h3>
-                                                <p className="text-xs text-[var(--text-muted)] line-clamp-2">
-                                                    {ep.overview || "No description available."}
-                                                </p>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
+                                    {/* Desktop/Tablet: Card Grid View */}
+                                    <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                        {episodes.map((ep) => (
+                                            <button
+                                                key={ep.id}
+                                                onClick={() => {
+                                                    setSelectedEpisode(ep.episode_number);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className={`text-left group relative overflow-hidden rounded-xl border transition-all duration-300 ${selectedEpisode === ep.episode_number
+                                                    ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                                                    : 'border-[var(--border-color)] hover:border-blue-500/50 hover:shadow-lg'
+                                                    }`}
+                                            >
+                                                <div className="aspect-video bg-[var(--bg-card)] relative overflow-hidden">
+                                                    {ep.still_path ? (
+                                                        <img
+                                                            src={`${IMG_BASE}/w300${ep.still_path}`}
+                                                            alt={ep.name}
+                                                            loading="lazy"
+                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] bg-black/20">
+                                                            No Image
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+
+                                                    {/* Play Icon Overlay */}
+                                                    <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${selectedEpisode === ep.episode_number ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                                        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                                                            <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow">
+                                                        E{ep.episode_number}
+                                                    </div>
+                                                    {ep.runtime > 0 && (
+                                                        <div className="absolute bottom-2 left-2 bg-black/80 px-1.5 py-0.5 rounded text-[10px] text-[var(--text-muted)]">
+                                                            {ep.runtime}m
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="p-3 bg-[var(--bg-main)]">
+                                                    <h3 className={`font-semibold text-sm line-clamp-1 mb-1 ${selectedEpisode === ep.episode_number ? 'text-blue-400' : 'text-[var(--text-main)] group-hover:text-blue-400'} transition-colors`}>
+                                                        {ep.episode_number}. {ep.name}
+                                                    </h3>
+                                                    <p className="text-xs text-[var(--text-muted)] line-clamp-2">
+                                                        {ep.overview || "No description available."}
+                                                    </p>
+                                                    {ep.air_date && (
+                                                        <p className="text-[10px] text-[var(--text-muted)] mt-1.5 flex items-center gap-1">
+                                                            <Calendar className="w-3 h-3" /> {ep.air_date}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </>
                             )}
                         </section>
                     )}
