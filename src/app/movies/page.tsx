@@ -324,7 +324,7 @@ export default function MoviesPage() {
                         <MovieHeroCarousel items={trending.length > 0 ? trending : popular} />
 
                         {/* Content Sections */}
-                        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-10">
+                        <div className="max-w-7xl mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
                             {/* Loading skeletons when data hasn't arrived */}
                             {trending.length === 0 && popular.length === 0 && (
                                 <div className="space-y-10">

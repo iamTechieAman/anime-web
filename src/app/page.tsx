@@ -132,18 +132,18 @@ export default function Home() {
 
             {/* Genre Bar */}
             <div className="bg-[var(--bg-card)] border-y border-[var(--border-color)]">
-               <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-3 flex gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
+               <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-2.5 flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
                    {["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"].map(genre => (
-                       <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
+                       <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-xs sm:text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
                    ))}
                </div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8 flex flex-col lg:flex-row gap-6 md:gap-8">
+            <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
                 {/* Left Column (Main Content) */}
-                <div className="flex-1 space-y-10 min-w-0">
+                <div className="flex-1 space-y-8 min-w-0">
                     <section>
-                       <div className="flex items-center justify-between mb-6">
+                       <div className="flex items-center justify-between mb-4">
                          <h2 className="text-xl md:text-2xl font-bold font-sora text-white">Recently Updated</h2>
                          <Link href="/recent" className="text-sm text-[var(--text-muted)] hover:text-white transition-colors">View All &gt;</Link>
                        </div>

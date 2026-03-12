@@ -137,7 +137,7 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
 // === MOVIE GRID ===
 export function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
             {items.map((item) => (
                 <MovieCard key={item.id} item={item} type={item.media_type || type} />
             ))}
@@ -181,7 +181,7 @@ export function MovieRow({ items, type = "movie", title }: { items: MovieItem[];
                 className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar scroll-smooth"
             >
                 {items.map((item) => (
-                    <div key={item.id} className="flex-shrink-0 w-[130px] sm:w-[155px] md:w-[170px] lg:w-[180px]">
+                    <div key={item.id} className="flex-shrink-0 w-[28vw] sm:w-[155px] md:w-[170px] lg:w-[180px] max-w-[180px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}

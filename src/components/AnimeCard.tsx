@@ -40,6 +40,7 @@ export function AnimeCard({ show }: { show: Show }) {
                             src={show.thumbnail}
                             alt={show.name}
                             onError={handleImageError}
+                            loading="lazy"
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     ) : (
@@ -104,7 +105,7 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
         )
     }
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
             {shows.map((show) => (
                 <AnimeCard key={show._id} show={show} />
             ))}
@@ -134,6 +135,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                         src={show.thumbnail}
                         alt={show.name}
                         onError={() => setImageError(true)}
+                        loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                 ) : (
