@@ -8,6 +8,7 @@ import MobileModals from "@/components/MobileModals";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import Header from "@/components/Header";
 import { MobileUIProvider } from "@/context/MobileUIContext";
+import ProfileGate from "@/components/ProfileGate";
 
 const sora = Sora({
   variable: "--font-sora",
@@ -82,11 +83,12 @@ export default function RootLayout({
               })
             }}
           />
+          <ProfileGate />
           <DesktopSidebar />
           <Suspense fallback={<div className="h-[70px] md:h-[80px] w-full bg-[var(--bg-overlay)] border-b border-[var(--border-color)] fixed top-0 left-0 z-50"></div>}>
             <Header />
           </Suspense>
-          <div className="flex-1 md:pl-[72px] w-full max-w-full pt-[70px] md:pt-[80px]">
+          <div className="flex-1 md:pl-[72px] w-full min-w-0 max-w-[100vw] overflow-x-hidden pt-[70px] md:pt-[80px] flex flex-col">
             {children}
           </div>
           <MobileModals />

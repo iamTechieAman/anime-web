@@ -265,8 +265,8 @@ export default function WatchClient({ id }: { id: string }) {
                 const allServers = [...validServers];
                 
                 if (tmdbId) {
-                    // Append movie servers with mapped properties to match anime server interface
-                    allServers.push(...MOVIE_SERVERS.map(ms => ({
+                    // Prepend movie servers to prioritize them
+                    allServers.unshift(...MOVIE_SERVERS.map(ms => ({
                         serverId: ms.id,
                         serverName: ms.name,
                         type: mode,

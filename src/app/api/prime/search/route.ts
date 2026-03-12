@@ -24,15 +24,15 @@ export async function GET(request: Request) {
         const data = await res.json();
 
         // Filter out people results, keep only movie and tv
-        const filtered = data.results.filter(
-            (item: any) => item.media_type === "movie" || item.media_type === "tv"
-        );
+        const filtered = Array.isArray(data.results) 
+            ? data.results.filter((item: any) => item.media_type === "movie" || item.media_type === "tv")
+            : [];
 
         return NextResponse.json({
             results: filtered,
-            page: data.page,
-            total_pages: data.total_pages,
-            total_results: data.total_results,
+            page: data.page || 1,
+            total_pages: data.total_pages || 0,
+            total_results: data.total_results || 0,
         });
     } catch (error: any) {
         console.error("Search API error:", error);

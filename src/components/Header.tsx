@@ -35,6 +35,7 @@ export default function Header() {
   const [showFilter, setShowFilter] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasNewNotif] = useState(true);
+  const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
 
   const [filterGenre, setFilterGenre] = useState("");
   const [filterFormat, setFilterFormat] = useState("");
@@ -54,7 +55,20 @@ export default function Header() {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifications(false);
     };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+
+    const updateProfile = () => {
+      const p = localStorage.getItem("toonplayer_profile");
+      if (p) {
+        try { setProfile(JSON.parse(p)); } catch(e) {}
+      }
+    };
+    updateProfile();
+    window.addEventListener('profileUpdated', updateProfile);
+
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      window.removeEventListener('profileUpdated', updateProfile);
+    };
   }, []);
 
   useEffect(() => {
@@ -277,9 +291,16 @@ export default function Header() {
             </AnimatePresence>
           </div>
 
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 p-[2px] transition-transform hover:scale-105 cursor-pointer">
-            <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
-               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User Avatar" />
+          <div className="flex items-center gap-3">
+            {profile && (
+              <span className="hidden md:inline-block text-sm font-bold text-[var(--text-muted)]">
+                Hi, {profile.name}
+              </span>
+            )}
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 p-[2px] transition-transform hover:scale-105 cursor-pointer">
+              <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
+                 <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" />
+              </div>
             </div>
           </div>
         </div>
