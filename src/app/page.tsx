@@ -126,7 +126,7 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/10 to-transparent opacity-50 transition-opacity duration-300" />
       </div>
 
-      <div className="relative z-10 w-full pt-20 md:pt-24 pb-24 md:pb-0">
+      <div className="relative z-10 w-full pb-24 md:pb-0">
 
             <HeroCarousel />
 

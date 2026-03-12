@@ -113,7 +113,7 @@ export default function WatchClient({ id }: { id: string }) {
 
     // Server State
     const [servers, setServers] = useState<any[]>([]);
-    const [selectedServer, setSelectedServer] = useState<string | null>("peachify");
+    const [selectedServer, setSelectedServer] = useState<string | null>(null);
     const [loadingServers, setLoadingServers] = useState(false);
 
     // Show loading and error states
@@ -274,39 +274,51 @@ export default function WatchClient({ id }: { id: string }) {
             getUrl: ms.getUrl
         }));
 
+        const hasTmdb = tmdbId && tmdbId !== "0";
+
         const fetchServers = async () => {
             setLoadingServers(true);
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}`);
-                const validServers = (res.data.servers || []).filter((s: any) => s.type === mode);
-                // Always prepend movie servers — they are the most reliable
-                const allServers = [...movieServersList, ...validServers];
+                const nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
+                
+                // Native anime servers FIRST, movie servers as fallback (only if we have a real TMDB ID)
+                const allServers = hasTmdb 
+                    ? [...nativeServers, ...movieServersList]
+                    : [...nativeServers];
+
+                // If no native servers and no TMDB, still show movie servers as last resort
+                if (allServers.length === 0) {
+                    allServers.push(...movieServersList);
+                }
 
                 setServers(allServers);
 
-                // Default to ToonPlayer-VIP (peachify) if available
+                // Default to first available native server, or first movie server
                 if (allServers.length > 0) {
-                    const peachify = allServers.find((s: any) => s.serverId === "peachify");
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists) {
-                        setSelectedServer(peachify ? "peachify" : allServers[0].serverId);
+                        // Prefer first native server, fall back to peachify
+                        const firstNative = allServers.find((s: any) => !s.isMovieServer);
+                        const peachify = allServers.find((s: any) => s.serverId === "peachify");
+                        setSelectedServer(firstNative?.serverId || peachify?.serverId || allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);
                 }
             } catch (err) {
-                console.error("Failed to fetch anime servers, using movie servers only", err);
-                // Always show movie servers even if anime API fails
-                setServers(movieServersList);
-                const peachify = movieServersList.find(s => s.serverId === "peachify");
-                setSelectedServer(peachify ? "peachify" : movieServersList[0]?.serverId || null);
+                console.error("Failed to fetch anime servers", err);
+                // Fallback: show movie servers if we have TMDB, otherwise empty
+                const fallback = hasTmdb ? movieServersList : movieServersList;
+                setServers(fallback);
+                setSelectedServer(fallback[0]?.serverId || null);
             } finally {
                 setLoadingServers(false);
             }
         };
 
         fetchServers();
-    }, [currentEp, mode, show]);
+    }, [currentEp, mode, show, tmdbId]);
 
     // Auto-switch to next server on failure
     const autoSwitchServer = (failedServerId: string) => {
@@ -334,15 +346,23 @@ export default function WatchClient({ id }: { id: string }) {
             const selectedServerObj = servers.find(s => s.serverId === selectedServer);
             if (!selectedServerObj) return;
 
-            // For movie servers — always load iframe directly, skip episode check
+            // For movie servers — only load iframe if we have a real TMDB ID
             if (selectedServerObj.isMovieServer) {
+                const hasTmdb = tmdbId && tmdbId !== "0";
+                if (!hasTmdb) {
+                    // Skip this movie server — can't play without real TMDB ID
+                    console.warn('[WatchPage] Movie server selected but no valid TMDB ID, auto-switching...');
+                    autoSwitchServer(selectedServer);
+                    processingRef.current = null;
+                    return;
+                }
+
                 setLoadingSource(true);
                 setSourceUrl(null);
                 setError(null);
 
                 const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
-                const tmdbIdToUse = tmdbId && tmdbId !== "0" ? tmdbId : "0";
-                const iframeUrl = serverWithUrl.getUrl("tv", tmdbIdToUse, 1, parseInt(String(currentEp) || "1"));
+                const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
                 setSourceUrl(iframeUrl);
                 setVideoType("iframe");
                 setLoadingSource(false);

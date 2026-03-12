@@ -141,7 +141,7 @@ export default function HeroCarousel() {
 
     if (isLoading) {
         return (
-            <div className="relative w-full aspect-video md:aspect-[21/9] min-h-[450px] md:max-h-[700px] bg-[var(--bg-main)] flex items-center justify-center border-b border-[var(--border-color)]">
+            <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] bg-[var(--bg-main)] flex items-center justify-center border-b border-[var(--border-color)]">
                 <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
@@ -152,7 +152,7 @@ export default function HeroCarousel() {
     const activeSlide = slides[current];
 
     return (
-        <div className="relative w-full aspect-video md:aspect-[21/9] min-h-[480px] md:max-h-[750px] overflow-hidden group bg-black">
+        <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] overflow-hidden group bg-black">
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={activeSlide.id}
