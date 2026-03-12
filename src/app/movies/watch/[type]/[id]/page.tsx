@@ -34,9 +34,9 @@ const SERVERS = [
             type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
     {
-        id: "onoflix",
-        name: "ToonPlayer VIP 2",
-        badge: "Backup",
+        id: "vidsrc_net",
+        name: "VidSrc",
+        badge: "Stable",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
     },
@@ -48,23 +48,9 @@ const SERVERS = [
             type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://vidsrc.me/embed/movie?tmdb=${id}`,
     },
     {
-        id: "fmovies",
-        name: "FMovies",
-        badge: "New",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://fmovies.gd/embed/tv/${id}/${s || 1}/${e || 1}` : `https://fmovies.gd/embed/movie/${id}`,
-    },
-    {
-        id: "vidsrc_pro",
-        name: "VidSrc Pro",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pro/embed/movie/${id}`,
-    },
-    {
         id: "superembed",
         name: "SuperEmbed",
-        badge: "Stable",
+        badge: "Reliable",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     },

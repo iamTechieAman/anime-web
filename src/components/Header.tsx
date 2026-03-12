@@ -93,13 +93,15 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent | null, queryOverride?: string) => {
     if (e) e.preventDefault();
     const q = queryOverride || searchQuery;
-    if (!q.trim()) return;
     
     const params = new URLSearchParams();
-    params.set("query", q);
+    if (q.trim()) params.set("query", q);
     if (filterGenre) params.set("genre", filterGenre);
     if (filterFormat) params.set("format", filterFormat.toLowerCase());
     if (filterStatus) params.set("status", filterStatus.toLowerCase());
+    
+    // Allow navigation if we have either a query or any filter set
+    if (!q.trim() && !filterGenre && !filterFormat && !filterStatus) return;
     
     setShowSuggestions(false);
     router.push(`/search?${params.toString()}`);
@@ -112,7 +114,17 @@ export default function Header() {
   };
 
   const applyFilter = () => {
-    handleSearch(null);
+    // If we have a search query, combine with filters
+    // If not, navigate with filters alone
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set("query", searchQuery);
+    if (filterGenre) params.set("genre", filterGenre);
+    if (filterFormat) params.set("format", filterFormat.toLowerCase());
+    if (filterStatus) params.set("status", filterStatus.toLowerCase());
+    
+    if (params.toString()) {
+      router.push(`/search?${params.toString()}`);
+    }
     setShowFilter(false);
   };
 

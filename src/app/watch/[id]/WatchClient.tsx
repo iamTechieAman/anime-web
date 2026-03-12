@@ -38,9 +38,9 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
     {
-        id: "onoflix",
-        name: "ToonPlayer VIP 2",
-        badge: "Backup",
+        id: "vidsrc_net",
+        name: "VidSrc",
+        badge: "Stable",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
@@ -54,25 +54,9 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://vidsrc.me/embed/movie?tmdb=${id}`,
     },
     {
-        id: "fmovies",
-        name: "FMovies",
-        badge: "New",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://fmovies.gd/embed/tv/${id}/${s || 1}/${e || 1}` : `https://fmovies.gd/embed/movie/${id}`,
-    },
-    {
-        id: "vidsrc_pro",
-        name: "VidSrc Pro",
-        badge: null,
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pro/embed/movie/${id}`,
-    },
-    {
         id: "superembed",
         name: "SuperEmbed",
-        badge: "Stable",
+        badge: "Reliable",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
@@ -100,38 +84,6 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
-    },
-    {
-        id: "vidstream_anime",
-        name: "Vidstream",
-        badge: "Anime",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidstreaming.io/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidstreaming.io/embed/movie/${id}`,
-    },
-    {
-        id: "aniwave",
-        name: "AniWave",
-        badge: "HD",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidplay.online/e/${id}?season=${s || 1}&episode=${e || 1}` : `https://vidplay.online/e/${id}`,
-    },
-    {
-        id: "animex",
-        name: "AnimeX Stream",
-        badge: "Sub/Dub",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://anime.autoembed.cc/embed/${id}-episode-${e || 1}` : `https://anime.autoembed.cc/embed/${id}-episode-1`,
-    },
-    {
-        id: "animesauce",
-        name: "Anime Sauce",
-        badge: "Fast",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://animesauce.org/embed/tv/${id}/${s || 1}/${e || 1}` : `https://animesauce.org/embed/movie/${id}`,
     },
 ];
 
@@ -332,14 +284,16 @@ export default function WatchClient({ id }: { id: string }) {
         // Reset failed servers when episode changes
         failedServersRef.current = new Set();
 
-        const movieServersList = MOVIE_SERVERS.map(ms => ({
+        // Only include movie/embed servers if we have a VALID TMDB ID (not "0" sentinel)
+        const hasValidTmdbId = tmdbId && tmdbId !== "0";
+        const movieServersList = hasValidTmdbId ? MOVIE_SERVERS.map(ms => ({
             serverId: ms.id,
             serverName: ms.name,
             type: mode,
             badge: ms.badge,
             isMovieServer: true,
             getUrl: ms.getUrl
-        }));
+        })) : [];
 
         const fetchServers = async () => {
             setLoadingServers(true);
@@ -432,8 +386,14 @@ export default function WatchClient({ id }: { id: string }) {
                 setError(null);
 
                 const serverWithUrl = selectedServerObj as { getUrl: (type: string, id: string, s?: number, e?: number) => string, serverName: string };
-                const idToUse = (tmdbId && tmdbId !== "0") ? tmdbId : "0";
-                const iframeUrl = serverWithUrl.getUrl("tv", idToUse, 1, parseInt(String(currentEp) || "1"));
+                // Guard: never generate an embed URL with ID "0"
+                if (!tmdbId || tmdbId === "0") {
+                    console.warn('[WatchClient] No valid TMDB ID, skipping movie server');
+                    autoSwitchServer(selectedServer);
+                    processingRef.current = null;
+                    return;
+                }
+                const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
                 setSourceUrl(iframeUrl);
                 setVideoType("iframe");
                 setLoadingSource(false);
