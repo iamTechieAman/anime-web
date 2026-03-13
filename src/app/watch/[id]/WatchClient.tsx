@@ -306,16 +306,16 @@ export default function WatchClient({ id }: { id: string }) {
                 badge: "Anime",
                 isMovieServer: true,
                 isEmergency: true,
-                getUrl: () => `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${currentEp}`
+                getUrl: () => `https://vidsrc.to/embed/anime/${anilistId}/${currentEp}`
             },
             {
-                serverId: "emergency_2embed_anime",
-                serverName: "2Embed Anime",
+                serverId: "emergency_vidsrc_me",
+                serverName: "VidSrc Me",
                 type: mode,
                 badge: "Backup",
                 isMovieServer: true,
                 isEmergency: true,
-                getUrl: () => `https://2anime.xyz/embed/${anilistId}-episode-${currentEp}`
+                getUrl: () => `https://vidsrc.me/embed/anime?anilist=${anilistId}&episode=${currentEp}`
             },
             ...(malId ? [{
                 serverId: "emergency_mal",
@@ -332,7 +332,12 @@ export default function WatchClient({ id }: { id: string }) {
             setLoadingServers(true);
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}`);
-                const nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
+                let nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
+                
+                // If no servers for specific mode (sub/dub), show all native servers as fallback
+                if (nativeServers.length === 0 && res.data.servers?.length > 0) {
+                    nativeServers = res.data.servers;
+                }
                 
                 // ALWAYS include movie servers — they are the guaranteed fallback
                 const allServers = [...nativeServers, ...movieServersList, ...emergencyEmbeds];

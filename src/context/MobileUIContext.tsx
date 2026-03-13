@@ -14,6 +14,8 @@ interface MobileUIContextType {
     setMenuOpen: (isOpen: boolean) => void;
     theme: 'dark' | 'light';
     toggleTheme: () => void;
+    showProfileSettings: boolean;
+    setShowProfileSettings: (open: boolean) => void;
 }
 
 const MobileUIContext = createContext<MobileUIContextType | undefined>(undefined);
@@ -22,6 +24,7 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+    const [showProfileSettings, setShowProfileSettings] = useState(false);
 
     // Handle Android Back Button
     useEffect(() => {
@@ -120,7 +123,9 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
             setSearchOpen: setIsSearchOpen,
             setMenuOpen: setIsMenuOpen,
             theme,
-            toggleTheme
+            toggleTheme,
+            showProfileSettings,
+            setShowProfileSettings
         }}>
             {children}
         </MobileUIContext.Provider>

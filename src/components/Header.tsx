@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
 import { useRef as useReactRef } from 'react';
+import { useMobileUI } from "@/context/MobileUIContext";
 
 const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"];
 const FORMATS = ["TV", "Movie", "OVA", "ONA", "Special"];
@@ -29,11 +30,12 @@ query($search: String) {
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [hasNewNotif] = useState(true);
@@ -42,6 +44,10 @@ export default function Header() {
   const [filterGenre, setFilterGenre] = useState("");
   const [filterFormat, setFilterFormat] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const { setShowProfileSettings } = useMobileUI();
+
+  const isMovies = pathname?.startsWith('/movies');
+  const searchPlaceholder = isMovies ? "Search movies & shows..." : "Search anime...";
 
   const filterRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -53,12 +59,12 @@ export default function Header() {
   }, [searchParams]);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilter(false);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilters(false);
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifications(false);
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) setShowProfileDropdown(false);
     };
-    document.addEventListener('mousedown', handler);
+    document.addEventListener('mousedown', handleClickOutside);
 
     const updateProfile = () => {
       const p = localStorage.getItem("toonplayer_profile");
@@ -70,7 +76,7 @@ export default function Header() {
     window.addEventListener('profileUpdated', updateProfile);
 
     return () => {
-      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('profileUpdated', updateProfile);
     };
   }, []);
@@ -108,6 +114,7 @@ export default function Header() {
     if (!q.trim() && !filterGenre && !filterFormat && !filterStatus) return;
     
     setShowSuggestions(false);
+    setShowFilters(false); // Added this line
     router.push(`/search?${params.toString()}`);
   };
 
@@ -129,7 +136,7 @@ export default function Header() {
     if (params.toString()) {
       router.push(`/search?${params.toString()}`);
     }
-    setShowFilter(false);
+    setShowFilters(false);
   };
 
   const clearFilters = () => {
@@ -139,7 +146,8 @@ export default function Header() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300 md:pl-[72px]">
+    <>
+    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform" onClick={clearSearch}>
@@ -148,7 +156,7 @@ export default function Header() {
             <img 
               src="/logo.png" 
               alt="ToonPlayer Logo" 
-              className="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 drop-shadow-[0_0_12px_rgba(255,255,255,0.5)]" 
+              className="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
               onError={(e) => {
                 // Fallback icon if logo fails
                 e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=TP&backgroundColor=a855f7';
@@ -172,7 +180,7 @@ export default function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSuggestions(true)}
-              placeholder="Search anime..."
+              placeholder={searchPlaceholder}
               className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
               autoComplete="off"
             />
@@ -186,9 +194,9 @@ export default function Header() {
           {/* Filter Button */}
           <div ref={filterRef} className="relative">
             <button
-              onClick={() => { setShowFilter(v => !v); setShowNotifications(false); }}
+              onClick={() => { setShowFilters(v => !v); setShowNotifications(false); }}
               className={`h-full px-4 py-2.5 bg-[var(--bg-card)] border rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
-                showFilter || filterGenre || filterFormat || filterStatus
+                showFilters || filterGenre || filterFormat || filterStatus
                   ? 'border-purple-500 text-purple-400 bg-purple-500/5'
                   : 'border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20'
               }`}
@@ -201,7 +209,7 @@ export default function Header() {
             </button>
 
             <AnimatePresence>
-              {showFilter && (
+              {showFilters && (
                 <motion.div
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -234,6 +242,20 @@ export default function Header() {
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-purple-500 border-purple-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
                           >
                             {f}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Status</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {STATUSES.map(s => (
+                          <button
+                            key={s}
+                            onClick={() => setFilterStatus(filterStatus === s ? "" : s)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-purple-500 border-purple-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                          >
+                            {s}
                           </button>
                         ))}
                       </div>
@@ -354,7 +376,14 @@ export default function Header() {
                         <p className="text-[10px] text-[var(--text-muted)]">Continue where you left off</p>
                       </div>
                     </Link>
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
+                    <button 
+                      onClick={() => { 
+                        setShowProfileSettings(true); 
+                        // Small delay to ensure modal gets priority
+                        setTimeout(() => setShowProfileDropdown(false), 50);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group"
+                    >
                       <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
                         <User className="w-4 h-4 text-blue-400" />
                       </div>
@@ -378,5 +407,6 @@ export default function Header() {
         </div>
       </div>
     </nav>
+    </>
   );
 }
