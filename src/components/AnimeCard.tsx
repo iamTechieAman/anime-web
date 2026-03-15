@@ -132,7 +132,7 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
 }
 
 // Anime Grid Component
-export function AnimeGrid({ shows }: { shows: Show[] }) {
+export function AnimeGrid({ shows, prefix = "anime" }: { shows: Show[], prefix?: string }) {
     if (!shows || shows.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -142,8 +142,8 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
     }
     return (
         <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
-            {shows.map((show) => (
-                <AnimeCard key={show._id} show={show} />
+            {shows.map((show, idx) => (
+                <AnimeCard key={`${prefix}-${show._id}-${idx}`} show={show} />
             ))}
         </div>
     );
@@ -161,6 +161,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-20px" }}
             transition={{ duration: 0.3 }}
+            key={`${show._id}-${rank}`}
         >
         <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
             {/* Rank Number (if provided) */}

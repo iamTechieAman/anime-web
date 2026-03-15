@@ -22,9 +22,10 @@ export async function GET(request: Request) {
         // 1. SMART RESOLUTION (Numeric AniList/MAL IDs)
         if (/^\d+$/.test(id)) {
             console.log(`[Episodes] Numeric ID detected (${id}). Attempting smart resolution...`);
-            const titles = await fetchAniListTitles(id);
+            const media = await fetchAniListTitles(id);
 
-            if (titles && titles.length > 0) {
+            if (media) {
+                const titles = [media.title.english, media.title.romaji, ...(media.synonyms || [])].filter(Boolean);
                 console.log(`[Episodes] Searching for titles: ${JSON.stringify(titles)}`);
                 
                 // We'll try to find matches on these providers
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
                                 if (match) {
                                     console.log(`[Episodes] Potential match found on ${searchP}: ${match.title} (${match.id})`);
                                     const info = await p.getInfo(match.id);
-                                    const show = mapInfoToShow(info);
+                                    const show = mapInfoToShow(info, media);
                                     const total = (show?.availableEpisodesDetail.sub.length || 0) + (show?.availableEpisodesDetail.dub.length || 0);
                                     
                                     if (show && total > maxEps) {
@@ -54,8 +55,6 @@ export async function GET(request: Request) {
                                     }
                                 }
                             }
-                            // If we already found a very good match (e.g. > 100 eps), we might break early to save time, 
-                            // but for Shin Chan we want as many as possible.
                         }
                     } catch (e: any) {
                         console.warn(`[Episodes] Search failed on ${searchP}: ${e.message}`);
@@ -140,25 +139,22 @@ const findBestMatch = (results: any[], target: string) => {
     return results[0];
 };
 
-async function fetchAniListTitles(id: string): Promise<string[]> {
+async function fetchAniListTitles(id: string) {
     try {
-        const query = `query ($id: Int) { Media (id: $id, type: ANIME) { title { romaji english } synonyms } }`;
+        const query = `query ($id: Int) { Media (id: $id, type: ANIME) { title { romaji english native } synonyms } }`;
         const res = await fetch('https://graphql.anilist.co', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query, variables: { id: parseInt(id) } })
         });
         const data = await res.json();
-        const media = data?.data?.Media;
-        if (!media) return [];
-        const titles = [media.title.english, media.title.romaji, ...(media.synonyms || [])].filter(Boolean);
-        return Array.from(new Set(titles));
+        return data?.data?.Media;
     } catch (e) {
-        return [];
+        return null;
     }
 }
 
-function mapInfoToShow(info: any) {
+function mapInfoToShow(info: any, aniListData?: any) {
     if (!info) return null;
     const episodes = info.episodes || [];
     const subEps = info.availableEpisodesDetail?.sub || (Array.isArray(episodes) ? episodes.map((ep: any) => ep?.number?.toString()) : []);
@@ -166,7 +162,9 @@ function mapInfoToShow(info: any) {
 
     return {
         _id: info.id || "unknown",
-        name: info.title || "Unknown",
+        name: info.title || aniListData?.title?.english || aniListData?.title?.romaji || "Unknown",
+        englishName: aniListData?.title?.english || null,
+        romajiName: aniListData?.title?.romaji || null,
         thumbnail: info.image,
         availableEpisodesDetail: {
             sub: subEps.filter(Boolean),

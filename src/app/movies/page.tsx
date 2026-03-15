@@ -5,8 +5,10 @@ import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp, SlidersHorizontal, User, History, LogOut } from "lucide-react";
-import MovieHeroCarousel from "@/components/MovieHeroCarousel";
 import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
+import HeroCarousel from "@/components/HeroCarousel";
+import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
+import useSWR from 'swr';
 
 // CineVibe-style category sections with TMDB genre IDs
 const GENRE_ROWS = [
@@ -32,7 +34,7 @@ const NETWORK_ROWS = [
 
 // Nav tabs
 const TABS = [
-    { id: "home", label: "Home", icon: Film },
+    { id: "home", label: "Explore", icon: Film },
     { id: "movies", label: "Movies", icon: Popcorn },
     { id: "tv", label: "TV Shows", icon: Tv },
     { id: "trending", label: "Trending", icon: TrendingUp },
@@ -51,10 +53,23 @@ export default function MoviesPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<MovieItem[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [showSearch, setShowSearch] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
     const [showProfile, setShowProfile] = useState(false);
+
+    // Anime Data using SWR (same as old home page for consistency)
+    const fetcher = (url: string) => axios.get(url).then(res => res.data);
+    const { data: animeRecent } = useSWR('/api/anime/recent', fetcher, { refreshInterval: 60000 });
+    const { data: animeTrending } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000 });
+    const { data: animePopular } = useSWR('/api/anime/popular', fetcher, { refreshInterval: 300000 });
+
+    // Helper to get active filters
+    const getFilteredContent = () => ({
+        showMoviesOnly: activeTab === "movies",
+        showTvOnly: activeTab === "tv",
+        showTrendingOnly: activeTab === "trending",
+        showAll: activeTab === "home"
+    });
 
     // Fetch user profile
     useEffect(() => {
@@ -195,328 +210,191 @@ export default function MoviesPage() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    // Filter content based on active tab
-    const getFilteredContent = () => {
-        switch (activeTab) {
-            case "movies":
-                return { showMoviesOnly: true };
-            case "tv":
-                return { showTvOnly: true };
-            case "trending":
-                return { showTrendingOnly: true };
-            default:
-                return { showAll: true };
+    const filter = getFilteredContent();
+
+    // Check for search query in URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const q = urlParams.get('q');
+        if (q) {
+            setSearchQuery(q);
+            handleSearch(q);
+        } else {
+            setSearchQuery("");
+            setSearchResults([]);
+        }
+    }, [window.location.search]);
+
+    const handleSearch = async (query: string) => {
+        setIsSearching(true);
+        try {
+            const res = await axios.get(`/api/search/unified?q=${encodeURIComponent(query)}`);
+            setSearchResults(res.data.results || []);
+        } catch (err) {
+            console.error("Search failed:", err);
+        } finally {
+            setIsSearching(false);
         }
     };
 
-    const filter = getFilteredContent();
-
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
-            {/* Top Navigation Bar — ToonPlayer Movies style */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
-                <div className="w-full max-w-[2000px] mx-auto px-4 md:px-6">
-                    <div className="flex items-center justify-between h-14">
-                        {/* Logo */}
-                        <div className="flex items-center gap-6">
-                            <a href="/movies" className="flex items-center gap-2 text-xl font-black tracking-tight">
-                                <div className="w-6 h-6 relative hidden sm:block">
-                                    <img src="/icon.png" alt="ToonPlayer Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                                </div>
-                                <span className="text-[var(--text-main)]">ToonPlayer</span>
-                                <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase tracking-widest -ml-1 mt-1">Movies</span>
-                            </a>
+        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden transition-colors duration-300">
+            {/* Background Ambience */}
+            <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 to-transparent opacity-50" />
+            </div>
 
-                            {/* Desktop tabs */}
-                            <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1">
-                                {TABS.map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.id
-                                            ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                                            : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
-                                            }`}
-                                    >
-                                        <tab.icon className="w-4 h-4" />
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+            <div className="relative z-10 w-full pb-24 md:pb-0">
+                {/* Hero section - Unified or Anime Primary */}
+                <HeroCarousel />
 
-                        {/* Filter Bar */}
-                        <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md">
-                            <span className="text-[10px] items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md uppercase tracking-wider font-black text-[var(--text-muted)] flex shrink-0">
-                                <SlidersHorizontal className="w-3 h-3" />
-                                Genres
-                            </span>
-                            <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar max-w-2xl px-2">
-                                {GENRE_ROWS.map((g) => (
-                                    <button
-                                        key={g.genreId}
-                                        onClick={() => {
-                                            // Scroll to the row or filter search
-                                            const element = document.getElementById(`genre-${g.genreId}`);
-                                            if (element) {
-                                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                            }
-                                        }}
-                                        className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white transition-all whitespace-nowrap"
-                                    >
-                                        {g.title}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Search & Global Nav */}
-                        <div className="flex items-center gap-3">
-                            <Link href="/" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-card)] hover:bg-[var(--border-color)] border border-[var(--border-color)] rounded-lg text-xs font-medium text-[var(--text-main)] hover:text-white transition-colors">
-                                <span className="text-purple-400 font-bold">←</span> Back to Anime
-                            </Link>
-
-                            <AnimatePresence>
-                                {showSearch && (
-                                    <motion.div
-                                        initial={{ width: 0, opacity: 0 }}
-                                        animate={{ width: "100%", maxWidth: 250, opacity: 1 }}
-                                        exit={{ width: 0, opacity: 0 }}
-                                        className="overflow-hidden absolute right-12 md:relative md:right-0 bg-[var(--bg-main)] md:bg-transparent p-2 md:p-0 flex-1 z-50 rounded-lg shadow-2xl shadow-black/50 md:shadow-none"
-                                        style={{ minWidth: showSearch ? '200px' : '0' }}
-                                    >
-                                        <input
-                                            type="text"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="Search movies & TV..."
-                                            className="w-full px-3 py-1.5 md:py-2 bg-white/10 md:bg-[var(--bg-card)] border border-[var(--border-color)] md:border-[var(--border-color)] rounded-lg text-sm text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/50"
-                                            autoFocus
-                                        />
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                            <button
-                                onClick={() => {
-                                    setShowSearch(!showSearch);
-                                    if (showSearch) { setSearchQuery(""); setSearchResults([]); }
-                                }}
-                                className={`p-2 rounded-lg transition-colors z-50 relative ${showSearch ? 'bg-white/10 md:bg-[var(--bg-card)]' : 'hover:bg-[var(--bg-card)]'}`}
-                            >
-                                {showSearch ? <X className="w-5 h-5 text-[var(--text-main)]" /> : <Search className="w-5 h-5 text-[var(--text-main)]" />}
-                            </button>
-                            
-                            {/* Profile Section */}
-                            <div className="relative">
-                                <button 
-                                    onClick={() => setShowProfile(!showProfile)}
-                                    className="flex items-center gap-3 p-1 pr-3 hover:bg-white/5 rounded-full transition-all border border-transparent hover:border-white/10 group ml-2"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-blue-500/20 flex-shrink-0">
-                                        <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
-                                            <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
-                                        </div>
-                                    </div>
-                                    <ChevronUp className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 hidden md:block ${showProfile ? 'rotate-180' : 'rotate-180 opacity-50'}`} />
-                                </button>
-
-                                <AnimatePresence>
-                                    {showProfile && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                                            className="absolute top-full right-0 mt-3 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
-                                        >
-                                            <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
-                                                <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Account</p>
-                                                <p className="text-sm font-bold text-white truncate">{profile?.name || "Guest Account"}</p>
-                                            </div>
-                                            <div className="p-2">
-                                                <Link href="/history" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                                                        <History className="w-4 h-4 text-blue-400" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-bold text-white">Watch History</p>
-                                                        <p className="text-[10px] text-[var(--text-muted)]">Continue watching</p>
-                                                    </div>
-                                                </Link>
-                                                <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
-                                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
-                                                        <User className="w-4 h-4 text-indigo-400" />
-                                                    </div>
-                                                    <div className="flex-1 text-left">
-                                                        <p className="text-sm font-bold text-white">Settings</p>
-                                                        <p className="text-[10px] text-[var(--text-muted)]">Manage account</p>
-                                                    </div>
-                                                </button>
-                                                <div className="my-2 border-t border-[var(--border-color)] mx-2" />
-                                                <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl transition-colors group text-red-400">
-                                                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-                                                        <LogOut className="w-4 h-4" />
-                                                    </div>
-                                                    <span className="text-sm font-bold">Sign Out</span>
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mobile tabs */}
-                    <div className="flex justify-between items-center pb-2 md:hidden">
-                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar">
+                {/* Genres & Categories Sub-Nav */}
+                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-0 z-40">
+                    <div className="w-full max-w-[2000px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
+                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50">
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${activeTab === tab.id
-                                        ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
-                                        : "text-[var(--text-muted)] hover:text-white"
-                                        }`}
+                                    className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer relative z-50 ${activeTab === tab.id
+                                        ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                                        : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
+                                    }`}
                                 >
-                                    <tab.icon className="w-3 h-3" />
+                                    <tab.icon className="w-3.5 h-3.5" />
                                     {tab.label}
                                 </button>
                             ))}
                         </div>
-                        <Link href="/" className="flex items-center gap-1 pl-2 ml-2 border-l border-[var(--border-color)] text-[10px] uppercase tracking-wider font-bold text-[var(--text-muted)] hover:text-purple-400 whitespace-nowrap shrink-0">
-                            <span>←</span> Anime
-                        </Link>
+                        <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-[var(--border-color)] ml-4">
+                            <span className="text-[10px] uppercase tracking-wider font-black text-[var(--text-muted)]">Quick Filters:</span>
+                            {GENRE_ROWS.slice(0, 4).map(g => (
+                                <button 
+                                    key={g.genreId}
+                                    onClick={() => document.getElementById(`genre-${g.genreId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                                    className="px-2.5 py-1 text-[10px] font-bold text-[var(--text-muted)] hover:text-white transition-colors"
+                                >
+                                    {g.title}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </nav>
 
-            {/* Main Content */}
-            <div className="pt-[104px] md:pt-14">
-                {/* Search Results */}
-                {searchQuery.trim() ? (
-                    <div className="w-full max-w-[2000px] mx-auto px-4 md:px-6 py-8">
-                        <h2 className="text-xl font-bold mb-6">
-                            {isSearching ? (
-                                <span className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                                    Searching...
-                                </span>
-                            ) : (
-                                <>Results for &ldquo;{searchQuery}&rdquo;</>
-                            )}
-                        </h2>
-                        {searchResults.length > 0 ? (
-                            <MovieGrid items={searchResults} />
-                        ) : (
-                            !isSearching && (
-                                <div className="text-center py-20">
-                                    <p className="text-[var(--text-muted)] text-lg">No results found</p>
-                                    <p className="text-zinc-600 text-sm mt-1">Try a different search term</p>
-                                </div>
-                            )
-                        )}
-                    </div>
-                ) : (
-                    <>
-                        {/* Hero Carousel */}
-                        <MovieHeroCarousel items={trending.length > 0 ? trending : popular} />
-
-                        {/* Content Sections */}
-                        <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-6 md:py-8 space-y-8 md:space-y-10">
-                            {/* Loading skeletons when data hasn't arrived */}
-                            {trending.length === 0 && popular.length === 0 && (
-                                <div className="space-y-10">
-                                    {[1, 2, 3].map((i) => (
-                                        <section key={i}>
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-1 h-6 bg-[var(--bg-card)] rounded-full animate-pulse" />
-                                                <div className="h-6 w-40 bg-[var(--bg-card)] rounded-lg animate-pulse" />
+                <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-4 md:py-8">
+                    {searchQuery ? (
+                        <div className="space-y-8">
+                            <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                                <Search className="w-6 h-6 text-purple-400" />
+                                {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
+                            </h2>
+                            {searchResults.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                    {searchResults.map((item: any) => (
+                                        <Link
+                                            key={`${item.type}-${item.id}`}
+                                            href={item.href}
+                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                        >
+                                            <div className="aspect-[2/3] relative">
+                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                                <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-black uppercase tracking-tighter text-white border border-white/10">
+                                                    {item.type}
+                                                </div>
                                             </div>
-                                            <div className="flex overflow-hidden gap-3">
-                                                {[...Array(7)].map((_, j) => (
-                                                    <div key={j} className="flex-shrink-0 w-[155px] md:w-[170px]">
-                                                        <div className="aspect-[2/3] rounded-xl bg-[var(--bg-card)] animate-pulse" />
-                                                        <div className="h-3 w-3/4 mt-2 bg-[var(--bg-card)] rounded animate-pulse" />
-                                                    </div>
-                                                ))}
+                                            <div className="p-3">
+                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+                                                <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-medium">
+                                                    <span>{item.format}</span>
+                                                    <span>{item.year}</span>
+                                                </div>
                                             </div>
-                                        </section>
+                                        </Link>
                                     ))}
                                 </div>
-                            )}
-                            {/* Trending */}
-                            {(filter.showAll || filter.showTrendingOnly) && trending.length > 0 && (
-                                <section>
-                                    <SectionHeader icon={TrendingUp} title="Trending Now" color="text-red-400" />
-                                    <MovieRow items={trending} title="trending" />
-                                </section>
-                            )}
-
-                            {/* Popular Movies */}
-                            {(filter.showAll || filter.showMoviesOnly) && popular.length > 0 && (
-                                <section>
-                                    <SectionHeader icon={Flame} title="Popular Movies" color="text-orange-400" />
-                                    <MovieRow items={popular} type="movie" title="popular-movies" />
-                                </section>
-                            )}
-
-                            {/* Popular TV */}
-                            {(filter.showAll || filter.showTvOnly) && tvPopular.length > 0 && (
-                                <section>
-                                    <SectionHeader icon={Tv} title="Popular TV Shows" color="text-purple-400" />
-                                    <MovieRow items={tvPopular} type="tv" title="popular-tv" />
-                                </section>
-                            )}
-
-                            {/* Network Rows — CineVibe feature */}
-                            {(filter.showAll || filter.showTvOnly) && NETWORK_ROWS.map((net) => (
-                                networkData[net.title] && networkData[net.title].length > 0 && (
-                                    <section key={net.title}>
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <span className="text-xl">{net.logo}</span>
-                                            <h2 className="text-lg font-bold text-[var(--text-main)]">{net.title}</h2>
-                                        </div>
-                                        <MovieRow items={networkData[net.title]} type="tv" title={net.title} />
-                                    </section>
-                                )
-                            ))}
-
-                            {/* Now Playing */}
-                            {(filter.showAll || filter.showMoviesOnly) && nowPlaying.length > 0 && (
-                                <section>
-                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
-                                    <MovieRow items={nowPlaying} type="movie" title="now-playing" />
-                                </section>
-                            )}
-
-                            {/* Genre Rows */}
-                            {(filter.showAll || filter.showMoviesOnly) && GENRE_ROWS.map((genre) => (
-                                genreData[genre.title] && genreData[genre.title].length > 0 && (
-                                    <section key={genre.title}>
-                                        <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
-                                        <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
-                                    </section>
-                                )
-                            ))}
-
-                            {/* Top Rated Movies */}
-                            {(filter.showAll || filter.showMoviesOnly) && topRated.length > 0 && (
-                                <section>
-                                    <SectionHeader icon={Sparkles} title="Top Rated Movies" color="text-green-400" />
-                                    <MovieRow items={topRated} type="movie" title="top-rated" />
-                                </section>
-                            )}
-
-                            {/* Top Rated TV */}
-                            {(filter.showAll || filter.showTvOnly) && tvTopRated.length > 0 && (
-                                <section>
-                                    <SectionHeader icon={Sparkles} title="Top Rated TV Shows" color="text-teal-400" />
-                                    <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" />
-                                </section>
+                            ) : (
+                                !isSearching && <div className="text-center py-20 text-[var(--text-muted)]">No results found for your search.</div>
                             )}
                         </div>
-                    </>
-                )}
+                    ) : activeTab === "home" ? (
+                        <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
+                            {/* Main Feed */}
+                            <div className="flex-1 space-y-12 min-w-0">
+                                {/* Recently Updated Anime */}
+                                <section>
+                                    <SectionHeader icon={Sparkles} title="Recently Updated Anime" color="text-purple-400" />
+                                    {animeRecent?.shows ? <AnimeGrid shows={animeRecent.shows.slice(0, 12)} prefix="recent" /> : <RowSkeleton />}
+                                </section>
+                                {/* Trending Movies & TV */}
+                                <section>
+                                    <SectionHeader icon={TrendingUp} title="Trending Movies & TV" color="text-red-400" />
+                                    {trending.length > 0 ? <MovieRow items={trending} title="movie-trending" /> : <RowSkeleton />}
+                                </section>
+                                
+                                {/* Popular Anime */}
+                                <section>
+                                    <SectionHeader icon={Flame} title="Popular Anime" color="text-orange-400" />
+                                    {animePopular?.shows ? <AnimeGrid shows={animePopular.shows.slice(0, 12)} prefix="popular" /> : <RowSkeleton />}
+                                </section>
+                                
+                                {/* Now Playing */}
+                                <section>
+                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
+                                    {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
+                                </section>
+
+                                {/* Genre Discovery */}
+                                {GENRE_ROWS.map((genre) => (
+                                    genreData[genre.title] && (
+                                        <section key={genre.title} id={`genre-${genre.genreId}`}>
+                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
+                                            <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
+                                        </section>
+                                    )
+                                ))}
+                            </div>
+
+                            {/* Sidebar - Trending & Airing */}
+                            <div className="w-full lg:w-[320px] xl:w-[380px] space-y-10 shrink-0">
+                                {/* Top Airing Anime */}
+                                <section className="bg-[var(--bg-card)]/50 p-5 rounded-2xl border border-[var(--border-color)]">
+                                    <h2 className="text-lg font-bold font-sora text-white mb-5 flex items-center gap-2">
+                                        <Tv className="w-5 h-5 text-purple-400" /> 
+                                        Top Anime
+                                    </h2>
+                                    <div className="flex flex-col gap-3">
+                                        {animeTrending?.shows?.slice(0, 6).map((show: Show, i: number) => (
+                                            <AnimeCardHorizontal key={`trending-${show._id}`} show={show} rank={i} />
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* Top Rated Movies */}
+                                <section className="bg-[var(--bg-card)]/50 p-5 rounded-2xl border border-[var(--border-color)]">
+                                    <h2 className="text-lg font-bold font-sora text-white mb-5 flex items-center gap-2">
+                                        <Sparkles className="w-5 h-5 text-yellow-400" /> 
+                                        Top Rated Movies
+                                    </h2>
+                                    {topRated.slice(0, 6).map((item, i) => (
+                                        <div key={item.id} className="flex items-center gap-3 py-2 group cursor-pointer border-b border-white/5 last:border-0">
+                                            <span className="text-2xl font-black text-white/10 group-hover:text-blue-500/50 transition-colors w-6">0{i+1}</span>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title}</h3>
+                                                <p className="text-[10px] text-[var(--text-muted)]">★ {item.vote_average?.toFixed(1)} • {item.release_date?.split('-')[0]}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </section>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-10">
+                            {activeTab === "movies" && popular.length > 0 && <section><SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" /><MovieGrid items={popular} /></section>}
+                            {activeTab === "tv" && tvPopular.length > 0 && <section><SectionHeader icon={Tv} title="Popular TV Shows" color="text-purple-400" /><MovieGrid items={tvPopular} /></section>}
+                            {activeTab === "trending" && trending.length > 0 && <section><SectionHeader icon={TrendingUp} title="Currently Trending" color="text-red-400" /><MovieGrid items={trending} /></section>}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Footer */}
@@ -557,6 +435,17 @@ function SectionHeader({ icon: Icon, title, color }: { icon: React.ComponentType
             <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
             <Icon className={`w-5 h-5 ${color}`} />
             <h2 className="text-lg font-bold text-[var(--text-main)]">{title}</h2>
+        </div>
+    );
+}
+
+// Row Skeleton for Anime
+function RowSkeleton() {
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+            {[...Array(6)].map((_, i) => (
+                <div key={i} className="aspect-[3/4.5] rounded-xl bg-white/5 animate-pulse" />
+            ))}
         </div>
     );
 }

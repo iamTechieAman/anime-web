@@ -50,14 +50,7 @@ export default function MobileNav() {
 
     const navItems = [
         {
-            label: "Home",
-            icon: Home,
-            color: "text-purple-500",
-            active: pathname === '/' && !isSearchOpen && !isMenuOpen,
-            onClick: handleHomeClick,
-        },
-        {
-            label: "Movies",
+            label: "Movies & Anime",
             icon: Film,
             color: "text-blue-500",
             active: pathname === '/movies' || pathname.startsWith('/movies/'),

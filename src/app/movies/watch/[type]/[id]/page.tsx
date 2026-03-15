@@ -77,6 +77,21 @@ const SERVERS = [
     },
 ];
 
+const ANIME_SERVERS = [
+    {
+        id: "vidsrc_anime",
+        name: "VidSrc Anime",
+        badge: "Anime",
+        getUrl: (id: string, ep: number) => `https://vidsrc.to/embed/anime/${id}/${ep}`
+    },
+    {
+        id: "vidsrc_me_anime",
+        name: "VidSrc Me",
+        badge: "Backup",
+        getUrl: (id: string, ep: number) => `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+    }
+];
+
 interface MovieDetails {
     id: number;
     title?: string;
@@ -122,23 +137,36 @@ interface EpisodeInfo {
     runtime: number;
 }
 
+interface ShowData {
+    _id: string;
+    name: string;
+    thumbnail: string;
+    aniListId: string;
+    availableEpisodesDetail: {
+        sub: string[];
+        dub: string[];
+    };
+}
+
 export default function WatchPage({ params }: { params: Promise<{ type: string; id: string }> }) {
     const resolvedParams = use(params);
     const { type, id } = resolvedParams;
     const [details, setDetails] = useState<MovieDetails | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [activeServer, setActiveServer] = useState(SERVERS[0]);
-    const [showServers, setShowServers] = useState(false);
     const [showTrailer, setShowTrailer] = useState(false);
+    const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
+    const [sourceError, setSourceError] = useState(false);
 
-    // TV Show State
+    // Unified State
+    const [animeData, setAnimeData] = useState<ShowData | null>(null);
     const [selectedSeason, setSelectedSeason] = useState(1);
     const [selectedEpisode, setSelectedEpisode] = useState(1);
-    const [episodes, setEpisodes] = useState<EpisodeInfo[]>([]);
+    const [episodes, setEpisodes] = useState<any[]>([]);
     const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+    const [mode, setMode] = useState<"sub" | "dub">("sub");
+    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
 
     // Scroll-to-top visibility
     useEffect(() => {
@@ -174,17 +202,74 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     }, []);
 
     useEffect(() => {
-        const fetchDetails = async () => {
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const res = await axios.get(`/api/prime/details?id=${id}&type=${type}`);
-                setDetails(res.data);
+                if (type === "anime") {
+                    // 1. Fetch Anime Episodes/Metadata
+                    const animeRes = await axios.get(`/api/anime/episodes?id=${id}`);
+                    const show = animeRes.data.show;
+                    setAnimeData(show);
+
+                    // 2. Optimized TMDB Metadata Resolution
+                    // Try to find a TMDB match using multiple title variants if available
+                    const searchQueries = [show.name, show.englishName, show.romajiName].filter(Boolean);
+                    let tmdbMatch = null;
+                    
+                    for (const q of searchQueries) {
+                        try {
+                            const tmdbSearch = await axios.get(`/api/prime/search?q=${encodeURIComponent(q)}`);
+                            if (tmdbSearch.data.results?.length > 0) {
+                                tmdbMatch = tmdbSearch.data.results[0];
+                                break;
+                            }
+                        } catch (e) {}
+                    }
+
+                    if (tmdbMatch) {
+                        setTmdbIdForAnime(tmdbMatch.id.toString());
+                        const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${tmdbMatch.media_type}`);
+                        setDetails(detailsRes.data);
+                    } else {
+                        setSourceError(true);
+                        // Minimal details if TMDB match fails
+                        setDetails({
+                            id: 0,
+                            name: show.name,
+                            poster_path: show.thumbnail,
+                            backdrop_path: show.thumbnail,
+                            overview: "Playing via Anime Servers",
+                            vote_average: 0,
+                            vote_count: 0,
+                            genres: [],
+                            cast: [],
+                            crew: [],
+                            similar: [],
+                            recommendations: [],
+                            trailer: null
+                        });
+                    }
+                    
+                    // Initial episode setup
+                    const eps = show.availableEpisodesDetail?.[mode] || [];
+                    setEpisodes(eps);
+                    if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
+
+                } else {
+                    // Standard Movie/TV Fetch
+                    const res = await axios.get(`/api/prime/details?id=${id}&type=${type}`);
+                    setDetails(res.data);
+                    if (type === "tv" && res.data.seasons?.length > 0) {
+                        setSelectedSeason(res.data.seasons[0].season_number || 1);
+                    }
+                }
             } catch (err) {
-                console.error("Failed to fetch details:", err);
+                console.error("Failed to fetch page data:", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchDetails();
+        fetchData();
     }, [id, type]);
 
     // Fetch episodes when season changes
@@ -208,10 +293,20 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
         fetchEpisodes();
     }, [type, id, selectedSeason, details]);
 
+    // Update anime episodes when mode (sub/dub) changes
+    useEffect(() => {
+        if (type === "anime" && animeData) {
+            const eps = animeData.availableEpisodesDetail?.[mode] || [];
+            setEpisodes(eps);
+            if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
+        }
+    }, [type, animeData, mode]);
+
     // Refresh iframe when server or episode changes
     useEffect(() => {
         setIframeKey((prev) => prev + 1);
-    }, [activeServer, selectedSeason, selectedEpisode]);
+        setSourceError(false); // Reset error on change
+    }, [activeServer, selectedSeason, selectedEpisode, mode]);
 
     if (loading) {
         return (
@@ -237,12 +332,18 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
         );
     }
 
-    const title = details.title || details.name || "Untitled";
+    const title = details.title || details.name || animeData?.name || "Untitled";
     const year = (details.release_date || details.first_air_date || "").slice(0, 4);
     const matchPercent = Math.round((details.vote_average || 0) * 10);
     const director = details.crew?.find((c) => c.job === "Director");
 
-    const embedUrl = activeServer.getUrl(type, id, selectedSeason, selectedEpisode);
+    // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
+    const activeId = type === "anime" ? (tmdbIdForAnime || "0") : id;
+    const isAnimeServer = ANIME_SERVERS.some(s => s.id === activeServer.id);
+    
+    const embedUrl = isAnimeServer 
+        ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
+        : activeServer.getUrl(type === "anime" ? "tv" : type, activeId, selectedSeason, selectedEpisode);
 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
@@ -262,7 +363,12 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                 {/* Video Player with Anti-Redirect Protection */}
                 <div className="relative w-full bg-black">
                     <div className="max-w-7xl mx-auto">
-                        <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden shadow-2xl shadow-blue-500/10"
+                        >
                             {/* Loading skeleton */}
                             {!playerLoaded && (
                                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--bg-card)]">
@@ -270,20 +376,41 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                         <div className="w-16 h-16 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
                                         <Play className="absolute inset-0 m-auto w-6 h-6 text-blue-400" />
                                     </div>
-                                    <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse">Loading player...</p>
-                                    <p className="mt-1 text-zinc-600 text-xs">Server: {activeServer.name}</p>
+                                    <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">Initializing Stream</p>
+                                    <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
                                 </div>
                             )}
+                            {/* Source Error Fallback */}
+                            {sourceError && !isAnimeServer && (
+                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center">
+                                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                                        <X className="w-8 h-8 text-red-500" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Movie Server Error</h3>
+                                    <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md">
+                                        This content might not be available on the {activeServer.name} server. 
+                                        Don't worry, you can try our dedicated Anime servers!
+                                    </p>
+                                    <button 
+                                        onClick={() => setActiveServer(ANIME_SERVERS[0])}
+                                        className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                                    >
+                                        <Server className="w-4 h-4" /> Switch to Anime Server
+                                    </button>
+                                </div>
+                            )}
+
                             <iframe
                                 key={iframeKey}
                                 src={embedUrl}
-                                className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-500 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                                className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allowFullScreen
                                 allow="autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="origin"
                                 onLoad={() => setPlayerLoaded(true)}
+                                onError={() => setSourceError(true)}
                             />
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
 
@@ -296,7 +423,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
 
                         {/* Server Buttons — show all inline on desktop */}
                         <div className="hidden md:flex items-center gap-2">
-                            {SERVERS.map((server) => (
+                            {(type === "anime" ? [...SERVERS, ...ANIME_SERVERS] : SERVERS).map((server) => (
                                 <button
                                     key={server.id}
                                     onClick={() => setActiveServer(server)}
@@ -334,11 +461,11 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                             </button>
                             {showServers && (
                                 <div className="absolute top-full left-0 mt-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg overflow-hidden shadow-2xl z-30 min-w-[160px]">
-                                    {SERVERS.map((server) => (
+                                    {type === "anime" ? [...SERVERS, ...ANIME_SERVERS].map((server) => (
                                         <button
                                             key={server.id}
                                             onClick={() => { setActiveServer(server); setShowServers(false); }}
-                                            className={`w-full px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-card)] transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
+                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
                                                 }`}
                                         >
                                             <div className="flex items-center">
@@ -350,7 +477,26 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                                 {server.name}
                                             </div>
                                             {server.badge && (
-                                                <span className="text-[10px] text-[var(--text-muted)]">{server.badge}</span>
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{server.badge}</span>
+                                            )}
+                                        </button>
+                                    )) : SERVERS.map((server) => (
+                                        <button
+                                            key={server.id}
+                                            onClick={() => { setActiveServer(server); setShowServers(false); }}
+                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
+                                                }`}
+                                        >
+                                            <div className="flex items-center">
+                                                {activeServer.id === server.id ? (
+                                                    <Play className="w-4 h-4 mr-2 fill-current" />
+                                                ) : (
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mx-1.5 mr-2.5" />
+                                                )}
+                                                {server.name}
+                                            </div>
+                                            {server.badge && (
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{server.badge}</span>
                                             )}
                                         </button>
                                     ))}
@@ -407,7 +553,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
 
                 {/* Movie Details — CineVibe glassmorphism style */}
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-                    <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                    <div className="flex flex-col lg:flex-row gap-8 items-start">
                         {/* Poster — visible on all devices */}
                         <div className="flex-shrink-0 w-[120px] md:w-[220px]">
                             {details.poster_path && (
@@ -425,40 +571,84 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
 
                         {/* Info Panel */}
                         <div className="flex-1 min-w-0">
-                            <h1 className="text-3xl md:text-4xl font-black mb-2 tracking-tight">{title}</h1>
-                            {details.tagline && (
-                                <p className="text-[var(--text-muted)] text-sm italic mb-4 font-medium">&ldquo;{details.tagline}&rdquo;</p>
-                            )}
+                            {/* Title Section */}
+                            <div className="mb-6">
+                                <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2 font-sora line-clamp-2">{title}</h1>
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
+                                    <span className="flex items-center gap-1.5 font-bold text-green-400">
+                                        <Sparkles className="w-4 h-4" /> {matchPercent}% Match
+                                    </span>
+                                    <span>{year}</span>
+                                    {details.runtime ? (
+                                        <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span>
+                                    ) : (
+                                        <span>{type === "tv" ? `${details.number_of_seasons} Seasons` : type === "anime" ? "Anime" : ""}</span>
+                                    )
+                                    }
+                                    <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[10px] font-bold tracking-widest uppercase">
+                                        {details.status || "Released"}
+                                    </span>
+                                </div>
+                            </div>
 
-                            {/* Meta badges */}
-                            <div className="flex items-center gap-3 mb-5 flex-wrap">
-                                {matchPercent > 0 && (
-                                    <span className={`text-sm font-bold px-2.5 py-1 rounded-md ${matchPercent >= 70 ? "bg-green-500/15 text-green-400" :
-                                        matchPercent >= 50 ? "bg-yellow-500/15 text-yellow-400" :
-                                            "bg-red-500/15 text-red-400"
-                                        }`}>
-                                        {matchPercent}% Match
-                                    </span>
+                            {/* Player Metadata & Controls */}
+                            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-8">
+                                {type === "anime" && episodes.length > 0 && (
+                                    <div className="mb-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-bold text-lg flex items-center gap-2">
+                                                <Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes
+                                            </h3>
+                                            <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
+                                                <button 
+                                                    onClick={() => setMode("sub")}
+                                                    className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}
+                                                >SUB</button>
+                                                <button 
+                                                    onClick={() => setMode("dub")}
+                                                    className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}
+                                                >DUB</button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
+                                            {episodes.map((epNum: string) => (
+                                                <button
+                                                    key={epNum}
+                                                    onClick={() => setSelectedEpisode(parseInt(epNum))}
+                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border ${
+                                                        selectedEpisode === parseInt(epNum)
+                                                            ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20"
+                                                            : "bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20 hover:text-white"
+                                                    }`}
+                                                >
+                                                    {epNum}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
-                                {year && (
-                                    <span className="flex items-center gap-1.5 text-[var(--text-muted)] text-sm bg-[var(--bg-card)] px-2.5 py-1 rounded-md">
-                                        <Calendar className="w-3.5 h-3.5" /> {year}
-                                    </span>
-                                )}
-                                {details.runtime && (
-                                    <span className="flex items-center gap-1.5 text-[var(--text-muted)] text-sm bg-[var(--bg-card)] px-2.5 py-1 rounded-md">
-                                        <Clock className="w-3.5 h-3.5" /> {Math.floor(details.runtime / 60)}h {details.runtime % 60}m
-                                    </span>
-                                )}
-                                {details.number_of_seasons && (
-                                    <span className="text-[var(--text-muted)] text-sm bg-[var(--bg-card)] px-2.5 py-1 rounded-md">
-                                        {details.number_of_seasons} Season{details.number_of_seasons !== 1 ? "s" : ""}
-                                    </span>
-                                )}
-                                <span className="flex items-center gap-1 text-yellow-400 text-sm font-semibold bg-yellow-500/10 px-2.5 py-1 rounded-md">
-                                    <Star className="w-3.5 h-3.5 fill-yellow-400" /> {details.vote_average?.toFixed(1)}
-                                </span>
-                                <span className="px-2 py-1 bg-blue-500/15 text-blue-400 text-[10px] font-bold rounded-md tracking-wider">HD</span>
+
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="bg-blue-600/10 p-3 rounded-xl border border-blue-500/20">
+                                            <Play className="w-6 h-6 text-blue-500 fill-current" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Now Playing</p>
+                                            <p className="font-bold text-sm">
+                                                {type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3">
+                                        <button className="flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-xl font-bold text-sm hover:scale-105 transition-all shadow-xl shadow-white/5 active:scale-95">
+                                            <Heart className="w-4 h-4" /> Watchlist
+                                        </button>
+                                        <button className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-sm hover:bg-[var(--border-color)] transition-all active:scale-95">
+                                            <Share2 className="w-4 h-4" /> Share
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Genres */}

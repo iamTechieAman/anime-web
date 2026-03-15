@@ -141,8 +141,8 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
 export function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
     return (
         <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
-            {items.map((item) => (
-                <MovieCard key={item.id} item={item} type={item.media_type || type} />
+            {items.map((item, idx) => (
+                <MovieCard key={`${item.id}-${idx}`} item={item} type={item.media_type || type} />
             ))}
         </div>
     );
@@ -183,8 +183,8 @@ export function MovieRow({ items, type = "movie", title }: { items: MovieItem[];
                 id={scrollId}
                 className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar scroll-smooth"
             >
-                {items.map((item) => (
-                    <div key={item.id} className="flex-shrink-0 w-[28vw] sm:w-[155px] md:w-[170px] lg:w-[180px] max-w-[180px]">
+                {items.map((item, idx) => (
+                    <div key={`${item.id}-${idx}`} className="flex-shrink-0 w-[28vw] sm:w-[155px] md:w-[170px] lg:w-[180px] max-w-[180px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}

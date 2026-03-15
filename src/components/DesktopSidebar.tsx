@@ -9,8 +9,7 @@ export default function DesktopSidebar() {
     const pathname = usePathname();
 
     const navItems = [
-        { name: "Home", href: "/", icon: Home, color: "text-purple-400" },
-        { name: "Movies", href: "/movies", icon: Compass, color: "text-blue-400" },
+        { name: "Movies & Anime", href: "/movies", icon: Compass, color: "text-blue-400" },
         { name: "Schedule", href: "/schedule", icon: Calendar, color: "text-green-400" },
         { name: "History", href: "/history", icon: Clock, color: "text-orange-400" },
     ];
@@ -23,7 +22,7 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="fixed left-0 top-[70px] bottom-0 w-[72px] bg-[var(--bg-main)] border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-4 gap-1 z-40 overflow-y-auto scrollbar-none">
+        <aside className="sticky left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)] border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-4 gap-1 z-40 overflow-y-auto scrollbar-none">
             {/* Main Navigation */}
             {navItems.map((item, i) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));

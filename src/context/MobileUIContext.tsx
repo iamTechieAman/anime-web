@@ -23,7 +23,6 @@ const MobileUIContext = createContext<MobileUIContextType | undefined>(undefined
 export function MobileUIProvider({ children }: { children: ReactNode }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [theme, setTheme] = useState<'dark' | 'light'>('dark');
     const [showProfileSettings, setShowProfileSettings] = useState(false);
 
     // Handle Android Back Button
@@ -32,7 +31,6 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
 
         const setupListener = async () => {
             backListener = await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
-                // If any overlay is open, close it instead of going back or exiting
                 if (isSearchOpen || isMenuOpen) {
                     setIsSearchOpen(false);
                     setIsMenuOpen(false);
@@ -56,39 +54,13 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
                 backListener.remove();
             }
         };
-    }, [isSearchOpen, isMenuOpen]); // We still need deps because the listener callback closure needs latest state
-
-    // Initialize theme from local storage or system preference
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-            document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-        } else {
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            setTheme(systemPrefersDark ? 'dark' : 'light');
-            document.documentElement.classList.toggle('dark', systemPrefersDark);
-        }
-    }, []);
-
-    const toggleTheme = () => {
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-        document.documentElement.classList.toggle('dark', newTheme === 'dark');
-    };
-
-    // Prevent scrolling when modals are open
-    useEffect(() => {
-        if (isSearchOpen || isMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => {
-            document.body.style.overflow = '';
-        };
     }, [isSearchOpen, isMenuOpen]);
+
+    // Force Dark Mode
+    useEffect(() => {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    }, []);
 
     const toggleSearch = () => {
         if (!isSearchOpen) {
@@ -122,10 +94,10 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
             closeAll,
             setSearchOpen: setIsSearchOpen,
             setMenuOpen: setIsMenuOpen,
-            theme,
-            toggleTheme,
             showProfileSettings,
-            setShowProfileSettings
+            setShowProfileSettings,
+            theme: 'dark',
+            toggleTheme: () => {} // No-op
         }}>
             {children}
         </MobileUIContext.Provider>

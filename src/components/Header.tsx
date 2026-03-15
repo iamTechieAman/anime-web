@@ -13,19 +13,7 @@ const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "
 const FORMATS = ["TV", "Movie", "OVA", "ONA", "Special"];
 const STATUSES = ["Ongoing", "Completed", "Upcoming"];
 
-const SEARCH_QUERY = `
-query($search: String) {
-  Page(page: 1, perPage: 5) {
-    media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
-      id
-      title { romaji english native }
-      coverImage { medium }
-      format
-      seasonYear
-    }
-  }
-}
-`;
+const UNIFIED_SEARCH_URL = '/api/search/unified';
 
 export default function Header() {
   const router = useRouter();
@@ -88,11 +76,10 @@ export default function Header() {
     }
     const timer = setTimeout(async () => {
       try {
-        const response = await axios.post('https://graphql.anilist.co', {
-          query: SEARCH_QUERY,
-          variables: { search: searchQuery }
+        const response = await axios.get(UNIFIED_SEARCH_URL, {
+          params: { q: searchQuery }
         });
-        setSuggestions(response.data.data.Page.media || []);
+        setSuggestions(response.data.results || []);
       } catch (error) {
         setSuggestions([]);
       }
@@ -178,9 +165,12 @@ export default function Header() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.length >= 2) setShowSuggestions(true);
+              }}
               onFocus={() => setShowSuggestions(true)}
-              placeholder={searchPlaceholder}
+              placeholder="Search movies, anime & shows..."
               className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
               autoComplete="off"
             />
@@ -282,17 +272,30 @@ export default function Header() {
               >
                 {suggestions.map((item: any) => (
                   <Link
-                    key={item.id}
-                    href={`/watch/${item.id}`}
+                    key={`${item.type}-${item.id}`}
+                    href={item.href}
                     className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors group"
                     onClick={() => setShowSuggestions(false)}
                   >
-                    <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md">
-                      <img src={item.coverImage.medium} alt={item.title.english || item.title.romaji} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md bg-zinc-800">
+                      {item.image ? (
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                           <Play className="w-4 h-4 text-zinc-600" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-white truncate">{item.title.english || item.title.romaji}</h4>
-                      <p className="text-[10px] text-[var(--text-muted)] mt-1">{item.format} • {item.seasonYear}</p>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
+                        <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest ${
+                          item.type === 'anime' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
+                        }`}>
+                          {item.type}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-muted)]">{item.format} • {item.year}</p>
                     </div>
                   </Link>
                 ))}
