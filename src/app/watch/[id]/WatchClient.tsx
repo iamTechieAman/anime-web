@@ -3,8 +3,8 @@
 import { useState, useEffect, use, useRef } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play } from "lucide-react";
 import Link from "next/link";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { useSearchParams } from "next/navigation";
@@ -191,6 +191,23 @@ export default function WatchClient({ id }: { id: string }) {
         toast.success(newValue ? 'Auto Next enabled ✓' : 'Auto Next disabled', {
             icon: newValue ? '⏭️' : '⏹️',
         });
+    };
+
+    const handleShare = async () => {
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: `Watch ${show?.name || 'Anime'}`,
+                    text: `Watch episode ${currentEp} of ${show?.name} on ToonPlayer!`,
+                    url: window.location.href,
+                });
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.success("Link copied to clipboard!");
+            }
+        } catch (err) {
+            console.error("Error sharing", err);
+        }
     };
 
     // Fetch Show Details
@@ -532,16 +549,18 @@ export default function WatchClient({ id }: { id: string }) {
     }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
 
     const handleVideoEnded = () => {
-        const currentEpNum = Number(currentEp);
-        if (!isNaN(currentEpNum)) {
-            const nextEpNum = currentEpNum + 1;
-            const availableEps = show?.availableEpisodesDetail?.[mode] || [];
-            if (availableEps.includes(String(nextEpNum))) {
-                setCurrentEp(String(nextEpNum));
-                toast.success(`Now playing Episode ${nextEpNum}`, {
-                    icon: '▶️',
-                });
-            }
+        const availableEps = show?.availableEpisodesDetail?.[mode] || [];
+        const currentIndex = availableEps.indexOf(currentEp);
+        
+        if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
+            const nextEp = availableEps[currentIndex + 1];
+            setCurrentEp(nextEp);
+            toast.success(`Now playing Episode ${nextEp}`, {
+                icon: '▶️',
+            });
+        } else {
+            // Alternatively, handle end of available episodes
+            toast("You have reached the latest available episode.", { icon: "✅" });
         }
     };
 
@@ -771,6 +790,9 @@ export default function WatchClient({ id }: { id: string }) {
                                     <input type="checkbox" checked={autoNext} onChange={toggleAutoNext} className="w-4 h-4 rounded-sm border-[var(--border-color)] bg-[var(--bg-main)] text-white focus:ring-0 cursor-pointer accent-white" />
                                     Auto Next
                                 </label>
+                                <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-md transition-colors text-white border border-white/5 disabled:opacity-50">
+                                   <Share2 className="w-4 h-4" /> Share
+                                </button>
                             </div>
                         </div>
 

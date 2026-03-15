@@ -22,7 +22,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <div className="flex flex-col md:grid md:grid-cols-[72px_1fr] min-h-screen bg-[var(--bg-main)] relative overflow-hidden">
       <DesktopSidebar />
-      <div className="flex-1 flex flex-col min-w-0 relative h-screen overflow-y-auto overflow-x-hidden scrollbar-none">
+      <div className="flex-1 flex flex-col min-w-0 relative max-h-screen overflow-y-auto overflow-x-hidden scrollbar-none">
         <Suspense fallback={<div className="h-16 w-full animate-pulse bg-white/5" />}>
           <Header />
         </Suspense>
@@ -32,7 +32,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
               <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           }>
-            <div className="page-transition-wrapper flex-1">
+            <div className="page-transition-wrapper flex-auto flex flex-col min-h-full">
               {children}
             </div>
           </Suspense>

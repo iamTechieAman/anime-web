@@ -142,6 +142,7 @@ export default function Home() {
             <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
                 {/* Left Column (Main Content) */}
                 <div className="flex-1 space-y-8 min-w-0">
+                    <WatchHistorySection />
                     <section>
                        <div className="flex items-center justify-between mb-4">
                          <h2 className="text-xl md:text-2xl font-bold font-sora text-white">Recently Updated</h2>
@@ -263,6 +264,47 @@ function WatchlistSection() {
               <X className="w-4 h-4" />
             </button>
           </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function WatchHistorySection() {
+  const [history, setHistory] = useState<any[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
+    setHistory(saved.slice(0, 10)); // Show max 10 recent
+  }, []);
+
+  if (!mounted || history.length === 0) return null;
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
+           <Clock className="w-5 h-5 text-purple-500" /> 
+           Continue Watching
+        </h2>
+      </div>
+      <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
+        {history.map((item, idx) => (
+          <Link key={`${item.id}-${idx}`} href={`/watch/${item.id}${item.provider ? `?provider=${item.provider}&ep=${item.episode}` : `?ep=${item.episode}`}`} className="flex-shrink-0 w-[280px]">
+            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-purple-500/50 p-3 flex gap-3 group transition-colors relative overflow-hidden">
+                <div className="w-16 h-20 rounded-md overflow-hidden shrink-0">
+                    <img src={item.thumbnail || '/icon.png'} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <h3 className="text-white font-bold text-sm line-clamp-2 leading-tight font-sora group-hover:text-purple-400 transition-colors">{item.title}</h3>
+                    <div className="mt-2 flex items-center gap-2">
+                        <span className="text-xs bg-purple-600/20 text-purple-400 px-2 py-0.5 rounded-sm font-bold border border-purple-500/20">EP {item.episode}</span>
+                    </div>
+                </div>
+            </div>
+          </Link>
         ))}
       </div>
     </section>
