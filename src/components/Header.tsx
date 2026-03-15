@@ -378,9 +378,9 @@ export default function Header() {
                     </Link>
                     <button 
                       onClick={() => { 
+                        console.log("[Header] Triggering Profile Settings modal...");
                         setShowProfileSettings(true); 
-                        // Small delay to ensure modal gets priority
-                        setTimeout(() => setShowProfileDropdown(false), 50);
+                        setShowProfileDropdown(false);
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group"
                     >

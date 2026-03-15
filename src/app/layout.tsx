@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import MobileNav from "@/components/MobileNav";
 import MobileModals from "@/components/MobileModals";
 import DesktopSidebar from "@/components/DesktopSidebar";
@@ -13,6 +13,12 @@ import ProfileSettings from "@/components/ProfileSettings";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
+  
+  useEffect(() => {
+    if (showProfileSettings) {
+      console.log("[Layout] showProfileSettings is TRUE, rendering modal...");
+    }
+  }, [showProfileSettings]);
   
   return (
     <div className="flex flex-col md:grid md:grid-cols-[72px_1fr] min-h-screen bg-[var(--bg-main)]">

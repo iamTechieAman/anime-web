@@ -414,32 +414,36 @@ export class AnikaiProvider implements AnimeProvider {
             const $ = cheerio.load(response.data);
             const slides: AnimeSearchResult[] = [];
 
-            $('.swiper-wrapper .swiper-slide').each((_, el) => {
-                const $el = $(el);
-                const title = $el.find('.title').text().trim();
-                const desc = $el.find('.desc').text().trim();
-                const href = $el.find('.watch-btn').attr('href');
-                const id = href?.split('/watch/')[1] || '';
+            let slideElements = $('.swiper-wrapper .swiper-slide');
+            if (slideElements.length === 0) slideElements = $('.deslide-item'); // HiAnime/Zoro style
+            if (slideElements.length === 0) slideElements = $('#slider .item'); // Other clones
 
-                // Extract the actual image from swiper slide style (background-image)
-                const style = $el.find('.bg-img').attr('style') || "";
+            slideElements.each((_, el) => {
+                const $el = $(el);
+                const title = $el.find('.title, .film-title, .film-name').text().trim();
+                const desc = $el.find('.desc, .description, .film-description').text().trim();
+                const href = $el.find('.watch-btn, a').attr('href');
+                const id = href?.split('/watch/')[1]?.split('?')[0] || '';
+
+                // Extract image from multiple possible locations
+                const style = $el.find('.bg-img, .film-poster-img').attr('style') || "";
                 let image = "";
                 if (style.includes('url(')) {
                     image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
                 }
+                if (!image) image = $el.find('img').attr('data-src') || $el.find('img').attr('src') || "";
 
-                const aniListId = $el.find('.user-bookmark').attr('data-alid');
+                const aniListId = $el.find('.user-bookmark, .btn-fav').attr('data-alid') || $el.attr('data-id');
 
                 if (id && title) {
                     slides.push({
                         id: id,
                         title,
-                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`, // Fallback
+                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`,
                         provider: this.name,
                         extra: {
-                            description: desc,
+                            description: desc || "No description available.",
                             aniListId: aniListId ? parseInt(aniListId) : undefined,
-                            cover: aniListId ? `https://s4.anilist.co/file/anilistcdn/media/anime/banner/${aniListId}.jpg` : undefined
                         }
                     } as any);
                 }
