@@ -6,7 +6,7 @@ import { useState, useEffect, use, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
@@ -152,6 +152,8 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const resolvedParams = use(params);
     const { type, id } = resolvedParams;
     const [details, setDetails] = useState<MovieDetails | null>(null);
+    const [activeServer, setActiveServer] = useState<any>(SERVERS[0]);
+    const [loading, setLoading] = useState(true);
     const [showTrailer, setShowTrailer] = useState(false);
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);

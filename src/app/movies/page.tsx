@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -213,9 +214,9 @@ export default function MoviesPage() {
     const filter = getFilteredContent();
 
     // Check for search query in URL
+    const paramsInUrl = useSearchParams();
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const q = urlParams.get('q');
+        const q = paramsInUrl?.get('q');
         if (q) {
             setSearchQuery(q);
             handleSearch(q);
@@ -223,7 +224,7 @@ export default function MoviesPage() {
             setSearchQuery("");
             setSearchResults([]);
         }
-    }, [window.location.search]);
+    }, [paramsInUrl]);
 
     const handleSearch = async (query: string) => {
         setIsSearching(true);
