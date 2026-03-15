@@ -82,17 +82,13 @@ export async function GET(request: Request) {
         errors.push(`TMDB failed: ${tmdbError.message}`);
     }
 
-    if (combinedShows.length > 0) {
-        // Shuffle to mix movies and anime
+    // Shuffle to mix movies and anime if there's > 1 item
+    if (combinedShows.length > 1) {
         for (let i = combinedShows.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [combinedShows[i], combinedShows[j]] = [combinedShows[j], combinedShows[i]];
         }
-        return NextResponse.json({ shows: combinedShows });
     }
 
-    return NextResponse.json(
-        { error: `Failed to fetch genre. Errors: ${errors.join(', ')}` },
-        { status: 500 }
-    );
+    return NextResponse.json({ shows: combinedShows, errors });
 }

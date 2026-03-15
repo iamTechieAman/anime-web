@@ -97,14 +97,10 @@ export async function GET(request: Request) {
     }
 
     // Shuffle/interleave or sort combined results alphabetically
-    if (combinedShows.length > 0) {
-        combinedShows.sort((a, b) => a.name.localeCompare(b.name));
-        return NextResponse.json({ shows: combinedShows, provider: successfulProvider });
-    }
-
-    // If we get here, all failed
-    return NextResponse.json(
-        { error: "All providers failed to fetch A-Z list", details: errors },
-        { status: 500 }
-    );
+    // Shuffle/interleave or sort combined results alphabetically
+    combinedShows.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Always return the shows array, even if empty, to avoid 500 errors on the frontend 
+    // when a specific letter truly has no results.
+    return NextResponse.json({ shows: combinedShows, provider: successfulProvider, details: errors });
 }

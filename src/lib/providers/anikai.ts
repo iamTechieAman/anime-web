@@ -356,9 +356,49 @@ export class AnikaiProvider implements AnimeProvider {
     }
 
     async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
-        // Reuse getRecent logic structure if consistent, but AZ list usually distinct
-        // Keeping original stub/implementation but ensuring selectors align if needed
-        return []; // Stub for now or keep existing
+        try {
+            let path = letter.toLowerCase();
+            if (path === '0-9' || path === 'other') path = 'other';
+            if (path === 'all') path = '';
+
+            const url = path
+                ? `${BASE_URL}/az-list/${path}?page=${page}`
+                : `${BASE_URL}/az-list?page=${page}`;
+
+            console.log(`[Anikai] Fetching A-Z List: ${url}`);
+            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.film_list-wrap .flw-item').each((_, element) => {
+                const $el = $(element);
+                const href = $el.find('.film-poster a').attr('href');
+                const id = href?.includes('/watch/')
+                    ? href?.split('/watch/')[1]
+                    : href?.split('/').pop() || '';
+
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+
+                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
+                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
+
+                if (id && title) {
+                    results.push({
+                        id,
+                        title,
+                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`,
+                        subOrDub: { sub, dub } as any,
+                        provider: this.name
+                    });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[Anikai] getAZList failed:', error);
+            return [];
+        }
     }
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
