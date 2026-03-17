@@ -187,8 +187,8 @@ export default function SchedulePage() {
 
       <div className="max-w-[2560px] mx-auto px-4 md:px-6 py-6 md:py-8">
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {Array.from({ length: 10 }).map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
+            {Array.from({ length: 14 }).map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-[3/4.5] rounded-lg bg-[var(--bg-card)]" />
                 <div className="h-4 mt-2 rounded bg-[var(--bg-card)] w-3/4" />
@@ -203,7 +203,7 @@ export default function SchedulePage() {
             <p className="text-sm text-[var(--text-muted)] mt-2">No episodes scheduled for {DAYS[activeDay]}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 md:gap-5">
             {dayItems.map((anime, idx) => {
               const isAiredOrAiring = anime.airingAt <= now;
               const countdown = anime.airingAt - now;

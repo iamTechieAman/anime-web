@@ -85,6 +85,28 @@ function SearchContent() {
         fetchResults();
     }, [query, genre, format, status]);
 
+    // Smart Tab Selection: Automatically switch to the most relevant category
+    useEffect(() => {
+        if (loading || (!animeResults.length && !movieResults.length && !scraplingResults.length)) return;
+
+        const totalAnime = animeResults.length;
+        const totalMovies = movieResults.length;
+        const totalCartoons = scraplingResults.filter(r => r.type === 'cartoon').length;
+
+        // Auto-select logic: If one category is overwhelmingly dominant, switch to it
+        if (totalAnime > 0 && totalMovies === 0 && totalCartoons === 0) {
+            setSearchType("anime");
+        } else if (totalMovies > 0 && totalAnime === 0 && totalCartoons === 0) {
+            setSearchType("movies");
+        } else if (totalCartoons > 0 && totalAnime === 0 && totalMovies === 0) {
+            setSearchType("cartoon");
+        } else if (totalAnime > totalMovies * 3 && totalAnime > totalCartoons * 3) {
+            setSearchType("anime");
+        } else if (totalMovies > totalAnime * 3 && totalMovies > totalCartoons * 3) {
+            setSearchType("movies");
+        }
+    }, [loading, animeResults.length, movieResults.length, scraplingResults.length]);
+
     const hasResults = animeResults.length > 0 || movieResults.length > 0 || scraplingResults.length > 0;
 
     return (

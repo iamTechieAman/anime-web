@@ -4,6 +4,36 @@ import argparse
 import re
 from scrapling import StealthyFetcher
 
+# Helper to ensure we only get clean embed/video URLs, not full site pages
+def clean_source_url(url, provider_domain):
+    if not url: return ""
+    # Filter out common non-video pages
+    blacklist = [
+        f"https://{provider_domain}/", f"https://www. {provider_domain}/",
+        f"https://{provider_domain}/movies/", f"https://{provider_domain}/series/",
+        "/category/", "/genre/", "/tag/", "/search/", "/contact-us/", "/dmca/"
+    ]
+    if any(b in url for b in blacklist) and not any(ext in url for ext in ['.m3u8', '.mp4', 'embed', 'player', '/v/']):
+        return ""
+    
+    # Ensure protocol
+    if url.startswith('//'): url = 'https:' + url
+    return url
+
+def extract_direct_video_links(text):
+    # Regex for common stream formats
+    patterns = [
+        r'https?://[^\s"\']+\.m3u8[^\s"\']*',
+        r'https?://[^\s"\']+\.mp4[^\s"\']*',
+        r'https?://(?:www\.)?googlevideo\.com/[^\s"\']+',
+        r'https?://(?:www\.)?(?:upstream|streamwish|vidmoly|dood|mixdrop|vidsrc|multiembed|rabbitstream|megacloud)[^\s"\']+'
+    ]
+    links = []
+    for p in patterns:
+        found = re.findall(p, text)
+        links.extend(found)
+    return list(set(links))
+
 def scrape_onoflix_search(query):
     fetcher = StealthyFetcher()
     url = f"https://onoflix.live/en/search?q={query}"
@@ -318,36 +348,28 @@ def scrape_watchanimeworld_source(episode_id):
     if not iframes:
         iframes = response.css('.video-player iframe, .movie-player iframe, #player iframe, iframe')
         
-    default_url = iframes[0].attrib.get('src') if iframes else ""
-    if default_url:
-        if default_url.startswith('//'): default_url = 'https:' + default_url
-        sources.append({"name": "Primary", "url": default_url})
+    for iframe in iframes:
+        u = clean_source_url(iframe.attrib.get('src'), "watchanimeworld.net")
+        if u:
+            sources.append({"name": "Primary", "url": u})
 
     # Extract alternative servers from buttons
     for btn in server_buttons:
         s_name = btn.text.strip() or btn.attrib.get('data-name') or "Server"
-        # Often data-src, data-id, or data-opt
         s_url = btn.attrib.get('data-src') or btn.attrib.get('data-id') or btn.attrib.get('data-opt') or btn.attrib.get('href', '')
         
-        # If it's just a number or ID, it might need to be resolved via AJAX, but for now let's hope for direct URLs
         if s_url and s_url != '#' and "javascript" not in s_url:
-            if s_url.startswith('//'): s_url = 'https:' + s_url
-            if not s_url.startswith('http') and len(s_url) > 5: # Likely a relative path
+            if not s_url.startswith('http') and len(s_url) > 5: # Relative path
                 s_url = f"https://watchanimeworld.net{s_url if s_url.startswith('/') else '/' + s_url}"
-            
-            if s_url not in [s['url'] for s in sources]:
-                sources.append({"name": s_name, "url": s_url})
+            u = clean_source_url(s_url, "watchanimeworld.net")
+            if u and u not in [s['url'] for s in sources]:
+                sources.append({"name": s_name, "url": u})
     
-    # Final check for hardcoded script URLs
-    if not sources:
-        scripts = response.css('script')
-        for s in scripts:
-            if 'iframe' in s.text and 'src=' in s.text:
-                m = re.search(r'src=["\'](https?:[^"\']+)["\']', s.text)
-                if m:
-                    u = m.group(1)
-                    if u not in [src['url'] for src in sources]:
-                        sources.append({"name": "JS-Player", "url": u})
+    # Final check for hardcoded script URLs or direct links in page
+    direct_links = extract_direct_video_links(response.text)
+    for dl in direct_links:
+        if dl not in [s['url'] for s in sources]:
+            sources.append({"name": "Direct", "url": dl})
 
     return {
         "url": sources[0]['url'] if sources else "",

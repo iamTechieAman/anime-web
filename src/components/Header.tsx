@@ -138,49 +138,79 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-10 h-10 md:w-12 md:h-12 relative flex items-center justify-center">
-            {/* Multi-layered Animation Rectangle */}
+            {/* Premium Animated SVG Logo */}
             <motion.div 
-              initial={{ rotate: 0, scale: 0.8 }}
-              animate={{ 
-                rotate: [0, 90, 180, 270, 360],
-                scale: [0.8, 1.1, 0.8],
-                borderRadius: ["20%", "50%", "20%"]
+              className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 90, 180, 270, 360]
               }}
-              transition={{ 
-                duration: 8, 
-                repeat: Infinity, 
-                ease: "linear" 
-              }}
-              className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600 opacity-20 blur-md"
-            ></motion.div>
-            <motion.div 
-              initial={{ rotate: 45, scale: 0.9 }}
-              animate={{ 
-                rotate: [45, -45, 45],
-                scale: [0.9, 1.0, 0.9],
-              }}
-              transition={{ 
-                duration: 4, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-              className="absolute inset-0 border-2 border-purple-500/30 rounded-xl"
-            ></motion.div>
-            <div className="absolute inset-1 bg-[var(--bg-card)] rounded-lg shadow-inner"></div>
-            <img 
-              src="/logo.png" 
-              alt="ToonPlayer Logo" 
-              className="w-8 h-8 md:w-10 md:h-10 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" 
-              onError={(e) => {
-                e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=TP&backgroundColor=a855f7';
-              }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
+            
+            <svg viewBox="0 0 100 100" className="w-full h-full relative z-10 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+              {/* Outer Glow Ring */}
+              <motion.circle
+                cx="50" cy="50" r="45"
+                fill="none"
+                stroke="url(#logo-gradient)"
+                strokeWidth="2"
+                strokeDasharray="280"
+                animate={{ strokeDashoffset: [280, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              {/* Main Play Shape */}
+              <motion.path
+                d="M35 30 L75 50 L35 70 Z"
+                fill="url(#logo-gradient)"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileHover={{ scale: 1.1 }}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+              
+              <defs>
+                <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#3b82f6" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Micro-Interaction Particles */}
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 bg-white rounded-full"
+                  animate={{
+                    y: [-10, -30],
+                    x: [0, (i - 1) * 10],
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: i * 0.6,
+                    ease: "easeOut"
+                  }}
+                  style={{ left: '50%', top: '50%' }}
+                />
+              ))}
+            </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] leading-tight">
-              ToonPlayer
+            <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] leading-tight uppercase">
+              Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Player</span>
             </span>
-            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-purple-400/80 -mt-0.5 ml-0.5">Premium</span>
+            <div className="flex items-center gap-1.5 -mt-0.5 ml-0.5">
+              <span className="text-[9px] uppercase tracking-[0.3em] font-black text-white/40">Premium</span>
+              <div className="w-1 h-1 rounded-full bg-purple-500 animate-pulse" />
+              <span className="text-[8px] font-bold text-purple-400/80 uppercase">Infinity</span>
+            </div>
           </div>
         </Link>
 
