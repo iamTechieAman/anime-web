@@ -22,7 +22,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <div className="flex flex-col md:grid md:grid-cols-[72px_1fr] min-h-screen bg-[var(--bg-main)] relative overflow-hidden">
       <DesktopSidebar />
-      <div className="flex-1 flex flex-col min-w-0 relative max-h-screen overflow-y-auto overflow-x-hidden scrollbar-none">
+      <div className="flex-1 flex flex-col min-w-0 relative min-h-screen overflow-x-hidden scrollbar-none">
         <Suspense fallback={<div className="h-16 w-full animate-pulse bg-white/5" />}>
           <Header />
         </Suspense>

@@ -12,8 +12,10 @@ export async function GET(request: Request) {
         const aniwatchPage = searchParams.get('aniwatch_page');
         const cartoonQuery = searchParams.get('cartoon_query');
         const cartoonCategory = searchParams.get('cartoon_category');
+        const waInfo = searchParams.get('wa_info');
+        const waSource = searchParams.get('wa_source');
 
-        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory) {
+        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory && !waInfo && !waSource) {
             return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
         }
 
@@ -24,6 +26,8 @@ export async function GET(request: Request) {
         if (aniwatchPage) command += ` --aniwatch_page ${aniwatchPage}`;
         if (cartoonQuery) command += ` --cartoon_query "${cartoonQuery.replace(/"/g, '\\"')}"`;
         if (cartoonCategory) command += ` --cartoon_category "${cartoonCategory.replace(/"/g, '\\"')}"`;
+        if (waInfo) command += ` --wa_info "${waInfo.replace(/"/g, '\\"')}"`;
+        if (waSource) command += ` --wa_source "${waSource.replace(/"/g, '\\"')}"`;
 
         const { stdout, stderr } = await execPromise(command);
 

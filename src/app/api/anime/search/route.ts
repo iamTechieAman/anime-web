@@ -1,6 +1,28 @@
 export const runtime = "edge";
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
+import axios from "axios";
+
+const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+
+const TMDB_GENRE_MAP: Record<string, number> = {
+    "action": 28,
+    "adventure": 12,
+    "animation": 16,
+    "comedy": 35,
+    "crime": 80,
+    "documentary": 99,
+    "drama": 18,
+    "family": 10751,
+    "fantasy": 14,
+    "history": 36,
+    "horror": 27,
+    "mystery": 9648,
+    "romance": 10749,
+    "sci-fi": 878,
+    "thriller": 53
+};
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -55,6 +77,34 @@ export async function GET(request: Request) {
                 return [];
             }
         });
+        
+        // Add TMDB Genre Search if genre is provided
+        if (genre) {
+            const tmdbPromise = (async () => {
+                try {
+                    const tmdbGenreId = TMDB_GENRE_MAP[genre.toLowerCase()];
+                    if (tmdbGenreId) {
+                        const tmdbUrl = `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&with_genres=${tmdbGenreId}&page=1&language=en-US&sort_by=popularity.desc`;
+                        const res = await axios.get(tmdbUrl);
+                        if (res.data && res.data.results) {
+                            return res.data.results.map((item: any) => ({
+                                _id: item.id.toString(),
+                                name: item.title,
+                                thumbnail: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
+                                availableEpisodes: { sub: 0, dub: 0 },
+                                provider: "tmdb",
+                                __typename: "Movie",
+                                type: "Movie"
+                            })).filter((m: any) => m.thumbnail);
+                        }
+                    }
+                } catch (err) {
+                    console.warn("[Search] TMDB genre failed:", err);
+                }
+                return [];
+            })();
+            searchPromises.push(tmdbPromise);
+        }
 
         const allResults = await Promise.all(searchPromises);
 

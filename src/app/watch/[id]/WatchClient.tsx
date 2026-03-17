@@ -799,7 +799,7 @@ export default function WatchClient({ id }: { id: string }) {
                                             className="w-full h-full border-0 bg-black"
                                             allowFullScreen
                                             allow="autoplay; fullscreen"
-                                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-downloads allow-modals allow-popups allow-popups-to-escape-sandbox"
+                                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-modals"
                                         ></iframe>
                                         {isGuardLocked && (
                                             <div 

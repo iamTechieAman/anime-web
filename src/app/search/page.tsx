@@ -62,10 +62,10 @@ function SearchContent() {
         fetchResults();
     }, [query, genre, format, status]);
 
-    const hasResults = animeResults.length > 0 || movieResults.length > 0;
+    const hasResults = animeResults.length > 0 || movieResults.length > 0 || scraplingResults.length > 0;
 
     return (
-        <main className="min-h-screen pt-24 px-4 md:px-8 max-w-7xl mx-auto bg-[var(--bg-main)]">
+        <main className="min-h-screen pt-24 px-4 md:px-8 max-w-[2000px] mx-auto bg-[var(--bg-main)]">
             <h1 className="text-2xl md:text-3xl font-black mb-8 text-[var(--text-main)]">
                 {query ? (
                     <>Search Results for <span className="text-purple-400">"{query}"</span></>
@@ -99,7 +99,7 @@ function SearchContent() {
                     <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
                 </div>
             ) : hasResults ? (
-                <div className="space-y-12 pb-20">
+                <div className="max-w-[2000px] mx-auto space-y-12 pb-20">
                     {/* Movie/TV Results */}
                     {(searchType === "all" || searchType === "movies") && movieResults.length > 0 && (
                         <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -132,7 +132,7 @@ function SearchContent() {
                                 <h2 className="text-xl font-bold">Enhanced Results</h2>
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 font-bold ml-2">Scrapling Powered</span>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
                                 {scraplingResults
                                     .filter(item => {
                                         if (searchType === 'all') return true;

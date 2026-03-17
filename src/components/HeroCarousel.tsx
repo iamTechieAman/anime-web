@@ -204,7 +204,7 @@ export default function HeroCarousel() {
 
             {/* Content Container */}
             <div className="absolute inset-0 flex items-center z-20">
-                <div className="w-full max-w-[2000px] mx-auto px-6 md:px-12 w-full pt-20 md:pt-10">
+                <div className="w-full max-w-[2400px] mx-auto px-6 md:px-12 w-full pt-20 md:pt-10">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeSlide.id + "-content"}
