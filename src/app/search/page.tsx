@@ -70,18 +70,20 @@ function SearchContent() {
             </h1>
             
             {/* Search Type Selector */}
-            <div className="flex bg-[var(--bg-card)] p-1 rounded-xl border border-[var(--border-color)] mb-8 w-fit mx-auto sm:mx-0">
+            <div className="flex bg-[var(--bg-card)] p-1.5 rounded-2xl border border-[var(--border-color)] mb-8 w-fit mx-auto sm:mx-0 shadow-xl">
                 {(["all", "movies", "anime"] as const).map((type) => (
                     <button
                         key={type}
                         onClick={() => setSearchType(type)}
-                        className={`px-6 py-2 rounded-lg text-sm font-bold capitalize transition-all ${
+                        className={`px-8 py-2.5 rounded-xl text-sm font-black capitalize transition-all duration-300 ${
                             searchType === type 
-                            ? type === 'movies' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "bg-purple-600 text-white shadow-lg shadow-purple-900/40"
-                            : "text-[var(--text-muted)] hover:text-white"
+                            ? type === 'movies' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40 transform scale-105" 
+                              : type === 'anime' ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40 transform scale-105"
+                              : "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-900/40 transform scale-105"
+                            : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
                         }`}
                     >
-                        {type}
+                        {type === 'all' ? 'Everything' : type}
                     </button>
                 ))}
             </div>

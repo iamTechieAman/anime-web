@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
 import useSWR from 'swr';
-import { Search, Play, Star, Clock, TrendingUp, ChevronUp, Zap, Calendar, CheckCircle, X } from "lucide-react";
+import { Search, Play, Star, Clock, TrendingUp, ChevronUp, Zap, Calendar, CheckCircle, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 import AZFilter from "@/components/AZFilter";
@@ -77,79 +77,132 @@ export default function Home() {
   const { data: completedData } = useSWR('/api/anime/completed', fetcher, { revalidateOnFocus: false });
   const { data: upcomingData } = useSWR('/api/anime/upcoming', fetcher, { revalidateOnFocus: false });
 
-  useEffect(() => { if (recentData?.shows) setRecent(recentData.shows); }, [recentData]);
-  useEffect(() => { if (popularData?.shows) setPopular(popularData.shows); }, [popularData]);
-  useEffect(() => { if (topData?.shows) setTop(topData.shows); }, [topData]);
-  useEffect(() => { if (trendingData?.shows) setTrending(trendingData.shows); }, [trendingData]);
-  useEffect(() => { if (completedData?.shows) setCompleted(completedData.shows); }, [completedData]);
-  useEffect(() => { if (upcomingData?.shows) setUpcoming(upcomingData.shows); }, [upcomingData]);
+    // Fetch Movie Data for Unified Home
+    const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
+    const { data: moviePopular } = useSWR('/api/prime/movies?category=popular', fetcher);
 
-  // Loading state calculations
-  useEffect(() => {
-    setLoading({
-      recent: !recentData && recent.length === 0,
-      popular: !popularData && popular.length === 0,
-      top: !topData && top.length === 0,
-      trending: !trendingData && trending.length === 0,
-      completed: !completedData && completed.length === 0,
-      upcoming: !upcomingData && upcoming.length === 0
-    } as any);
-  }, [recentData, recent, popularData, popular, topData, top, trendingData, trending]);
+    useEffect(() => { if (recentData?.shows) setRecent(recentData.shows); }, [recentData]);
+    useEffect(() => { if (popularData?.shows) setPopular(popularData.shows); }, [popularData]);
+    useEffect(() => { if (topData?.shows) setTop(topData.shows); }, [topData]);
+    useEffect(() => { if (trendingData?.shows) setTrending(trendingData.shows); }, [trendingData]);
+    useEffect(() => { if (completedData?.shows) setCompleted(completedData.shows); }, [completedData]);
+    useEffect(() => { if (upcomingData?.shows) setUpcoming(upcomingData.shows); }, [upcomingData]);
 
-  return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">
-      {/* No JavaScript Fallback */}
-      <noscript>
-        <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-xl flex items-center justify-center p-6">
-          <div className="max-w-md bg-[var(--bg-card)] border border-purple-500/30 rounded-2xl p-8 text-center">
-            <div className="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <Play className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold mb-3">JavaScript Required</h2>
-            <p className="text-[var(--text-muted)] mb-6">
-              ToonPlayer requires JavaScript to provide the best streaming experience. Please enable JavaScript in your browser settings to continue.
-            </p>
-            <div className="text-sm text-[var(--text-muted)]">
-              <p className="mb-2">Without JavaScript:</p>
-              <ul className="text-left space-y-1">
-                <li>• Video playback will not work</li>
-                <li>• Search functionality is unavailable</li>
-                <li>• Interactive features are disabled</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </noscript>
+    // Loading state calculations
+    useEffect(() => {
+        setLoading({
+            recent: !recentData && recent.length === 0,
+            popular: !popularData && popular.length === 0,
+            top: !topData && top.length === 0,
+            trending: !trendingData && trending.length === 0,
+            completed: !completedData && completed.length === 0,
+            upcoming: !upcomingData && upcoming.length === 0
+        } as any);
+    }, [recentData, recent, popularData, popular, topData, top, trendingData, trending]);
 
-      {/* Background Ambience - Highly optimized */}
-      <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
-        <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/10 to-transparent opacity-50 transition-opacity duration-300" />
-      </div>
-
-      <div className="relative z-10 w-full pb-24 md:pb-0">
-
-            <HeroCarousel />
-
-            {/* Genre Bar */}
-            <div className="bg-[var(--bg-card)] border-y border-[var(--border-color)]">
-               <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-2.5 flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
-                   {["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"].map(genre => (
-                       <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-xs sm:text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
-                   ))}
-               </div>
-            </div>
-
-            <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
-                {/* Left Column (Main Content) */}
-                <div className="flex-1 space-y-8 min-w-0">
-                    <WatchHistorySection />
-                    <section>
-                       <div className="flex items-center justify-between mb-4">
-                         <h2 className="text-xl md:text-2xl font-bold font-sora text-white">Recently Updated</h2>
-                       </div>
-                       {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 24)} />}
-                    </section>
+    return (
+        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">
+            {/* No JavaScript Fallback */}
+            <noscript>
+                <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-xl flex items-center justify-center p-6">
+                    <div className="max-w-md bg-[var(--bg-card)] border border-purple-500/30 rounded-2xl p-8 text-center">
+                        <div className="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <Play className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold mb-3">JavaScript Required</h2>
+                        <p className="text-[var(--text-muted)] mb-6">
+                            ToonPlayer requires JavaScript to provide the best streaming experience. Please enable JavaScript in your browser settings to continue.
+                        </p>
+                    </div>
                 </div>
+            </noscript>
+
+            {/* Background Ambience */}
+            <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/10 to-transparent opacity-50 transition-opacity duration-300" />
+            </div>
+
+            <div className="relative z-10 w-full pb-24 md:pb-0">
+                <HeroCarousel />
+
+                {/* Genre Bar */}
+                <div className="bg-[var(--bg-card)] border-y border-[var(--border-color)]">
+                    <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-2.5 flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
+                        {["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"].map(genre => (
+                            <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-xs sm:text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
+                    {/* Left Column (Main Content) */}
+                    <div className="flex-1 space-y-12 min-w-0">
+                        <WatchHistorySection />
+                        
+                        {/* Unified Trending - Movies & Shows */}
+                        {movieTrending?.results && (
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
+                                        <TrendingUp className="w-5 h-5 text-red-500" />
+                                        Trending Movies & Shows
+                                    </h2>
+                                    <Link href="/movies" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                    {movieTrending.results.slice(0, 12).map((item: any) => (
+                                        <Link key={item.id} href={`/movies/watch/${item.media_type || 'movie'}/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg">
+                                            <div className="aspect-[2/3] relative">
+                                                <img src={`https://image.tmdb.org/t/p/w300${item.poster_path}`} alt={item.title || item.name} className="w-full h-full object-cover" />
+                                                <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/10 uppercase">
+                                                    {item.media_type || 'movie'}
+                                                </div>
+                                            </div>
+                                            <div className="p-3">
+                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title || item.name}</h3>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* Recently Updated Anime */}
+                        <section>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-purple-400" />
+                                    Recently Updated Anime
+                                </h2>
+                                <Link href="/az-list/all" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
+                            </div>
+                            {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 18)} />}
+                        </section>
+
+                        {/* Popular Movies */}
+                        {moviePopular?.results && (
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
+                                        <Star className="w-5 h-5 text-yellow-500" />
+                                        Popular Movies
+                                    </h2>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                    {moviePopular.results.slice(0, 12).map((item: any) => (
+                                        <Link key={item.id} href={`/movies/watch/movie/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg">
+                                            <div className="aspect-[2/3] relative">
+                                                <img src={`https://image.tmdb.org/t/p/w300${item.poster_path}`} alt={item.title} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="p-3">
+                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </div>
 
                 {/* Right Column (Sidebar) */}
                 <div className="w-full lg:w-[320px] xl:w-[350px] space-y-10 shrink-0">
