@@ -132,7 +132,7 @@ export default function SchedulePage() {
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-0 pb-24 md:pb-10 md:pl-[72px]">
       <div className="sticky top-0 z-40 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)]">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+        <div className="max-w-[2560px] mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Calendar className="w-6 h-6 text-purple-400" />
             <h1 className="text-xl md:text-2xl font-bold font-sora">Airing Schedule</h1>
@@ -155,7 +155,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Day tabs */}
-        <div className="max-w-6xl mx-auto px-4 md:px-6 flex gap-1 overflow-x-auto hide-scrollbar pb-3">
+        <div className="max-w-[2560px] mx-auto px-4 md:px-6 flex gap-1 overflow-x-auto hide-scrollbar pb-3">
           {DAYS.map((day, i) => {
             const count = (scheduleByDay[i] || []).length;
             const isToday = weekOffset === 0 && i === today;
@@ -185,7 +185,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+      <div className="max-w-[2560px] mx-auto px-4 md:px-6 py-6 md:py-8">
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {Array.from({ length: 10 }).map((_, i) => (

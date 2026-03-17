@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp, SlidersHorizontal, User, History, LogOut } from "lucide-react";
+import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp, SlidersHorizontal, User, History, LogOut, Zap } from "lucide-react";
 import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
 import HeroCarousel from "@/components/HeroCarousel";
 import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
@@ -51,6 +51,7 @@ export default function MoviesPage() {
     const [tvTopRated, setTvTopRated] = useState<MovieItem[]>([]);
     const [genreData, setGenreData] = useState<Record<string, MovieItem[]>>({});
     const [networkData, setNetworkData] = useState<Record<string, MovieItem[]>>({});
+    const [cartoons, setCartoons] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<MovieItem[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -92,7 +93,7 @@ export default function MoviesPage() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Fetch main data sequentially to avoid maxing out concurrent connections
+    // Fetch main data sequentially
     useEffect(() => {
         const loadAllData = async () => {
             // 1. Fetch main headers
@@ -167,6 +168,14 @@ export default function MoviesPage() {
             } catch (err) {
                 console.error("Failed to fetch genres:", err);
             }
+
+            // 4. Fetch Cartoons
+            try {
+                const cartoonRes = await axios.get('/api/cartoon?category=cartoon');
+                setCartoons(cartoonRes.data.shows || []);
+            } catch (err) {
+                console.error("Failed to fetch cartoons:", err);
+            }
         };
 
         loadAllData();
@@ -180,15 +189,14 @@ export default function MoviesPage() {
             setTrending((prev) =>
                 prev.map((item) => {
                     if (!item.liveViewers) return item;
-                    // Fluctuate viewers by up to +/- 100
                     const change = Math.floor(Math.random() * 201) - 100;
                     return { ...item, liveViewers: Math.max(100, item.liveViewers + change) };
                 })
             );
-        }, 5000); // Poll every 5 seconds for visual "live updates"
+        }, 5000);
 
         return () => clearInterval(interval);
-    }, [trending.length > 0]); // only trigger once when trending has data
+    }, [trending.length]);
 
     // Search handler
     useEffect(() => {
@@ -211,32 +219,14 @@ export default function MoviesPage() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    const filter = getFilteredContent();
-
     // Check for search query in URL
     const paramsInUrl = useSearchParams();
     useEffect(() => {
         const q = paramsInUrl?.get('q');
         if (q) {
             setSearchQuery(q);
-            handleSearch(q);
-        } else {
-            setSearchQuery("");
-            setSearchResults([]);
         }
     }, [paramsInUrl]);
-
-    const handleSearch = async (query: string) => {
-        setIsSearching(true);
-        try {
-            const res = await axios.get(`/api/search/unified?q=${encodeURIComponent(query)}`);
-            setSearchResults(res.data.results || []);
-        } catch (err) {
-            console.error("Search failed:", err);
-        } finally {
-            setIsSearching(false);
-        }
-    };
 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden transition-colors duration-300">
@@ -246,7 +236,6 @@ export default function MoviesPage() {
             </div>
 
             <div className="relative z-10 w-full pb-24 md:pb-0">
-                {/* Hero section - Unified or Anime Primary */}
                 <HeroCarousel />
 
                 {/* Genres & Categories Sub-Nav */}
@@ -344,6 +333,32 @@ export default function MoviesPage() {
                                     {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
                                 </section>
 
+                                {/* Cartoons Section */}
+                                {cartoons.length > 0 && (
+                                    <section id="cartoons" className="group/cart">
+                                        <SectionHeader icon={Zap} title="Cartoon Favorites" color="text-yellow-400" />
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                            {cartoons.slice(0, 12).map((item: any) => (
+                                                <Link
+                                                    key={`cart-${item._id}`}
+                                                    href={`/watch/${item._id}`}
+                                                    className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                                >
+                                                    <div className="aspect-[2/3] relative">
+                                                        <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
+                                                        <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/10 tracking-tighter">
+                                                            Cartoon
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-3">
+                                                        <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.name}</h3>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
                                 {/* Genre Discovery */}
                                 {GENRE_ROWS.map((genre) => (
                                     genreData[genre.title] && (
@@ -430,12 +445,12 @@ export default function MoviesPage() {
 }
 
 // Section Header Component
-function SectionHeader({ icon: Icon, title, color }: { icon: React.ComponentType<{ className?: string }>; title: string; color: string }) {
+function SectionHeader({ icon: Icon, title, color }: { icon: any; title: string; color: string }) {
     return (
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 text-[var(--text-main)]">
             <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
             <Icon className={`w-5 h-5 ${color}`} />
-            <h2 className="text-lg font-bold text-[var(--text-main)]">{title}</h2>
+            <h2 className="text-lg font-bold">{title}</h2>
         </div>
     );
 }
