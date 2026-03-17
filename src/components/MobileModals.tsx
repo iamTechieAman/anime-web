@@ -21,9 +21,9 @@ export default function MobileModals() {
     const [autoNext, setAutoNext] = useState(false);
 
     const isMovies = pathname?.startsWith('/movies');
-    const searchAction = isMovies ? "/movies/search" : "/search";
-    const searchPlaceholder = isMovies ? "Search movies & TV..." : "Search anime...";
-    const searchPrompt = isMovies ? "Search for movies" : "Search for anime";
+    const searchAction = "/search";
+    const searchPlaceholder = "Search movies, anime & shows...";
+    const searchPrompt = "Search for anything";
 
     useEffect(() => {
         setAutoPlay(localStorage.getItem('toonplayer_autoplay') === 'true');

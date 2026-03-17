@@ -110,12 +110,13 @@ export interface AnimeProvider {
     getServers?(episodeId: string): Promise<any[]>;
 
     /**
-     * Get latest completed anime (optional)
-     */
-    getCompleted?(): Promise<AnimeSearchResult[]>;
-
-    /**
      * Get top upcoming anime (optional)
      */
     getUpcoming?(): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get TV series list (optional)
+     * @param page - Page number
+     */
+    getTVSeries?(page?: number): Promise<AnimeSearchResult[]>;
 }

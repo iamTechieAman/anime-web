@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
+import { OnoflixProvider } from "@/lib/providers/onoflix";
 
 const ANILIST_URL = 'https://graphql.anilist.co';
 const TMDB_SEARCH_URL = 'https://api.themoviedb.org/3/search/multi';
@@ -22,14 +23,14 @@ query($search: String) {
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q');
+    const query = searchParams.get('q') || searchParams.get('query');
 
     if (!query || query.length < 2) {
         return NextResponse.json({ results: [] });
     }
 
     try {
-        const [anilistRes, tmdbRes] = await Promise.allSettled([
+        const [anilistRes, tmdbRes, onoflixResults] = await Promise.allSettled([
             axios.post(ANILIST_URL, {
                 query: ANILIST_QUERY,
                 variables: { search: query }
@@ -42,7 +43,8 @@ export async function GET(request: Request) {
                     page: 1,
                     include_adult: false
                 }
-            })
+            }),
+            new OnoflixProvider().search(query)
         ]);
 
         const results: any[] = [];
@@ -77,6 +79,19 @@ export async function GET(request: Request) {
                     year: (item.release_date || item.first_air_date || '').split('-')[0],
                     format: item.media_type.toUpperCase(),
                     href: `/movies/watch/${item.media_type}/${item.id}`
+                });
+            });
+        }
+
+        // Process Onoflix Results
+        if (onoflixResults.status === 'fulfilled') {
+            onoflixResults.value.slice(0, 5).forEach((item: any) => {
+                const [type, realId] = item.id.includes('|') ? item.id.split('|') : ['movie', item.id];
+                results.push({
+                    ...item,
+                    href: type === 'tv' 
+                        ? `/movies/watch/tv/${realId}?provider=onoflix`
+                        : `/movies/watch/movie/${realId}?provider=onoflix`
                 });
             });
         }

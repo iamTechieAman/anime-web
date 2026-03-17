@@ -200,7 +200,7 @@ export default function MoviesPage() {
         setIsSearching(true);
         const timer = setTimeout(async () => {
             try {
-                const res = await axios.get(`/api/prime/search?q=${encodeURIComponent(searchQuery)}`);
+                const res = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchQuery)}`);
                 setSearchResults(res.data.results || []);
             } catch (err) {
                 console.error("Search failed:", err);

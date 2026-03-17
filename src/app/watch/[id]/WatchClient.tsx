@@ -735,6 +735,12 @@ export default function WatchClient({ id }: { id: string }) {
                             )}
                         </div>
 
+                        {/* Source helper message */}
+                        <div className="mt-2 flex items-center justify-center gap-2 text-[var(--text-muted)] text-xs bg-[var(--bg-card)]/30 py-1.5 rounded-lg border border-[var(--border-color)]/50">
+                            <AlertCircle className="w-3.5 h-3.5 text-yellow-500/70" />
+                            <span>💡 Source not working? Try another one from the server list below</span>
+                        </div>
+
                         {/* Server & Meta Controls - JustAnime Style */}
                         <div className="mt-4 bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">

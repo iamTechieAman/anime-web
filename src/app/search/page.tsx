@@ -18,7 +18,9 @@ function SearchContent() {
     
     const [animeResults, setAnimeResults] = useState<Show[]>([]);
     const [movieResults, setMovieResults] = useState<MovieItem[]>([]);
+    const [scraplingResults, setScraplingResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchType, setSearchType] = useState<"all" | "movies" | "anime">("all");
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -30,13 +32,21 @@ function SearchContent() {
             if (status) params.set('status', status);
 
             try {
-                const [animeRes, movieRes] = await Promise.all([
+                const [animeRes, movieRes, scrapeRes] = await Promise.allSettled([
                     axios.get(`/api/anime/search?${params.toString()}`),
-                    query ? axios.get(`/api/prime/search?q=${encodeURIComponent(query)}`) : Promise.resolve({ data: { results: [] } })
+                    query ? axios.get(`/api/prime/search?q=${encodeURIComponent(query)}`) : Promise.resolve({ data: { results: [] } }),
+                    query ? axios.get(`/api/scrape?q=${encodeURIComponent(query)}`) : Promise.resolve({ data: { onoflix: [] } })
                 ]);
 
-                setAnimeResults(animeRes.data.shows || []);
-                setMovieResults(movieRes.data.results || []);
+                if (animeRes.status === 'fulfilled') setAnimeResults(animeRes.value.data.shows || []);
+                if (movieRes.status === 'fulfilled') setMovieResults(movieRes.value.data.results || []);
+                if (scrapeRes.status === 'fulfilled') {
+                    const data = scrapeRes.value.data;
+                    setScraplingResults([
+                        ...(data.onoflix || []),
+                        ...(data.aniwatch || [])
+                    ]);
+                }
             } catch (err) {
                 console.error("Search failed:", err);
             } finally {
@@ -58,6 +68,23 @@ function SearchContent() {
                     <>Filtering Anime: <span className="text-purple-400">{genre || format || status}</span></>
                 )}
             </h1>
+            
+            {/* Search Type Selector */}
+            <div className="flex bg-[var(--bg-card)] p-1 rounded-xl border border-[var(--border-color)] mb-8 w-fit mx-auto sm:mx-0">
+                {(["all", "movies", "anime"] as const).map((type) => (
+                    <button
+                        key={type}
+                        onClick={() => setSearchType(type)}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold capitalize transition-all ${
+                            searchType === type 
+                            ? type === 'movies' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "bg-purple-600 text-white shadow-lg shadow-purple-900/40"
+                            : "text-[var(--text-muted)] hover:text-white"
+                        }`}
+                    >
+                        {type}
+                    </button>
+                ))}
+            </div>
 
             {loading ? (
                 <div className="flex justify-center items-center py-20">
@@ -66,7 +93,7 @@ function SearchContent() {
             ) : hasResults ? (
                 <div className="space-y-12 pb-20">
                     {/* Movie/TV Results */}
-                    {movieResults.length > 0 && (
+                    {(searchType === "all" || searchType === "movies") && movieResults.length > 0 && (
                         <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex items-center gap-2 mb-6">
                                 <Film className="w-5 h-5 text-blue-400" />
@@ -78,7 +105,7 @@ function SearchContent() {
                     )}
 
                     {/* Anime Results */}
-                    {animeResults.length > 0 && (
+                    {(searchType === "all" || searchType === "anime") && animeResults.length > 0 && (
                         <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
                             <div className="flex items-center gap-2 mb-6">
                                 <Play className="w-5 h-5 text-purple-400" />
@@ -86,6 +113,33 @@ function SearchContent() {
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-bold ml-2">AniList/Multi Source</span>
                             </div>
                             <AnimeGrid shows={animeResults} />
+                        </section>
+                    )}
+
+                    {/* Scrapling Extra Results */}
+                    {scraplingResults.length > 0 && (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Sparkles className="w-5 h-5 text-yellow-400" />
+                                <h2 className="text-xl font-bold">Enhanced Results</h2>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 font-bold ml-2">Scrapling Powered</span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                {scraplingResults.map((item: any) => (
+                                    <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-yellow-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
+                                         onClick={() => window.location.href = item.type === 'anime' ? `/watch/${item.id}` : `/movies/watch/${item.type}/${item.id}?provider=onoflix`}>
+                                        <div className="aspect-[2/3] relative">
+                                            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                            <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-wider">
+                                                {item.type}
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </section>
                     )}
                 </div>

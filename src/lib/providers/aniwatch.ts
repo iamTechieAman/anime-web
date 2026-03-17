@@ -425,4 +425,32 @@ export class AniWatchProvider implements AnimeProvider {
             return [];
         }
     }
+
+    async getTVSeries(page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const url = `${BASE_URL}/tv?page=${page}`;
+            console.log(`[AniWatch] Fetching TV Series List: ${url}`);
+
+            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.film_list-wrap .flw-item').each((_, element) => {
+                const $el = $(element);
+                const href = $el.find('.film-poster-ahref').attr('href');
+                const id = href?.split('?')[0]?.split('/').pop() || '';
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src');
+
+                if (id && title) {
+                    results.push({ id, title, image, provider: 'aniwatch' });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[AniWatch] getTVSeries failed:', error);
+            return [];
+        }
+    }
 }

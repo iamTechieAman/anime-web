@@ -34,8 +34,7 @@ export default function Header() {
   const [filterStatus, setFilterStatus] = useState("");
   const { setShowProfileSettings } = useMobileUI();
 
-  const isMovies = pathname?.startsWith('/movies');
-  const searchPlaceholder = isMovies ? "Search movies & shows..." : "Search anime...";
+  const searchPlaceholder = "Search movies, anime & shows...";
 
   const filterRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
