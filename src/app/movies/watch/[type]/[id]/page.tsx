@@ -345,6 +345,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const year = (details.release_date || details.first_air_date || "").slice(0, 4);
     const matchPercent = Math.round((details.vote_average || 0) * 10);
     const director = details.crew?.find((c) => c.job === "Director");
+    const isUpcoming = details.release_date && new Date(details.release_date) > new Date();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
     const activeId = type === "anime" ? (tmdbIdForAnime || "0") : id;
@@ -387,6 +388,26 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                     </div>
                                     <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">Initializing Stream</p>
                                     <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
+                                    {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-purple-600/20 text-purple-400 border border-purple-500/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
+                                </div>
+                            )}
+                            {/* Upcoming Content Lock */}
+                            {isUpcoming && playerLoaded && (
+                                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 p-8 text-center backdrop-blur-md">
+                                    <Calendar className="w-16 h-16 text-purple-500 mb-6" />
+                                    <h2 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter">Content Upcoming</h2>
+                                    <p className="text-[var(--text-muted)] text-base max-w-md mb-8">
+                                        This content has not been released yet (Expected: {details.release_date}).
+                                        Trailers or promo clips may play if available, but the full movie will appear here after the release date.
+                                    </p>
+                                    <div className="flex gap-4">
+                                        <Link 
+                                            href="/movies" 
+                                            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-500 transition-all uppercase tracking-widest text-[10px]"
+                                        >
+                                            Explore Others
+                                        </Link>
+                                    </div>
                                 </div>
                             )}
                             {/* Source Error Fallback */}

@@ -310,11 +310,11 @@ def scrape_watchanimeworld_source(episode_id):
                 response = fetcher.fetch(new_url, engine='chrome')
 
     # Find all server buttons
-    server_buttons = response.css('.server-list li, .server-button, .btn-server, a[data-id]')
+    server_buttons = response.css('.server-list li, .server-button, .btn-server, a[data-id], .dooplay_player_option')
     sources = []
     
     # Extract from default iframe first
-    iframes = response.css('iframe[src*="play."], iframe[src*="zephyr"], iframe[src*="embed"], iframe[src*="video"], iframe[src*="/v/"]')
+    iframes = response.css('iframe[src*="play."], iframe[src*="zephyr"], iframe[src*="embed"], iframe[src*="video"], iframe[src*="/v/"], iframe[src*="player"]')
     if not iframes:
         iframes = response.css('.video-player iframe, .movie-player iframe, #player iframe, iframe')
         
@@ -325,19 +325,29 @@ def scrape_watchanimeworld_source(episode_id):
 
     # Extract alternative servers from buttons
     for btn in server_buttons:
-        s_name = btn.text.strip() or "Server"
-        # Often data-id or data-src
-        s_url = btn.attrib.get('data-src') or btn.attrib.get('href', '')
+        s_name = btn.text.strip() or btn.attrib.get('data-name') or "Server"
+        # Often data-src, data-id, or data-opt
+        s_url = btn.attrib.get('data-src') or btn.attrib.get('data-id') or btn.attrib.get('data-opt') or btn.attrib.get('href', '')
+        
+        # If it's just a number or ID, it might need to be resolved via AJAX, but for now let's hope for direct URLs
         if s_url and s_url != '#' and "javascript" not in s_url:
             if s_url.startswith('//'): s_url = 'https:' + s_url
+            if not s_url.startswith('http') and len(s_url) > 5: # Likely a relative path
+                s_url = f"https://watchanimeworld.net{s_url if s_url.startswith('/') else '/' + s_url}"
+            
             if s_url not in [s['url'] for s in sources]:
                 sources.append({"name": s_name, "url": s_url})
     
-    # If no sources yet, try to find hidden inputs or scripts
+    # Final check for hardcoded script URLs
     if not sources:
-        # Fallback to the first iframe we found (legacy check)
-        if default_url:
-            sources.append({"name": "Default", "url": default_url})
+        scripts = response.css('script')
+        for s in scripts:
+            if 'iframe' in s.text and 'src=' in s.text:
+                m = re.search(r'src=["\'](https?:[^"\']+)["\']', s.text)
+                if m:
+                    u = m.group(1)
+                    if u not in [src['url'] for src in sources]:
+                        sources.append({"name": "JS-Player", "url": u})
 
     return {
         "url": sources[0]['url'] if sources else "",

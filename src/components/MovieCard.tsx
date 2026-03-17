@@ -28,7 +28,9 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: string }) {
     const [imgError, setImgError] = useState(false);
     const title = item.title || item.name || "Untitled";
-    const year = (item.release_date || item.first_air_date || "").slice(0, 4);
+    const releaseDate = item.release_date || item.first_air_date;
+    const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
+    const year = (releaseDate || "").slice(0, 4);
     const rating = item.vote_average?.toFixed(1);
     const mediaType = item.media_type || type;
     const matchPercent = Math.round((item.vote_average || 0) * 10);
@@ -96,10 +98,18 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
                         <span className="text-[11px] font-bold text-white">{rating}</span>
                     </div>
 
-                    {/* HD badge — hidden on very small screens to prevent overlap */}
-                    <div className="absolute top-2 right-2 hidden sm:block bg-blue-500/80 backdrop-blur-sm rounded px-1.5 py-0.5 z-10">
-                        <span className="text-[9px] font-bold text-white tracking-wider">HD</span>
-                    </div>
+                    {/* Upcoming or HD badge */}
+                    {isUpcoming ? (
+                        <div className="absolute top-2 right-2 bg-purple-600/90 backdrop-blur-md rounded px-1.5 py-0.5 z-20 shadow-lg border border-purple-500/30">
+                            <span className="text-[9px] font-black text-white uppercase tracking-wider">
+                                Upcoming
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="absolute top-2 right-2 hidden sm:block bg-blue-500/80 backdrop-blur-sm rounded px-1.5 py-0.5 z-10">
+                            <span className="text-[9px] font-bold text-white tracking-wider">HD</span>
+                        </div>
+                    )}
 
                     {/* Play button on hover */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

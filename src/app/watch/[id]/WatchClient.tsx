@@ -198,6 +198,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [sourceUrl, setSourceUrl] = useState<string | null>(null);
     const [videoType, setVideoType] = useState<string>("auto");
     const [loadingSource, setLoadingSource] = useState(false);
+    const [isValidating, setIsValidating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Auto-play and Auto-next settings
@@ -504,6 +505,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         
         if (nextServer) {
             setError(null); // Clear any previous errors
+            setCheckingStatus(`Switching to ${nextServer.serverName}...`);
             toast(`Switching to ${nextServer.serverName}...`, { icon: '🔄' });
             setSelectedServer(nextServer.serverId);
         } else {
@@ -513,14 +515,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 // Reset and try peachify again as absolute last resort
                 failedServersRef.current.delete("peachify");
                 setError(null);
+                setCheckingStatus('Retrying ToonPlayer VIP...');
                 toast('Retrying ToonPlayer VIP...', { icon: '🔄' });
                 setSelectedServer("peachify");
             } else {
+                setCheckingStatus(null);
                 setError("All servers are currently unavailable. Try switching servers manually below.");
                 toast.error("Servers unavailable — try switching manually");
             }
         }
     };
+
+    const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
 
     // Fetch Source
     useEffect(() => {
@@ -606,6 +612,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                     setSourceUrl(absoluteUrl);
                     setVideoType(selected.isIframe ? "iframe" : selected.hls ? "m3u8" : "auto");
+                    setCheckingStatus(null);
                     toast.success(`Episode ${currentEp} loaded successfully`);
 
                     // Save to watch history
@@ -643,6 +650,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
         };
 
+        const currentServerName = servers.find(s => s.serverId === selectedServer)?.serverName || 'server';
+        setCheckingStatus(`Validating ${currentServerName}...`);
         fetchSource();
 
     }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
@@ -755,7 +764,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             {loadingSource ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[var(--bg-main)]/50 backdrop-blur-sm z-10">
                                     <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
-                                    <p className="text-sm text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Loading Stream</p>
+                                    <div className="text-center">
+                                        <p className="text-sm text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Loading Stream</p>
+                                        {checkingStatus && <p className="text-[10px] text-purple-400 mt-2 font-bold uppercase tracking-tighter opacity-80">{checkingStatus}</p>}
+                                    </div>
                                 </div>
                             ) : error ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-[var(--bg-card)]/80 backdrop-blur-lg">
@@ -847,6 +859,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
                                     <div className="w-10 h-10 rounded-full border-2 border-[var(--border-color)] border-t-purple-500 animate-spin"></div>
                                     <p>Initializing...</p>
+                                    {checkingStatus && <p className="text-[10px] text-purple-400 font-bold uppercase tracking-tighter opacity-60">{checkingStatus}</p>}
                                 </div>
                             )}
                         </div>
