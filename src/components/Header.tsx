@@ -138,69 +138,20 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-10 h-10 md:w-12 md:h-12 relative flex items-center justify-center">
-            {/* Premium Animated SVG Logo */}
+            {/* Original Logo with Premium Glow */}
             <motion.div 
               className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"
               animate={{
-                scale: [1, 1.2, 1],
-                rotate: [0, 90, 180, 270, 360]
+                scale: [1, 1.1, 1],
               }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             />
             
-            <svg viewBox="0 0 100 100" className="w-full h-full relative z-10 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-              {/* Outer Glow Ring */}
-              <motion.circle
-                cx="50" cy="50" r="45"
-                fill="none"
-                stroke="url(#logo-gradient)"
-                strokeWidth="2"
-                strokeDasharray="280"
-                animate={{ strokeDashoffset: [280, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              />
-              
-              {/* Main Play Shape */}
-              <motion.path
-                d="M35 30 L75 50 L35 70 Z"
-                fill="url(#logo-gradient)"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                whileHover={{ scale: 1.1 }}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-              
-              <defs>
-                <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#a855f7" />
-                  <stop offset="100%" stopColor="#3b82f6" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            {/* Micro-Interaction Particles */}
-            <div className="absolute inset-0 pointer-events-none">
-              {[...Array(3)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1 h-1 bg-white rounded-full"
-                  animate={{
-                    y: [-10, -30],
-                    x: [0, (i - 1) * 10],
-                    opacity: [0, 1, 0],
-                    scale: [0, 1, 0]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: i * 0.6,
-                    ease: "easeOut"
-                  }}
-                  style={{ left: '50%', top: '50%' }}
-                />
-              ))}
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="ToonPlayer Logo" 
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform duration-300"
+            />
           </div>
           <div className="flex flex-col">
             <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] leading-tight uppercase">

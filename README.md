@@ -107,13 +107,20 @@ ToonPlayer's UI/UX draws inspiration from leading streaming platforms:
 - Accent: Cyan (`#06b6d4`) - Modern tech feel
 - Background: Near-Black (`#050505`) - Premium dark mode
 
-## ⚡ Deployment Journey
+## 🚀 Roadmap & Implementation Phases
 
-We faced several challenges during development, including:
-1.  **Video Playback**: Fixing "Loading Stream" issues by implementing a smart proxy for SharePoint/GDrive links.
-2.  **React 19 Compatibility**: Resolving peer dependency conflicts between Next.js 15 and video libraries.
-3.  **CORS**: Handling cross-origin resource sharing for third-party video sources.
-4.  **Mobile Performance**: Optimizing scroll lag by reducing GPU-heavy blur effects on mobile devices.
+The development of ToonPlayer was structured into 10 major phases, focusing on content expansion, reliability, and premium UX:
+
+- **Phase 1: Foundation & Initial Content** - Established core streaming logic and fixed initial VidBinge provider issues.
+- **Phase 2: Multi-Source Expansion** - Integrated multiple anime/movie providers for high redundancy.
+- **Phase 3: Classification Refinement** - Improved categorical sorting for series, movies, and episodes.
+- **Phase 4: UI/UX Intensive Polish** - Refined the layout, animations, and transitions for a professional feel.
+- **Phase 5: Provider Reliability** - Solved "Content Not Found" errors by implementing better fallback logic.
+- **Phase 6: Playback Stability** - Optimized video player and bypassed browser sandbox/redirection issues.
+- **Phase 7: Total Cleanup & Unified Filtering** - Consolidated search results and unified filtering across genres and years.
+- **Phase 8: Ad-Blocking & Search Accuracy** - Integrated DNS-level ad blocking (dns.adguard.com) and improved search suggestions.
+- **Phase 9: Upcoming Shows & Smart Play** - Added "Upcoming" badges and automated server-health checks during playback.
+- **Phase 10: Premium Branding & Clean Scraping** - Finalized the ToonPlayer brand, added Smart Tab Selection, and refined scrapers for direct, clean player links.
 
 👉 **[Read the full Dev Journey & Learnings here](./JOURNEY.md)**
 
