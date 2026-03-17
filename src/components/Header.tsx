@@ -136,15 +136,28 @@ export default function Header() {
     <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform" onClick={clearSearch}>
-          <div className="w-9 h-9 md:w-11 md:h-11 relative flex items-center justify-center">
-            <div className="absolute inset-0 bg-white/10 rounded-xl rotate-6 group-hover:rotate-12 transition-transform"></div>
+        <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
+          <div className="w-10 h-10 md:w-12 md:h-12 relative flex items-center justify-center">
+            {/* Animation Rectangle / Glow */}
+            <motion.div 
+              initial={{ rotate: 6, scale: 0.9 }}
+              animate={{ 
+                rotate: [6, 12, 6],
+                scale: [0.9, 1.05, 0.9],
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 to-blue-600/30 rounded-xl blur-sm group-hover:blur-md transition-all"
+            ></motion.div>
+            <div className="absolute inset-0 bg-white/10 rounded-xl border border-white/10 rotate-6 group-hover:rotate-12 transition-transform"></div>
             <img 
               src="/logo.png" 
               alt="ToonPlayer Logo" 
-              className="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+              className="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]" 
               onError={(e) => {
-                // Fallback icon if logo fails
                 e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=TP&backgroundColor=a855f7';
               }}
             />

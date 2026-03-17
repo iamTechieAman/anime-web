@@ -4,8 +4,9 @@ import { useState, useEffect, use, useRef } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2 } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { useSearchParams } from "next/navigation";
 
@@ -127,6 +128,8 @@ export default function WatchClient({ id }: { id: string }) {
     // Show loading and error states
     const [showError, setShowError] = useState<string | null>(null);
     const [loadingShow, setLoadingShow] = useState(true);
+    const [showServerDropdown, setShowServerDropdown] = useState(false);
+    const serverRef = useRef<HTMLDivElement>(null);
 
     const processingRef = useRef<string | null>(null);
     const failedServersRef = useRef<Set<string>>(new Set());
@@ -145,6 +148,15 @@ export default function WatchClient({ id }: { id: string }) {
         const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
         const exists = watchlist.some((item: any) => item._id === id);
         setIsBookmarked(exists);
+
+        // Click outside to close dropdown
+        const handleClickOutside = (e: MouseEvent) => {
+            if (serverRef.current && !serverRef.current.contains(e.target as Node)) {
+                setShowServerDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [id]);
 
     const toggleBookmark = () => {
@@ -713,6 +725,8 @@ export default function WatchClient({ id }: { id: string }) {
                                         className="w-full h-full border-0 bg-black"
                                         allowFullScreen
                                         allow="autoplay; fullscreen"
+                                        // Sandbox attribute to prevent popups and top-level redirects
+                                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
                                     ></iframe>
                                 ) : (
                                     <ArtPlayer
@@ -763,26 +777,68 @@ export default function WatchClient({ id }: { id: string }) {
                                     </div>
                                 </div>
 
-                                {/* Server Selection */}
-                                <div className="flex items-center gap-3">
+                                {/* Server Selection Dropdown */}
+                                <div className="flex items-center gap-3 relative" ref={serverRef}>
                                     <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Server:</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {servers.map((server) => (
-                                            <button
-                                                key={server.serverId}
-                                                onClick={() => setSelectedServer(server.serverId)}
-                                                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-2
-                                                    ${selectedServer === server.serverId
-                                                        ? "bg-white/10 text-white border border-white/20"
-                                                        : "bg-transparent border border-transparent text-[var(--text-muted)] hover:bg-white/5 hover:text-white"
-                                                    }`}
+                                    <button
+                                        onClick={() => setShowServerDropdown(!showServerDropdown)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] hover:bg-white/5 border border-[var(--border-color)] rounded-lg text-sm font-bold text-white transition-all min-w-[180px] justify-between group"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Server className="w-4 h-4 text-purple-500" />
+                                            <span>{servers.find(s => s.serverId === selectedServer)?.serverName || "Select Server"}</span>
+                                        </div>
+                                        <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] group-hover:text-white transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {showServerDropdown && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-xl"
                                             >
-                                                {server.serverName}
-                                            </button>
-                                        ))}
-                                        {loadingServers && <span className="text-xs text-[var(--text-muted)] animate-pulse">Loading servers...</span>}
-                                        {servers.length === 0 && !loadingServers && <span className="text-xs text-[var(--text-muted)]">No servers found</span>}
-                                    </div>
+                                                <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                                                    <span className="text-xs font-black uppercase text-[var(--text-muted)] tracking-widest">Select Source</span>
+                                                    <span className="text-[10px] text-purple-400 font-bold px-1.5 py-0.5 bg-purple-500/10 rounded">Streaming</span>
+                                                </div>
+                                                <div className="max-h-64 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
+                                                    {servers.map((server) => (
+                                                        <button
+                                                            key={server.serverId}
+                                                            onClick={() => {
+                                                                setSelectedServer(server.serverId);
+                                                                setShowServerDropdown(false);
+                                                            }}
+                                                            className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
+                                                                selectedServer === server.serverId
+                                                                    ? "bg-purple-600/10 text-white border border-purple-500/30 shadow-lg"
+                                                                    : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                                                    server.isMovieServer ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'
+                                                                }`}>
+                                                                    <Play className={`w-3.5 h-3.5 ${selectedServer === server.serverId ? 'fill-current' : ''}`} />
+                                                                </div>
+                                                                <div className="text-left">
+                                                                    <p className="text-xs font-bold leading-none mb-1">{server.serverName}</p>
+                                                                    <p className="text-[9px] uppercase tracking-tighter opacity-60">
+                                                                        {server.badge || (server.isMovieServer ? "Movie Server" : "Native HLS")}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            {selectedServer === server.serverId && (
+                                                                <Check className="w-4 h-4 text-purple-400" />
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </div>
 
