@@ -12,6 +12,7 @@ export default function DesktopSidebar() {
         { name: "Movies & Anime", href: "/movies", icon: Compass, color: "text-blue-400" },
         { name: "Schedule", href: "/schedule", icon: Calendar, color: "text-green-400" },
         { name: "History", href: "/history", icon: Clock, color: "text-orange-400" },
+        { name: "About", href: "/about", icon: Star, color: "text-purple-400" },
     ];
 
     const exploreItems = [

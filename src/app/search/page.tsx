@@ -31,6 +31,17 @@ function SearchContent() {
             if (format) params.set('format', format);
             if (status) params.set('status', status);
 
+            const cacheKey = `search_cache_${params.toString()}`;
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                const { anime, movie, scrape } = JSON.parse(cached);
+                setAnimeResults(anime);
+                setMovieResults(movie);
+                setScraplingResults(scrape);
+                setLoading(false);
+                return;
+            }
+
             try {
                 const [animeRes, movieRes, scrapeRes] = await Promise.allSettled([
                     axios.get(`/api/anime/search?${params.toString()}`),
@@ -38,11 +49,15 @@ function SearchContent() {
                     query ? axios.get(`/api/scrape?q=${encodeURIComponent(query)}`) : Promise.resolve({ data: { onoflix: [] } })
                 ]);
 
-                if (animeRes.status === 'fulfilled') setAnimeResults(animeRes.value.data.shows || []);
-                if (movieRes.status === 'fulfilled') setMovieResults(movieRes.value.data.results || []);
+                let aData: Show[] = [];
+                let mData: MovieItem[] = [];
+                let sData: any[] = [];
+
+                if (animeRes.status === 'fulfilled') aData = animeRes.value.data.shows || [];
+                if (movieRes.status === 'fulfilled') mData = movieRes.value.data.results || [];
                 if (scrapeRes.status === 'fulfilled') {
                     const data = scrapeRes.value.data;
-                    setScraplingResults([
+                    sData = [
                         ...(data.onoflix || []),
                         ...(data.aniwatch || []),
                         ...(data.watchanimeworld || []),
@@ -50,8 +65,16 @@ function SearchContent() {
                         ...(data.filmex || []),
                         ...(data.cinezo || []),
                         ...(data.pstream || [])
-                    ]);
+                    ];
                 }
+
+                setAnimeResults(aData);
+                setMovieResults(mData);
+                setScraplingResults(sData);
+
+                // Cache results
+                sessionStorage.setItem(cacheKey, JSON.stringify({ anime: aData, movie: mData, scrape: sData }));
+
             } catch (err) {
                 console.error("Search failed:", err);
             } finally {
@@ -65,7 +88,7 @@ function SearchContent() {
     const hasResults = animeResults.length > 0 || movieResults.length > 0 || scraplingResults.length > 0;
 
     return (
-        <main className="min-h-screen pt-24 px-4 md:px-8 max-w-[2000px] mx-auto bg-[var(--bg-main)]">
+        <main className="min-h-screen pt-24 px-4 md:px-8 max-w-[2560px] mx-auto bg-[var(--bg-main)]">
             <h1 className="text-2xl md:text-3xl font-black mb-8 text-[var(--text-main)]">
                 {query ? (
                     <>Search Results for <span className="text-purple-400">"{query}"</span></>
@@ -99,75 +122,95 @@ function SearchContent() {
                     <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
                 </div>
             ) : hasResults ? (
-                <div className="max-w-[2000px] mx-auto space-y-12 pb-20">
-                    {/* Movie/TV Results */}
-                    {(searchType === "all" || searchType === "movies") && movieResults.length > 0 && (
+                <div className="max-w-[2560px] mx-auto space-y-12 pb-20">
+                    {/* Unified "Everything" View */}
+                    {searchType === "all" && (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Sparkles className="w-5 h-5 text-purple-400" />
+                                <h2 className="text-xl font-bold">Top Picks</h2>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-bold ml-2">Combined Results</span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
+                                {[
+                                    ...movieResults.map(m => ({ ...m, id: m.id.toString(), type: m.media_type || 'movie', provider: 'tmdb' })),
+                                    ...animeResults.map(a => ({ ...a, id: a._id, title: a.name, image: a.thumbnail, type: 'anime' })),
+                                    ...scraplingResults
+                                ].map((item: any) => (
+                                    <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
+                                         onClick={() => {
+                                             if (item.type === 'cartoon') {
+                                                 window.location.href = `/watch/${item.id}`;
+                                             } else if (item.type === 'anime') {
+                                                 window.location.href = `/watch/${item.id}`;
+                                             } else if (item.provider === 'tmdb') {
+                                                 window.location.href = `/movies/watch/${item.type}/${item.id}`;
+                                             } else {
+                                                 window.location.href = `/watch/${item.id}`;
+                                             }
+                                         }}>
+                                        <div className="aspect-[2/3] relative">
+                                            <img src={(item.image || item.poster_path) ? (item.image || `https://image.tmdb.org/t/p/w300${item.poster_path}`) : '/icon.png'} alt={item.title || item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                            <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-wider">
+                                                {item.type}
+                                            </div>
+                                            {item.provider && (
+                                                <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded-md bg-purple-600/60 backdrop-blur-md border border-white/10 text-[8px] font-black text-white uppercase tracking-wider">
+                                                    {item.provider}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-3">
+                                            <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title || item.name}</h3>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Filtered Section - Movies */}
+                    {searchType === "movies" && movieResults.length > 0 && (
                         <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex items-center gap-2 mb-6">
                                 <Film className="w-5 h-5 text-blue-400" />
                                 <h2 className="text-xl font-bold">Movies & TV Shows</h2>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-bold ml-2">TMDB Content</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-bold ml-2">TMDB content</span>
                             </div>
-                            <MovieGrid items={movieResults} />
+                            <MovieGrid items={movieResults.map(m => ({ ...m, id: m.id.toString().startsWith('tmdb:') ? m.id : `tmdb:${m.id}` })) as any} />
                         </section>
                     )}
 
-                    {/* Anime Results */}
-                    {(searchType === "all" || searchType === "anime") && animeResults.length > 0 && (
-                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+                    {/* Filtered Section - Anime */}
+                    {searchType === "anime" && animeResults.length > 0 && (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="flex items-center gap-2 mb-6">
                                 <Play className="w-5 h-5 text-purple-400" />
                                 <h2 className="text-xl font-bold">Anime Results</h2>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-bold ml-2">AniList/Multi Source</span>
                             </div>
                             <AnimeGrid shows={animeResults} />
                         </section>
                     )}
 
-                    {/* Scrapling Extra Results */}
-                    {scraplingResults.length > 0 && (
-                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                            <div className="flex items-center gap-2 mb-6">
-                                <Sparkles className="w-5 h-5 text-yellow-400" />
-                                <h2 className="text-xl font-bold">Enhanced Results</h2>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 font-bold ml-2">Scrapling Powered</span>
+                    {/* Filtered Section - Cartoons */}
+                    {searchType === "cartoon" && scraplingResults.filter(i => i.type === 'cartoon').length > 0 && (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                             <div className="flex items-center gap-2 mb-6">
+                                <Zap className="w-5 h-5 text-yellow-500" />
+                                <h2 className="text-xl font-bold">Cartoon Results</h2>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
-                                {scraplingResults
-                                    .filter(item => {
-                                        if (searchType === 'all') return true;
-                                        if (searchType === 'movies') return item.type === 'movie' || item.type === 'tv';
-                                        if (searchType === 'anime') return item.type === 'anime';
-                                        if (searchType === 'cartoon') return item.type === 'cartoon';
-                                        return true;
-                                    })
-                                    .map((item: any) => (
-                                        <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-yellow-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
-                                             onClick={() => {
-                                                 if (item.type === 'cartoon') {
-                                                     window.location.href = `/watch/${item.id}?provider=watchanimeworld`;
-                                                 } else if (item.type === 'anime') {
-                                                     window.location.href = `/watch/${item.id}?provider=${item.provider || 'aniwatch'}`;
-                                                 } else {
-                                                     // If it's a specific movie provider result
-                                                     const prov = item.url?.includes('cinemacity') ? 'cinemacity' : 
-                                                                 item.url?.includes('filmex') ? 'filmex' :
-                                                                 item.url?.includes('cinezo') ? 'cinezo' :
-                                                                 item.url?.includes('pstream') ? 'pstream' : 'onoflix';
-                                                     window.location.href = `/movies/watch/${item.type}/${item.id}?provider=${prov}`;
-                                                 }
-                                             }}>
-                                            <div className="aspect-[2/3] relative">
-                                                <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                                <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-wider">
-                                                    {item.type}
-                                                </div>
-                                            </div>
-                                            <div className="p-3">
-                                                <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{item.title}</h3>
-                                            </div>
+                                {scraplingResults.filter(i => i.type === 'cartoon').map((item: any) => (
+                                    <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-yellow-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
+                                         onClick={() => window.location.href = `/watch/${item.id}`}>
+                                        <div className="aspect-[2/3] relative">
+                                            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
                                         </div>
-                                    ))}
+                                        <div className="p-3">
+                                            <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </section>
                     )}

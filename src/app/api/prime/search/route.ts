@@ -29,7 +29,10 @@ export async function GET(request: Request) {
             : [];
 
         return NextResponse.json({
-            results: filtered,
+            results: filtered.map((item: any) => ({
+                ...item,
+                id: `tmdb:${item.id}`
+            })),
             page: data.page || 1,
             total_pages: data.total_pages || 0,
             total_results: data.total_results || 0,

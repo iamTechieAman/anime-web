@@ -4,7 +4,7 @@ import { useState, useEffect, use, useRef } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -174,9 +174,20 @@ interface ShowData {
     };
 }
 
-export default function WatchClient({ id }: { id: string }) {
+export default function WatchClient({ id: fullId }: { id: string }) {
     const searchParams = useSearchParams();
-    const provider = searchParams.get('provider');
+    
+    // Parse ID for provider prefix (e.g., tmdb:123, aw:naruto)
+    const { provider: idProvider, actualId: id } = (() => {
+        if (fullId.includes(':')) {
+            const parts = fullId.split(':');
+            return { provider: parts[0], actualId: parts.slice(1).join(':') };
+        }
+        return { provider: null, actualId: fullId };
+    })();
+
+    // Priority: Prefix > URL Parameter
+    const provider = idProvider || searchParams.get('provider');
 
     const [show, setShow] = useState<ShowData | null>(null);
     const [isGuardLocked, setIsGuardLocked] = useState(true);
@@ -207,6 +218,9 @@ export default function WatchClient({ id }: { id: string }) {
     const processingRef = useRef<string | null>(null);
     const failedServersRef = useRef<Set<string>>(new Set());
 
+    const [isSafeStream, setIsSafeStream] = useState(true);
+    const [showSafeGuide, setShowSafeGuide] = useState(false);
+
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [tmdbId, setTmdbId] = useState<string | null>(null);
 
@@ -219,7 +233,7 @@ export default function WatchClient({ id }: { id: string }) {
 
         // Check Bookmark
         const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
-        const exists = watchlist.some((item: any) => item._id === id);
+        const exists = watchlist.some((item: any) => item._id === fullId);
         setIsBookmarked(exists);
 
         // Click outside to close dropdown
@@ -238,7 +252,7 @@ export default function WatchClient({ id }: { id: string }) {
 
         if (isBookmarked) {
             // Remove
-            const newList = watchlist.filter((item: any) => item._id !== id);
+            const newList = watchlist.filter((item: any) => item._id !== fullId);
             localStorage.setItem('toonplayer_watchlist', JSON.stringify(newList));
             setIsBookmarked(false);
             toast.success('Removed from Watchlist');
@@ -312,7 +326,7 @@ export default function WatchClient({ id }: { id: string }) {
 
                 // Check bookmark again with full show data
                 const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
-                const exists = watchlist.some((item: any) => item._id === id);
+                const exists = watchlist.some((item: any) => item._id === fullId);
                 setIsBookmarked(exists);
 
                 let initialMode: "sub" | "dub" = "sub";
@@ -836,6 +850,59 @@ export default function WatchClient({ id }: { id: string }) {
                                 </div>
                             )}
                         </div>
+
+                        {/* Safe Stream & Stats */}
+                        <div className="flex flex-wrap items-center gap-3 pt-4">
+                            <button 
+                                onClick={() => setShowSafeGuide(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider hover:bg-emerald-500/20 transition-colors"
+                            >
+                                <Shield className="w-3 h-3" />
+                                SafeStream Protected
+                            </button>
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-wider">
+                                <Zap className="w-3 h-3" />
+                                Edge Optimized
+                            </div>
+                        </div>
+
+                        {/* Ad-Blocker Guide Modal */}
+                        <AnimatePresence>
+                            {showSafeGuide && (
+                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowSafeGuide(false)}>
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                        className="max-w-md w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 space-y-4 shadow-2xl"
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <div className="flex items-center gap-3 text-emerald-400 mb-2">
+                                            <Shield className="w-6 h-6" />
+                                            <h3 className="text-xl font-bold text-white">SafeStream Guide</h3>
+                                        </div>
+                                        <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+                                            We've enabled <span className="text-white font-bold">Player Guard</span> to block 99% of redirects and popups. To reach <span className="text-emerald-400 font-bold">100% Ad-Free</span> experience, we highly recommend using AdGuard DNS.
+                                        </p>
+                                        <div className="bg-black/40 rounded-xl p-4 border border-white/5 space-y-3">
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span className="text-[var(--text-muted)]">DNS Server:</span>
+                                                <code className="text-purple-400 font-bold selection:bg-purple-500/30">dns.adguard.com</code>
+                                            </div>
+                                            <p className="text-[9px] text-[var(--text-muted)] italic">
+                                                * This will block ads across all streaming sites and providers automatically.
+                                            </p>
+                                        </div>
+                                        <button 
+                                            onClick={() => setShowSafeGuide(false)}
+                                            className="w-full py-3 bg-white text-black rounded-xl font-black text-sm hover:bg-white/90 transition-colors uppercase tracking-widest"
+                                        >
+                                            Got it
+                                        </button>
+                                    </motion.div>
+                                </div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Troubleshooting & Help */}
                         <div className="mt-4 p-4 bg-slate-900/40 backdrop-blur-sm rounded-xl border border-slate-800/60 shadow-inner">

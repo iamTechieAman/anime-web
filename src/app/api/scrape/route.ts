@@ -12,8 +12,8 @@ export async function GET(request: Request) {
         const aniwatchPage = searchParams.get('aniwatch_page');
         const cartoonQuery = searchParams.get('cartoon_query');
         const cartoonCategory = searchParams.get('cartoon_category');
-        const waInfo = searchParams.get('wa_info');
-        const waSource = searchParams.get('wa_source');
+        const waInfo = searchParams.get('wa_info')?.split(':').pop();
+        const waSource = searchParams.get('wa_source')?.split(':').pop();
 
         if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory && !waInfo && !waSource) {
             return NextResponse.json({ error: "Missing parameters" }, { status: 400 });

@@ -65,7 +65,7 @@ export async function GET(request: Request) {
                 }
 
                 return (results || []).map(result => ({
-                    _id: result.id,
+                    _id: `${provider}:${result.id}`,
                     name: result.title,
                     thumbnail: result.image,
                     availableEpisodes: result.subOrDub,
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
                         const res = await axios.get(tmdbUrl);
                         if (res.data && res.data.results) {
                             return res.data.results.map((item: any) => ({
-                                _id: item.id.toString(),
+                                _id: `tmdb:${item.id}`,
                                 name: item.title,
                                 thumbnail: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
                                 availableEpisodes: { sub: 0, dub: 0 },

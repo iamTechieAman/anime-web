@@ -34,7 +34,7 @@ def scrape_onoflix_search(query):
             is_movie = "/movie/" in href
             item_id = href.rstrip('/').split('/')[-1]
             results.append({
-                "id": item_id,
+                "id": f"on:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https://onoflix.live{img}",
                 "type": "movie" if is_movie else "tv",
@@ -67,7 +67,7 @@ def scrape_aniwatch_tv_list(page=17):
         
         if title and href:
             results.append({
-                "id": href.split('/')[-1].split('?')[0],
+                "id": f"aw:{href.split('/')[-1].split('?')[0]}",
                 "title": title,
                 "image": img,
                 "type": "anime"
@@ -112,7 +112,7 @@ def scrape_watchanimeworld(query=None, category=None):
         if title and href:
             item_id = href.rstrip('/').split('/')[-1]
             results.append({
-                "id": item_id,
+                "id": f"wa:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
                 "type": "cartoon",
@@ -359,7 +359,7 @@ def scrape_cinemacity(query):
         img = imgs[0].attrib.get('src', '') if imgs else ""
         if title and href:
             results.append({
-                "id": href.rstrip('/').split('/')[-1],
+                "id": f"cc:{href.rstrip('/').split('/')[-1]}",
                 "title": title,
                 "image": f"https://cinemacity.cc{img}" if img.startswith('/') else img,
                 "url": href,
@@ -382,7 +382,7 @@ def scrape_filmex(query):
         if title and href:
             item_id = href.rstrip('/').split('/')[-1]
             results.append({
-                "id": item_id,
+                "id": f"fx:{item_id}",
                 "title": title,
                 "image": img,
                 "url": f"https://filmex.to{href}" if href.startswith('/') else href,
@@ -405,7 +405,7 @@ def scrape_cinezo(query):
         if href:
             item_id = href.split('/')[-1]
             results.append({
-                "id": item_id,
+                "id": f"cz:{item_id}",
                 "title": title,
                 "image": img,
                 "url": f"https://www.cinezo.net{href}" if href.startswith('/') else href,
@@ -428,7 +428,7 @@ def scrape_pstream(query):
         if href:
             item_id = href.split('/')[-1]
             results.append({
-                "id": item_id,
+                "id": f"ps:{item_id}",
                 "title": title or item_id.replace('-', ' ').title(),
                 "image": img,
                 "url": f"https://pstream.net{href}" if href.startswith('/') else href,
