@@ -138,25 +138,39 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-10 h-10 md:w-12 md:h-12 relative flex items-center justify-center">
-            {/* Animation Rectangle / Glow */}
+            {/* Multi-layered Animation Rectangle */}
             <motion.div 
-              initial={{ rotate: 6, scale: 0.9 }}
+              initial={{ rotate: 0, scale: 0.8 }}
               animate={{ 
-                rotate: [6, 12, 6],
-                scale: [0.9, 1.05, 0.9],
+                rotate: [0, 90, 180, 270, 360],
+                scale: [0.8, 1.1, 0.8],
+                borderRadius: ["20%", "50%", "20%"]
+              }}
+              transition={{ 
+                duration: 8, 
+                repeat: Infinity, 
+                ease: "linear" 
+              }}
+              className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600 opacity-20 blur-md"
+            ></motion.div>
+            <motion.div 
+              initial={{ rotate: 45, scale: 0.9 }}
+              animate={{ 
+                rotate: [45, -45, 45],
+                scale: [0.9, 1.0, 0.9],
               }}
               transition={{ 
                 duration: 4, 
                 repeat: Infinity, 
                 ease: "easeInOut" 
               }}
-              className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 to-blue-600/30 rounded-xl blur-sm group-hover:blur-md transition-all"
+              className="absolute inset-0 border-2 border-purple-500/30 rounded-xl"
             ></motion.div>
-            <div className="absolute inset-0 bg-white/10 rounded-xl border border-white/10 rotate-6 group-hover:rotate-12 transition-transform"></div>
+            <div className="absolute inset-1 bg-[var(--bg-card)] rounded-lg shadow-inner"></div>
             <img 
               src="/logo.png" 
               alt="ToonPlayer Logo" 
-              className="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]" 
+              className="w-8 h-8 md:w-10 md:h-10 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" 
               onError={(e) => {
                 e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=TP&backgroundColor=a855f7';
               }}

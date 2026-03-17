@@ -24,7 +24,14 @@ const SERVERS = [
         name: "VidBinge",
         badge: "4K/HD",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidbinge.dev/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.dev/embed/movie/${id}`,
+            type === "tv" ? `https://vidbinge.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.to/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_xyz",
+        name: "VidSrc XYZ",
+        badge: "New",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
     },
     {
         id: "vidlink",

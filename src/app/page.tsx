@@ -46,7 +46,8 @@ export default function Home() {
   const [trending, setTrending] = useState<Show[]>([]);
   const [completed, setCompleted] = useState<Show[]>([]);
   const [upcoming, setUpcoming] = useState<Show[]>([]);
-  const [loading, setLoading] = useState({ popular: true, recent: true, top: true, completed: true, upcoming: true });
+  const [cartoons, setCartoons] = useState<Show[]>([]);
+  const [loading, setLoading] = useState({ popular: true, recent: true, top: true, completed: true, upcoming: true, cartoons: true });
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Scroll-to-top visibility
@@ -76,6 +77,7 @@ export default function Home() {
   const { data: trendingData } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
   const { data: completedData } = useSWR('/api/anime/completed', fetcher, { revalidateOnFocus: false });
   const { data: upcomingData } = useSWR('/api/anime/upcoming', fetcher, { revalidateOnFocus: false });
+  const { data: cartoonData } = useSWR('/api/cartoon?category=cartoon', fetcher, { refreshInterval: 600000 });
 
     // Fetch Movie Data for Unified Home
     const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
@@ -87,6 +89,7 @@ export default function Home() {
     useEffect(() => { if (trendingData?.shows) setTrending(trendingData.shows); }, [trendingData]);
     useEffect(() => { if (completedData?.shows) setCompleted(completedData.shows); }, [completedData]);
     useEffect(() => { if (upcomingData?.shows) setUpcoming(upcomingData.shows); }, [upcomingData]);
+    useEffect(() => { if (cartoonData?.shows) setCartoons(cartoonData.shows); }, [cartoonData]);
 
     // Loading state calculations
     useEffect(() => {
@@ -96,9 +99,10 @@ export default function Home() {
             top: !topData && top.length === 0,
             trending: !trendingData && trending.length === 0,
             completed: !completedData && completed.length === 0,
-            upcoming: !upcomingData && upcoming.length === 0
+            upcoming: !upcomingData && upcoming.length === 0,
+            cartoons: !cartoonData && cartoons.length === 0
         } as any);
-    }, [recentData, recent, popularData, popular, topData, top, trendingData, trending]);
+    }, [recentData, recent, popularData, popular, topData, top, trendingData, trending, cartoonData, cartoons]);
 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">
@@ -177,6 +181,18 @@ export default function Home() {
                                 <Link href="/az-list/all" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
                             </div>
                             {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 18)} />}
+                        </section>
+
+                        {/* Newest Cartoons */}
+                        <section>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
+                                    <Zap className="w-5 h-5 text-yellow-400" />
+                                    Newest Cartoons
+                                </h2>
+                                <Link href="/search?type=cartoon" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
+                            </div>
+                            {loading.cartoons ? <LoadingSkeleton /> : <AnimeGrid shows={cartoons.slice(0, 12)} />}
                         </section>
 
                         {/* Popular Movies */}

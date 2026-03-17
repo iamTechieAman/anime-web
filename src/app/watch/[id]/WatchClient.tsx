@@ -28,7 +28,15 @@ const MOVIE_SERVERS = [
         badge: "4K/HD",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidbinge.dev/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.dev/embed/movie/${id}`,
+            type === "tv" ? `https://vidbinge.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.to/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_xyz",
+        name: "VidSrc XYZ",
+        badge: "New",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
     },
     {
         id: "vidlink",
@@ -45,6 +53,38 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
+    },
+    {
+        id: "cinemacity",
+        name: "CinemaCity",
+        badge: "New",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://cinemacity.cc/index.php?do=search&subaction=search&story=${id}` : `https://cinemacity.cc/index.php?do=search&subaction=search&story=${id}`,
+    },
+    {
+        id: "filmex",
+        name: "Filmex",
+        badge: "Fast",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://filmex.to/search?q=${id}` : `https://filmex.to/search?q=${id}`,
+    },
+    {
+        id: "cinezo",
+        name: "Cinezo",
+        badge: "Direct",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://www.cinezo.net/search?q=${id}`,
+    },
+    {
+        id: "pstream",
+        name: "P-Stream",
+        badge: "Multi",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://pstream.net/search/${id}`,
     },
     {
         id: "vidsrc_me",
@@ -360,7 +400,7 @@ export default function WatchClient({ id }: { id: string }) {
         const fetchServers = async () => {
             setLoadingServers(true);
             try {
-                const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}`);
+                const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}&provider=${provider || ''}`);
                 let nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
                 
                 // If no servers for specific mode (sub/dub), show all native servers as fallback
@@ -725,8 +765,8 @@ export default function WatchClient({ id }: { id: string }) {
                                         className="w-full h-full border-0 bg-black"
                                         allowFullScreen
                                         allow="autoplay; fullscreen"
-                                        // Sandbox attribute to prevent popups and top-level redirects
-                                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+                                        // sandbox strictly to prevent popups and redirects without user interaction
+                                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
                                     ></iframe>
                                 ) : (
                                     <ArtPlayer

@@ -19,7 +19,7 @@ const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const SCHEDULE_QUERY = `
 query ($weekStart: Int, $weekEnd: Int) {
-  Page(page: 1, perPage: 50) {
+  Page(page: 1, perPage: 100) {
     airingSchedules(airingAt_greater: $weekStart, airingAt_lesser: $weekEnd, sort: TIME) {
       id
       episode

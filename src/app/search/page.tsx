@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { AnimeGrid, type Show } from "@/components/AnimeCard";
 import { MovieGrid, type MovieItem } from "@/components/MovieCard";
-import { Play, Film, Tv, Sparkles } from "lucide-react";
+import { Play, Film, Tv, Sparkles, Zap } from "lucide-react";
 
 function SearchContent() {
     const searchParams = useSearchParams();
@@ -20,7 +20,7 @@ function SearchContent() {
     const [movieResults, setMovieResults] = useState<MovieItem[]>([]);
     const [scraplingResults, setScraplingResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchType, setSearchType] = useState<"all" | "movies" | "anime">("all");
+    const [searchType, setSearchType] = useState<"all" | "movies" | "anime" | "cartoon">("all");
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -44,7 +44,12 @@ function SearchContent() {
                     const data = scrapeRes.value.data;
                     setScraplingResults([
                         ...(data.onoflix || []),
-                        ...(data.aniwatch || [])
+                        ...(data.aniwatch || []),
+                        ...(data.watchanimeworld || []),
+                        ...(data.cinemacity || []),
+                        ...(data.filmex || []),
+                        ...(data.cinezo || []),
+                        ...(data.pstream || [])
                     ]);
                 }
             } catch (err) {
@@ -71,7 +76,7 @@ function SearchContent() {
             
             {/* Search Type Selector */}
             <div className="flex bg-[var(--bg-card)] p-1.5 rounded-2xl border border-[var(--border-color)] mb-8 w-fit mx-auto sm:mx-0 shadow-xl">
-                {(["all", "movies", "anime"] as const).map((type) => (
+                {(["all", "movies", "anime", "cartoon"] as const).map((type) => (
                     <button
                         key={type}
                         onClick={() => setSearchType(type)}
@@ -79,6 +84,7 @@ function SearchContent() {
                             searchType === type 
                             ? type === 'movies' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40 transform scale-105" 
                               : type === 'anime' ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40 transform scale-105"
+                              : type === 'cartoon' ? "bg-yellow-500 text-white shadow-lg shadow-yellow-900/40 transform scale-105"
                               : "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-900/40 transform scale-105"
                             : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
                         }`}
@@ -127,20 +133,41 @@ function SearchContent() {
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 font-bold ml-2">Scrapling Powered</span>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                                {scraplingResults.map((item: any) => (
-                                    <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-yellow-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
-                                         onClick={() => window.location.href = item.type === 'anime' ? `/watch/${item.id}` : `/movies/watch/${item.type}/${item.id}?provider=onoflix`}>
-                                        <div className="aspect-[2/3] relative">
-                                            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                            <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-wider">
-                                                {item.type}
+                                {scraplingResults
+                                    .filter(item => {
+                                        if (searchType === 'all') return true;
+                                        if (searchType === 'movies') return item.type === 'movie' || item.type === 'tv';
+                                        if (searchType === 'anime') return item.type === 'anime';
+                                        if (searchType === 'cartoon') return item.type === 'cartoon';
+                                        return true;
+                                    })
+                                    .map((item: any) => (
+                                        <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-yellow-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
+                                             onClick={() => {
+                                                 if (item.type === 'cartoon') {
+                                                     window.location.href = `/watch/${item.id}?provider=watchanimeworld`;
+                                                 } else if (item.type === 'anime') {
+                                                     window.location.href = `/watch/${item.id}?provider=${item.provider || 'aniwatch'}`;
+                                                 } else {
+                                                     // If it's a specific movie provider result
+                                                     const prov = item.url?.includes('cinemacity') ? 'cinemacity' : 
+                                                                 item.url?.includes('filmex') ? 'filmex' :
+                                                                 item.url?.includes('cinezo') ? 'cinezo' :
+                                                                 item.url?.includes('pstream') ? 'pstream' : 'onoflix';
+                                                     window.location.href = `/movies/watch/${item.type}/${item.id}?provider=${prov}`;
+                                                 }
+                                             }}>
+                                            <div className="aspect-[2/3] relative">
+                                                <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                <div className="absolute top-2 left-2 z-10 px-2 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-wider">
+                                                    {item.type}
+                                                </div>
+                                            </div>
+                                            <div className="p-3">
+                                                <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{item.title}</h3>
                                             </div>
                                         </div>
-                                        <div className="p-3">
-                                            <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{item.title}</h3>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
                         </section>
                     )}

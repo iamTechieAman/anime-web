@@ -10,9 +10,11 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('q');
         const aniwatchPage = searchParams.get('aniwatch_page');
+        const cartoonQuery = searchParams.get('cartoon_query');
+        const cartoonCategory = searchParams.get('cartoon_category');
 
-        if (!query && !aniwatchPage) {
-            return NextResponse.json({ error: "Missing query or page" }, { status: 400 });
+        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory) {
+            return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
         }
 
         const scriptPath = path.join(process.cwd(), "src/lib/python/scrapling_sync.py");
@@ -20,6 +22,8 @@ export async function GET(request: Request) {
         
         if (query) command += ` --query "${query.replace(/"/g, '\\"')}"`;
         if (aniwatchPage) command += ` --aniwatch_page ${aniwatchPage}`;
+        if (cartoonQuery) command += ` --cartoon_query "${cartoonQuery.replace(/"/g, '\\"')}"`;
+        if (cartoonCategory) command += ` --cartoon_category "${cartoonCategory.replace(/"/g, '\\"')}"`;
 
         const { stdout, stderr } = await execPromise(command);
 
