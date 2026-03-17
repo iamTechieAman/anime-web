@@ -766,7 +766,7 @@ export default function WatchClient({ id }: { id: string }) {
                                         allowFullScreen
                                         allow="autoplay; fullscreen"
                                         // sandbox strictly to prevent popups and redirects without user interaction
-                                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-downloads allow-modals"
                                     ></iframe>
                                 ) : (
                                     <ArtPlayer

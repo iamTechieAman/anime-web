@@ -84,7 +84,9 @@ def scrape_watchanimeworld(query=None, category=None):
     else:
         url = "https://watchanimeworld.net/"
 
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
+    if not response.css('article.post, article.item, .result-item, .movie-item'):
+        response = fetcher.fetch(url, engine='chrome')
     results = []
     
     items = response.css('article.post, article.item, .result-item, .movie-item')
@@ -130,32 +132,59 @@ def scrape_watchanimeworld_info(item_id):
     response = fetcher.fetch(url, engine='chrome')
     
     episodes = []
-    # Pattern: Series with episodes
-    # Even if hidden, Scrapling might see them if they are in the DOM
-    ep_links = response.css('.episodios a, .lnk-blk, a[href*="/episode/"]')
-    for link in ep_links:
-        href = link.attrib.get('href', '')
-        if not href or "/episode/" not in href: continue
-        
-        # Try to get season/episode info from text or URL
-        # URL pattern: /episode/slug-1x1/
-        text = link.text.strip()
-        if not text:
-            # Check for numerando or similar
-            num_el = link.css('.numerando, .ep')
-            text = num_el[0].text.strip() if num_el else ""
-            
-        ep_id = href.rstrip('/').split('/')[-1]
-        if ep_id and ep_id not in [e['id'] for e in episodes]:
-            episodes.append({
-                "id": ep_id,
-                "number": text if text else ep_id.split('-')[-1],
-                "href": href
-            })
-            
-    if not episodes:
+    
+    if is_movie:
         # Check if it's a movie page (movieDetail is the playback page)
         episodes.append({"id": item_id, "number": "1", "href": url})
+    else:
+        # 1. Extract post_id and seasons for AJAX
+        season_links = response.css('.aa-cnt a')
+        post_id = None
+        seasons = []
+        for sl in season_links:
+            post_id = sl.attrib.get('data-post')
+            season_num = sl.attrib.get('data-season')
+            if post_id and season_num:
+                seasons.append(season_num)
+        
+        # 2. Iterate through seasons using AJAX if found
+        if post_id and seasons:
+            for s_num in seasons:
+                ajax_url = f"https://watchanimeworld.net/wp-admin/admin-ajax.php?action=action_select_season&season={s_num}&post={post_id}"
+                try:
+                    # AJAX might return HTML snippets
+                    ajax_res = fetcher.fetch(ajax_url)
+                    ep_links = ajax_res.css('.lnk-blk, a[href*="/episode/"]')
+                    for link in ep_links:
+                        href = link.attrib.get('href', '')
+                        if "/episode/" not in href: continue
+                        ep_id = href.rstrip('/').split('/')[-1]
+                        num_el = link.css('.numerando, .ep')
+                        text = num_el[0].text.strip() if num_el else ep_id.split('-')[-1]
+                        if ep_id not in [e['id'] for e in episodes]:
+                            episodes.append({
+                                "id": ep_id,
+                                "number": text,
+                                "href": href
+                            })
+                except Exception as e:
+                    print(f"Error fetching season {s_num}: {e}", file=sys.stderr)
+        
+        # Fallback to current page episodes if no AJAX results
+        if not episodes:
+            ep_links = response.css('.episodios a, .lnk-blk, a[href*="/episode/"]')
+            for link in ep_links:
+                href = link.attrib.get('href', '')
+                if not href or "/episode/" not in href: continue
+                ep_id = href.rstrip('/').split('/')[-1]
+                num_el = link.css('.numerando, .ep')
+                text = num_el[0].text.strip() if num_el else ep_id.split('-')[-1]
+                if ep_id and ep_id not in [e['id'] for e in episodes]:
+                    episodes.append({
+                        "id": ep_id,
+                        "number": text,
+                        "href": href
+                    })
 
     title_el = response.css('h1, .entry-title')
     title = title_el[0].text.strip() if title_el else item_id
@@ -296,7 +325,17 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    output = {}
+    output = {
+        "onoflix": [],
+        "watchanimeworld": [],
+        "cinemacity": [],
+        "filmex": [],
+        "cinezo": [],
+        "pstream": [],
+        "wa_info": {},
+        "wa_source": {},
+        "aniwatch": []
+    }
     if args.query:
         output["onoflix"] = scrape_onoflix_search(args.query)
         output["watchanimeworld"] = scrape_watchanimeworld(query=args.query)

@@ -24,9 +24,9 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
             const res = await axios.get(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scrape?wa_info=${id}`);
             const data = res.data.wa_info;
             
-            const episodes: AnimeEpisode[] = data.episodes.map((ep: any) => ({
+            const episodes: AnimeEpisode[] = data.episodes.map((ep: any, index: number) => ({
                 id: ep.id,
-                number: parseInt(ep.number) || 1,
+                number: index + 1,
                 title: `Episode ${ep.number}`
             }));
 
@@ -36,7 +36,7 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
                 image: '', 
                 episodes: episodes,
                 availableEpisodesDetail: {
-                    sub: episodes.map(e => e.number.toString()),
+                    sub: data.episodes.map((ep: any) => ep.number.toString()),
                     dub: []
                 }
             };
