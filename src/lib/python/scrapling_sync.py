@@ -139,22 +139,77 @@ def scrape_watchanimeworld_info(item_id):
     for url in urls_to_try:
         try:
             temp_resp = fetcher.fetch(url)
-            if temp_resp.status_code != 404:
+            # Some versions of scrapling Response have status_code, others have status
+            status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
+            if temp_resp and status < 400:
                 response = temp_resp
                 break
         except:
             continue
             
-    if not response:
-        # Final fallback with chrome if all static failed with 404 or errors
+    if not response or getattr(response, 'status_code', getattr(response, 'status', 200)) >= 400:
+        # Final fallback with chrome if all static failed
         response = fetcher.fetch(urls_to_try[0], engine='chrome')
     
     episodes = []
     
+    # Check status again after chrome fallback
+    current_status = getattr(response, 'status_code', getattr(response, 'status', 200)) if response else 404
+    
+    if (not response or current_status >= 400) and not is_movie:
+        # SEARCH RECOVERY: If direct URL failed, try searching for the ID-based title
+        # This handles cases where the slug changed or has a different structure
+        guessed_title = item_id.replace('-', ' ').title()
+        print(f"[Scraper] 404 on direct lookup for {item_id}. Attempting search recovery for '{guessed_title}'...", file=sys.stderr)
+        
+        search_res = scrape_watchanimeworld(guessed_title)
+        
+        # If no results, try a broader search with just the first two words
+        if not search_res:
+            words = guessed_title.split()
+            if len(words) > 2:
+                broader_title = " ".join(words[:2])
+                print(f"[Scraper] No results for '{guessed_title}'. Trying broader search for '{broader_title}'...", file=sys.stderr)
+                search_res = scrape_watchanimeworld(broader_title)
+
+        if search_res and len(search_res) > 0:
+            # Pick best match (exact or first)
+            best_match = None
+            # Filter out original failing ID to avoid infinite recursion or re-trying same failure
+            valid_results = [r for r in search_res if r['id'] != item_id]
+            
+            if valid_results:
+                for r in valid_results:
+                    if r['title'].lower() in guessed_title.lower() or guessed_title.lower() in r['title'].lower():
+                        best_match = r
+                        break
+                
+                if not best_match:
+                    best_match = valid_results[0]
+                
+                print(f"[Scraper] Search recovery found new candidate ID: {best_match['id']}", file=sys.stderr)
+                # Re-fetch with the new ID
+                urls_to_try = [
+                    f"https://watchanimeworld.net/series/{best_match['id']}/",
+                    f"https://watchanimeworld.net/movies/{best_match['id']}/",
+                    f"https://watchanimeworld.net/{best_match['id']}/"
+                ]
+                response = None
+                for url in urls_to_try:
+                    try:
+                        temp_resp = fetcher.fetch(url)
+                        status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
+                        if temp_resp and status < 400:
+                            response = temp_resp
+                            break
+                    except: continue
+
     if not response:
         return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series"}
         
-    if is_movie:
+    is_movie_detected = is_movie or "/movies/" in response.url or "/movie/" in response.url
+    
+    if is_movie_detected:
         # Check if it's a movie page (movieDetail is the playback page)
         episodes.append({"id": item_id, "number": "1", "href": response.url})
     else:

@@ -108,18 +108,24 @@ export async function GET(request: Request) {
                  const guessedTitle = id.split("-").join(" ").replace(/\(.*\)/, "").trim();
                  console.log(`[Episodes] ID lookup failed. Trying guessed title search: "${guessedTitle}"`);
                  
-                 const p = getProvider("allanime"); // Use AllAnime as best searcher
-                 const results = await p.search(guessedTitle);
-                 if (results && results.length > 0) {
-                     const match = results[0];
-                     const info = await p.getInfo(match.id);
-                     const show = mapInfoToShow(info);
-                     if (show) {
-                         return NextResponse.json({
-                             show: { ...show, provider: "allanime" }
-                         });
-                     }
-                 }
+                  const searchResProviders: ProviderName[] = ["allanime", "hianime", "aniwatch"];
+                  for (const searchP of searchResProviders) {
+                      try {
+                          console.log(`[Episodes] Trying guessed title search on ${searchP}: "${guessedTitle}"`);
+                          const p = getProvider(searchP);
+                          const results = await p.search(guessedTitle);
+                          if (results && results.length > 0) {
+                              const match = findBestMatch(results, guessedTitle);
+                              const info = await p.getInfo(match.id);
+                              const show = mapInfoToShow(info);
+                              if (show && (show.availableEpisodesDetail.sub.length > 0 || show.availableEpisodesDetail.dub.length > 0)) {
+                                  return NextResponse.json({
+                                      show: { ...show, provider: searchP }
+                                  });
+                              }
+                          }
+                      } catch (e) { /* silent */ }
+                  }
              } catch (e) { }
         }
 
