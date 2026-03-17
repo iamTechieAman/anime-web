@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+scrapling
+requests
+beautifulsoup4
+playwright
+lxml
+httpx
