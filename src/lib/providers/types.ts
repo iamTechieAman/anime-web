@@ -32,8 +32,9 @@ export interface AnimeDetails {
         dub: string[];
         raw?: string[];
     };
-    malId?: number;
     anilistId?: number;
+    type?: string;
+    status?: string;
 }
 
 export interface VideoSource {

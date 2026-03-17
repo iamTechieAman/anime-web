@@ -31,12 +31,12 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://vidbinge.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.to/embed/movie/${id}`,
     },
     {
-        id: "vidsrc_xyz",
-        name: "VidSrc XYZ",
-        badge: "New",
+        id: "vidsrc_pro",
+        name: "VidSrc Pro",
+        badge: "VIP",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
+            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pro/embed/movie/${id}`,
     },
     {
         id: "vidlink",
@@ -53,6 +53,14 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_xyz",
+        name: "VidSrc XYZ",
+        badge: "New",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
     },
     {
         id: "cinemacity",
@@ -125,6 +133,30 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
+    },
+    {
+        id: "vidsrc_pm",
+        name: "VidSrc PM",
+        badge: "Stable",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.pm/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pm/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_pro",
+        name: "VidSrc Pro",
+        badge: "VIP",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.pro/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_in",
+        name: "VidSrc IN",
+        badge: "Fast",
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.in/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.in/embed/movie/${id}`,
     },
 ];
 
@@ -767,7 +799,7 @@ export default function WatchClient({ id }: { id: string }) {
                                             className="w-full h-full border-0 bg-black"
                                             allowFullScreen
                                             allow="autoplay; fullscreen"
-                                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-downloads allow-modals"
+                                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-downloads allow-modals allow-popups allow-popups-to-escape-sandbox"
                                         ></iframe>
                                         {isGuardLocked && (
                                             <div 
@@ -805,10 +837,34 @@ export default function WatchClient({ id }: { id: string }) {
                             )}
                         </div>
 
-                        {/* Source helper message */}
-                        <div className="mt-2 flex items-center justify-center gap-2 text-[var(--text-muted)] text-xs bg-[var(--bg-card)]/30 py-1.5 rounded-lg border border-[var(--border-color)]/50">
-                            <AlertCircle className="w-3.5 h-3.5 text-yellow-500/70" />
-                            <span>💡 Source not working? Try another one from the server list below</span>
+                        {/* Troubleshooting & Help */}
+                        <div className="mt-4 p-4 bg-slate-900/40 backdrop-blur-sm rounded-xl border border-slate-800/60 shadow-inner">
+                            <div className="flex items-center gap-2 mb-3 text-amber-500/90 font-medium">
+                                <AlertTriangle className="w-4 h-4" />
+                                <span className="text-sm">Playback Troubleshooting</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-400">
+                                <div className="space-y-2">
+                                    <p className="flex items-start gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span>If video is not found or refused to connect, switch to <b>VidSrc Pro</b> or <b>VidSrc PM</b>.</span>
+                                    </p>
+                                    <p className="flex items-start gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span>Disable <b>Ad-Blockers</b> if you see a blank player or "Connection Refused".</span>
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="flex items-start gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span>Try switching from <b>SUB to DUB</b> (or vice versa) if one source fails.</span>
+                                    </p>
+                                    <p className="flex items-start gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span>If using <b>WatchAnimeWorld</b>, some old links may return 404—switch server.</span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Server & Meta Controls - JustAnime Style */}

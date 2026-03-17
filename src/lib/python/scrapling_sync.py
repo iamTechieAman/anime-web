@@ -157,17 +157,25 @@ def scrape_watchanimeworld_info(item_id):
     current_status = getattr(response, 'status_code', getattr(response, 'status', 200)) if response else 404
     
     if (not response or current_status >= 400) and not is_movie:
-        # SEARCH RECOVERY: If direct URL failed, try searching for the ID-based title
-        # This handles cases where the slug changed or has a different structure
-        guessed_title = item_id.replace('-', ' ').title()
-        print(f"[Scraper] 404 on direct lookup for {item_id}. Attempting search recovery for '{guessed_title}'...", file=sys.stderr)
+        # SEARCH RECOVERY: Handle specific slugs and years
+        # Clean title for better search: "ben-10-classic-2005-series" -> "Ben 10"
+        clean_title = re.sub(r'-(series|classic|20\d\d|19\d\d)', '', item_id.lower())
+        guessed_title = clean_title.replace('-', ' ').title()
         
+        print(f"[Scraper] 404 on direct lookup for {item_id}. Search recovery for '{guessed_title}'...", file=sys.stderr)
         search_res = scrape_watchanimeworld(guessed_title)
         
         # If no results, try a broader search with just the first two words
         if not search_res:
             words = guessed_title.split()
-            if len(words) > 2:
+            # If it looks like an episode search, strip the episode part
+            if "Episode" in words:
+                ep_idx = words.index("Episode")
+                guessed_title = " ".join(words[:ep_idx])
+                print(f"[Scraper] Stripping episode part for broader search: '{guessed_title}'", file=sys.stderr)
+                search_res = scrape_watchanimeworld(guessed_title)
+            
+            if not search_res and len(words) > 2:
                 broader_title = " ".join(words[:2])
                 print(f"[Scraper] No results for '{guessed_title}'. Trying broader search for '{broader_title}'...", file=sys.stderr)
                 search_res = scrape_watchanimeworld(broader_title)
@@ -281,24 +289,59 @@ def scrape_watchanimeworld_source(episode_id):
     url = f"https://watchanimeworld.net/episode/{episode_id}/"
     response = fetcher.fetch(url, engine='chrome')
     
-    if not response.css('iframe'):
-        # Maybe it's a movie
+    if getattr(response, 'status_code', getattr(response, 'status', 200)) >= 400:
+        # Try movie URL as fallback if episode 404s
         url = f"https://watchanimeworld.net/movies/{episode_id}/"
         response = fetcher.fetch(url, engine='chrome')
 
-    # Find the player iframe
-    iframes = response.css('iframe[src*="play."], iframe[src*="zephyr"], iframe[src*="embed"], iframe[src*="video"]')
-    if not iframes:
-        iframes = response.css('iframe')
+    # If still 404, try searching for the episode_id
+    if getattr(response, 'status_code', getattr(response, 'status', 200)) >= 400:
+        # Clean title: "ben-10-classic-2005-episode-1" -> "Ben 10"
+        clean_title = re.sub(r'-(episode|part)-\d+', '', episode_id.lower())
+        clean_title = re.sub(r'-(series|classic|20\d\d|19\d\d)', '', clean_title)
+        guessed_title = clean_title.replace('-', ' ').title()
         
-    source_url = iframes[0].attrib.get('src') if iframes else ""
+        print(f"[Source Scraper] 404 for {episode_id}. Searching for '{guessed_title}'...", file=sys.stderr)
+        search_res = scrape_watchanimeworld(guessed_title)
+        if search_res:
+            new_url = search_res[0].get('href')
+            if new_url:
+                print(f"[Source Scraper] Recovered new URL: {new_url}", file=sys.stderr)
+                response = fetcher.fetch(new_url, engine='chrome')
+
+    # Find all server buttons
+    server_buttons = response.css('.server-list li, .server-button, .btn-server, a[data-id]')
+    sources = []
     
-    # Check for direct video links in script if possible
-    # (Optional: Advanced extraction if iframe fails)
+    # Extract from default iframe first
+    iframes = response.css('iframe[src*="play."], iframe[src*="zephyr"], iframe[src*="embed"], iframe[src*="video"], iframe[src*="/v/"]')
+    if not iframes:
+        iframes = response.css('.video-player iframe, .movie-player iframe, #player iframe, iframe')
+        
+    default_url = iframes[0].attrib.get('src') if iframes else ""
+    if default_url:
+        if default_url.startswith('//'): default_url = 'https:' + default_url
+        sources.append({"name": "Primary", "url": default_url})
+
+    # Extract alternative servers from buttons
+    for btn in server_buttons:
+        s_name = btn.text.strip() or "Server"
+        # Often data-id or data-src
+        s_url = btn.attrib.get('data-src') or btn.attrib.get('href', '')
+        if s_url and s_url != '#' and "javascript" not in s_url:
+            if s_url.startswith('//'): s_url = 'https:' + s_url
+            if s_url not in [s['url'] for s in sources]:
+                sources.append({"name": s_name, "url": s_url})
     
+    # If no sources yet, try to find hidden inputs or scripts
+    if not sources:
+        # Fallback to the first iframe we found (legacy check)
+        if default_url:
+            sources.append({"name": "Default", "url": default_url})
+
     return {
-        "url": source_url,
-        "is_iframe": True
+        "url": sources[0]['url'] if sources else "",
+        "sources": sources
     }
 
 def scrape_cinemacity(query):
