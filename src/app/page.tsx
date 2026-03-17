@@ -138,7 +138,7 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-[2000px] mx-auto px-3 md:px-6 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
+                <div className="w-full max-w-[2000px] mx-auto px-4 lg:px-8 py-6 md:py-10 flex flex-col lg:flex-row gap-8 xl:gap-12">
                     {/* Left Column (Main Content) */}
                     <div className="flex-1 space-y-12 min-w-0">
                         <WatchHistorySection />
@@ -153,7 +153,7 @@ export default function Home() {
                                     </h2>
                                     <Link href="/movies" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
                                     {movieTrending.results.slice(0, 12).map((item: any) => (
                                         <Link key={item.id} href={`/movies/watch/${item.media_type || 'movie'}/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg">
                                             <div className="aspect-[2/3] relative">
@@ -184,16 +184,26 @@ export default function Home() {
                         </section>
 
                         {/* Newest Cartoons */}
-                        <section>
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-                                    <Zap className="w-5 h-5 text-yellow-400" />
-                                    Newest Cartoons
-                                </h2>
-                                <Link href="/search?type=cartoon" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
-                            </div>
-                            {loading.cartoons ? <LoadingSkeleton /> : <AnimeGrid shows={cartoons.slice(0, 12)} />}
-                        </section>
+                        {!loading.cartoons && cartoons.length > 0 && (
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
+                                        <Zap className="w-5 h-5 text-yellow-400" />
+                                        Newest Cartoons
+                                    </h2>
+                                    <Link href="/search?type=cartoon" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
+                                </div>
+                                <AnimeGrid shows={cartoons.slice(0, 12)} />
+                            </section>
+                        )}
+                        {loading.cartoons && (
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="h-8 w-48 bg-[var(--bg-card)] animate-pulse rounded-md" />
+                                </div>
+                                <LoadingSkeleton />
+                            </section>
+                        )}
 
                         {/* Popular Movies */}
                         {moviePopular?.results && (
@@ -204,7 +214,7 @@ export default function Home() {
                                         Popular Movies
                                     </h2>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
                                     {moviePopular.results.slice(0, 12).map((item: any) => (
                                         <Link key={item.id} href={`/movies/watch/movie/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg">
                                             <div className="aspect-[2/3] relative">

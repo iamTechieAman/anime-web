@@ -123,19 +123,40 @@ def scrape_watchanimeworld(query=None, category=None):
 
 def scrape_watchanimeworld_info(item_id):
     fetcher = StealthyFetcher()
-    # Check if it's a movie or series
     is_movie = "-movie" in item_id or "movies" in item_id
-    url = f"https://watchanimeworld.net/series/{item_id}/"
+    
+    # Try multiple URL patterns
+    urls_to_try = [
+        f"https://watchanimeworld.net/series/{item_id}/",
+        f"https://watchanimeworld.net/movies/{item_id}/",
+        f"https://watchanimeworld.net/{item_id}/"
+    ]
+    
     if is_movie:
-        url = f"https://watchanimeworld.net/movies/{item_id}/"
+        urls_to_try = [urls_to_try[1], urls_to_try[0], urls_to_try[2]]
         
-    response = fetcher.fetch(url, engine='chrome')
+    response = None
+    for url in urls_to_try:
+        try:
+            temp_resp = fetcher.fetch(url)
+            if temp_resp.status_code != 404:
+                response = temp_resp
+                break
+        except:
+            continue
+            
+    if not response:
+        # Final fallback with chrome if all static failed with 404 or errors
+        response = fetcher.fetch(urls_to_try[0], engine='chrome')
     
     episodes = []
     
+    if not response:
+        return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series"}
+        
     if is_movie:
         # Check if it's a movie page (movieDetail is the playback page)
-        episodes.append({"id": item_id, "number": "1", "href": url})
+        episodes.append({"id": item_id, "number": "1", "href": response.url})
     else:
         # 1. Extract post_id and seasons for AJAX
         season_links = response.css('.aa-cnt a')
@@ -186,7 +207,10 @@ def scrape_watchanimeworld_info(item_id):
                         "href": href
                     })
 
-    title_el = response.css('h1, .entry-title')
+    if not response:
+        return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series"}
+    
+    title_el = response.css('h1.entry-title, .title')
     title = title_el[0].text.strip() if title_el else item_id
 
     return {

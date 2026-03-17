@@ -147,6 +147,7 @@ export default function WatchClient({ id }: { id: string }) {
     const provider = searchParams.get('provider');
 
     const [show, setShow] = useState<ShowData | null>(null);
+    const [isGuardLocked, setIsGuardLocked] = useState(true);
 
     const [currentEp, setCurrentEp] = useState<string>("1");
     const [mode, setMode] = useState<"sub" | "dub">("sub");
@@ -760,14 +761,29 @@ export default function WatchClient({ id }: { id: string }) {
                                 </div>
                             ) : sourceUrl ? (
                                 videoType === "iframe" ? (
-                                    <iframe
-                                        src={sourceUrl}
-                                        className="w-full h-full border-0 bg-black"
-                                        allowFullScreen
-                                        allow="autoplay; fullscreen"
-                                        // sandbox strictly to prevent popups and redirects without user interaction
-                                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-downloads allow-modals"
-                                    ></iframe>
+                                    <div className="relative w-full h-full">
+                                        <iframe
+                                            src={sourceUrl}
+                                            className="w-full h-full border-0 bg-black"
+                                            allowFullScreen
+                                            allow="autoplay; fullscreen"
+                                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-downloads allow-modals"
+                                        ></iframe>
+                                        {isGuardLocked && (
+                                            <div 
+                                                className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center p-6 text-center group cursor-pointer"
+                                                onClick={() => setIsGuardLocked(false)}
+                                            >
+                                                <div className="w-20 h-20 rounded-full bg-purple-600/90 text-white flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)] group-hover:scale-110 transition-transform duration-300">
+                                                    <Play className="w-10 h-10 fill-current ml-1" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-white mt-6 drop-shadow-lg">Click to Unlock Player</h3>
+                                                <p className="text-white/70 text-sm mt-2 max-w-sm drop-shadow-md">
+                                                    This guard prevents automatic redirects and intrusive ads. Click anywhere on the player to start watching safely.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
                                 ) : (
                                     <ArtPlayer
                                         key={sourceUrl} // Force remount on URL change
