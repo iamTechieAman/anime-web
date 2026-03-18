@@ -445,7 +445,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         ];
 
         const fetchServers = async () => {
-            if (!currentEp) return; // Guard against null episode ID
+            if (!currentEp || currentEp === 'undefined' || currentEp === 'null') return; // Guard against invalid episode ID
             setLoadingServers(true);
             setCheckingStatus("Searching for best source...");
             try {
@@ -771,11 +771,30 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="flex-1 w-full min-w-0">
                         <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative z-20 shadow-2xl">
                             {loadingSource ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[var(--bg-main)]/50 backdrop-blur-sm z-10">
-                                    <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
-                                    <div className="text-center">
-                                        <p className="text-sm text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Loading Stream</p>
-                                        {checkingStatus && <p className="text-[10px] text-purple-400 mt-2 font-bold uppercase tracking-tighter opacity-80">{checkingStatus}</p>}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-purple-600/30 blur-2xl rounded-full scale-150 animate-pulse"></div>
+                                        <Loader2 className="w-16 h-16 animate-spin text-purple-500 relative z-10" />
+                                    </div>
+                                    <div className="text-center relative z-10 px-4">
+                                        <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                                            Initializing Stream
+                                        </h3>
+                                        {checkingStatus ? (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                                                    <RefreshCw className="w-3 h-3 text-purple-400 animate-spin" />
+                                                    <p className="text-[10px] text-purple-300 font-bold uppercase tracking-tighter">
+                                                        {checkingStatus}
+                                                    </p>
+                                                </div>
+                                                <p className="text-[9px] text-white/40 uppercase tracking-[0.2em]">Please wait while we scan premium servers</p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
+                                                Optimizing for your connection
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             ) : error ? (
@@ -1001,8 +1020,22 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-xl"
                                             >
                                                 <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
-                                                    <span className="text-xs font-black uppercase text-[var(--text-muted)] tracking-widest">Select Source</span>
-                                                    <span className="text-[10px] text-purple-400 font-bold px-1.5 py-0.5 bg-purple-500/10 rounded">Streaming</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs font-black uppercase text-white tracking-widest">Select Source</span>
+                                                        <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-tighter">Scanning {servers.length} active servers</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            failedServersRef.current.clear();
+                                                            const firstNative = servers.find(s => !s.isMovieServer);
+                                                            setSelectedServer(firstNative?.serverId || servers[0]?.serverId);
+                                                            setShowServerDropdown(false);
+                                                        }}
+                                                        className="text-[10px] text-purple-400 font-bold px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 rounded-md transition-colors border border-purple-500/20"
+                                                    >
+                                                        Auto Scan
+                                                    </button>
                                                 </div>
                                                 <div className="max-h-64 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
                                                     {servers.map((server, index) => (

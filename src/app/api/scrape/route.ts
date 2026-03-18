@@ -16,9 +16,12 @@ export async function GET(request: Request) {
         const axQuery = searchParams.get('ax_query');
         const axInfo = searchParams.get('ax_info')?.split(':').pop();
         const axSource = searchParams.get('ax_source')?.split(':').pop();
+        const universalSite = searchParams.get('universal_site');
+        const universalItem = searchParams.get('universal_item');
+        const universalEp = searchParams.get('universal_ep');
         const slug = searchParams.get('slug');
 
-        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory && !waInfo && !waSource && !jaQuery && !jaInfo && !jaSource && !axQuery && !axInfo && !axSource) {
+        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory && !waInfo && !waSource && !jaQuery && !jaInfo && !jaSource && !axQuery && !axInfo && !axSource && !universalSite) {
             return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
         }
 
@@ -35,6 +38,9 @@ export async function GET(request: Request) {
             ax_query: axQuery || undefined,
             ax_info: axInfo || undefined,
             ax_source: axSource || undefined,
+            universal_site: universalSite || undefined,
+            universal_item: universalItem || undefined,
+            universal_ep: universalEp || undefined,
             slug: slug || undefined
         });
 

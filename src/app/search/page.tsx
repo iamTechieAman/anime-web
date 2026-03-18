@@ -158,18 +158,13 @@ function SearchContent() {
                                     ...movieResults.map(m => ({ ...m, id: m.id.toString(), type: m.media_type || 'movie', provider: 'tmdb' })),
                                     ...animeResults.map(a => ({ ...a, id: a._id, title: a.name, image: a.thumbnail, type: 'anime' })),
                                     ...scraplingResults
-                                ].map((item: any) => (
-                                    <div key={item.id} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
+                                ].map((item: any, index: number) => (
+                                    <div key={`${item.provider || item.type}-${item.id}-${index}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg cursor-pointer" 
                                          onClick={() => {
-                                             if (item.type === 'cartoon') {
-                                                 window.location.href = `/watch/${item.id}`;
-                                             } else if (item.type === 'anime') {
-                                                 window.location.href = `/watch/${item.id}`;
-                                             } else if (item.provider === 'tmdb') {
-                                                 window.location.href = `/movies/watch/${item.type}/${item.id}`;
-                                             } else {
-                                                 window.location.href = `/watch/${item.id}`;
-                                             }
+                                             const playUrl = item.provider === 'tmdb' 
+                                                 ? `/movies/watch/${item.type}/${item.id}`
+                                                 : `/watch/${item.id}${item.provider ? `?provider=${item.provider}` : ''}`;
+                                             window.location.href = playUrl;
                                          }}>
                                         <div className="aspect-[2/3] relative">
                                             <img src={(item.image || item.poster_path) ? (item.image || `https://image.tmdb.org/t/p/w300${item.poster_path}`) : '/icon.png'} alt={item.title || item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />

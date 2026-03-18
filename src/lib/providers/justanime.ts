@@ -8,7 +8,7 @@ export class JustAnimeProvider implements AnimeProvider {
         try {
             const res = await axios.get(`/api/scrape?ja_query=${encodeURIComponent(query)}`);
             return (res.data.justanime || []).map((item: any) => ({
-                id: `${item.id}|${item.slug}`,
+                id: `ja:${item.id}|${item.slug}`,
                 title: item.title,
                 image: item.image,
                 provider: 'justanime'
@@ -21,24 +21,25 @@ export class JustAnimeProvider implements AnimeProvider {
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const [realId, slug] = id.split('|');
+            const cleanId = id.startsWith('ja:') ? id.slice(3) : id;
+            const [realId, slug] = cleanId.split('|');
             const res = await axios.get(`/api/scrape?ja_info=${realId}&slug=${slug}`);
             const data = res.data.ja_info;
             
-            const episodes: AnimeEpisode[] = data.episodes.map((ep: any) => ({
+            const episodes: AnimeEpisode[] = (data.episodes || []).map((ep: any) => ({
                 id: ep.id,
                 number: parseFloat(ep.number),
                 title: `Episode ${ep.number}`
             }));
 
             return {
-                id: id,
+                id: id.startsWith('ja:') ? id : `ja:${id}`,
                 title: data.title,
                 image: data.image || '/placeholder.png', 
                 episodes: episodes,
-                availableEpisodes: {
-                    sub: episodes.length,
-                    dub: 0
+                availableEpisodesDetail: {
+                    sub: episodes.map(ep => ep.number.toString()),
+                    dub: []
                 },
                 type: 'anime'
             };
@@ -73,7 +74,8 @@ export class JustAnimeProvider implements AnimeProvider {
             }
             return [];
         } catch (error: any) {
-            throw new Error(`[JustAnime] GetSources failed: ${error.message}`);
+            console.error(`[JustAnime] GetSources failed:`, error);
+            return [];
         }
     }
 }

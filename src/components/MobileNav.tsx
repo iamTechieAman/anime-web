@@ -90,9 +90,10 @@ export default function MobileNav() {
         <div
             className={`
         fixed bottom-0 left-0 right-0 z-50 
-        bg-[var(--bg-overlay)] backdrop-blur-xl border-t border-[var(--border-color)]
-        pb-[env(safe-area-inset-bottom)] transition-transform duration-300 md:hidden
-        ${isScrolledDown ? "translate-y-full" : "translate-y-0"}
+        bg-[var(--bg-main)]/80 backdrop-blur-2xl border-t border-[var(--border-color)]
+        pb-[env(safe-area-inset-bottom)] transition-all duration-500 md:hidden
+        ${isScrolledDown ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"}
+        shadow-[0_-10px_30px_rgba(0,0,0,0.5)]
       `}
         >
             <div className="flex justify-around items-center h-16 px-1">
@@ -101,14 +102,16 @@ export default function MobileNav() {
                     return (
                         <motion.button
                             key={item.label}
-                            whileTap={{ scale: 0.85 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={item.onClick}
-                            className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors ${
-                                item.active ? item.color : "text-[var(--text-muted)]"
+                            className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-1 transition-all duration-300 ${
+                                item.active ? item.color : "text-[var(--text-muted)] hover:text-white"
                             }`}
                         >
-                            <Icon className={`${item.active ? "w-5 h-5" : "w-4 h-4"} transition-all`} />
-                            <span className="text-[10px] font-bold">{item.label}</span>
+                            <div className={`relative ${item.active ? 'after:content-[""] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-current after:rounded-full after:shadow-[0_0_8px_currentColor]' : ''}`}>
+                              <Icon className={`${item.active ? "w-5 h-5 drop-shadow-[0_0_8px_currentColor]" : "w-4 h-4"} transition-all duration-300`} />
+                            </div>
+                            <span className={`text-[10px] font-bold tracking-tight transition-opacity ${item.active ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
                         </motion.button>
                     );
                 })}

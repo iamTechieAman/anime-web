@@ -8,6 +8,8 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
 import { useRef as useReactRef } from 'react';
 import { useMobileUI } from "@/context/MobileUIContext";
+import { useNotifications } from "@/context/NotificationContext";
+import { formatDistanceToNow } from 'date-fns';
 
 const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"];
 const FORMATS = ["TV", "Movie", "OVA", "ONA", "Special"];
@@ -26,7 +28,7 @@ export default function Header() {
   const [showFilters, setShowFilters] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [hasNewNotif] = useState(true);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
   const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
 
   const [filterGenre, setFilterGenre] = useState("");
@@ -321,31 +323,79 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <div ref={notifRef} className="relative">
             <button 
-              onClick={() => setShowNotifications(v => !v)}
-              className="p-2.5 hover:bg-[var(--bg-card)] rounded-xl relative transition-all text-[var(--text-muted)] hover:text-white"
+              onClick={() => {
+                setShowNotifications(v => !v);
+                setShowFilters(false);
+                setShowProfileDropdown(false);
+              }}
+              className="p-2.5 hover:bg-[var(--bg-card)] rounded-xl relative transition-all text-[var(--text-muted)] hover:text-white group"
             >
-              <Bell className="w-5 h-5" />
-              {hasNewNotif && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[var(--bg-main)] animate-pulse" />}
+              <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-purple-500 rounded-full border-2 border-[var(--bg-main)] animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+              )}
             </button>
             <AnimatePresence>
               {showNotifications && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  initial={{ opacity: 0, y: 12, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  exit={{ opacity: 0, y: 12, scale: 0.95 }}
                   className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
                 >
                    <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
-                      <span className="font-bold text-sm">Notifications</span>
-                      <button className="text-[10px] uppercase tracking-widest text-purple-400 font-black">Mark all read</button>
-                   </div>
-                   <div className="p-6 text-center">
-                      <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Bell className="w-6 h-6 text-[var(--text-muted)]" />
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm">Notifications</span>
+                        {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-black">{unreadCount}</span>}
                       </div>
-                      <p className="text-sm font-medium text-white mb-1">No new alerts</p>
-                      <p className="text-xs text-[var(--text-muted)]">Check back later for anime updates and season starts.</p>
+                      <button 
+                        onClick={() => markAllAsRead()}
+                        className="text-[10px] uppercase tracking-widest text-purple-400 font-black hover:text-purple-300 transition-colors"
+                      >
+                        Mark all read
+                      </button>
                    </div>
+                   <div className="max-h-[400px] overflow-y-auto hide-scrollbar">
+                      {notifications.length > 0 ? (
+                        <div className="divide-y divide-[var(--border-color)]">
+                          {notifications.map((notif) => (
+                            <div 
+                              key={notif.id} 
+                              className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-purple-500/5' : ''}`}
+                              onClick={() => {
+                                markAsRead(notif.id);
+                                if (notif.link) router.push(notif.link);
+                              }}
+                            >
+                              {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500" />}
+                              <div className="flex justify-between items-start mb-1">
+                                <h5 className="text-xs font-bold text-white truncate pr-4">{notif.title}</h5>
+                                <span className="text-[9px] text-[var(--text-muted)] whitespace-nowrap">
+                                  {formatDistanceToNow(notif.timestamp, { addSuffix: true }).replace('about ', '')}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-2">{notif.message}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-10 text-center">
+                          <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Bell className="w-6 h-6 text-[var(--text-muted)] opacity-20" />
+                          </div>
+                          <p className="text-sm font-medium text-white mb-1">Stay Tuned!</p>
+                          <p className="text-xs text-[var(--text-muted)]">We'll alert you when your favorite shows get new episodes.</p>
+                        </div>
+                      )}
+                   </div>
+                   {notifications.length > 0 && (
+                     <button
+                        onClick={clearNotifications}
+                        className="w-full py-3 bg-white/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all border-t border-[var(--border-color)]"
+                     >
+                       Clear All
+                     </button>
+                   )}
                 </motion.div>
               )}
             </AnimatePresence>

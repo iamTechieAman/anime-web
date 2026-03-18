@@ -6,11 +6,14 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scrape?cartoon_query=${encodeURIComponent(query)}`);
+            const res = await axios.get('/api/scrape', {
+                params: { cartoon_query: query }
+            });
             return (res.data.watchanimeworld || []).map((item: any) => ({
-                id: item.id,
+                id: item.id.startsWith('wa:') ? item.id : `wa:${item.id}`,
                 title: item.title,
                 image: item.image,
+                provider: 'watchanimeworld',
                 type: 'cartoon'
             }));
         } catch (error) {
@@ -21,17 +24,22 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scrape?wa_info=${id}`);
+            const realId = id.includes(':') ? id.split(':').pop() : id;
+            const res = await axios.get('/api/scrape', {
+                params: { wa_info: realId }
+            });
             const data = res.data.wa_info;
             
-            const episodes: AnimeEpisode[] = data.episodes.map((ep: any, index: number) => ({
+            if (!data || data.error) throw new Error(data?.error || "Content Not Found");
+
+            const episodes: AnimeEpisode[] = (data.episodes || []).map((ep: any, index: number) => ({
                 id: ep.id,
                 number: parseFloat(ep.number) || (index + 1),
                 title: ep.number ? `Episode ${ep.number}` : `Part ${index + 1}`
             }));
 
             return {
-                id: data.id,
+                id: id.startsWith('wa:') ? id : `wa:${data.id}`,
                 title: data.title,
                 image: data.image || '/placeholder.png', 
                 episodes: episodes,
@@ -49,7 +57,9 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
 
     async getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw', serverId?: string): Promise<VideoSource[]> {
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scrape?wa_source=${episodeId}`);
+            const res = await axios.get('/api/scrape', {
+                params: { wa_source: episodeId }
+            });
             const data = res.data.wa_source;
             
             if (data.url || (data.sources && data.sources.length > 0)) {
@@ -57,22 +67,23 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
                     return data.sources.map((s: any) => ({
                         url: s.url,
                         name: s.name,
-                        isM3U8: false,
-                        isIframe: true,
+                        isM3U8: s.url.includes('.m3u8'),
+                        isIframe: !s.url.includes('.m3u8') && !s.url.includes('.mp4'),
                         quality: 'auto'
                     }));
                 }
                 
                 return [{
                     url: data.url,
-                    isM3U8: false,
-                    isIframe: true,
+                    isM3U8: data.url.includes('.m3u8'),
+                    isIframe: !data.url.includes('.m3u8') && !data.url.includes('.mp4'),
                     quality: 'auto'
                 }];
             }
             return [];
         } catch (error: any) {
-            throw new Error(`[WatchAnimeWorld] GetSources failed: ${error.message}`);
+            console.error(`[WatchAnimeWorld] GetSources failed:`, error);
+            return [];
         }
     }
 }

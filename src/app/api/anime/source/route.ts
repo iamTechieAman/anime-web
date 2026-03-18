@@ -21,9 +21,29 @@ export async function GET(request: Request) {
 
     // Consumet Provider serves as a highly robust entrypoint
     const defaultProvider = "consumet";
-    const providerName = providerParam || defaultProvider;
-    let provider;
+    let providerName = providerParam || defaultProvider;
 
+    // 0. AUTO-DETECT PROVIDER FROM ID PREFIX
+    if (showId && showId.includes(":")) {
+        const [prefix] = showId.split(":");
+        const prefixMap: Record<string, ProviderName> = {
+            'aw': 'aniwatch',
+            'hi': 'hianime',
+            'al': 'allanime',
+            'on': 'onoflix',
+            'wa': 'watchanimeworld',
+            'ja': 'justanime',
+            'ax': 'animex',
+            'cb': 'cinebolt',
+            'un': 'cinebolt'
+        };
+        if (prefixMap[prefix]) {
+            providerName = prefixMap[prefix];
+            console.log(`[SourceAPI] Auto-detected provider: ${providerName} from ID prefix: ${prefix}`);
+        }
+    }
+
+    let provider;
     try {
         provider = getProvider(providerName);
         console.log(`[SourceAPI] Using provider: ${providerName}`);

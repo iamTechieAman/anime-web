@@ -14,10 +14,25 @@ from scrapers import (
     scrape_justanime_source,
     scrape_animex_search,
     scrape_animex_info,
-    scrape_animex_source
+    scrape_animex_source,
+    scrape_universal_search,
+    scrape_universal_info,
+    scrape_universal_source
 )
 
 app = FastAPI(title="ToonPlayer Scraper API")
+
+@app.get("/search/universal")
+def search_universal(q: str, site: str):
+    return scrape_universal_search(site, q)
+
+@app.get("/info/universal")
+def info_universal(id: str, site: str):
+    return scrape_universal_info(site, id)
+
+@app.get("/source/universal")
+def source_universal(id: str, site: str):
+    return scrape_universal_source(site, id)
 
 @app.get("/search/onoflix")
 def search_onoflix(q: str):

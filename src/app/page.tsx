@@ -138,7 +138,7 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-[2560px] mx-auto px-4 lg:px-8 py-6 md:py-10 flex flex-col lg:flex-row gap-8 xl:gap-12">
+                <div className="w-full max-w-[1920px] mx-auto px-4 lg:px-8 py-6 md:py-10 flex flex-col lg:flex-row gap-8 xl:gap-16">
                     {/* Left Column (Main Content) */}
                     <div className="flex-1 space-y-12 min-w-0">
                         <WatchHistorySection />
@@ -153,9 +153,9 @@ export default function Home() {
                                     </h2>
                                     <Link href="/movies" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
+                                <div className="responsive-grid">
                                     {movieTrending.results.slice(0, 12).map((item: any) => (
-                                        <Link key={item.id} href={`/movies/watch/${item.media_type || 'movie'}/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg">
+                                        <Link key={item.id} href={`/movies/watch/${item.media_type || 'movie'}/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.05] duration-500 shadow-2xl premium-card backdrop-blur-sm">
                                             <div className="aspect-[2/3] relative">
                                                 <img src={`https://image.tmdb.org/t/p/w300${item.poster_path}`} alt={item.title || item.name} className="w-full h-full object-cover" />
                                                 <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/10 uppercase">
@@ -214,9 +214,9 @@ export default function Home() {
                                         Popular Movies
                                     </h2>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
+                                <div className="responsive-grid">
                                     {moviePopular.results.slice(0, 12).map((item: any) => (
-                                        <Link key={item.id} href={`/movies/watch/movie/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg">
+                                        <Link key={item.id} href={`/movies/watch/movie/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.05] duration-500 shadow-2xl premium-card backdrop-blur-sm">
                                             <div className="aspect-[2/3] relative">
                                                 <img src={`https://image.tmdb.org/t/p/w300${item.poster_path}`} alt={item.title} className="w-full h-full object-cover" />
                                             </div>
@@ -231,7 +231,7 @@ export default function Home() {
                     </div>
 
                 {/* Right Column (Sidebar) */}
-                <div className="w-full lg:w-[320px] xl:w-[350px] space-y-10 shrink-0">
+                <div className="w-full lg:w-[350px] xl:w-[400px] space-y-12 shrink-0">
                     {/* Top Airing */}
                     <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
                        <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">

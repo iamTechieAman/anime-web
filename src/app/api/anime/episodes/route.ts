@@ -14,13 +14,33 @@ export async function GET(request: Request) {
     }
 
     const defaultProvider: ProviderName = "anikai";
-    const provider = providerParam || defaultProvider;
+    let provider = providerParam || defaultProvider;
+
+    // 0. AUTO-DETECT PROVIDER FROM ID PREFIX (e.g., "on:123" -> onoflix)
+    if (id && id.includes(":")) {
+        const [prefix] = id.split(":");
+        const prefixMap: Record<string, ProviderName> = {
+            'aw': 'aniwatch',
+            'hi': 'hianime',
+            'al': 'allanime',
+            'on': 'onoflix',
+            'wa': 'watchanimeworld',
+            'ja': 'justanime',
+            'ax': 'animex',
+            'cb': 'cinebolt',
+            'un': 'cinebolt' // Default for universal IDs
+        };
+        if (prefixMap[prefix]) {
+            provider = prefixMap[prefix];
+            console.log(`[Episodes] Auto-detected provider: ${provider} from ID prefix: ${prefix}`);
+        }
+    }
 
     try {
         console.log(`[Episodes] Request: ID=${id}, Provider=${provider}`);
 
         // 1. SMART RESOLUTION (Numeric AniList/MAL IDs)
-        if (/^\d+$/.test(id)) {
+        if (id && /^\d+$/.test(id)) {
             console.log(`[Episodes] Numeric ID detected (${id}). Attempting smart resolution...`);
             const media = await fetchAniListTitles(id);
 

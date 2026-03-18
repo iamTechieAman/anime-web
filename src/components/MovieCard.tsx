@@ -42,8 +42,8 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.4, ease: "easeOut" }}
         >
-        <Link href={`/movies/watch/${mediaType}/${item.id}`} className="block group">
-            <div className="relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-500/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
+        <Link href={`/movies/watch/${mediaType}/${item.id}`} className="block group perspective-1000">
+            <div className="relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all duration-500 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.7)] premium-card backdrop-blur-sm group-hover:rotate-x-2 group-hover:rotate-y-2">
                 {/* Poster */}
                 <div className="relative aspect-[2/3] overflow-hidden">
                     {item.poster_path && !imgError ? (
@@ -61,7 +61,7 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
                     )}
 
                     {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     {/* Ranking Number */}
                     {item.rank && (
@@ -112,9 +112,9 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
                     )}
 
                     {/* Play button on hover */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-12 h-12 rounded-full bg-blue-500/90 backdrop-blur-sm flex items-center justify-center shadow-[0_0_25px_rgba(59,130,246,0.5)]">
-                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110">
+                        <div className="w-14 h-14 rounded-full bg-purple-600/90 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.6)] border border-white/20">
+                            <Play className="w-6 h-6 text-white fill-white ml-1" />
                         </div>
                     </div>
 
@@ -133,12 +133,12 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
                 </div>
 
                 {/* Title */}
-                <div className="p-2.5">
-                    <h3 className="text-xs font-semibold text-[var(--text-main)] truncate group-hover:text-white transition-colors">{title}</h3>
-                    <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--text-muted)]">
-                        {year && <span>{year}</span>}
-                        {year && <span>•</span>}
-                        <span className="capitalize">{mediaType}</span>
+                <div className="p-3 bg-gradient-to-b from-transparent to-black/20">
+                    <h3 className="text-[13px] font-bold text-[var(--text-main)] truncate group-hover:text-purple-400 transition-colors duration-300">{title}</h3>
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--text-muted)] font-medium">
+                        {year && <span className="text-white/60">{year}</span>}
+                        {year && <span className="w-1 h-1 rounded-full bg-white/20" />}
+                        <span className="capitalize px-1.5 py-0.5 rounded bg-white/5">{mediaType}</span>
                     </div>
                 </div>
             </div>
@@ -150,7 +150,7 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
 // === MOVIE GRID ===
 export function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
     return (
-        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
+        <div className="responsive-grid">
             {items.map((item, idx) => (
                 <MovieCard key={`${item.id}-${idx}`} item={item} type={item.media_type || type} />
             ))}

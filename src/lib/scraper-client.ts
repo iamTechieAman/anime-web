@@ -20,6 +20,9 @@ export async function fetchFromScraper(params: {
     ax_info?: string;
     ax_source?: string;
     slug?: string;
+    universal_site?: string;
+    universal_item?: string;
+    universal_ep?: string;
 }) {
     if (SCRAPER_API_URL) {
         // Use remote API
@@ -28,11 +31,24 @@ export async function fetchFromScraper(params: {
             let endpoint = "";
             let queryParams: any = {};
 
-            if (params.cartoon_query) {
+            if (params.universal_site) {
+                if (params.universal_item) {
+                    endpoint = "/info/universal";
+                    queryParams.id = params.universal_item;
+                    queryParams.site = params.universal_site;
+                } else if (params.universal_ep) {
+                    endpoint = "/source/universal";
+                    queryParams.id = params.universal_ep;
+                    queryParams.site = params.universal_site;
+                } else {
+                    endpoint = "/search/universal";
+                    queryParams.q = params.query;
+                    queryParams.site = params.universal_site;
+                }
+            } else if (params.cartoon_query) {
                 endpoint = "/search/watchanimeworld";
                 queryParams.q = params.cartoon_query;
             } else if (params.cartoon_category) {
-                // Mapping category for remote API if needed, or using search
                 endpoint = "/search/watchanimeworld";
                 queryParams.q = params.cartoon_category;
             } else if (params.wa_info) {
@@ -91,6 +107,9 @@ export async function fetchFromScraper(params: {
     if (params.ax_query) command += ` --ax_query "${params.ax_query.replace(/"/g, '\\"')}"`;
     if (params.ax_info) command += ` --ax_info "${params.ax_info.replace(/"/g, '\\"')}" --slug "${params.slug?.replace(/"/g, '\\"')}"`;
     if (params.ax_source) command += ` --ax_source "${params.ax_source.replace(/"/g, '\\"')}"`;
+    if (params.universal_site) command += ` --universal_site "${params.universal_site.replace(/"/g, '\\"')}"`;
+    if (params.universal_item) command += ` --universal_item "${params.universal_item.replace(/"/g, '\\"')}"`;
+    if (params.universal_ep) command += ` --universal_ep "${params.universal_ep.replace(/"/g, '\\"')}"`;
 
     const { stdout, stderr } = await execPromise(command);
 
