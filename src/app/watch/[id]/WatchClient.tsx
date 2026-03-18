@@ -63,38 +63,6 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
     },
     {
-        id: "cinemacity",
-        name: "CinemaCity",
-        badge: "New",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://cinemacity.cc/index.php?do=search&subaction=search&story=${id}` : `https://cinemacity.cc/index.php?do=search&subaction=search&story=${id}`,
-    },
-    {
-        id: "filmex",
-        name: "Filmex",
-        badge: "Fast",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://filmex.to/search?q=${id}` : `https://filmex.to/search?q=${id}`,
-    },
-    {
-        id: "cinezo",
-        name: "Cinezo",
-        badge: "Direct",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://www.cinezo.net/search?q=${id}`,
-    },
-    {
-        id: "pstream",
-        name: "P-Stream",
-        badge: "Multi",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://pstream.net/search/${id}`,
-    },
-    {
         id: "vidsrc_me",
         name: "VidSrc US",
         badge: "Fast",
@@ -621,7 +589,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     setSourceUrl(absoluteUrl);
                     setVideoType(selected.isIframe ? "iframe" : selected.hls ? "m3u8" : "auto");
                     setCheckingStatus(null);
-                    toast.success(`Episode ${currentEp} loaded successfully`);
+                    // toast.success(`Episode ${currentEp} loaded successfully`); // Remove annoying toasts for fast switches
 
                     // Save to watch history
                     try {
@@ -788,11 +756,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                         {checkingStatus}
                                                     </p>
                                                 </div>
-                                                <p className="text-[9px] text-white/40 uppercase tracking-[0.2em]">Please wait while we scan premium servers</p>
                                             </div>
                                         ) : (
                                             <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
-                                                Optimizing for your connection
+                                                Bypassing protections...
                                             </p>
                                         )}
                                     </div>

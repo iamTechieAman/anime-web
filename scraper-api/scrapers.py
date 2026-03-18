@@ -7,13 +7,26 @@ from scrapling import StealthyFetcher # type: ignore
 # Helper to ensure we only get clean embed/video URLs, not full site pages
 def clean_source_url(url, provider_domain):
     if not url: return ""
-    # Filter out common non-video pages
+    # Filter out common non-video pages more aggressively
     blacklist = [
         f"https://{provider_domain}/", f"https://www. {provider_domain}/",
         f"https://{provider_domain}/movies/", f"https://{provider_domain}/series/",
-        "/category/", "/genre/", "/tag/", "/search/", "/contact-us/", "/dmca/"
+        "/category/", "/genre/", "/tag/", "/search/", "/contact-us/", "/dmca/",
+        "/about-us/", "/privacy-policy/", "/terms-and-conditions/"
     ]
-    if any(b in url for b in blacklist) and not any(ext in url for ext in ['.m3u8', '.mp4', 'embed', 'player', '/v/']):
+    
+    # White-list of known embed/video patterns
+    whitelist = [
+        '.m3u8', '.mp4', 'embed', 'player', '/v/', 'zephyr', 'zplayer', 
+        'vidsrc', 'upstream', 'streamwish', 'vidmoly', 'dood', 'mixdrop',
+        'multiembed', 'rabbitstream', 'megacloud', 'streamlare', 'filemoon'
+    ]
+    
+    # If the URL is just the base page, it's definitely not a source
+    if url.rstrip('/') == f"https://{provider_domain}" or url.rstrip('/') == f"http://{provider_domain}":
+        return ""
+        
+    if any(b in url for b in blacklist) and not any(w in url.lower() for w in whitelist):
         return ""
     
     # Ensure protocol
@@ -37,10 +50,10 @@ def extract_direct_video_links(text):
 def scrape_onoflix_search(query):
     fetcher = StealthyFetcher()
     url = f"https://onoflix.live/en/search?q={query}"
-    response = fetcher.fetch(url)
+    response = fetcher.fetch(url, wait_until='networkidle', timeout=25000)
     
     if not response or not response.css('div.grid, a[href*="/movie/"]'):
-        response = fetcher.fetch(url, engine='chrome')
+        response = fetcher.fetch(url, engine='chrome', wait_until='networkidle', timeout=25000)
     
     results = []
     if not response: return []
@@ -77,7 +90,7 @@ def scrape_onoflix_search(query):
 def scrape_aniwatch_tv_list(page=17):
     fetcher = StealthyFetcher()
     url = f"https://aniwatchtv.to/tv?page={page}"
-    response = fetcher.fetch(url)
+    response = fetcher.fetch(url, wait_until='domcontentloaded', timeout=20000)
     
     results = []
     if not response: return []
@@ -109,16 +122,15 @@ def scrape_aniwatch_tv_list(page=17):
 
 def scrape_watchanimeworld(query=None, category=None):
     fetcher = StealthyFetcher()
+    url = "https://watchanimeworld.net/"
     if query:
         url = f"https://watchanimeworld.net/?s={query}"
     elif category:
         url = f"https://watchanimeworld.net/category/{category}/"
-    else:
-        url = "https://watchanimeworld.net/"
-
-    response = fetcher.fetch(url)
+    
+    response = fetcher.fetch(url, wait_until='domcontentloaded', timeout=20000)
     if not response or not response.css('article.post, article.item, .result-item, .movie-item'):
-        response = fetcher.fetch(url, engine='chrome')
+        response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=20000)
     results = []
     
     if not response: return []
@@ -160,16 +172,11 @@ def scrape_watchanimeworld_info(item_id):
     
     # Try multiple URL patterns to avoid "Content Not Found"
     urls_to_try = [
-        f"https://watchanimeworld.net/series/{item_id}/",
-        f"https://watchanimeworld.net/movies/{item_id}/",
-        f"https://watchanimeworld.net/{item_id}/",
         f"https://watchanimeworld.net/anime/{item_id}/",
-        f"https://watchanimeworld.net/cartoon/{item_id}/"
+        f"https://watchanimeworld.net/movies/{item_id}/" if is_movie else f"https://watchanimeworld.net/series/{item_id}/",
+        f"https://watchanimeworld.net/{item_id}/"
     ]
     
-    if is_movie:
-        urls_to_try = [urls_to_try[1], urls_to_try[0], urls_to_try[2], urls_to_try[3], urls_to_try[4]]
-        
     response = None
     for url in urls_to_try:
         try:
@@ -297,14 +304,12 @@ def scrape_watchanimeworld_info(item_id):
 def scrape_watchanimeworld_source(episode_id):
     fetcher = StealthyFetcher()
     url = f"https://watchanimeworld.net/episode/{episode_id}/"
-    
-    # Try multiple URL patterns for episodes too
     urls = [url, f"https://watchanimeworld.net/watch/{episode_id}/", f"https://watchanimeworld.net/{episode_id}/"]
     response = None
     
     for u in urls:
         try:
-            temp = fetcher.fetch(u, engine='chrome', timeout=25000)
+            temp = fetcher.fetch(u, engine='chrome', timeout=30000, wait_until='networkidle')
             if temp and getattr(temp, 'status_code', 200) < 400 and temp.css('iframe, .video-player, .movie-player'):
                 response = temp
                 break
@@ -354,7 +359,7 @@ def scrape_watchanimeworld_source(episode_id):
                     continue
             
             u = clean_source_url(s_url, "watchanimeworld.net")
-            if u and u not in [s['url'] for s in sources]:
+            if u and u not in [s['url'] for s in sources] and u != f"https://watchanimeworld.net{s_url}" if s_url.startswith('/') else True:
                 sources.append({"name": s_name, "url": u})
     
     # Background text search for hidden links
@@ -443,7 +448,7 @@ def scrape_cinezo(query):
 def scrape_justanime_search(query):
     fetcher = StealthyFetcher()
     url = f"https://justanime.to/search?keyword={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=25000, wait_until='networkidle')
     results = []
     if not response: return []
     items = response.css('a[href*="/anime/"]')
@@ -471,7 +476,7 @@ def scrape_justanime_search(query):
 def scrape_justanime_info(item_id, slug):
     fetcher = StealthyFetcher()
     url = f"https://justanime.to/anime/{item_id}/{slug}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=25000, wait_until='networkidle')
     episodes = []
     if not response: return {"id": item_id, "episodes": []}
     ep_links = response.css('a[href*="/watch/"]')
@@ -506,7 +511,7 @@ def scrape_justanime_source(ep_id):
 def scrape_animex_search(query):
     fetcher = StealthyFetcher()
     url = f"https://animex.one/search?q={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=25000, wait_until='networkidle')
     results = []
     if not response: return []
     items = response.css('a[href*="/anime/"]')
@@ -528,7 +533,7 @@ def scrape_animex_search(query):
 def scrape_animex_info(item_id, slug):
     fetcher = StealthyFetcher()
     url = f"https://animex.one/anime/{slug}-{item_id}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=25000, wait_until='networkidle')
     episodes = []
     if not response: return {"id": item_id, "episodes": []}
     ep_links = response.css('a[href*="/watch/"]')
@@ -649,11 +654,12 @@ def scrape_universal_source(site_url, ep_id):
     sources = []
     iframes = response.css('iframe') if response else []
     for iframe in iframes:
-        src = iframe.attrib.get('src')
-        if src and "google" not in src and "facebook" not in src:
+        src = iframe.attrib.get('src') or iframe.attrib.get('data-src') or iframe.attrib.get('data-lazy-src') # type: ignore
+        if src and "google" not in src and "facebook" not in src and "twitter" not in src:
             target_domain = site_url.split('//')[-1] if '//' in site_url else site_url
             u = clean_source_url(src, target_domain)
-            if u: sources.append({"name": "Server", "url": u})
+            if u and u not in [s['url'] for s in sources]: 
+                sources.append({"name": "Server", "url": u})
     
     if response and hasattr(response, 'text'):
         direct = extract_direct_video_links(response.text) # type: ignore
