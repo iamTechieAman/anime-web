@@ -21,14 +21,14 @@ export class AniWatchProvider implements AnimeProvider {
 
             $('.film_list-wrap .flw-item').each((_, element) => {
                 const $el = $(element);
-                const href = $el.find('.film-poster-ahref').attr('href');
+                const href = $el.find('.film-poster a').attr('href') || $el.find('.film-poster-ahref').attr('href');
                 const id = href?.split('?')[0]?.split('/').pop() || '';
 
                 const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src');
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
 
                 if (id && title) {
-                    results.push({ id, title, image });
+                    results.push({ id, title, image, provider: this.name });
                 }
             });
 
@@ -46,36 +46,59 @@ export class AniWatchProvider implements AnimeProvider {
             });
 
             const $ = cheerio.load(response.data);
-            const title = $('.film-name').text().trim();
-            const image = $('.film-poster img').attr('src');
-            const description = $('.film-description').text().trim();
+            const title = $('.film-name').first().text().trim() || $('.anime-name').first().text().trim();
+            const image = $('.film-poster img').first().attr('src') || $('.film-poster img').first().attr('data-src');
+            const description = $('.film-description').first().text().trim() || $('.show-description').first().text().trim();
+
+            // Detect seasons
+            const seasons: any[] = [];
+            $('.os-list .os-item, .seasons-block .os-item').each((_, el) => {
+                const $el = $(el);
+                const seasonId = $el.attr('href')?.split('/').pop() || '';
+                const seasonTitle = $el.text().trim() || $el.attr('title') || '';
+                const isActive = $el.hasClass('active');
+
+                if (seasonId && seasonId !== id) {
+                    seasons.push({ id: seasonId, title: seasonTitle, active: isActive });
+                }
+            });
+
+            // Get sub/dub counts from the page
+            const sub = parseInt($('.tick-sub').first().text().trim()) || 0;
+            const dub = parseInt($('.tick-dub').first().text().trim()) || 0;
 
             // Get episode list via AJAX
-            const dataId = $('#wrapper').attr('data-id');
-            const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+            const dataId = $('#wrapper').attr('data-id') || $('body').attr('data-id') || $('.anime-main').attr('data-id') || $('#sync-meta').attr('data-id');
+            if (!dataId) {
+                console.warn(`[AniWatch] Could not find data-id for ${id}, attempting fallback...`);
+            }
 
-            const $episodes = cheerio.load(episodesResponse.data.html);
-            const episodes: any[] = [];
+            let episodes: any[] = [];
+            if (dataId) {
+                const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
+                    headers: {
+                        'User-Agent': USER_AGENT,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
 
-            $episodes('.ep-item').each((_, el) => {
-                const $ep = $(el);
-                const episodeId = $ep.attr('data-id') || '';
-                const number = parseInt($ep.attr('data-number') || '0');
-                const title = $ep.attr('title');
+                const $episodes = cheerio.load(episodesResponse.data.html);
 
-                if (episodeId && number) {
-                    episodes.push({
-                        id: episodeId,
-                        number,
-                        title
-                    });
-                }
-            });
+                $episodes('.ep-item').each((_, el) => {
+                    const $ep = $(el);
+                    const episodeId = $ep.attr('data-id') || '';
+                    const number = parseInt($ep.attr('data-number') || '0');
+                    const epTitle = $ep.attr('title') || $ep.find('.ep-name').text().trim();
+
+                    if (episodeId && number) {
+                        episodes.push({
+                            id: episodeId,
+                            number,
+                            title: epTitle || `Episode ${number}`
+                        });
+                    }
+                });
+            }
 
             return {
                 id,
@@ -83,7 +106,11 @@ export class AniWatchProvider implements AnimeProvider {
                 image,
                 description,
                 episodes,
-                totalEpisodes: episodes.length
+                totalEpisodes: episodes.length,
+                availableEpisodes: { sub, dub },
+                type: $('.item-title:contains("Type:")').next().text().trim(),
+                status: $('.item-title:contains("Status:")').next().text().trim(),
+                otherNames: [seasons.map(s => s.title)].flat() as string[] // Hacky way to pass season info for now or we could extend the interface
             };
         } catch (error) {
             console.error('[AniWatch] GetInfo failed:', error);
@@ -95,76 +122,31 @@ export class AniWatchProvider implements AnimeProvider {
         try {
             console.log(`[AniWatch] Fetching sources for: ID=${id}, EpString=${episodeString}, Mode=${mode}, ServerID=${serverId}`);
 
-            // If serverId is provided directly, we can try to use it directly
-            if (serverId) {
-                // Step 2: Get embed link directly using serverId
-                const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
-                    params: { id: serverId },
-                    headers: {
-                        'User-Agent': USER_AGENT,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                const embedLink = sourcesResponse.data.link;
-                if (!embedLink) {
-                    throw new Error('No embed link found for provided serverId');
-                }
-
-                return this.extractSources(embedLink);
-            }
-
-            // Step 0: If episodeString is not a valid HiAnime episode ID, we need to resolve it
-            // HiAnime episode IDs are typically longer alphanumeric strings, not just "1", "2", etc.
             let episodeId = episodeString;
 
-            // If it looks like just an episode number, fetch the show info to get the real episode ID
+            // Resolve episode number to ID if needed
             if (/^\d+$/.test(episodeString)) {
-                console.log(`[AniWatch] Episode string "${episodeString}" appears to be a number, resolving to HiAnime episode ID...`);
-                const episodeNumber = parseInt(episodeString);
-
-                // Fetch show details to get episode list
-                const response = await axios.get(`${BASE_URL}/${id}`, {
-                    headers: { 'User-Agent': USER_AGENT }
-                });
-
-                const $ = cheerio.load(response.data);
-                const dataId = $('#wrapper').attr('data-id');
-
-                if (!dataId) {
-                    throw new Error('Could not find show data-id');
-                }
-
-                const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
-                    headers: {
-                        'User-Agent': USER_AGENT,
-                        'X-Requested-With': 'XMLHttpRequest'
+                try {
+                    const info = await this.getInfo(id);
+                    
+                    // IF it's already a valid ID, don't treat it as a number
+                    const alreadyAnId = info.episodes.some(ep => ep.id === episodeString);
+                    
+                    if (!alreadyAnId) {
+                        console.log(`[AniWatch] Episode string "${episodeString}" is a number, resolving to ID...`);
+                        const targetEp = info.episodes.find(ep => ep.number === parseInt(episodeString));
+                        if (targetEp) {
+                            episodeId = targetEp.id;
+                        } else {
+                            throw new Error(`Episode ${episodeString} not found for show ${id}`);
+                        }
                     }
-                });
-
-                const $episodes = cheerio.load(episodesResponse.data.html);
-                let foundEpisodeId: string | null = null;
-
-                $episodes('.ep-item').each((_, el) => {
-                    const $ep = $episodes(el);
-                    const epId = $ep.attr('data-id');
-                    const epNum = parseInt($ep.attr('data-number') || '0');
-
-                    if (epNum === episodeNumber && epId) {
-                        foundEpisodeId = epId;
-                        return false; // break
-                    }
-                });
-
-                if (!foundEpisodeId) {
-                    throw new Error(`Episode ${episodeNumber} not found for show ${id}`);
+                } catch (e: any) {
+                    console.error(`[AniWatch] ID Resolution failed:`, e.message);
                 }
-
-                episodeId = foundEpisodeId;
-                console.log(`[AniWatch] Resolved episode ${episodeNumber} to HiAnime ID: ${episodeId}`);
             }
 
-            // Step 1: Get server list for episode
+            // Step 1: Get server list for the episode
             const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
                 params: { episodeId },
                 headers: {
@@ -174,68 +156,89 @@ export class AniWatchProvider implements AnimeProvider {
             });
 
             const $servers = cheerio.load(serversResponse.data.html);
-            let targetServerId: string | null = null;
+            const servers: { id: string, name: string, type: string }[] = [];
 
-            // Find server ID for requested type (sub/dub)
             $servers('.server-item').each((_, el) => {
                 const $server = $servers(el);
                 const dataType = $server.attr('data-type');
-                if (dataType === mode) {
-                    targetServerId = $server.attr('data-id') || null;
+                const sId = $server.attr('data-id');
+                const name = $server.text().trim();
+
+                // If a specific server was requested, only take that one
+                if (serverId && sId === serverId) {
+                    servers.length = 0; // Clear others
+                    servers.push({ id: sId, name, type: dataType || 'sub' });
                     return false; // break
+                }
+
+                // Otherwise, take all servers that match the requested mode (or fallback to sub)
+                if (dataType === mode) {
+                    servers.push({ id: sId || '', name, type: dataType });
                 }
             });
 
-            if (!targetServerId) {
-                // Fallback to raw if requested type not found
+            // If no servers found for requested mode, fallback to any available
+            if (servers.length === 0 && !serverId) {
+                console.log(`[AniWatch] No ${mode} servers found, checking for ANY servers...`);
                 $servers('.server-item').each((_, el) => {
                     const $server = $servers(el);
-                    const dataType = $server.attr('data-type');
-                    if (dataType === 'raw') {
-                        targetServerId = $server.attr('data-id') || null;
-                        return false;
-                    }
+                    servers.push({ 
+                        id: $server.attr('data-id') || '', 
+                        name: $server.text().trim(), 
+                        type: $server.attr('data-type') || 'sub' 
+                    });
                 });
             }
 
-            if (!targetServerId) {
-                throw new Error('No server found for requested type');
+            if (servers.length === 0) {
+                throw new Error('No servers found for the requested episode');
             }
 
-            // Step 2: Get embed link
-            const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
-                params: { id: targetServerId },
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'X-Requested-With': 'XMLHttpRequest'
+            console.log(`[AniWatch] Extracting sources from ${servers.length} servers...`);
+
+            // Step 2: Extract sources from all identified servers in parallel
+            const sourcePromises = servers.map(async (server) => {
+                try {
+                    const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
+                        params: { id: server.id },
+                        headers: {
+                            'User-Agent': USER_AGENT,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const embedLink = sourcesResponse.data.link;
+                    if (!embedLink) return null;
+
+                    return {
+                        url: embedLink,
+                        isM3U8: false,
+                        isIframe: true,
+                        quality: 'auto',
+                        server: server.name,
+                        type: server.type as any
+                    };
+                } catch (e: any) {
+                    console.error(`[AniWatch] Failed to fetch source for server ${server.name}:`, e.message);
+                    return null;
                 }
             });
 
-            const embedLink = sourcesResponse.data.link;
-            if (!embedLink) {
-                throw new Error('No embed link found');
+            const results = (await Promise.all(sourcePromises)).filter(s => s !== null) as VideoSource[];
+
+            if (results.length === 0) {
+                throw new Error('All servers failed to return an embed link');
             }
 
-            return this.extractSources(embedLink);
+            return results;
 
         } catch (error: any) {
             console.error('[AniWatch] GetSources failed:', error);
             // Fallback to AllAnime
             try {
                 const allAnime = new AllAnimeProvider();
-                let searchTitle = "";
-                try {
-                    const info = await this.getInfo(id);
-                    searchTitle = info.title;
-                } catch (e) { }
-
-                if (searchTitle) {
-                    console.log(`[AniWatch-Fallback] Searching AllAnime for "${searchTitle}"...`);
-                    const searchRes = await allAnime.search(searchTitle);
-                    if (searchRes.length > 0) {
-                        return await allAnime.getSources(searchRes[0].id, episodeString, mode);
-                    }
-                }
+                console.log(`[AniWatch-Fallback] Attempting to fallback to AllAnime...`);
+                return await allAnime.getSources(id, episodeString, mode);
             } catch (e: any) {
                 console.error('[AniWatch-Fallback] AllAnime fallback failed:', e.message);
             }
@@ -246,8 +249,6 @@ export class AniWatchProvider implements AnimeProvider {
     private async extractSources(embedLink: string): Promise<VideoSource[]> {
         console.log('[AniWatch] Returning embed link as iframe source:', embedLink);
         
-        // Return the embed link directly as an iframe to avoid CORS/Referer issues
-        // that occur when trying to play the extracted m3u8 directly in the browser.
         return [{
             url: embedLink,
             isM3U8: false,
@@ -273,11 +274,11 @@ export class AniWatchProvider implements AnimeProvider {
 
             $('.film_list-wrap .flw-item').each((_, element) => {
                 const $el = $(element);
-                const href = $el.find('.film-poster-ahref').attr('href');
+                const href = $el.find('.film-poster a').attr('href') || $el.find('.film-poster-ahref').attr('href');
                 const id = href?.split('?')[0]?.split('/').pop() || '';
 
                 const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src');
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
 
                 // Extract sub/dub count
                 const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
@@ -437,19 +438,46 @@ export class AniWatchProvider implements AnimeProvider {
 
             $('.film_list-wrap .flw-item').each((_, element) => {
                 const $el = $(element);
-                const href = $el.find('.film-poster-ahref').attr('href');
+                const href = $el.find('.film-poster a').attr('href') || $el.find('.film-poster-ahref').attr('href');
                 const id = href?.split('?')[0]?.split('/').pop() || '';
                 const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src');
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
 
                 if (id && title) {
-                    results.push({ id, title, image, provider: 'aniwatch' });
+                    results.push({ id, title, image, provider: this.name });
                 }
             });
 
             return results;
         } catch (error) {
             console.error('[AniWatch] getTVSeries failed:', error);
+            return [];
+        }
+    }
+
+    async getCompleted(): Promise<AnimeSearchResult[]> {
+        try {
+            const response = await axios.get(`${BASE_URL}/home`, {
+                headers: { 'User-Agent': USER_AGENT }
+            });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.anif-block-02 .ulclear li').each((_, element) => {
+                const $el = $(element);
+                const href = $el.find('.film-poster a').attr('href') || $el.find('.film-poster-ahref').attr('href');
+                const id = href?.split('/').filter(Boolean).pop() || '';
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+
+                if (id && title) {
+                    results.push({ id, title, image, provider: this.name });
+                }
+            });
+
+            return results;
+        } catch (error) {
+            console.error('[AniWatch] getCompleted failed:', error);
             return [];
         }
     }

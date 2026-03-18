@@ -42,6 +42,8 @@ export interface VideoSource {
     isM3U8: boolean;
     quality: string;
     isIframe?: boolean;
+    server?: string;
+    type?: 'sub' | 'dub' | 'raw';
 }
 
 export interface AnimeProvider {
@@ -120,4 +122,9 @@ export interface AnimeProvider {
      * @param page - Page number
      */
     getTVSeries?(page?: number): Promise<AnimeSearchResult[]>;
+
+    /**
+     * Get completed anime (optional)
+     */
+    getCompleted?(): Promise<AnimeSearchResult[]>;
 }
