@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  
   // Prevent OOM errors on Netlify by disabling linting/typescript during the final build
   typescript: {
     ignoreBuildErrors: true,
@@ -11,6 +12,7 @@ const nextConfig: NextConfig = {
     workerThreads: false,
   },
   images: {
+    
     remotePatterns: [
       { protocol: 'https', hostname: 's4.anilist.co' },
       { protocol: 'https', hostname: 'allanime.day' },

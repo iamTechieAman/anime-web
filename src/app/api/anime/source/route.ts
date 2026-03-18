@@ -64,76 +64,70 @@ export async function GET(request: Request) {
         console.error("[SourceAPI] Error:", error.message);
 
         // ==========================================
-        // SMART FALLBACK (Try other providers)
+        // AGGRESSIVE SOURCE SCRAMBLING (Multi-Provider Fallback)
         // ==========================================
         try {
-            console.log(`[SourceAPI] Primary provider ${providerName} failed. Attempting Smart Fallback...`);
+            console.log(`[SourceAPI] Primary provider ${providerName} failed. Initiating Scrambling...`);
 
-            // 1. Resolve Show Title to search on other providers (Use passed title if available)
+            // 1. Resolve Show Title if not provided
             let searchTitle = searchParams.get("title") || "";
             if (!searchTitle) {
                 try {
-                    const infoProvider = getProvider(providerName);
-                    const info = await infoProvider.getInfo(showId);
-                    searchTitle = info.title;
-                } catch (e) {
-                    console.log("[SourceAPI] Could not fetch info from primary provider for title resolution.");
-                }
+                    const infoProviders: ProviderName[] = ["allanime", "hianime", "consumet"];
+                    for (const ip of infoProviders) {
+                        try {
+                            const info = await getProvider(ip).getInfo(showId);
+                            if (info?.title) { searchTitle = info.title; break; }
+                        } catch (e) { }
+                    }
+                } catch (e) { }
             }
 
-            // 2. Define fallback providers (Prioritize Consumet and AllAnime)
-            const fallbacks: ProviderName[] = ["consumet", "allanime", "vidsrc", "anikai", "hianime", "aniwatch"];
-            const otherProviders = fallbacks.filter(p => p !== providerName);
+            // 2. Define and SHUFFLE fallback providers
+            const fallbacks: ProviderName[] = ["consumet", "allanime", "hianime", "aniwatch", "anikai", "vidsrc"];
+            const otherProviders = fallbacks
+                .filter(p => p !== providerName)
+                .sort(() => Math.random() - 0.5); // Randomize to avoid repeated failures
 
-            for (const fallbackName of otherProviders) {
+            console.log(`[SourceAPI] Scrambling: ${otherProviders.join(', ')}`);
+
+            // 3. Try to get sources from other providers
+            for (const fbName of otherProviders) {
                 try {
-                    console.log(`[SourceAPI] Trying fallback: ${fallbackName}`);
-                    const fallbackProvider = getProvider(fallbackName);
-                    let fallbackId = showId;
+                    console.log(`[SourceAPI] Trying scrambled fallback: ${fbName}`);
+                    const fbProvider = getProvider(fbName);
+                    let fbId = showId;
 
-                    // If we have a title, search first to get the correct ID for this provider
                     if (searchTitle) {
-                        const results = await fallbackProvider.search(searchTitle);
+                        const results = await fbProvider.search(searchTitle);
                         if (results.length > 0) {
-                            // Find best match (simple match for now)
-                            const bestMatch = results.find(r =>
-                                r.title.toLowerCase().includes(searchTitle.toLowerCase()) ||
+                            const match = results.find(r => 
+                                r.title.toLowerCase().includes(searchTitle.toLowerCase()) || 
                                 searchTitle.toLowerCase().includes(r.title.toLowerCase())
                             ) || results[0];
-
-                            console.log(`[SourceAPI] Resolved "${searchTitle}" to ${fallbackName} ID: ${bestMatch.id}`);
-                            fallbackId = bestMatch.id;
+                            fbId = match.id;
                         }
                     }
 
-                    // Try to get sources with (potentially new) ID
-                    const sources = await fallbackProvider.getSources(fallbackId, episodeString, mode);
+                    const sources = await fbProvider.getSources(fbId, episodeString, mode);
 
                     if (sources && sources.length > 0) {
-                        console.log(`[SourceAPI] ✓ Universal Fallback ${fallbackName} succeeded!`);
-                        const links = sources.map(s => {
-                            const needsProxy = s.url.includes('sharepoint.com') ||
-                                s.url.includes('drive.google.com') ||
-                                s.url.includes('googleapis.com');
-                            const finalUrl = needsProxy && s.url.startsWith('http')
-                                ? `/api/proxy?url=${encodeURIComponent(s.url)}`
-                                : s.url;
-                            return {
-                                link: finalUrl,
-                                hls: s.isM3U8,
-                                resolutionStr: s.quality || "default",
-                                isIframe: s.isIframe || false,
-                                fromCache: new Date().toISOString()
-                            };
-                        });
-                        return NextResponse.json({ links, provider: fallbackName });
+                        console.log(`[SourceAPI] ✓ Scrambling succeeded with ${fbName}!`);
+                        const links = sources.map(s => ({
+                            link: s.url,
+                            hls: s.isM3U8,
+                            resolutionStr: s.quality || "auto",
+                            isIframe: s.isIframe || false,
+                            fromCache: new Date().toISOString()
+                        }));
+                        return NextResponse.json({ links, provider: fbName });
                     }
                 } catch (fbErr) {
-                    // Silently fail and try next provider
+                    continue; // try next
                 }
             }
-        } catch (fallbackErr: any) {
-            console.error(`[SourceAPI] Smart Fallback failed completely:`, fallbackErr.message);
+        } catch (scrambleErr: any) {
+            console.error(`[SourceAPI] Scrambling failed completely:`, scrambleErr.message);
         }
 
         // Provide helpful error message with context if everything fails

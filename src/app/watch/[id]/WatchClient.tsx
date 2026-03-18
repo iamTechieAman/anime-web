@@ -401,16 +401,15 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         // Reset failed servers when episode changes
         failedServersRef.current = new Set();
 
-        // Only include movie/embed servers if we have a VALID TMDB ID (not "0" sentinel)
-        const hasValidTmdbId = tmdbId && tmdbId !== "0";
-        const movieServersList = hasValidTmdbId ? MOVIE_SERVERS.map(ms => ({
+        // ALWAYS include movie servers — they are the guaranteed fallback
+        const movieServersList = MOVIE_SERVERS.map(ms => ({
             serverId: ms.id,
             serverName: ms.name,
             type: mode,
             badge: ms.badge,
             isMovieServer: true,
             getUrl: ms.getUrl
-        })) : [];
+        }));
 
         // Emergency AniList ID-based embeds — ALWAYS available since we always have the show ID
         const anilistId = show?.aniListId || show?._id || id;
@@ -736,10 +735,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             </div>
 
             {/* Navbar with Safe Area Support */}
-            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all pt-[max(1rem,env(safe-area-inset-top))] h-auto min-h-[calc(70px+env(safe-area-inset-top))]">
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
-                        <ChevronLeft className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
+            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all pt-[max(0.75rem,env(safe-area-inset-top))] h-auto">
+                <div className="flex items-center gap-3 md:gap-4">
+                    <Link href="/" className="p-1 md:p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
+                        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
                     </Link>
                     <div className="flex flex-col">
                         <h1 className="font-bold text-lg leading-tight line-clamp-1 tracking-tight max-w-[200px] md:max-w-md text-[var(--text-main)]">
@@ -755,7 +754,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             </nav>
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className="flex-1 w-full max-w-[1920px] mx-auto pt-[calc(100px+env(safe-area-inset-top))] pb-8 px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
+            <div className="flex-1 w-full max-w-[1920px] mx-auto pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
                 <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                     {/* Player Column */}
