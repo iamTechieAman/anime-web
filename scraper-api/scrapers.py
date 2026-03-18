@@ -2,7 +2,7 @@ import json
 import sys
 import argparse
 import re
-from scrapling import StealthyFetcher
+from scrapling import StealthyFetcher # type: ignore
 
 # Helper to ensure we only get clean embed/video URLs, not full site pages
 def clean_source_url(url, provider_domain):
@@ -207,7 +207,7 @@ def scrape_watchanimeworld_info(item_id):
             title_words = list(guessed_title.split())
             if len(title_words) > 2:
                 # Use a explicit slice to satisfy IDE type checkers
-                title_slice = title_words[0:2]
+                title_slice = list(title_words)[0:2] # type: ignore
                 search_res = scrape_watchanimeworld(" ".join(title_slice))
 
         if search_res:
@@ -614,18 +614,18 @@ def scrape_universal_info(site_url, item_id):
                 break
         except: continue
     if not response or not hasattr(response, 'css'): return {"id": item_id, "error": "Not found"}
-    title_el = response.css('h1, .title')
+    title_el = response.css('h1, .title') # type: ignore
     title = title_el[0].text.strip() if title_el else item_id
     episodes = []
     # Ensure response is treated as non-Optional by IDE
-    ep_links = response.css('a[href*="/episode/"], a[href*="-episode-"], .episode-item a')
+    ep_links = response.css('a[href*="/episode/"], a[href*="-episode-"], .episode-item a') # type: ignore
     for link in ep_links:
         href = link.attrib.get('href', '')
         num_match = re.search(r'episode-(\d+)', href)
         num = num_match.group(1) if num_match else link.text.strip()
         episodes.append({"id": href.rstrip('/').split('/')[-1], "number": num, "href": href if href.startswith('http') else f"{site_url}{href}"})
     if not episodes and response and hasattr(response, 'url'): 
-        episodes.append({"id": item_id, "number": "1", "href": response.url})
+        episodes.append({"id": item_id, "number": "1", "href": response.url}) # type: ignore
     
     return {
         "id": item_id, 
@@ -656,7 +656,7 @@ def scrape_universal_source(site_url, ep_id):
             if u: sources.append({"name": "Server", "url": u})
     
     if response and hasattr(response, 'text'):
-        direct = extract_direct_video_links(response.text)
+        direct = extract_direct_video_links(response.text) # type: ignore
         for d in direct:
             if d not in [s['url'] for s in sources]: sources.append({"name": "Direct", "url": d})
     return {"url": sources[0]['url'] if sources else "", "sources": sources}
