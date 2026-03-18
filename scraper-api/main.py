@@ -8,7 +8,13 @@ from scrapers import (
     scrape_cinemacity,
     scrape_filmex,
     scrape_cinezo,
-    scrape_pstream
+    scrape_pstream,
+    scrape_justanime_search,
+    scrape_justanime_info,
+    scrape_justanime_source,
+    scrape_animex_search,
+    scrape_animex_info,
+    scrape_animex_source
 )
 
 app = FastAPI(title="ToonPlayer Scraper API")
@@ -44,6 +50,30 @@ def search_cinezo(q: str):
 @app.get("/search/pstream")
 def search_pstream(q: str):
     return scrape_pstream(q)
+
+@app.get("/search/justanime")
+def search_ja(q: str):
+    return scrape_justanime_search(q)
+
+@app.get("/info/justanime")
+def info_ja(id: str, slug: str):
+    return scrape_justanime_info(id, slug)
+
+@app.get("/source/justanime")
+def source_ja(id: str):
+    return scrape_justanime_source(id)
+
+@app.get("/search/animex")
+def search_ax(q: str):
+    return scrape_animex_search(q)
+
+@app.get("/info/animex")
+def info_ax(id: str, slug: str):
+    return scrape_animex_info(id, slug)
+
+@app.get("/source/animex")
+def source_ax(id: str):
+    return scrape_animex_source(id)
 
 @app.get("/health")
 def health():

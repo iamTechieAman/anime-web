@@ -206,7 +206,7 @@ def scrape_watchanimeworld_info(item_id):
                 search_res = scrape_watchanimeworld(guessed_title)
             
             if not search_res and len(words) > 2:
-                broader_title = " ".join(words[:2])
+                broader_title = " ".join(words[0:2])
                 print(f"[Scraper] No results for '{guessed_title}'. Trying broader search for '{broader_title}'...", file=sys.stderr)
                 search_res = scrape_watchanimeworld(broader_title)
 
@@ -225,22 +225,23 @@ def scrape_watchanimeworld_info(item_id):
                 if not best_match:
                     best_match = valid_results[0]
                 
-                print(f"[Scraper] Search recovery found new candidate ID: {best_match['id']}", file=sys.stderr)
-                # Re-fetch with the new ID
-                urls_to_try = [
-                    f"https://watchanimeworld.net/series/{best_match['id']}/",
-                    f"https://watchanimeworld.net/movies/{best_match['id']}/",
-                    f"https://watchanimeworld.net/{best_match['id']}/"
-                ]
-                response = None
-                for url in urls_to_try:
-                    try:
-                        temp_resp = fetcher.fetch(url)
-                        status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
-                        if temp_resp and status < 400:
-                            response = temp_resp
-                            break
-                    except: continue
+                if best_match:
+                    print(f"[Scraper] Search recovery found new candidate ID: {best_match['id']}", file=sys.stderr)
+                    # Re-fetch with the new ID
+                    urls_to_try = [
+                        f"https://watchanimeworld.net/series/{best_match['id']}/",
+                        f"https://watchanimeworld.net/movies/{best_match['id']}/",
+                        f"https://watchanimeworld.net/{best_match['id']}/"
+                    ]
+                    response = None
+                    for url in urls_to_try:
+                        try:
+                            temp_resp = fetcher.fetch(url)
+                            status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
+                            if temp_resp and status < 400:
+                                response = temp_resp
+                                break
+                        except: continue
 
     if not response:
         return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series"}
@@ -444,6 +445,188 @@ def scrape_cinezo(query):
                 "type": "movie" if "/movie/" in href else "tv"
             })
     return results
+
+def scrape_justanime_search(query):
+    fetcher = StealthyFetcher()
+    url = f"https://justanime.to/search?keyword={query}"
+    response = fetcher.fetch(url, engine='chrome')
+    
+    results = []
+    # Based on probe: items are links with /anime/
+    items = response.css('a[href*="/anime/"]')
+    seen_ids = set()
+    
+    for item in items:
+        href = item.attrib.get('href', '')
+        # Pattern: /anime/ID/SLUG
+        match = re.search(r'/anime/(\d+)/([^/]+)', href)
+        if match:
+            item_id = match.group(1)
+            slug = match.group(2)
+            if item_id in seen_ids: continue
+            seen_ids.add(item_id)
+            
+            # Find title - usually in a nearby span or inside the link
+            title = item.text.strip() if item.text else slug.replace('-', ' ').title()
+            
+            # Find image
+            img_el = item.css('img')
+            img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            
+            results.append({
+                "id": f"ja:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://justanime.to{img}",
+                "type": "anime",
+                "slug": slug
+            })
+    return results
+
+def scrape_justanime_info(item_id, slug):
+    fetcher = StealthyFetcher()
+    url = f"https://justanime.to/anime/{item_id}/{slug}"
+    response = fetcher.fetch(url, engine='chrome')
+    
+    episodes = []
+    ep_links = response.css('a[href*="/watch/"]')
+    
+    for link in ep_links:
+        href = link.attrib.get('href', '')
+        # Pattern: /watch/SLUG-ID-episode-NUMBER
+        ep_match = re.search(r'episode-(\d+)', href)
+        if ep_match:
+            ep_num = ep_match.group(1)
+            # watch/ID is often used for the playback page
+            ep_id = href.split('/')[-1]
+            episodes.append({
+                "id": ep_id,
+                "number": ep_num,
+                "href": href if href.startswith('http') else f"https://justanime.to{href}"
+            })
+            
+    title_el = response.css('h1, .title')
+    title = title_el[0].text.strip() if title_el else slug.replace('-', ' ').title()
+    
+    return {
+        "id": item_id,
+        "title": title,
+        "episodes": episodes,
+        "type": "anime"
+    }
+
+def scrape_justanime_source(ep_id):
+    fetcher = StealthyFetcher()
+    url = f"https://justanime.to/watch/{ep_id}"
+    response = fetcher.fetch(url, engine='chrome')
+    
+    sources = []
+    # Look for iframes
+    iframes = response.css('iframe')
+    for iframe in iframes:
+        src = iframe.attrib.get('src')
+        if src and not src.startswith('#'):
+             u = clean_source_url(src, "justanime.to")
+             if u:
+                 sources.append({"name": "Server", "url": u})
+                 
+    # Check for script data or direct links
+    direct = extract_direct_video_links(response.text)
+    for d in direct:
+        if d not in [s['url'] for s in sources]:
+            sources.append({"name": "Direct", "url": d})
+            
+    return {
+        "url": sources[0]['url'] if sources else "",
+        "sources": sources
+    }
+
+def scrape_animex_search(query):
+    fetcher = StealthyFetcher()
+    url = f"https://animex.one/search?q={query}"
+    response = fetcher.fetch(url, engine='chrome')
+    
+    results = []
+    # Items are usually in a grid
+    items = response.css('a[href*="/anime/"]')
+    seen_ids = set()
+    
+    for item in items:
+        href = item.attrib.get('href', '')
+        # Pattern: /anime/slug-ID
+        match = re.search(r'/anime/([^/]+)-(\d+)$', href)
+        if match:
+            slug = match.group(1)
+            item_id = match.group(2)
+            if item_id in seen_ids: continue
+            seen_ids.add(item_id)
+            
+            title = item.text.strip() if item.text else slug.replace('-', ' ').title()
+            img_el = item.css('img')
+            img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            
+            results.append({
+                "id": f"ax:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://animex.one{img}",
+                "type": "anime",
+                "slug": slug
+            })
+    return results
+
+def scrape_animex_info(item_id, slug):
+    fetcher = StealthyFetcher()
+    url = f"https://animex.one/anime/{slug}-{item_id}"
+    response = fetcher.fetch(url, engine='chrome')
+    
+    episodes = []
+    ep_links = response.css('a[href*="/watch/"]')
+    
+    for link in ep_links:
+        href = link.attrib.get('href', '')
+        # Pattern: /watch/slug-ID-episode-NUMBER
+        ep_match = re.search(r'episode-(\d+)', href)
+        if ep_match:
+            ep_num = ep_match.group(1)
+            ep_id = href.split('/')[-1]
+            episodes.append({
+                "id": ep_id,
+                "number": ep_num,
+                "href": href if href.startswith('http') else f"https://animex.one{href}"
+            })
+            
+    title_el = response.css('h1, .title')
+    title = title_el[0].text.strip() if title_el else slug.replace('-', ' ').title()
+    
+    return {
+        "id": item_id,
+        "title": title,
+        "episodes": episodes,
+        "type": "anime"
+    }
+
+def scrape_animex_source(ep_id):
+    fetcher = StealthyFetcher()
+    url = f"https://animex.one/watch/{ep_id}"
+    response = fetcher.fetch(url, engine='chrome')
+    
+    sources = []
+    iframes = response.css('iframe')
+    for iframe in iframes:
+        src = iframe.attrib.get('src')
+        if src and not src.startswith('#'):
+             u = clean_source_url(src, "animex.one")
+             if u:
+                 sources.append({"name": "Server", "url": u})
+                 
+    direct = extract_direct_video_links(response.text)
+    for d in direct:
+        if d not in [s['url'] for s in sources]:
+            sources.append({"name": "Direct", "url": d})
+            
+    return {
+        "url": sources[0]['url'] if sources else "",
+        "sources": sources
+    }
 
 def scrape_pstream(query):
     fetcher = StealthyFetcher()

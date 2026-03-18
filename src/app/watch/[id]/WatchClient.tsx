@@ -445,7 +445,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         ];
 
         const fetchServers = async () => {
+            if (!currentEp) return; // Guard against null episode ID
             setLoadingServers(true);
+            setCheckingStatus("Searching for best source...");
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}&provider=${provider || ''}`);
                 let nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
@@ -460,12 +462,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 setServers(allServers);
 
-                // Default to first native server if available, else ToonPlayer VIP, else emergency
+                // Auto-selection logic: Find first working server
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists) {
-                        const firstNative = nativeServers[0];
-                        const peachify = allServers.find((s: any) => s.serverId === "peachify");
+                        setCheckingStatus("Scanning servers...");
+                        // Try to find the first native server that works
+                        let bestServer = null;
+                        
+                        // Just pick the first one and let fetchSource handle the fallback/auto-switch
+                        // but prioritize native ones that aren't known to be down
+                        const firstNative = nativeServers.find((s: any) => !failedServersRef.current.has(s.serverId));
+                        const peachify = allServers.find((s: any) => s.serverId === "peachify" && !failedServersRef.current.has(s.serverId));
+                        
                         setSelectedServer(firstNative?.serverId || peachify?.serverId || allServers[0].serverId);
                     }
                 } else {
@@ -640,6 +649,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 if (processingRef.current !== key) return;
                 console.error('[WatchPage] Native server failed:', err.message);
                 // Auto-switch instead of showing error
+                setCheckingStatus(`Server ${selectedServerObj.serverName} failed, trying next...`);
                 autoSwitchServer(selectedServer);
             } finally {
                 if (processingRef.current === key) {
@@ -995,9 +1005,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                     <span className="text-[10px] text-purple-400 font-bold px-1.5 py-0.5 bg-purple-500/10 rounded">Streaming</span>
                                                 </div>
                                                 <div className="max-h-64 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
-                                                    {servers.map((server) => (
+                                                    {servers.map((server, index) => (
                                                         <button
-                                                            key={server.serverId}
+                                                            key={`${server.serverId}-${server.type}-${index}`}
                                                             onClick={() => {
                                                                 setSelectedServer(server.serverId);
                                                                 setShowServerDropdown(false);

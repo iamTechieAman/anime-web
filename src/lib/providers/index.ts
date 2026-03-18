@@ -6,9 +6,11 @@ import { ConsumetProvider } from './consumet';
 import { VidSrcProvider } from './vidsrc';
 import { OnoflixProvider } from './onoflix';
 import { WatchAnimeWorldProvider } from './watchanimeworld';
+import { JustAnimeProvider } from './justanime';
+import { AnimexProvider } from './animex';
 import type { AnimeProvider } from './types';
 
-export type ProviderName = 'allanime' | 'hianime' | 'anikai' | 'aniwatch' | 'consumet' | 'vidsrc' | 'onoflix' | 'watchanimeworld';
+export type ProviderName = 'allanime' | 'hianime' | 'anikai' | 'aniwatch' | 'consumet' | 'vidsrc' | 'onoflix' | 'watchanimeworld' | 'justanime' | 'animex';
 
 const providers = new Map<ProviderName, AnimeProvider>([
     ['allanime', new AllAnimeProvider()],
@@ -18,7 +20,9 @@ const providers = new Map<ProviderName, AnimeProvider>([
     ['consumet', new ConsumetProvider()],
     ['vidsrc', new VidSrcProvider()],
     ['onoflix', new OnoflixProvider()],
-    ['watchanimeworld', new WatchAnimeWorldProvider()]
+    ['watchanimeworld', new WatchAnimeWorldProvider()],
+    ['justanime', new JustAnimeProvider()],
+    ['animex', new AnimexProvider()]
 ]);
 
 export function getProvider(name: ProviderName): AnimeProvider {
@@ -33,5 +37,5 @@ export function getAllProviders(): AnimeProvider[] {
     return Array.from(providers.values());
 }
 
-export { AllAnimeProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, OnoflixProvider, WatchAnimeWorldProvider };
+export { AllAnimeProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, OnoflixProvider, WatchAnimeWorldProvider, JustAnimeProvider, AnimexProvider };
 export * from './types';

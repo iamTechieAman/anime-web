@@ -13,6 +13,13 @@ export async function fetchFromScraper(params: {
     wa_info?: string;
     wa_source?: string;
     aniwatch_page?: string;
+    ja_query?: string;
+    ja_info?: string;
+    ja_source?: string;
+    ax_query?: string;
+    ax_info?: string;
+    ax_source?: string;
+    slug?: string;
 }) {
     if (SCRAPER_API_URL) {
         // Use remote API
@@ -37,6 +44,26 @@ export async function fetchFromScraper(params: {
             } else if (params.query) {
                 endpoint = "/search/onoflix";
                 queryParams.q = params.query;
+            } else if (params.ja_query) {
+                endpoint = "/search/justanime";
+                queryParams.q = params.ja_query;
+            } else if (params.ja_info) {
+                endpoint = "/info/justanime";
+                queryParams.id = params.ja_info;
+                queryParams.slug = params.slug;
+            } else if (params.ja_source) {
+                endpoint = "/source/justanime";
+                queryParams.id = params.ja_source;
+            } else if (params.ax_query) {
+                endpoint = "/search/animex";
+                queryParams.q = params.ax_query;
+            } else if (params.ax_info) {
+                endpoint = "/info/animex";
+                queryParams.id = params.ax_info;
+                queryParams.slug = params.slug;
+            } else if (params.ax_source) {
+                endpoint = "/source/animex";
+                queryParams.id = params.ax_source;
             }
 
             if (endpoint) {
@@ -58,6 +85,12 @@ export async function fetchFromScraper(params: {
     if (params.cartoon_category) command += ` --cartoon_category "${params.cartoon_category.replace(/"/g, '\\"')}"`;
     if (params.wa_info) command += ` --wa_info "${params.wa_info.replace(/"/g, '\\"')}"`;
     if (params.wa_source) command += ` --wa_source "${params.wa_source.replace(/"/g, '\\"')}"`;
+    if (params.ja_query) command += ` --ja_query "${params.ja_query.replace(/"/g, '\\"')}"`;
+    if (params.ja_info) command += ` --ja_info "${params.ja_info.replace(/"/g, '\\"')}" --slug "${params.slug?.replace(/"/g, '\\"')}"`;
+    if (params.ja_source) command += ` --ja_source "${params.ja_source.replace(/"/g, '\\"')}"`;
+    if (params.ax_query) command += ` --ax_query "${params.ax_query.replace(/"/g, '\\"')}"`;
+    if (params.ax_info) command += ` --ax_info "${params.ax_info.replace(/"/g, '\\"')}" --slug "${params.slug?.replace(/"/g, '\\"')}"`;
+    if (params.ax_source) command += ` --ax_source "${params.ax_source.replace(/"/g, '\\"')}"`;
 
     const { stdout, stderr } = await execPromise(command);
 
