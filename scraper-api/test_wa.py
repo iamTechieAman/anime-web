@@ -1,5 +1,22 @@
-import json
-from scrapers import scrape_watchanimeworld, scrape_watchanimeworld_info
+try:
+    # Try direct import first for standard execution
+    import scrapers
+    from scrapers import scrape_watchanimeworld, scrape_watchanimeworld_info
+except ImportError:
+    # Fallback for IDEs and scripts run from different working directories
+    import sys
+    import os
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.append(current_dir)
+    try:
+        from scrapers import scrape_watchanimeworld, scrape_watchanimeworld_info
+    except ImportError:
+        # Final fallback for cases where scraper-api is the parent
+        parent_dir = os.path.dirname(current_dir)
+        if parent_dir not in sys.path:
+            sys.path.append(parent_dir)
+        from scrapers import scrape_watchanimeworld, scrape_watchanimeworld_info
 
 def test():
     print("Testing Search for 'Solo Leveling'...")
