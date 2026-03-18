@@ -23,6 +23,8 @@ export async function fetchFromScraper(params: {
     universal_site?: string;
     universal_item?: string;
     universal_ep?: string;
+    wa_az_letter?: string;
+    wa_az_page?: string;
 }) {
     if (SCRAPER_API_URL) {
         // Use remote API
@@ -51,6 +53,10 @@ export async function fetchFromScraper(params: {
             } else if (params.cartoon_category) {
                 endpoint = "/search/watchanimeworld";
                 queryParams.q = params.cartoon_category;
+            } else if (params.wa_az_letter) {
+                endpoint = "/search/watchanimeworld_az";
+                queryParams.letter = params.wa_az_letter;
+                queryParams.page = params.wa_az_page || "1";
             } else if (params.wa_info) {
                 endpoint = "/info/watchanimeworld";
                 queryParams.id = params.wa_info;
@@ -110,6 +116,7 @@ export async function fetchFromScraper(params: {
     if (params.universal_site) command += ` --universal_site "${params.universal_site.replace(/"/g, '\\"')}"`;
     if (params.universal_item) command += ` --universal_item "${params.universal_item.replace(/"/g, '\\"')}"`;
     if (params.universal_ep) command += ` --universal_ep "${params.universal_ep.replace(/"/g, '\\"')}"`;
+    if (params.wa_az_letter) command += ` --wa_az_letter "${params.wa_az_letter.replace(/"/g, '\\"')}" --wa_az_page "${params.wa_az_page || 1}"`;
 
     const { stdout, stderr } = await execPromise(command);
 

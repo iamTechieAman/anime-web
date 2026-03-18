@@ -3,6 +3,7 @@ from typing import Optional, List
 from scrapers import (
     scrape_onoflix_search, 
     scrape_watchanimeworld, 
+    scrape_watchanimeworld_az,
     scrape_watchanimeworld_info, 
     scrape_watchanimeworld_source,
     scrape_cinemacity,
@@ -41,6 +42,10 @@ def search_onoflix(q: str):
 @app.get("/search/watchanimeworld")
 def search_wa(q: str):
     return scrape_watchanimeworld(query=q)
+
+@app.get("/search/watchanimeworld_az")
+def search_wa_az(letter: str, page: int = 1):
+    return scrape_watchanimeworld_az(letter, page=page)
 
 @app.get("/info/watchanimeworld")
 def info_wa(id: str):

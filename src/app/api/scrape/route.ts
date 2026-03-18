@@ -19,9 +19,11 @@ export async function GET(request: Request) {
         const universalSite = searchParams.get('universal_site');
         const universalItem = searchParams.get('universal_item');
         const universalEp = searchParams.get('universal_ep');
+        const waAzLetter = searchParams.get('wa_az_letter');
+        const waAzPage = searchParams.get('wa_az_page');
         const slug = searchParams.get('slug');
 
-        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory && !waInfo && !waSource && !jaQuery && !jaInfo && !jaSource && !axQuery && !axInfo && !axSource && !universalSite) {
+        if (!query && !aniwatchPage && !cartoonQuery && !cartoonCategory && !waInfo && !waSource && !jaQuery && !jaInfo && !jaSource && !axQuery && !axInfo && !axSource && !universalSite && !waAzLetter) {
             return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
         }
 
@@ -41,6 +43,8 @@ export async function GET(request: Request) {
             universal_site: universalSite || undefined,
             universal_item: universalItem || undefined,
             universal_ep: universalEp || undefined,
+            wa_az_letter: waAzLetter || undefined,
+            wa_az_page: waAzPage || undefined,
             slug: slug || undefined
         });
 

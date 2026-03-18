@@ -128,31 +128,40 @@ def scrape_watchanimeworld(query=None, category=None):
     elif category:
         url = f"https://watchanimeworld.net/category/{category}/"
     
-    response = fetcher.fetch(url, wait_until='domcontentloaded', timeout=20000)
-    if not response or not response.css('article.post, article.item, .result-item, .movie-item'):
-        response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=20000)
+    # Force Chrome engine for better bypass and JS rendering
+    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=20000)
     results = []
     
     if not response: return []
-    items = response.css('article.post, article.item, .result-item, .movie-item')
+    # Hybrid selector for different page structures (Home, Search, A-Z)
+    items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        links = item.css('h2.entry-title a, h2 a, h3 a, a.lnk-blk')
-        if not links:
-            links = item.css('a')
-            
-        if not links: continue
+        # Try to find the link to the show
+        href = item.attrib.get('href', '')
+        if not href or not href.startswith('http'):
+            links = item.css('a.lnk-blk, .details a, a')
+            if links:
+                href = links[0].attrib.get('href', '')
         
-        href = links[0].attrib.get('href', '')
-        title = links[0].text.strip() if links[0].text else ""
+        if not href: continue
+
+        # Try multiple title patterns
+        title = ""
+        title_tag = item.css('h2.entry-title, h2, h3, .title, .details a')
+        if title_tag:
+            title = title_tag[0].text.strip()
         if not title:
-            title_el = item.css('h2.entry-title, h3, .title')
-            title = title_el[0].text.strip() if title_el else ""
+            # Fallback to link text
+            links = item.css('a.lnk-blk, .details a, a')
+            if links:
+                title = links[0].text.strip()
             
-        imgs = item.css('.post-thumbnail img, img') if item else []
-        img = "(empty)"
+        imgs = item.css('.post-thumbnail img, img')
+        img = ""
         if imgs:
-            img = imgs[0].attrib.get('src') or imgs[0].attrib.get('data-src') or ""
+            # Check data-src first for lazy loading
+            img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
         
         if title and href:
             item_id = href.rstrip('/').split('/')[-1]
@@ -160,42 +169,82 @@ def scrape_watchanimeworld(query=None, category=None):
                 "id": f"wa:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
-                "type": "cartoon",
+                "type": "anime",
                 "href": href
             })
+    return results
+
+def scrape_watchanimeworld_az(letter, page=1):
+    fetcher = StealthyFetcher()
+    # Pattern discovered: /letter/{LETTER}/page/{PAGE}/
+    url = f"https://watchanimeworld.net/letter/{letter.upper()}/" if page == 1 else f"https://watchanimeworld.net/letter/{letter.upper()}/page/{page}/"
+    
+    # Enforcement: Always use chrome for WA as it's heavily dynamic/protected
+    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
+    results = []
+    
+    if not response: return []
+    # Hybrid selector for different page structures
+    items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
+    
+    for item in items:
+        # Try different link patterns
+        links = item.css('a.lnk-blk, h2.entry-title a, h2 a, h3 a, .details a, a')
+        if not links: continue
+        
+        href = links[0].attrib.get('href', '')
+        # Title can be in various places
+        title = ""
+        title_tag = item.css('h2.entry-title, h2, h3, .title, .details a')
+        if title_tag:
+            title = title_tag[0].text.strip()
+        if not title:
+            title = links[0].text.strip()
             
+        imgs = item.css('.post-thumbnail img, img')
+        img = ""
+        if imgs:
+            img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
+        
+        if title and href:
+            item_id = href.rstrip('/').split('/')[-1]
+            results.append({
+                "id": f"wa:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
+                "type": "anime",
+                "href": href
+            })
     return results
 
 def scrape_watchanimeworld_info(item_id):
     fetcher = StealthyFetcher()
     is_movie = "-movie" in item_id or "movies" in item_id
     
-    # Try multiple URL patterns to avoid "Content Not Found"
+    # Research showed better patterns for direct links
     urls_to_try = [
+        f"https://watchanimeworld.net/series/{item_id}/",
+        f"https://watchanimeworld.net/movies/{item_id}/",
+        f"https://watchanimeworld.net/{item_id}/",
         f"https://watchanimeworld.net/anime/{item_id}/",
-        f"https://watchanimeworld.net/movies/{item_id}/" if is_movie else f"https://watchanimeworld.net/series/{item_id}/",
-        f"https://watchanimeworld.net/{item_id}/"
+        f"https://watchanimeworld.net/cartoon/{item_id}/"
     ]
     
+    if is_movie:
+        urls_to_try = [urls_to_try[1], urls_to_try[0], urls_to_try[2], urls_to_try[3], urls_to_try[4]]
+        
     response = None
     for url in urls_to_try:
         try:
-            # Configure fetcher for better bypass - use 15s (15000ms)
-            temp_resp = fetcher.fetch(url, timeout=15000)
+            # Always use chrome for info to ensure JS overlays are bypassed/loaded
+            temp_resp = fetcher.fetch(url, engine='chrome', timeout=20000)
             status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
             if temp_resp and status < 400:
-                # Check if it's a real page, not a parked site or error page that returns 200
-                if temp_resp.css('h1.entry-title, .title, .episodios, .aa-cnt'):
+                if temp_resp.css('h1.entry-title, .title, .episodios, .aa-cnt, .item__card'):
                     response = temp_resp
                     break
         except:
             continue
-            
-    if not response:
-        # Final fallback with chrome if all static failed
-        try:
-            response = fetcher.fetch(urls_to_try[0], engine='chrome', timeout=30000)
-        except: pass
     
     episodes = []
     
@@ -329,20 +378,27 @@ def scrape_watchanimeworld_source(episode_id):
                 except: pass
 
     if not response: return {"url": "", "sources": [], "error": "connectivity_issue"}
-    
     server_buttons = response.css('.server-list li, .server-button, .btn-server, a[data-id], .dooplay_player_option, .play-video') if response else []
     sources = []
     
+    if response and hasattr(response, 'text'):
+        # 1. Look for zephyrflick player
+        zephyr_match = re.search(r'https://play\.zephyrflick\.top/video/([a-zA-Z0-9]+)', response.text) # type: ignore
+        if zephyr_match:
+            sources.append({"name": "Zephyr Player", "url": zephyr_match.group(0)})
+
     # Direct iframe extraction
     iframes = response.css('iframe[src*="play."], iframe[src*="zephyr"], iframe[src*="embed"], iframe[src*="video"], iframe[src*="/v/"], iframe[src*="player"], .video-iframe iframe') if response else []
     if not iframes and response:
         iframes = response.css('.video-player iframe, .movie-player iframe, #player iframe, iframe')
-        
+
     for iframe in iframes:
-        src = iframe.attrib.get('src') or iframe.attrib.get('data-src')
-        u = clean_source_url(src, "watchanimeworld.net")
-        if u:
-            sources.append({"name": "Primary", "url": u})
+        src = iframe.attrib.get('src') or iframe.attrib.get('data-src') or iframe.attrib.get('data-lazy-src') # type: ignore
+        if src and "google" not in src and "facebook" not in src and "twitter" not in src:
+            target_domain = "watchanimeworld.net" # Fix undefined url shadowing
+            u = clean_source_url(src, target_domain)
+            if u and u not in [s['url'] for s in sources]: 
+                sources.append({"name": "Server", "url": u})
 
     # Data attribute extraction from buttons
     for btn in server_buttons:
@@ -610,14 +666,17 @@ def scrape_universal_search(site_url, query):
 def scrape_universal_info(site_url, item_id):
     fetcher = StealthyFetcher()
     urls = [f"{site_url}/movie/{item_id}", f"{site_url}/tv/{item_id}", f"{site_url}/series/{item_id}", f"{site_url}/{item_id}"]
+    # Force chrome for info
     response = None
     for url in urls:
         try:
-            temp = fetcher.fetch(url, engine='chrome')
-            if temp and getattr(temp, 'status_code', 200) < 400:
-                response = temp
+            temp_resp = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
+            status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
+            if temp_resp and status < 400:
+                response = temp_resp
                 break
-        except: continue
+        except:
+            continue
     if not response or not hasattr(response, 'css'): return {"id": item_id, "error": "Not found"}
     title_el = response.css('h1, .title') # type: ignore
     title = title_el[0].text.strip() if title_el else item_id
@@ -652,12 +711,16 @@ def scrape_universal_source(site_url, ep_id):
         except: continue
     if not response: return {"url": "", "sources": []}
     sources = []
+    
+    # Existing iframe extraction
     iframes = response.css('iframe') if response else []
     for iframe in iframes:
         src = iframe.attrib.get('src') or iframe.attrib.get('data-src') or iframe.attrib.get('data-lazy-src') # type: ignore
         if src and "google" not in src and "facebook" not in src and "twitter" not in src:
             target_domain = site_url.split('//')[-1] if '//' in site_url else site_url
             u = clean_source_url(src, target_domain)
+            if u and u not in [s['url'] for s in sources]: 
+                sources.append({"name": "Server", "url": u})
             if u and u not in [s['url'] for s in sources]: 
                 sources.append({"name": "Server", "url": u})
     

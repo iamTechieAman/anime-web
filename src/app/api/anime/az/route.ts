@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     // List of providers to try in order
     const providersToTry: ProviderName[] = providerParam
         ? [providerParam as ProviderName]
-        : ["anikai", "hianime"];
+        : ["watchanimeworld", "anikai", "hianime"];
 
     const errors: any[] = [];
     let combinedShows: any[] = [];

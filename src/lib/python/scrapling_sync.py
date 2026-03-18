@@ -116,31 +116,39 @@ def scrape_watchanimeworld(query=None, category=None):
     else:
         url = "https://watchanimeworld.net/"
 
-    response = fetcher.fetch(url)
-    if not response or not response.css('article.post, article.item, .result-item, .movie-item'):
-        response = fetcher.fetch(url, engine='chrome')
+    # Force Chrome for WA
+    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=20000)
     results = []
     
     if not response: return []
-    items = response.css('article.post, article.item, .result-item, .movie-item')
+    items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        links = item.css('h2.entry-title a, h2 a, h3 a, a.lnk-blk')
-        if not links:
-            links = item.css('a')
-            
-        if not links: continue
+        # Try to find the link to the show
+        href = item.attrib.get('href', '')
+        if not href or not href.startswith('http'):
+            links = item.css('a.lnk-blk, .details a, a')
+            if links:
+                href = links[0].attrib.get('href', '')
         
-        href = links[0].attrib.get('href', '')
-        title = links[0].text.strip() if links[0].text else ""
+        if not href: continue
+
+        # Try multiple title patterns
+        title = ""
+        title_tag = item.css('h2.entry-title, h2, h3, .title, .details a')
+        if title_tag:
+            title = title_tag[0].text.strip()
         if not title:
-            title_el = item.css('h2.entry-title, h3, .title')
-            title = title_el[0].text.strip() if title_el else ""
+            # Fallback to link text
+            links = item.css('a.lnk-blk, .details a, a')
+            if links:
+                title = links[0].text.strip()
             
         imgs = item.css('.post-thumbnail img, img')
-        img = "(empty)"
+        img = ""
         if imgs:
-            img = imgs[0].attrib.get('src') or imgs[0].attrib.get('data-src') or ""
+            # Check data-src first for lazy loading
+            img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
         
         if title and href:
             item_id = href.rstrip('/').split('/')[-1]
@@ -151,7 +159,37 @@ def scrape_watchanimeworld(query=None, category=None):
                 "type": "cartoon",
                 "href": href
             })
-            
+    return results
+
+def scrape_watchanimeworld_az(letter, page=1):
+    fetcher = StealthyFetcher()
+    url = f"https://watchanimeworld.net/letter/{letter.upper()}/" if page == 1 else f"https://watchanimeworld.net/letter/{letter.upper()}/page/{page}/"
+    
+    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
+    results = []
+    
+    if not response: return []
+    items = response.css('.items article, a.item__card.lnk-blk, article.post')
+    
+    for item in items:
+        links = item.css('a.lnk-blk, a')
+        if not links: continue
+        
+        href = links[0].attrib.get('href', '')
+        title_el = item.css('h2, h3, .title')
+        title = title_el[0].text.strip() if title_el else ""
+        imgs = item.css('img')
+        img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
+        
+        if title and href:
+            item_id = href.rstrip('/').split('/')[-1]
+            results.append({
+                "id": f"wa:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
+                "type": "anime",
+                "href": href
+            })
     return results
 
 def scrape_watchanimeworld_info(item_id):
@@ -199,11 +237,13 @@ def scrape_watchanimeworld_info(item_id):
         if not search_res:
             words = guessed_title.split()
             if "Episode" in words:
-                guessed_title = " ".join(words[:words.index("Episode")])
+                ep_idx = words.index("Episode")
+                guessed_title = " ".join(words[:ep_idx])
                 search_res = scrape_watchanimeworld(guessed_title)
             
             if not search_res and len(words) > 2:
-                search_res = scrape_watchanimeworld(" ".join(words[:2]))
+                short_words = words[:2]
+                search_res = scrape_watchanimeworld(" ".join(short_words))
 
         if search_res:
             valid_results = [r for r in search_res if r['id'] != item_id]
@@ -581,7 +621,8 @@ def scrape_universal_info(site_url, item_id):
                 response = temp
                 break
         except: continue
-    if not response: return {"id": item_id, "error": "Not found"}
+    if not response or not hasattr(response, 'css'): 
+        return {"id": item_id, "error": "Not found"}
     title_el = response.css('h1, .title')
     title = title_el[0].text.strip() if title_el else item_id
     episodes = []
@@ -605,7 +646,8 @@ def scrape_universal_source(site_url, ep_id):
                 response = temp
                 break
         except: continue
-    if not response: return {"url": "", "sources": []}
+    if not response or not hasattr(response, 'css'): 
+        return {"url": "", "sources": []}
     sources = []
     iframes = response.css('iframe')
     for iframe in iframes:
@@ -636,6 +678,8 @@ if __name__ == "__main__":
     parser.add_argument("--ax_info", help="Animex info ID")
     parser.add_argument("--ax_source", help="Animex source ID")
     parser.add_argument("--slug", help="Slug for anime info")
+    parser.add_argument("--wa_az_letter", help="Letter for WatchAnimeWorld A-Z")
+    parser.add_argument("--wa_az_page", type=int, default=1, help="Page for WatchAnimeWorld A-Z")
     
     args = parser.parse_args()
     output = {"onoflix": [], "watchanimeworld": [], "cinemacity": [], "filmex": [], "cinezo": [], "pstream": [], "wa_info": {}, "wa_source": {}, "aniwatch": [], "universal_search": [], "universal_info": {}, "universal_source": {}}
@@ -665,5 +709,7 @@ if __name__ == "__main__":
     if args.wa_info: output["wa_info"] = scrape_watchanimeworld_info(args.wa_info)
     if args.wa_source: output["wa_source"] = scrape_watchanimeworld_source(args.wa_source)
     if args.aniwatch_page: output["aniwatch"] = scrape_aniwatch_tv_list(args.aniwatch_page)
+    
+    if args.wa_az_letter: output["watchanimeworld"] = scrape_watchanimeworld_az(args.wa_az_letter, args.wa_az_page)
     
     print(json.dumps(output))
