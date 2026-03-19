@@ -35,6 +35,11 @@ export default function Header() {
   const [filterFormat, setFilterFormat] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const { setShowProfileSettings } = useMobileUI();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const searchPlaceholder = "Search movies, anime & shows...";
 
@@ -333,7 +338,7 @@ export default function Header() {
               className="p-2.5 hover:bg-[var(--bg-card)] rounded-xl relative transition-all text-[var(--text-muted)] hover:text-white group"
             >
               <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              {unreadCount > 0 && (
+              {isMounted && unreadCount > 0 && (
                 <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-purple-500 rounded-full border-2 border-[var(--bg-main)] animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
               )}
             </button>

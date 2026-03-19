@@ -35,14 +35,13 @@ const NETWORK_ROWS = [
 
 // Nav tabs
 const TABS = [
-    { id: "home", label: "Explore", icon: Film },
     { id: "movies", label: "Movies", icon: Popcorn },
     { id: "tv", label: "TV Shows", icon: Tv },
     { id: "trending", label: "Trending", icon: TrendingUp },
 ];
 
 export default function MoviesPage() {
-    const [activeTab, setActiveTab] = useState("home");
+    const [activeTab, setActiveTab] = useState("movies");
     const [trending, setTrending] = useState<MovieItem[]>([]);
     const [popular, setPopular] = useState<MovieItem[]>([]);
     const [topRated, setTopRated] = useState<MovieItem[]>([]);
@@ -51,14 +50,13 @@ export default function MoviesPage() {
     const [tvTopRated, setTvTopRated] = useState<MovieItem[]>([]);
     const [genreData, setGenreData] = useState<Record<string, MovieItem[]>>({});
     const [networkData, setNetworkData] = useState<Record<string, MovieItem[]>>({});
-    const [cartoons, setCartoons] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<MovieItem[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [trendingPeople, setTrendingPeople] = useState<any[]>([]);
-    const [upcomingMovies, setUpcomingMovies] = useState<MovieItem[]>([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+
     // Fetch Movie Data for Unified Home
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
     
@@ -72,21 +70,11 @@ export default function MoviesPage() {
             setProfile(null);
         }
     }, [userData]);
+
     const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
-    const { data: moviePopular } = useSWR('/api/prime/movies?category=popular', fetcher);
-    const { data: movieUpcoming } = useSWR('/api/prime/movies?category=now_playing', fetcher);
+    const { data: moviePopular } = useSWR('/api/prime/?category=popular', fetcher);
+    const { data: movieUpcoming } = useSWR('/api/prime/?category=now_playing', fetcher);
     const { data: moviePeople } = useSWR('/api/prime/trending?type=person', fetcher);
-    const { data: cartoonData } = useSWR('/api/cartoon?category=cartoon', fetcher);
-
-    // Helper to get active filters
-    const getFilteredContent = () => ({
-        showMoviesOnly: activeTab === "movies",
-        showTvOnly: activeTab === "tv",
-        showTrendingOnly: activeTab === "trending",
-        showAll: activeTab === "home"
-    });
-
-
 
     // Scroll-to-top visibility
     useEffect(() => {
@@ -110,32 +98,46 @@ export default function MoviesPage() {
     }, [movieTrending]);
 
     useEffect(() => { if (moviePopular?.results) setPopular(moviePopular.results); }, [moviePopular]);
-    useEffect(() => { if (movieUpcoming?.results) setUpcomingMovies(movieUpcoming.results.slice(0, 10)); }, [movieUpcoming]);
+    useEffect(() => { if (movieUpcoming?.results) setNowPlaying(movieUpcoming.results); }, [movieUpcoming]);
     useEffect(() => { if (moviePeople?.results) setTrendingPeople(moviePeople.results.slice(0, 6)); }, [moviePeople]);
-    useEffect(() => { if (cartoonData?.shows) setCartoons(cartoonData.shows); }, [cartoonData]);
-
 
     // Fetch main data sequentially (remaining axios calls)
     useEffect(() => {
         const loadOtherData = async () => {
-            // Fetch top rated movies, now playing movies, tv popular, tv top rated
+            // Fetch top rated movies, tv popular, tv top rated
             try {
-                const [topRatedRes, nowPlayingRes, tvPopRes, tvTopRes] = await Promise.all([
-                    axios.get("/api/prime/movies?category=top_rated"),
-                    axios.get("/api/prime/movies?category=now_playing"),
+                const [topRatedRes, tvPopRes, tvTopRes] = await Promise.all([
+                    axios.get("/api/prime/?category=top_rated"),
                     axios.get("/api/prime/tv?category=popular"),
                     axios.get("/api/prime/tv?category=top_rated"),
                 ]);
 
                 setTopRated(topRatedRes.data.results || []);
-                setNowPlaying(nowPlayingRes.data.results || []);
                 setTvPopular(tvPopRes.data.results || []);
                 setTvTopRated(tvTopRes.data.results || []);
             } catch (err) {
                 console.error("Failed to fetch main data:", err);
             }
 
-            // 2. Fetch networks
+            // Fetch genres (since we only show these for movies now, it fits the movies tab)
+            try {
+                const promises = GENRE_ROWS.map((genre) =>
+                    axios.get(`/api/prime/discover?media_type=${genre.type}&genre_id=${genre.genreId}`)
+                );
+                const results = await Promise.allSettled(promises);
+                const newGenreData: Record<string, MovieItem[]> = {};
+                GENRE_ROWS.forEach((genre, i) => {
+                    const res = results[i];
+                    if (res.status === "fulfilled" && res.value.data.results?.length > 0) {
+                        newGenreData[genre.title] = res.value.data.results;
+                    }
+                });
+                setGenreData(newGenreData);
+            } catch (err) {
+                console.error("Failed to fetch genres:", err);
+            }
+            
+            // Fetch networks
             try {
                 const promises = NETWORK_ROWS.map((net) =>
                     axios.get(`/api/prime/discover?media_type=tv&network_id=${net.networkId}`)
@@ -148,35 +150,11 @@ export default function MoviesPage() {
                         if (res.value.data.results && res.value.data.results.length > 0) {
                             newNetworkData[net.title] = res.value.data.results;
                         }
-                    } else {
-                        console.error(`Failed to fetch ${net.title}:`, res.reason);
                     }
                 });
                 setNetworkData(newNetworkData);
             } catch (err) {
                 console.error("Failed to fetch network data:", err);
-            }
-
-            // 3. Fetch genres
-            try {
-                const promises = GENRE_ROWS.map((genre) =>
-                    axios.get(`/api/prime/discover?media_type=${genre.type}&genre_id=${genre.genreId}`)
-                );
-                const results = await Promise.allSettled(promises);
-                const newGenreData: Record<string, MovieItem[]> = {};
-                GENRE_ROWS.forEach((genre, i) => {
-                    const res = results[i];
-                    if (res.status === "fulfilled") {
-                        if (res.value.data.results && res.value.data.results.length > 0) {
-                            newGenreData[genre.title] = res.value.data.results;
-                        }
-                    } else {
-                        console.error(`Failed to fetch ${genre.title}:`, res.reason);
-                    }
-                });
-                setGenreData(newGenreData);
-            } catch (err) {
-                console.error("Failed to fetch genres:", err);
             }
         };
 
@@ -308,63 +286,83 @@ export default function MoviesPage() {
                                 !isSearching && <div className="text-center py-20 text-[var(--text-muted)]">No results found for your search.</div>
                             )}
                         </div>
-                    ) : activeTab === "home" ? (
+                    ) : (
                         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                             {/* Main Feed */}
                             <div className="flex-1 space-y-12 min-w-0">
-                                { /* Trending Movies & TV */ }
-                                <section>
-                                    <SectionHeader icon={TrendingUp} title="Trending Movies & TV" color="text-red-400" />
-                                    {trending.length > 0 ? <MovieRow items={trending} title="movie-trending" /> : <RowSkeleton />}
-                                </section>
-                                
-                                { /* Now Playing */ }
-                                <section>
-                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
-                                    {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
-                                </section>
-
-                                {/* Cartoons Section */}
-                                {cartoons.length > 0 && (
-                                    <section id="cartoons" className="group/cart">
-                                        <SectionHeader icon={Zap} title="Cartoon Favorites" color="text-yellow-400" />
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                                            {cartoons.slice(0, 12).map((item: any) => (
-                                                <Link
-                                                    key={`cart-${item._id}`}
-                                                    href={`/watch/${item._id}`}
-                                                    className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg"
-                                                >
-                                                    <div className="aspect-[2/3] relative">
-                                                        <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
-                                                        <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/10 tracking-tighter">
-                                                            Cartoon
-                                                        </div>
-                                                    </div>
-                                                    <div className="p-3">
-                                                        <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.name}</h3>
-                                                    </div>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </section>
+                                {activeTab === "movies" && (
+                                    <>
+                                        {/* Movies Feed */}
+                                        <section>
+                                            <SectionHeader icon={Flame} title="Trending Movies" color="text-red-400" />
+                                            {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" /> : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" />
+                                            {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular" /> : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
+                                            {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Star} title="Top Rated Movies" color="text-yellow-400" />
+                                            {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" /> : <RowSkeleton />}
+                                        </section>
+                                        {GENRE_ROWS.map((genre) => (
+                                            genreData[genre.title] && (
+                                                <section key={genre.title} id={`genre-${genre.genreId}`}>
+                                                    <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
+                                                    <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
+                                                </section>
+                                            )
+                                        ))}
+                                    </>
                                 )}
 
-                                {/* Upcoming Section */}
-                                <section>
-                                    <SectionHeader icon={Sparkles} title="Coming Soon & Fresh" color="text-teal-400" />
-                                    {upcomingMovies.length > 0 ? <MovieRow items={upcomingMovies} title="upcoming" /> : <RowSkeleton />}
-                                </section>
-
-                                {/* Genre Discovery */}
-                                {GENRE_ROWS.map((genre) => (
-                                    genreData[genre.title] && (
-                                        <section key={genre.title} id={`genre-${genre.genreId}`}>
-                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
-                                            <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
+                                {activeTab === "tv" && (
+                                    <>
+                                        {/* TV Shows Feed */}
+                                        <section>
+                                            <SectionHeader icon={Flame} title="Trending TV Shows" color="text-purple-400" />
+                                            {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" /> : <RowSkeleton />}
                                         </section>
-                                    )
-                                ))}
+                                        <section>
+                                            <SectionHeader icon={Tv} title="Popular TV Shows" color="text-blue-400" />
+                                            {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular" /> : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-yellow-400" />
+                                            {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" /> : <RowSkeleton />}
+                                        </section>
+                                        {NETWORK_ROWS.map((net) => (
+                                            networkData[net.title] && (
+                                                <section key={net.title} id={`network-${net.networkId}`}>
+                                                    <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-pink-400" />
+                                                    <MovieRow items={networkData[net.title]} type="tv" title={net.title} />
+                                                </section>
+                                            )
+                                        ))}
+                                    </>
+                                )}
+
+                                {activeTab === "trending" && (
+                                    <>
+                                        {/* Trending Feed */}
+                                        <section>
+                                            <SectionHeader icon={TrendingUp} title="Global Trending" color="text-red-400" />
+                                            {trending.length > 0 ? <MovieRow items={trending} title="global-trending" /> : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-emerald-400" />
+                                            {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Tv} title="Trending Series" color="text-purple-400" />
+                                            {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
+                                        </section>
+                                    </>
+                                )}
                             </div>
 
                             {/* Sidebar - Trending & Airing */}
@@ -390,35 +388,29 @@ export default function MoviesPage() {
                                     </section>
                                 )}
 
-                                {/* Top Rated Movies */}
+                                {/* Top Rated */}
                                 <section className="bg-[var(--bg-card)]/50 p-6 rounded-2xl border border-[var(--border-color)] backdrop-blur-xl">
                                     <h2 className="text-lg font-bold font-sora text-white mb-6 flex items-center gap-2">
                                         <Sparkles className="w-5 h-5 text-yellow-400" /> 
-                                        Top Rated Movies
+                                        {activeTab === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'}
                                     </h2>
                                     <div className="space-y-4">
-                                        {topRated.slice(0, 10).map((item, i) => (
+                                        {(activeTab === 'tv' ? tvTopRated : topRated).slice(0, 10).map((item, i) => (
                                             <div key={item.id} className="flex items-center gap-4 group cursor-pointer pb-4 border-b border-white/5 last:border-0 last:pb-0">
                                                 <span className="text-3xl font-black text-white/5 group-hover:text-blue-500/40 transition-colors w-8 tabular-nums italic">
                                                     {i + 1}
                                                 </span>
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title}</h3>
+                                                    <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title || item.name}</h3>
                                                     <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-2">
                                                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                                        {item.vote_average?.toFixed(1)} • {item.release_date?.split('-')[0]}</p>
+                                                        {item.vote_average?.toFixed(1)} • {(item.release_date || item.first_air_date || '').split('-')[0]}</p>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 </section>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-10">
-                            {activeTab === "movies" && popular.length > 0 && <section><SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" /><MovieGrid items={popular} /></section>}
-                            {activeTab === "tv" && tvPopular.length > 0 && <section><SectionHeader icon={Tv} title="Popular TV Shows" color="text-purple-400" /><MovieGrid items={tvPopular} /></section>}
-                            {activeTab === "trending" && trending.length > 0 && <section><SectionHeader icon={TrendingUp} title="Currently Trending" color="text-red-400" /><MovieGrid items={trending} /></section>}
                         </div>
                     )}
                 </div>

@@ -20,7 +20,7 @@ export default function MobileModals() {
     const [autoPlay, setAutoPlay] = useState(false);
     const [autoNext, setAutoNext] = useState(false);
 
-    const isMovies = pathname?.startsWith('/movies');
+    const isMovies = pathname?.startsWith('/');
     const searchAction = "/search";
     const searchPlaceholder = "Search movies, anime & shows...";
     const searchPrompt = "Search for anything";

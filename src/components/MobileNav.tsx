@@ -53,7 +53,7 @@ export default function MobileNav() {
             label: "Movies",
             icon: Film,
             color: "text-blue-500",
-            active: pathname === '/' || pathname.startsWith('/movies/'),
+            active: pathname === '/' || pathname.startsWith('//'),
             onClick: () => { closeAll(); router.push('/'); },
         },
         {
