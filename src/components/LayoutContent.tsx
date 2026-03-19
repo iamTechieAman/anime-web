@@ -12,7 +12,7 @@ import { useMobileUI } from "@/context/MobileUIContext";
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
   const pathname = usePathname();
-  const isWatchPage = pathname?.startsWith('/watch') || pathname?.startsWith('/movies/watch');
+  const isWatchPage = pathname?.startsWith('/watch') || pathname?.startsWith('/watch');
   const isHomePage = pathname === '/';
   
   // Cleanup: showProfileSettings should only be triggered by user action

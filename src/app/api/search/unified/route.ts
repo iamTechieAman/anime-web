@@ -78,7 +78,7 @@ export async function GET(request: Request) {
                     type: item.media_type === 'movie' ? 'movie' : 'tv',
                     year: (item.release_date || item.first_air_date || '').split('-')[0],
                     format: item.media_type.toUpperCase(),
-                    href: `/movies/watch/${item.media_type}/${item.id}`
+                    href: `/watch/${item.media_type}/${item.id}`
                 });
             });
         }
@@ -90,8 +90,8 @@ export async function GET(request: Request) {
                 results.push({
                     ...item,
                     href: type === 'tv' 
-                        ? `/movies/watch/tv/${realId}?provider=onoflix`
-                        : `/movies/watch/movie/${realId}?provider=onoflix`
+                        ? `/watch/tv/${realId}?provider=onoflix`
+                        : `/watch/movie/${realId}?provider=onoflix`
                 });
             });
         }

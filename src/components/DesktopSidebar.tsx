@@ -22,7 +22,7 @@ export default function DesktopSidebar() {
         { name: "Genres", href: "/az-list/all", icon: LayoutGrid, color: "text-cyan-400" },
         { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "text-yellow-400" },
         { name: "New", href: "/search?status=Ongoing", icon: Sparkles, color: "text-emerald-400" },
-        { name: "Random", href: "/movies/watch/movie/random", icon: Shuffle, color: "text-pink-400", isRandom: true },
+        { name: "Random", href: "/watch/movie/random", icon: Shuffle, color: "text-pink-400", isRandom: true },
     ];
 
     return (
@@ -87,7 +87,7 @@ export default function DesktopSidebar() {
                                     // For now, let's pick a popular one or navigate to a random search result.
                                     const randomIds = [1022789, 822119, 933260, 519182, 1011985]; // Sample popular TMDB IDs
                                     const randomId = randomIds[Math.floor(Math.random() * randomIds.length)];
-                                    router.push(`/movies/watch/movie/${randomId}`);
+                                    router.push(`/watch/movie/${randomId}`);
                                 }
                             }}
                             className={`flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all duration-300 w-14 ${

@@ -133,7 +133,7 @@ export default function Header() {
     setFilterStatus('');
   };
 
-  if (pathname?.startsWith('/watch') || pathname?.startsWith('/movies/watch')) return null;
+  if (pathname?.startsWith('/watch') || pathname?.startsWith('/watch')) return null;
 
   return (
     <>

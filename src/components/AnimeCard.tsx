@@ -30,7 +30,7 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
             const parts = show._id.split(':');
             const type = parts[1]; // movie or tv
             const tmdbId = parts[2];
-            return `/movies/watch/${type}/${tmdbId}`;
+            return `/watch/${type}/${tmdbId}`;
         }
         return `/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
     };
@@ -178,7 +178,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             const parts = show._id.split(':');
             const type = parts[1];
             const tmdbId = parts[2];
-            return `/movies/watch/${type}/${tmdbId}`;
+            return `/watch/${type}/${tmdbId}`;
         }
         return `/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
     };

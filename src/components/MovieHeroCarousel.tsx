@@ -128,14 +128,14 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             {/* Action buttons */}
                             <div className="flex items-center gap-3">
                                 <Link
-                                    href={`/movies/watch/${type}/${item.id}`}
+                                    href={`/watch/${type}/${item.id}`}
                                     className="flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-xl"
                                 >
                                     <Play className="w-5 h-5 fill-black" />
                                     Play
                                 </Link>
                                 <Link
-                                    href={`/movies/watch/${type}/${item.id}`}
+                                    href={`/watch/${type}/${item.id}`}
                                     className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all border border-white/10"
                                 >
                                     <Info className="w-5 h-5" />
