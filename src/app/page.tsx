@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp, SlidersHorizontal, User, History, LogOut, Zap } from "lucide-react";
+import { Calendar, CheckCircle, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
 import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
 import HeroCarousel from "@/components/HeroCarousel";
 import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
@@ -55,11 +55,18 @@ export default function MoviesPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<MovieItem[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [trendingPeople, setTrendingPeople] = useState<any[]>([]);
+    const [upcomingMovies, setUpcomingMovies] = useState<MovieItem[]>([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
     const [showProfile, setShowProfile] = useState(false);
-
-
+    // Fetch Movie Data for Unified Home
+    const fetcher = (url: string) => axios.get(url).then(res => res.data);
+    const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
+    const { data: moviePopular } = useSWR('/api/prime/movies?category=popular', fetcher);
+    const { data: movieUpcoming } = useSWR('/api/prime/movies?category=now_playing', fetcher);
+    const { data: moviePeople } = useSWR('/api/prime/trending?type=person', fetcher);
+    const { data: cartoonData } = useSWR('/api/cartoon?category=cartoon', fetcher);
 
     // Helper to get active filters
     const getFilteredContent = () => ({
@@ -89,30 +96,38 @@ export default function MoviesPage() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Fetch main data sequentially
+    // Update state from SWR data
     useEffect(() => {
-        const loadAllData = async () => {
-            // 1. Fetch main headers
+        if (movieTrending?.results) {
+            const rawTrending = movieTrending.results || [];
+            const enhancedTrending = rawTrending.map((item: MovieItem, index: number) => ({
+                ...item,
+                rank: index < 10 ? index + 1 : undefined,
+                isMostViewed: index < 3,
+                liveViewers: index < 10 ? Math.floor(Math.random() * (5000 - 1000) + 1000) : undefined
+            }));
+            setTrending(enhancedTrending);
+        }
+    }, [movieTrending]);
+
+    useEffect(() => { if (moviePopular?.results) setPopular(moviePopular.results); }, [moviePopular]);
+    useEffect(() => { if (movieUpcoming?.results) setUpcomingMovies(movieUpcoming.results.slice(0, 10)); }, [movieUpcoming]);
+    useEffect(() => { if (moviePeople?.results) setTrendingPeople(moviePeople.results.slice(0, 6)); }, [moviePeople]);
+    useEffect(() => { if (cartoonData?.shows) setCartoons(cartoonData.shows); }, [cartoonData]);
+
+
+    // Fetch main data sequentially (remaining axios calls)
+    useEffect(() => {
+        const loadOtherData = async () => {
+            // Fetch top rated movies, now playing movies, tv popular, tv top rated
             try {
-                const [trendingRes, popularRes, topRatedRes, nowPlayingRes, tvPopRes, tvTopRes] = await Promise.all([
-                    axios.get("/api/prime/trending"),
-                    axios.get("/api/prime/movies?category=popular"),
+                const [topRatedRes, nowPlayingRes, tvPopRes, tvTopRes] = await Promise.all([
                     axios.get("/api/prime/movies?category=top_rated"),
                     axios.get("/api/prime/movies?category=now_playing"),
                     axios.get("/api/prime/tv?category=popular"),
                     axios.get("/api/prime/tv?category=top_rated"),
                 ]);
 
-                const rawTrending = trendingRes.data.results || [];
-                const enhancedTrending = rawTrending.map((item: MovieItem, index: number) => ({
-                    ...item,
-                    rank: index < 10 ? index + 1 : undefined,
-                    isMostViewed: index < 3,
-                    liveViewers: index < 10 ? Math.floor(Math.random() * (5000 - 1000) + 1000) : undefined
-                }));
-
-                setTrending(enhancedTrending);
-                setPopular(popularRes.data.results || []);
                 setTopRated(topRatedRes.data.results || []);
                 setNowPlaying(nowPlayingRes.data.results || []);
                 setTvPopular(tvPopRes.data.results || []);
@@ -164,17 +179,9 @@ export default function MoviesPage() {
             } catch (err) {
                 console.error("Failed to fetch genres:", err);
             }
-
-            // 4. Fetch Cartoons
-            try {
-                const cartoonRes = await axios.get('/api/cartoon?category=cartoon');
-                setCartoons(cartoonRes.data.shows || []);
-            } catch (err) {
-                console.error("Failed to fetch cartoons:", err);
-            }
         };
 
-        loadAllData();
+        loadOtherData();
     }, []);
 
     // Simulated Live Polling for Viewership Data
@@ -344,6 +351,12 @@ export default function MoviesPage() {
                                     </section>
                                 )}
 
+                                {/* Upcoming Section */}
+                                <section>
+                                    <SectionHeader icon={Sparkles} title="Coming Soon & Fresh" color="text-teal-400" />
+                                    {upcomingMovies.length > 0 ? <MovieRow items={upcomingMovies} title="upcoming" /> : <RowSkeleton />}
+                                </section>
+
                                 {/* Genre Discovery */}
                                 {GENRE_ROWS.map((genre) => (
                                     genreData[genre.title] && (
@@ -357,21 +370,48 @@ export default function MoviesPage() {
 
                             {/* Sidebar - Trending & Airing */}
                             <div className="w-full lg:w-[320px] xl:w-[380px] space-y-10 shrink-0">
+                                {/* Trending People */}
+                                {trendingPeople.length > 0 && (
+                                    <section className="bg-[var(--bg-card)]/50 p-6 rounded-2xl border border-[var(--border-color)] backdrop-blur-xl">
+                                        <h2 className="text-lg font-bold font-sora text-white mb-6 flex items-center gap-2">
+                                            <User className="w-5 h-5 text-teal-400" /> 
+                                            Trending Stars
+                                        </h2>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {trendingPeople.map((person: any) => (
+                                                <div key={person.id} className="flex flex-col items-center text-center group cursor-pointer">
+                                                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-500/30 group-hover:border-purple-500 transition-all mb-2">
+                                                        <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                                    </div>
+                                                    <p className="text-[11px] font-bold text-white group-hover:text-purple-400 truncate w-full">{person.name}</p>
+                                                    <p className="text-[9px] text-[var(--text-muted)] truncate w-full">{person.known_for_department}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
                                 {/* Top Rated Movies */}
-                                <section className="bg-[var(--bg-card)]/50 p-5 rounded-2xl border border-[var(--border-color)]">
-                                    <h2 className="text-lg font-bold font-sora text-white mb-5 flex items-center gap-2">
+                                <section className="bg-[var(--bg-card)]/50 p-6 rounded-2xl border border-[var(--border-color)] backdrop-blur-xl">
+                                    <h2 className="text-lg font-bold font-sora text-white mb-6 flex items-center gap-2">
                                         <Sparkles className="w-5 h-5 text-yellow-400" /> 
                                         Top Rated Movies
                                     </h2>
-                                    {topRated.slice(0, 6).map((item, i) => (
-                                        <div key={item.id} className="flex items-center gap-3 py-2 group cursor-pointer border-b border-white/5 last:border-0">
-                                            <span className="text-2xl font-black text-white/10 group-hover:text-blue-500/50 transition-colors w-6">0{i+1}</span>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title}</h3>
-                                                <p className="text-[10px] text-[var(--text-muted)]">★ {item.vote_average?.toFixed(1)} • {item.release_date?.split('-')[0]}</p>
+                                    <div className="space-y-4">
+                                        {topRated.slice(0, 10).map((item, i) => (
+                                            <div key={item.id} className="flex items-center gap-4 group cursor-pointer pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                                                <span className="text-3xl font-black text-white/5 group-hover:text-blue-500/40 transition-colors w-8 tabular-nums italic">
+                                                    {i + 1}
+                                                </span>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title}</h3>
+                                                    <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-2">
+                                                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                                                        {item.vote_average?.toFixed(1)} • {item.release_date?.split('-')[0]}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </section>
                             </div>
                         </div>

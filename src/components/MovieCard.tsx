@@ -43,7 +43,7 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
             transition={{ duration: 0.4, ease: "easeOut" }}
         >
         <Link href={`/movies/watch/${mediaType}/${item.id}`} className="block group perspective-1000">
-            <div className="relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all duration-500 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.7)] premium-card backdrop-blur-sm group-hover:rotate-x-2 group-hover:rotate-y-2">
+            <div className="relative rounded-2xl overflow-hidden bg-[var(--bg-card)]/40 border border-white/10 hover:border-purple-500/50 transition-all duration-700 hover:shadow-[0_20px_50px_-20px_rgba(168,85,247,0.4)] premium-card backdrop-blur-md group-hover:rotate-x-2 group-hover:rotate-y-2 group-hover:scale-[1.02]">
                 {/* Poster */}
                 <div className="relative aspect-[2/3] overflow-hidden">
                     {item.poster_path && !imgError ? (
