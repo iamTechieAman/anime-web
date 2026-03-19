@@ -284,7 +284,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             setLoadingShow(true);
             setShowError(null);
             try {
-                const res = await axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`);
+                const res = await axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`, {
+                    timeout: 15000, // 15 second timeout to avoid infinite spinner
+                });
                 const fetchedShow = res.data.show;
                 
                 if (!fetchedShow) {
@@ -660,28 +662,72 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
 
     if (showError) {
+        // Instead of dead-end error, show a fallback embed player
+        const animeTitle = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const fallbackEmbedUrl = `https://vidsrc.me/embed/anime?anilist=${id}&episode=1`;
+        const fallbackEmbedUrl2 = `https://vidsrc.to/embed/anime/${id}/1`;
+        
         return (
-            <div className="min-h-screen bg-[var(--bg-main)] flex flex-col items-center justify-center p-6 text-center">
-                <div className="max-w-md w-full glass p-8 rounded-3xl border border-red-500/20">
-                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
-                    <h2 className="text-2xl font-bold text-[var(--text-main)] mb-4">Anime Not Found</h2>
-                    <p className="text-[var(--text-muted)] mb-8">{showError}</p>
-                    <div className="flex flex-col gap-3">
-                        <Link 
-                            href="/"
-                            className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-                        >
-                            <ChevronLeft className="w-4 h-4" /> Return Home
+            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col">
+                {/* Navbar */}
+                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(0.75rem,env(safe-area-inset-top))]">
+                    <div className="flex items-center gap-3">
+                        <Link href="/" className="p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
+                            <ChevronLeft className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
                         </Link>
-                        <Link 
-                            href="/search"
-                            className="w-full py-3 border border-[var(--border-color)] hover:bg-[var(--bg-card)] text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-                        >
-                            <Search className="w-4 h-4" /> Try Searching
-                        </Link>
+                        <h1 className="font-bold text-lg leading-tight line-clamp-1 tracking-tight max-w-[200px] md:max-w-md">{animeTitle}</h1>
+                    </div>
+                </nav>
+
+                <div className="pt-[80px] px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
+                    {/* Fallback Player */}
+                    <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
+                        <iframe
+                            src={fallbackEmbedUrl}
+                            className="absolute inset-0 w-full h-full border-0"
+                            allowFullScreen
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            referrerPolicy="origin"
+                        />
+                    </div>
+
+                    {/* Info + Alternative Servers */}
+                    <div className="px-4 py-6">
+                        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+                            <p className="text-yellow-400 text-sm font-medium">⚠️ Native servers unavailable. Playing via fallback embed servers.</p>
+                        </div>
+                        
+                        <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Try Other Servers</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {[
+                                { name: "VidSrc Me", url: fallbackEmbedUrl },
+                                { name: "VidSrc.to", url: fallbackEmbedUrl2 },
+                                { name: "Peachify", url: `https://peachify.top/?type=tv&id=${id}&s=1&e=1` },
+                                { name: "VidLink", url: `https://vidlink.pro/tv/${id}/1/1?autoplay=true` },
+                            ].map(server => (
+                                <a key={server.name} href={server.url} target="_blank" rel="noopener" className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-xs font-medium hover:bg-[var(--border-color)] transition-colors">
+                                    {server.name}
+                                </a>
+                            ))}
+                        </div>
+
+                        <div className="mt-8 flex flex-col gap-3">
+                            <Link 
+                                href="/"
+                                className="w-full max-w-xs py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                            >
+                                <ChevronLeft className="w-4 h-4" /> Return Home
+                            </Link>
+                            <Link 
+                                href="/search"
+                                className="w-full max-w-xs py-3 border border-[var(--border-color)] hover:bg-[var(--bg-card)] text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                            >
+                                <Search className="w-4 h-4" /> Try Searching
+                            </Link>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
         );
     }
 

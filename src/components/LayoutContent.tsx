@@ -13,6 +13,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
   const pathname = usePathname();
   const isWatchPage = pathname?.startsWith('/watch') || pathname?.startsWith('/movies/watch');
+  const isHomePage = pathname === '/';
   
   // Cleanup: showProfileSettings should only be triggered by user action
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <Suspense fallback={<div className="h-16 w-full animate-pulse bg-white/5" />}>
           <Header />
         </Suspense>
-        <main className={`flex-1 flex flex-col min-w-0 relative ${isWatchPage ? '' : 'pt-14 md:pt-20'}`}>
+        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-20'}`}>
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[50vh]">
               <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>

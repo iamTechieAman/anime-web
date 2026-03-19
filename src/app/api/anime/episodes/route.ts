@@ -4,6 +4,14 @@ import { getProvider, type ProviderName } from "@/lib/providers";
 
 export const revalidate = 0;
 
+// Helper: wrap a promise with a timeout
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string = ''): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout (${ms}ms): ${label}`)), ms))
+    ]);
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -59,7 +67,7 @@ export async function GET(request: Request) {
                         const p = getProvider(searchP);
                         for (const title of titles) {
                             console.log(`[Episodes] Searching "${title}" on ${searchP}...`);
-                            const results = await p.search(title);
+                            const results = await withTimeout(p.search(title), 8000, `search ${searchP}:${title}`);
                             if (results && results.length > 0) {
                                 // Find best match or take first
                                 const match = findBestMatch(results, title);
@@ -91,7 +99,7 @@ export async function GET(request: Request) {
         // 2. STANDARD LOOKUP (Direct ID)
         try {
             const animeProvider = getProvider(provider);
-            const info = await animeProvider.getInfo(id);
+            const info = await withTimeout(animeProvider.getInfo(id), 8000, `getInfo ${provider}:${id}`);
             const mappedInfo = mapInfoToShow(info);
 
             if (mappedInfo && (mappedInfo.availableEpisodesDetail.sub.length > 0 || mappedInfo.availableEpisodesDetail.dub.length > 0)) {
@@ -110,7 +118,7 @@ export async function GET(request: Request) {
             try {
                 console.log(`[Episodes] Trying fallback ID lookup: ${fb}`);
                 const p = getProvider(fb);
-                const info = await p.getInfo(id);
+                const info = await withTimeout(p.getInfo(id), 6000, `fallback getInfo ${fb}:${id}`);
                 const show = mapInfoToShow(info);
                 if (show && (show.availableEpisodesDetail.sub.length > 0 || show.availableEpisodesDetail.dub.length > 0)) {
                     return NextResponse.json({
@@ -134,7 +142,7 @@ export async function GET(request: Request) {
                       try {
                           console.log(`[Episodes] Trying guessed title search on ${searchP}: "${guessedTitle}"`);
                           const p = getProvider(searchP);
-                          const results = await p.search(guessedTitle);
+                          const results = await withTimeout(p.search(guessedTitle), 6000, `guessed search ${searchP}:${guessedTitle}`);
                           if (results && results.length > 0) {
                               const match = findBestMatch(results, guessedTitle);
                               const info = await p.getInfo(match.id);
