@@ -139,7 +139,7 @@ export default function HistoryPage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <Link href={`/watch/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`} className="hover:text-purple-400 transition-colors">
+                        <Link href={entry.provider === 'tmdb' ? `/watch/${entry.id}` : `/watch/anime/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`} className="hover:text-purple-400 transition-colors">
                           <h3 className="font-semibold text-sm line-clamp-1 font-sora">{entry.title}</h3>
                         </Link>
                         <p className="text-xs text-purple-400 font-bold mt-1">Episode {entry.episode}</p>
@@ -148,7 +148,7 @@ export default function HistoryPage() {
 
                       <div className="flex items-center gap-2 shrink-0">
                         <Link
-                          href={`/watch/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`}
+                          href={entry.provider === 'tmdb' ? `/watch/${entry.id}` : `/watch/anime/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`}
                           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-[var(--border-color)] rounded-lg text-xs font-bold transition-colors"
                         >
                           <Play className="w-3 h-3 fill-white" /> Resume

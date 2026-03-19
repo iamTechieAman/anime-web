@@ -32,7 +32,7 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
             const tmdbId = parts[2];
             return `/watch/${type}/${tmdbId}`;
         }
-        return `/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
+        return `/watch/anime/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
     };
 
     const handleImageError = () => {
