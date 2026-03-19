@@ -201,6 +201,9 @@ function mapInfoToShow(info: any, aniListData?: any) {
         englishName: aniListData?.title?.english || null,
         romajiName: aniListData?.title?.romaji || null,
         thumbnail: info.image,
+        anilistId: info.anilistId || info.aniListId || null,
+        malId: info.malId || null,
+        tmdbId: info.tmdbId || null,
         availableEpisodesDetail: {
             sub: subEps.filter(Boolean),
             dub: dubEps.filter(Boolean)

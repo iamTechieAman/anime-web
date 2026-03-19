@@ -132,7 +132,8 @@ interface ShowData {
     _id: string;
     name?: string;
     malId?: string;
-    aniListId?: string;
+    anilistId?: string;
+    tmdbId?: string;
     provider?: string;
     thumbnail?: string;
     availableEpisodesDetail: {
@@ -381,38 +382,45 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             getUrl: ms.getUrl
         }));
 
-        // Emergency AniList ID-based embeds — ALWAYS available since we always have the show ID
-        const anilistId = show?.aniListId || show?._id || id;
-        const malId = show?.malId || "";
-        const emergencyEmbeds = [
-            {
+        // Emergency ID-based embeds — only if we have numeric IDs to avoid wrong content
+        const numericAnilistId = (show?.anilistId && /^\d+$/.test(String(show.anilistId))) ? String(show.anilistId) : null;
+        const numericMalId = (show?.malId && /^\d+$/.test(String(show.malId))) ? String(show.malId) : null;
+        const numericTmdbId = (show?.tmdbId && /^\d+$/.test(String(show.tmdbId))) ? String(show.tmdbId) : tmdbId;
+
+        const emergencyEmbeds: any[] = [];
+        
+        if (numericAnilistId) {
+            emergencyEmbeds.push({
                 serverId: "emergency_vidsrc",
                 serverName: "VidSrc Anime",
                 type: mode,
                 badge: "Anime",
                 isMovieServer: true,
                 isEmergency: true,
-                getUrl: () => `https://vidsrc.to/embed/anime/${anilistId}/${currentEp}`
-            },
-            {
+                getUrl: () => `https://vidsrc.to/embed/anime/${numericAnilistId}/${currentEp}`
+            });
+            emergencyEmbeds.push({
                 serverId: "emergency_vidsrc_me",
                 serverName: "VidSrc Me",
                 type: mode,
                 badge: "Backup",
                 isMovieServer: true,
                 isEmergency: true,
-                getUrl: () => `https://vidsrc.me/embed/anime?anilist=${anilistId}&episode=${currentEp}`
-            },
-            ...(malId ? [{
+                getUrl: () => `https://vidsrc.me/embed/anime?anilist=${numericAnilistId}&episode=${currentEp}`
+            });
+        }
+
+        if (numericMalId) {
+            emergencyEmbeds.push({
                 serverId: "emergency_mal",
                 serverName: "MAL Stream",
                 type: mode,
                 badge: "MAL",
                 isMovieServer: true,
                 isEmergency: true,
-                getUrl: () => `https://vidsrc.me/embed/anime?mal=${malId}&episode=${currentEp}`
-            }] : []),
-        ];
+                getUrl: () => `https://vidsrc.me/embed/anime?mal=${numericMalId}&episode=${currentEp}`
+            });
+        }
 
         const fetchServers = async () => {
             if (!currentEp || currentEp === 'undefined' || currentEp === 'null') return; // Guard against invalid episode ID
@@ -688,7 +696,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             allowFullScreen
                             allow="autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
-                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-presentation"
                         />
                     </div>
 
@@ -867,7 +874,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             className="w-full h-full border-0 bg-black"
                                             allowFullScreen
                                             allow="autoplay; fullscreen"
-                                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-modals"
                                         ></iframe>
                                         {isGuardLocked && (
                                             <div 
