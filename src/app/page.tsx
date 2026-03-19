@@ -171,16 +171,16 @@ export default function Home() {
                             </section>
                         )}
 
-                        {/* Recently Updated Anime */}
-                        <section>
-                            <div className="flex items-center justify-between mb-4">
+                        {/* Top 10 Anime Ranking */}
+                        <section className="relative">
+                            <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-                                    <Sparkles className="w-5 h-5 text-purple-400" />
-                                    Recently Updated Anime
+                                    <TrendingUp className="w-5 h-5 text-purple-400" />
+                                    Top 10 This Week
                                 </h2>
                                 <Link href="/az-list/all" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
                             </div>
-                            {loading.recent ? <LoadingSkeleton /> : <AnimeGrid shows={recent.slice(0, 18)} />}
+                            {loading.top ? <LoadingSkeleton /> : <AnimeGridRanked shows={top.slice(0, 10)} />}
                         </section>
 
                         {/* Newest Cartoons */}
@@ -232,13 +232,13 @@ export default function Home() {
 
                 {/* Right Column (Sidebar) */}
                 <div className="w-full lg:w-[350px] xl:w-[400px] space-y-12 shrink-0">
-                    {/* Top Airing */}
+                    {/* Popular Hits */}
                     <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
                        <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
-                         <Star className="w-5 h-5 text-[#FF5722]" /> 
-                         Top Airing
+                         <Zap className="w-5 h-5 text-yellow-400" /> 
+                         Popular Hits
                        </h2>
-                       {loading.popular ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{popular.slice(0, 10).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} rank={i} />)}</div>}
+                       {loading.popular ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{popular.slice(0, 8).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} />)}</div>}
                     </section>
 
                     {/* Trending */}
@@ -395,25 +395,36 @@ function AnimeGridRanked({ shows }: { shows: Show[] }) {
 
   return (
     <div className="relative">
-      <div className="flex overflow-x-auto gap-6 pb-6 pt-2 px-2 snap-x hide-scrollbar">
+      <div className="flex overflow-x-auto gap-8 pb-10 pt-4 px-2 snap-x hide-scrollbar">
         {shows.map((show, index) => (
-          <Link key={show._id} href={`/watch/${show._id}`} className="relative flex-shrink-0 w-[160px] md:w-[200px] snap-start group">
-            <div className="relative aspect-[3/4.5] ml-8 z-10 transition-transform duration-300 group-hover:-translate-y-2">
-              <div className="absolute inset-0 rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl">
+          <Link key={show._id} href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="relative flex-shrink-0 w-[180px] md:w-[220px] snap-start group">
+            <div className="relative aspect-[2/3] ml-12 z-10 transition-all duration-500 group-hover:-translate-y-3 group-hover:translate-x-2">
+              <div className="absolute inset-0 rounded-xl overflow-hidden bg-[var(--bg-card)] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:shadow-purple-500/20 group-hover:border-purple-500/50 transition-all duration-500">
                 <img
                   src={show.thumbnail}
                   alt={show.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/60 to-transparent p-4">
+                  <p className="text-white text-sm font-black line-clamp-2 leading-tight font-sora uppercase tracking-tighter italic">
+                    {show.name}
+                  </p>
+                </div>
+                {/* Glow Effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none" />
               </div>
             </div>
             {/* Big Ranking Number */}
-            <div className="absolute -left-2 bottom-4 text-[100px] md:text-[140px] font-black text-transparent leading-none z-0 select-none"
-              style={{ WebkitTextStroke: '2px rgba(255,255,255,0.2)' }}>
+            <div className="absolute -left-4 bottom-0 text-[120px] md:text-[180px] font-black leading-none z-0 select-none transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6"
+              style={{ 
+                WebkitTextStroke: '2px rgba(255,255,255,0.15)',
+                color: 'transparent',
+                fontFamily: 'system-ui'
+              }}>
               {index + 1}
             </div>
-            <div className="absolute -left-2 bottom-4 text-[100px] md:text-[140px] font-black text-[var(--accent)] leading-none z-0 select-none opacity-20 transform translate-x-1 translate-y-1">
+            {/* Ambient Shadow for Number */}
+            <div className="absolute -left-4 bottom-0 text-[120px] md:text-[180px] font-black text-purple-600/10 leading-none z-0 select-none blur-xl transform translate-y-4">
               {index + 1}
             </div>
           </Link>

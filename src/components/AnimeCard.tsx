@@ -45,8 +45,8 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            whileHover={{ scale: 1.04, transition: { duration: 0.25 } }}
-            className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}
+            whileHover={{ scale: 1.04, transition: { duration: 0.3 } }}
+            className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-purple-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.3)] hover:-translate-y-1 ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}
         >
             <Link href={getHref()} className="block w-full h-full">
                 {/* Ranking Number */}
