@@ -473,7 +473,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const failedNativeCount = servers.filter(s => !s.isMovieServer && failedServersRef.current.has(s.serverId)).length;
         
         let nextServer;
-        if (failedNativeCount >= 2) {
+        if (failedNativeCount >= 1) {
             // After 2 native failures, jump directly to movie servers
             nextServer = servers.find(s => s.isMovieServer && !failedServersRef.current.has(s.serverId));
         }
@@ -688,6 +688,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             allowFullScreen
                             allow="autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
+                            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-presentation"
                         />
                     </div>
 

@@ -22,6 +22,19 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
     const [imageError, setImageError] = useState(false);
     const isHD = show.availableEpisodes?.sub > 0 || show.availableEpisodes?.dub > 0;
 
+    // Route TMDB content to movie watch page
+    const isTmdbContent = show._id?.startsWith('tmdb:');
+    const getHref = () => {
+        if (isTmdbContent) {
+            // tmdb:movie:123 or tmdb:tv:456
+            const parts = show._id.split(':');
+            const type = parts[1]; // movie or tv
+            const tmdbId = parts[2];
+            return `/movies/watch/${type}/${tmdbId}`;
+        }
+        return `/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
+    };
+
     const handleImageError = () => {
         setImageError(true);
     };
@@ -35,7 +48,7 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
             whileHover={{ scale: 1.04, transition: { duration: 0.25 } }}
             className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}
         >
-            <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="block w-full h-full">
+            <Link href={getHref()} className="block w-full h-full">
                 {/* Ranking Number */}
                 {rank !== undefined && (
                     <div className="absolute top-0 right-0 z-20 pointer-events-none drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
@@ -116,6 +129,9 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
                             )}
                             <span className="w-1 h-1 rounded-full bg-white/30 shrink-0"></span>
                             <span className="font-medium shrink-0 uppercase tracking-wider">{show.type || "TV"}</span>
+                            {isTmdbContent && (
+                                <span className="px-1 py-0.5 bg-blue-500/20 text-blue-400 text-[8px] font-bold rounded-sm uppercase">TMDB</span>
+                            )}
                         </div>
                     </div>
 
@@ -154,6 +170,18 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
     const [imageError, setImageError] = useState(false);
     const showWithScore = show as any;
     const matchScore = showWithScore.score ? Math.round(showWithScore.score * 10) : null;
+
+    // Route TMDB content to movie watch page
+    const isTmdbContent = show._id?.startsWith('tmdb:');
+    const getHref = () => {
+        if (isTmdbContent) {
+            const parts = show._id.split(':');
+            const type = parts[1];
+            const tmdbId = parts[2];
+            return `/movies/watch/${type}/${tmdbId}`;
+        }
+        return `/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
+    };
     
     return (
         <motion.div
@@ -163,7 +191,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             transition={{ duration: 0.3 }}
             key={`${show._id}-${rank}`}
         >
-        <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
+        <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
             {/* Rank Number (if provided) */}
             {rank !== undefined && (
                 <div className="w-6 text-center shrink-0">
