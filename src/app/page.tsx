@@ -59,7 +59,8 @@ export default function MoviesPage() {
     const [upcomingMovies, setUpcomingMovies] = useState<MovieItem[]>([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
-    const [showProfile, setShowProfile] = useState(false);
+    // Fetch Movie Data for Unified Home
+    const fetcher = (url: string) => axios.get(url).then(res => res.data);
     
     // Fetch current user from secure API
     const { data: userData } = useSWR('/api/auth/me', fetcher);
@@ -71,8 +72,6 @@ export default function MoviesPage() {
             setProfile(null);
         }
     }, [userData]);
-    // Fetch Movie Data for Unified Home
-    const fetcher = (url: string) => axios.get(url).then(res => res.data);
     const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
     const { data: moviePopular } = useSWR('/api/prime/movies?category=popular', fetcher);
     const { data: movieUpcoming } = useSWR('/api/prime/movies?category=now_playing', fetcher);
