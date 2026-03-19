@@ -101,7 +101,29 @@ export async function fetchFromScraper(params: {
 
             if (endpoint) {
                 const response = await axios.get(`${baseUrl}${endpoint}`, { params: queryParams });
-                return response.data;
+                
+                // Wrap the response to match the CLI JSON output format
+                const result: any = {};
+                if (params.query) result.onoflix = response.data;
+                if (params.cartoon_query) result.watchanimeworld = response.data;
+                if (params.wa_info) result.wa_info = response.data;
+                if (params.wa_source) result.wa_source = response.data;
+                if (params.ja_query) result.justanime = response.data;
+                if (params.ja_info) result.ja_info = response.data;
+                if (params.ja_source) result.ja_source = response.data;
+                if (params.ax_query) result.animex = response.data;
+                if (params.ax_info) result.ax_info = response.data;
+                if (params.ax_source) result.ax_source = response.data;
+                if (params.wa_az_letter) result.watchanimeworld = response.data;
+                if (params.of_info) result.of_info = response.data;
+                if (params.of_source) result.of_source = response.data;
+                if (params.universal_site) {
+                    if (params.universal_item) result.universal_info = response.data;
+                    else if (params.universal_ep) result.universal_source = response.data;
+                    else result.universal_search = response.data;
+                }
+                
+                return result;
             }
         } catch (error: any) {
             console.error("[Scraper Client] Remote API failed, falling back to local:", error.message);

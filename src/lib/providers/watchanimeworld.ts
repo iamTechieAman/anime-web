@@ -9,7 +9,8 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
             const res = await axios.get('/api/scrape', {
                 params: { cartoon_query: query }
             });
-            return (res.data || res.data.watchanimeworld || []).map((item: any) => ({
+            const results = Array.isArray(res.data) ? res.data : (res.data?.watchanimeworld || []);
+            return results.map((item: any) => ({
                 id: item.id.startsWith('wa:') ? item.id : `wa:${item.id}`,
                 title: item.title,
                 image: item.image,
@@ -27,7 +28,8 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
             const res = await axios.get('/api/scrape', {
                 params: { wa_az_letter: letter, wa_az_page: page }
             });
-            return (res.data || []).map((item: any) => ({
+            const results = Array.isArray(res.data) ? res.data : (res.data?.watchanimeworld || []);
+            return results.map((item: any) => ({
                 id: item.id.startsWith('wa:') ? item.id : `wa:${item.id}`,
                 title: item.title,
                 image: item.image,
