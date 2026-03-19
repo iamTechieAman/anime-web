@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { hashPassword } from '@/lib/auth';
+import { hashPassword } from '@/lib/hashing';
 import { logSecurityEvent, isRateLimited } from '@/lib/security';
 import { sanitizeObject } from '@/lib/sanitizer';
 import fs from 'fs';

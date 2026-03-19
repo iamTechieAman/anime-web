@@ -1,5 +1,4 @@
 import * as jose from 'jose';
-import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'toon-player-super-secret-key-change-me'
@@ -32,19 +31,4 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
   } catch (err) {
     return null;
   }
-}
-
-/**
- * Hashes a password using bcrypt.
- */
-export async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(12);
-  return await bcrypt.hash(password, salt);
-}
-
-/**
- * Compares a plain password with a hashed one.
- */
-export async function comparePassword(password: string, hashed: string): Promise<boolean> {
-  return await bcrypt.compare(password, hashed);
 }
