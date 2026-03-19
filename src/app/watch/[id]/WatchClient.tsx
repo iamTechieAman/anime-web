@@ -1044,7 +1044,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             </div>
 
                             {/* Auto Toggles */}
-                            <div className="flex items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
+                            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
                                 <label className="flex items-center gap-2 cursor-pointer group hover:text-white transition-colors">
                                     <input type="checkbox" checked={autoPlay} onChange={toggleAutoPlay} className="w-4 h-4 rounded-sm border-[var(--border-color)] bg-[var(--bg-main)] text-white focus:ring-0 cursor-pointer accent-white" />
                                     Auto Play

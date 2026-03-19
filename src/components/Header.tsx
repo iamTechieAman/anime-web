@@ -133,6 +133,8 @@ export default function Header() {
     setFilterStatus('');
   };
 
+  if (pathname?.startsWith('/watch') || pathname?.startsWith('/movies/watch')) return null;
+
   return (
     <>
     <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">

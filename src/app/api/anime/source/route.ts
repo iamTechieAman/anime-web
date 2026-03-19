@@ -31,6 +31,7 @@ export async function GET(request: Request) {
             'hi': 'hianime',
             'al': 'allanime',
             'on': 'onoflix',
+            'of': 'onoflix',
             'wa': 'watchanimeworld',
             'ja': 'justanime',
             'ax': 'animex',

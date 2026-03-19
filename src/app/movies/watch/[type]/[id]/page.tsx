@@ -106,9 +106,65 @@ const SERVERS = [
     {
         id: "cineby",
         name: "CineBy",
-        badge: null,
+        badge: "Fast",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
+    },
+    {
+        id: "rivestream",
+        name: "RiveStream",
+        badge: "HD",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://rivestream.org/embed?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://rivestream.org/embed?type=movie&id=${id}`,
+    },
+    {
+        id: "ridomovies",
+        name: "RidoMovies",
+        badge: "Premium",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://ridomovies.tv/embed/tv/${id}/${s || 1}/${e || 1}` : `https://ridomovies.tv/embed/movie/${id}`,
+    },
+    {
+        id: "flickystream",
+        name: "FlickyStream",
+        badge: "Alt",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://flickystream.ru/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
+    },
+    {
+        id: "aether",
+        name: "Aether",
+        badge: "New",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://aether.mom/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
+    },
+    {
+        id: "shuttletv",
+        name: "ShuttleTV",
+        badge: "RU",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://shuttletv.su/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
+    },
+    {
+        id: "cinemaos",
+        name: "CinemaOS",
+        badge: "Vip",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
+    },
+    {
+        id: "hollymovie",
+        name: "HollyMovie",
+        badge: "USA",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://hollymoviehd.cc/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
+    },
+    {
+        id: "unique",
+        name: "UniqueStream",
+        badge: "SD",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            `https://uniquestream.net/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
     },
 ];
 
@@ -185,8 +241,9 @@ interface ShowData {
 
 export default function WatchPage({ params }: { params: Promise<{ type: string; id: string }> }) {
     const resolvedParams = use(params);
-    const { type, id: rawId } = resolvedParams;
-    // Strip any prefix like 'tmdb:' from the ID so embed servers get a clean numeric ID
+    const { type, id: encodedRawId } = resolvedParams;
+    const rawId = decodeURIComponent(encodedRawId || '');
+    // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]);

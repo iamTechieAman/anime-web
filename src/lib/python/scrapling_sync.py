@@ -34,45 +34,6 @@ def extract_direct_video_links(text):
         links.extend(found)
     return list(set(links))
 
-def scrape_onoflix_search(query):
-    fetcher = StealthyFetcher()
-    url = f"https://onoflix.live/en/search?q={query}"
-    response = fetcher.fetch(url)
-    
-    if not response or not response.css('div.grid, a[href*="/movie/"]'):
-        response = fetcher.fetch(url, engine='chrome')
-    
-    results = []
-    if not response: return []
-    items = response.css('.movie-item, a[href*="/movie/"], a[href*="/series/"]')
-    
-    for item in items:
-        if item.tag == 'a':
-            href = item.attrib.get('href', '')
-            titles = item.css('h3, .title, b')
-            title = titles[0].text.strip() if titles else item.text.strip()
-        else:
-            links = item.css('a')
-            if not links: continue
-            href = links[0].attrib.get('href', '')
-            titles = item.css('h3, .title, b, .movie-title')
-            title = titles[0].text.strip() if titles else ""
-            
-        imgs = item.css('img')
-        img = imgs[0].attrib.get('src', '') if imgs else ""
-        
-        if title and href:
-            is_movie = "/movie/" in href
-            item_id = href.rstrip('/').split('/')[-1]
-            results.append({
-                "id": f"on:{item_id}",
-                "title": title,
-                "image": img if img.startswith('http') else f"https://onoflix.live{img}",
-                "type": "movie" if is_movie else "tv",
-                "href": href if href.startswith('http') else f"https://onoflix.live{href}"
-            })
-    
-    return results
 
 def scrape_aniwatch_tv_list(page=17):
     fetcher = StealthyFetcher()
@@ -663,105 +624,108 @@ def scrape_universal_info(site_url, item_id):
     return {"id": item_id, "title": title, "episodes": episodes, "type": "movie" if "/movie/" in response.url else "tv"}
 
 def scrape_onoflix_search(query):
-    fetcher = StealthyFetcher()
-    url = f"https://onoflix.live/en/search?q={query}"
-    response = fetcher.fetch(url, engine='chrome', wait_until='networkidle', timeout=60000)
-    results = []
-    if not response: return []
-    
-    items = response.css("a.block.w-full.cursor-pointer")
-    if not items:
-        items = response.css("a[href*='/movie/'], a[href*='/series/']")
-    seen_ids = set()
-    
-    for item in items:
-        href = item.attrib.get('href', '')
-        match = re.search(r'/(?:en/)?(movie|series)/(.+)/(\d+)/?$', href)
-        if match:
-            item_type = match.group(1)
-            slug = match.group(2)
-            item_id = match.group(3)
-            full_id = f"{slug}/{item_id}"
+    import requests
+    url = f"https://onoflix.live/api/search?q={query}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Referer": "https://onoflix.live/"
+    }
+    try:
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code != 200: return []
+        data = resp.json()
+        
+        results = []
+        items = data.get('results', []) if isinstance(data, dict) else data
+        for item in items:
+            if not isinstance(item, dict): continue
+            real_id = str(item.get('id', ''))
+            title = item.get('title') or item.get('name') or "Unknown Title"
+            item_type = item.get('media_type', 'movie')
+            slug = title.lower().replace(' ', '-').replace(':', '').replace('--', '-')
+            img = item.get('poster_path', '')
             
-            if full_id in seen_ids: continue
-            seen_ids.add(full_id)
-            
-            title = item.attrib.get('aria-label') or item.text.strip() or slug.replace('-', ' ').title()
-            img_el = item.css('img')
-            img = ""
-            if img_el:
-                img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
-            
+            # Use of:{type}:{tmdb_id} format to ensure watch page can find it
             results.append({
-                "id": f"of:{item_type}:{full_id}",
+                "id": f"of:{item_type}:{real_id}",
                 "title": title,
-                "image": img if img.startswith('http') else f"https://onoflix.live{img}",
+                "image": f"https://image.tmdb.org/t/p/w500{img}" if img else "",
                 "type": "movie" if item_type == "movie" else "series",
                 "slug": slug,
-                "real_id": item_id
+                "real_id": real_id
             })
-    return results
+        return results
+    except Exception as e:
+        print(f"[Onoflix] Search Error: {e}", file=sys.stderr)
+        return []
 
-def scrape_onoflix_info(item_id, item_type="series"):
-    fetcher = StealthyFetcher()
-    url = f"https://onoflix.live/en/{item_type}/{item_id}"
-    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
-    if not response: return {"id": item_id, "error": "Content Not Found"}
-    
-    title_el = response.css('h1, .title')
-    title = title_el[0].text.strip() if title_el else item_id.split('/')[0].replace('-', ' ').title()
-    
-    episodes = []
-    if item_type == "series":
-        watch_url = f"https://onoflix.live/en/watch/series/{item_id}"
-        watch_resp = fetcher.fetch(watch_url, engine='chrome', wait_until='domcontentloaded')
-        if watch_resp:
-            ep_buttons = watch_resp.css("button[aria-label*='Episode']")
-            for btn in ep_buttons:
-                label = btn.attrib.get('aria-label', '')
-                num_match = re.search(r'Episode (\d+)', label)
-                num = num_match.group(1) if num_match else "1"
-                episodes.append({
-                    "id": f"{item_id}?season=1&episode={num}",
-                    "number": num,
-                    "title": label
-                })
-    else:
-        episodes.append({"id": item_id, "number": "1", "title": title})
+def scrape_onoflix_info(item_id, item_type="movie"):
+    # item_id is typically the TMDB ID
+    import requests
+    url = f"https://onoflix.live/en/watch/{item_type}/{item_id}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Referer": "https://onoflix.live/"
+    }
+    try:
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code != 200:
+            return {"id": item_id, "error": f"HTTP {resp.status_code}"}
         
-    return {"id": item_id, "title": title, "episodes": episodes, "type": item_type}
+        html = resp.text
+        # Extract title from <title> tag
+        title_match = re.search(r'<title>(.*?) - ONOFLIX</title>', html)
+        title = title_match.group(1).replace('Watch ', '').replace(' HD free', '') if title_match else item_id
+        
+        episodes = []
+        if item_type == "series":
+            # For series, we might need to find episodes in the hydration data
+            # Simple fallback for now: show the main watch page
+            episodes.append({"id": item_id, "number": "1", "title": title})
+        else:
+            episodes.append({"id": item_id, "number": "1", "title": title})
+            
+        return {"id": item_id, "title": title, "episodes": episodes, "type": item_type}
+    except Exception as e:
+        return {"id": item_id, "error": str(e)}
 
 def scrape_onoflix_source(item_id, item_type="movie"):
-    fetcher = StealthyFetcher()
-    # item_id here is expected to be "slug/real_id" or "slug/real_id?season=1&episode=X"
-    if item_type == 'movie':
-        url = f"https://onoflix.live/en/watch/movie/{item_id}"
-    else:
-        # For series, item_id might contain season/episode query params
-        url = f"https://onoflix.live/en/watch/series/{item_id}"
+    import requests
+    url = f"https://onoflix.live/en/watch/{item_type}/{item_id}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Referer": "https://onoflix.live/"
+    }
+    try:
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code != 200: return {"url": "", "sources": []}
         
-    response = fetcher.fetch(url, engine='chrome', wait_until='networkidle', timeout=60000)
-    sources = []
-    if not response: return {"url": "", "sources": []}
-    
-    # Look for iframe or source tags
-    iframes = response.css('iframe::attr(src)').getall()
-    for src in iframes:
-        if any(x in src.lower() for x in ['vid', 'embed', 'player', 'stream', 'load']):
-            sources.append({"url": src, "name": "Server"})
-    
-    # Also look for direct video links if any
-    video_srcs = response.css('video source::attr(src)').getall()
-    for vsrc in video_srcs:
-        sources.append({"url": vsrc, "name": "Direct"})
+        html = resp.text
+        sources = []
         
-    if not sources:
-        # Final fallback - just grab any iframe that looks like a player
-        for iframe in response.css('iframe::attr(src)').getall():
-            if 'http' in iframe:
-                sources.append({"url": iframe, "name": "Player"})
+        # Look for standard embed providers that Onoflix is known to use
+        # If we can't find them in HTML (since it's Next.js hydration), 
+        # we provide the direct watch link and common fallbacks
+        
+        # Check for any iframe in HTML just in case
+        iframes = re.findall(r'<iframe[^>]*src="([^"]+)"', html)
+        for src in iframes:
+            if 'http' in src:
+                sources.append({"name": "Server", "url": src})
+        
+        # Onoflix often uses these as their backend providers
+        # We can reconstruct them if we have the TMDB ID
+        tmdb_id = item_id.split('/')[-1]
+        
+        if not sources:
+            # Fallback to known providers Onoflix UI shows
+            sources.append({"name": "Onoflix (Main)", "url": url})
+            sources.append({"name": "VidSrc", "url": f"https://vidsrc.me/embed/{item_type}?tmdb={tmdb_id}"})
+            sources.append({"name": "Peachify", "url": f"https://peachify.net/embed/{item_type}/{tmdb_id}"})
             
-    return {"url": sources[0]['url'] if sources else "", "sources": sources}
+        return {"url": sources[0]['url'] if sources else "", "sources": sources}
+    except Exception as e:
+        return {"url": "", "sources": [], "error": str(e)}
 
 def scrape_universal_source(site_url, ep_id):
     fetcher = StealthyFetcher()
