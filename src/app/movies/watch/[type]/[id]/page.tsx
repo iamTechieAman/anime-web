@@ -6,12 +6,19 @@ import { useState, useEffect, use, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
+    {
+        id: "vidlink",
+        name: "VidLink",
+        badge: "Recommended",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
+    },
     {
         id: "peachify",
         name: "ToonPlayer VIP",
@@ -29,16 +36,9 @@ const SERVERS = [
     {
         id: "vidsrc_xyz",
         name: "VidSrc XYZ",
-        badge: "New",
+        badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
-    },
-    {
-        id: "vidlink",
-        name: "VidLink",
-        badge: "Recommended",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
     {
         id: "vidsrc_net",
@@ -81,6 +81,91 @@ const SERVERS = [
         badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
+    },
+    // ─── NEW SERVERS ───
+    {
+        id: "cineby",
+        name: "CineBy",
+        badge: "HD",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
+    },
+    {
+        id: "rive",
+        name: "RiveStream",
+        badge: "Premium",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://rivestream.org/embed?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://rivestream.org/embed?type=movie&id=${id}`,
+    },
+    {
+        id: "flickystream",
+        name: "FlickyStream",
+        badge: "Fast",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://flickystream.ru/embed/tv/${id}/${s || 1}/${e || 1}` : `https://flickystream.ru/embed/movie/${id}`,
+    },
+    {
+        id: "aether",
+        name: "Aether",
+        badge: "New",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://aether.mom/embed/tv/${id}/${s || 1}/${e || 1}` : `https://aether.mom/embed/movie/${id}`,
+    },
+    {
+        id: "cinemaos",
+        name: "CinemaOS",
+        badge: "Live",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://cinemaos.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://cinemaos.live/embed/movie/${id}`,
+    },
+    {
+        id: "hollymoviehd",
+        name: "HollyMovieHD",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://hollymoviehd.cc/embed/tv/${id}/${s || 1}/${e || 1}` : `https://hollymoviehd.cc/embed/movie/${id}`,
+    },
+    {
+        id: "uniquestream",
+        name: "UniqueStream",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://uniquestream.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://uniquestream.net/embed/movie/${id}`,
+    },
+    {
+        id: "moviebox",
+        name: "MovieBox",
+        badge: "Popular",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://moviebox.ph/embed/tv/${id}/${s || 1}/${e || 1}` : `https://moviebox.ph/embed/movie/${id}`,
+    },
+    {
+        id: "ridomovies",
+        name: "RidoMovies",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://ridomovies.tv/embed/tv/${id}/${s || 1}/${e || 1}` : `https://ridomovies.tv/embed/movie/${id}`,
+    },
+    {
+        id: "sanuflix",
+        name: "SanuFlix",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://sanuflix-web-v2.pages.dev/embed/tv/${id}/${s || 1}/${e || 1}` : `https://sanuflix-web-v2.pages.dev/embed/movie/${id}`,
+    },
+    {
+        id: "youflex",
+        name: "YouFlex",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://youflex.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://youflex.live/embed/movie/${id}`,
+    },
+    {
+        id: "67movies",
+        name: "67Movies",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://67movies.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://67movies.net/embed/movie/${id}`,
     },
 ];
 
@@ -168,6 +253,10 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
 
+    // Auto Server Selection State
+    const [isAutoChecking, setIsAutoChecking] = useState(false);
+    const [autoCheckProgress, setAutoCheckProgress] = useState({ current: 0, total: 0, serverName: '', results: [] as { name: string; ok: boolean }[] });
+
     // Unified State
     const [animeData, setAnimeData] = useState<ShowData | null>(null);
     const [selectedSeason, setSelectedSeason] = useState(1);
@@ -176,6 +265,46 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const [loadingEpisodes, setLoadingEpisodes] = useState(false);
     const [mode, setMode] = useState<"sub" | "dub">("sub");
     const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+
+    // Auto Server Check — probes top servers and picks the first working one
+    const autoCheckServers = useCallback(async () => {
+        if (isAutoChecking) return;
+        setIsAutoChecking(true);
+        const serversToCheck = SERVERS.slice(0, 8); // Check top 8 servers
+        const results: { name: string; ok: boolean }[] = [];
+        setAutoCheckProgress({ current: 0, total: serversToCheck.length, serverName: '', results: [] });
+
+        for (let i = 0; i < serversToCheck.length; i++) {
+            const server = serversToCheck[i];
+            setAutoCheckProgress(prev => ({ ...prev, current: i + 1, serverName: server.name }));
+            
+            try {
+                const testUrl = server.getUrl(type === "anime" ? "tv" : type, type === "anime" ? (tmdbIdForAnime || "0") : id, selectedSeason, selectedEpisode);
+                const ok = await new Promise<boolean>((resolve) => {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+                    iframe.src = testUrl;
+                    const timer = setTimeout(() => { resolve(false); try { document.body.removeChild(iframe); } catch {} }, 4000);
+                    iframe.onload = () => { clearTimeout(timer); resolve(true); try { document.body.removeChild(iframe); } catch {} };
+                    iframe.onerror = () => { clearTimeout(timer); resolve(false); try { document.body.removeChild(iframe); } catch {} };
+                    document.body.appendChild(iframe);
+                });
+                results.push({ name: server.name, ok });
+                setAutoCheckProgress(prev => ({ ...prev, results: [...results] }));
+                if (ok) {
+                    setActiveServer(server);
+                    setIsAutoChecking(false);
+                    return;
+                }
+            } catch {
+                results.push({ name: server.name, ok: false });
+                setAutoCheckProgress(prev => ({ ...prev, results: [...results] }));
+            }
+        }
+        // If none worked, stay on first server
+        setIsAutoChecking(false);
+    }, [type, id, selectedSeason, selectedEpisode, tmdbIdForAnime, isAutoChecking]);
+
 
     // Scroll-to-top visibility
     useEffect(() => {
@@ -331,17 +460,43 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     }
 
     if (!details) {
+        // Show a minimal player page instead of "Content Not Found"
+        const fallbackTitle = type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : 'Movie';
+        const fallbackId = type === "anime" ? (tmdbIdForAnime || "0") : id;
+        const embedUrl = SERVERS[0].getUrl(type === "anime" ? "tv" : type, fallbackId, 1, 1);
         return (
-            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Content Not Found</h1>
-                    <Link href="/movies" className="text-blue-400 hover:text-blue-300 transition-colors">← Back to Movies</Link>
+            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+                        <Link href="/movies" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                            <span className="text-sm font-medium hidden sm:inline">Back to Movies</span>
+                        </Link>
+                        <h1 className="text-sm font-bold truncate text-center flex-1">{fallbackTitle}</h1>
+                    </div>
+                </div>
+                <div className="pt-14">
+                    <div className="relative w-full bg-black">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
+                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="origin" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+                        <p className="text-[var(--text-muted)]">Detailed metadata is unavailable. Try switching servers if the content doesn&apos;t play.</p>
+                        <div className="flex flex-wrap gap-2 justify-center mt-4">
+                            {SERVERS.slice(0, 6).map((server) => (
+                                <a key={server.id} href={server.getUrl(type === "anime" ? "tv" : type, fallbackId, 1, 1)} target="_blank" rel="noopener" className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-xs font-medium hover:bg-[var(--border-color)] transition-colors">{server.name}</a>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </main>
         );
     }
 
-    const title = details.title || details.name || animeData?.name || "Untitled";
+    const title = details!.title || details!.name || animeData?.name || "Untitled";
     const year = (details.release_date || details.first_air_date || "").slice(0, 4);
     const matchPercent = Math.round((details.vote_average || 0) * 10);
     const director = details.crew?.find((c) => c.job === "Director");
@@ -411,23 +566,83 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 </div>
                             )}
                             {/* Source Error Fallback */}
-                            {sourceError && !isAnimeServer && (
+                            {sourceError && !isAnimeServer && !isAutoChecking && (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center">
                                     <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
                                         <X className="w-8 h-8 text-red-500" />
                                     </div>
-                                    <h3 className="text-xl font-bold mb-2">Movie Server Error</h3>
+                                    <h3 className="text-xl font-bold mb-2">Server Not Responding</h3>
                                     <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md">
-                                        This content might not be available on the {activeServer.name} server. 
-                                        Don't worry, you can try our dedicated Anime servers!
+                                        This content might not be available on {activeServer.name}.
                                     </p>
-                                    <button 
-                                        onClick={() => setActiveServer(ANIME_SERVERS[0])}
-                                        className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all flex items-center gap-2"
-                                    >
-                                        <Server className="w-4 h-4" /> Switch to Anime Server
-                                    </button>
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={autoCheckServers}
+                                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                                        >
+                                            <Zap className="w-4 h-4" /> Auto Find Working Server
+                                        </button>
+                                        {type === 'anime' && (
+                                            <button 
+                                                onClick={() => setActiveServer(ANIME_SERVERS[0])}
+                                                className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                                            >
+                                                <Server className="w-4 h-4" /> Anime Server
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
+                            )}
+
+                            {/* Auto Server Check Overlay */}
+                            {isAutoChecking && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6"
+                                >
+                                    <div className="w-full max-w-sm">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="relative">
+                                                <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-bold text-white">Finding Best Server</h3>
+                                                <p className="text-xs text-[var(--text-muted)]">
+                                                    Checking {autoCheckProgress.current}/{autoCheckProgress.total} — {autoCheckProgress.serverName}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {/* Progress bar */}
+                                        <div className="w-full h-1.5 bg-white/10 rounded-full mb-4 overflow-hidden">
+                                            <motion.div 
+                                                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                                animate={{ width: `${(autoCheckProgress.current / Math.max(autoCheckProgress.total, 1)) * 100}%` }}
+                                                transition={{ duration: 0.3 }}
+                                            />
+                                        </div>
+                                        {/* Server results list */}
+                                        <div className="space-y-1.5 max-h-[180px] overflow-y-auto scrollbar-none">
+                                            {autoCheckProgress.results.map((r, i) => (
+                                                <motion.div 
+                                                    key={i}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm ${
+                                                        r.ok ? 'bg-green-500/10 border border-green-500/20' : 'bg-white/5 border border-white/5'
+                                                    }`}
+                                                >
+                                                    <span className={r.ok ? 'text-green-400 font-medium' : 'text-zinc-500'}>{r.name}</span>
+                                                    {r.ok ? (
+                                                        <Check className="w-4 h-4 text-green-400" />
+                                                    ) : (
+                                                        <X className="w-4 h-4 text-zinc-600" />
+                                                    )}
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </motion.div>
                             )}
 
                             <iframe
@@ -451,13 +666,23 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                             <Server className="w-3.5 h-3.5" /> Server:
                         </span>
 
-                        {/* Server Buttons — show all inline on desktop */}
-                        <div className="hidden md:flex items-center gap-2">
+                        {/* Auto Find Server Button */}
+                        <button
+                            onClick={autoCheckServers}
+                            disabled={isAutoChecking}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-bold hover:from-blue-600/30 hover:to-purple-600/30 transition-all shrink-0 disabled:opacity-50"
+                        >
+                            {isAutoChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                            Auto
+                        </button>
+
+                        {/* Server Buttons — scrollable row on desktop */}
+                        <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-none max-w-[calc(100vw-280px)] pb-1">
                             {(type === "anime" ? [...SERVERS, ...ANIME_SERVERS] : SERVERS).map((server) => (
                                 <button
                                     key={server.id}
                                     onClick={() => setActiveServer(server)}
-                                    className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeServer.id === server.id
+                                    className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id
                                         ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
                                         : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)]"
                                         }`}
