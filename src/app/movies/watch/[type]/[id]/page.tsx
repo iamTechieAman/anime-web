@@ -242,7 +242,9 @@ interface ShowData {
 
 export default function WatchPage({ params }: { params: Promise<{ type: string; id: string }> }) {
     const resolvedParams = use(params);
-    const { type, id } = resolvedParams;
+    const { type, id: rawId } = resolvedParams;
+    // Strip any prefix like 'tmdb:' from the ID so embed servers get a clean numeric ID
+    const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]);
     const [loading, setLoading] = useState(true);
@@ -394,15 +396,44 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                     if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
 
                 } else {
-                    // Standard Movie/TV Fetch
-                    const res = await axios.get(`/api/prime/details?id=${id}&type=${type}`);
-                    setDetails(res.data);
-                    if (type === "tv" && res.data.seasons?.length > 0) {
-                        setSelectedSeason(res.data.seasons[0].season_number || 1);
+                    // Standard Movie/TV Fetch with retry
+                    let res = null;
+                    for (let attempt = 0; attempt < 2; attempt++) {
+                        try {
+                            res = await axios.get(`/api/prime/details?id=${id}&type=${type}`);
+                            if (res.data) break;
+                        } catch (retryErr) {
+                            if (attempt === 1) throw retryErr;
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+                    }
+                    if (res?.data) {
+                        setDetails(res.data);
+                        if (type === "tv" && res.data.seasons?.length > 0) {
+                            setSelectedSeason(res.data.seasons[0].season_number || 1);
+                        }
+                    } else {
+                        throw new Error('No data returned from TMDB');
                     }
                 }
             } catch (err) {
                 console.error("Failed to fetch page data:", err);
+                // Set minimal fallback details so the player still works
+                setDetails({
+                    id: parseInt(id) || 0,
+                    title: type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : 'Movie',
+                    poster_path: null,
+                    backdrop_path: null,
+                    overview: 'Could not load metadata. The player is still available — try different servers if the content doesn\'t play.',
+                    vote_average: 0,
+                    vote_count: 0,
+                    genres: [],
+                    cast: [],
+                    crew: [],
+                    similar: [],
+                    recommendations: [],
+                    trailer: null,
+                });
             } finally {
                 setLoading(false);
             }
