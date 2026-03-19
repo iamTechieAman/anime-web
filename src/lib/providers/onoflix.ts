@@ -8,16 +8,15 @@ export class OnoflixProvider implements AnimeProvider {
     try {
       const response = await axios.get('/api/scrape', {
         params: { 
-          query,
-          universal_site: 'https://onoflix.live'
+          query
         }
       });
 
       const data = response.data;
-      const results = data.universal_search || data.onoflix || [];
+      const results = data.onoflix || [];
 
       return results.map((item: any) => ({
-        id: item.id.startsWith('on:') ? item.id : `on:${item.id}`,
+        id: item.id,
         title: item.title,
         image: item.image,
         provider: 'onoflix'
@@ -30,16 +29,15 @@ export class OnoflixProvider implements AnimeProvider {
 
   async getInfo(id: string): Promise<AnimeDetails> {
     try {
-      const realId = id.includes(':') ? id.split(':').pop() : id;
-      // We need to know if it's a movie or series. 
-      // Most IDs from search will have the type. 
-      // If not, we can try to guess or use the default.
-      const isMovie = realId?.includes('/movie/');
-      const cleanId = realId; // Introduce cleanId as requested
+      // id format: of:type:slug/real_id
+      const parts = id.split(':');
+      const type = parts.length > 2 ? parts[1] : (id.includes('/movie/') ? 'movie' : 'series');
+      const cleanId = parts.pop() || id;
+      
       const response = await axios.get('/api/scrape', {
         params: { 
           of_info: cleanId,
-          of_type: isMovie ? 'movie' : 'series'
+          of_type: type
         }
       });
 
@@ -47,7 +45,7 @@ export class OnoflixProvider implements AnimeProvider {
       if (!data || data.error) throw new Error(data?.error || "Content Not Found");
 
       return {
-        id: id.startsWith('of:') ? id : `of:${realId}`,
+        id: id,
         title: data.title,
         image: data.image || '',
         description: data.description || '',
@@ -64,7 +62,9 @@ export class OnoflixProvider implements AnimeProvider {
     }
   }
 
+  async getSources(id: string, episodeId: string): Promise<VideoSource[]> {
     try {
+      // id format: of:type:slug/real_id
       const parts = id.split(':');
       const type = parts.length > 2 ? parts[1] : (episodeId.includes('?season=') ? 'series' : 'movie');
       const cleanId = parts.pop() || id;
