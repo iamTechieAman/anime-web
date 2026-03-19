@@ -10,7 +10,7 @@ export default function DesktopSidebar() {
     const router = useRouter();
 
     const navItems = [
-        { name: "Movies", href: "/movies", icon: Film, color: "text-blue-400" },
+        { name: "Movies", href: "/", icon: Film, color: "text-blue-400" },
         { name: "Anime", href: "/az-list/all", icon: Zap, color: "text-purple-400" },
         { name: "Schedule", href: "/schedule", icon: Calendar, color: "text-green-400" },
         { name: "History", href: "/history", icon: Clock, color: "text-orange-400" },

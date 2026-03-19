@@ -1,452 +1,439 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
-import useSWR from 'swr';
-import { Search, Play, Star, Clock, TrendingUp, ChevronUp, Zap, Calendar, CheckCircle, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMobileUI } from "@/context/MobileUIContext";
-import AZFilter from "@/components/AZFilter";
-import { AnimeCard, AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
-import { useRouter } from "next/navigation";
+import { Search, X, Film, Tv, TrendingUp, Flame, Popcorn, Heart, Skull, Laugh, Swords, Sparkles, ChevronUp, SlidersHorizontal, User, History, LogOut, Zap } from "lucide-react";
+import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
 import HeroCarousel from "@/components/HeroCarousel";
+import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
+import useSWR from 'swr';
 
-const GENRES = ["Action","Adventure","Comedy","Drama","Fantasy","Horror","Mecha","Mystery","Psychological","Romance","Sci-Fi","Slice of Life","Sports","Supernatural","Thriller"];
-const FORMATS = ["TV","Movie","OVA","ONA","Special"];
-const STATUSES = ["Ongoing","Completed","Upcoming"];
+// CineVibe-style category sections with TMDB genre IDs
+const GENRE_ROWS = [
+    { title: "Action & Adventure", icon: Swords, genreId: "28", type: "movie" },
+    { title: "Comedy", icon: Laugh, genreId: "35", type: "movie" },
+    { title: "Romance", icon: Heart, genreId: "10749", type: "movie" },
+    { title: "Horror & Thriller", icon: Skull, genreId: "27,53", type: "movie" },
+    { title: "Animation", icon: Sparkles, genreId: "16", type: "movie" },
+    { title: "Science Fiction", icon: Flame, genreId: "878", type: "movie" },
+];
 
-// AniList GraphQL Query
-const SEARCH_QUERY = `
-query($search: String) {
-  Page(page: 1, perPage: 5) {
-    media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
-      id
-        title {
-        romaji
-        english
-        native
-      }
-        coverImage {
-        medium
-      }
-      format
-      seasonYear
-    }
-  }
-}
-`;
+// Network IDs for streaming platform rows
+const NETWORK_ROWS = [
+    { title: "Netflix Originals", networkId: "213", logo: "🔴" },
+    { title: "Prime Video", networkId: "1024", logo: "📦" },
+    { title: "Disney+", networkId: "2739", logo: "🔵" },
+    { title: "Hulu", networkId: "453", logo: "🟢" },
+    { title: "HBO Shows", networkId: "49", logo: "🟣" },
+    { title: "Apple TV+", networkId: "2552", logo: "⚪" },
+    { title: "Paramount+", networkId: "4330", logo: "⛰️" },
+    { title: "Peacock", networkId: "3353", logo: "🦚" },
+];
 
-export default function Home() {
-  const router = useRouter();
+// Nav tabs
+const TABS = [
+    { id: "home", label: "Explore", icon: Film },
+    { id: "movies", label: "Movies", icon: Popcorn },
+    { id: "tv", label: "TV Shows", icon: Tv },
+    { id: "trending", label: "Trending", icon: TrendingUp },
+];
 
-  const [popular, setPopular] = useState<Show[]>([]);
-  const [top, setTop] = useState<Show[]>([]);
-  const [trending, setTrending] = useState<Show[]>([]);
-  const [completed, setCompleted] = useState<Show[]>([]);
-  const [upcoming, setUpcoming] = useState<Show[]>([]);
-  const [cartoons, setCartoons] = useState<Show[]>([]);
-  const [loading, setLoading] = useState({ popular: true, top: true, completed: true, upcoming: true, cartoons: true });
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  // Scroll-to-top visibility
-  useEffect(() => {
-    const handleScroll = () => setShowScrollTop(window.scrollY > 500);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-
-  const handleShuffle = () => {
-    const pool = [...trending, ...popular];
-    if (pool.length > 0) {
-      const random = pool[Math.floor(Math.random() * pool.length)];
-      router.push(`/watch/${random._id}${random.provider ? `?provider=${random.provider}` : ''}`);
-    }
-  };
+export default function MoviesPage() {
+    const [activeTab, setActiveTab] = useState("home");
+    const [trending, setTrending] = useState<MovieItem[]>([]);
+    const [popular, setPopular] = useState<MovieItem[]>([]);
+    const [topRated, setTopRated] = useState<MovieItem[]>([]);
+    const [nowPlaying, setNowPlaying] = useState<MovieItem[]>([]);
+    const [tvPopular, setTvPopular] = useState<MovieItem[]>([]);
+    const [tvTopRated, setTvTopRated] = useState<MovieItem[]>([]);
+    const [genreData, setGenreData] = useState<Record<string, MovieItem[]>>({});
+    const [networkData, setNetworkData] = useState<Record<string, MovieItem[]>>({});
+    const [cartoons, setCartoons] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<MovieItem[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+    const [showProfile, setShowProfile] = useState(false);
 
 
-  // Fetcher helper
-  const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-  // Use SWR for all sections with revalidation for real-time updates and instant caching
-  const { data: popularData } = useSWR('/api/anime/popular', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
-  const { data: topData } = useSWR('/api/anime/top', fetcher, { revalidateOnFocus: false });
-  const { data: trendingData } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
-  const { data: completedData } = useSWR('/api/anime/completed', fetcher, { revalidateOnFocus: false });
-  const { data: upcomingData } = useSWR('/api/anime/upcoming', fetcher, { revalidateOnFocus: false });
-  const { data: cartoonData } = useSWR('/api/cartoon?category=cartoon', fetcher, { refreshInterval: 600000 });
+    // Helper to get active filters
+    const getFilteredContent = () => ({
+        showMoviesOnly: activeTab === "movies",
+        showTvOnly: activeTab === "tv",
+        showTrendingOnly: activeTab === "trending",
+        showAll: activeTab === "home"
+    });
 
-    // Fetch Movie Data for Unified Home
-    const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
-    const { data: moviePopular } = useSWR('/api/prime/movies?category=popular', fetcher);
-
-    useEffect(() => { if (popularData?.shows) setPopular(popularData.shows); }, [popularData]);
-    useEffect(() => { if (topData?.shows) setTop(topData.shows); }, [topData]);
-    useEffect(() => { if (trendingData?.shows) setTrending(trendingData.shows); }, [trendingData]);
-    useEffect(() => { if (completedData?.shows) setCompleted(completedData.shows); }, [completedData]);
-    useEffect(() => { if (upcomingData?.shows) setUpcoming(upcomingData.shows); }, [upcomingData]);
-    useEffect(() => { if (cartoonData?.shows) setCartoons(cartoonData.shows); }, [cartoonData]);
-
-    // Loading state calculations
+    // Fetch user profile
     useEffect(() => {
-        setLoading({
-            popular: !popularData && popular.length === 0,
-            top: !topData && top.length === 0,
-            trending: !trendingData && trending.length === 0,
-            completed: !completedData && completed.length === 0,
-            upcoming: !upcomingData && upcoming.length === 0,
-            cartoons: !cartoonData && cartoons.length === 0
-        } as any);
-    }, [popularData, popular, topData, top, trendingData, trending, cartoonData, cartoons]);
+        const updateProfile = () => {
+            const p = localStorage.getItem("toonplayer_profile");
+            if (p) {
+                try { setProfile(JSON.parse(p)); } catch(e) {}
+            }
+        };
+        updateProfile();
+        window.addEventListener('profileUpdated', updateProfile);
+        return () => window.removeEventListener('profileUpdated', updateProfile);
+    }, []);
+
+    // Scroll-to-top visibility
+    useEffect(() => {
+        const handleScroll = () => setShowScrollTop(window.scrollY > 500);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Fetch main data sequentially
+    useEffect(() => {
+        const loadAllData = async () => {
+            // 1. Fetch main headers
+            try {
+                const [trendingRes, popularRes, topRatedRes, nowPlayingRes, tvPopRes, tvTopRes] = await Promise.all([
+                    axios.get("/api/prime/trending"),
+                    axios.get("/api/prime/movies?category=popular"),
+                    axios.get("/api/prime/movies?category=top_rated"),
+                    axios.get("/api/prime/movies?category=now_playing"),
+                    axios.get("/api/prime/tv?category=popular"),
+                    axios.get("/api/prime/tv?category=top_rated"),
+                ]);
+
+                const rawTrending = trendingRes.data.results || [];
+                const enhancedTrending = rawTrending.map((item: MovieItem, index: number) => ({
+                    ...item,
+                    rank: index < 10 ? index + 1 : undefined,
+                    isMostViewed: index < 3,
+                    liveViewers: index < 10 ? Math.floor(Math.random() * (5000 - 1000) + 1000) : undefined
+                }));
+
+                setTrending(enhancedTrending);
+                setPopular(popularRes.data.results || []);
+                setTopRated(topRatedRes.data.results || []);
+                setNowPlaying(nowPlayingRes.data.results || []);
+                setTvPopular(tvPopRes.data.results || []);
+                setTvTopRated(tvTopRes.data.results || []);
+            } catch (err) {
+                console.error("Failed to fetch main data:", err);
+            }
+
+            // 2. Fetch networks
+            try {
+                const promises = NETWORK_ROWS.map((net) =>
+                    axios.get(`/api/prime/discover?media_type=tv&network_id=${net.networkId}`)
+                );
+                const results = await Promise.allSettled(promises);
+                const newNetworkData: Record<string, MovieItem[]> = {};
+                NETWORK_ROWS.forEach((net, i) => {
+                    const res = results[i];
+                    if (res.status === "fulfilled") {
+                        if (res.value.data.results && res.value.data.results.length > 0) {
+                            newNetworkData[net.title] = res.value.data.results;
+                        }
+                    } else {
+                        console.error(`Failed to fetch ${net.title}:`, res.reason);
+                    }
+                });
+                setNetworkData(newNetworkData);
+            } catch (err) {
+                console.error("Failed to fetch network data:", err);
+            }
+
+            // 3. Fetch genres
+            try {
+                const promises = GENRE_ROWS.map((genre) =>
+                    axios.get(`/api/prime/discover?media_type=${genre.type}&genre_id=${genre.genreId}`)
+                );
+                const results = await Promise.allSettled(promises);
+                const newGenreData: Record<string, MovieItem[]> = {};
+                GENRE_ROWS.forEach((genre, i) => {
+                    const res = results[i];
+                    if (res.status === "fulfilled") {
+                        if (res.value.data.results && res.value.data.results.length > 0) {
+                            newGenreData[genre.title] = res.value.data.results;
+                        }
+                    } else {
+                        console.error(`Failed to fetch ${genre.title}:`, res.reason);
+                    }
+                });
+                setGenreData(newGenreData);
+            } catch (err) {
+                console.error("Failed to fetch genres:", err);
+            }
+
+            // 4. Fetch Cartoons
+            try {
+                const cartoonRes = await axios.get('/api/cartoon?category=cartoon');
+                setCartoons(cartoonRes.data.shows || []);
+            } catch (err) {
+                console.error("Failed to fetch cartoons:", err);
+            }
+        };
+
+        loadAllData();
+    }, []);
+
+    // Simulated Live Polling for Viewership Data
+    useEffect(() => {
+        if (trending.length === 0) return;
+
+        const interval = setInterval(() => {
+            setTrending((prev) =>
+                prev.map((item) => {
+                    if (!item.liveViewers) return item;
+                    const change = Math.floor(Math.random() * 201) - 100;
+                    return { ...item, liveViewers: Math.max(100, item.liveViewers + change) };
+                })
+            );
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [trending.length]);
+
+    // Search handler
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+            setIsSearching(false);
+            return;
+        }
+        setIsSearching(true);
+        const timer = setTimeout(async () => {
+            try {
+                const res = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchQuery)}`);
+                setSearchResults(res.data.results || []);
+            } catch (err) {
+                console.error("Search failed:", err);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Check for search query in URL
+    const paramsInUrl = useSearchParams();
+    useEffect(() => {
+        const q = paramsInUrl?.get('q');
+        if (q) {
+            setSearchQuery(q);
+        }
+    }, [paramsInUrl]);
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">
-            {/* No JavaScript Fallback */}
-            <noscript>
-                <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-xl flex items-center justify-center p-6">
-                    <div className="max-w-md bg-[var(--bg-card)] border border-purple-500/30 rounded-2xl p-8 text-center">
-                        <div className="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <Play className="w-8 h-8 text-white" />
-                        </div>
-                        <h2 className="text-2xl font-bold mb-3">JavaScript Required</h2>
-                        <p className="text-[var(--text-muted)] mb-6">
-                            ToonPlayer requires JavaScript to provide the best streaming experience. Please enable JavaScript in your browser settings to continue.
-                        </p>
-                    </div>
-                </div>
-            </noscript>
-
+        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden transition-colors duration-300">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
-                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/10 to-transparent opacity-50 transition-opacity duration-300" />
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 to-transparent opacity-50" />
             </div>
 
             <div className="relative z-10 w-full pb-24 md:pb-0">
                 <HeroCarousel />
 
-                {/* Genre Bar */}
-                <div className="bg-[var(--bg-card)] border-y border-[var(--border-color)]">
-                    <div className="w-full max-w-[2560px] mx-auto px-3 md:px-6 py-2.5 flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
-                        {["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"].map(genre => (
-                            <Link key={genre} href={`/genre/${genre.toLowerCase()}`} className="text-xs sm:text-sm font-medium text-[var(--text-muted)] hover:text-white transition-colors">{genre}</Link>
-                        ))}
+                {/* Genres & Categories Sub-Nav */}
+                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-0 z-40">
+                    <div className="w-full max-w-[2560px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
+                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50">
+                            {TABS.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer relative z-50 ${activeTab === tab.id
+                                        ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                                        : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
+                                    }`}
+                                >
+                                    <tab.icon className="w-3.5 h-3.5" />
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-[var(--border-color)] ml-4">
+                            <span className="text-[10px] uppercase tracking-wider font-black text-[var(--text-muted)]">Quick Filters:</span>
+                            {GENRE_ROWS.slice(0, 4).map(g => (
+                                <button 
+                                    key={g.genreId}
+                                    onClick={() => document.getElementById(`genre-${g.genreId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                                    className="px-2.5 py-1 text-[10px] font-bold text-[var(--text-muted)] hover:text-white transition-colors"
+                                >
+                                    {g.title}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                <div className="w-full max-w-[1920px] mx-auto px-4 lg:px-8 py-6 md:py-10 flex flex-col lg:flex-row gap-8 xl:gap-16">
-                    {/* Left Column (Main Content) */}
-                    <div className="flex-1 space-y-12 min-w-0">
-                        <WatchHistorySection />
-                        
-                        {/* Unified Trending - Movies & Shows */}
-                        {movieTrending?.results && (
-                            <section>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-                                        <TrendingUp className="w-5 h-5 text-red-500" />
-                                        Trending Movies & Shows
-                                    </h2>
-                                    <Link href="/movies" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
-                                </div>
-                                <div className="responsive-grid">
-                                    {movieTrending.results.slice(0, 12).map((item: any) => (
-                                        <Link key={item.id} href={`/movies/watch/${item.media_type || 'movie'}/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.05] duration-500 shadow-2xl premium-card backdrop-blur-sm">
+                <div className="w-full max-w-[2560px] mx-auto px-3 md:px-6 py-4 md:py-8">
+                    {searchQuery ? (
+                        <div className="space-y-8">
+                            <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                                <Search className="w-6 h-6 text-purple-400" />
+                                {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
+                            </h2>
+                            {searchResults.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                    {searchResults.map((item: any) => (
+                                        <Link
+                                            key={`${item.type}-${item.id}`}
+                                            href={item.href}
+                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                        >
                                             <div className="aspect-[2/3] relative">
-                                                <img src={`https://image.tmdb.org/t/p/w300${item.poster_path}`} alt={item.title || item.name} className="w-full h-full object-cover" />
-                                                <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/10 uppercase">
-                                                    {item.media_type || 'movie'}
+                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                                <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-black uppercase tracking-tighter text-white border border-white/10">
+                                                    {item.type}
                                                 </div>
                                             </div>
                                             <div className="p-3">
-                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title || item.name}</h3>
+                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+                                                <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-medium">
+                                                    <span>{item.format}</span>
+                                                    <span>{item.year}</span>
+                                                </div>
                                             </div>
                                         </Link>
                                     ))}
                                 </div>
-                            </section>
-                        )}
+                            ) : (
+                                !isSearching && <div className="text-center py-20 text-[var(--text-muted)]">No results found for your search.</div>
+                            )}
+                        </div>
+                    ) : activeTab === "home" ? (
+                        <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
+                            {/* Main Feed */}
+                            <div className="flex-1 space-y-12 min-w-0">
+                                { /* Trending Movies & TV */ }
+                                <section>
+                                    <SectionHeader icon={TrendingUp} title="Trending Movies & TV" color="text-red-400" />
+                                    {trending.length > 0 ? <MovieRow items={trending} title="movie-trending" /> : <RowSkeleton />}
+                                </section>
+                                
+                                { /* Now Playing */ }
+                                <section>
+                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
+                                    {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
+                                </section>
 
-                        {/* Top 10 Anime Ranking */}
-                        <section className="relative">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-                                    <TrendingUp className="w-5 h-5 text-purple-400" />
-                                    Top 10 This Week
-                                </h2>
-                                <Link href="/az-list/all" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
+                                {/* Cartoons Section */}
+                                {cartoons.length > 0 && (
+                                    <section id="cartoons" className="group/cart">
+                                        <SectionHeader icon={Zap} title="Cartoon Favorites" color="text-yellow-400" />
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                            {cartoons.slice(0, 12).map((item: any) => (
+                                                <Link
+                                                    key={`cart-${item._id}`}
+                                                    href={`/watch/${item._id}`}
+                                                    className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                                >
+                                                    <div className="aspect-[2/3] relative">
+                                                        <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
+                                                        <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/10 tracking-tighter">
+                                                            Cartoon
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-3">
+                                                        <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.name}</h3>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
+                                {/* Genre Discovery */}
+                                {GENRE_ROWS.map((genre) => (
+                                    genreData[genre.title] && (
+                                        <section key={genre.title} id={`genre-${genre.genreId}`}>
+                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
+                                            <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
+                                        </section>
+                                    )
+                                ))}
                             </div>
-                            {loading.top ? <LoadingSkeleton /> : <AnimeGridRanked shows={top.slice(0, 10)} />}
-                        </section>
 
-                        {/* Newest Cartoons */}
-                        {!loading.cartoons && cartoons.length > 0 && (
-                            <section>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-                                        <Zap className="w-5 h-5 text-yellow-400" />
-                                        Newest Cartoons
+                            {/* Sidebar - Trending & Airing */}
+                            <div className="w-full lg:w-[320px] xl:w-[380px] space-y-10 shrink-0">
+                                {/* Top Rated Movies */}
+                                <section className="bg-[var(--bg-card)]/50 p-5 rounded-2xl border border-[var(--border-color)]">
+                                    <h2 className="text-lg font-bold font-sora text-white mb-5 flex items-center gap-2">
+                                        <Sparkles className="w-5 h-5 text-yellow-400" /> 
+                                        Top Rated Movies
                                     </h2>
-                                    <Link href="/search?type=cartoon" className="text-xs font-bold text-purple-400 hover:text-purple-300">View All</Link>
-                                </div>
-                                <AnimeGrid shows={cartoons.slice(0, 12)} />
-                            </section>
-                        )}
-                        {loading.cartoons && (
-                            <section>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="h-8 w-48 bg-[var(--bg-card)] animate-pulse rounded-md" />
-                                </div>
-                                <LoadingSkeleton />
-                            </section>
-                        )}
-
-                        {/* Popular Movies */}
-                        {moviePopular?.results && (
-                            <section>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-                                        <Star className="w-5 h-5 text-yellow-500" />
-                                        Popular Movies
-                                    </h2>
-                                </div>
-                                <div className="responsive-grid">
-                                    {moviePopular.results.slice(0, 12).map((item: any) => (
-                                        <Link key={item.id} href={`/movies/watch/movie/${item.id}`} className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.05] duration-500 shadow-2xl premium-card backdrop-blur-sm">
-                                            <div className="aspect-[2/3] relative">
-                                                <img src={`https://image.tmdb.org/t/p/w300${item.poster_path}`} alt={item.title} className="w-full h-full object-cover" />
+                                    {topRated.slice(0, 6).map((item, i) => (
+                                        <div key={item.id} className="flex items-center gap-3 py-2 group cursor-pointer border-b border-white/5 last:border-0">
+                                            <span className="text-2xl font-black text-white/10 group-hover:text-blue-500/50 transition-colors w-6">0{i+1}</span>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title}</h3>
+                                                <p className="text-[10px] text-[var(--text-muted)]">★ {item.vote_average?.toFixed(1)} • {item.release_date?.split('-')[0]}</p>
                                             </div>
-                                            <div className="p-3">
-                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title}</h3>
-                                            </div>
-                                        </Link>
+                                        </div>
                                     ))}
-                                </div>
-                            </section>
-                        )}
-                    </div>
-
-                {/* Right Column (Sidebar) */}
-                <div className="w-full lg:w-[350px] xl:w-[400px] space-y-12 shrink-0">
-                    {/* Popular Hits */}
-                    <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
-                       <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
-                         <Zap className="w-5 h-5 text-yellow-400" /> 
-                         Popular Hits
-                       </h2>
-                       {loading.popular ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{popular.slice(0, 8).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} />)}</div>}
-                    </section>
-
-                    {/* Trending */}
-                    <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
-                       <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
-                         <TrendingUp className="w-5 h-5 text-purple-500" /> 
-                         Trending Right Now
-                       </h2>
-                       {(loading as any).trending ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{trending.slice(0, 10).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} rank={i} />)}</div>}
-                    </section>
-
-                    {/* Latest Completed */}
-                    <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
-                       <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
-                         <CheckCircle className="w-5 h-5 text-green-500" /> 
-                         Latest Completed
-                       </h2>
-                       {(loading as any).completed ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{completed.slice(0, 10).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} />)}</div>}
-                    </section>
-
-                    {/* Top Upcoming */}
-                    <section className="bg-[var(--bg-card)]/50 p-4 rounded-xl border border-[var(--border-color)]">
-                       <h2 className="text-lg font-bold font-sora text-white mb-4 flex items-center gap-2">
-                         <Calendar className="w-5 h-5 text-blue-500" /> 
-                         Top Upcoming
-                       </h2>
-                       {(loading as any).upcoming ? <SidebarLoadingSkeleton /> : <div className="flex flex-col gap-2">{upcoming.slice(0, 10).map((show, i) => <AnimeCardHorizontal key={`${show._id}-${i}`} show={show} />)}</div>}
-                    </section>
+                                </section>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-10">
+                            {activeTab === "movies" && popular.length > 0 && <section><SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" /><MovieGrid items={popular} /></section>}
+                            {activeTab === "tv" && tvPopular.length > 0 && <section><SectionHeader icon={Tv} title="Popular TV Shows" color="text-purple-400" /><MovieGrid items={tvPopular} /></section>}
+                            {activeTab === "trending" && trending.length > 0 && <section><SectionHeader icon={TrendingUp} title="Currently Trending" color="text-red-400" /><MovieGrid items={trending} /></section>}
+                        </div>
+                    )}
                 </div>
             </div>
-      </div>
 
-      {/* Scroll to Top */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-6 right-6 z-40 p-3 bg-purple-500/90 hover:bg-purple-500 text-white rounded-full shadow-[0_0_20px_rgba(168,85,247,0.4)] backdrop-blur-sm transition-colors"
-          >
-            <ChevronUp className="w-5 h-5" />
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </main>
-  );
+            {/* Footer */}
+            <footer className="border-t border-[var(--border-color)] py-8 px-4 mt-10">
+                <div className="w-full max-w-[2560px] mx-auto text-center text-zinc-600 text-xs">
+                    <p className="font-medium mb-1">
+                        <span className="text-[var(--text-main)]">ToonPlayer</span>
+                        <span className="text-[var(--text-muted)] ml-1">Movies</span>
+                        {" "} — Powered by TMDB
+                    </p>
+                    <p>This platform serves as a content aggregator and does not host any media files directly.</p>
+                    <p className="mt-1">© 2026 ToonPlayer Movies. All rights reserved.</p>
+                </div>
+            </footer>
+
+            {/* Scroll to Top */}
+            <AnimatePresence>
+                {showScrollTop && (
+                    <motion.button
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-blue-500/90 hover:bg-blue-500 text-white rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] backdrop-blur-sm transition-colors"
+                    >
+                        <ChevronUp className="w-5 h-5" />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+        </main>
+    );
 }
 
 // Section Header Component
-function SectionHeader({ icon: Icon, title }: { icon: any; title: string }) {
-  return (
-    <div className="flex items-center gap-3 mb-6">
-      <div className="w-1 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7]"></div>
-      <h2 className="text-xl md:text-2xl font-bold tracking-tight">{title}</h2>
-      <Icon className="w-5 h-5 text-purple-400" />
-    </div>
-  );
+function SectionHeader({ icon: Icon, title, color }: { icon: any; title: string; color: string }) {
+    return (
+        <div className="flex items-center gap-3 mb-4 text-[var(--text-main)]">
+            <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
+            <Icon className={`w-5 h-5 ${color}`} />
+            <h2 className="text-lg font-bold">{title}</h2>
+        </div>
+    );
 }
 
-function WatchlistSection() {
-  const [watchlist, setWatchlist] = useState<Show[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const saved = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
-    setWatchlist(saved);
-  }, []);
-
-  if (!mounted || watchlist.length === 0) return null;
-
-  return (
-    <section>
-      <SectionHeader icon={Star} title="Your Watchlist" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
-        {watchlist.map((show) => (
-          <div key={show._id} className="relative group">
-            <Link href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`}>
-              <div className="aspect-[3/4.5] rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 transition-all cursor-pointer relative shadow-lg group-hover:shadow-purple-500/20">
-                <img
-                  src={show.thumbnail}
-                  alt={show.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-3">
-                  <p className="text-white text-sm font-bold line-clamp-2 leading-tight">{show.name}</p>
-                </div>
-              </div>
-            </Link>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                const newList = watchlist.filter(i => i._id !== show._id);
-                localStorage.setItem('toonplayer_watchlist', JSON.stringify(newList));
-                setWatchlist(newList);
-              }}
-              className="absolute top-2 right-2 p-1.5 bg-black/60 backdrop-blur-md rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
-              title="Remove"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function WatchHistorySection() {
-  const [history, setHistory] = useState<any[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-    setHistory(saved.slice(0, 10)); // Show max 10 recent
-  }, []);
-
-  if (!mounted || history.length === 0) return null;
-
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold font-sora text-white flex items-center gap-2">
-           <Clock className="w-5 h-5 text-purple-500" /> 
-           Continue Watching
-        </h2>
-      </div>
-      <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
-        {history.map((item, idx) => (
-          <Link key={`${item.id}-${idx}`} href={`/watch/${item.id}${item.provider ? `?provider=${item.provider}&ep=${item.episode}` : `?ep=${item.episode}`}`} className="flex-shrink-0 w-[280px]">
-            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-purple-500/50 p-3 flex gap-3 group transition-colors relative overflow-hidden">
-                <div className="w-16 h-20 rounded-md overflow-hidden shrink-0">
-                    <img src={item.thumbnail || '/icon.png'} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <h3 className="text-white font-bold text-sm line-clamp-2 leading-tight font-sora group-hover:text-purple-400 transition-colors">{item.title}</h3>
-                    <div className="mt-2 flex items-center gap-2">
-                        <span className="text-xs bg-purple-600/20 text-purple-400 px-2 py-0.5 rounded-sm font-bold border border-purple-500/20">EP {item.episode}</span>
-                    </div>
-                </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AnimeGridRanked({ shows }: { shows: Show[] }) {
-  if (!shows || shows.length === 0) return null;
-
-  return (
-    <div className="relative">
-      <div className="flex overflow-x-auto gap-8 pb-10 pt-4 px-2 snap-x hide-scrollbar">
-        {shows.map((show, index) => (
-          <Link key={show._id} href={`/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`} className="relative flex-shrink-0 w-[180px] md:w-[220px] snap-start group">
-            <div className="relative aspect-[2/3] ml-12 z-10 transition-all duration-500 group-hover:-translate-y-3 group-hover:translate-x-2">
-              <div className="absolute inset-0 rounded-xl overflow-hidden bg-[var(--bg-card)] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group-hover:shadow-purple-500/20 group-hover:border-purple-500/50 transition-all duration-500">
-                <img
-                  src={show.thumbnail}
-                  alt={show.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/60 to-transparent p-4">
-                  <p className="text-white text-sm font-black line-clamp-2 leading-tight font-sora uppercase tracking-tighter italic">
-                    {show.name}
-                  </p>
-                </div>
-                {/* Glow Effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none" />
-              </div>
-            </div>
-            {/* Big Ranking Number */}
-            <div className="absolute -left-4 bottom-0 text-[120px] md:text-[180px] font-black leading-none z-0 select-none transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6"
-              style={{ 
-                WebkitTextStroke: '2px rgba(255,255,255,0.15)',
-                color: 'transparent',
-                fontFamily: 'system-ui'
-              }}>
-              {index + 1}
-            </div>
-            {/* Ambient Shadow for Number */}
-            <div className="absolute -left-4 bottom-0 text-[120px] md:text-[180px] font-black text-purple-600/10 leading-none z-0 select-none blur-xl transform translate-y-4">
-              {index + 1}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Loading Skeleton
-function LoadingSkeleton() {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
-      {[...Array(10)].map((_, i) => (
-        <div key={i} className="aspect-[3/4.5] rounded-sm bg-[var(--bg-card)] animate-pulse border border-[var(--border-color)]"></div>
-      ))}
-    </div>
-  );
-}
-
-function SidebarLoadingSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="w-full h-20 bg-[var(--bg-card)] animate-pulse rounded-md"></div>
-      ))}
-    </div>
-  );
+// Row Skeleton for Anime
+function RowSkeleton() {
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+            {[...Array(6)].map((_, i) => (
+                <div key={i} className="aspect-[3/4.5] rounded-xl bg-white/5 animate-pulse" />
+            ))}
+        </div>
+    );
 }
