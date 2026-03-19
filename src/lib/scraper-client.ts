@@ -25,6 +25,9 @@ export async function fetchFromScraper(params: {
     universal_ep?: string;
     wa_az_letter?: string;
     wa_az_page?: string;
+    of_info?: string;
+    of_type?: string;
+    of_source?: string;
 }) {
     if (SCRAPER_API_URL) {
         // Use remote API
@@ -86,6 +89,14 @@ export async function fetchFromScraper(params: {
             } else if (params.ax_source) {
                 endpoint = "/source/animex";
                 queryParams.id = params.ax_source;
+            } else if (params.of_info) {
+                endpoint = "/info/onoflix";
+                queryParams.id = params.of_info;
+                queryParams.type = params.of_type || "series";
+            } else if (params.of_source) {
+                endpoint = "/source/onoflix";
+                queryParams.id = params.of_source;
+                queryParams.type = params.of_type || "series";
             }
 
             if (endpoint) {
@@ -117,6 +128,8 @@ export async function fetchFromScraper(params: {
     if (params.universal_item) command += ` --universal_item "${params.universal_item.replace(/"/g, '\\"')}"`;
     if (params.universal_ep) command += ` --universal_ep "${params.universal_ep.replace(/"/g, '\\"')}"`;
     if (params.wa_az_letter) command += ` --wa_az_letter "${params.wa_az_letter.replace(/"/g, '\\"')}" --wa_az_page "${params.wa_az_page || 1}"`;
+    if (params.of_info) command += ` --of_info "${params.of_info.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
+    if (params.of_source) command += ` --of_source "${params.of_source.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
 
     const { stdout, stderr } = await execPromise(command);
 

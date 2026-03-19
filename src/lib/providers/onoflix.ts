@@ -31,26 +31,32 @@ export class OnoflixProvider implements AnimeProvider {
   async getInfo(id: string): Promise<AnimeDetails> {
     try {
       const realId = id.includes(':') ? id.split(':').pop() : id;
+      // We need to know if it's a movie or series. 
+      // Most IDs from search will have the type. 
+      // If not, we can try to guess or use the default.
+      const isMovie = realId?.includes('/movie/');
+      const cleanId = realId; // Introduce cleanId as requested
       const response = await axios.get('/api/scrape', {
         params: { 
-          universal_item: realId,
-          universal_site: 'https://onoflix.live'
+          of_info: cleanId,
+          of_type: isMovie ? 'movie' : 'series'
         }
       });
 
-      const data = response.data.universal_info;
+      const data = response.data.of_info;
+      if (!data || data.error) throw new Error(data?.error || "Content Not Found");
 
       return {
-        id: id.startsWith('on:') ? id : `on:${id}`,
+        id: id.startsWith('of:') ? id : `of:${realId}`,
         title: data.title,
         image: data.image || '',
         description: data.description || '',
         episodes: data.episodes.map((ep: any) => ({
           id: ep.id,
-          number: parseInt(ep.number) || 1,
-          title: `Episode ${ep.number}`
+          number: parseFloat(ep.number) || 1,
+          title: ep.title || `Episode ${ep.number}`
         })),
-        totalEpisodes: data.episodes.length
+        type: data.type === 'movie' ? 'movie' : 'series'
       };
     } catch (error) {
       console.error('[Onoflix] GetInfo failed:', error);
@@ -60,16 +66,22 @@ export class OnoflixProvider implements AnimeProvider {
 
   async getSources(id: string, episodeId: string): Promise<VideoSource[]> {
     try {
+      const isMovie = !episodeId.includes('?');
+      const realId = id.includes(':') ? id.split(':').pop() : id;
+      const cleanId = realId;
       const response = await axios.get('/api/scrape', {
         params: { 
-          universal_ep: episodeId,
-          universal_site: 'https://onoflix.live'
+          of_source: isMovie ? cleanId : episodeId,
+          of_type: isMovie ? 'movie' : 'series'
         }
       });
 
-      const data = response.data.universal_source;
+      const data = response.data.of_source;
+      if (!data || !data.sources) return [];
+      
       return data.sources.map((s: any) => ({
         url: s.url,
+        name: s.name || 'Server',
         quality: 'auto',
         isM3U8: s.url.includes('.m3u8'),
         isIframe: !s.url.includes('.m3u8') && !s.url.includes('.mp4')

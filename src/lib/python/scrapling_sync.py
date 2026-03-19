@@ -368,12 +368,19 @@ def scrape_watchanimeworld_source(episode_id):
     
     iframes = response.css('iframe[src*="play."], iframe[src*="zephyr"], iframe[src*="embed"], iframe[src*="video"], iframe[src*="/v/"], iframe[src*="player"]')
     if not iframes:
-        iframes = response.css('.video-player iframe, .movie-player iframe, #player iframe, iframe')
+        iframes = response.css('iframe::attr(src)').getall()
+        for src in iframes:
+            if any(x in src.lower() for x in ['vid', 'embed', 'player', 'stream', 'load']):
+                sources.append({"url": src, "name": "Server"})
         
-    for iframe in iframes:
-        u = clean_source_url(iframe.attrib.get('src'), "watchanimeworld.net")
-        if u:
-            sources.append({"name": "Primary", "url": u})
+        video_srcs = response.css('video source::attr(src)').getall()
+        for vsrc in video_srcs:
+            sources.append({"url": vsrc, "name": "Direct"})
+            
+    if not sources:
+        for iframe in response.css('iframe::attr(src)').getall():
+            if 'http' in iframe:
+                sources.append({"url": iframe, "name": "Player"})
 
     for btn in server_buttons:
         s_name = btn.text.strip() or btn.attrib.get('data-name') or "Server"
@@ -655,6 +662,107 @@ def scrape_universal_info(site_url, item_id):
     if not episodes: episodes.append({"id": item_id, "number": "1", "href": response.url})
     return {"id": item_id, "title": title, "episodes": episodes, "type": "movie" if "/movie/" in response.url else "tv"}
 
+def scrape_onoflix_search(query):
+    fetcher = StealthyFetcher()
+    url = f"https://onoflix.live/en/search?q={query}"
+    response = fetcher.fetch(url, engine='chrome', wait_until='networkidle', timeout=60000)
+    results = []
+    if not response: return []
+    
+    items = response.css("a.block.w-full.cursor-pointer")
+    if not items:
+        items = response.css("a[href*='/movie/'], a[href*='/series/']")
+    seen_ids = set()
+    
+    for item in items:
+        href = item.attrib.get('href', '')
+        match = re.search(r'/(?:en/)?(movie|series)/(.+)/(\d+)/?$', href)
+        if match:
+            item_type = match.group(1)
+            slug = match.group(2)
+            item_id = match.group(3)
+            full_id = f"{slug}/{item_id}"
+            
+            if full_id in seen_ids: continue
+            seen_ids.add(full_id)
+            
+            title = item.attrib.get('aria-label') or item.text.strip() or slug.replace('-', ' ').title()
+            img_el = item.css('img')
+            img = ""
+            if img_el:
+                img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            
+            results.append({
+                "id": f"of:{full_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://onoflix.live{img}",
+                "type": "movie" if item_type == "movie" else "series",
+                "slug": slug,
+                "real_id": item_id
+            })
+    return results
+
+def scrape_onoflix_info(item_id, item_type="series"):
+    fetcher = StealthyFetcher()
+    url = f"https://onoflix.live/en/{item_type}/{item_id}"
+    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
+    if not response: return {"id": item_id, "error": "Content Not Found"}
+    
+    title_el = response.css('h1, .title')
+    title = title_el[0].text.strip() if title_el else item_id.split('/')[0].replace('-', ' ').title()
+    
+    episodes = []
+    if item_type == "series":
+        watch_url = f"https://onoflix.live/en/watch/series/{item_id}"
+        watch_resp = fetcher.fetch(watch_url, engine='chrome', wait_until='domcontentloaded')
+        if watch_resp:
+            ep_buttons = watch_resp.css("button[aria-label*='Episode']")
+            for btn in ep_buttons:
+                label = btn.attrib.get('aria-label', '')
+                num_match = re.search(r'Episode (\d+)', label)
+                num = num_match.group(1) if num_match else "1"
+                episodes.append({
+                    "id": f"{item_id}?season=1&episode={num}",
+                    "number": num,
+                    "title": label
+                })
+    else:
+        episodes.append({"id": item_id, "number": "1", "title": title})
+        
+    return {"id": item_id, "title": title, "episodes": episodes, "type": item_type}
+
+def scrape_onoflix_source(item_id, item_type="movie"):
+    fetcher = StealthyFetcher()
+    # item_id here is expected to be "slug/real_id" or "slug/real_id?season=1&episode=X"
+    if item_type == 'movie':
+        url = f"https://onoflix.live/en/watch/movie/{item_id}"
+    else:
+        # For series, item_id might contain season/episode query params
+        url = f"https://onoflix.live/en/watch/series/{item_id}"
+        
+    response = fetcher.fetch(url, engine='chrome', wait_until='networkidle', timeout=60000)
+    sources = []
+    if not response: return {"url": "", "sources": []}
+    
+    # Look for iframe or source tags
+    iframes = response.css('iframe::attr(src)').getall()
+    for src in iframes:
+        if any(x in src.lower() for x in ['vid', 'embed', 'player', 'stream', 'load']):
+            sources.append({"url": src, "name": "Server"})
+    
+    # Also look for direct video links if any
+    video_srcs = response.css('video source::attr(src)').getall()
+    for vsrc in video_srcs:
+        sources.append({"url": vsrc, "name": "Direct"})
+        
+    if not sources:
+        # Final fallback - just grab any iframe that looks like a player
+        for iframe in response.css('iframe::attr(src)').getall():
+            if 'http' in iframe:
+                sources.append({"url": iframe, "name": "Player"})
+            
+    return {"url": sources[0]['url'] if sources else "", "sources": sources}
+
 def scrape_universal_source(site_url, ep_id):
     fetcher = StealthyFetcher()
     urls = [f"{site_url}/watch/{ep_id}", f"{site_url}/episode/{ep_id}", f"{site_url}/{ep_id}"]
@@ -700,6 +808,9 @@ if __name__ == "__main__":
     parser.add_argument("--slug", help="Slug for anime info")
     parser.add_argument("--wa_az_letter", help="Letter for WatchAnimeWorld A-Z")
     parser.add_argument("--wa_az_page", type=int, default=1, help="Page for WatchAnimeWorld A-Z")
+    parser.add_argument("--of_info", help="Onoflix info ID")
+    parser.add_argument("--of_type", default="series", help="Onoflix item type (movie/series)")
+    parser.add_argument("--of_source", help="Onoflix source ID")
     
     args = parser.parse_args()
     output = {"onoflix": [], "watchanimeworld": [], "cinemacity": [], "filmex": [], "cinezo": [], "pstream": [], "wa_info": {}, "wa_source": {}, "aniwatch": [], "universal_search": [], "universal_info": {}, "universal_source": {}}
@@ -731,5 +842,8 @@ if __name__ == "__main__":
     if args.aniwatch_page: output["aniwatch"] = scrape_aniwatch_tv_list(args.aniwatch_page)
     
     if args.wa_az_letter: output["watchanimeworld"] = scrape_watchanimeworld_az(args.wa_az_letter, args.wa_az_page)
+    
+    if args.of_info: output["of_info"] = scrape_onoflix_info(args.of_info, args.of_type)
+    if args.of_source: output["of_source"] = scrape_onoflix_source(args.of_source, args.of_type)
     
     print(json.dumps(output))
