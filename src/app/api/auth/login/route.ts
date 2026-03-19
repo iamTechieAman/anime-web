@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { comparePassword, signToken } from '@/lib/auth';
 import { logSecurityEvent, isRateLimited } from '@/lib/security';
+import { sanitizeObject } from '@/lib/sanitizer';
 import fs from 'fs';
 import path from 'path';
 
@@ -21,7 +22,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json();
+    let body = await req.json();
+    body = sanitizeObject(body); // SANITIZE INPUT
     const validated = loginSchema.parse(body);
 
     // Load users

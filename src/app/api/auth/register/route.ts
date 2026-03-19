@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { hashPassword } from '@/lib/auth';
 import { logSecurityEvent, isRateLimited } from '@/lib/security';
+import { sanitizeObject } from '@/lib/sanitizer';
 import fs from 'fs';
 import path from 'path';
 
@@ -24,7 +25,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json();
+    let body = await req.json();
+    body = sanitizeObject(body); // SANITIZE INPUT
     const validated = registerSchema.parse(body);
 
     // 2. Database Check (Using mock JSON for now)
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
 
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid input', details: err.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid input', details: err.flatten() }, { status: 400 });
     }
     console.error('Registration error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

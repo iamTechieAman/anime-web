@@ -60,6 +60,17 @@ export default function MoviesPage() {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
     const [showProfile, setShowProfile] = useState(false);
+    
+    // Fetch current user from secure API
+    const { data: userData } = useSWR('/api/auth/me', fetcher);
+    
+    useEffect(() => {
+        if (userData?.user) {
+            setProfile(userData.user);
+        } else {
+            setProfile(null);
+        }
+    }, [userData]);
     // Fetch Movie Data for Unified Home
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
     const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
@@ -76,18 +87,7 @@ export default function MoviesPage() {
         showAll: activeTab === "home"
     });
 
-    // Fetch user profile
-    useEffect(() => {
-        const updateProfile = () => {
-            const p = localStorage.getItem("toonplayer_profile");
-            if (p) {
-                try { setProfile(JSON.parse(p)); } catch(e) {}
-            }
-        };
-        updateProfile();
-        window.addEventListener('profileUpdated', updateProfile);
-        return () => window.removeEventListener('profileUpdated', updateProfile);
-    }, []);
+
 
     // Scroll-to-top visibility
     useEffect(() => {
