@@ -10,7 +10,7 @@ def clean_source_url(url, provider_domain):
     # Filter out common non-video pages
     blacklist = [
         f"https://{provider_domain}/", f"https://www. {provider_domain}/",
-        f"https://{provider_domain}/movies/", f"https://{provider_domain}/series/",
+        f"https://{provider_domain}//", f"https://{provider_domain}/series/",
         "/category/", "/genre/", "/tag/", "/search/", "/contact-us/", "/dmca/"
     ]
     if any(b in url for b in blacklist) and not any(ext in url for ext in ['.m3u8', '.mp4', 'embed', 'player', '/v/']):
@@ -96,7 +96,7 @@ def scrape_watchanimeworld(query=None, category=None):
 
         # Detect type from URL or labels
         item_type = "series"
-        if "/movies/" in href:
+        if "//" in href:
             item_type = "movie"
         elif "/series/" in href:
             item_type = "series"
@@ -177,7 +177,7 @@ def scrape_watchanimeworld_info(item_id):
     # Try multiple URL patterns
     urls_to_try = [
         f"https://watchanimeworld.net/series/{item_id}/",
-        f"https://watchanimeworld.net/movies/{item_id}/",
+        f"https://watchanimeworld.net//{item_id}/",
         f"https://watchanimeworld.net/{item_id}/"
     ]
     
@@ -231,7 +231,7 @@ def scrape_watchanimeworld_info(item_id):
                 
                 urls_to_try = [
                     f"https://watchanimeworld.net/series/{best_match['id']}/",
-                    f"https://watchanimeworld.net/movies/{best_match['id']}/",
+                    f"https://watchanimeworld.net//{best_match['id']}/",
                     f"https://watchanimeworld.net/{best_match['id']}/"
                 ]
                 for url in urls_to_try:
@@ -245,7 +245,7 @@ def scrape_watchanimeworld_info(item_id):
     if not response:
         return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series"}
         
-    is_movie_detected = is_movie or (response and ("/movies/" in response.url or "/movie/" in response.url))
+    is_movie_detected = is_movie or (response and ("//" in response.url or "/movie/" in response.url))
     if response and not is_movie_detected:
         # Check for duration text or other movie indicators (Torofilm usually shows duration for movies)
         text_content = response.text.lower()
@@ -309,7 +309,7 @@ def scrape_watchanimeworld_source(episode_id):
     response = fetcher.fetch(url, engine='chrome')
     
     if not response or getattr(response, 'status_code', 200) >= 400:
-        url = f"https://watchanimeworld.net/movies/{episode_id}/"
+        url = f"https://watchanimeworld.net//{episode_id}/"
         response = fetcher.fetch(url, engine='chrome')
 
     if not response or getattr(response, 'status_code', 200) >= 400:
@@ -384,7 +384,7 @@ def scrape_cinemacity(query):
                 "title": title,
                 "image": f"https://cinemacity.cc{img}" if img.startswith('/') else img,
                 "url": href,
-                "type": "movie" if "/movies/" in href else "tv"
+                "type": "movie" if "//" in href else "tv"
             })
     return results
 

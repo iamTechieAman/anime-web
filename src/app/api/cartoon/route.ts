@@ -24,7 +24,11 @@ export async function GET(request: Request) {
         });
 
     } catch (error: any) {
-        console.error("[Cartoon API] Error:", error.message);
-        return NextResponse.json({ error: "Internal server error", detail: error.message }, { status: 500 });
+        console.error("[Cartoon API] Full Error:", error);
+        return NextResponse.json({ 
+            error: "Internal server error", 
+            detail: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }

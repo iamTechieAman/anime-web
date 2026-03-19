@@ -153,11 +153,18 @@ export async function fetchFromScraper(params: {
     if (params.of_info) command += ` --of_info "${params.of_info.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
     if (params.of_source) command += ` --of_source "${params.of_source.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
 
-    const { stdout, stderr } = await execPromise(command);
+    console.log("[Scraper Client] Executing local command:", command);
+    try {
+        const { stdout, stderr } = await execPromise(command);
 
-    if (stderr && !stdout) {
-        throw new Error(stderr);
+        if (stderr && !stdout) {
+            console.error("[Scraper Client] Local command failed (stderr):", stderr);
+            throw new Error(stderr);
+        }
+
+        return JSON.parse(stdout);
+    } catch (err: any) {
+        console.error("[Scraper Client] Local command exception:", err);
+        throw err;
     }
-
-    return JSON.parse(stdout);
 }
