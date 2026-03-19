@@ -34,11 +34,18 @@ const SERVERS = [
             type === "tv" ? `https://vidbinge.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.to/embed/movie/${id}`,
     },
     {
-        id: "vidsrc_xyz",
-        name: "VidSrc XYZ",
-        badge: null,
+        id: "embed_su",
+        name: "EmbedSU",
+        badge: "HD",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
+            type === "tv" ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}` : `https://embed.su/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_cc",
+        name: "VidSrc CC",
+        badge: "New",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.cc/v2/embed/movie/${id}`,
     },
     {
         id: "vidsrc_net",
@@ -46,6 +53,13 @@ const SERVERS = [
         badge: "Stable",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
+    },
+    {
+        id: "vidsrc_xyz",
+        name: "VidSrc XYZ",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
     },
     {
         id: "vidsrc_me",
@@ -82,90 +96,19 @@ const SERVERS = [
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
     },
-    // ─── NEW SERVERS ───
+    {
+        id: "nontongo",
+        name: "NontonGo",
+        badge: null,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
+    },
     {
         id: "cineby",
         name: "CineBy",
-        badge: "HD",
+        badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
-    },
-    {
-        id: "rive",
-        name: "RiveStream",
-        badge: "Premium",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://rivestream.org/embed?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://rivestream.org/embed?type=movie&id=${id}`,
-    },
-    {
-        id: "flickystream",
-        name: "FlickyStream",
-        badge: "Fast",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://flickystream.ru/embed/tv/${id}/${s || 1}/${e || 1}` : `https://flickystream.ru/embed/movie/${id}`,
-    },
-    {
-        id: "aether",
-        name: "Aether",
-        badge: "New",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://aether.mom/embed/tv/${id}/${s || 1}/${e || 1}` : `https://aether.mom/embed/movie/${id}`,
-    },
-    {
-        id: "cinemaos",
-        name: "CinemaOS",
-        badge: "Live",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://cinemaos.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://cinemaos.live/embed/movie/${id}`,
-    },
-    {
-        id: "hollymoviehd",
-        name: "HollyMovieHD",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://hollymoviehd.cc/embed/tv/${id}/${s || 1}/${e || 1}` : `https://hollymoviehd.cc/embed/movie/${id}`,
-    },
-    {
-        id: "uniquestream",
-        name: "UniqueStream",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://uniquestream.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://uniquestream.net/embed/movie/${id}`,
-    },
-    {
-        id: "moviebox",
-        name: "MovieBox",
-        badge: "Popular",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://moviebox.ph/embed/tv/${id}/${s || 1}/${e || 1}` : `https://moviebox.ph/embed/movie/${id}`,
-    },
-    {
-        id: "ridomovies",
-        name: "RidoMovies",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://ridomovies.tv/embed/tv/${id}/${s || 1}/${e || 1}` : `https://ridomovies.tv/embed/movie/${id}`,
-    },
-    {
-        id: "sanuflix",
-        name: "SanuFlix",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://sanuflix-web-v2.pages.dev/embed/tv/${id}/${s || 1}/${e || 1}` : `https://sanuflix-web-v2.pages.dev/embed/movie/${id}`,
-    },
-    {
-        id: "youflex",
-        name: "YouFlex",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://youflex.live/embed/tv/${id}/${s || 1}/${e || 1}` : `https://youflex.live/embed/movie/${id}`,
-    },
-    {
-        id: "67movies",
-        name: "67Movies",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://67movies.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://67movies.net/embed/movie/${id}`,
     },
 ];
 
