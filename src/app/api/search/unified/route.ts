@@ -60,7 +60,7 @@ export async function GET(request: Request) {
                     type: 'anime',
                     year: item.seasonYear,
                     format: item.format,
-                    href: `/watch/${item.id}`
+                    href: `/watch/anime/${item.id}`
                 });
             });
         }

@@ -26,13 +26,14 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
     const isTmdbContent = show._id?.startsWith('tmdb:');
     const getHref = () => {
         if (isTmdbContent) {
-            // tmdb:movie:123 or tmdb:tv:456
             const parts = show._id.split(':');
             const type = parts[1]; // movie or tv
             const tmdbId = parts[2];
             return `/watch/${type}/${tmdbId}`;
         }
-        return `/watch/anime/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
+        // Ensure provider is passed, or default to allanime/hianime if likely
+        const provider = show.provider || (show._id.startsWith('hi:') ? 'hianime' : show._id.startsWith('aw:') ? 'aniwatch' : 'allanime');
+        return `/watch/anime/${show._id}?provider=${provider}`;
     };
 
     const handleImageError = () => {
@@ -180,7 +181,8 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             const tmdbId = parts[2];
             return `/watch/${type}/${tmdbId}`;
         }
-        return `/watch/${show._id}${show.provider ? `?provider=${show.provider}` : ''}`;
+        const provider = show.provider || (show._id.startsWith('hi:') ? 'hianime' : show._id.startsWith('aw:') ? 'aniwatch' : 'allanime');
+        return `/watch/anime/${show._id}?provider=${provider}`;
     };
     
     return (

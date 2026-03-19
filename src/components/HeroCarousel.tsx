@@ -105,7 +105,7 @@ export default function HeroCarousel() {
                     release: year,
                     quality: "HD",
                     type: "TV",
-                    link: `/watch/${item.id}?provider=anikai`
+                    link: `/watch/anime/${item.id}?provider=anikai`
                 };
             });
 

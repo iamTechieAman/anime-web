@@ -9,6 +9,8 @@ type HistoryEntry = {
   title: string;
   thumbnail?: string;
   episode: string;
+  season?: string;
+  type: string;
   provider: string;
   watchedAt: number;
 };
@@ -62,6 +64,20 @@ export default function HistoryPage() {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
+  const getHistoryLink = (entry: HistoryEntry) => {
+    if (entry.type) {
+      if (entry.type === 'anime' || entry.type === 'cartoon') {
+        return `/watch/${entry.type}/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`;
+      }
+      const seasonQuery = entry.season ? `&s=${entry.season}` : '';
+      return `/watch/${entry.type}/${entry.id}?e=${entry.episode}${seasonQuery}`;
+    }
+    if (entry.provider === 'tmdb') {
+      return `/watch/movie/${entry.id}?e=${entry.episode}`;
+    }
+    return `/watch/anime/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`;
+  };
+
   if (!isMounted) return null;
 
   return (
@@ -109,9 +125,9 @@ export default function HistoryPage() {
           <div className="flex flex-col items-center justify-center py-24 text-center opacity-50">
             <Clock className="w-16 h-16 mb-4 text-[var(--text-muted)]" />
             <p className="text-xl font-bold">No Watch History</p>
-            <p className="text-sm text-[var(--text-muted)] mt-2">Anime you watch will appear here</p>
+            <p className="text-sm text-[var(--text-muted)] mt-2">Content you watch will appear here</p>
             <Link href="/" className="mt-6 px-6 py-2 bg-purple-600 text-white rounded-full text-sm font-bold hover:bg-purple-700 transition-colors">
-              Browse Anime
+              Browse Movies & Anime
             </Link>
           </div>
         ) : filtered.length === 0 ? (
@@ -139,16 +155,18 @@ export default function HistoryPage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <Link href={entry.provider === 'tmdb' ? `/watch/${entry.id}` : `/watch/anime/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`} className="hover:text-purple-400 transition-colors">
+                        <Link href={getHistoryLink(entry)} className="hover:text-purple-400 transition-colors">
                           <h3 className="font-semibold text-sm line-clamp-1 font-sora">{entry.title}</h3>
                         </Link>
-                        <p className="text-xs text-purple-400 font-bold mt-1">Episode {entry.episode}</p>
+                        <p className="text-xs text-purple-400 font-bold mt-1">
+                          {entry.type === 'tv' ? `S${entry.season} E${entry.episode}` : `Episode ${entry.episode}`}
+                        </p>
                         <p className="text-xs text-[var(--text-muted)] mt-1">{relativeTime(entry.watchedAt)}</p>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
                         <Link
-                          href={entry.provider === 'tmdb' ? `/watch/${entry.id}` : `/watch/anime/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`}
+                          href={getHistoryLink(entry)}
                           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-[var(--border-color)] rounded-lg text-xs font-bold transition-colors"
                         >
                           <Play className="w-3 h-3 fill-white" /> Resume

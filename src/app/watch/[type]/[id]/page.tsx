@@ -1,7 +1,5 @@
 "use client";
 
-export const runtime = 'edge';
-
 import { useState, useEffect, use, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
@@ -231,11 +229,13 @@ interface EpisodeInfo {
 interface ShowData {
     _id: string;
     name: string;
-    thumbnail: string;
+    thumbnail?: string;
+    provider?: string;
     aniListId: string;
     availableEpisodesDetail: {
         sub: string[];
         dub: string[];
+        raw: string[];
     };
 }
 
@@ -345,8 +345,8 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
         const fetchData = async () => {
             setLoading(true);
             try {
-                if (type === "anime") {
-                    // 1. Fetch Anime Episodes/Metadata
+                if (type === "anime" || type === "cartoon") {
+                    // 1. Fetch Anime/Cartoon Episodes/Metadata
                     const animeRes = await axios.get(`/api/anime/episodes?id=${id}`);
                     const show = animeRes.data.show;
                     setAnimeData(show);
@@ -396,7 +396,14 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                     if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
 
                 } else {
-                    // Standard Movie/TV Fetch with retry
+                    // Guard against missing or invalid IDs
+                    if (!id || id === 'undefined' || id === 'null') {
+                        console.error("[WatchPage] Segments missing or invalid ID:", { id, type });
+                        setSourceError(true);
+                        setLoading(false);
+                        return;
+                    }
+                    
                     let res = null;
                     for (let attempt = 0; attempt < 2; attempt++) {
                         try {
@@ -475,7 +482,31 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     useEffect(() => {
         setIframeKey((prev) => prev + 1);
         setSourceError(false); // Reset error on change
-    }, [activeServer, selectedSeason, selectedEpisode, mode]);
+
+        // Save to watch history
+        if (details && (id || tmdbIdForAnime)) {
+            try {
+                const historyKey = "watchHistory";
+                const existing = JSON.parse(localStorage.getItem(historyKey) || "[]");
+                const entry = {
+                    id: (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id,
+                    title: details.title || details.name || animeData?.name || "Untitled",
+                    thumbnail: details.poster_path ? `https://image.tmdb.org/t/p/w200${details.poster_path}` : animeData?.thumbnail,
+                    episode: String(selectedEpisode),
+                    season: type === 'tv' ? String(selectedSeason) : undefined,
+                    type: type, // movie, tv, anime, cartoon
+                    provider: type === 'anime' ? (animeData?.provider || 'allanime') : 'tmdb',
+                    watchedAt: Date.now(),
+                };
+                // Dedup based on id, type and episode
+                const deduped = existing.filter((h: any) => !(h.id === entry.id && h.type === entry.type && h.episode === entry.episode));
+                deduped.unshift(entry);
+                localStorage.setItem(historyKey, JSON.stringify(deduped.slice(0, 100)));
+            } catch (e) {
+                console.error("Failed to save history:", e);
+            }
+        }
+    }, [activeServer, selectedSeason, selectedEpisode, mode, details, animeData, tmdbIdForAnime]);
 
     if (loading) {
         return (
@@ -492,14 +523,14 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
 
     if (!details) {
         // Show a minimal player page instead of "Content Not Found"
-        const fallbackTitle = type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : 'Movie';
-        const fallbackId = type === "anime" ? (tmdbIdForAnime || "0") : id;
-        const embedUrl = SERVERS[0].getUrl(type === "anime" ? "tv" : type, fallbackId, 1, 1);
+        const fallbackTitle = type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : type === 'cartoon' ? 'Cartoon' : 'Movie';
+        const fallbackId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
+        const embedUrl = SERVERS[0].getUrl((type === "anime" || type === "cartoon") ? "tv" : type, fallbackId, 1, 1);
         return (
             <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
                     <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                        <Link href="/movies" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                        <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             <span className="text-sm font-medium hidden sm:inline">Back to Movies</span>
                         </Link>
@@ -534,23 +565,23 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const isUpcoming = details.release_date && new Date(details.release_date) > new Date();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
-    const activeId = type === "anime" ? (tmdbIdForAnime || "0") : id;
+    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
     const isAnimeServer = ANIME_SERVERS.some(s => s.id === activeServer.id);
     
     const embedUrl = isAnimeServer 
         ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
-        : activeServer.getUrl(type === "anime" ? "tv" : type, activeId, selectedSeason, selectedEpisode);
+        : activeServer.getUrl((type === "anime" || type === "cartoon") ? "tv" : type, activeId, selectedSeason, selectedEpisode);
 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
             {/* Top Navigation Bar */}
             <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                    <Link href="/movies" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                    <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-sm font-medium hidden sm:inline">Back to Movies</span>
+                        <span className="text-sm font-medium hidden sm:inline">Back</span>
                     </Link>
-                    <h1 className="text-sm font-bold truncate text-center flex-1 text-[var(--text-main)]">{title}</h1>
+                    <h1 className="text-sm font-bold truncate text-center flex-1 text-[var(--text-main)]">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h1>
                     <div className="w-[100px] hidden sm:block" /> {/* Spacer to center title */}
                 </div>
             </div>
@@ -588,7 +619,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                     </p>
                                     <div className="flex gap-4">
                                         <Link 
-                                            href="/movies" 
+                                            href="/" 
                                             className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-500 transition-all uppercase tracking-widest text-[10px]"
                                         >
                                             Explore Others
