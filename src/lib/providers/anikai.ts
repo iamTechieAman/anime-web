@@ -542,16 +542,9 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
-            // Fetch additional sections from HiAnime for a richer Home page (Completed, Upcoming)
-            const hianime = new HiAnimeProvider();
-            const [completed, upcoming] = await Promise.all([
-                hianime.getCompleted().catch(() => []),
-                hianime.getUpcoming().catch(() => [])
-            ]);
-
             if (slides.length === 0) throw new Error("No slides found on Anikai");
 
-            return { slides, trending, latest, completed, upcoming };
+            return { slides, trending, latest, completed: [], upcoming: [] };
         } catch (error) {
             console.error('[Anikai] getHome failed, falling back to HiAnime...', error);
             try {
@@ -565,11 +558,7 @@ export class AnikaiProvider implements AnimeProvider {
                         aniListId: undefined
                     }
                 })) as any[];
-                const [completed, upcoming] = await Promise.all([
-                    hianime.getCompleted().catch(() => []),
-                    hianime.getUpcoming().catch(() => [])
-                ]);
-                return { slides: fallbackSlides, trending: trendingRes, latest: trendingRes, completed, upcoming };
+                return { slides: fallbackSlides, trending: trendingRes, latest: trendingRes, completed: [], upcoming: [] };
             } catch (fallbackError) {
                 console.error('[Anikai] Fallback failed:', fallbackError);
                 return { slides: [], trending: [], latest: [], completed: [], upcoming: [] };

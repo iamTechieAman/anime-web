@@ -110,10 +110,17 @@ export default function HeroCarousel() {
             });
 
             const validSlides = formattedSlides.filter(s => s.image && s.image !== '');
+            console.log("[HeroCarousel] Raw slides count:", rawSlides.length);
+            console.log("[HeroCarousel] Valid slides count:", validSlides.length);
+            console.log("[HeroCarousel] Raw slides sample:", rawSlides[0]);
+            
             if (validSlides.length > 0) {
                 setSlides(validSlides);
             } else {
-                console.warn("[HeroCarousel] No valid slides found after processing.");
+                console.warn("[HeroCarousel] No valid slides found after processing. Setting fallback to raw slides if any.", formattedSlides);
+                if (formattedSlides.length > 0) {
+                    setSlides(formattedSlides);
+                }
             }
         } catch (err) {
             console.error("Error processing slides:", err);
