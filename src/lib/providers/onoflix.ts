@@ -64,15 +64,15 @@ export class OnoflixProvider implements AnimeProvider {
     }
   }
 
-  async getSources(id: string, episodeId: string): Promise<VideoSource[]> {
     try {
-      const isMovie = !episodeId.includes('?');
-      const realId = id.includes(':') ? id.split(':').pop() : id;
-      const cleanId = realId;
+      const parts = id.split(':');
+      const type = parts.length > 2 ? parts[1] : (episodeId.includes('?season=') ? 'series' : 'movie');
+      const cleanId = parts.pop() || id;
+      
       const response = await axios.get('/api/scrape', {
         params: { 
-          of_source: isMovie ? cleanId : episodeId,
-          of_type: isMovie ? 'movie' : 'series'
+          of_source: type === 'movie' ? cleanId : episodeId,
+          of_type: type
         }
       });
 

@@ -693,7 +693,7 @@ def scrape_onoflix_search(query):
                 img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
             
             results.append({
-                "id": f"of:{full_id}",
+                "id": f"of:{item_type}:{full_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https://onoflix.live{img}",
                 "type": "movie" if item_type == "movie" else "series",
