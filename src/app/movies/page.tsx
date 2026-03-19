@@ -59,10 +59,7 @@ export default function MoviesPage() {
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
     const [showProfile, setShowProfile] = useState(false);
 
-    // Anime Data using SWR (same as old home page for consistency)
-    const fetcher = (url: string) => axios.get(url).then(res => res.data);
-    const { data: animeTrending } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000 });
-    const { data: animePopular } = useSWR('/api/anime/popular', fetcher, { refreshInterval: 300000 });
+
 
     // Helper to get active filters
     const getFilteredContent = () => ({
@@ -309,19 +306,13 @@ export default function MoviesPage() {
                         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                             {/* Main Feed */}
                             <div className="flex-1 space-y-12 min-w-0">
-                                {/* Trending Movies & TV */}
+                                { /* Trending Movies & TV */ }
                                 <section>
                                     <SectionHeader icon={TrendingUp} title="Trending Movies & TV" color="text-red-400" />
                                     {trending.length > 0 ? <MovieRow items={trending} title="movie-trending" /> : <RowSkeleton />}
                                 </section>
                                 
-                                {/* Popular Anime */}
-                                <section>
-                                    <SectionHeader icon={Flame} title="Popular Anime" color="text-orange-400" />
-                                    {animePopular?.shows ? <AnimeGrid shows={animePopular.shows.slice(0, 12)} prefix="popular" /> : <RowSkeleton />}
-                                </section>
-                                
-                                {/* Now Playing */}
+                                { /* Now Playing */ }
                                 <section>
                                     <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
                                     {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
@@ -366,19 +357,6 @@ export default function MoviesPage() {
 
                             {/* Sidebar - Trending & Airing */}
                             <div className="w-full lg:w-[320px] xl:w-[380px] space-y-10 shrink-0">
-                                {/* Top Airing Anime */}
-                                <section className="bg-[var(--bg-card)]/50 p-5 rounded-2xl border border-[var(--border-color)]">
-                                    <h2 className="text-lg font-bold font-sora text-white mb-5 flex items-center gap-2">
-                                        <Tv className="w-5 h-5 text-purple-400" /> 
-                                        Top Anime
-                                    </h2>
-                                    <div className="flex flex-col gap-3">
-                                        {animeTrending?.shows?.slice(0, 6).map((show: Show, i: number) => (
-                                            <AnimeCardHorizontal key={`trending-${show._id}`} show={show} rank={i} />
-                                        ))}
-                                    </div>
-                                </section>
-
                                 {/* Top Rated Movies */}
                                 <section className="bg-[var(--bg-card)]/50 p-5 rounded-2xl border border-[var(--border-color)]">
                                     <h2 className="text-lg font-bold font-sora text-white mb-5 flex items-center gap-2">
