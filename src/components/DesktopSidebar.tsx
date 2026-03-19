@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Compass, Calendar, Clock, TrendingUp, LayoutGrid, Star, Sparkles, Shuffle } from "lucide-react";
+import { Home, Compass, Calendar, Clock, TrendingUp, LayoutGrid, Star, Sparkles, Shuffle, Film, Tv, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function DesktopSidebar() {
@@ -10,7 +10,8 @@ export default function DesktopSidebar() {
     const router = useRouter();
 
     const navItems = [
-        { name: "Movies & Anime", href: "/movies", icon: Compass, color: "text-blue-400" },
+        { name: "Movies", href: "/movies", icon: Film, color: "text-blue-400" },
+        { name: "Anime", href: "/az-list/all", icon: Zap, color: "text-purple-400" },
         { name: "Schedule", href: "/schedule", icon: Calendar, color: "text-green-400" },
         { name: "History", href: "/history", icon: Clock, color: "text-orange-400" },
         { name: "About", href: "/about", icon: Star, color: "text-purple-400" },

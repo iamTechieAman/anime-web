@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Search, Menu, Film, Calendar, Clock } from "lucide-react";
+import { Home, Search, Menu, Film, Calendar, Clock, Tv, Zap } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -50,11 +50,18 @@ export default function MobileNav() {
 
     const navItems = [
         {
-            label: "Movies & Anime",
+            label: "Movies",
             icon: Film,
             color: "text-blue-500",
             active: pathname === '/movies' || pathname.startsWith('/movies/'),
             onClick: () => { closeAll(); router.push('/movies'); },
+        },
+        {
+            label: "Anime",
+            icon: Zap,
+            color: "text-purple-500",
+            active: pathname === '/az-list/all' || pathname.startsWith('/az-list/'),
+            onClick: () => { closeAll(); router.push('/az-list/all'); },
         },
         {
             label: "Schedule",

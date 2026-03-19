@@ -9,7 +9,6 @@ import AZFilter from "@/components/AZFilter";
 import { AnimeGrid, type Show } from "@/components/AnimeCard";
 
 const TABS = [
-    { id: "everything", label: "Everything", icon: Sparkles },
     { id: "movies", label: "Movies & TV", icon: Film },
     { id: "anime", label: "Anime", icon: Tv },
 ];
@@ -23,7 +22,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState("everything");
+    const [activeTab, setActiveTab] = useState("movies");
     const [animeCount, setAnimeCount] = useState(0);
     const [movieCount, setMovieCount] = useState(0);
 

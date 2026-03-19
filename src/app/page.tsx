@@ -41,13 +41,12 @@ export default function Home() {
   const router = useRouter();
 
   const [popular, setPopular] = useState<Show[]>([]);
-  const [recent, setRecent] = useState<Show[]>([]);
   const [top, setTop] = useState<Show[]>([]);
   const [trending, setTrending] = useState<Show[]>([]);
   const [completed, setCompleted] = useState<Show[]>([]);
   const [upcoming, setUpcoming] = useState<Show[]>([]);
   const [cartoons, setCartoons] = useState<Show[]>([]);
-  const [loading, setLoading] = useState({ popular: true, recent: true, top: true, completed: true, upcoming: true, cartoons: true });
+  const [loading, setLoading] = useState({ popular: true, top: true, completed: true, upcoming: true, cartoons: true });
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Scroll-to-top visibility
@@ -59,7 +58,7 @@ export default function Home() {
 
 
   const handleShuffle = () => {
-    const pool = [...trending, ...popular, ...recent];
+    const pool = [...trending, ...popular];
     if (pool.length > 0) {
       const random = pool[Math.floor(Math.random() * pool.length)];
       router.push(`/watch/${random._id}${random.provider ? `?provider=${random.provider}` : ''}`);
@@ -71,7 +70,6 @@ export default function Home() {
   const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
   // Use SWR for all sections with revalidation for real-time updates and instant caching
-  const { data: recentData } = useSWR('/api/anime/recent', fetcher, { refreshInterval: 60000, revalidateOnFocus: true });
   const { data: popularData } = useSWR('/api/anime/popular', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
   const { data: topData } = useSWR('/api/anime/top', fetcher, { revalidateOnFocus: false });
   const { data: trendingData } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000, revalidateOnFocus: false });
@@ -83,7 +81,6 @@ export default function Home() {
     const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
     const { data: moviePopular } = useSWR('/api/prime/movies?category=popular', fetcher);
 
-    useEffect(() => { if (recentData?.shows) setRecent(recentData.shows); }, [recentData]);
     useEffect(() => { if (popularData?.shows) setPopular(popularData.shows); }, [popularData]);
     useEffect(() => { if (topData?.shows) setTop(topData.shows); }, [topData]);
     useEffect(() => { if (trendingData?.shows) setTrending(trendingData.shows); }, [trendingData]);
@@ -94,7 +91,6 @@ export default function Home() {
     // Loading state calculations
     useEffect(() => {
         setLoading({
-            recent: !recentData && recent.length === 0,
             popular: !popularData && popular.length === 0,
             top: !topData && top.length === 0,
             trending: !trendingData && trending.length === 0,
@@ -102,7 +98,7 @@ export default function Home() {
             upcoming: !upcomingData && upcoming.length === 0,
             cartoons: !cartoonData && cartoons.length === 0
         } as any);
-    }, [recentData, recent, popularData, popular, topData, top, trendingData, trending, cartoonData, cartoons]);
+    }, [popularData, popular, topData, top, trendingData, trending, cartoonData, cartoons]);
 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden font-sans transition-colors duration-300">

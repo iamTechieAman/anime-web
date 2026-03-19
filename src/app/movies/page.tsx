@@ -61,7 +61,6 @@ export default function MoviesPage() {
 
     // Anime Data using SWR (same as old home page for consistency)
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
-    const { data: animeRecent } = useSWR('/api/anime/recent', fetcher, { refreshInterval: 60000 });
     const { data: animeTrending } = useSWR('/api/anime/trending', fetcher, { refreshInterval: 300000 });
     const { data: animePopular } = useSWR('/api/anime/popular', fetcher, { refreshInterval: 300000 });
 
@@ -310,11 +309,6 @@ export default function MoviesPage() {
                         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                             {/* Main Feed */}
                             <div className="flex-1 space-y-12 min-w-0">
-                                {/* Recently Updated Anime */}
-                                <section>
-                                    <SectionHeader icon={Sparkles} title="Recently Updated Anime" color="text-purple-400" />
-                                    {animeRecent?.shows ? <AnimeGrid shows={animeRecent.shows.slice(0, 12)} prefix="recent" /> : <RowSkeleton />}
-                                </section>
                                 {/* Trending Movies & TV */}
                                 <section>
                                     <SectionHeader icon={TrendingUp} title="Trending Movies & TV" color="text-red-400" />
