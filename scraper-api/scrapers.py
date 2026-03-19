@@ -137,7 +137,7 @@ def scrape_watchanimeworld(query=None, category=None):
     items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        # Try to find the link to the show
+        # Try to find the link and detect type
         href = item.attrib.get('href', '')
         if not href or not href.startswith('http'):
             links = item.css('a.lnk-blk, .details a, a')
@@ -145,6 +145,23 @@ def scrape_watchanimeworld(query=None, category=None):
                 href = links[0].attrib.get('href', '')
         
         if not href: continue
+
+        # Detect type from URL or labels
+        item_type = "series"
+        if "/movies/" in href:
+            item_type = "movie"
+        elif "/series/" in href:
+            item_type = "series"
+        else:
+            labels = item.css('.aa-lnk, .view-button')
+            for lbl in labels:
+                txt = lbl.text.strip()
+                if "Movie" in txt:
+                    item_type = "movie"
+                    break
+                if "Serie" in txt:
+                    item_type = "series"
+                    break
 
         # Try multiple title patterns
         title = ""
@@ -169,7 +186,7 @@ def scrape_watchanimeworld(query=None, category=None):
                 "id": f"wa:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
-                "type": "anime",
+                "type": item_type,
                 "href": href
             })
     return results
@@ -188,22 +205,47 @@ def scrape_watchanimeworld_az(letter, page=1):
     items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        # Try different link patterns
-        links = item.css('a.lnk-blk, h2.entry-title a, h2 a, h3 a, .details a, a')
-        if not links: continue
+        # Try to find the link and detect type
+        href = item.attrib.get('href', '')
+        if not href or not href.startswith('http'):
+            links = item.css('a.lnk-blk, .details a, a')
+            if links:
+                href = links[0].attrib.get('href', '')
         
-        href = links[0].attrib.get('href', '')
-        # Title can be in various places
+        if not href: continue
+
+        # Detect type from URL or labels
+        item_type = "series"
+        if "/movies/" in href:
+            item_type = "movie"
+        elif "/series/" in href:
+            item_type = "series"
+        else:
+            labels = item.css('.aa-lnk, .view-button')
+            for lbl in labels:
+                txt = lbl.text.strip()
+                if "Movie" in txt:
+                    item_type = "movie"
+                    break
+                if "Serie" in txt:
+                    item_type = "series"
+                    break
+
+        # Try multiple title patterns
         title = ""
         title_tag = item.css('h2.entry-title, h2, h3, .title, .details a')
         if title_tag:
             title = title_tag[0].text.strip()
         if not title:
-            title = links[0].text.strip()
+            # Fallback to link text
+            links = item.css('a.lnk-blk, .details a, a')
+            if links:
+                title = links[0].text.strip()
             
         imgs = item.css('.post-thumbnail img, img')
         img = ""
         if imgs:
+            # Check data-src first for lazy loading
             img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
         
         if title and href:
@@ -212,7 +254,7 @@ def scrape_watchanimeworld_az(letter, page=1):
                 "id": f"wa:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
-                "type": "anime",
+                "type": item_type,
                 "href": href
             })
     return results
@@ -236,11 +278,12 @@ def scrape_watchanimeworld_info(item_id):
     response = None
     for url in urls_to_try:
         try:
-            # Always use chrome for info to ensure JS overlays are bypassed/loaded
-            temp_resp = fetcher.fetch(url, engine='chrome', timeout=20000)
+            # Always use chrome for info and WAIT for DOM to ensure dynamic content loads
+            temp_resp = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=25000)
             status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
             if temp_resp and status < 400:
-                if temp_resp.css('h1.entry-title, .title, .episodios, .aa-cnt, .item__card'):
+                # Basic validation that we are on a valid content page
+                if temp_resp.css('h1.entry-title, .title, .episodios, .aa-cnt, .item__card, .play-video'):
                     response = temp_resp
                     break
         except:
@@ -299,7 +342,13 @@ def scrape_watchanimeworld_info(item_id):
         return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series", "error": "connectivity_issue"}
         
     is_movie_detected = is_movie or (response and ("/movies/" in response.url or "/movie/" in response.url))
-    
+    if response and not is_movie_detected:
+        # Check for duration text or other movie indicators (Torofilm usually shows duration for movies)
+        text_content = response.text.lower()
+        if "duration" in text_content or "1h " in text_content or "2h " in text_content or "matsuri" in text_content:
+            if not response.css('.episodios, .aa-cnt, .se-q'):
+                is_movie_detected = True
+
     if is_movie_detected:
         episodes.append({"id": item_id, "number": "1", "href": response.url if response else ""})
     else:

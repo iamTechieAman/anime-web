@@ -124,7 +124,7 @@ def scrape_watchanimeworld(query=None, category=None):
     items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        # Try to find the link to the show
+        # Try to find the link and detect type
         href = item.attrib.get('href', '')
         if not href or not href.startswith('http'):
             links = item.css('a.lnk-blk, .details a, a')
@@ -132,6 +132,23 @@ def scrape_watchanimeworld(query=None, category=None):
                 href = links[0].attrib.get('href', '')
         
         if not href: continue
+
+        # Detect type from URL or labels
+        item_type = "series"
+        if "/movies/" in href:
+            item_type = "movie"
+        elif "/series/" in href:
+            item_type = "series"
+        else:
+            labels = item.css('.aa-lnk, .view-button')
+            for lbl in labels:
+                txt = lbl.text.strip()
+                if "Movie" in txt:
+                    item_type = "movie"
+                    break
+                if "Serie" in txt:
+                    item_type = "series"
+                    break
 
         # Try multiple title patterns
         title = ""
@@ -156,7 +173,7 @@ def scrape_watchanimeworld(query=None, category=None):
                 "id": f"wa:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https:{img}" if img.startswith('//') else img,
-                "type": "cartoon",
+                "type": item_type,
                 "href": href
             })
     return results
@@ -209,24 +226,21 @@ def scrape_watchanimeworld_info(item_id):
     response = None
     for url in urls_to_try:
         try:
-            temp_resp = fetcher.fetch(url)
+            # Always use chrome for info and WAIT for DOM to ensure dynamic content loads
+            temp_resp = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=25000)
             status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
             if temp_resp and status < 400:
-                response = temp_resp
-                break
+                # Basic validation that we are on a valid content page
+                if temp_resp.css('h1.entry-title, .title, .episodios, .aa-cnt, .item__card, .play-video'):
+                    response = temp_resp
+                    break
         except:
             continue
             
-    if not response or getattr(response, 'status_code', getattr(response, 'status', 200)) >= 400:
-        # Final fallback with chrome if all static failed
-        response = fetcher.fetch(urls_to_try[0], engine='chrome')
-    
+    # Basic chrome fallback removed as we now use it in the loop above
+    status = getattr(response, 'status_code', getattr(response, 'status', 200)) if response else 404
     episodes = []
-    
-    # Check status again after chrome fallback
-    current_status = getattr(response, 'status_code', getattr(response, 'status', 200)) if response else 404
-    
-    if (not response or current_status >= 400) and not is_movie:
+    if (not response or status >= 400) and not is_movie:
         # SEARCH RECOVERY
         clean_title = re.sub(r'-(series|classic|20\d\d|19\d\d)', '', item_id.lower())
         guessed_title = clean_title.replace('-', ' ').title()
@@ -270,10 +284,16 @@ def scrape_watchanimeworld_info(item_id):
     if not response:
         return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series"}
         
-    is_movie_detected = is_movie or "/movies/" in response.url or "/movie/" in response.url
-    
+    is_movie_detected = is_movie or (response and ("/movies/" in response.url or "/movie/" in response.url))
+    if response and not is_movie_detected:
+        # Check for duration text or other movie indicators (Torofilm usually shows duration for movies)
+        text_content = response.text.lower()
+        if "duration" in text_content or "1h " in text_content or "2h " in text_content or "matsuri" in text_content:
+            if not response.css('.episodios, .aa-cnt, .se-q'):
+                is_movie_detected = True
+
     if is_movie_detected:
-        episodes.append({"id": item_id, "number": "1", "href": response.url})
+        episodes.append({"id": item_id, "number": "1", "href": response.url if response else ""})
     else:
         # Extract post_id and seasons for AJAX
         season_links = response.css('.aa-cnt a')

@@ -14,7 +14,7 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
                 title: item.title,
                 image: item.image,
                 provider: 'watchanimeworld',
-                type: 'cartoon'
+                type: item.type === 'movie' ? 'movie' : 'cartoon'
             }));
         } catch (error) {
             console.error('[WatchAnimeWorld] Search failed:', error);
@@ -32,7 +32,7 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
                 title: item.title,
                 image: item.image,
                 provider: 'watchanimeworld',
-                type: 'cartoon'
+                type: item.type === 'movie' ? 'movie' : 'cartoon'
             }));
         } catch (error) {
             console.error('[WatchAnimeWorld] A-Z failed:', error);
