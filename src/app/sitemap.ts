@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 // In a real app, you would fetch these from your API
-const BASE_URL = 'https://toonplayer.in'
+const BASE_URL = 'https://www.toonplayer.in'
 
 export default function sitemap(): MetadataRoute.Sitemap {
     // Static routes
