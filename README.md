@@ -1,6 +1,6 @@
 # 📺 ToonPlayer - Premium Anime Streaming App
 
-### 🔴 **Live Demo:** (https://stupendous-queijadas-fb219a.netlify.app/movies)
+### 🔴 **Live Demo:** (https://www.toonplayer.in/)
 
 ToonPlayer is a modern, ad-free anime streaming application (the ultimate **AnimeWatch** alternative) built with **Next.js 15** and **React 19**. It features a sleek, responsive UI, real-time search, and a robust video player that aggregates sources from multiple providers.
 
