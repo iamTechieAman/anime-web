@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: '/private/',
         },
-        sitemap: 'https://anime-web-neon-one.vercel.app/sitemap.xml',
+        sitemap: 'https://toonplayer.in/sitemap.xml',
     }
 }

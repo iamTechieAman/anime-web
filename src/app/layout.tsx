@@ -27,17 +27,17 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://anime-web-neon-one.vercel.app'),
+  metadataBase: new URL('https://toonplayer.in'),
   title: {
     default: "ToonPlayer - Best AnimeWatch Alternative for Free HD Anime",
     template: "%s | ToonPlayer",
   },
-  description: "ToonPlayer is the ultimate AnimeWatch alternative. Stream Naruto, One Piece, and latest anime in HD for free. No ads, high speed, and real-time updates.",
-  keywords: ["ToonPlayer", "AnimeWatch", "watch anime free", "HD anime streaming", "ad-free anime", "latest anime episodes", "premium anime player"],
+  description: "ToonPlayer is the best AnimeWatch alternative for HD anime streaming. Watch Naruto, One Piece, and the latest anime episodes for free with high speed and zero ads.",
+  keywords: ["ToonPlayer", "AnimeWatch", "watch anime free", "HD anime streaming", "ad-free anime", "latest anime episodes", "premium anime player", "toonplayer.in", "free anime HD"],
   openGraph: {
     title: "ToonPlayer - Premium Free Anime Streaming",
     description: "The best way to watch anime online for free. Ad-free HD streaming with real-time updates.",
-    url: 'https://anime-web-neon-one.vercel.app',
+    url: 'https://toonplayer.in',
     siteName: 'ToonPlayer',
     images: [{ url: '/icon.png' }],
     type: 'website',
@@ -72,10 +72,10 @@ export default function RootLayout({
                   "@type": "WebSite",
                   "name": "ToonPlayer",
                   "alternateName": "AnimeWatch",
-                  "url": "https://anime-web-neon-one.vercel.app/",
+                  "url": "https://toonplayer.in/",
                   "potentialAction": {
                     "@type": "SearchAction",
-                    "target": "https://anime-web-neon-one.vercel.app/search?query={search_term_string}",
+                    "target": "https://toonplayer.in/search?query={search_term_string}",
                     "query-input": "required name=search_term_string"
                   }
                 })
