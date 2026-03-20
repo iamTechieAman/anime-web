@@ -318,7 +318,29 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     // Reset player loaded state on server change
     useEffect(() => {
         setPlayerLoaded(false);
+        setSourceError(false);
     }, [activeServer]);
+
+    // Automatic Auto-Server Selection if initial server is slow/error
+    useEffect(() => {
+        if (loading || isAutoChecking || playerLoaded || !details) return;
+
+        const timer = setTimeout(() => {
+            if (!playerLoaded && !sourceError) {
+                console.log("[WatchPage] Initial server taking too long, starting auto-check...");
+                autoCheckServers();
+            }
+        }, 6000); // 6 second threshold
+
+        return () => clearTimeout(timer);
+    }, [loading, playerLoaded, sourceError, details, autoCheckServers, isAutoChecking]);
+
+    // Trigger auto-check immediately on source error
+    useEffect(() => {
+        if (sourceError && !isAutoChecking) {
+            autoCheckServers();
+        }
+    }, [sourceError, isAutoChecking, autoCheckServers]);
 
     // Keyboard shortcuts: 1-9 to switch servers, Escape to close modals
     useEffect(() => {

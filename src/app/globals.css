@@ -28,7 +28,8 @@
   --glass-border: rgba(255, 255, 255, 0.05);
 }
 
-@theme inline {
+:root {
+  /* Tailwind v4 Configuration */
   --color-background: var(--bg-main);
   --color-foreground: var(--text-main);
   --color-card: var(--bg-card);
@@ -174,8 +175,15 @@ html {
 /* Responsive Grid */
 .responsive-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1.5rem;
+  }
 }
 
 @media (min-width: 1280px) {
@@ -184,9 +192,9 @@ html {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 480px) {
   .responsive-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
   }
 }

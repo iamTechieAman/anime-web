@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 
 const quickLinks = [
     { name: "Trending Now", href: "/search?genre=Action", icon: TrendingUp, color: "from-rose-500 to-pink-600" },
-    { name: "Browse Genres", href: "/az-list/all", icon: LayoutGrid, color: "from-cyan-500 to-blue-600" },
+    { name: "Browse Genres", href: "/genres", icon: LayoutGrid, color: "from-cyan-500 to-blue-600" },
     { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "from-yellow-500 to-amber-600" },
     { name: "New Releases", href: "/search?status=Ongoing", icon: Sparkles, color: "from-emerald-500 to-green-600" },
 ];
@@ -107,25 +107,6 @@ export default function MobileModals() {
                                 <div className="space-y-3 mb-6">
                                     <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Settings</h3>
 
-                                    {/* Theme Toggle */}
-                                    <div className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-purple-500/20 text-purple-400' : 'bg-yellow-500/20 text-yellow-600'}`}>
-                                                {theme === 'dark' ? <div className="w-5 h-5">🌙</div> : <div className="w-5 h-5">☀️</div>}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm text-[var(--text-main)]">Theme</p>
-                                                <p className="text-[10px] text-[var(--text-muted)]">{theme === 'dark' ? 'Dark' : 'Light'} Mode</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={toggleTheme}
-                                            className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-purple-600' : 'bg-zinc-300'}`}
-                                        >
-                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${theme === 'dark' ? 'left-6' : 'left-1'}`}></div>
-                                        </button>
-                                    </div>
-
                                     {/* Auto Play */}
                                     <div className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
                                         <div className="flex items-center gap-3">
@@ -145,23 +126,13 @@ export default function MobileModals() {
                                         </button>
                                     </div>
 
-                                    {/* Auto Next */}
-                                    <div className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-green-500/20 text-green-400">
-                                                <ChevronRight className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm text-[var(--text-main)]">Auto Next</p>
-                                                <p className="text-[10px] text-[var(--text-muted)]">Next episode auto</p>
-                                            </div>
+                                    {/* Features Info */}
+                                    <div className="p-3 bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-xl border border-[var(--border-color)]">
+                                        <div className="flex items-center gap-2 text-[10px] font-bold text-purple-400 uppercase tracking-tight">
+                                            <Sparkles className="w-3 h-3" />
+                                            Premium Features Active
                                         </div>
-                                        <button
-                                            onClick={toggleAutoNext}
-                                            className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${autoNext ? 'bg-green-600' : 'bg-zinc-600'}`}
-                                        >
-                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${autoNext ? 'left-6' : 'left-1'}`}></div>
-                                        </button>
+                                        <p className="mt-1 text-[10px] text-[var(--text-muted)]">Auto-Next and Dark Theme are permanently enabled for the best experience.</p>
                                     </div>
                                 </div>
 
@@ -170,12 +141,12 @@ export default function MobileModals() {
                                     <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">About</h3>
                                     <div className="p-4 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-xl border border-purple-500/20">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                                                <Shield className="w-5 h-5" />
+                                            <div className="w-10 h-10 rounded-xl bg-white/5 p-1 flex items-center justify-center shadow-lg border border-white/10">
+                                                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div class="text-white font-black text-xs">TP</div>'; }} />
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-[var(--text-main)]">ToonPlayer</h4>
-                                                <p className="text-[10px] text-[var(--text-muted)]">v3.0 • Powered by Next.js</p>
+                                                <p className="text-[10px] text-[var(--text-muted)]">v3.5 • Full Experience</p>
                                             </div>
                                         </div>
                                         <p className="text-[11px] text-[var(--text-muted)] leading-relaxed mb-3">

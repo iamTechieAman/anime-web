@@ -134,7 +134,7 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
 
                 {/* Title */}
                 <div className="p-3 bg-gradient-to-b from-transparent to-black/20">
-                    <h3 className="text-[13px] font-bold text-[var(--text-main)] truncate group-hover:text-purple-400 transition-colors duration-300">{title}</h3>
+                    <h3 className="text-[13px] font-bold text-[var(--text-main)] line-clamp-2 h-10 group-hover:text-purple-400 transition-colors duration-300 leading-tight">{title}</h3>
                     <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--text-muted)] font-medium">
                         {year && <span className="text-white/60">{year}</span>}
                         {year && <span className="w-1 h-1 rounded-full bg-white/20" />}

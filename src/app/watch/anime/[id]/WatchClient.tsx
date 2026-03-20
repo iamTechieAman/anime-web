@@ -170,9 +170,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [isValidating, setIsValidating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Auto-play and Auto-next settings
-    const [autoPlay, setAutoPlay] = useState(false);
-    const [autoNext, setAutoNext] = useState(false);
+    // Auto-play and Auto-next always enabled
+    const [autoPlay, setAutoPlay] = useState(true);
+    const [autoNext, setAutoNext] = useState(true);
 
     // Server State
     const [servers, setServers] = useState<any[]>([]);
@@ -242,25 +242,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
     };
 
-    // Save auto-play setting
-    const toggleAutoPlay = () => {
-        const newValue = !autoPlay;
-        setAutoPlay(newValue);
-        localStorage.setItem('toonplayer_autoplay', String(newValue));
-        toast.success(newValue ? 'Auto Play enabled ✓' : 'Auto Play disabled', {
-            icon: newValue ? '▶️' : '⏸️',
-        });
-    };
-
-    // Save auto-next setting
-    const toggleAutoNext = () => {
-        const newValue = !autoNext;
-        setAutoNext(newValue);
-        localStorage.setItem('toonplayer_autonext', String(newValue));
-        toast.success(newValue ? 'Auto Next enabled ✓' : 'Auto Next disabled', {
-            icon: newValue ? '⏭️' : '⏹️',
-        });
-    };
+    // Auto-play and Auto-next logic removed (now permanent)
 
     const handleShare = async () => {
         try {
@@ -874,6 +856,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             className="w-full h-full border-0 bg-black"
                                             allowFullScreen
                                             allow="autoplay; fullscreen"
+                                            onLoad={() => setLoadingSource(false)}
+                                            onError={() => autoSwitchServer(selectedServer!)}
                                         ></iframe>
                                         {isGuardLocked && (
                                             <div 
@@ -1096,16 +1080,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </div>
                             </div>
 
-                            {/* Auto Toggles */}
+                            {/* Auto Toggles Removed — Now Permanent */}
                             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
-                                <label className="flex items-center gap-2 cursor-pointer group hover:text-white transition-colors">
-                                    <input type="checkbox" checked={autoPlay} onChange={toggleAutoPlay} className="w-4 h-4 rounded-sm border-[var(--border-color)] bg-[var(--bg-main)] text-white focus:ring-0 cursor-pointer accent-white" />
-                                    Auto Play
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer group hover:text-white transition-colors">
-                                    <input type="checkbox" checked={autoNext} onChange={toggleAutoNext} className="w-4 h-4 rounded-sm border-[var(--border-color)] bg-[var(--bg-main)] text-white focus:ring-0 cursor-pointer accent-white" />
-                                    Auto Next
-                                </label>
+                                <div className="flex items-center gap-2 text-purple-400">
+                                    <Sparkles className="w-4 h-4" />
+                                    Premium Auto-Features Active
+                                </div>
                                 <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-md transition-colors text-white border border-white/5 disabled:opacity-50">
                                    <Share2 className="w-4 h-4" /> Share
                                 </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Twitter, Mail, Globe, Code2, Heart, Sparkles, Zap, Shield, Rocket } from "lucide-react";
+import { Github, Twitter, Mail, Globe, Heart, Sparkles, Zap, Shield, Rocket } from "lucide-react";
 import Link from "next/link";
 
 export default function AboutPage() {
@@ -15,9 +15,9 @@ export default function AboutPage() {
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="w-24 h-24 bg-gradient-to-tr from-purple-600 to-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.4)] mb-8"
+                        className="w-24 h-24 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.3)] mb-8 p-4"
                     >
-                        <Code2 className="w-12 h-12 text-white" />
+                        <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain" />
                     </motion.div>
                     
                     <motion.h1 
