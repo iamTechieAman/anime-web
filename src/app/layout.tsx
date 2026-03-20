@@ -6,6 +6,8 @@ import { MobileUIProvider } from "@/context/MobileUIContext";
 import ProfileGate from "@/components/ProfileGate";
 import LayoutContent from "@/components/LayoutContent";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 const sora = Sora({
   variable: "--font-sora",
@@ -86,6 +88,8 @@ export default function RootLayout({
               {children}
             </LayoutContent>
             <Toaster position="bottom-center" />
+            <SpeedInsights />
+            <Analytics />
           </NotificationProvider>
         </MobileUIProvider>
       </body>
