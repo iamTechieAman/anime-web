@@ -88,7 +88,7 @@ export default function ProfileGate() {
                 disabled={!profileName.trim()}
                 className="w-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-white px-8 py-4 rounded-xl text-lg font-bold transition-all disabled:cursor-not-allowed"
               >
-                Let's Watch Anime
+                Lets Watch
               </button>
             </form>
           </motion.div>

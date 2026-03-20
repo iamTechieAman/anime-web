@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Play, Star, ChevronLeft, ChevronRight, Flame } from "lucide-react";
@@ -25,8 +25,21 @@ export interface MovieItem {
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
 // === MOVIE CARD ===
-export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: string }) {
+export const MovieCard = memo(function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: string }) {
     const [imgError, setImgError] = useState(false);
+    const [liveViewers, setLiveViewers] = useState(item.liveViewers);
+
+    useEffect(() => {
+        if (!item.liveViewers) return;
+        const interval = setInterval(() => {
+            setLiveViewers((prev) => {
+                if (!prev) return prev;
+                const change = Math.floor(Math.random() * 201) - 100;
+                return Math.max(100, prev + change);
+            });
+        }, 10000); // Less frequent updates for better performance
+        return () => clearInterval(interval);
+    }, [item.liveViewers]);
     const title = item.title || item.name || "Untitled";
     const releaseDate = item.release_date || item.first_air_date;
     const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
@@ -83,11 +96,11 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
                     )}
 
                     {/* Live Viewers badge */}
-                    {item.liveViewers && (
+                    {liveViewers && (
                         <div className="absolute bottom-2 right-2 hidden sm:flex items-center gap-1.5 bg-black/80 backdrop-blur-md rounded-full px-2 py-1 z-20 border border-white/10 shadow-lg group-hover:opacity-0 transition-opacity duration-300">
                             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-[9px] sm:text-[10px] font-bold text-white tracking-wide">
-                                {item.liveViewers.toLocaleString()} watching
+                                {liveViewers.toLocaleString()} watching
                             </span>
                         </div>
                     )}
@@ -145,10 +158,10 @@ export function MovieCard({ item, type = "movie" }: { item: MovieItem; type?: st
         </Link>
         </motion.div>
     );
-}
+});
 
 // === MOVIE GRID ===
-export function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
+export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
     return (
         <div className="responsive-grid">
             {items.map((item, idx) => (
@@ -156,10 +169,10 @@ export function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?
             ))}
         </div>
     );
-}
+});
 
 // === MOVIE ROW (Horizontal Scroll) ===
-export function MovieRow({ items, type = "movie", title }: { items: MovieItem[]; type?: string; title?: string }) {
+export const MovieRow = memo(function MovieRow({ items, type = "movie", title }: { items: MovieItem[]; type?: string; title?: string }) {
     const scrollId = `row-${title?.replace(/\s/g, "-") || Math.random()}`;
 
     const scroll = (direction: "left" | "right") => {
@@ -201,4 +214,4 @@ export function MovieRow({ items, type = "movie", title }: { items: MovieItem[];
             </div>
         </div>
     );
-}
+});

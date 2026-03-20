@@ -161,22 +161,7 @@ export default function MoviesPage() {
         loadOtherData();
     }, []);
 
-    // Simulated Live Polling for Viewership Data
-    useEffect(() => {
-        if (trending.length === 0) return;
 
-        const interval = setInterval(() => {
-            setTrending((prev) =>
-                prev.map((item) => {
-                    if (!item.liveViewers) return item;
-                    const change = Math.floor(Math.random() * 201) - 100;
-                    return { ...item, liveViewers: Math.max(100, item.liveViewers + change) };
-                })
-            );
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [trending.length]);
 
     // Search handler
     useEffect(() => {
