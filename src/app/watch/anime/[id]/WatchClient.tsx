@@ -4,7 +4,7 @@ import { useState, useEffect, use, useRef } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -660,7 +660,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col">
                 {/* Navbar */}
-                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(0.75rem,env(safe-area-inset-top))]">
+                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] pt-[max(0.75rem,env(safe-area-inset-top))]">
                     <div className="flex items-center gap-3">
                         <Link href="/" className="p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
                             <ChevronLeft className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
@@ -729,7 +729,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col font-sans selection:bg-purple-500/30 transition-colors duration-300">
             {/* No JavaScript Fallback */}
             <noscript>
-                <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-xl flex items-center justify-center p-6">
+                <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">
                     <div className="max-w-md bg-[var(--bg-card)] border border-red-500/30 rounded-2xl p-8 text-center">
                         <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold mb-3 text-[var(--text-main)]">JavaScript Required</h2>
@@ -749,7 +749,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             </div>
 
             {/* Navbar with Safe Area Support */}
-            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all pt-[max(0.75rem,env(safe-area-inset-top))] h-auto">
+            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] transition-all pt-[max(0.75rem,env(safe-area-inset-top))] h-auto">
                 <div className="flex items-center gap-3 md:gap-4">
                     <Link href="/" className="p-1 md:p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
                         <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
@@ -1021,7 +1021,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-xl"
+                                                className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-md"
                                             >
                                                 <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                                                     <div className="flex flex-col">

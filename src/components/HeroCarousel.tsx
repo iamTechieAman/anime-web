@@ -30,21 +30,21 @@ export default function HeroCarousel() {
     // Use SWR for real-time updates and auto-revalidation
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-    // Poll every 5 minutes (300000ms) to check for new trending anime
-    const { data, error, isLoading: isSwrLoading } = useSWR('/api/anime/home', fetcher, {
+    // Poll every 5 minutes (300000ms) to check for new trending movies/tv
+    const { data: trendingData, error, isLoading: isSwrLoading } = useSWR('/api/prime/trending', fetcher, {
         refreshInterval: 60000,
         revalidateOnFocus: true,
         dedupingInterval: 60000,
     });
 
     useEffect(() => {
-        if (data?.slides) {
-            processSlides(data.slides);
+        if (trendingData?.results) {
+            processSlides(trendingData.results);
         } else if (error) {
             console.error("Failed to fetch home slides:", error);
             setIsLoading(false);
         }
-    }, [data, error]);
+    }, [trendingData, error]);
 
     const normalizeUrl = (url: string | null | undefined): string => {
         if (!url) return '';
@@ -54,73 +54,39 @@ export default function HeroCarousel() {
     };
 
     const processSlides = async (rawSlides: any[]) => {
-        console.log("[HeroCarousel] Processing slides from SWR...");
+        console.log("[HeroCarousel] Processing slides from TMDB...");
         try {
-            const idsToFetch = rawSlides
-                .map(item => item.extra?.aniListId)
-                .filter(id => id != null);
-
-            let anilistDataMap = new Map();
-
-            if (idsToFetch.length > 0) {
-                try {
-                    const alRes = await axios.post('https://graphql.anilist.co', {
-                        query: `query($ids: [Int]) { Page(page: 1, perPage: 50) { media(id_in: $ids) { id bannerImage coverImage{extraLarge} averageScore seasonYear genres format } } }`,
-                        variables: { ids: idsToFetch }
-                    });
-                    
-                    const mediaList = alRes.data?.data?.Page?.media || [];
-                    mediaList.forEach((media: any) => {
-                        anilistDataMap.set(media.id, media);
-                    });
-                } catch (e) {
-                    console.error("Batched AniList fetch failed:", e);
-                }
-            }
-
-            const formattedSlides: Slide[] = rawSlides.map((item: any) => {
-                let image = item.image;
-                let cover = item.extra?.cover;
-                let banner = null;
-                let rating = "?";
-                let year = "2026";
-
-                const alId = item.extra?.aniListId;
-                if (alId && anilistDataMap.has(alId)) {
-                    const media = anilistDataMap.get(alId);
-                    banner = media.bannerImage;
-                    cover = media.coverImage?.extraLarge || cover;
-                    if (media.averageScore) rating = `${media.averageScore}%`;
-                    if (media.seasonYear) year = media.seasonYear.toString();
-                }
+            const formattedSlides: Slide[] = rawSlides.slice(0, 15).map((item: any) => {
+                const isTv = item.media_type === 'tv' || !item.title;
+                const title = item.title || item.name;
+                const description = item.overview || "No description.";
+                const image = item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : '';
+                const cover = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
+                const rating = item.vote_average ? `${(item.vote_average * 10).toFixed(0)}%` : "?";
+                const release = (item.release_date || item.first_air_date || "2026").split('-')[0];
+                const type = isTv ? "TV" : "MOVIE";
+                const link = `/watch/${isTv ? 'tv' : 'movie'}/${item.id}`;
 
                 return {
                     id: item.id,
-                    title: item.title,
-                    description: item.extra?.description || "No description.",
-                    image: normalizeUrl(banner || cover || item.image),
-                    cover: normalizeUrl(cover || item.image),
-                    tags: ["Anime", "HD", "New"],
+                    title,
+                    description,
+                    image,
+                    cover,
+                    tags: ["HD", "Trending"],
                     rating,
-                    release: year,
+                    release,
                     quality: "HD",
-                    type: "TV",
-                    link: `/watch/anime/${item.id}?provider=anikai`
+                    type,
+                    link
                 };
             });
 
             const validSlides = formattedSlides.filter(s => s.image && s.image !== '');
-            console.log("[HeroCarousel] Raw slides count:", rawSlides.length);
-            console.log("[HeroCarousel] Valid slides count:", validSlides.length);
-            console.log("[HeroCarousel] Raw slides sample:", rawSlides[0]);
-            
             if (validSlides.length > 0) {
                 setSlides(validSlides);
             } else {
-                console.warn("[HeroCarousel] No valid slides found after processing. Setting fallback to raw slides if any.", formattedSlides);
-                if (formattedSlides.length > 0) {
-                    setSlides(formattedSlides);
-                }
+                setSlides(formattedSlides);
             }
         } catch (err) {
             console.error("Error processing slides:", err);
@@ -181,6 +147,7 @@ export default function HeroCarousel() {
                                 alt={activeSlide.title}
                                 fill
                                 priority
+                                fetchPriority="high"
                                 className="object-cover object-center opacity-70"
                                 sizes="100vw"
                             />
@@ -203,7 +170,7 @@ export default function HeroCarousel() {
                     className="bg-purple-600 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded-sm shadow-lg flex items-center gap-2 backdrop-blur-md"
                 >
                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                    EP {activeSlide.rating.replace('%', '').slice(0,1) || '1'} IN 2d 14h
+                    TRENDING SELECTION
                 </motion.div>
             </div>
 

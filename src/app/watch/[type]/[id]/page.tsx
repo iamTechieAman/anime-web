@@ -3,9 +3,11 @@
 import { useState, useEffect, use, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
+import toast from "react-hot-toast";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -13,7 +15,7 @@ const SERVERS = [
     {
         id: "vidlink",
         name: "VidLink",
-        badge: "Recommended",
+        badge: "Auto-Next",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
@@ -29,21 +31,14 @@ const SERVERS = [
         name: "VidBinge",
         badge: "4K/HD",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidbinge.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.to/embed/movie/${id}`,
+            type === "tv" ? `https://vidbinge.com/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.com/embed/movie/${id}`,
     },
     {
-        id: "embed_su",
-        name: "EmbedSU",
-        badge: "HD",
+        id: "cineby",
+        name: "CineBy",
+        badge: "Fast",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}` : `https://embed.su/embed/movie/${id}`,
-    },
-    {
-        id: "vidsrc_cc",
-        name: "VidSrc CC",
-        badge: "New",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.cc/v2/embed/movie/${id}`,
+            type === "tv" ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
     },
     {
         id: "vidsrc_net",
@@ -52,6 +47,15 @@ const SERVERS = [
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
     },
+
+    {
+        id: "vidsrc_cc",
+        name: "VidSrc CC",
+        badge: "New",
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === "tv" ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.cc/v2/embed/movie/${id}`,
+    },
+
     {
         id: "vidsrc_xyz",
         name: "VidSrc XYZ",
@@ -74,13 +78,6 @@ const SERVERS = [
             type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     },
     {
-        id: "autoembed",
-        name: "AutoEmbed",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://player.autoembed.cc/embed/tv/${id}/${s || 1}/${e || 1}` : `https://player.autoembed.cc/embed/movie/${id}`,
-    },
-    {
         id: "smashy",
         name: "SmashyStream",
         badge: null,
@@ -100,13 +97,6 @@ const SERVERS = [
         badge: null,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
-    },
-    {
-        id: "cineby",
-        name: "CineBy",
-        badge: "Fast",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
     },
     {
         id: "rivestream",
@@ -135,13 +125,6 @@ const SERVERS = [
         badge: "New",
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             `https://aether.mom/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
-    },
-    {
-        id: "shuttletv",
-        name: "ShuttleTV",
-        badge: "RU",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://shuttletv.su/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
     },
     {
         id: "cinemaos",
@@ -245,18 +228,24 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const rawId = decodeURIComponent(encodedRawId || '');
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
+    const router = useRouter();
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]);
+    const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [showTrailer, setShowTrailer] = useState(false);
     const [showServers, setShowServers] = useState(false);
+    const [isAutoChecking, setIsAutoChecking] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
+    
+    // User Settings Support
+    const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
+    const [serversList, setServersList] = useState<any[]>(SERVERS);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
 
     // Auto Server Selection State
-    const [isAutoChecking, setIsAutoChecking] = useState(false);
     const [autoCheckProgress, setAutoCheckProgress] = useState({ current: 0, total: 0, serverName: '', results: [] as { name: string; ok: boolean }[] });
 
     // Unified State
@@ -286,7 +275,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                     const iframe = document.createElement('iframe');
                     iframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
                     iframe.src = testUrl;
-                    const timer = setTimeout(() => { resolve(false); try { document.body.removeChild(iframe); } catch {} }, 4000);
+                    const timer = setTimeout(() => { resolve(false); try { document.body.removeChild(iframe); } catch {} }, 2500);
                     iframe.onload = () => { clearTimeout(timer); resolve(true); try { document.body.removeChild(iframe); } catch {} };
                     iframe.onerror = () => { clearTimeout(timer); resolve(false); try { document.body.removeChild(iframe); } catch {} };
                     document.body.appendChild(iframe);
@@ -315,32 +304,145 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Reset player loaded state on server change
+    // Refresh iframe when server or episode changes
+    useEffect(() => {
+        setPlayerLoaded(false);
+        setSourceError(false);
+        setIframeKey(prev => prev + 1);
+        
+        // Ensure auto-play / next-episode handling
+        const handleMessage = (e: MessageEvent) => {
+            if (e.data && (e.data.type === "videoEnd" || e.data.event === "ended" || e.data === "video_ended")) {
+                if (type === 'tv' || type === 'anime') {
+                    let nextEp = selectedEpisode + 1;
+                    let nextSeason = selectedSeason;
+                    const seasons = details?.seasons; // Assuming 'details' contains season info
+                    const currentSeasonData = seasons?.find(s => s.season_number === selectedSeason);
+                    if (currentSeasonData && nextEp > currentSeasonData.episode_count) {
+                        nextSeason += 1;
+                        nextEp = 1;
+                    }
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set("s", nextSeason.toString());
+                    newUrl.searchParams.set("e", nextEp.toString());
+                    router.push(newUrl.pathname + newUrl.search);
+                }
+            }
+        };
+        window.addEventListener("message", handleMessage);
+        return () => window.removeEventListener("message", handleMessage);
+    }, [activeServer, selectedSeason, selectedEpisode, type, details?.seasons, router]);
+
+    // Load App Settings Live
+    useEffect(() => {
+        let isFirstLoad = true;
+        const loadSettings = () => {
+            try {
+                let parsed = { smartSwitch: true, multiAudio: true };
+                const s = localStorage.getItem("toonplayer_settings");
+                if (s) {
+                    parsed = JSON.parse(s);
+                }
+                
+                if (parsed.smartSwitch !== undefined) setSmartSwitchEnabled(parsed.smartSwitch);
+                else setSmartSwitchEnabled(true);
+                
+                // Re-sort servers if MultiAudio prioritize is on
+                if (parsed.multiAudio === true || parsed.multiAudio === undefined) {
+                    const sortedServers = [...SERVERS].sort((a, b) => {
+                        if (a.id === "peachify") return -1;
+                        if (b.id === "peachify") return 1;
+                        if (a.id === "vidlink") return -1; // Vidlink is best fallback
+                        return 0;
+                    });
+                    setServersList(sortedServers);
+                    
+                    if (isFirstLoad) {
+                        setActiveServer(sortedServers[0]);
+                        isFirstLoad = false;
+                    }
+                } else {
+                    setServersList([...SERVERS]);
+                    if (isFirstLoad) {
+                        setActiveServer(SERVERS[0]);
+                        isFirstLoad = false;
+                    }
+                }
+            } catch (e) {}
+        };
+
+        // Load initially
+        loadSettings();
+
+        // Listen for live updates from ProfileSettings modal
+        const handleProfileUpdate = () => {
+            isFirstLoad = false; // Never forcibly swap server on live toggles to prevent deep lag!
+            loadSettings();
+        };
+        window.addEventListener("profileUpdated", handleProfileUpdate);
+        return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
+    }, []);
+
+    // Reset states on server change
     useEffect(() => {
         setPlayerLoaded(false);
         setSourceError(false);
     }, [activeServer]);
 
+    // Intelligent Auto-Switching
+    const autoSwitchToNext = useCallback((failedId: string) => {
+        if (!smartSwitchEnabled) return; // Respect user settings
+        
+        console.warn(`[WatchPage] Server ${failedId} failed or timed out. Marking as failed.`);
+        setFailedServers(prev => {
+            const newSet = new Set(prev);
+            newSet.add(failedId);
+            return newSet;
+        });
+
+        // Find next available
+        const baseServers = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList;
+        const nextServer = baseServers.find(s => s.id !== failedId && !failedServers.has(s.id));
+        
+        if (nextServer) {
+            toast(`Auto-switching to ${nextServer.name}...`, { icon: '🔄', id: 'autoSwitchToggle' });
+            setActiveServer(nextServer);
+        } else {
+            toast.error("All auto-check servers failed. Please try a manual selection.", { id: 'autoSwitchToggle' });
+        }
+    }, [failedServers, type, smartSwitchEnabled, serversList]);
+
     // Automatic Auto-Server Selection if initial server is slow/error
     useEffect(() => {
-        if (loading || isAutoChecking || playerLoaded || !details) return;
+        if (loading || isAutoChecking || playerLoaded || !details || !activeServer) return;
 
         const timer = setTimeout(() => {
+            // If after 6 seconds, player hasn't loaded and no source error,
+            // we assume it's stuck/blocked. Auto switch visually.
             if (!playerLoaded && !sourceError) {
-                console.log("[WatchPage] Initial server taking too long, starting auto-check...");
-                autoCheckServers();
+                console.log("[WatchPage] Initial server taking too long, auto-switching.");
+                autoSwitchToNext(activeServer.id);
             }
         }, 6000); // 6 second threshold
 
         return () => clearTimeout(timer);
-    }, [loading, playerLoaded, sourceError, details, autoCheckServers, isAutoChecking]);
+    }, [loading, playerLoaded, sourceError, details, isAutoChecking, activeServer, autoSwitchToNext]);
 
-    // Trigger auto-check immediately on source error
+    // Monitor for strict iframe errors
     useEffect(() => {
-        if (sourceError && !isAutoChecking) {
-            autoCheckServers();
+        if (playerLoaded && sourceError && activeServer) {
+            console.log("Iframe loaded but reported error state. Auto-switching.");
+            autoSwitchToNext(activeServer.id);
         }
-    }, [sourceError, isAutoChecking, autoCheckServers]);
+    }, [loading, playerLoaded, sourceError, details, activeServer, autoSwitchToNext]);
+
+    // Handle generic source errors safely
+    useEffect(() => {
+        if (!isAutoChecking && sourceError && activeServer && !playerLoaded) {
+            console.log("iframe onload error or generic error, auto-switching.");
+            autoSwitchToNext(activeServer.id);
+        }
+    }, [sourceError, isAutoChecking, activeServer, playerLoaded, autoSwitchToNext]);
 
     // Keyboard shortcuts: 1-9 to switch servers, Escape to close modals
     useEffect(() => {
@@ -550,7 +652,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
         const embedUrl = SERVERS[0].getUrl((type === "anime" || type === "cartoon") ? "tv" : type, fallbackId, 1, 1);
         return (
             <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
                     <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                         <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -597,7 +699,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
             {/* Top Navigation Bar */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-[var(--border-color)]">
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                     <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -734,13 +836,21 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allowFullScreen
-                                allow="autoplay; encrypted-media; picture-in-picture"
+                                allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture"
                                 referrerPolicy="origin"
-                                onLoad={() => setPlayerLoaded(true)}
                                 onError={() => setSourceError(true)}
+                                onLoad={() => setPlayerLoaded(true)}
                             />
                         </motion.div>
                     </div>
+                </div>
+
+                {/* Server disclaimer */}
+                <div className="w-full bg-blue-500/10 border-b border-blue-500/20 px-4 md:px-6 py-2.5 backdrop-blur-md">
+                    <p className="max-w-7xl mx-auto text-xs font-semibold text-blue-300 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 shrink-0 text-yellow-400" />
+                        <span>You are watching <span className="font-black text-white px-1">{title}</span>. If the current server doesn't work, please try other servers below.</span>
+                    </p>
                 </div>
 
                 {/* Server Selector Bar */}
@@ -762,29 +872,37 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
 
                         {/* Server Buttons — scrollable row on desktop */}
                         <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-none max-w-[calc(100vw-280px)] pb-1">
-                            {(type === "anime" ? [...SERVERS, ...ANIME_SERVERS] : SERVERS).map((server) => (
+                            {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
                                 <button
                                     key={server.id}
-                                    onClick={() => setActiveServer(server)}
+                                    onClick={() => {
+                                        setFailedServers(new Set()); // Reset failures on manual click
+                                        setActiveServer(server);
+                                    }}
                                     className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id
-                                        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
-                                        : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)]"
-                                        }`}
+                                        ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 font-bold"
+                                        : failedServers.has(server.id)
+                                            ? "bg-red-500/10 text-red-400 border border-red-500/20 line-through opacity-70"
+                                            : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white"
+                                        } ${server.id === "peachify" ? "border-amber-500/50 hover:border-amber-500" : ""}`}
                                 >
-                                    {activeServer.id === server.id ? (
-                                        <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
-                                    ) : (
-                                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mr-2" />
-                                    )}
-                                    {server.name}
-                                    {server.badge && (
-                                        <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold ${server.badge === "Recommended" ? "bg-green-500/20 text-green-400" :
-                                            server.badge === "Fast" ? "bg-yellow-500/20 text-yellow-400" :
-                                                "bg-blue-500/20 text-blue-400"
-                                            }`}>
-                                            {server.badge}
-                                        </span>
-                                    )}
+                                    <div className="flex flex-col items-start gap-0.5">
+                                        <div className="flex items-center gap-1.5">
+                                            {activeServer.id === server.id ? (
+                                                <Play className="w-3.5 h-3.5 fill-current" />
+                                            ) : (
+                                                <Server className="w-3.5 h-3.5" />
+                                            )}
+                                            {server.name}
+                                        </div>
+                                        {server.badge && (
+                                            <span className={`text-[9px] px-1.5 py-[1px] rounded uppercase font-black tracking-widest ${server.id === "peachify" ? "text-amber-400 bg-amber-400/10"
+                                                : "text-purple-400 bg-purple-400/10"
+                                                }`}>
+                                                {server.badge}
+                                            </span>
+                                        )}
+                                    </div>
                                 </button>
                             ))}
                         </div>

@@ -41,9 +41,16 @@ export async function GET(request: Request) {
         if (!res.ok) throw new Error(`TMDB API error: ${res.status}`);
 
         const data = await res.json();
-        const filtered = Array.isArray(data.results) 
+        let filtered = Array.isArray(data.results) 
             ? data.results.filter((item: any) => item.media_type === "movie" || item.media_type === "tv" || !item.media_type)
             : [];
+
+        if (query.trim() && genre) {
+            const genreId = TMDB_GENRE_MAP[genre.toLowerCase()];
+            if (genreId) {
+                filtered = filtered.filter((item: any) => item.genre_ids && item.genre_ids.includes(genreId));
+            }
+        }
 
         return NextResponse.json({
             results: filtered.map((item: any) => ({

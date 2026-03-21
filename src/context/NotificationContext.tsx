@@ -35,17 +35,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         setNotifications([]);
       }
     } else {
-      // Initial welcome notification
-      const initial: Notification = {
-        id: 'welcome',
-        title: 'Welcome to ToonPlayer!',
-        message: 'Enjoy your favorite anime and movies in premium quality.',
-        type: 'info',
+      const initial1: Notification = {
+        id: 'welcome_v4',
+        title: '🎉 Server & Player Upgrades Complete!',
+        message: 'Aggressive server switching bugs have been vanquished! Enjoy smoother playback, a fully upgraded History page, and lag-free UI.',
+        type: 'update',
         timestamp: Date.now(),
         read: false
       };
-      setNotifications([initial]);
-      localStorage.setItem('toonplayer_notifications', JSON.stringify([initial]));
+      setNotifications([initial1]);
+      localStorage.setItem('toonplayer_notifications', JSON.stringify([initial1]));
     }
   }, []);
 

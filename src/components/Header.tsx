@@ -11,7 +11,7 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { formatDistanceToNow } from 'date-fns';
 
-const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mecha", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller"];
+const GENRES = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
 const FORMATS = ["TV", "Movie", "OVA", "ONA", "Special"];
 const STATUSES = ["Ongoing", "Completed", "Upcoming"];
 
@@ -142,7 +142,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md md:backdrop-blur-xl border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
+    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
@@ -157,7 +157,7 @@ export default function Header() {
             />
             
             <img 
-              src="/logo.png" 
+              src="/logo.webp" 
               alt="ToonPlayer Logo" 
               className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform duration-300"
             />
@@ -191,7 +191,7 @@ export default function Header() {
               autoComplete="off"
             />
             {searchQuery && (
-              <button type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full mr-1">
+              <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full mr-1">
                 <X className="w-4 h-4 text-[var(--text-muted)]" />
               </button>
             )}
@@ -200,6 +200,7 @@ export default function Header() {
           {/* Filter Button */}
           <div ref={filterRef} className="relative">
             <button
+              aria-label="Filter Options"
               onClick={() => { setShowFilters(v => !v); setShowNotifications(false); }}
               className={`h-full px-4 py-2.5 bg-[var(--bg-card)] border rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
                 showFilters || filterGenre || filterFormat || filterStatus
@@ -220,7 +221,7 @@ export default function Header() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl"
+                  className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
                 >
                   <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                     <span className="font-bold text-sm">Fine-tune Search</span>
@@ -284,7 +285,7 @@ export default function Header() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute top-full left-0 right-14 mt-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl"
+                className="absolute top-full left-0 right-14 mt-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
               >
                 {suggestions.map((item: any) => (
                   <Link
@@ -330,6 +331,7 @@ export default function Header() {
         <div className="flex items-center gap-2 md:gap-4">
           <div ref={notifRef} className="relative">
             <button 
+              aria-label="Notifications"
               onClick={() => {
                 setShowNotifications(v => !v);
                 setShowFilters(false);
@@ -348,7 +350,7 @@ export default function Header() {
                   initial={{ opacity: 0, y: 12, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+                  className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
                 >
                    <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -410,12 +412,13 @@ export default function Header() {
 
           <div ref={profileRef} className="relative">
             <button 
+              aria-label="Profile Menu"
               onClick={() => setShowProfileDropdown(v => !v)}
               className="flex items-center gap-3 p-1 pr-3 hover:bg-[var(--bg-card)] rounded-full transition-all border border-transparent hover:border-[var(--border-color)] group"
             >
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-purple-500/20">
                 <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
-                  <img src={profile?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
+                  <img src={profile?.avatar || "https://api.dicebear.com/9.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
                 </div>
               </div>
               <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 ${showProfileDropdown ? 'rotate-180' : ''}`} />
@@ -427,7 +430,7 @@ export default function Header() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+                  className="absolute top-full right-0 mt-3 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
                 >
                   <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
                     <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Account</p>
@@ -460,11 +463,11 @@ export default function Header() {
                       </div>
                     </button>
                     <div className="my-2 border-t border-[var(--border-color)] mx-2" />
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl transition-colors group text-red-400">
+                    <button onClick={() => { localStorage.removeItem("toonplayer_profile"); window.location.href = "/"; }} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl transition-colors group text-red-400">
                       <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
                         <LogOut className="w-4 h-4" />
                       </div>
-                      <span className="text-sm font-bold">Sign Out</span>
+                      <span className="text-sm font-bold">Switch Profile</span>
                     </button>
                   </div>
                 </motion.div>

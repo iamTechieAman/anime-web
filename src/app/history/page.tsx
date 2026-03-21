@@ -7,7 +7,7 @@ import Link from "next/link";
 type HistoryEntry = {
   id: string;
   title: string;
-  thumbnail?: string;
+  image?: string;
   episode: string;
   season?: string;
   type: string;
@@ -18,6 +18,7 @@ type HistoryEntry = {
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "anime" | "movie" | "tv">("all");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -43,9 +44,11 @@ export default function HistoryPage() {
     localStorage.setItem("watchHistory", JSON.stringify(updated));
   };
 
-  const filtered = history.filter((h) =>
-    h.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = history.filter((h) => {
+    const matchesSearch = h.title.toLowerCase().includes(search.toLowerCase());
+    const matchesType = filterType === "all" || h.type === filterType || (filterType === 'anime' && h.type === 'cartoon');
+    return matchesSearch && matchesType;
+  });
 
   const grouped: Record<string, HistoryEntry[]> = {};
   filtered.forEach((entry) => {
@@ -82,7 +85,7 @@ export default function HistoryPage() {
 
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-0 pb-24 md:pb-10 md:pl-[72px]">
-      <div className="sticky top-0 z-40 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)]">
+      <div className="sticky top-0 z-40 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)]">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Clock className="w-6 h-6 text-purple-400" />
@@ -116,6 +119,20 @@ export default function HistoryPage() {
                 </button>
               )}
             </div>
+            
+            <div className="flex items-center gap-2 mt-4 overflow-x-auto hide-scrollbar pb-1">
+              {(["all", "anime", "movie", "tv"] as const).map(type => (
+                <button
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                    filterType === type ? "bg-purple-600 text-white" : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20"
+                  }`}
+                >
+                  {type === "all" ? "All History" : type === "anime" ? "Anime" : type === "movie" ? "Movies" : "TV Shows"}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -146,8 +163,8 @@ export default function HistoryPage() {
                   {entries.map((entry, i) => (
                     <div key={`${entry.id}-${entry.episode}-${i}`} className="group flex items-center gap-4 p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-white/10 transition-all">
                       <div className="relative w-16 h-24 rounded-lg overflow-hidden shrink-0 bg-black/20">
-                        {entry.thumbnail && (
-                          <img src={entry.thumbnail} alt={entry.title} className="w-full h-full object-cover" />
+                        {entry.image && (
+                          <img src={entry.image} alt={entry.title} className="w-full h-full object-cover" />
                         )}
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <Play className="w-5 h-5 text-white fill-white" />

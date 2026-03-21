@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Search, Menu, Film, Calendar, Clock, Tv, Zap } from "lucide-react";
+import { Home, Search, Menu, Film, Calendar, Clock, Tv, Zap, Shuffle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -64,11 +64,11 @@ export default function MobileNav() {
             onClick: () => { closeAll(); router.push('/az-list/all'); },
         },
         {
-            label: "Schedule",
-            icon: Calendar,
-            color: "text-green-500",
-            active: pathname === '/schedule',
-            onClick: () => { closeAll(); router.push('/schedule'); },
+            label: "Random",
+            icon: Shuffle,
+            color: "text-pink-500",
+            active: pathname === '/randomize',
+            onClick: () => { closeAll(); router.push('/randomize'); },
         },
         {
             label: "History",
@@ -97,7 +97,7 @@ export default function MobileNav() {
         <div
             className={`
         fixed bottom-0 left-0 right-0 z-50 
-        bg-[var(--bg-main)]/80 backdrop-blur-2xl border-t border-[var(--border-color)]
+        bg-[var(--bg-main)]/80 backdrop-blur-md border-t border-[var(--border-color)]
         pb-[env(safe-area-inset-bottom)] transition-all duration-500 md:hidden
         ${isScrolledDown ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"}
         shadow-[0_-10px_30px_rgba(0,0,0,0.5)]

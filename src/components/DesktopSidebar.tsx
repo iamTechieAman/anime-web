@@ -12,7 +12,7 @@ export default function DesktopSidebar() {
     const navItems = [
         { name: "Movies", href: "/", icon: Film, color: "text-blue-400" },
         { name: "Anime", href: "/az-list/all", icon: Zap, color: "text-purple-400" },
-        { name: "Schedule", href: "/schedule", icon: Calendar, color: "text-green-400" },
+        { name: "Randomize", href: "/randomize", icon: Shuffle, color: "text-pink-400" },
         { name: "History", href: "/history", icon: Clock, color: "text-orange-400" },
         { name: "About", href: "/about", icon: Star, color: "text-purple-400" },
     ];
@@ -22,11 +22,10 @@ export default function DesktopSidebar() {
         { name: "Genres", href: "/genres", icon: LayoutGrid, color: "text-cyan-400" },
         { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "text-yellow-400" },
         { name: "New", href: "/search?status=Ongoing", icon: Sparkles, color: "text-emerald-400" },
-        { name: "Random", href: "/watch/movie/random", icon: Shuffle, color: "text-pink-400", isRandom: true },
     ];
 
     return (
-        <aside className="sticky left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/80 backdrop-blur-xl border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-2 z-40 overflow-y-auto hide-scrollbar shadow-[20px_0_40px_-20px_rgba(0,0,0,0.5)]">
+        <aside className="sticky left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/80 backdrop-blur-lg border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-2 z-40 overflow-y-auto hide-scrollbar shadow-[20px_0_40px_-20px_rgba(0,0,0,0.5)]">
             {/* Main Navigation */}
             {navItems.map((item, i) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
@@ -79,17 +78,7 @@ export default function DesktopSidebar() {
                         transition={{ delay: 0.4 + i * 0.08, duration: 0.3 }}
                     >
                         <Link 
-                            href={item.isRandom ? '#' : item.href}
-                            onClick={(e) => {
-                                if (item.isRandom) {
-                                    e.preventDefault();
-                                    // In a real app, this would fetch a random ID. 
-                                    // For now, let's pick a popular one or navigate to a random search result.
-                                    const randomIds = [1022789, 822119, 933260, 519182, 1011985]; // Sample popular TMDB IDs
-                                    const randomId = randomIds[Math.floor(Math.random() * randomIds.length)];
-                                    router.push(`/watch/movie/${randomId}`);
-                                }
-                            }}
+                            href={item.href}
                             className={`flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all duration-300 w-14 ${
                                 isActive 
                                 ? `${item.color} bg-[var(--bg-card)] shadow-lg border border-[var(--border-color)]` 
