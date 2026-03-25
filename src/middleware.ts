@@ -1,58 +1,51 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-const PROTECTED_ROUTES = ['/api/user'];
+// List of known automated tools and scrapers to block
+const BLOCKED_UAS = [
+    'curl', 'wget', 'python', 'scrapy', 'postman', 
+    'bot', 'crawl', 'spider', 'slurp', 'nikto',
+    'headlesschrome', 'puppeteer', 'playwright', 'cypress'
+];
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const ip = request.headers.get('x-forwarded-for') || 'unknown';
+export function middleware(request: NextRequest) {
+    const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
-  // 1. Enforce HTTPS in production
-  if (process.env.NODE_ENV === 'production' && !request.headers.get('x-forwarded-proto')?.includes('https')) {
-    return NextResponse.redirect(`https://${request.headers.get('host')}${pathname}`, 301);
-  }
-
-  // 2. Auth Guard
-  const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
-  const sessionToken = request.cookies.get('toonplayer_session')?.value;
-
-  if (isProtected) {
-    if (!sessionToken) {
-      return NextResponse.redirect(new URL('/login', request.url));
+    // Advanced Bot Protection: Block empty user agents or script bots
+    if (!userAgent || BLOCKED_UAS.some(ua => userAgent.includes(ua))) {
+        // Drop the connection for scrapers (403 Forbidden)
+        return new NextResponse(
+            JSON.stringify({ 
+                error: 'Access denied.', 
+                message: 'Your IP or User-Agent has been flagged for automated behavior.' 
+            }),
+            { 
+                status: 403, 
+                headers: { 'content-type': 'application/json' } 
+            }
+        );
     }
 
-    const payload = await verifyToken(sessionToken);
-    if (!payload) {
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('toonplayer_session');
-      return response;
-    }
+    const response = NextResponse.next();
+
+    // Comprehensive Security Headers
+    response.headers.set('X-Content-Type-Options', 'nosniff'); // Prevent MIME sniffing
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN'); // Prevent clickjacking
+    response.headers.set('X-XSS-Protection', '1; mode=block'); // Cross-site scripting (XSS) filter
+    response.headers.set('X-DNS-Prefetch-Control', 'on');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     
-    // Pass user info in headers for API routes (Internal Only)
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-user-id', payload.userId);
-    requestHeaders.set('x-user-role', payload.role);
+    // Strict Transport Security (HSTS) - enforce HTTPS
+    if (process.env.NODE_ENV === 'production') {
+        response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
 
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  }
-
-  return NextResponse.next();
+    return response;
 }
 
+// Optimize matcher to skip static files and images
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (authentication routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
-  ],
-};
+    matcher: [
+        '/((?!_next/static|_next/image|favicon.ico|_vercel|images).*)',
+    ],
+}

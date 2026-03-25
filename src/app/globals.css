@@ -198,3 +198,93 @@ html {
     gap: 0.75rem;
   }
 }
+
+/* ========== Android/Mobile Performance ========== */
+
+/* GPU-accelerated smooth scrolling for all scroll containers */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar none utility (for horizontal scroll containers) */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Horizontal scroll containers - smooth and snappy */
+.scroll-smooth-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  transform: translateZ(0); /* Force GPU layer */
+  will-change: scroll-position;
+}
+.scroll-smooth-x::-webkit-scrollbar { display: none; }
+.scroll-smooth-x > * {
+  scroll-snap-align: start;
+}
+
+/* Reduce motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Performance optimizations for cards and interactive elements */
+.premium-card,
+[class*="rounded-xl"],
+[class*="rounded-2xl"] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Optimized backdrop-blur for mobile (lighter effect for performance) */
+@media (max-width: 768px) {
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+}
+
+/* Fix for iOS/Android iframe container rendering */
+iframe {
+  transform: translateZ(0);
+}
+
+/* Smooth modal/overlay animations on mobile */
+@media (max-width: 768px) {
+  .fixed {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+}
+
+/* Touch feedback for interactive elements */
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: rgba(139, 92, 246, 0.1);
+  }
+  
+  /* Disable hover transforms on touch devices (causes lag) */
+  .premium-card:hover {
+    transform: none;
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Contain paint for grid items to prevent cascading repaints */
+.responsive-grid > * {
+  contain: layout style paint;
+}

@@ -36,9 +36,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       }
     } else {
       const initial1: Notification = {
-        id: 'welcome_v4',
-        title: '🎉 Server & Player Upgrades Complete!',
-        message: 'Aggressive server switching bugs have been vanquished! Enjoy smoother playback, a fully upgraded History page, and lag-free UI.',
+        id: 'welcome_v1_7',
+        title: '🚀 ToonPlayer V1.7 Released!',
+        message: 'Massive update: Ultra-fast UI with zero lag on mobile devices, automatic server fallback system, new ToonNortan server, and fully working Share & Watchlist features!',
         type: 'update',
         timestamp: Date.now(),
         read: false

@@ -94,7 +94,7 @@ For non-anime content, the `/api/prime` suite communicates with TheMovieDatabase
 
 ### 3. Build & Deployment
 - **Web**: Automatically deployed to **Vercel** on every push to `main`.
-- **Mobile**: Compiled to **Android APK** using Gradle and Capacitor. We increment versioning (currently **v1.6**) for every major UI or performance overhaul.
+- **Mobile**: Compiled to **Android APK** using Gradle and Capacitor. Version **v1.7** introduces zero-lag mobile UI, Native Sharing, and automatic server switching.
 
 ## 🛠️ Tech Stack
 
@@ -150,6 +150,7 @@ The development of ToonPlayer was structured into 10 major phases, focusing on c
 - **Phase 8: Ad-Blocking & Search Accuracy** - Integrated DNS-level ad blocking (dns.adguard.com) and improved search suggestions.
 - **Phase 9: Upcoming Shows & Smart Play** - Added "Upcoming" badges and automated server-health checks during playback.
 - **Phase 10: Premium Branding & Clean Scraping** - Finalized the ToonPlayer brand, added Smart Tab Selection, and refined scrapers for direct, clean player links.
+- **Phase 11: Final Polish & UI Optimization (v1.7)** - Eliminated all mobile UI lag by optimizing CSS 3D transforms, introduced the `ToonNortan` server, built an automatic server-fallback system for broken streams, and mapped out fully working LocalStorage Watchlist and Web Share functionalities.
 
 👉 **[Read the full Dev Journey & Learnings here](./JOURNEY.md)**
 

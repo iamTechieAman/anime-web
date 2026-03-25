@@ -5,7 +5,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 
@@ -13,140 +13,96 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
-        id: "vidlink",
-        name: "VidLink",
-        badge: "Auto-Next",
+        id: 'toon_ultimate',
+        name: 'Toon Player Ultimate',
+        badge: 'Best',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
+            type === 'tv' ? `https://111movies.net/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://111movies.net/movie/${id}?autoplay=1`,
     },
     {
-        id: "peachify",
-        name: "ToonPlayer VIP",
-        badge: "Multi-Audio",
+        id: 'vidfast',
+        name: 'Toon Player Auto',
+        badge: 'Fast',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
+            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&theme=3b82f6&nextButton=true&autoNext=true` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
     },
     {
-        id: "vidbinge",
-        name: "VidBinge",
-        badge: "4K/HD",
+        id: 'nortan',
+        name: 'ToonNortan',
+        badge: 'Classic',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidbinge.com/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.com/embed/movie/${id}`,
+            type === 'tv' ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
     },
     {
-        id: "cineby",
-        name: "CineBy",
-        badge: "Fast",
+        id: 'autoembed_pro',
+        name: 'Toon Player Pro',
+        badge: 'CinEvo',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
+            type === 'tv' ? `https://vidstorm.ru/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidstorm.ru/embed/movie/${id}`,
     },
     {
-        id: "vidsrc_net",
-        name: "VidSrc",
-        badge: "Stable",
+        id: 'vidbinge',
+        name: 'Toon Player Titan',
+        badge: '4K/HD',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.net/embed/movie/${id}`,
-    },
-
-    {
-        id: "vidsrc_cc",
-        name: "VidSrc CC",
-        badge: "New",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.cc/v2/embed/movie/${id}`,
-    },
-
-    {
-        id: "vidsrc_xyz",
-        name: "VidSrc XYZ",
-        badge: null,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.xyz/embed/movie/${id}`,
+            type === 'tv' ? `https://vidbinge.com/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.com/embed/movie/${id}`,
     },
     {
-        id: "vidsrc_me",
-        name: "VidSrc US",
-        badge: "Fast",
+        id: 'embedsu',
+        name: 'Toon Player Multi',
+        badge: 'Multi-Q',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://vidsrc.me/embed/movie?tmdb=${id}`,
+            type === 'tv' ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}` : `https://embed.su/embed/movie/${id}`,
     },
     {
-        id: "superembed",
-        name: "SuperEmbed",
-        badge: "Reliable",
+        id: 'multiembed',
+        name: 'Toon Player Xtreme',
+        badge: 'Reliable',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
+            type === 'tv' ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     },
     {
-        id: "smashy",
-        name: "SmashyStream",
-        badge: null,
+        id: 'peachify',
+        name: 'Toon Player VIP',
+        badge: 'Multi-Audio',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
     },
     {
-        id: "2embed",
-        name: "2Embed",
-        badge: null,
+        id: 'vidlink',
+        name: 'VidLink',
+        badge: 'Auto-Next',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}` : `https://www.2embed.cc/embed/${id}`,
+            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
     },
     {
-        id: "nontongo",
-        name: "NontonGo",
-        badge: null,
+        id: 'smashy',
+        name: 'SmashyStream',
+        badge: 'CinEvo',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
+            type === 'tv' ? `https://player.smashy.stream/tv/${id}?s=${s || 1}&e=${e || 1}` : `https://player.smashy.stream/movie/${id}`,
     },
     {
-        id: "rivestream",
-        name: "RiveStream",
-        badge: "HD",
+        id: 'cineby',
+        name: 'CineBy',
+        badge: 'Fast',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://rivestream.org/embed?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://rivestream.org/embed?type=movie&id=${id}`,
+            type === 'tv' ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
     },
     {
-        id: "ridomovies",
-        name: "RidoMovies",
-        badge: "Premium",
+        id: 'rivestream',
+        name: 'RiveStream',
+        badge: 'HD',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://ridomovies.tv/embed/tv/${id}/${s || 1}/${e || 1}` : `https://ridomovies.tv/embed/movie/${id}`,
+            type === 'tv' ? `https://rivestream.org/embed?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://rivestream.org/embed?type=movie&id=${id}`,
     },
     {
-        id: "flickystream",
-        name: "FlickyStream",
-        badge: "Alt",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://flickystream.ru/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
-    },
-    {
-        id: "aether",
-        name: "Aether",
-        badge: "New",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://aether.mom/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
-    },
-    {
-        id: "cinemaos",
-        name: "CinemaOS",
-        badge: "Vip",
+        id: 'cinemaos',
+        name: 'CinemaOS',
+        badge: 'Vip',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
-    },
-    {
-        id: "hollymovie",
-        name: "HollyMovie",
-        badge: "USA",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://hollymoviehd.cc/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
-    },
-    {
-        id: "unique",
-        name: "UniqueStream",
-        badge: "SD",
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://uniquestream.net/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
-    },
+    }
 ];
 
 const ANIME_SERVERS = [
@@ -244,7 +200,52 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
+    
+    // Watchlist & Share
+    const [inWatchlist, setInWatchlist] = useState(false);
+    
+    useEffect(() => {
+        const list = JSON.parse(localStorage.getItem("toonplayer_watchlist") || "[]");
+        setInWatchlist(list.some((item: any) => item.id.toString() === id?.toString() && item.type === type));
+    }, [id, type]);
 
+    const toggleWatchlist = () => {
+        const list = JSON.parse(localStorage.getItem("toonplayer_watchlist") || "[]");
+        if (inWatchlist) {
+            const newList = list.filter((item: any) => !(item.id.toString() === id?.toString() && item.type === type));
+            localStorage.setItem("toonplayer_watchlist", JSON.stringify(newList));
+            setInWatchlist(false);
+        } else {
+            list.unshift({
+                id,
+                type,
+                title: details?.name || details?.title || "Unknown",
+                thumbnail: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : "",
+                addedAt: Date.now()
+            });
+            localStorage.setItem("toonplayer_watchlist", JSON.stringify(list));
+            setInWatchlist(true);
+        }
+    };
+
+    const handleShare = async () => {
+        const title = details?.name || details?.title || "ToonPlayer";
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title,
+                    text: `Watch ${title} for free on ToonPlayer!`,
+                    url: window.location.href,
+                });
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                alert("Link copied to clipboard!");
+            }
+        } catch (err) {
+            console.error("Error sharing:", err);
+        }
+    };
     // Auto Server Selection State
     const [autoCheckProgress, setAutoCheckProgress] = useState({ current: 0, total: 0, serverName: '', results: [] as { name: string; ok: boolean }[] });
 
@@ -780,49 +781,64 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 </div>
                             )}
 
-                            {/* Auto Server Check Overlay */}
+                            {/* Premium Auto Server Check Overlay */}
+                            <AnimatePresence>
                             {isAutoChecking && (
                                 <motion.div 
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6"
+                                    initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                                    animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
+                                    exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                                    className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 p-6"
                                 >
-                                    <div className="w-full max-w-sm">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className="relative">
-                                                <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+                                    <div className="w-full max-w-sm bg-[var(--bg-main)]/80 p-6 rounded-2xl border border-blue-500/20 shadow-[0_0_40px_rgba(59,130,246,0.15)] relative overflow-hidden">
+                                        {/* Decorative glow */}
+                                        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
+                                        
+                                        <div className="flex items-center gap-4 mb-6 relative z-10">
+                                            <div className="relative flex shrink-0">
+                                                <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse rounded-full" />
+                                                <div className="w-12 h-12 rounded-full border border-blue-500/30 bg-blue-500/10 flex items-center justify-center">
+                                                    <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+                                                </div>
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-white">Finding Best Server</h3>
-                                                <p className="text-xs text-[var(--text-muted)]">
-                                                    Checking {autoCheckProgress.current}/{autoCheckProgress.total} — {autoCheckProgress.serverName}
+                                                <h3 className="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Routing Stream</h3>
+                                                <p className="text-xs text-blue-300/80 font-medium mt-0.5">
+                                                    Scanning servers ({autoCheckProgress.current}/{autoCheckProgress.total})
                                                 </p>
                                             </div>
                                         </div>
+
                                         {/* Progress bar */}
-                                        <div className="w-full h-1.5 bg-white/10 rounded-full mb-4 overflow-hidden">
+                                        <div className="w-full h-1 bg-white/5 rounded-full mb-5 overflow-hidden relative z-10">
                                             <motion.div 
-                                                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                                className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full relative"
                                                 animate={{ width: `${(autoCheckProgress.current / Math.max(autoCheckProgress.total, 1)) * 100}%` }}
-                                                transition={{ duration: 0.3 }}
-                                            />
+                                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                            >
+                                                <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_1s_infinite]" />
+                                            </motion.div>
                                         </div>
-                                        {/* Server results list */}
-                                        <div className="space-y-1.5 max-h-[180px] overflow-y-auto scrollbar-none">
+
+                                        {/* Server results list with stagger */}
+                                        <div className="space-y-2 max-h-[160px] overflow-y-auto scrollbar-none relative z-10 hide-scrollbar mask-image-bottom">
                                             {autoCheckProgress.results.map((r, i) => (
                                                 <motion.div 
                                                     key={i}
-                                                    initial={{ opacity: 0, x: -10 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm ${
-                                                        r.ok ? 'bg-green-500/10 border border-green-500/20' : 'bg-white/5 border border-white/5'
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    transition={{ delay: 0.05, type: 'spring' }}
+                                                    className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                                                        r.ok 
+                                                            ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                                                            : 'bg-white/5 border border-white/5 text-zinc-500'
                                                     }`}
                                                 >
-                                                    <span className={r.ok ? 'text-green-400 font-medium' : 'text-zinc-500'}>{r.name}</span>
+                                                    <span>{r.name}</span>
                                                     {r.ok ? (
-                                                        <Check className="w-4 h-4 text-green-400" />
+                                                        <Check className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
                                                     ) : (
-                                                        <X className="w-4 h-4 text-zinc-600" />
+                                                        <span className="text-[10px] uppercase tracking-widest text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded">Failed</span>
                                                     )}
                                                 </motion.div>
                                             ))}
@@ -830,15 +846,21 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                     </div>
                                 </motion.div>
                             )}
+                            </AnimatePresence>
 
                             <iframe
                                 key={iframeKey}
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allowFullScreen
-                                allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture"
-                                referrerPolicy="origin"
-                                onError={() => setSourceError(true)}
+                                allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; clipboard-write"
+                                referrerPolicy="no-referrer"
+                                onError={() => {
+                                    setSourceError(true);
+                                    if (!isAnimeServer && !isAutoChecking) {
+                                        autoCheckServers();
+                                    }
+                                }}
                                 onLoad={() => setPlayerLoaded(true)}
                             />
                         </motion.div>
@@ -1098,10 +1120,22 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap gap-3">
-                                        <button className="flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-xl font-bold text-sm hover:scale-105 transition-all shadow-xl shadow-white/5 active:scale-95">
-                                            <Heart className="w-4 h-4" /> Watchlist
+                                        <button 
+                                            onClick={toggleWatchlist} 
+                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 ${inWatchlist ? "bg-purple-600 text-white shadow-purple-500/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}
+                                        >
+                                            <Heart className={`w-4 h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}
                                         </button>
-                                        <button className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-sm hover:bg-[var(--border-color)] transition-all active:scale-95">
+                                        <button
+                                            onClick={() => setShowDownloadModal(true)}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                                        >
+                                            <Download className="w-4 h-4" /> Download
+                                        </button>
+                                        <button 
+                                            onClick={handleShare} 
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-sm hover:bg-[var(--border-color)] transition-all active:scale-95"
+                                        >
                                             <Share2 className="w-4 h-4" /> Share
                                         </button>
                                     </div>
@@ -1368,6 +1402,95 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                         </section>
                     )}
                 </div>
+
+                {/* Download Modal */}
+                <AnimatePresence>
+                    {showDownloadModal && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col"
+                            onClick={() => setShowDownloadModal(false)}
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                                        <Download className="w-5 h-5 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-sm text-white">Download — {title}</h3>
+                                        <p className="text-[11px] text-zinc-500">{type === 'tv' ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : 'Full Movie'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <a
+                                        href={type === 'tv'
+                                            ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
+                                            : `https://dl.vidsrc.vip/movie/${id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"
+                                    >
+                                        <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
+                                    </a>
+                                    <button onClick={() => setShowDownloadModal(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                                        <X className="w-5 h-5 text-zinc-400" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Download Iframe */}
+                            <div className="flex-1 relative" onClick={(e) => e.stopPropagation()}>
+                                <iframe
+                                    src={type === 'tv'
+                                        ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
+                                        : `https://dl.vidsrc.vip/movie/${id}`}
+                                    className="w-full h-full border-0"
+                                    allowFullScreen
+                                    allow="autoplay; encrypted-media; fullscreen"
+                                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox allow-downloads"
+                                    referrerPolicy="no-referrer"
+                                />
+                            </div>
+
+                            {/* Alternative Sources Bar */}
+                            <div className="shrink-0 p-3 border-t border-white/10 bg-black/80 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+                                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Alt:</span>
+                                    <a
+                                        href={type === 'tv'
+                                            ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
+                                            : `https://dl.vidsrc.vip/movie/${id}`}
+                                        target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-emerald-600/30 transition-colors"
+                                    >
+                                        <Download className="w-3 h-3" /> VidSrc DL
+                                    </a>
+                                    <a
+                                        href={type === 'tv'
+                                            ? `https://vidfast.pro/tv/${id}/${selectedSeason}/${selectedEpisode}?autoPlay=true`
+                                            : `https://vidfast.pro/movie/${id}?autoPlay=true`}
+                                        target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-blue-600/30 transition-colors"
+                                    >
+                                        <Download className="w-3 h-3" /> VidFast Pro
+                                    </a>
+                                    <a
+                                        href={type === 'tv'
+                                            ? `https://embed.su/embed/tv/${id}/${selectedSeason}/${selectedEpisode}`
+                                            : `https://embed.su/embed/movie/${id}`}
+                                        target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-purple-600/30 transition-colors"
+                                    >
+                                        <Download className="w-3 h-3" /> Embed.su
+                                    </a>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Footer */}

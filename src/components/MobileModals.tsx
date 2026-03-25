@@ -173,61 +173,72 @@ export default function MobileModals() {
                 {isSearchOpen && (
                     <motion.div
                         key="search-overlay"
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed inset-0 z-[55] bg-[var(--bg-main)] pt-safe px-4 block md:hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-[55] bg-[var(--bg-main)] pt-safe block md:hidden"
+                        style={{ willChange: 'opacity' }}
                     >
-                        <div className="flex items-center gap-4 py-4 border-b border-[var(--border-color)]">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const form = e.target as HTMLFormElement;
-                                    const input = form.elements.namedItem('query') as HTMLInputElement;
-                                    if (input.value.trim()) {
-                                        setSearchOpen(false);
-                                        router.push(`${searchAction}?query=${encodeURIComponent(input.value.trim())}`);
-                                    }
-                                }}>
-                                    <input
-                                        type="text"
-                                        name="query"
-                                        placeholder={searchPlaceholder}
-                                        autoFocus
-                                        className="w-full bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-3 outline-none focus:border-purple-500 transition-colors"
-                                    />
-                                </form>
+                        <motion.div
+                            initial={{ y: 30, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                        >
+                            <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border-color)]">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                                    <form onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const form = e.target as HTMLFormElement;
+                                        const input = form.elements.namedItem('query') as HTMLInputElement;
+                                        if (input.value.trim()) {
+                                            setSearchOpen(false);
+                                            router.push(`${searchAction}?query=${encodeURIComponent(input.value.trim())}`);
+                                        }
+                                    }}>
+                                        <input
+                                            type="text"
+                                            name="query"
+                                            placeholder={searchPlaceholder}
+                                            autoFocus
+                                            className="w-full bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-3 outline-none focus:border-purple-500/60 transition-colors text-sm"
+                                        />
+                                    </form>
+                                </div>
+                                <button
+                                    onClick={() => setSearchOpen(false)}
+                                    className="p-2 bg-[var(--bg-card)] rounded-xl transition-colors active:scale-95"
+                                >
+                                    <X className="w-5 h-5 text-[var(--text-muted)]" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setSearchOpen(false)}
-                                className="text-sm font-bold text-[var(--text-muted)] hover:text-[var(--text-main)]"
-                            >
-                                Cancel
-                            </button>
-                        </div>
 
-                        {/* Quick Genre Chips */}
-                        <div className="py-4">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-3">Popular Genres</p>
-                            <div className="flex flex-wrap gap-2">
-                                {["Action", "Romance", "Comedy", "Fantasy", "Thriller", "Sci-Fi", "Horror", "Drama"].map(genre => (
-                                    <button 
-                                        key={genre}
-                                        onClick={() => { setSearchOpen(false); router.push(`/search?genre=${genre}`); }}
-                                        className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full text-xs font-bold text-[var(--text-muted)] hover:text-purple-400 hover:border-purple-500/50 transition-all active:scale-95"
-                                    >
-                                        {genre}
-                                    </button>
-                                ))}
+                            {/* Genre Chips - horizontal scroll with GPU acceleration */}
+                            <div className="px-4 py-4">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-3">Popular Genres</p>
+                                <div className="flex gap-2 overflow-x-auto scrollbar-none pb-2 -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                                    {["Action", "Romance", "Comedy", "Fantasy", "Thriller", "Sci-Fi", "Horror", "Drama", "Mystery", "Adventure"].map((genre, i) => (
+                                        <motion.button 
+                                            key={genre}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: i * 0.03 }}
+                                            onClick={() => { setSearchOpen(false); router.push(`/search?genre=${genre}`); }}
+                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-purple-400 hover:border-purple-500/50 transition-all active:scale-95 shrink-0"
+                                        >
+                                            {genre}
+                                        </motion.button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="py-4 flex flex-col items-center justify-center text-center opacity-50">
-                            <Search className="w-12 h-12 text-[var(--text-muted)] mb-4" />
-                            <p className="text-[var(--text-main)] font-medium">{searchPrompt}</p>
-                            <p className="text-sm text-[var(--text-muted)]">Type to find your favorite {isMovies ? "movies" : "shows"}</p>
-                        </div>
+                            <div className="py-8 flex flex-col items-center justify-center text-center opacity-40">
+                                <Search className="w-12 h-12 text-[var(--text-muted)] mb-4" />
+                                <p className="text-[var(--text-main)] font-medium">{searchPrompt}</p>
+                                <p className="text-sm text-[var(--text-muted)]">Type to find your favorite {isMovies ? "movies" : "shows"}</p>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

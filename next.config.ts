@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'allmanga.to' },
       { protocol: 'https', hostname: 'gogocdn.net' },
       { protocol: 'https', hostname: 'img.netto.com' },
+      { protocol: 'https', hostname: 'embed.su' },
+      { protocol: 'https', hostname: 'player.autoembed.cc' },
+      { protocol: 'https', hostname: 'dl.vidsrc.vip' },
+      { protocol: 'https', hostname: 'vidfast.pro' },
+      { protocol: 'https', hostname: 'vidstorm.ru' },
+      { protocol: 'https', hostname: 'autoembed.co' },
+      { protocol: 'https', hostname: 'vidsrc.xyz' },
+      { protocol: 'https', hostname: 'player.smashy.stream' },
     ],
   }
 };
