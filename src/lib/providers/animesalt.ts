@@ -1,49 +1,40 @@
 import { fetchFromScraper } from '@/lib/scraper-client';
 import { AnimeProvider, AnimeSearchResult, AnimeDetails, AnimeEpisode, VideoSource } from './types';
 
-export class WatchAnimeWorldProvider implements AnimeProvider {
-    name = 'watchanimeworld';
+export class AnimeSaltProvider implements AnimeProvider {
+    name = 'animesalt';
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const data = await fetchFromScraper({ cartoon_query: query });
-            const results = Array.isArray(data) ? data : (data?.watchanimeworld || []);
+            const data = await fetchFromScraper({ query });
+            const results = data?.animesalt || [];
             return results.map((item: any) => ({
-                id: item.id.startsWith('wa:') ? item.id : `wa:${item.id}`,
+                id: item.id.startsWith('as:') ? item.id : `as:${item.id}`,
                 title: item.title,
                 image: item.image,
-                provider: 'watchanimeworld',
+                provider: 'animesalt',
+                // Check if it's a cartoon or movie based on our internal logic if needed
                 type: item.type === 'movie' ? 'movie' : 'cartoon'
             }));
         } catch (error) {
-            console.error('[WatchAnimeWorld] Search failed:', error);
+            console.error('[AnimeSalt] Search failed:', error);
             return [];
         }
     }
 
     async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
-        try {
-            const data = await fetchFromScraper({ wa_az_letter: letter, wa_az_page: String(page) });
-            const results = Array.isArray(data) ? data : (data?.watchanimeworld || []);
-            return results.map((item: any) => ({
-                id: item.id.startsWith('wa:') ? item.id : `wa:${item.id}`,
-                title: item.title,
-                image: item.image,
-                provider: 'watchanimeworld',
-                type: item.type === 'movie' ? 'movie' : 'cartoon'
-            }));
-        } catch (error) {
-            console.error('[WatchAnimeWorld] A-Z failed:', error);
-            return [];
-        }
+        // AnimeSalt doesn't support A-Z directly via CLI yet, but we can search for the letter
+        return this.search(letter);
     }
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
             const realId = id.includes(':') ? id.split(':').pop() : id;
-            if (!realId) throw new Error("Invalid wa_info id");
-            const res_data = await fetchFromScraper({ wa_info: realId });
-            const data = res_data.wa_info;
+            if (!realId) throw new Error("Invalid AnimeSalt ID");
+            
+            // We use the 'slug' parameter to trigger the AnimeSalt info scrape in our python script
+            const res_data = await fetchFromScraper({ slug: `as:${realId}` });
+            const data = res_data.as_info;
             
             if (!data || data.error) throw new Error(data?.error || "Content Not Found");
 
@@ -54,7 +45,7 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
             }));
 
             return {
-                id: id.startsWith('wa:') ? id : `wa:${data.id}`,
+                id: id.startsWith('as:') ? id : `as:${data.id}`,
                 title: data.title,
                 image: data.image || '/placeholder.png', 
                 episodes: episodes,
@@ -65,29 +56,34 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
                 type: data.type === 'movie' ? 'movie' : 'cartoon'
             };
         } catch (error: any) {
-            console.error(`[WatchAnimeWorld] GetInfo failed:`, error);
-            throw new Error(`[WatchAnimeWorld] GetInfo failed: ${error.message}`);
+            console.error(`[Anime] GetInfo failed:`, error);
+            throw new Error(`[Anime] GetInfo failed: ${error.message}`);
         }
     }
 
     async getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw', serverId?: string): Promise<VideoSource[]> {
         try {
-            const res_data = await fetchFromScraper({ wa_source: episodeId });
-            const data = res_data.wa_source;
+            // episodeId for AnimeSalt is already the full episode slug
+            // Trigger open_claw_engine via the slug pattern as-ep:
+            const res_data = await fetchFromScraper({ slug: `as-ep:${episodeId}` });
+            const data = res_data.as_source;
             
+            if (!data) return [];
+
             if (data.url || (data.sources && data.sources.length > 0)) {
                 if (data.sources && data.sources.length > 0) {
                     return data.sources.map((s: any) => ({
                         url: s.url,
-                        name: s.name,
-                        isM3U8: s.url.includes('.m3u8'),
-                        isIframe: !s.url.includes('.m3u8') && !s.url.includes('.mp4'),
+                        server: s.name || 'Anime-Alpha',
+                        isM3U8: s.url.includes('.m3u8') || !!s.hls,
+                        isIframe: !s.url.includes('.m3u8') && !s.url.includes('.mp4') && !s.hls,
                         quality: 'auto'
                     }));
                 }
                 
                 return [{
                     url: data.url,
+                    server: 'Anime-Speed',
                     isM3U8: data.url.includes('.m3u8'),
                     isIframe: !data.url.includes('.m3u8') && !data.url.includes('.mp4'),
                     quality: 'auto'
@@ -95,7 +91,7 @@ export class WatchAnimeWorldProvider implements AnimeProvider {
             }
             return [];
         } catch (error: any) {
-            console.error(`[WatchAnimeWorld] GetSources failed:`, error);
+            console.error(`[Anime] GetSources failed:`, error);
             return [];
         }
     }

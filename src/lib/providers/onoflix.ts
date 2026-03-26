@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetchFromScraper } from '@/lib/scraper-client';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 
 export class OnoflixProvider implements AnimeProvider {
@@ -6,13 +6,7 @@ export class OnoflixProvider implements AnimeProvider {
 
   async search(query: string): Promise<AnimeSearchResult[]> {
     try {
-      const response = await axios.get('/api/scrape', {
-        params: { 
-          query
-        }
-      });
-
-      const data = response.data;
+      const data = await fetchFromScraper({ query });
       const results = data.onoflix || [];
 
       return results.map((item: any) => ({
@@ -34,14 +28,12 @@ export class OnoflixProvider implements AnimeProvider {
       const type = parts.length > 2 ? parts[1] : (id.includes('/movie/') ? 'movie' : 'series');
       const cleanId = parts.pop() || id;
       
-      const response = await axios.get('/api/scrape', {
-        params: { 
+      const response = await fetchFromScraper({ 
           of_info: cleanId,
           of_type: type
-        }
       });
 
-      const data = response.data.of_info;
+      const data = response.of_info;
       if (!data || data.error) throw new Error(data?.error || "Content Not Found");
 
       return {
@@ -69,14 +61,12 @@ export class OnoflixProvider implements AnimeProvider {
       const type = parts.length > 2 ? parts[1] : (episodeId.includes('?season=') ? 'series' : 'movie');
       const cleanId = parts.pop() || id;
       
-      const response = await axios.get('/api/scrape', {
-        params: { 
+      const response = await fetchFromScraper({ 
           of_source: type === 'movie' ? cleanId : episodeId,
           of_type: type
-        }
       });
 
-      const data = response.data.of_source;
+      const data = response.of_source;
       if (!data || !data.sources) return [];
       
       return data.sources.map((s: any) => ({

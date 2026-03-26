@@ -151,8 +151,9 @@ The development of ToonPlayer was structured into 10 major phases, focusing on c
 - **Phase 9: Upcoming Shows & Smart Play** - Added "Upcoming" badges and automated server-health checks during playback.
 - **Phase 10: Premium Branding & Clean Scraping** - Finalized the ToonPlayer brand, added Smart Tab Selection, and refined scrapers for direct, clean player links.
 - **Phase 11: Final Polish & UI Optimization (v1.7)** - Eliminated all mobile UI lag by optimizing CSS 3D transforms, introduced the `ToonNortan` server, built an automatic server-fallback system for broken streams, and mapped out fully working LocalStorage Watchlist and Web Share functionalities.
+- **Phase 12: Universal Fixed & Branding (v1.8)** - Integrated the high-performance **Anime-Alpha** (AnimeSalt) server using the Pyppeteer-driven `OpenClaw` engine. Performed a universal "Hard Reset" of all player restrictions, removing all `sandbox` attributes to fix "disable sandbox" errors forever. Renamed and obfuscated providers for a cleaner, unified branding.
 
-👉 **[Read the full Dev Journey & Learnings here](./JOURNEY.md)**
+👉 **[Read the full Dev Journey & Learnings here](./DEV_JOURNEY.md)**
 
 ## 🚀 Getting Started
 
@@ -182,6 +183,8 @@ Contributions are what make the open source community such an amazing place to l
 Please read our [**Contributing Guidelines**](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 We also have a [**Code of Conduct**](CODE_OF_CONDUCT.md) to ensure a welcoming community for everyone.
+
+Check out our [**Security Policy**](SECURITY.md) for reporting vulnerabilities.
 
 ### Quick steps:
 1. Fork the Project
@@ -215,4 +218,7 @@ When I'm not coding, I'm probably watching anime (which is why this project exis
 
 ## 📄 License
 
-This project is for educational purposes only. Content is scraped from public sources.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+**Disclaimer:** This project is for educational purposes only. Content is indexed from public sources.

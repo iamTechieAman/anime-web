@@ -31,7 +31,7 @@ const SORT_OPTIONS = [
 function MovieSearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const query = searchParams?.get("query") || "";
+    const query = searchParams?.get("query") || searchParams?.get("q") || "";
     const genre = searchParams?.get("genre") || "";
     const status = searchParams?.get("status") || "";
     

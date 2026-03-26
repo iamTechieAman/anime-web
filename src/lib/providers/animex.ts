@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetchFromScraper } from '@/lib/scraper-client';
 import { AnimeProvider, AnimeSearchResult, AnimeDetails, AnimeEpisode, VideoSource } from './types';
 
 export class AnimexProvider implements AnimeProvider {
@@ -6,8 +6,8 @@ export class AnimexProvider implements AnimeProvider {
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const res = await axios.get(`/api/scrape?ax_query=${encodeURIComponent(query)}`);
-            return (res.data.animex || []).map((item: any) => ({
+            const data = await fetchFromScraper({ ax_query: query });
+            return (data.animex || []).map((item: any) => ({
                 id: `ax:${item.id}|${item.slug}`,
                 title: item.title,
                 image: item.image,
@@ -23,10 +23,10 @@ export class AnimexProvider implements AnimeProvider {
         try {
             const cleanId = id.startsWith('ax:') ? id.slice(3) : id;
             const [realId, slug] = cleanId.split('|');
-            const res = await axios.get(`/api/scrape?ax_info=${realId}&slug=${slug}`);
-            const data = res.data.ax_info;
+            const data = await fetchFromScraper({ ax_info: realId, slug });
+            const ax_info = data.ax_info;
             
-            const episodes: AnimeEpisode[] = (data.episodes || []).map((ep: any) => ({
+            const episodes: AnimeEpisode[] = (ax_info.episodes || []).map((ep: any) => ({
                 id: ep.id,
                 number: parseFloat(ep.number),
                 title: `Episode ${ep.number}`
@@ -34,8 +34,8 @@ export class AnimexProvider implements AnimeProvider {
 
             return {
                 id: id.startsWith('ax:') ? id : `ax:${id}`,
-                title: data.title,
-                image: data.image || '/placeholder.png', 
+                title: ax_info.title,
+                image: ax_info.image || '/placeholder.png', 
                 episodes: episodes,
                 availableEpisodesDetail: {
                     sub: episodes.map(ep => ep.number.toString()),
@@ -51,12 +51,12 @@ export class AnimexProvider implements AnimeProvider {
 
     async getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw', serverId?: string): Promise<VideoSource[]> {
         try {
-            const res = await axios.get(`/api/scrape?ax_source=${episodeId}`);
-            const data = res.data.ax_source;
+            const data = await fetchFromScraper({ ax_source: episodeId });
+            const ax_source = data.ax_source;
             
-            if (data.url || (data.sources && data.sources.length > 0)) {
-                if (data.sources && data.sources.length > 0) {
-                    return data.sources.map((s: any) => ({
+            if (ax_source.url || (ax_source.sources && ax_source.sources.length > 0)) {
+                if (ax_source.sources && ax_source.sources.length > 0) {
+                    return ax_source.sources.map((s: any) => ({
                         url: s.url,
                         name: s.name,
                         isM3U8: s.url.includes('.m3u8'),
@@ -66,9 +66,9 @@ export class AnimexProvider implements AnimeProvider {
                 }
                 
                 return [{
-                    url: data.url,
-                    isM3U8: data.url.includes('.m3u8'),
-                    isIframe: !data.url.includes('.m3u8') && !data.url.includes('.mp4'),
+                    url: ax_source.url,
+                    isM3U8: ax_source.url.includes('.m3u8'),
+                    isIframe: !ax_source.url.includes('.m3u8') && !ax_source.url.includes('.mp4'),
                     quality: 'auto'
                 }];
             }

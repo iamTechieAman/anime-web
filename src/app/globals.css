@@ -60,12 +60,10 @@ body {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: background-color 0.3s ease, color 0.3s ease;
-  will-change: background-color, color;
 }
 
 html {
   background: var(--bg-main);
-  scroll-behavior: smooth;
 }
 
 /* Utilities for Safe Area */
@@ -239,10 +237,8 @@ html {
   }
 }
 
-/* Performance optimizations for cards and interactive elements */
-.premium-card,
-[class*="rounded-xl"],
-[class*="rounded-2xl"] {
+/* Performance optimizations for interactive card elements only */
+.premium-card {
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -253,9 +249,15 @@ html {
   .backdrop-blur-xl,
   .backdrop-blur-lg,
   .backdrop-blur-md {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
   }
+}
+
+/* Off-screen content optimization */
+.responsive-grid > *:nth-child(n+13) {
+  content-visibility: auto;
+  contain-intrinsic-size: 180px 310px;
 }
 
 /* Fix for iOS/Android iframe container rendering */
@@ -287,4 +289,15 @@ iframe {
 /* Contain paint for grid items to prevent cascading repaints */
 .responsive-grid > * {
   contain: layout style paint;
+}
+
+/* Card reveal animation (replaces framer-motion whileInView) */
+.card-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+.card-reveal.card-visible {
+  opacity: 1;
+  transform: translateY(0);
 }

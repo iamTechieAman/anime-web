@@ -36,9 +36,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       }
     } else {
       const initial1: Notification = {
-        id: 'welcome_v1_7',
-        title: '🚀 ToonPlayer V1.7 Released!',
-        message: 'Massive update: Ultra-fast UI with zero lag on mobile devices, automatic server fallback system, new ToonNortan server, and fully working Share & Watchlist features!',
+        id: 'welcome_v1_8',
+        title: '⚡ ToonPlayer V1.8 — Performance Update!',
+        message: 'New AnimeSalt-powered ToonAbyss server, zero-lag scrolling on Android, instant autoplay, and download redirection blocking for a cleaner experience!',
         type: 'update',
         timestamp: Date.now(),
         read: false

@@ -152,6 +152,7 @@ export async function fetchFromScraper(params: {
     if (params.wa_az_letter) command += ` --wa_az_letter "${params.wa_az_letter.replace(/"/g, '\\"')}" --wa_az_page "${params.wa_az_page || 1}"`;
     if (params.of_info) command += ` --of_info "${params.of_info.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
     if (params.of_source) command += ` --of_source "${params.of_source.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
+    if (params.slug) command += ` --slug "${params.slug.replace(/"/g, '\\"')}"`;
 
     console.log("[Scraper Client] Executing local command:", command);
     try {

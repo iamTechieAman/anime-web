@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
+import { useAdBlock } from "@/context/AdBlockContext";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -83,6 +84,13 @@ const SERVERS = [
             type === 'tv' ? `https://player.smashy.stream/tv/${id}?s=${s || 1}&e=${e || 1}` : `https://player.smashy.stream/movie/${id}`,
     },
     {
+        id: 'abyss',
+        name: 'ToonAbyss',
+        badge: 'AnimeSalt',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://abysscdn.com/?v=tv-${id}-${s || 1}-${e || 1}` : `https://abysscdn.com/?v=movie-${id}`,
+    },
+    {
         id: 'cineby',
         name: 'CineBy',
         badge: 'Fast',
@@ -101,7 +109,7 @@ const SERVERS = [
         name: 'CinemaOS',
         badge: 'Vip',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}`,
+            `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}?autoplay=1`,
     }
 ];
 
@@ -181,6 +189,7 @@ interface ShowData {
 export default function WatchPage({ params }: { params: Promise<{ type: string; id: string }> }) {
     const resolvedParams = use(params);
     const { type, id: encodedRawId } = resolvedParams;
+    const { isAdBlockEnabled } = useAdBlock();
     const rawId = decodeURIComponent(encodedRawId || '');
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
@@ -853,7 +862,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allowFullScreen
-                                allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; clipboard-write"
+                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
                                 referrerPolicy="no-referrer"
                                 onError={() => {
                                     setSourceError(true);
@@ -1450,7 +1459,6 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                     className="w-full h-full border-0"
                                     allowFullScreen
                                     allow="autoplay; encrypted-media; fullscreen"
-                                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox allow-downloads"
                                     referrerPolicy="no-referrer"
                                 />
                             </div>

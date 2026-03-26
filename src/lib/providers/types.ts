@@ -33,6 +33,7 @@ export interface AnimeDetails {
         raw?: string[];
     };
     anilistId?: number;
+    malId?: number;
     type?: string;
     status?: string;
 }

@@ -2,7 +2,21 @@ import json
 import sys
 import argparse
 import re
+import random
 from scrapling import StealthyFetcher
+
+def get_random_headers(referer=""):
+    user_agents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0'
+    ]
+    headers = {
+        "User-Agent": random.choice(user_agents)
+    }
+    if referer:
+        headers["Referer"] = referer
+    return headers
 
 # Helper to ensure we only get clean embed/video URLs, not full site pages
 def clean_source_url(url, provider_domain):
@@ -626,10 +640,7 @@ def scrape_universal_info(site_url, item_id):
 def scrape_onoflix_search(query):
     import requests
     url = f"https://onoflix.live/api/search?q={query}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Referer": "https://onoflix.live/"
-    }
+    headers = get_random_headers("https://onoflix.live/")
     try:
         resp = requests.get(url, headers=headers, timeout=15)
         if resp.status_code != 200: return []
@@ -663,10 +674,7 @@ def scrape_onoflix_info(item_id, item_type="movie"):
     # item_id is typically the TMDB ID
     import requests
     url = f"https://onoflix.live/en/watch/{item_type}/{item_id}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Referer": "https://onoflix.live/"
-    }
+    headers = get_random_headers("https://onoflix.live/")
     try:
         resp = requests.get(url, headers=headers, timeout=15)
         if resp.status_code != 200:
@@ -692,10 +700,7 @@ def scrape_onoflix_info(item_id, item_type="movie"):
 def scrape_onoflix_source(item_id, item_type="movie"):
     import requests
     url = f"https://onoflix.live/en/watch/{item_type}/{item_id}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Referer": "https://onoflix.live/"
-    }
+    headers = get_random_headers("https://onoflix.live/")
     try:
         resp = requests.get(url, headers=headers, timeout=15)
         if resp.status_code != 200: return {"url": "", "sources": []}
@@ -752,6 +757,125 @@ def scrape_universal_source(site_url, ep_id):
         if d not in [s['url'] for s in sources]: sources.append({"name": "Direct", "url": d})
     return {"url": sources[0]['url'] if sources else "", "sources": sources}
 
+def scrape_animesalt_search(query):
+    fetcher = StealthyFetcher()
+    url = f"https://animesalt.ac/?s={query}"
+    response = fetcher.fetch(url, engine='chrome')
+    results = []
+    if not response: return []
+    
+    items = response.css('article.post')
+    for item in items:
+        link_el = item.css('a')
+        if not link_el: continue
+        href = link_el[0].attrib.get('href', '')
+        title_el = item.css('.title, h2')
+        title = title_el[0].text.strip() if title_el else ""
+        img_el = item.css('img')
+        img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+        
+        if href and title:
+            item_id = href.rstrip('/').split('/')[-1]
+            results.append({
+                "id": f"as:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://animesalt.ac{img}" if img.startswith('/') else img,
+                "href": href,
+                "type": "movie" if "/movies/" in href else "series"
+            })
+    return results
+
+def scrape_animesalt_info(item_id):
+    fetcher = StealthyFetcher()
+    urls = [f"https://animesalt.ac/series/{item_id}/", f"https://animesalt.ac/movies/{item_id}/", f"https://animesalt.ac/{item_id}/"]
+    response = None
+    for url in urls:
+        try:
+            temp = fetcher.fetch(url, engine='chrome')
+            if temp and getattr(temp, 'status_code', 200) < 400:
+                response = temp
+                break
+        except: continue
+        
+    if not response: return {"id": item_id, "error": "Not found"}
+    
+    title_el = response.css('h1, .title')
+    title = title_el[0].text.strip() if title_el else item_id
+    
+    episodes = []
+    ep_links = response.css('a[href*="/episode/"]')
+    for link in ep_links:
+        href = link.attrib.get('href', '')
+        num_match = re.search(r'-(\d+)x(\d+)', href)
+        ep_num = num_match.group(2) if num_match else href.rstrip('/').split('-')[-1]
+            
+        ep_id = href.rstrip('/').split('/')[-1]
+        if ep_id not in [e['id'] for e in episodes]:
+            episodes.append({"id": ep_id, "number": ep_num, "href": href})
+    
+    if not episodes:
+        episodes.append({"id": item_id, "number": "1", "href": response.url})
+        
+    return {"id": item_id, "title": title, "episodes": episodes, "type": "movie" if "/movies/" in response.url else "series"}
+
+async def open_claw_engine(url):
+    import pyppeteer
+    import logging
+    from bs4 import BeautifulSoup
+    import random
+    import requests
+    import time
+    import asyncio
+    
+    logging.basicConfig(filename='openclaw.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.info(f"OpenClaw Engine starting on {url}")
+    
+    try:
+        browser = await pyppeteer.launch(headless=True, args=[
+            '--disable-setuid-sandbox', '--no-sandbox',
+            f'user-agent=Mozilla/5.0 (Windows NT {random.randint(10,12)}.{random.randint(3,9)}) AppleWebKit/{random.randint(607,618)}.36'
+        ])
+        
+        page = await browser.newPage()
+        await page.setViewport({'width': 1920, 'height': 1080})
+        
+        # Intercept network requests to find the getVideo POST
+        found_source = {"url": None}
+        async def intercept_response(response):
+            if 'getVideo' in response.url and response.request.method == 'POST':
+                try:
+                    data = await response.json()
+                    if data.get('videoSource'):
+                        found_source["url"] = data['videoSource']
+                        logging.info(f"OpenClaw intercepted source: {found_source['url']}")
+                except: pass
+
+        page.on('response', lambda res: asyncio.ensure_future(intercept_response(res)))
+        
+        try:
+            await page.goto(url, {'timeout': 45000, 'waitUntil': 'networkidle2'})
+            # Give it a bit more time for AJAX
+            await asyncio.sleep(2)
+        except Exception as e:
+            logging.error(f"OpenClaw navigation error: {e}")
+            
+        if found_source["url"]:
+            return {"url": found_source["url"], "sources": [{"name": "OpenClaw High-Speed", "url": found_source["url"], "hls": True}]}
+
+        # Fallback to interactive extraction
+        html_content = await page.content()
+        soup = BeautifulSoup(html_content, 'html.parser')
+        iframes = soup.find_all('iframe')
+        video_srcs = [i.get('src') for i in iframes if i.get('src') and any(x in i.get('src').lower() for x in ['vid', 'embed', 'player', 'm3u8'])]
+        
+        if video_srcs:
+            return {"url": video_srcs[0], "sources": [{"name": "OpenClaw Found", "url": s} for s in video_srcs]}
+            
+        return {"url": url, "content": "No direct source intercepted"}
+            
+    finally:
+        await browser.close()
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", help="Search query")
@@ -775,9 +899,10 @@ if __name__ == "__main__":
     parser.add_argument("--of_info", help="Onoflix info ID")
     parser.add_argument("--of_type", default="series", help="Onoflix item type (movie/series)")
     parser.add_argument("--of_source", help="Onoflix source ID")
+    parser.add_argument("--adaptive", help="Use adaptive pyppeteer unblocking on specific URL")
     
     args = parser.parse_args()
-    output = {"onoflix": [], "watchanimeworld": [], "cinemacity": [], "filmex": [], "cinezo": [], "pstream": [], "wa_info": {}, "wa_source": {}, "aniwatch": [], "universal_search": [], "universal_info": {}, "universal_source": {}}
+    output = {"onoflix": [], "watchanimeworld": [], "cinemacity": [], "filmex": [], "cinezo": [], "pstream": [], "wa_info": {}, "wa_source": {}, "aniwatch": [], "universal_search": [], "universal_info": {}, "universal_source": {}, "animesalt": []}
     
     if args.universal_site:
         if args.query: output["universal_search"] = scrape_universal_search(args.universal_site, args.query)
@@ -799,6 +924,13 @@ if __name__ == "__main__":
     if args.ax_info: output["ax_info"] = scrape_animex_info(args.ax_info, args.slug)
     if args.ax_source: output["ax_source"] = scrape_animex_source(args.ax_source)
     
+    if args.slug and "as:" in str(args.slug): # Custom check for animesalt info
+        output["as_info"] = scrape_animesalt_info(args.slug.replace("as:", ""))
+    elif args.slug and "as-ep:" in str(args.slug): # Custom check for animesalt source
+        import asyncio
+        url = f"https://animesalt.ac/episode/{args.slug.replace('as-ep:', '')}/"
+        output["as_source"] = asyncio.get_event_loop().run_until_complete(open_claw_engine(url))
+    
     if args.cartoon_query: output["watchanimeworld"] = scrape_watchanimeworld(query=args.cartoon_query)
     if args.cartoon_category: output["watchanimeworld"] = scrape_watchanimeworld(category=args.cartoon_category)
     if args.wa_info: output["wa_info"] = scrape_watchanimeworld_info(args.wa_info)
@@ -810,4 +942,8 @@ if __name__ == "__main__":
     if args.of_info: output["of_info"] = scrape_onoflix_info(args.of_info, args.of_type)
     if args.of_source: output["of_source"] = scrape_onoflix_source(args.of_source, args.of_type)
     
+    if args.adaptive:
+        import asyncio
+        output["adaptive_scrape"] = asyncio.get_event_loop().run_until_complete(open_claw_engine(args.adaptive))
+        
     print(json.dumps(output))

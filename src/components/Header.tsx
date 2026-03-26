@@ -6,9 +6,9 @@ import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
-import { useRef as useReactRef } from 'react';
 import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
+import { useAdBlock } from "@/context/AdBlockContext";
 import { formatDistanceToNow } from 'date-fns';
 
 const GENRES = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
@@ -35,6 +35,7 @@ export default function Header() {
   const [filterFormat, setFilterFormat] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const { setShowProfileSettings } = useMobileUI();
+  const { isAdBlockEnabled, toggleAdBlock } = useAdBlock();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function Header() {
     if (!q.trim() && !filterGenre && !filterFormat && !filterStatus) return;
     
     setShowSuggestions(false);
-    setShowFilters(false); // Added this line
+    setShowFilters(false); 
     router.push(`/search?${params.toString()}`);
   };
 
@@ -138,7 +139,7 @@ export default function Header() {
     setFilterStatus('');
   };
 
-  if (pathname?.startsWith('/watch') || pathname?.startsWith('/watch')) return null;
+  if (pathname?.startsWith('/watch')) return null;
 
   return (
     <>
@@ -176,33 +177,83 @@ export default function Header() {
 
         {/* Search Bar + Filter */}
         <div className="flex-1 max-w-xl hidden md:flex items-center gap-2 relative">
-          <form onSubmit={(e) => handleSearch(e)} className="relative flex-1 flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 hover:bg-[var(--bg-card)]/80 focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/10 transition-all">
-            <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (e.target.value.length >= 2) setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              placeholder="Search movies, anime & shows..."
-              className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
-              autoComplete="off"
-            />
-            {searchQuery && (
-              <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full mr-1">
-                <X className="w-4 h-4 text-[var(--text-muted)]" />
-              </button>
-            )}
-          </form>
+          <div className="flex-1 relative">
+            <form onSubmit={(e) => handleSearch(e)} className="relative flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 hover:bg-[var(--bg-card)]/80 focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/10 transition-all">
+              <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.length >= 2) setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Search movies, anime & shows..."
+                className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
+                autoComplete="off"
+              />
+              {searchQuery && (
+                <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full mr-1">
+                  <X className="w-4 h-4 text-[var(--text-muted)]" />
+                </button>
+              )}
+            </form>
+
+            {/* Suggestions Dropdown */}
+            <AnimatePresence>
+              {showSuggestions && suggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
+                >
+                  {suggestions.map((item: any) => (
+                    <Link
+                      key={`${item.type}-${item.id}`}
+                      href={item.href}
+                      className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors group"
+                      onClick={() => setShowSuggestions(false)}
+                    >
+                      <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md bg-zinc-800">
+                        {item.image ? (
+                          <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                             <Play className="w-4 h-4 text-zinc-600" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
+                          <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest ${
+                            item.type === 'anime' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
+                          }`}>
+                            {item.type}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[var(--text-muted)]">{item.format} • {item.year}</p>
+                      </div>
+                    </Link>
+                  ))}
+                  <button 
+                    onClick={() => handleSearch(null)}
+                    className="w-full p-3 text-center text-xs font-bold text-purple-400 border-t border-[var(--border-color)] hover:bg-purple-500/5 transition-colors"
+                  >
+                    View all results
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Filter Button */}
-          <div ref={filterRef} className="relative">
+          <div ref={filterRef} className="relative shrink-0">
             <button
               aria-label="Filter Options"
-              onClick={() => { setShowFilters(v => !v); setShowNotifications(false); }}
-              className={`h-full px-4 py-2.5 bg-[var(--bg-card)] border rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
+              onClick={() => { setShowFilters(v => !v); setShowNotifications(false); setShowProfileDropdown(false); }}
+              className={`h-[44px] px-4 bg-[var(--bg-card)] border rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
                 showFilters || filterGenre || filterFormat || filterStatus
                   ? 'border-purple-500 text-purple-400 bg-purple-500/5'
                   : 'border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20'
@@ -277,143 +328,140 @@ export default function Header() {
               )}
             </AnimatePresence>
           </div>
-
-          {/* Suggestions Dropdown */}
-          <AnimatePresence>
-            {showSuggestions && suggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute top-full left-0 right-14 mt-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
-              >
-                {suggestions.map((item: any) => (
-                  <Link
-                    key={`${item.type}-${item.id}`}
-                    href={item.href}
-                    className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors group"
-                    onClick={() => setShowSuggestions(false)}
-                  >
-                    <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md bg-zinc-800">
-                      {item.image ? (
-                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                           <Play className="w-4 h-4 text-zinc-600" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
-                        <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest ${
-                          item.type === 'anime' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
-                        }`}>
-                          {item.type}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[var(--text-muted)]">{item.format} • {item.year}</p>
-                    </div>
-                  </Link>
-                ))}
-                <button 
-                  onClick={() => handleSearch(null)}
-                  className="w-full p-3 text-center text-xs font-bold text-purple-400 border-t border-[var(--border-color)] hover:bg-purple-500/5 transition-colors"
-                >
-                  View all results
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Right side icons */}
-        <div className="flex items-center gap-2 md:gap-4">
-          <div ref={notifRef} className="relative">
-            <button 
-              aria-label="Notifications"
-              onClick={() => {
-                setShowNotifications(v => !v);
-                setShowFilters(false);
-                setShowProfileDropdown(false);
-              }}
-              className="p-2.5 hover:bg-[var(--bg-card)] rounded-xl relative transition-all text-[var(--text-muted)] hover:text-white group"
-            >
-              <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              {isMounted && unreadCount > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-purple-500 rounded-full border-2 border-[var(--bg-main)] animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-              )}
-            </button>
-            <AnimatePresence>
-              {showNotifications && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
-                >
-                   <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm">Notifications</span>
-                        {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-black">{unreadCount}</span>}
-                      </div>
-                      <button 
-                        onClick={() => markAllAsRead()}
-                        className="text-[10px] uppercase tracking-widest text-purple-400 font-black hover:text-purple-300 transition-colors"
-                      >
-                        Mark all read
-                      </button>
-                   </div>
-                   <div className="max-h-[400px] overflow-y-auto hide-scrollbar">
-                      {notifications.length > 0 ? (
-                        <div className="divide-y divide-[var(--border-color)]">
-                          {notifications.map((notif) => (
-                            <div 
-                              key={notif.id} 
-                              className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-purple-500/5' : ''}`}
-                              onClick={() => {
-                                markAsRead(notif.id);
-                                if (notif.link) router.push(notif.link);
-                              }}
-                            >
-                              {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500" />}
-                              <div className="flex justify-between items-start mb-1">
-                                <h5 className="text-xs font-bold text-white truncate pr-4">{notif.title}</h5>
-                                <span className="text-[9px] text-[var(--text-muted)] whitespace-nowrap">
-                                  {formatDistanceToNow(notif.timestamp, { addSuffix: true }).replace('about ', '')}
-                                </span>
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-3">
+             {/* AdBlock Toggle Button */}
+             {isMounted && (
+              <button
+                onClick={toggleAdBlock}
+                className={`flex items-center justify-center p-2 rounded-full transition-all border ${
+                  isAdBlockEnabled 
+                    ? 'bg-green-500/10 border-green-500/30 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:bg-green-500/20' 
+                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
+                }`}
+                title={isAdBlockEnabled ? "AdBlock is ON: Blocks Redirections & Ads" : "AdBlock is OFF"}
+              >
+                <div className="relative">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {isAdBlockEnabled ? (
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4" />
+                    ) : (
+                      <>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2.5" />
+                      </>
+                    )}
+                  </svg>
+                </div>
+              </button>
+            )}
+
+            {/* Notifications */}
+            <div ref={notifRef} className="relative">
+              <button 
+                aria-label="Notifications"
+                onClick={() => {
+                  if (!showNotifications) {
+                    setShowNotifications(true);
+                    markAllAsRead(); // Mark all as read when opening
+                  } else {
+                    setShowNotifications(false);
+                  }
+                  setShowFilters(false);
+                  setShowProfileDropdown(false);
+                }}
+                className={`p-2 rounded-full transition-all border ${
+                  showNotifications 
+                    ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' 
+                    : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20'
+                }`}
+              >
+                <div className="relative">
+                  <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  {isMounted && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--bg-overlay)] animate-pulse" />
+                  )}
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                    className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
+                  >
+                     <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm">Notifications</span>
+                          {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-black">{unreadCount}</span>}
+                        </div>
+                        <button 
+                          onClick={() => markAllAsRead()}
+                          className="text-[10px] uppercase tracking-widest text-purple-400 font-black hover:text-purple-300 transition-colors"
+                        >
+                          Mark all read
+                        </button>
+                     </div>
+                     <div className="max-h-[400px] overflow-y-auto hide-scrollbar">
+                        {notifications.length > 0 ? (
+                          <div className="divide-y divide-[var(--border-color)]">
+                            {notifications.map((notif) => (
+                              <div 
+                                key={notif.id} 
+                                className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-purple-500/5' : ''}`}
+                                onClick={() => {
+                                  markAsRead(notif.id);
+                                  if (notif.link) router.push(notif.link);
+                                }}
+                              >
+                                {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500" />}
+                                <div className="flex justify-between items-start mb-1">
+                                  <h5 className="text-xs font-bold text-white truncate pr-4">{notif.title}</h5>
+                                  <span className="text-[9px] text-[var(--text-muted)] whitespace-nowrap">
+                                    {formatDistanceToNow(notif.timestamp, { addSuffix: true }).replace('about ', '')}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-2">{notif.message}</p>
                               </div>
-                              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-2">{notif.message}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-10 text-center">
-                          <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <Bell className="w-6 h-6 text-[var(--text-muted)] opacity-20" />
+                            ))}
                           </div>
-                          <p className="text-sm font-medium text-white mb-1">Stay Tuned!</p>
-                          <p className="text-xs text-[var(--text-muted)]">We'll alert you when your favorite shows get new episodes.</p>
-                        </div>
-                      )}
-                   </div>
-                   {notifications.length > 0 && (
-                     <button
-                        onClick={clearNotifications}
-                        className="w-full py-3 bg-white/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all border-t border-[var(--border-color)]"
-                     >
-                       Clear All
-                     </button>
-                   )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                        ) : (
+                          <div className="p-10 text-center">
+                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <Bell className="w-6 h-6 text-[var(--text-muted)] opacity-20" />
+                            </div>
+                            <p className="text-sm font-medium text-white mb-1">Stay Tuned!</p>
+                            <p className="text-xs text-[var(--text-muted)]">We'll alert you when your favorite shows get new episodes.</p>
+                          </div>
+                        )}
+                     </div>
+                     {notifications.length > 0 && (
+                       <button
+                          onClick={clearNotifications}
+                          className="w-full py-3 bg-white/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all border-t border-[var(--border-color)]"
+                       >
+                         Clear All
+                       </button>
+                     )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           <div ref={profileRef} className="relative">
             <button 
               aria-label="Profile Menu"
-              onClick={() => setShowProfileDropdown(v => !v)}
+              onClick={() => {
+                setShowProfileDropdown(v => !v);
+                setShowNotifications(false);
+                setShowFilters(false);
+              }}
               className="flex items-center gap-3 p-1 pr-3 hover:bg-[var(--bg-card)] rounded-full transition-all border border-transparent hover:border-[var(--border-color)] group"
             >
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-purple-500/20">
@@ -448,7 +496,6 @@ export default function Header() {
                     </Link>
                     <button 
                       onClick={() => { 
-                        console.log("[Header] Triggering Profile Settings modal...");
                         setShowProfileSettings(true); 
                         setShowProfileDropdown(false);
                       }}

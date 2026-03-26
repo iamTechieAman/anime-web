@@ -2,34 +2,28 @@
 
 ## Supported Versions
 
+Currently, only the latest version of ToonPlayer is supported for security updates.
+
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x.x   | ✅ Yes             |
+| v1.8.x  | :white_check_mark: |
+| < v1.8  | :x:                |
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ToonPlayer, please report it responsibly.
+We take the security of ToonPlayer seriously. If you believe you have found a security vulnerability, please report it to us as follows:
 
-**Do NOT open a public GitHub issue for security vulnerabilities.**
+1.  **Do not open a public GitHub issue**.
+2.  Email your findings to **iamTechieAman@gmail.com**.
+3.  Include as much detail as possible, including steps to reproduce and any potential impact.
 
-Instead, please contact us via:
-- Email: security@toonplayer.app
+We will acknowledge your report within 48 hours and provide a timeline for a fix if necessary.
 
-### What to Include
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if any)
+## Our Commitment
 
-### Response Timeline
-- We will acknowledge your report within **48 hours**
-- We aim to provide a fix within **7 days** for critical vulnerabilities
+*   We will prioritize security fixes above new features.
+*   We will never intentionally include backdoors or malicious code.
+*   We use server-side scrapers to ensure that potentially malicious ad scripts from third-party providers are never executed in your primary browser context where possible.
 
-## Security Best Practices
-
-This project follows these security practices:
-- All API keys are stored as environment variables
-- No sensitive data is committed to version control
-- Dependencies are regularly updated to patch known vulnerabilities
-- Iframe sandbox attributes are used for embedded content
-- Input sanitization is applied on all user-facing forms
+---
+**Disclaimer:** ToonPlayer is a streaming aggregator. We do not host any content ourselves. Users are responsible for their own security when visiting external provider links.
