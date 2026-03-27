@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     try {
         // Fetch show data for metadata
         // Note: In a real app, you might want to cache this or use a shared fetch utility
-        const res = await fetch(`https://anime-web-neon-one.vercel.app/api/anime/episodes?id=${id}`).then(r => r.json());
+        const res = await fetch(`https://toonplayer.in/api/anime/episodes?id=${id}`).then(r => r.json());
         const show = res.show;
 
         if (!show) {
