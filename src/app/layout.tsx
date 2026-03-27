@@ -61,6 +61,8 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.dicebear.com" />
+        {/* HilltopAds Verification */}
+        <meta name="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" content="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" />
       </head>
       <body
         className={`${sora.variable} ${inter.variable} font-inter antialiased min-h-[100dvh] bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30 overflow-x-hidden flex flex-col`}
@@ -94,6 +96,8 @@ export default function RootLayout({
               <Toaster position="bottom-center" />
               <SpeedInsights />
               <Analytics />
+              {/* HilltopAds Global Script */}
+              <script type='text/javascript' src='//poweredbyhilltopads.com/ad3ad63b7ceec379be5a929cd5e988238fbeaf17.js' async />
             </NotificationProvider>
           </MobileUIProvider>
         </AdBlockProvider>

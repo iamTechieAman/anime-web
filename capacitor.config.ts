@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'ToonPlayer',
   webDir: 'out',
   server: {
-    url: 'https://anime-web-neon-one.vercel.app',
+    url: 'https://toonplayer.in',
     androidScheme: 'https'
   },
   plugins: {
