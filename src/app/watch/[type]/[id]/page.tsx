@@ -675,7 +675,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                     <div className="relative w-full bg-black">
                         <div className="max-w-7xl mx-auto">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
-                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="origin" />
+                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture; remote-playback" referrerPolicy="origin" />
                             </div>
                         </div>
                     </div>
@@ -862,7 +862,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allowFullScreen
-                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
+                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write; remote-playback"
                                 referrerPolicy="no-referrer"
                                 onError={() => {
                                     setSourceError(true);
@@ -1025,7 +1025,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                 <iframe
                                     src={`https://www.youtube.com/embed/${details.trailer.key}?autoplay=1`}
                                     className="w-full h-full"
-                                    allow="autoplay; encrypted-media"
+                                    allow="autoplay; encrypted-media; remote-playback"
                                     allowFullScreen
                                 />
                             </motion.div>
@@ -1458,7 +1458,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                                         : `https://dl.vidsrc.vip/movie/${id}`}
                                     className="w-full h-full border-0"
                                     allowFullScreen
-                                    allow="autoplay; encrypted-media; fullscreen"
+                                    allow="autoplay; encrypted-media; fullscreen; remote-playback"
                                     referrerPolicy="no-referrer"
                                 />
                             </div>

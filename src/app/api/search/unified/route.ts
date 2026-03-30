@@ -23,7 +23,12 @@ query($search: String) {
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q') || searchParams.get('query');
+    const rawQuery = searchParams.get('q') || searchParams.get('query') || '';
+    const query = rawQuery
+        .replace(/[-_.,/:;()]/g, ' ') // Replace separators with space
+        .replace(/([a-z])([A-Z])/g, '$1 $2') // Split camelCase (e.g., DemonSlayer -> Demon Slayer)
+        .replace(/\s+/g, ' ') // Collapse multiple spaces
+        .trim();
 
     if (!query || query.length < 2) {
         return NextResponse.json({ results: [] });
@@ -68,7 +73,7 @@ export async function GET(request: Request) {
         // Process TMDB Results
         if (tmdbRes.status === 'fulfilled') {
             const movies = tmdbRes.value.data.results || [];
-            movies.slice(0, 5).forEach((item: any) => {
+            movies.slice(0, 10).forEach((item: any) => {
                 if (item.media_type === 'person') return;
                 
                 results.push({

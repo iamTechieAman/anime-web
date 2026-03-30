@@ -258,7 +258,7 @@ export default function MoviesPage() {
                                                 </div>
                                             </div>
                                             <div className="p-3">
-                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors tracking-tight">{item.title}</h3>
                                                 <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-medium">
                                                     <span>{item.format}</span>
                                                     <span>{item.year}</span>
@@ -381,7 +381,11 @@ export default function MoviesPage() {
                                     </h2>
                                     <div className="space-y-4">
                                         {(activeTab === 'tv' ? tvTopRated : topRated).slice(0, 10).map((item, i) => (
-                                            <div key={item.id} className="flex items-center gap-4 group cursor-pointer pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                                            <Link 
+                                                key={item.id} 
+                                                href={`/watch/${activeTab === 'tv' ? 'tv' : 'movie'}/${item.id}`}
+                                                className="flex items-center gap-4 group cursor-pointer pb-4 border-b border-white/5 last:border-0 last:pb-0"
+                                            >
                                                 <span className="text-3xl font-black text-white/5 group-hover:text-blue-500/40 transition-colors w-8 tabular-nums italic">
                                                     {i + 1}
                                                 </span>
@@ -391,7 +395,7 @@ export default function MoviesPage() {
                                                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                                                         {item.vote_average?.toFixed(1)} • {(item.release_date || item.first_air_date || '').split('-')[0]}</p>
                                                 </div>
-                                            </div>
+                                            </Link>
                                         ))}
                                     </div>
                                 </section>

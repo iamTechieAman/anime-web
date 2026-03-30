@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Twitter, Mail, Globe, Heart, Sparkles, Zap, Shield, Rocket } from "lucide-react";
+import { Github, Twitter, Mail, Globe, Heart, Sparkles, Zap, Shield, Rocket, User } from "lucide-react";
 import Link from "next/link";
 
 export default function AboutPage() {
@@ -120,15 +120,52 @@ export default function AboutPage() {
                     </div>
                 </section>
 
+                {/* Creator & Disclaimer Section */}
+                <section className="space-y-12">
+                    <div className="bg-[var(--bg-card)] rounded-3xl p-8 md:p-12 border border-[var(--border-color)] relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[100px] -z-10 group-hover:bg-purple-500/20 transition-colors duration-700" />
+                        
+                        <div className="flex flex-col md:flex-row gap-10 items-center">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-purple-500/30 p-1 shrink-0">
+                                <div className="w-full h-full rounded-full bg-[var(--bg-main)] flex items-center justify-center">
+                                    <User className="w-12 h-12 text-purple-400" />
+                                </div>
+                            </div>
+                            <div className="space-y-4 text-center md:text-left transition-all">
+                                <span className="px-3 py-1 bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-purple-500/20">Lead Developer</span>
+                                <h2 className="text-3xl font-black text-white">Aman Kumar</h2>
+                                <p className="text-[var(--text-muted)] leading-relaxed max-w-xl">
+                                    I am a passionate <span className="text-white font-bold">college student</span> and full-stack developer dedicated to building innovative open-source projects. ToonPlayer is a personal project developed for educational purposes, focusing on high-performance web architecture and unified search experiences.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-12 pt-12 border-t border-[var(--border-color)] space-y-6">
+                            <div className="flex items-center gap-3 text-amber-400">
+                                <Shield className="w-5 h-5" />
+                                <h3 className="text-lg font-bold uppercase tracking-tight">Legal Disclaimer</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs leading-relaxed text-[var(--text-muted)] font-medium">
+                                <p>
+                                    ToonPlayer is a <span className="text-white">content aggregator</span> and search tool. We do not host, store, or upload any media files (videos, movies, or shows) on our own servers. All content is indexed from third-party publicly available sources on the internet.
+                                </p>
+                                <p>
+                                    This platform is a <span className="text-white">personal development project</span> by a student. We do not promote or encourage digital piracy. If you believe your copyrighted content is being linked without authorization, please contact the respective hosting provider for removal.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Closing */}
-                <section className="text-center pt-20 border-t border-[var(--border-color)]">
+                <section className="text-center pt-10">
                     <div className="flex items-center justify-center gap-2 mb-4 text-[var(--text-muted)]">
                         <span>Made with</span>
                         <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-                        <span>for the community</span>
+                        <span>by Aman Kumar</span>
                     </div>
-                    <p className="text-sm text-[var(--text-muted)] opacity-50">
-                        &copy; {new Date().getFullYear()} ToonPlayer. All rights reserved.
+                    <p className="text-[9px] text-[var(--text-muted)] opacity-50 uppercase tracking-[0.2em] font-black">
+                        &copy; {new Date().getFullYear()} ToonPlayer Project • Built for Learning
                     </p>
                 </section>
 

@@ -81,6 +81,12 @@ export default function RootLayout({
                     "name": "ToonPlayer",
                     "alternateName": "AnimeWatch",
                     "url": "https://toonplayer.in/",
+                    "description": "ToonPlayer is a personal student project developed by Aman Kumar. It is an ad-free content aggregator for streaming movies, tv series, and anime.",
+                    "creator": {
+                        "@type": "Person",
+                        "name": "Aman Kumar",
+                        "jobTitle": "College Student & Developer"
+                    },
                     "potentialAction": {
                       "@type": "SearchAction",
                       "target": "https://toonplayer.in/search?query={search_term_string}",

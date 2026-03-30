@@ -1,20 +1,30 @@
 import { MetadataRoute } from 'next'
-
-// In a real app, you would fetch these from your API
-const BASE_URL = 'https://www.toonplayer.in'
-
+ 
 export default function sitemap(): MetadataRoute.Sitemap {
-    // Static routes
-    const routes = [
-        '',
-        '/watch',
-        '/az-list',
-    ].map((route) => ({
-        url: `${BASE_URL}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: 1,
-    }))
-
-    return [...routes]
+  return [
+    {
+      url: 'https://toonplayer.in',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1,
+    },
+    {
+      url: 'https://toonplayer.in/about',
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: 'https://toonplayer.in/search',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: 'https://toonplayer.in/history',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }
+  ]
 }
