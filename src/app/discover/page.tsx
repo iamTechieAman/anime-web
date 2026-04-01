@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { Sparkles, Search, Play, Compass, Frown, Smile, Flame, Coffee, Share2, Loader2 } from "lucide-react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const MOODS = [
-    { id: "happy", icon: Smile, label: "Happy", color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
-    { id: "sad", icon: Frown, label: "Emotional", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-    { id: "action", icon: Flame, label: "Action & Hype", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
-    { id: "chill", icon: Coffee, label: "Chill & Relax", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
+    { id: "happy", icon: Smile, label: "Happy", color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", genre: "Comedy" },
+    { id: "sad", icon: Frown, label: "Emotional", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", genre: "Drama" },
+    { id: "action", icon: Flame, label: "Action & Hype", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", genre: "Action" },
+    { id: "chill", icon: Coffee, label: "Chill & Relax", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", genre: "Slice of Life" }
 ];
 
 const SCENE_SUGGESTIONS = [
@@ -29,6 +29,7 @@ export default function DiscoverPage() {
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<typeof mockScenes | null>(null);
     const [selectedMood, setSelectedMood] = useState<string | null>(null);
+    const router = useRouter();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -168,13 +169,15 @@ export default function DiscoverPage() {
                                     
                                     {isSelected && (
                                         <div className="mt-4 pt-4 border-t border-white/10 flex justify-end">
-                                            <Link 
-                                                // Link to a filtered search results page mock
-                                                href={`/search?query=anime`} 
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    router.push(`/search?genre=${mood.genre}`);
+                                                }}
                                                 className={`text-xs font-black uppercase tracking-widest ${mood.color} hover:text-white transition-colors flex items-center gap-1`}
                                             >
                                                 Explore Now &rarr;
-                                            </Link>
+                                            </button>
                                         </div>
                                     )}
                                 </button>

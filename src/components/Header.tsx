@@ -143,7 +143,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
+    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-sm border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
@@ -160,7 +160,7 @@ export default function Header() {
             <img 
               src="/logo.webp" 
               alt="ToonPlayer Logo" 
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform duration-300 mix-blend-screen"
             />
           </div>
           <div className="flex flex-col">

@@ -1,12 +1,13 @@
 "use client";
 
-import { X, Search, TrendingUp, LayoutGrid, Star, Sparkles, Settings, Zap, Shield, Globe, ChevronRight } from "lucide-react";
+import { X, Search, TrendingUp, LayoutGrid, Star, Sparkles, Settings, Zap, Shield, Globe, ChevronRight, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const quickLinks = [
+    { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-purple-500 to-indigo-600" },
     { name: "Trending Now", href: "/search?genre=Action", icon: TrendingUp, color: "from-rose-500 to-pink-600" },
     { name: "Browse Genres", href: "/genres", icon: LayoutGrid, color: "from-cyan-500 to-blue-600" },
     { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "from-yellow-500 to-amber-600" },

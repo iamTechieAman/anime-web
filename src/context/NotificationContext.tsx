@@ -46,6 +46,29 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setNotifications([initial1]);
       localStorage.setItem('toonplayer_notifications', JSON.stringify([initial1]));
     }
+    
+    // Growth Hack: Simulate a new episode release after 5 seconds to show updates working
+    const mockTimer = setTimeout(() => {
+        setNotifications(prev => {
+            const hasDemonSlayer = prev.some(p => p.id === 'growth_mock_ds');
+            if (hasDemonSlayer) return prev;
+            
+            const newNotif: Notification = {
+                id: 'growth_mock_ds',
+                title: '🔥 New Episode Released!',
+                message: 'Demon Slayer: Hashira Training Arc - Episode 4 is now available in 1080p!',
+                type: 'info',
+                timestamp: Date.now(),
+                read: false,
+                link: '/search?query=Demon%20Slayer'
+            };
+            const updated = [newNotif, ...prev];
+            localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+            return updated;
+        });
+    }, 5000);
+
+    return () => clearTimeout(mockTimer);
   }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
