@@ -20,6 +20,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "@vidstack/react": "1.12.12",
     "artplayer": "^5.3.0",
+    "artplayer-plugin-chromecast": "^1.1.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cheerio": "^1.2.0",
