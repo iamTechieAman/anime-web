@@ -675,7 +675,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
                     <div className="relative w-full bg-black">
                         <div className="max-w-7xl mx-auto">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
-                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture; remote-playback" referrerPolicy="origin" />
+                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture; presentation; remote-playback; clipboard-write; clipboard-read" referrerPolicy="origin" />
                             </div>
                         </div>
                     </div>

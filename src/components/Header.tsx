@@ -90,7 +90,7 @@ export default function Header() {
       } catch (error) {
         setSuggestions([]);
       }
-    }, 300);
+    }, 600);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 

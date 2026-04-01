@@ -24,11 +24,7 @@ query($search: String) {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const rawQuery = searchParams.get('q') || searchParams.get('query') || '';
-    const query = rawQuery
-        .replace(/[-_.,/:;()]/g, ' ') // Replace separators with space
-        .replace(/([a-z])([A-Z])/g, '$1 $2') // Split camelCase (e.g., DemonSlayer -> Demon Slayer)
-        .replace(/\s+/g, ' ') // Collapse multiple spaces
-        .trim();
+    const query = rawQuery.trim();
 
     if (!query || query.length < 2) {
         return NextResponse.json({ results: [] });

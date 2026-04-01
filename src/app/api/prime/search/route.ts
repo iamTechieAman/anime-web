@@ -14,11 +14,7 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const rawQuery = searchParams.get("q") || searchParams.get("query") || "";
-        const query = rawQuery
-            .replace(/[-_.,/:;()]/g, ' ')
-            .replace(/([a-z])([A-Z])/g, '$1 $2')
-            .replace(/\s+/g, ' ')
-            .trim();
+        const query = rawQuery.trim();
         const genre = searchParams.get("genre");
         const status = searchParams.get("status");
         const page = searchParams.get("page") || "1";
