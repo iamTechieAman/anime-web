@@ -17,11 +17,11 @@ const SCENE_SUGGESTIONS = [
     "Sad anime scenes", "Best anime fights", "Goku transformation", "Funny anime moments"
 ];
 
-// Mock mapped results for AI scene search with real playback IDs
+// Mock mapped results for AI scene search with real AniList IDs for the anime player
 const mockScenes = [
-    { title: "Epic Final Battle", show: "Demon Slayer", duration: "2:45", img: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJHS6zeJBf1.jpg", playId: "tmdb:85937", type: "anime" },
-    { title: "Emotional Farewell", show: "Your Lie in April", duration: "3:10", img: "https://image.tmdb.org/t/p/w500/1yepeH9pQeR0pY956N3ySihs48H.jpg", playId: "tmdb:61663", type: "anime" },
-    { title: "Surprise Attack Strategy", show: "Attack on Titan", duration: "1:15", img: "https://image.tmdb.org/t/p/w500/1k1Bnn610Bq5a2A9Q70sZgR10gS.jpg", playId: "tmdb:1429", type: "anime" },
+    { title: "Epic Final Battle", show: "Demon Slayer", duration: "2:45", img: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJHS6zeJBf1.jpg", playId: "101922", type: "anime" },
+    { title: "Emotional Farewell", show: "Your Lie in April", duration: "3:10", img: "https://image.tmdb.org/t/p/w500/1yepeH9pQeR0pY956N3ySihs48H.jpg", playId: "20665", type: "anime" },
+    { title: "Surprise Attack Strategy", show: "Attack on Titan", duration: "1:15", img: "https://image.tmdb.org/t/p/w500/1k1Bnn610Bq5a2A9Q70sZgR10gS.jpg", playId: "16498", type: "anime" },
 ];
 
 export default function DiscoverPage() {

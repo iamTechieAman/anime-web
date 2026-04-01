@@ -53,16 +53,18 @@ export default function MobileModals() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm"
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80"
                         onClick={() => setMenuOpen(false)}
+                        style={{ willChange: "opacity" }}
                     >
                         <motion.div
                             initial={{ y: "100%" }}
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full md:max-w-md bg-[var(--bg-card)] border-t md:border border-[var(--border-color)] rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+                            className="w-full md:max-w-md bg-[var(--bg-card)] border-t md:border border-[var(--border-color)] rounded-t-2xl md:rounded-2xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col will-change-transform"
                         >
                             <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
                                 <div className="w-12 h-1.5 bg-[var(--text-muted)]/30 rounded-full"></div>
@@ -88,11 +90,8 @@ export default function MobileModals() {
                                             return (
                                                 <motion.button
                                                     key={link.name}
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: i * 0.06 }}
                                                     onClick={() => { setMenuOpen(false); router.push(link.href); }}
-                                                    className="flex items-center gap-2.5 p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)] hover:border-white/20 transition-all active:scale-95"
+                                                    className="flex items-center gap-2.5 p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)] hover:border-white/20 transition-colors active:scale-95"
                                                 >
                                                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${link.color} flex items-center justify-center shadow-lg`}>
                                                         <Icon className="w-4 h-4 text-white" />
@@ -182,9 +181,9 @@ export default function MobileModals() {
                         style={{ willChange: 'opacity' }}
                     >
                         <motion.div
-                            initial={{ y: 30, opacity: 0 }}
+                            initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                            transition={{ type: "tween", duration: 0.2 }}
                         >
                             <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border-color)]">
                                 <div className="relative flex-1">
@@ -220,16 +219,13 @@ export default function MobileModals() {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-3">Popular Genres</p>
                                 <div className="flex gap-2 overflow-x-auto scrollbar-none pb-2 -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                                     {["Action", "Romance", "Comedy", "Fantasy", "Thriller", "Sci-Fi", "Horror", "Drama", "Mystery", "Adventure"].map((genre, i) => (
-                                        <motion.button 
+                                        <button 
                                             key={genre}
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: i * 0.03 }}
                                             onClick={() => { setSearchOpen(false); router.push(`/search?genre=${genre}`); }}
-                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-purple-400 hover:border-purple-500/50 transition-all active:scale-95 shrink-0"
+                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-purple-400 hover:border-purple-500/50 transition-colors active:scale-95 shrink-0"
                                         >
                                             {genre}
-                                        </motion.button>
+                                        </button>
                                     ))}
                                 </div>
                             </div>
