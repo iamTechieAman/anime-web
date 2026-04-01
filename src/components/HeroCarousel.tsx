@@ -135,13 +135,9 @@ export default function HeroCarousel() {
                     transition={{ duration: 0.5 }}
                     className="absolute inset-0"
                 >
-                    {/* Background Image with Zoom Effect */}
-                    <div className="absolute inset-0 overflow-hidden">
-                        <motion.div
-                            animate={{ scale: [1, 1.05] }}
-                            transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
-                            className="absolute inset-0"
-                        >
+                    {/* Background Image (optimized) */}
+                    <div className="absolute inset-0 overflow-hidden bg-black">
+                        <div className="absolute inset-0">
                             <Image
                                 src={activeSlide.image}
                                 alt={activeSlide.title}
@@ -149,9 +145,9 @@ export default function HeroCarousel() {
                                 priority
                                 fetchPriority="high"
                                 className="object-cover object-center opacity-70"
-                                sizes="100vw"
+                                sizes="(max-width: 768px) 100vw, 100vw"
                             />
-                        </motion.div>
+                        </div>
                         
                         {/* Premium Vignette & Gradients - justanime.to style */}
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a]/30 z-10" />
@@ -166,8 +162,7 @@ export default function HeroCarousel() {
                 <motion.div 
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    key={activeSlide.id + "-countdown"}
-                    className="bg-purple-600 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded-sm shadow-lg flex items-center gap-2 backdrop-blur-md"
+                    className="bg-purple-600 border border-purple-500/50 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded-sm shadow-xl flex items-center gap-2"
                 >
                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                     TRENDING SELECTION
@@ -201,7 +196,7 @@ export default function HeroCarousel() {
                                 <span className="bg-[#FF5722] text-white px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider">
                                     {activeSlide.type}
                                 </span>
-                                <span className="bg-white/10 text-white px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase backdrop-blur-md border border-white/5">
+                                <span className="bg-black/40 text-white px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase border border-white/10">
                                     {activeSlide.quality}
                                 </span>
                                 <span className="text-xs font-bold text-white/70 flex items-center gap-1 ml-1">
@@ -240,12 +235,12 @@ export default function HeroCarousel() {
                                 className="flex items-center gap-3 md:gap-4"
                             >
                                 <Link href={activeSlide.link}>
-                                    <button className="flex items-center gap-2.5 px-8 md:px-10 py-3.5 md:py-4 bg-white text-black hover:bg-white/90 font-black rounded-sm transition-all active:scale-95 group/btn shadow-[0_4px_20px_rgba(255,255,255,0.2)]">
+                                    <button className="flex items-center gap-2.5 px-8 md:px-10 py-3.5 md:py-4 bg-white text-black hover:bg-white/90 font-black rounded-sm transition-colors active:scale-95 group/btn shadow-[0_4px_20px_rgba(255,255,255,0.1)]">
                                         <Play className="w-5 h-5 fill-current" />
                                         WATCH NOW
                                     </button>
                                 </Link>
-                                <button className="flex items-center gap-2.5 px-6 py-3.5 md:py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-sm border border-white/5 transition-all backdrop-blur-xl group/details">
+                                <button className="flex items-center gap-2.5 px-6 py-3.5 md:py-4 bg-black/40 hover:bg-black/60 text-white font-bold rounded-sm border border-white/10 transition-colors group/details">
                                     Details <ChevronRight className="w-4 h-4 transition-transform group-hover/details:translate-x-1" />
                                 </button>
                             </motion.div>
@@ -254,17 +249,16 @@ export default function HeroCarousel() {
                 </div>
             </div>
 
-            {/* Navigation Controls */}
             <div className="absolute bottom-10 right-4 md:right-8 flex items-center gap-2 z-30">
                 <button
                     onClick={prevSlide}
-                    className="p-3 md:p-4 bg-white/5 hover:bg-white/10 text-white rounded-sm border border-white/5 transition-all backdrop-blur-md active:scale-90"
+                    className="p-3 md:p-4 bg-black/40 hover:bg-black/60 text-white rounded-sm border border-white/10 transition-colors active:scale-90"
                 >
                     <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                     onClick={nextSlide}
-                    className="p-3 md:p-4 bg-white/5 hover:bg-white/10 text-white rounded-sm border border-white/5 transition-all backdrop-blur-md active:scale-90"
+                    className="p-3 md:p-4 bg-black/40 hover:bg-black/60 text-white rounded-sm border border-white/10 transition-colors active:scale-90"
                 >
                     <ChevronRight className="w-5 h-5" />
                 </button>

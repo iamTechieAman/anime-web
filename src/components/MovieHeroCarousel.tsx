@@ -136,7 +136,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                                 </Link>
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
-                                    className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all border border-white/10"
+                                    className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors border border-white/10"
                                 >
                                     <Info className="w-5 h-5" />
                                     More Info
@@ -147,16 +147,15 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                 </div>
             </div>
 
-            {/* Navigation arrows */}
             <button
                 onClick={prev}
-                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 backdrop-blur-sm rounded-full hover:bg-black/70 transition-all border border-white/10 opacity-0 hover:opacity-100 focus:opacity-100"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 rounded-full hover:bg-black/70 transition-colors border border-white/10 opacity-0 hover:opacity-100 focus:opacity-100"
             >
                 <ChevronLeft className="w-5 h-5 text-white" />
             </button>
             <button
                 onClick={next}
-                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 backdrop-blur-sm rounded-full hover:bg-black/70 transition-all border border-white/10 opacity-0 hover:opacity-100 focus:opacity-100"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2 bg-black/40 rounded-full hover:bg-black/70 transition-colors border border-white/10 opacity-0 hover:opacity-100 focus:opacity-100"
             >
                 <ChevronRight className="w-5 h-5 text-white" />
             </button>
