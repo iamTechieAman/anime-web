@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Artplayer from "artplayer";
 import Hls from "hls.js";
+// @ts-ignore
+import artplayerPluginChromecast from 'artplayer-plugin-chromecast';
 
 interface PlayerProps {
     option: {
@@ -15,11 +17,13 @@ interface PlayerProps {
     style?: React.CSSProperties;
     getInstance?: (art: Artplayer) => void;
     onEnded?: () => void;
+    onTimeUpdate?: (currentTime: number, duration: number) => void;
+    initialTime?: number;
     autoPlay?: boolean;
     autoNext?: boolean;
 }
 
-export default function Player({ option, className, style, getInstance, onEnded, autoPlay = false, autoNext = false }: PlayerProps) {
+export default function Player({ option, className, style, getInstance, onEnded, onTimeUpdate, initialTime = 0, autoPlay = false, autoNext = false }: PlayerProps) {
     const artRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<Artplayer | null>(null);
     const [showCountdown, setShowCountdown] = useState(false);
@@ -63,6 +67,9 @@ export default function Player({ option, className, style, getInstance, onEnded,
                     airplay: true,
                     theme: '#a855f7',
                     lang: 'en',
+                    plugins: [
+                        artplayerPluginChromecast({}),
+                    ],
                     moreVideoAttr: {
                         crossOrigin: 'anonymous',
                         playsInline: true,
@@ -189,6 +196,18 @@ export default function Player({ option, className, style, getInstance, onEnded,
                 if (getInstance && typeof getInstance === 'function') {
                     getInstance(art);
                 }
+
+                art.on('ready', () => {
+                    if (initialTime > 0) {
+                        art.currentTime = initialTime;
+                    }
+                });
+
+                art.on('video:timeupdate', () => {
+                    if (onTimeUpdate && !isDestroyed.current) {
+                        onTimeUpdate(art.currentTime, art.duration);
+                    }
+                });
 
                 art.on('video:ended', () => {
                     if (onEnded && !isDestroyed.current) onEnded();

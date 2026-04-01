@@ -18,6 +18,7 @@ export default function DesktopSidebar() {
     ];
 
     const exploreItems = [
+        { name: "Discover", href: "/discover", icon: Compass, color: "text-blue-400" },
         { name: "Trending", href: "/search?genre=Action", icon: TrendingUp, color: "text-rose-400" },
         { name: "Genres", href: "/genres", icon: LayoutGrid, color: "text-cyan-400" },
         { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "text-yellow-400" },

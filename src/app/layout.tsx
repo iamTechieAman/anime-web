@@ -6,6 +6,7 @@ import { MobileUIProvider } from "@/context/MobileUIContext";
 import ProfileGate from "@/components/ProfileGate";
 import LayoutContent from "@/components/LayoutContent";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { WatchProvider } from "@/context/WatchContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
@@ -71,39 +72,41 @@ export default function RootLayout({
         <AdBlockProvider>
           <MobileUIProvider>
             <NotificationProvider>
-              {/* JSON-LD Structured Data for Search Engine Optimization */}
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                  __html: JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "WebSite",
-                    "name": "ToonPlayer",
-                    "alternateName": "AnimeWatch",
-                    "url": "https://toonplayer.in/",
-                    "description": "ToonPlayer is a personal student project developed by Aman Kumar. It is an ad-free content aggregator for streaming movies, tv series, and anime.",
-                    "creator": {
-                        "@type": "Person",
-                        "name": "Aman Kumar",
-                        "jobTitle": "College Student & Developer"
-                    },
-                    "potentialAction": {
-                      "@type": "SearchAction",
-                      "target": "https://toonplayer.in/search?query={search_term_string}",
-                      "query-input": "required name=search_term_string"
-                    }
-                  })
-                }}
-              />
-              <ProfileGate />
-              <LayoutContent>
-                {children}
-              </LayoutContent>
-              <Toaster position="bottom-center" />
-              <SpeedInsights />
-              <Analytics />
-              {/* HilltopAds Global Script */}
-              <script type='text/javascript' src='//poweredbyhilltopads.com/ad3ad63b7ceec379be5a929cd5e988238fbeaf17.js' async />
+              <WatchProvider>
+                {/* JSON-LD Structured Data for Search Engine Optimization */}
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "WebSite",
+                      "name": "ToonPlayer",
+                      "alternateName": "AnimeWatch",
+                      "url": "https://toonplayer.in/",
+                      "description": "ToonPlayer is a personal student project developed by Aman Kumar. It is an ad-free content aggregator for streaming movies, tv series, and anime.",
+                      "creator": {
+                          "@type": "Person",
+                          "name": "Aman Kumar",
+                          "jobTitle": "College Student & Developer"
+                      },
+                      "potentialAction": {
+                        "@type": "SearchAction",
+                        "target": "https://toonplayer.in/search?query={search_term_string}",
+                        "query-input": "required name=search_term_string"
+                      }
+                    })
+                  }}
+                />
+                <ProfileGate />
+                <LayoutContent>
+                  {children}
+                </LayoutContent>
+                <Toaster position="bottom-center" />
+                <SpeedInsights />
+                <Analytics />
+                {/* HilltopAds Global Script */}
+                <script type='text/javascript' src='//poweredbyhilltopads.com/ad3ad63b7ceec379be5a929cd5e988238fbeaf17.js' async />
+              </WatchProvider>
             </NotificationProvider>
           </MobileUIProvider>
         </AdBlockProvider>

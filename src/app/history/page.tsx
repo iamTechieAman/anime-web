@@ -3,56 +3,34 @@
 import { useState, useEffect } from "react";
 import { Clock, Trash2, Play, Search, X } from "lucide-react";
 import Link from "next/link";
-
-type HistoryEntry = {
-  id: string;
-  title: string;
-  image?: string;
-  episode: string;
-  season?: string;
-  type: string;
-  provider: string;
-  watchedAt: number;
-};
+import { useWatch } from "@/context/WatchContext";
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const { history, clearHistory, removeFromHistory } = useWatch();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<"all" | "anime" | "movie" | "tv">("all");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const stored = localStorage.getItem("watchHistory");
-    if (stored) {
-      try {
-        setHistory(JSON.parse(stored));
-      } catch { setHistory([]); }
-    }
   }, []);
 
-  const clearAll = () => {
+  const handleClearAll = () => {
     if (confirm("Clear your entire watch history?")) {
-      localStorage.removeItem("watchHistory");
-      setHistory([]);
+      clearHistory();
     }
-  };
-
-  const removeEntry = (id: string, episode: string) => {
-    const updated = history.filter((h) => !(h.id === id && h.episode === episode));
-    setHistory(updated);
-    localStorage.setItem("watchHistory", JSON.stringify(updated));
   };
 
   const filtered = history.filter((h) => {
     const matchesSearch = h.title.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType === "all" || h.type === filterType || (filterType === 'anime' && h.type === 'cartoon');
+    const matchesType = filterType === "all" || h.type === filterType;
     return matchesSearch && matchesType;
   });
 
-  const grouped: Record<string, HistoryEntry[]> = {};
+  const grouped: Record<string, typeof history> = {};
   filtered.forEach((entry) => {
-    const date = new Date(entry.watchedAt).toLocaleDateString(undefined, {
+    // History is sorted by updatedAt from context
+    const date = new Date(entry.updatedAt).toLocaleDateString(undefined, {
       weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
     if (!grouped[date]) grouped[date] = [];
@@ -67,18 +45,17 @@ export default function HistoryPage() {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  const getHistoryLink = (entry: HistoryEntry) => {
-    if (entry.type) {
-      if (entry.type === 'anime' || entry.type === 'cartoon') {
-        return `/watch/${entry.type}/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`;
-      }
-      const seasonQuery = entry.season ? `&s=${entry.season}` : '';
-      return `/watch/${entry.type}/${entry.id}?e=${entry.episode}${seasonQuery}`;
+  const getHistoryLink = (entry: typeof history[0]) => {
+    if (entry.type === 'movie' || entry.type === 'tv') {
+      return `/watch/${entry.type}/${entry.showId}?e=${entry.episodeId || ''}`;
     }
-    if (entry.provider === 'tmdb') {
-      return `/watch/movie/${entry.id}?e=${entry.episode}`;
-    }
-    return `/watch/anime/${entry.id}?provider=${entry.provider}&ep=${entry.episode}`;
+    // Anime
+    return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
+  };
+
+  const formatProgress = (current: number, total: number) => {
+    if (!total || total <= 0) return '0%';
+    return `${Math.min(100, Math.round((current / total) * 100))}%`;
   };
 
   if (!isMounted) return null;
@@ -93,7 +70,7 @@ export default function HistoryPage() {
           </div>
           {history.length > 0 && (
             <button
-              onClick={clearAll}
+              onClick={handleClearAll}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors border border-red-500/30 hover:border-red-500/50"
             >
               <Trash2 className="w-4 h-4" />
@@ -161,24 +138,32 @@ export default function HistoryPage() {
                 </h2>
                 <div className="space-y-3">
                   {entries.map((entry, i) => (
-                    <div key={`${entry.id}-${entry.episode}-${i}`} className="group flex items-center gap-4 p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-white/10 transition-all">
-                      <div className="relative w-16 h-24 rounded-lg overflow-hidden shrink-0 bg-black/20">
-                        {entry.image && (
-                          <img src={entry.image} alt={entry.title} className="w-full h-full object-cover" />
+                    <div key={entry.id} className="group flex items-center gap-4 p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-white/10 transition-all">
+                      <div className="relative w-24 md:w-32 aspect-video rounded-lg overflow-hidden shrink-0 bg-black/40">
+                        {entry.poster && (
+                          <img src={entry.poster} alt={entry.title} className="w-full h-full object-cover" />
                         )}
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Play className="w-5 h-5 text-white fill-white" />
+                        <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20">
+                          <div 
+                            className="h-full bg-purple-500" 
+                            style={{ width: formatProgress(entry.currentTime, entry.duration) }}
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white fill-white shadow-lg" />
                         </div>
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <Link href={getHistoryLink(entry)} className="hover:text-purple-400 transition-colors">
-                          <h3 className="font-semibold text-sm line-clamp-1 font-sora">{entry.title}</h3>
+                          <h3 className="font-semibold text-sm md:text-base line-clamp-1 font-sora">{entry.title}</h3>
                         </Link>
-                        <p className="text-xs text-purple-400 font-bold mt-1">
-                          {entry.type === 'tv' ? `S${entry.season} E${entry.episode}` : `Episode ${entry.episode}`}
-                        </p>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">{relativeTime(entry.watchedAt)}</p>
+                        {entry.episodeId && (
+                            <p className="text-xs text-purple-400 font-bold mt-1">
+                                {entry.type === 'tv' ? `Episode ${entry.episodeId}` : `Episode ${entry.episodeNumber || entry.episodeId}`}
+                            </p>
+                        )}
+                        <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1.5">{relativeTime(entry.updatedAt)}</p>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
@@ -189,10 +174,10 @@ export default function HistoryPage() {
                           <Play className="w-3 h-3 fill-white" /> Resume
                         </Link>
                         <button
-                          onClick={() => removeEntry(entry.id, entry.episode)}
-                          className="p-1.5 text-[var(--text-muted)] hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
+                          onClick={() => removeFromHistory(entry.id)}
+                          className="p-1.5 md:p-2 text-[var(--text-muted)] hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                       </div>
                     </div>

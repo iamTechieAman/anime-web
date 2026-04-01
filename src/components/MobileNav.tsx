@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Search, Menu, Film, Calendar, Clock, Tv, Zap, Shuffle } from "lucide-react";
+import { Home, Search, Menu, Film, Calendar, Clock, Tv, Zap, Shuffle, Compass } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -64,11 +64,11 @@ export default function MobileNav() {
             onClick: () => { closeAll(); router.push('/az-list/all'); },
         },
         {
-            label: "Random",
-            icon: Shuffle,
-            color: "text-pink-500",
-            active: pathname === '/randomize',
-            onClick: () => { closeAll(); router.push('/randomize'); },
+            label: "Discover",
+            icon: Compass,
+            color: "text-blue-500",
+            active: pathname === '/discover',
+            onClick: () => { closeAll(); router.push('/discover'); },
         },
         {
             label: "History",

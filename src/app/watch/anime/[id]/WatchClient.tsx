@@ -4,12 +4,14 @@ import { useState, useEffect, use, useRef } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
+import SimilarAnime from "@/components/SimilarAnime";
 
 import { useSearchParams } from "next/navigation";
+import { useWatch } from "@/context/WatchContext";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -192,20 +194,16 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [isSafeStream, setIsSafeStream] = useState(true);
     const [showSafeGuide, setShowSafeGuide] = useState(false);
 
-    const [isBookmarked, setIsBookmarked] = useState(false);
     const [tmdbId, setTmdbId] = useState<string | null>(null);
 
+    const { addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+    
     // Load Settings & Bookmark
     useEffect(() => {
         const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') === 'true';
         const savedAutoNext = localStorage.getItem('toonplayer_autonext') === 'true';
         setAutoPlay(savedAutoPlay);
         setAutoNext(savedAutoNext);
-
-        // Check Bookmark
-        const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
-        const exists = watchlist.some((item: any) => item._id === fullId);
-        setIsBookmarked(exists);
 
         // Click outside to close dropdown
         const handleClickOutside = (e: MouseEvent) => {
@@ -217,29 +215,22 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [id]);
 
+    const isBookmarked = isInWatchlist(fullId);
 
     const toggleBookmark = () => {
         if (!show) return;
-        const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
 
         if (isBookmarked) {
-            // Remove
-            const newList = watchlist.filter((item: any) => item._id !== fullId);
-            localStorage.setItem('toonplayer_watchlist', JSON.stringify(newList));
-            setIsBookmarked(false);
+            removeFromWatchlist(fullId);
             toast.success('Removed from Watchlist');
         } else {
-            // Add
-            const newItem = {
-                _id: show._id,
-                name: show.name,
-                thumbnail: show.thumbnail || ((show as any).image), // Fallback
-                provider: show.provider || provider,
-                addedAt: Date.now()
-            };
-            watchlist.unshift(newItem); // Add to top
-            localStorage.setItem('toonplayer_watchlist', JSON.stringify(watchlist));
-            setIsBookmarked(true);
+            addToWatchlist({
+                id: fullId,
+                showId: fullId,
+                type: 'anime',
+                title: show.name || 'Unknown',
+                poster: show.thumbnail || ((show as any).image) || '/placeholder.jpg',
+            });
             toast.success('Added to Watchlist');
         }
     };
@@ -280,10 +271,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 
                 if (!fetchedShow) throw new Error("No show data received");
                 setShow(fetchedShow);
-
-                // Bookmark check
-                const watchlist = JSON.parse(localStorage.getItem('toonplayer_watchlist') || '[]');
-                setIsBookmarked(watchlist.some((item: any) => item._id === fullId));
 
                 // Determine initial mode and episode
                 let initialMode: "sub" | "dub" = "sub";
@@ -560,23 +547,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     setCheckingStatus(null);
                     // toast.success(`Episode ${currentEp} loaded successfully`); // Remove annoying toasts for fast switches
 
-                    // Save to watch history
-                    try {
-                        const historyKey = "watchHistory";
-                        const existing: any[] = JSON.parse(localStorage.getItem(historyKey) || "[]");
-                        const entry = {
-                            id: show._id,
-                            title: show.name,
-                            thumbnail: show.thumbnail,
-                            episode: currentEp,
-                            provider: show.provider || provider || "unknown",
-                            watchedAt: Date.now(),
-                        };
-                        const deduped = existing.filter((h) => !(h.id === entry.id && h.episode === entry.episode));
-                        deduped.unshift(entry);
-                        localStorage.setItem(historyKey, JSON.stringify(deduped.slice(0, 200)));
-                    } catch (_) {}
-
+                    setCheckingStatus(null);
                 } else {
                     // No links found — auto-switch to next server
                     console.warn('[WatchPage] No links from native server, auto-switching...');
@@ -839,10 +810,24 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     </div>
                                 ) : (
                                     <ArtPlayer
-                                        key={sourceUrl} // Force remount on URL change
+                                        key={`${sourceUrl}-${currentEp}`} // Force remount on URL change OR EP change
                                         option={{
                                             url: sourceUrl,
                                             type: videoType,
+                                        }}
+                                        initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
+                                        onTimeUpdate={(currentTime, duration) => {
+                                            addToHistory({
+                                                id: `${fullId}-${currentEp}`, // track per episode for anime
+                                                showId: fullId,
+                                                type: 'anime',
+                                                title: show.name || 'Unknown',
+                                                poster: show.thumbnail || ((show as any).image) || '',
+                                                episodeId: currentEp,
+                                                episodeNumber: Number(currentEp) || 1,
+                                                currentTime,
+                                                duration
+                                            });
                                         }}
                                         onEnded={handleVideoEnded}
                                         autoPlay={autoPlay}
@@ -1056,14 +1041,38 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </div>
 
                         {/* Metadata */}
-                        <div className="mt-6 flex flex-col gap-2">
+                        <div className="mt-6 flex flex-col gap-2 relative">
                             <div className="flex items-start justify-between gap-4">
                                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex-1 font-sora">{show.name}</h1>
+                                
+                                <button
+                                    onClick={toggleBookmark}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shrink-0 ${
+                                        isBookmarked 
+                                            ? "bg-purple-600/20 text-purple-400 border-purple-500/50 hover:bg-purple-600/30" 
+                                            : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
+                                    }`}
+                                >
+                                    {isBookmarked ? (
+                                        <>
+                                            <BookmarkCheck className="w-5 h-5 fill-current" />
+                                            <span className="hidden sm:inline font-bold text-sm">In Watchlist</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <BookmarkPlus className="w-5 h-5" />
+                                            <span className="hidden sm:inline font-bold text-sm">Add to Watchlist</span>
+                                        </>
+                                    )}
+                                </button>
                             </div>
                             <p className="text-sm text-[var(--text-muted)]">
                                 Watching Episode {currentEp} in {mode.toUpperCase()}
                             </p>
                         </div>
+
+                        {/* Smart Recommendations */}
+                        <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
                     </div>
 
                     {/* Sidebar - Fixed Height Vertical Episode List */}

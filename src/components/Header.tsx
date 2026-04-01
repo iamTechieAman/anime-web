@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut } from "lucide-react";
+import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
@@ -492,6 +492,15 @@ export default function Header() {
                       <div className="flex-1">
                         <p className="text-sm font-bold text-white">Watch History</p>
                         <p className="text-[10px] text-[var(--text-muted)]">Continue where you left off</p>
+                      </div>
+                    </Link>
+                    <Link href="/watchlist" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
+                        <Bookmark className="w-4 h-4 text-pink-400" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-bold text-white">Watchlist</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Saved shows & movies</p>
                       </div>
                     </Link>
                     <button 
