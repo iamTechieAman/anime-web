@@ -17,11 +17,11 @@ const SCENE_SUGGESTIONS = [
     "Sad anime scenes", "Best anime fights", "Goku transformation", "Funny anime moments"
 ];
 
-// Mock mapped results for AI scene search
+// Mock mapped results for AI scene search with real playback IDs
 const mockScenes = [
-    { title: "Epic Final Battle", show: "Demon Slayer", duration: "2:45", img: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJHS6zeJBf1.jpg" },
-    { title: "Emotional Farewell", show: "Your Lie in April", duration: "3:10", img: "https://image.tmdb.org/t/p/w500/1yepeH9pQeR0pY956N3ySihs48H.jpg" },
-    { title: "Surprise Attack Strategy", show: "Attack on Titan", duration: "1:15", img: "https://image.tmdb.org/t/p/w500/1k1Bnn610Bq5a2A9Q70sZgR10gS.jpg" },
+    { title: "Epic Final Battle", show: "Demon Slayer", duration: "2:45", img: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJHS6zeJBf1.jpg", playId: "tmdb:85937", type: "anime" },
+    { title: "Emotional Farewell", show: "Your Lie in April", duration: "3:10", img: "https://image.tmdb.org/t/p/w500/1yepeH9pQeR0pY956N3ySihs48H.jpg", playId: "tmdb:61663", type: "anime" },
+    { title: "Surprise Attack Strategy", show: "Attack on Titan", duration: "1:15", img: "https://image.tmdb.org/t/p/w500/1k1Bnn610Bq5a2A9Q70sZgR10gS.jpg", playId: "tmdb:1429", type: "anime" },
 ];
 
 export default function DiscoverPage() {
@@ -31,13 +31,14 @@ export default function DiscoverPage() {
     const [selectedMood, setSelectedMood] = useState<string | null>(null);
     const router = useRouter();
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSearch = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         if (!sceneSearch.trim()) return;
         setIsSearching(true);
-        // Mock network delay for "AI Processing"
+        setSearchResults(null);
+        // AI Processing Delay
         setTimeout(() => {
-            setSearchResults(mockScenes.sort(() => 0.5 - Math.random()));
+            setSearchResults(mockScenes);
             setIsSearching(false);
         }, 1500);
     };
@@ -89,7 +90,15 @@ export default function DiscoverPage() {
                             {SCENE_SUGGESTIONS.map(s => (
                                 <button 
                                     key={s} 
-                                    onClick={() => setSceneSearch(s)}
+                                    onClick={() => {
+                                        setSceneSearch(s);
+                                        setIsSearching(true);
+                                        setSearchResults(null);
+                                        setTimeout(() => {
+                                            setSearchResults(mockScenes);
+                                            setIsSearching(false);
+                                        }, 1500);
+                                    }}
                                     className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white transition-colors"
                                 >
                                     {s}
@@ -120,7 +129,10 @@ export default function DiscoverPage() {
                                             <p className="text-[10px] font-black uppercase tracking-wider text-purple-400">{scene.show}</p>
                                             <h4 className="text-sm font-bold text-white leading-tight mb-2">{scene.title}</h4>
                                             <div className="flex items-center gap-2">
-                                                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow-lg hover:scale-105 transition-transform">
+                                                <button 
+                                                    onClick={() => router.push(`/watch/${scene.type}/${scene.playId}`)}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow-lg hover:scale-105 transition-transform"
+                                                >
                                                     <Play className="w-3 h-3 fill-current ml-0.5" /> Watch
                                                 </button>
                                                 <button 

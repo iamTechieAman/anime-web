@@ -9,6 +9,7 @@ import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, Chev
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 import { useAdBlock } from "@/context/AdBlockContext";
+import { useWatch } from "@/context/WatchContext";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -194,6 +195,7 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
     const router = useRouter();
+    const { addToHistory, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]);
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
@@ -211,30 +213,20 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
     const [sourceError, setSourceError] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     
-    // Watchlist & Share
-    const [inWatchlist, setInWatchlist] = useState(false);
-    
-    useEffect(() => {
-        const list = JSON.parse(localStorage.getItem("toonplayer_watchlist") || "[]");
-        setInWatchlist(list.some((item: any) => item.id.toString() === id?.toString() && item.type === type));
-    }, [id, type]);
+    // Watchlist
+    const inWatchlist = isInWatchlist(id);
 
     const toggleWatchlist = () => {
-        const list = JSON.parse(localStorage.getItem("toonplayer_watchlist") || "[]");
         if (inWatchlist) {
-            const newList = list.filter((item: any) => !(item.id.toString() === id?.toString() && item.type === type));
-            localStorage.setItem("toonplayer_watchlist", JSON.stringify(newList));
-            setInWatchlist(false);
+            removeFromWatchlist(id);
         } else {
-            list.unshift({
+            addToWatchlist({
                 id,
-                type,
+                showId: id,
+                type: type as any,
                 title: details?.name || details?.title || "Unknown",
-                thumbnail: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : "",
-                addedAt: Date.now()
+                poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : ""
             });
-            localStorage.setItem("toonplayer_watchlist", JSON.stringify(list));
-            setInWatchlist(true);
         }
     };
 
@@ -620,22 +612,18 @@ export default function WatchPage({ params }: { params: Promise<{ type: string; 
         // Save to watch history
         if (details && (id || tmdbIdForAnime)) {
             try {
-                const historyKey = "watchHistory";
-                const existing = JSON.parse(localStorage.getItem(historyKey) || "[]");
-                const entry = {
-                    id: (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id,
+                const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
+                addToHistory({
+                    id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
+                    showId: finalId,
+                    type: type as any,
                     title: details.title || details.name || animeData?.name || "Untitled",
-                    thumbnail: details.poster_path ? `https://image.tmdb.org/t/p/w200${details.poster_path}` : animeData?.thumbnail,
-                    episode: String(selectedEpisode),
-                    season: type === 'tv' ? String(selectedSeason) : undefined,
-                    type: type, // movie, tv, anime, cartoon
-                    provider: type === 'anime' ? (animeData?.provider || 'allanime') : 'tmdb',
-                    watchedAt: Date.now(),
-                };
-                // Dedup based on id, type and episode
-                const deduped = existing.filter((h: any) => !(h.id === entry.id && h.type === entry.type && h.episode === entry.episode));
-                deduped.unshift(entry);
-                localStorage.setItem(historyKey, JSON.stringify(deduped.slice(0, 100)));
+                    poster: details.poster_path ? `https://image.tmdb.org/t/p/w200${details.poster_path}` : (animeData?.thumbnail || ""),
+                    episodeId: String(selectedEpisode),
+                    episodeNumber: selectedEpisode,
+                    currentTime: 0,
+                    duration: 0
+                });
             } catch (e) {
                 console.error("Failed to save history:", e);
             }
