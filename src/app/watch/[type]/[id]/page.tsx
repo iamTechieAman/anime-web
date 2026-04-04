@@ -15,6 +15,13 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
+        id: 'toon4k',
+        name: 'Toon4K',
+        badge: 'Premium 4K',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&title=false`,
+    },
+    {
         id: 'toon_ultimate',
         name: 'Toon Player Ultimate',
         badge: 'Best',
@@ -115,6 +122,12 @@ const SERVERS = [
 ];
 
 const ANIME_SERVERS = [
+    {
+        id: "toon4k_anime",
+        name: "Toon4K Anime",
+        badge: "Premium 4K",
+        getUrl: (id: string, ep: number) => `https://vidlink.pro/embed/anime/${id}/${ep}?primaryColor=3b82f6`
+    },
     {
         id: "vidsrc_anime",
         name: "VidSrc Anime",
