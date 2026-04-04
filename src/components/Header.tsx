@@ -576,65 +576,89 @@ export default function Header() {
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
-                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                    className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
-                  >
-                     <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm">Notifications</span>
-                          {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-black">{unreadCount}</span>}
-                        </div>
-                        <button 
-                          onClick={() => markAllAsRead()}
-                          className="text-[10px] uppercase tracking-widest text-purple-400 font-black hover:text-purple-300 transition-colors"
+                     initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                     animate={{ opacity: 1, y: 0, scale: 1 }}
+                     exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                     className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
+                   >
+                      <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                         <div className="flex items-center gap-2">
+                           <span className="font-bold text-sm">Notifications</span>
+                           {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-black">{unreadCount}</span>}
+                         </div>
+                         <button
+                           onClick={() => markAllAsRead()}
+                           className="text-[10px] uppercase tracking-widest text-purple-400 font-black hover:text-purple-300 transition-colors"
+                         >
+                           Mark all read
+                         </button>
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto hide-scrollbar">
+                         {notifications.length > 0 ? (
+                           <div className="divide-y divide-[var(--border-color)]">
+                             {notifications.map((notif: any) => {
+                               const CATEGORY_META: Record<string, { label: string; color: string }> = {
+                                 episodes: { label: 'New Episode', color: 'text-purple-400 bg-purple-500/10' },
+                                 trending: { label: 'Trending', color: 'text-red-400 bg-red-500/10' },
+                                 recommendations: { label: 'AI Pick', color: 'text-amber-400 bg-amber-500/10' },
+                                 watchlist: { label: 'Watchlist', color: 'text-blue-400 bg-blue-500/10' },
+                                 community: { label: 'Community', color: 'text-green-400 bg-green-500/10' },
+                                 system: { label: 'System', color: 'text-zinc-400 bg-zinc-500/10' },
+                               };
+                               const meta = CATEGORY_META[notif.category] || CATEGORY_META['system'];
+                               return (
+                                 <div
+                                   key={notif.id}
+                                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-purple-500/5' : ''}`}
+                                   onClick={() => {
+                                     markAsRead(notif.id);
+                                     if (notif.link) router.push(notif.link);
+                                   }}
+                                 >
+                                   {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-r" />}
+                                   <div className="flex justify-between items-start mb-1 gap-2">
+                                     <div className="flex-1 min-w-0">
+                                       <div className="flex items-center gap-1.5 mb-0.5">
+                                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${meta.color}`}>{meta.label}</span>
+                                       </div>
+                                       <h5 className="text-xs font-bold text-white leading-tight">{notif.title}</h5>
+                                     </div>
+                                     <span className="text-[9px] text-[var(--text-muted)] whitespace-nowrap shrink-0">
+                                       {formatDistanceToNow(notif.timestamp, { addSuffix: true }).replace('about ', '')}
+                                     </span>
+                                   </div>
+                                   <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-2">{notif.message}</p>
+                                 </div>
+                               );
+                             })}
+                           </div>
+                         ) : (
+                           <div className="p-10 text-center">
+                             <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                               <Bell className="w-6 h-6 text-[var(--text-muted)] opacity-20" />
+                             </div>
+                             <p className="text-sm font-medium text-white mb-1">Stay Tuned!</p>
+                             <p className="text-xs text-[var(--text-muted)]">We'll alert you when your favorite shows get new episodes.</p>
+                           </div>
+                         )}
+                      </div>
+                      <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
+                        <button
+                          onClick={() => { setShowNotifications(false); setShowProfileSettings(true); }}
+                          className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-purple-400 font-black hover:bg-purple-500/5 transition-all"
                         >
-                          Mark all read
+                          ⚙ Manage Alerts
                         </button>
-                     </div>
-                     <div className="max-h-[400px] overflow-y-auto hide-scrollbar">
-                        {notifications.length > 0 ? (
-                          <div className="divide-y divide-[var(--border-color)]">
-                            {notifications.map((notif) => (
-                              <div 
-                                key={notif.id} 
-                                className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-purple-500/5' : ''}`}
-                                onClick={() => {
-                                  markAsRead(notif.id);
-                                  if (notif.link) router.push(notif.link);
-                                }}
-                              >
-                                {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500" />}
-                                <div className="flex justify-between items-start mb-1">
-                                  <h5 className="text-xs font-bold text-white truncate pr-4">{notif.title}</h5>
-                                  <span className="text-[9px] text-[var(--text-muted)] whitespace-nowrap">
-                                    {formatDistanceToNow(notif.timestamp, { addSuffix: true }).replace('about ', '')}
-                                  </span>
-                                </div>
-                                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-2">{notif.message}</p>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-10 text-center">
-                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <Bell className="w-6 h-6 text-[var(--text-muted)] opacity-20" />
-                            </div>
-                            <p className="text-sm font-medium text-white mb-1">Stay Tuned!</p>
-                            <p className="text-xs text-[var(--text-muted)]">We'll alert you when your favorite shows get new episodes.</p>
-                          </div>
+                        {notifications.length > 0 && (
+                          <button
+                            onClick={clearNotifications}
+                            className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all"
+                          >
+                            Clear All
+                          </button>
                         )}
-                     </div>
-                     {notifications.length > 0 && (
-                       <button
-                          onClick={clearNotifications}
-                          className="w-full py-3 bg-white/5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all border-t border-[var(--border-color)]"
-                       >
-                         Clear All
-                       </button>
-                     )}
-                  </motion.div>
+                      </div>
+                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
