@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut, Bookmark } from "lucide-react";
+import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut, Bookmark, Clock, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
@@ -10,6 +10,8 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { formatDistanceToNow } from 'date-fns';
+
+import Fuse from "fuse.js";
 
 const GENRES = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
 const FORMATS = ["TV", "Movie", "OVA", "ONA", "Special"];
@@ -37,9 +39,62 @@ export default function Header() {
   const { setShowProfileSettings } = useMobileUI();
   const { isAdBlockEnabled, toggleAdBlock } = useAdBlock();
   const [isMounted, setIsMounted] = useState(false);
+  const [globalCatalog, setGlobalCatalog] = useState<any[]>([]);
+  const fuseRef = useRef<Fuse<any> | null>(null);
+
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    const saved = localStorage.getItem("toonplayer_recent_searches");
+    if (saved) try { setRecentSearches(JSON.parse(saved)); } catch(e) {}
+    
+    // Preload top trending metadata into local Fuse.js memory cache for instant, zero-latency fuzzy typing
+    const preloadCatalog = async () => {
+      try {
+        const tmdbRes = await axios.get(`https://api.themoviedb.org/3/trending/all/day?api_key=522103f166160100778c1995804369a4`);
+        const animeRes = await axios.post('https://graphql.anilist.co', {
+          query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji } coverImage { medium } seasonYear format } } }`
+        });
+
+        const catalog: any[] = [];
+        tmdbRes.data.results.forEach((item: any) => {
+            if (item.media_type === 'person') return;
+            catalog.push({
+                id: item.id,
+                title: item.title || item.name,
+                image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
+                type: item.media_type === 'movie' ? 'movie' : 'tv',
+                year: (item.release_date || item.first_air_date || '').split('-')[0],
+                format: item.media_type.toUpperCase(),
+                href: `/watch/${item.media_type}/${item.id}`
+            });
+        });
+
+        animeRes.data.data.Page.media.forEach((item: any) => {
+            catalog.push({
+                id: item.id,
+                title: item.title.english || item.title.romaji,
+                image: item.coverImage.medium,
+                type: 'anime',
+                year: item.seasonYear,
+                format: item.format,
+                href: `/watch/anime/${item.id}`
+            });
+        });
+
+        setGlobalCatalog(catalog);
+        fuseRef.current = new Fuse(catalog, {
+            keys: ["title", "type"],
+            threshold: 0.4, // high typo tolerance
+            ignoreLocation: true,
+            minMatchCharLength: 2
+        });
+      } catch (e) {}
+    };
+    preloadCatalog();
   }, []);
 
   const searchPlaceholder = "Search movies, anime & shows...";
@@ -77,27 +132,62 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (!searchQuery.trim() || searchQuery.length < 2) {
+    const cleanQuery = searchQuery.trim().replace(/\s+/g, ' '); // Normalize spaces
+    
+    if (!cleanQuery) {
       setSuggestions([]);
       return;
     }
+
+    // 1. Instant local Fuzzy Search
+    if (fuseRef.current) {
+        const localMatches = fuseRef.current.search(cleanQuery).map(r => r.item);
+        if (localMatches.length > 0) {
+            setSuggestions(localMatches.slice(0, 10));
+        }
+    }
+
+    // 2. 300ms Debounced Network Deep Search
     const timer = setTimeout(async () => {
+      if (cleanQuery.length < 2) return;
       try {
         const response = await axios.get(UNIFIED_SEARCH_URL, {
-          params: { q: searchQuery }
+          params: { q: cleanQuery }
         });
-        setSuggestions(response.data.results || []);
+        const networkItems = response.data.results || [];
+        
+        if (networkItems.length > 0) {
+            // Apply Fuzzy Search against network items to strictly rank typo anomalies
+            const networkFuse = new Fuse(networkItems, { keys: ["title"], threshold: 0.4 });
+            const rankedNetwork = networkFuse.search(cleanQuery).map(r => r.item);
+            const finalNetwork = rankedNetwork.length > 0 ? rankedNetwork : networkItems;
+            
+            setSuggestions((prev) => {
+                const combined = [...prev, ...finalNetwork];
+                const unique = combined.filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i);
+                return unique.slice(0, 10);
+            });
+        }
       } catch (error) {
-        setSuggestions([]);
       }
-    }, 600);
+    }, 300); // Strict 300ms debounce
+    
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const saveRecentSearch = (query: string) => {
+    if (!query.trim()) return;
+    const newRecent = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
+    setRecentSearches(newRecent);
+    localStorage.setItem("toonplayer_recent_searches", JSON.stringify(newRecent));
+  };
 
   const handleSearch = (e: React.FormEvent | null, queryOverride?: string) => {
     if (e) e.preventDefault();
     const q = queryOverride || searchQuery;
     
+    if (q.trim()) saveRecentSearch(q);
+
     const params = new URLSearchParams();
     if (q.trim()) params.set("query", q);
     if (filterGenre) params.set("genre", filterGenre);
@@ -110,6 +200,39 @@ export default function Header() {
     setShowSuggestions(false);
     setShowFilters(false); 
     router.push(`/search?${params.toString()}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex(prev => (prev > -1 ? prev - 1 : prev));
+    } else if (e.key === "Enter") {
+      if (activeIndex >= 0) {
+        e.preventDefault();
+        const item = suggestions[activeIndex];
+        router.push(item.href);
+        setShowSuggestions(false);
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  };
+
+  const HighlightText = ({ text, highlight }: { text: string, highlight: string }) => {
+    if (!highlight.trim()) return <span>{text}</span>;
+    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+    return (
+      <span>
+        {parts.map((part, i) => 
+          part.toLowerCase() === highlight.toLowerCase() 
+            ? <b key={i} className="text-purple-400">{part}</b> 
+            : part
+        )}
+      </span>
+    );
   };
 
   const clearSearch = () => {
@@ -178,16 +301,21 @@ export default function Header() {
         {/* Search Bar + Filter */}
         <div className="flex-1 max-w-xl hidden md:flex items-center gap-2 relative">
           <div className="flex-1 relative">
-            <form onSubmit={(e) => handleSearch(e)} className="relative flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 hover:bg-[var(--bg-card)]/80 focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/10 transition-all">
+            <form 
+              onSubmit={(e) => handleSearch(e)} 
+              className="relative flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 hover:bg-[var(--bg-card)]/80 focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/10 transition-all"
+            >
               <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
+                  setActiveIndex(-1);
                   if (e.target.value.length >= 2) setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
+                onKeyDown={handleKeyDown}
                 placeholder="Search movies, anime & shows..."
                 className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
                 autoComplete="off"
@@ -201,48 +329,106 @@ export default function Header() {
 
             {/* Suggestions Dropdown */}
             <AnimatePresence>
-              {showSuggestions && suggestions.length > 0 && (
+              {showSuggestions && (
                 <motion.div
+                  ref={dropdownRef}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   className="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
                 >
-                  {suggestions.map((item: any) => (
-                    <Link
-                      key={`${item.type}-${item.id}`}
-                      href={item.href}
-                      className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors group"
-                      onClick={() => setShowSuggestions(false)}
-                    >
-                      <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md bg-zinc-800">
-                        {item.image ? (
-                          <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                             <Play className="w-4 h-4 text-zinc-600" />
+                  {searchQuery.length < 2 ? (
+                    <div className="divide-y divide-[var(--border-color)]">
+                      {recentSearches.length > 0 && (
+                        <div className="p-4">
+                          <p className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                            <Clock className="w-3 h-3" /> Recent Searches
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {recentSearches.map((s, i) => (
+                              <button
+                                key={i}
+                                onClick={() => { setSearchQuery(s); handleSearch(null, s); }}
+                                className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-full text-xs font-medium transition-colors"
+                              >
+                                {s}
+                              </button>
+                            ))}
                           </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
-                          <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest ${
-                            item.type === 'anime' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
-                          }`}>
-                            {item.type}
-                          </span>
                         </div>
-                        <p className="text-[10px] text-[var(--text-muted)]">{item.format} • {item.year}</p>
+                      )}
+                      
+                      {/* Trending Section when empty */}
+                      <div className="p-4">
+                        <p className="text-[10px] uppercase tracking-widest font-black text-purple-400 mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-3 h-3" /> Trending Now
+                        </p>
+                        <div className="space-y-1">
+                          {globalCatalog.slice(0, 5).map((item, i) => (
+                            <Link
+                              key={i}
+                              href={item.href}
+                              className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-colors group"
+                              onClick={() => setShowSuggestions(false)}
+                            >
+                              <span className="text-xs font-black text-[var(--text-muted)] w-4 italic">{i + 1}</span>
+                              <div className="w-8 h-10 relative shrink-0 overflow-hidden rounded bg-zinc-800">
+                                {item.image && <img src={item.image} alt="" className="w-full h-full object-cover" />}
+                              </div>
+                              <span className="text-xs font-bold text-white truncate group-hover:text-purple-400 transition-colors">{item.title}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </Link>
-                  ))}
-                  <button 
-                    onClick={() => handleSearch(null)}
-                    className="w-full p-3 text-center text-xs font-bold text-purple-400 border-t border-[var(--border-color)] hover:bg-purple-500/5 transition-colors"
-                  >
-                    View all results
-                  </button>
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <>
+                      {suggestions.map((item: any, i: number) => (
+                        <Link
+                          key={`${item.type}-${item.id}`}
+                          href={item.href}
+                          className={`flex items-center gap-3 p-3 transition-colors group ${activeIndex === i ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                          onMouseEnter={() => setActiveIndex(i)}
+                          onClick={() => { setShowSuggestions(false); saveRecentSearch(item.title); }}
+                        >
+                          <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md bg-zinc-800">
+                            {item.image ? (
+                              <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Play className="w-4 h-4 text-zinc-600" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <h4 className="text-sm font-bold text-white truncate">
+                                <HighlightText text={item.title} highlight={searchQuery} />
+                              </h4>
+                              <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest ${
+                                item.type === 'anime' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
+                              }`}>
+                                {item.type}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-[var(--text-muted)]">{item.format} • {item.year}</p>
+                          </div>
+                        </Link>
+                      ))}
+                      <button 
+                        onClick={() => handleSearch(null)}
+                        className="w-full p-3 text-center text-xs font-bold text-purple-400 border-t border-[var(--border-color)] hover:bg-purple-500/5 transition-colors"
+                      >
+                        View all results for "{searchQuery}"
+                      </button>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center opacity-50">
+                      <Search className="w-10 h-10 mx-auto mb-3 text-[var(--text-muted)]" />
+                      <p className="text-sm font-bold">No results found for "{searchQuery}"</p>
+                      <p className="text-xs text-[var(--text-muted)] mt-1">Try a different name or category</p>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

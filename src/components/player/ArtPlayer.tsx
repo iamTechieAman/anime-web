@@ -45,7 +45,7 @@ export default function Player({ option, className, style, getInstance, onEnded,
                     title: option.title,
                     volume: 0.5,
                     isLive: false,
-                    muted: false,
+                    muted: autoPlay && (typeof navigator !== 'undefined' ? /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) : false),
                     autoplay: autoPlay,
                     pip: false,
                     autoSize: true,
@@ -83,10 +83,13 @@ export default function Player({ option, className, style, getInstance, onEnded,
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
                                 const hls = new Hls({
-                                    // Aggressive buffering for near-instant startup
-                                    maxBufferLength: 15,
-                                    maxMaxBufferLength: 30,
-                                    maxBufferSize: 15 * 1000 * 1000,
+                                    // Extremely fast startup buffering
+                                    maxBufferLength: 5,
+                                    maxMaxBufferLength: 15,
+                                    maxBufferSize: 5 * 1000 * 1000,
+                                    
+                                    // Fix Subtitles (force JS rendering instead of native which lags)
+                                    renderTextTracksNatively: false,
 
                                     // Faster initial load
                                     initialLiveManifestSize: 1,
@@ -95,14 +98,14 @@ export default function Player({ option, className, style, getInstance, onEnded,
                                     // Stability and workers
                                     enableWorker: true,
                                     lowLatencyMode: true,
-                                    backBufferLength: 5,
+                                    backBufferLength: 3,
 
                                     // Fast timeouts for quick fallback
-                                    manifestLoadingTimeOut: 5000,  // 5s manifest timeout
+                                    manifestLoadingTimeOut: 3000,  // 3s manifest timeout
                                     manifestLoadingMaxRetry: 2,
-                                    levelLoadingTimeOut: 5000,
+                                    levelLoadingTimeOut: 3000,
                                     levelLoadingMaxRetry: 2,
-                                    fragLoadingTimeOut: 10000,
+                                    fragLoadingTimeOut: 5000,
                                     fragLoadingMaxRetry: 3,
                                     startLevel: -1,  // Auto-quality 
                                 });
@@ -141,7 +144,10 @@ export default function Player({ option, className, style, getInstance, onEnded,
 
                                     if (art.option.autoplay && !isDestroyed.current && art.video.isConnected) {
                                         art.play().catch((e) => {
-                                            console.warn('[ArtPlayer] Auto-play prevented:', e);
+                                            console.warn('[ArtPlayer] Auto-play prevented, likely user interaction needed on mobile:', e);
+                                            // Fallback for Safari/iOS muted policy block
+                                            art.muted = true;
+                                            art.play().catch((err) => console.log('Even muted play failed', err));
                                         });
                                     }
                                 });

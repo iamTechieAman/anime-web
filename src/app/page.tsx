@@ -9,6 +9,7 @@ import { Calendar, CheckCircle, ChevronUp, Clock, Film, Flame, Heart, History, I
 import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
 import HeroCarousel from "@/components/HeroCarousel";
 import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
+import ContinueWatchingRow from "@/components/ContinueWatchingRow";
 import useSWR from 'swr';
 
 // CineVibe-style category sections with TMDB genre IDs
@@ -275,6 +276,7 @@ export default function MoviesPage() {
                         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                             {/* Main Feed */}
                             <div className="flex-1 space-y-12 min-w-0">
+                                <ContinueWatchingRow />
                                 {activeTab === "movies" && (
                                     <>
                                         {/* Movies Feed */}

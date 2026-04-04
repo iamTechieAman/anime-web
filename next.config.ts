@@ -1,18 +1,28 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+});
 
 const nextConfig: NextConfig = {
-  
   // Prevent OOM errors on Netlify by disabling linting/typescript during the final build
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Silences Turbopack error when using webpack plugins like PWA
+  // @ts-ignore
+  turbopack: {},
   // Constrain webpack so it doesn't spin up multiple threads and consume all RAM
   experimental: {
     cpus: 1,
     workerThreads: false,
   },
   images: {
-    
     remotePatterns: [
       { protocol: 'https', hostname: 's4.anilist.co' },
       { protocol: 'https', hostname: 'allanime.day' },
@@ -41,4 +51,4 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

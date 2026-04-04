@@ -94,6 +94,7 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
                             height={270}
                             onError={handleImageError}
                             loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                     ) : (
@@ -215,6 +216,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                         height={80}
                         onError={() => setImageError(true)}
                         loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                 ) : (

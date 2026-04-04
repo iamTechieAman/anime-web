@@ -80,6 +80,8 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             src={`${IMG_BASE}/original${item.backdrop_path}`}
                             alt={title}
                             className="w-full h-full object-cover"
+                            loading={current === 0 ? "eager" : "lazy"}
+                            decoding="async"
                         />
                     )}
                 </motion.div>

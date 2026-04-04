@@ -1,0 +1,24 @@
+{
+  "name": "ToonPlayer Movies & Anime",
+  "short_name": "ToonPlayer",
+  "description": "Watch movies, TV shows, and anime online.",
+  "theme_color": "#000000",
+  "background_color": "#050505",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/logo.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/logo.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "maskable any"
+    }
+  ]
+}

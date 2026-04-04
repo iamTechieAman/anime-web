@@ -27,14 +27,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('toonplayer_notifications');
-    if (saved) {
-      try {
-        setNotifications(JSON.parse(saved));
-      } catch (e) {
-        setNotifications([]);
+    const loadFromStorage = () => {
+      const saved = localStorage.getItem('toonplayer_notifications');
+      if (saved) {
+        try {
+          setNotifications(JSON.parse(saved));
+        } catch (e) {
+          setNotifications([]);
+        }
       }
-    } else {
+    };
+
+    // Initial load
+    const saved = localStorage.getItem('toonplayer_notifications');
+    if (!saved) {
       const initial1: Notification = {
         id: 'welcome_v1_8',
         title: '⚡ ToonPlayer V1.8 — Performance Update!',
@@ -45,9 +51,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       };
       setNotifications([initial1]);
       localStorage.setItem('toonplayer_notifications', JSON.stringify([initial1]));
+    } else {
+      loadFromStorage();
     }
+
+    // Real-time Storage Sync (for multiple tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'toonplayer_notifications') {
+        loadFromStorage();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
     
-    // Growth Hack: Simulate a new episode release after 5 seconds to show updates working
+    // Growth Hack: Simulate a new episode release after a delay to show real-time updates working
     const mockTimer = setTimeout(() => {
         setNotifications(prev => {
             const hasDemonSlayer = prev.some(p => p.id === 'growth_mock_ds');
@@ -68,7 +84,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
     }, 5000);
 
-    return () => clearTimeout(mockTimer);
+    return () => {
+      clearTimeout(mockTimer);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
