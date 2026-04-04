@@ -200,8 +200,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     
     // Load Settings & Bookmark
     useEffect(() => {
-        const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') === 'true';
-        const savedAutoNext = localStorage.getItem('toonplayer_autonext') === 'true';
+        // null means first visit → default to true. Only disable if explicitly set to 'false'.
+        const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') !== 'false';
+        const savedAutoNext = localStorage.getItem('toonplayer_autonext') !== 'false';
         setAutoPlay(savedAutoPlay);
         setAutoNext(savedAutoNext);
 

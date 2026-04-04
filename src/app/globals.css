@@ -404,3 +404,56 @@ nav, .fixed, [class*="fixed"] {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
+
+/* ──────────────────────────────────────────────────
+   V2.2 MOBILE-FIRST PERFORMANCE ADDITIONS
+   ──────────────────────────────────────────────── */
+
+/* 8. KILL all hover transforms on touch devices — #1 lag source on Android
+   Touch screens fire :hover on tap which forces immediate style recalculation */
+@media (hover: none) and (pointer: coarse) {
+  /* Disable ALL hover scale/translate transforms */
+  *:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Re-enable only active: feedback (intentional press) */
+  button:active, a:active, [role="button"]:active {
+    opacity: 0.7;
+  }
+  
+  /* Kill all transition-all (forces recalc on every frame) */
+  .transition-all {
+    transition-property: opacity, color, background-color, border-color !important;
+    transition-duration: 100ms !important;
+  }
+  
+  /* Disable expensive duration-500 animations */
+  .duration-500, .duration-300 {
+    transition-duration: 100ms !important;
+  }
+
+  /* Kill image scale on hover (always lags on low-end) */
+  img {
+    transition: none !important;
+  }
+}
+
+/* 9. Prevent interaction delay on all touch scroll containers */
+[class*="overflow-x-auto"],
+[class*="scroll-smooth-x"],
+.hide-scrollbar {
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+}
+
+/* 10. Ensure tap highlight is removed site-wide */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 11. Reduce paint cost for animated elements */
+.animate-spin, .animate-pulse, .animate-bounce {
+  will-change: transform;
+}

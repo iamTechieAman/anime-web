@@ -43,9 +43,11 @@ export default function Player({ option, className, style, getInstance, onEnded,
                     // url: option.url, // REMOVED to avoid duplication with ...option
                     poster: option.poster || "",
                     title: option.title,
-                    volume: 0.5,
+                    volume: 0.7,
                     isLive: false,
-                    muted: autoPlay && (typeof navigator !== 'undefined' ? /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) : false),
+                    // On mobile, MUST start muted for browser autoplay policy compliance
+                    // User can unmute after playback starts
+                    muted: autoPlay ? true : false,
                     autoplay: autoPlay,
                     pip: false,
                     autoSize: true,
@@ -83,31 +85,31 @@ export default function Player({ option, className, style, getInstance, onEnded,
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
                                 const hls = new Hls({
-                                    // Extremely fast startup buffering
-                                    maxBufferLength: 5,
-                                    maxMaxBufferLength: 15,
-                                    maxBufferSize: 5 * 1000 * 1000,
-                                    
-                                    // Fix Subtitles (force JS rendering instead of native which lags)
+                                    // Fast startup — minimal buffering before first frame
+                                    maxBufferLength: 8,
+                                    maxMaxBufferLength: 20,
+                                    maxBufferSize: 8 * 1000 * 1000,
+
+                                    // JS subtitle rendering
                                     renderTextTracksNatively: false,
 
-                                    // Faster initial load
+                                    // Fast initial load
                                     initialLiveManifestSize: 1,
                                     nudgeMaxRetry: 10,
 
-                                    // Stability and workers
+                                    // Workers + low latency
                                     enableWorker: true,
-                                    lowLatencyMode: true,
-                                    backBufferLength: 3,
+                                    lowLatencyMode: false, // Disable for VOD — causes buffering on low bandwidth
+                                    backBufferLength: 10,
 
-                                    // Fast timeouts for quick fallback
-                                    manifestLoadingTimeOut: 3000,  // 3s manifest timeout
-                                    manifestLoadingMaxRetry: 2,
-                                    levelLoadingTimeOut: 3000,
-                                    levelLoadingMaxRetry: 2,
-                                    fragLoadingTimeOut: 5000,
-                                    fragLoadingMaxRetry: 3,
-                                    startLevel: -1,  // Auto-quality 
+                                    // Aggressive timeouts — fast fallback
+                                    manifestLoadingTimeOut: 5000,
+                                    manifestLoadingMaxRetry: 3,
+                                    levelLoadingTimeOut: 5000,
+                                    levelLoadingMaxRetry: 3,
+                                    fragLoadingTimeOut: 8000,
+                                    fragLoadingMaxRetry: 4,
+                                    startLevel: -1, // Auto-quality
                                 });
 
                                 hls.loadSource(url);
@@ -131,23 +133,25 @@ export default function Player({ option, className, style, getInstance, onEnded,
                                                 })).reverse(),
                                             ],
                                             onSelect: function (item: any) {
-                                                console.log('[ArtPlayer] Switching quality to:', item.html, 'Level:', item.level);
-                                                hls.currentLevel = item.level; // -1 for Auto, index for specific
+                                                hls.currentLevel = item.level;
                                                 art.notice.show = `Switched to ${item.html}`;
-
-                                                // Update tooltip manually for immediate feedback
                                                 return item.html;
                                             },
                                         };
                                         art.setting.add(qualitySelector);
                                     }
 
+                                    // Auto-play: muted first, then unmute after short delay
                                     if (art.option.autoplay && !isDestroyed.current && art.video.isConnected) {
-                                        art.play().catch((e) => {
-                                            console.warn('[ArtPlayer] Auto-play prevented, likely user interaction needed on mobile:', e);
-                                            // Fallback for Safari/iOS muted policy block
+                                        art.play().then(() => {
+                                            // Unmute after 800ms — gives browser time to register play started
+                                            setTimeout(() => {
+                                                if (!isDestroyed.current) art.muted = false;
+                                            }, 800);
+                                        }).catch(() => {
+                                            // Muted fallback guaranteed to work on all mobile browsers
                                             art.muted = true;
-                                            art.play().catch((err) => console.log('Even muted play failed', err));
+                                            art.play().catch(() => {});
                                         });
                                     }
                                 });
