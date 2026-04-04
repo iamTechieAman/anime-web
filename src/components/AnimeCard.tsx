@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Play, Star } from "lucide-react";
 
 export interface Show {
@@ -18,38 +17,43 @@ export interface Show {
     __typename: string;
 }
 
-export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { show: any, showScore?: boolean, isBanner?: boolean, rank?: number }) {
+export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBanner = false, rank }: { show: any, showScore?: boolean, isBanner?: boolean, rank?: number }) {
     const [imageError, setImageError] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
     const isHD = show.availableEpisodes?.sub > 0 || show.availableEpisodes?.dub > 0;
+
+    // Intersection Observer — replaces whileInView (zero JS animation cost)
+    useEffect(() => {
+        const el = cardRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
+            { rootMargin: "-30px", threshold: 0.05 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
 
     // Route TMDB content to movie watch page
     const isTmdbContent = show._id?.startsWith('tmdb:');
     const getHref = () => {
         if (isTmdbContent) {
             const parts = show._id.split(':');
-            const type = parts[1]; // movie or tv
+            const type = parts[1];
             const tmdbId = parts[2];
             return `/watch/${type}/${tmdbId}`;
         }
-        // Ensure provider is passed, or default to allanime/hianime if likely
         const provider = show.provider || (show._id.startsWith('hi:') ? 'hianime' : show._id.startsWith('aw:') ? 'aniwatch' : 'allanime');
         return `/watch/anime/${show._id}?provider=${provider}`;
     };
 
-    const handleImageError = () => {
-        setImageError(true);
-    };
-
     return (
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            whileHover={{ scale: 1.04, transition: { duration: 0.3 } }}
-            className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-purple-500/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.3)] hover:-translate-y-1 ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}
+        <div
+            ref={cardRef}
+            className={`card-reveal ${isVisible ? 'card-visible' : ''}`}
         >
-            <Link href={getHref()} className="block w-full h-full">
+            <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-purple-500/40 transition-colors duration-150 block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}>
                 {/* Ranking Number */}
                 {rank !== undefined && (
                     <div className="absolute top-0 right-0 z-20 pointer-events-none drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
@@ -92,7 +96,7 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
                             alt={show.name}
                             width={180}
                             height={270}
-                            onError={handleImageError}
+                        onError={() => setImageError(true)}
                             loading="lazy"
                             decoding="async"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -147,9 +151,9 @@ export function AnimeCard({ show, showScore = true, isBanner = false, rank }: { 
                     </div>
                 </div>
             </Link>
-        </motion.div>
+        </div>
     );
-}
+});
 
 // Anime Grid Component
 export function AnimeGrid({ shows, prefix = "anime" }: { shows: Show[], prefix?: string }) {
@@ -189,13 +193,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
     };
     
     return (
-        <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-20px" }}
-            transition={{ duration: 0.3 }}
-            key={`${show._id}-${rank}`}
-        >
+        <div key={`${show._id}-${rank}`} className="card-reveal card-visible">
         <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
             {/* Rank Number (if provided) */}
             {rank !== undefined && (
@@ -217,7 +215,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                         onError={() => setImageError(true)}
                         loading="lazy"
                         decoding="async"
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
                 ) : (
                     <div className="absolute inset-0 bg-white/5 flex items-center justify-center">
@@ -245,6 +243,6 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                 </div>
             </div>
         </Link>
-        </motion.div>
+        </div>
     );
 }

@@ -335,9 +335,72 @@ iframe {
 .card-reveal {
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  will-change: opacity, transform;
 }
 .card-reveal.card-visible {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto; /* Release after animation completes */
+}
+
+/* ──────────────────────────────────────────────────
+   V2.1 PERFORMANCE ADDITIONS
+   ──────────────────────────────────────────────── */
+
+/* 1. Eliminate 300ms tap delay — all interactive elements */
+button, a, [role="button"], label, select, input, textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 2. CSS-only press feedback (replaces framer-motion whileTap) */
+.tap-scale {
+  transition: transform 0.1s ease;
+}
+.tap-scale:active {
+  transform: scale(0.93);
+}
+
+/* 3. Speed up page transitions (was 0.6s — too slow) */
+.page-transition-wrapper {
+  animation: pageReveal 0.25s cubic-bezier(0.2, 0, 0.2, 1) both;
+  will-change: opacity, transform;
+}
+
+/* 4. Prevent overscroll bounce causing nav jitter on mobile */
+html, body {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+}
+
+/* 5. Stronger paint containment for card grids */
+.responsive-grid > * {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* 6. Prevent expensive box-shadow repaint on low-end mobile */
+@media (max-width: 768px) {
+  .hover\:shadow-\[0_12px_30px_-10px_rgba\(168\,85\,247\,0\.35\)\]:hover,
+  .hover\:shadow-\[0_0_40px_rgba\(168\,85\,247\,0\.3\)\]:hover {
+    box-shadow: none !important;
+  }
+  
+  /* Disable scale-on-hover for touch screens (causes repaint jitter) */
+  .group:hover .group-hover\:scale-105,
+  .group:hover .group-hover\:scale-110 {
+    transform: none !important;
+  }
+
+  /* Keep transition speed snappy */
+  .transition-all {
+    transition-duration: 150ms !important;
+  }
+}
+
+/* 7. Force GPU layer for fixed elements to prevent compositing issues */
+nav, .fixed, [class*="fixed"] {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }

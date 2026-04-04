@@ -30,10 +30,10 @@ export default function HeroCarousel() {
     // Use SWR for real-time updates and auto-revalidation
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-    // Poll every 5 minutes (300000ms) to check for new trending movies/tv
+    // Increase refresh interval to 5min — prevents excessive API calls
     const { data: trendingData, error, isLoading: isSwrLoading } = useSWR('/api/prime/trending', fetcher, {
-        refreshInterval: 60000,
-        revalidateOnFocus: true,
+        refreshInterval: 300000,
+        revalidateOnFocus: false, // Prevents API burst on tab switch
         dedupingInterval: 60000,
     });
 
@@ -186,13 +186,8 @@ export default function HeroCarousel() {
                             transition={{ duration: 0.3 }}
                             className="max-w-2xl"
                         >
-                            {/* Metadata Badges - Stagger 1 */}
-                            <motion.div
-                                initial={{ y: 20, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.4, delay: 0.1 }}
-                                className="flex flex-wrap items-center gap-2 mb-4"
-                            >
+                            {/* Metadata Badges */}
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
                                 <span className="bg-[#FF5722] text-white px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider">
                                     {activeSlide.type}
                                 </span>
@@ -205,13 +200,13 @@ export default function HeroCarousel() {
                                 <span className="text-xs font-bold text-white/70 flex items-center gap-1">
                                     <Calendar className="w-3.5 h-3.5" /> {activeSlide.release}
                                 </span>
-                            </motion.div>
+                            </div>
 
                             {/* Title - Stagger 2 */}
                             <motion.h1
-                                initial={{ y: 25, opacity: 0 }}
+                                initial={{ y: 12, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
+                                transition={{ duration: 0.3, delay: 0.05 }}
                                 className="text-4xl md:text-6xl font-black leading-tight text-white mb-4 line-clamp-2 font-sora tracking-tighter"
                             >
                                 {activeSlide.title}
@@ -219,9 +214,9 @@ export default function HeroCarousel() {
 
                             {/* Description - Stagger 3 */}
                             <motion.p
-                                initial={{ y: 20, opacity: 0 }}
+                                initial={{ y: 10, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.5, delay: 0.35 }}
+                                transition={{ duration: 0.3, delay: 0.1 }}
                                 className="text-white/70 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-8 font-medium"
                             >
                                 {activeSlide.description}
@@ -229,9 +224,9 @@ export default function HeroCarousel() {
 
                             {/* Action Buttons - Stagger 4 */}
                             <motion.div
-                                initial={{ y: 20, opacity: 0 }}
+                                initial={{ y: 10, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
+                                transition={{ duration: 0.25, delay: 0.15 }}
                                 className="flex items-center gap-3 md:gap-4"
                             >
                                 <Link href={activeSlide.link}>

@@ -1,9 +1,8 @@
 "use client";
 
-import { Home, Search, Menu, Film, Calendar, Clock, Tv, Zap, Shuffle, Compass } from "lucide-react";
+import { Search, Menu, Film, Zap, Shuffle, Clock } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useMobileUI } from "@/context/MobileUIContext";
 
 export default function MobileNav() {
@@ -12,28 +11,28 @@ export default function MobileNav() {
     const { isSearchOpen, isMenuOpen, toggleSearch, toggleMenu, closeAll } = useMobileUI();
 
     const [isScrolledDown, setIsScrolledDown] = useState(false);
-    const [lastScrollY, setLastScrollY] = useState(0);
+    const lastScrollY = useRef(0); // useRef = zero re-renders on scroll
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    // Hide nav on scroll down, show on scroll up (app-like feel)
+    // Hide nav on scroll down, show on scroll up — stable handler via useRef (no dep array re-creation)
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
                 setIsScrolledDown(true);
             } else {
                 setIsScrolledDown(false);
             }
-            setLastScrollY(currentScrollY);
+            lastScrollY.current = currentScrollY;
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [lastScrollY]);
+    }, []); // Empty deps — handler never re-created
 
     // Handle Home Click
     const handleHomeClick = () => {
@@ -107,19 +106,18 @@ export default function MobileNav() {
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     return (
-                        <motion.button
+                        <button
                             key={item.label}
-                            whileTap={{ scale: 0.9 }}
                             onClick={item.onClick}
-                            className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-1 transition-all duration-300 ${
-                                item.active ? item.color : "text-[var(--text-muted)] hover:text-white"
+                            className={`tap-scale flex flex-col items-center justify-center gap-1.5 flex-1 py-1 transition-colors duration-150 ${
+                                item.active ? item.color : "text-[var(--text-muted)]"
                             }`}
                         >
-                            <div className={`relative ${item.active ? 'after:content-[""] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-current after:rounded-full after:shadow-[0_0_8px_currentColor]' : ''}`}>
-                              <Icon className={`${item.active ? "w-5 h-5 drop-shadow-[0_0_8px_currentColor]" : "w-4 h-4"} transition-all duration-300`} />
+                            <div className={`relative ${item.active ? 'after:content-[""] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-current after:rounded-full' : ''}`}>
+                              <Icon className={`${item.active ? "w-5 h-5" : "w-4 h-4"} transition-all duration-150`} />
                             </div>
-                            <span className={`text-[10px] font-bold tracking-tight transition-opacity ${item.active ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
-                        </motion.button>
+                            <span className={`text-[10px] font-bold tracking-tight ${item.active ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
+                        </button>
                     );
                 })}
             </div>
