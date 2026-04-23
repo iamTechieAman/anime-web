@@ -9,13 +9,12 @@ const ALLOWED_BOTS = [
     'google-extended', 'gptbot', 'chatgpt-user', 'perplexitybot',
     'anthropic-ai', 'claude-web', 'ccbot',
     'lighthouse', 'pagespeed', 'chrome-lighthouse',
-    'uptimerobot', 'pingdom',
+    'uptimerobot', 'pingdom', 'google-inspectiontool', 'googleOther', 'storebot-google'
 ];
 
 // Only block clearly malicious automated tools and scrapers
 const BLOCKED_UAS = [
     'scrapy', 'nikto', 'masscan', 'nmap', 'sqlmap',
-    'headlesschrome', 'puppeteer', 'playwright',
     'httrack', 'offline explorer', 'webcopier',
     'harvest', 'emailcollector', 'linkextractor',
 ];
