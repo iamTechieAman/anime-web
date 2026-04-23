@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut, Bookmark, Clock, TrendingUp } from "lucide-react";
+import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut, Bookmark, Clock, TrendingUp, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
@@ -51,48 +51,22 @@ export default function Header() {
     const saved = localStorage.getItem("toonplayer_recent_searches");
     if (saved) try { setRecentSearches(JSON.parse(saved)); } catch(e) {}
     
-    // Preload top trending metadata into local Fuse.js memory cache for instant, zero-latency fuzzy typing
+    // Preload trending catalog from server-side API (no API key exposure)
     const preloadCatalog = async () => {
       try {
-        const tmdbRes = await axios.get(`https://api.themoviedb.org/3/trending/all/day?api_key=522103f166160100778c1995804369a4`);
-        const animeRes = await axios.post('https://graphql.anilist.co', {
-          query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji } coverImage { medium } seasonYear format } } }`
-        });
-
-        const catalog: any[] = [];
-        tmdbRes.data.results.forEach((item: any) => {
-            if (item.media_type === 'person') return;
-            catalog.push({
-                id: item.id,
-                title: item.title || item.name,
-                image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
-                type: item.media_type === 'movie' ? 'movie' : 'tv',
-                year: (item.release_date || item.first_air_date || '').split('-')[0],
-                format: item.media_type.toUpperCase(),
-                href: `/watch/${item.media_type}/${item.id}`
-            });
-        });
-
-        animeRes.data.data.Page.media.forEach((item: any) => {
-            catalog.push({
-                id: item.id,
-                title: item.title.english || item.title.romaji,
-                image: item.coverImage.medium,
-                type: 'anime',
-                year: item.seasonYear,
-                format: item.format,
-                href: `/watch/anime/${item.id}`
-            });
-        });
+        const res = await axios.get('/api/search/catalog');
+        const catalog = res.data.results || [];
 
         setGlobalCatalog(catalog);
         fuseRef.current = new Fuse(catalog, {
             keys: ["title", "type"],
-            threshold: 0.4, // high typo tolerance
+            threshold: 0.4,
             ignoreLocation: true,
             minMatchCharLength: 2
         });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Header] Catalog preload failed:', e);
+      }
     };
     preloadCatalog();
   }, []);
@@ -223,7 +197,9 @@ export default function Header() {
 
   const HighlightText = ({ text, highlight }: { text: string, highlight: string }) => {
     if (!highlight.trim()) return <span>{text}</span>;
-    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+    // Escape special characters so they don't break the regex
+    const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escapedHighlight})`, "gi"));
     return (
       <span>
         {parts.map((part, i) => 
@@ -303,9 +279,9 @@ export default function Header() {
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
-              className="relative flex items-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 hover:bg-[var(--bg-card)]/80 focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/10 transition-all"
+              className="relative flex items-center bg-[var(--bg-card)]/50 backdrop-blur-sm border border-[var(--border-color)] rounded-2xl px-4 py-3 group hover:border-white/20 focus-within:border-purple-500/50 focus-within:ring-4 focus-within:ring-purple-500/5 transition-all duration-300"
             >
-              <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+              <Search className="w-[18px] h-[18px] text-[var(--text-muted)] group-focus-within:text-purple-400 shrink-0 transition-colors" />
               <input
                 type="text"
                 value={searchQuery}
@@ -316,12 +292,12 @@ export default function Header() {
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search movies, anime & shows..."
-                className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-inter"
+                placeholder="Find movies, shows & more..."
+                className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight"
                 autoComplete="off"
               />
               {searchQuery && (
-                <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1 hover:bg-[var(--border-color)] rounded-full mr-1">
+                <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1.5 hover:bg-white/5 rounded-full transition-colors">
                   <X className="w-4 h-4 text-[var(--text-muted)]" />
                 </button>
               )}
@@ -332,16 +308,16 @@ export default function Header() {
               {showSuggestions && (
                 <motion.div
                   ref={dropdownRef}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
+                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                  className="absolute top-full left-0 right-0 mt-3 bg-zinc-950/95 border border-white/10 rounded-[28px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-50 backdrop-blur-2xl"
                 >
                   {searchQuery.length < 2 ? (
-                    <div className="divide-y divide-[var(--border-color)]">
+                    <div className="divide-y divide-white/[0.04]">
                       {recentSearches.length > 0 && (
-                        <div className="p-4">
-                          <p className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                        <div className="p-5">
+                          <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/40 mb-3 flex items-center gap-2">
                             <Clock className="w-3 h-3" /> Recent Searches
                           </p>
                           <div className="flex flex-wrap gap-2">
@@ -349,7 +325,7 @@ export default function Header() {
                               <button
                                 key={i}
                                 onClick={() => { setSearchQuery(s); handleSearch(null, s); }}
-                                className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-full text-xs font-medium transition-colors"
+                                className="px-3.5 py-1.5 bg-white/[0.03] hover:bg-white/10 border border-white/[0.05] rounded-full text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 text-white/70 hover:text-white"
                               >
                                 {s}
                               </button>
@@ -359,74 +335,84 @@ export default function Header() {
                       )}
                       
                       {/* Trending Section when empty */}
-                      <div className="p-4">
-                        <p className="text-[10px] uppercase tracking-widest font-black text-purple-400 mb-3 flex items-center gap-2">
-                          <TrendingUp className="w-3 h-3" /> Trending Now
+                      <div className="p-5">
+                        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-purple-400 mb-4 flex items-center gap-2">
+                          <TrendingUp className="w-3 h-3" /> Trending Hits
                         </p>
                         <div className="space-y-1">
                           {globalCatalog.slice(0, 5).map((item, i) => (
                             <Link
                               key={i}
-                              href={item.href}
-                              className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-colors group"
+                              href={item.id ? `/watch/${item.type}/${item.id}` : '#'}
+                              className="flex items-center gap-4 p-2.5 hover:bg-white/5 rounded-2xl transition-all group hover:pl-4"
                               onClick={() => setShowSuggestions(false)}
                             >
-                              <span className="text-xs font-black text-[var(--text-muted)] w-4 italic">{i + 1}</span>
-                              <div className="w-8 h-10 relative shrink-0 overflow-hidden rounded bg-zinc-800">
-                                {item.image && <img src={item.image} alt="" className="w-full h-full object-cover" />}
+                              <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-purple-500 transition-colors">0{i + 1}</span>
+                              <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-zinc-900 border border-white/5">
+                                {item.image && <img src={item.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />}
                               </div>
-                              <span className="text-xs font-bold text-white truncate group-hover:text-purple-400 transition-colors">{item.title}</span>
+                              <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{item.title}</span>
+                              <Sparkles className="w-3.5 h-3.5 text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                             </Link>
                           ))}
                         </div>
                       </div>
                     </div>
                   ) : suggestions.length > 0 ? (
-                    <>
+                    <div className="p-2 space-y-1">
                       {suggestions.map((item: any, i: number) => (
                         <Link
                           key={`${item.type}-${item.id}`}
-                          href={item.href}
-                          className={`flex items-center gap-3 p-3 transition-colors group ${activeIndex === i ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                          href={item.href || `/watch/${item.type}/${item.id}`}
+                          className={`flex items-center gap-4 p-3 rounded-2xl transition-all group ${activeIndex === i ? 'bg-white/10 ring-1 ring-white/10 shadow-lg' : 'hover:bg-white/5'}`}
                           onMouseEnter={() => setActiveIndex(i)}
                           onClick={() => { setShowSuggestions(false); saveRecentSearch(item.title); }}
                         >
-                          <div className="w-10 h-14 relative shrink-0 overflow-hidden rounded-md bg-zinc-800">
+                          <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-zinc-900 border border-white/5 shadow-inner">
                             {item.image ? (
-                              <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                              <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <Play className="w-4 h-4 text-zinc-600" />
+                                <Play className="w-5 h-5 text-zinc-700" />
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <h4 className="text-sm font-bold text-white truncate">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="text-sm font-black text-white truncate group-hover:text-purple-400 transition-colors">
                                 <HighlightText text={item.title} highlight={searchQuery} />
                               </h4>
-                              <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest ${
-                                item.type === 'anime' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'
+                              <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
+                                item.type === 'anime' ? 'bg-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
                               }`}>
                                 {item.type}
                               </span>
                             </div>
-                            <p className="text-[10px] text-[var(--text-muted)]">{item.format} • {item.year}</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{item.format}</p>
+                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                                <p className="text-[10px] font-bold text-white/40">{item.year}</p>
+                            </div>
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0 -translate-x-2">
+                            <ChevronDown className="w-5 h-5 text-purple-500 -rotate-90" />
                           </div>
                         </Link>
                       ))}
                       <button 
                         onClick={() => handleSearch(null)}
-                        className="w-full p-3 text-center text-xs font-bold text-purple-400 border-t border-[var(--border-color)] hover:bg-purple-500/5 transition-colors"
+                        className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-purple-400 hover:text-white hover:bg-purple-600 rounded-2xl transition-all duration-300"
                       >
-                        View all results for "{searchQuery}"
+                        All results for "{searchQuery}"
                       </button>
-                    </>
+                    </div>
                   ) : (
-                    <div className="p-8 text-center opacity-50">
-                      <Search className="w-10 h-10 mx-auto mb-3 text-[var(--text-muted)]" />
-                      <p className="text-sm font-bold">No results found for "{searchQuery}"</p>
-                      <p className="text-xs text-[var(--text-muted)] mt-1">Try a different name or category</p>
+                    <div className="p-12 text-center">
+                      <div className="w-16 h-16 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-4 border border-white/[0.05]">
+                        <Search className="w-6 h-6 text-white/20" />
+                      </div>
+                      <p className="text-sm font-black text-white mb-1 uppercase tracking-widest">No Matches Found</p>
+                      <p className="text-xs text-white/40 font-medium">Try different keywords or browse genres</p>
                     </div>
                   )}
                 </motion.div>

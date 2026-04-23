@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
 import SimilarAnime from "@/components/SimilarAnime";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWatch } from "@/context/WatchContext";
 
 // Using ArtPlayer for robust playback
@@ -147,9 +147,10 @@ interface ShowData {
 }
 
 export default function WatchClient({ id: fullId }: { id: string }) {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const { isAdBlockEnabled } = useAdBlock();
-    
+
     // Parse ID for provider prefix (e.g., tmdb:123, aw:naruto)
     const { provider: idProvider, actualId: id } = (() => {
         if (fullId.includes(':')) {
@@ -158,7 +159,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
         return { provider: null, actualId: fullId };
     })();
-
+    
     // Priority: Prefix > URL Parameter
     const provider = idProvider || searchParams.get('provider');
 
@@ -166,6 +167,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     const [currentEp, setCurrentEp] = useState<string>("1");
     const [mode, setMode] = useState<"sub" | "dub">("sub");
+
+    const availableEps = show?.availableEpisodesDetail?.[mode] || [];
 
     const [sourceUrl, setSourceUrl] = useState<string | null>(null);
     const [videoType, setVideoType] = useState<string>("auto");
@@ -176,6 +179,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     // Auto-play and Auto-next always enabled
     const [autoPlay, setAutoPlay] = useState(true);
     const [autoNext, setAutoNext] = useState(true);
+    const [showNextOverlay, setShowNextOverlay] = useState(false);
+    const [nextCountdown, setNextCountdown] = useState(5);
+    const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Server State
     const [servers, setServers] = useState<any[]>([]);
@@ -206,6 +212,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         setAutoPlay(savedAutoPlay);
         setAutoNext(savedAutoNext);
 
+        const handleMessage = (e: MessageEvent) => {
+            const isEndEvent = e.data && (
+                e.data.type === "videoEnd" || 
+                e.data.event === "ended" || 
+                e.data === "video_ended" ||
+                e.data.type === "player_ended"
+            );
+
+            if (isEndEvent && autoNext) {
+                handleVideoEnded();
+            }
+        };
+
         // Click outside to close dropdown
         const handleClickOutside = (e: MouseEvent) => {
             if (serverRef.current && !serverRef.current.contains(e.target as Node)) {
@@ -213,8 +232,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [id]);
+        window.addEventListener("message", handleMessage);
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener("message", handleMessage);
+        };
+    }, [id, autoNext, currentEp, mode, show]);
 
     const isBookmarked = isInWatchlist(fullId);
 
@@ -575,17 +599,35 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
 
     const handleVideoEnded = () => {
+        if (!autoNext) return;
+        
         const availableEps = show?.availableEpisodesDetail?.[mode] || [];
         const currentIndex = availableEps.indexOf(currentEp);
         
         if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
-            const nextEp = availableEps[currentIndex + 1];
-            setCurrentEp(nextEp);
-            toast.success(`Now playing Episode ${nextEp}`, {
-                icon: '▶️',
-            });
+            // Trigger Netflix-style countdown overlay
+            if (showNextOverlay) return;
+            
+            setShowNextOverlay(true);
+            setNextCountdown(5);
+            
+            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+            
+            nextIntervalRef.current = setInterval(() => {
+                setNextCountdown(prev => {
+                    if (prev <= 1) {
+                        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                        setShowNextOverlay(false);
+                        
+                        const nextEp = availableEps[currentIndex + 1];
+                        setCurrentEp(nextEp);
+                        toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
         } else {
-            // Alternatively, handle end of available episodes
             toast("You have reached the latest available episode.", { icon: "✅" });
         }
     };
@@ -717,7 +759,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             </nav>
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className="flex-1 w-full max-w-[1920px] mx-auto pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
+            <div className="flex-1 w-full mx-auto pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
                 <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                     {/* Player Column */}
@@ -798,8 +840,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     </div>
                                 </div>
                             ) : sourceUrl ? (
-                                videoType === "iframe" ? (
-                                    <div className="relative w-full h-full">
+                                <div className="relative w-full h-full">
+                                    {videoType === "iframe" ? (
                                         <iframe
                                             src={sourceUrl}
                                             className="w-full h-full border-0 bg-black"
@@ -808,34 +850,110 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             onLoad={() => setLoadingSource(false)}
                                             onError={() => autoSwitchServer(selectedServer!)}
                                         ></iframe>
-                                    </div>
-                                ) : (
-                                    <ArtPlayer
-                                        key={`${sourceUrl}-${currentEp}`} // Force remount on URL change OR EP change
-                                        option={{
-                                            url: sourceUrl,
-                                            type: videoType,
-                                        }}
-                                        initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
-                                        onTimeUpdate={(currentTime, duration) => {
-                                            addToHistory({
-                                                id: `${fullId}-${currentEp}`, // track per episode for anime
-                                                showId: fullId,
-                                                type: 'anime',
-                                                title: show.name || 'Unknown',
-                                                poster: show.thumbnail || ((show as any).image) || '',
-                                                episodeId: currentEp,
-                                                episodeNumber: Number(currentEp) || 1,
-                                                currentTime,
-                                                duration
-                                            });
-                                        }}
-                                        onEnded={handleVideoEnded}
-                                        autoPlay={autoPlay}
-                                        autoNext={autoNext}
-                                        className="w-full h-full"
-                                    />
-                                )
+                                    ) : (
+                                        <ArtPlayer
+                                            key={`${sourceUrl}-${currentEp}`}
+                                            option={{
+                                                url: sourceUrl,
+                                                type: videoType,
+                                            }}
+                                            initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
+                                            onTimeUpdate={(currentTime, duration) => {
+                                                addToHistory({
+                                                    id: `${fullId}-${currentEp}`,
+                                                    showId: fullId,
+                                                    type: 'anime',
+                                                    title: show?.name || 'Unknown',
+                                                    poster: show?.thumbnail || ((show as any)?.image) || '',
+                                                    episodeId: currentEp,
+                                                    episodeNumber: Number(currentEp) || 1,
+                                                    currentTime,
+                                                    duration
+                                                });
+                                            }}
+                                            onEnded={handleVideoEnded}
+                                            onError={() => autoSwitchServer(selectedServer!)}
+                                            autoPlay={autoPlay}
+                                            autoNext={autoNext}
+                                            className="w-full h-full"
+                                        />
+                                    )}
+
+                                    {/* Netflix-style Auto Next Overlay (Shared) */}
+                                    <AnimatePresence>
+                                        {showNextOverlay && (
+                                            <motion.div 
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="absolute inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
+                                            >
+                                                <motion.div
+                                                    initial={{ scale: 0.9, y: 20 }}
+                                                    animate={{ scale: 1, y: 0 }}
+                                                    className="max-w-sm w-full"
+                                                >
+                                                    <div className="relative w-20 h-20 mx-auto mb-6">
+                                                        <svg className="w-full h-full transform -rotate-90">
+                                                            <circle
+                                                                cx="40"
+                                                                cy="40"
+                                                                r="36"
+                                                                stroke="rgba(255,255,255,0.1)"
+                                                                strokeWidth="6"
+                                                                fill="none"
+                                                            />
+                                                            <motion.circle
+                                                                cx="40"
+                                                                cy="40"
+                                                                r="36"
+                                                                stroke="#a855f7"
+                                                                strokeWidth="6"
+                                                                fill="none"
+                                                                strokeDasharray="226.08"
+                                                                animate={{ strokeDashoffset: 226.08 - (226.08 * (5 - nextCountdown)) / 5 }}
+                                                                transition={{ duration: 1, ease: "linear" }}
+                                                            />
+                                                        </svg>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <span className="text-2xl font-black text-white">{nextCountdown}</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <h3 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">Up Next</h3>
+                                                    <p className="text-[var(--text-muted)] text-xs font-bold mb-6">
+                                                        Episode {availableEps[availableEps.indexOf(currentEp) + 1] || 'Next'}
+                                                    </p>
+                                                    
+                                                    <div className="flex items-center gap-2 justify-center">
+                                                        <button 
+                                                            onClick={() => {
+                                                                if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                                                setShowNextOverlay(false);
+                                                            }}
+                                                            className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs transition-all"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                                                setShowNextOverlay(false);
+                                                                const currentIndex = availableEps.indexOf(currentEp);
+                                                                if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
+                                                                    setCurrentEp(availableEps[currentIndex + 1]);
+                                                                }
+                                                            }}
+                                                            className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg font-black text-xs transition-all flex items-center gap-1.5"
+                                                        >
+                                                            Play Now <Play className="w-3.5 h-3.5 fill-current" />
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             ) : (
                                 <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
                                     <div className="w-10 h-10 rounded-full border-2 border-[var(--border-color)] border-t-purple-500 animate-spin"></div>
@@ -847,6 +965,22 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                         {/* Safe Stream & Stats */}
                         <div className="flex flex-wrap items-center gap-3 pt-4">
+                            {/* Next Episode Button */}
+                            {availableEps && currentEp && availableEps.indexOf(currentEp) < availableEps.length - 1 && (
+                                <button
+                                    onClick={() => {
+                                        const currentIndex = availableEps.indexOf(currentEp);
+                                        if (currentIndex !== -1 && currentIndex < availableEps.length - 1) {
+                                            const nextEp = availableEps[currentIndex + 1];
+                                            router.push(`/watch/anime/${id}?ep=${nextEp}&mode=${mode}`);
+                                        }
+                                    }}
+                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] mr-auto"
+                                >
+                                    Next Episode <Play className="w-3.5 h-3.5 fill-current" />
+                                </button>
+                            )}
+
                             <button 
                                 onClick={() => setShowSafeGuide(true)}
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider hover:bg-emerald-500/20 transition-colors"

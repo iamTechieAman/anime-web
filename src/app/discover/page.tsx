@@ -162,10 +162,10 @@ export default function DiscoverPage() {
 
     return (
         <main className="min-h-[100dvh] bg-[var(--bg-main)] text-[var(--text-main)] pt-[max(4rem,env(safe-area-inset-top))] md:pt-16 pb-24 md:pl-[72px]">
-            <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-12">
+            <div className="w-full px-4 md:px-8 py-6 space-y-12">
 
                 {/* Header */}
-                <div className="flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-4 pt-8">
+                <div className="flex flex-col items-center justify-center text-center w-full mx-auto space-y-4 pt-8">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-bold uppercase tracking-widest mb-2">
                         <Sparkles className="w-4 h-4" />
                         AI Powered Discovery
@@ -179,7 +179,7 @@ export default function DiscoverPage() {
                 </div>
 
                 {/* AI Search */}
-                <div className="relative max-w-3xl mx-auto">
+                <div className="relative w-full mx-auto">
                     <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20" />
                     <form onSubmit={handleSearch} className="relative bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-2 shadow-2xl flex items-center">
                         <div className="px-4 text-[var(--text-muted)]">

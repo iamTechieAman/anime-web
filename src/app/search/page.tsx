@@ -65,7 +65,7 @@ function MovieSearchContent() {
         : "Discover Content";
 
     return (
-        <main className="min-h-screen pt-20 pb-24 px-4 md:px-8 max-w-7xl mx-auto bg-[var(--bg-main)]">
+        <main className="min-h-screen pt-20 pb-24 px-4 md:px-8 w-full bg-[var(--bg-main)]">
             {/* Search Header */}
             <motion.div 
                 initial={{ opacity: 0, y: -20 }}

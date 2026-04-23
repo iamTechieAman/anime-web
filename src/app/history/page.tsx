@@ -63,7 +63,7 @@ export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-0 pb-24 md:pb-10 md:pl-[72px]">
       <div className="sticky top-0 z-40 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)]">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4">
+        <div className="w-full px-6 md:px-12 px-4 md:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Clock className="w-6 h-6 text-purple-400" />
             <h1 className="text-xl md:text-2xl font-bold font-sora">Watch History</h1>
@@ -80,7 +80,7 @@ export default function HistoryPage() {
         </div>
 
         {history.length > 0 && (
-          <div className="max-w-4xl mx-auto px-4 md:px-6 pb-4">
+          <div className="w-full px-6 md:px-12 px-4 md:px-6 pb-4">
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
@@ -114,7 +114,7 @@ export default function HistoryPage() {
         )}
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
+      <div className="w-full px-6 md:px-12 px-4 md:px-6 py-8">
         {history.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center opacity-50">
             <Clock className="w-16 h-16 mb-4 text-[var(--text-muted)]" />

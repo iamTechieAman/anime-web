@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Artplayer from "artplayer";
 import Hls from "hls.js";
 // @ts-ignore
@@ -17,19 +17,70 @@ interface PlayerProps {
     style?: React.CSSProperties;
     getInstance?: (art: Artplayer) => void;
     onEnded?: () => void;
+    onError?: (error: any) => void;
     onTimeUpdate?: (currentTime: number, duration: number) => void;
     initialTime?: number;
     autoPlay?: boolean;
     autoNext?: boolean;
+    showSkipIntro?: boolean;
+    skipIntroDuration?: number; // Duration in seconds to skip to (default: 90)
 }
 
-export default function Player({ option, className, style, getInstance, onEnded, onTimeUpdate, initialTime = 0, autoPlay = false, autoNext = false }: PlayerProps) {
+export default function Player({ 
+    option, className, style, getInstance, onEnded, onError, onTimeUpdate, 
+    initialTime = 0, autoPlay = false, autoNext = false,
+    showSkipIntro = true, skipIntroDuration = 90
+}: PlayerProps) {
     const artRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<Artplayer | null>(null);
     const [showCountdown, setShowCountdown] = useState(false);
     const [countdown, setCountdown] = useState(5);
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isDestroyed = useRef(false);
+    const [showSkipButton, setShowSkipButton] = useState(false);
+    const [playerTime, setPlayerTime] = useState(0);
+    const [resumeTime, setResumeTime] = useState(0);
+    const [showResumePrompt, setShowResumePrompt] = useState(false);
+
+    // Skip intro logic — show between 5s and skipIntroDuration
+    useEffect(() => {
+        if (!showSkipIntro || !playerRef.current) return;
+        
+        if (playerTime >= 5 && playerTime <= skipIntroDuration) {
+            setShowSkipButton(true);
+        } else {
+            setShowSkipButton(false);
+        }
+    }, [playerTime, showSkipIntro, skipIntroDuration]);
+
+    // Resume playback — check if there's a saved position
+    useEffect(() => {
+        if (initialTime > 10) { // Only show resume if more than 10s
+            setResumeTime(initialTime);
+            setShowResumePrompt(true);
+            // Auto-hide after 8 seconds
+            const timer = setTimeout(() => setShowResumePrompt(false), 8000);
+            return () => clearTimeout(timer);
+        }
+    }, [initialTime]);
+
+    const handleSkipIntro = useCallback(() => {
+        if (playerRef.current && !isDestroyed.current) {
+            playerRef.current.currentTime = skipIntroDuration;
+            setShowSkipButton(false);
+        }
+    }, [skipIntroDuration]);
+
+    const handleResume = useCallback(() => {
+        if (playerRef.current && !isDestroyed.current && resumeTime > 0) {
+            playerRef.current.currentTime = resumeTime;
+            setShowResumePrompt(false);
+        }
+    }, [resumeTime]);
+
+    const handleStartFromBeginning = useCallback(() => {
+        setShowResumePrompt(false);
+    }, []);
 
     useEffect(() => {
         isDestroyed.current = false;
@@ -40,13 +91,11 @@ export default function Player({ option, className, style, getInstance, onEnded,
             try {
                 const art = new Artplayer({
                     container: artRef.current,
-                    // url: option.url, // REMOVED to avoid duplication with ...option
                     poster: option.poster || "",
                     title: option.title,
                     volume: 0.7,
                     isLive: false,
                     // On mobile, MUST start muted for browser autoplay policy compliance
-                    // User can unmute after playback starts
                     muted: autoPlay ? true : false,
                     autoplay: autoPlay,
                     pip: false,
@@ -71,6 +120,20 @@ export default function Player({ option, className, style, getInstance, onEnded,
                     lang: 'en',
                     plugins: [
                         artplayerPluginChromecast({}),
+                    ],
+                    controls: [
+                        // Next Episode Button
+                        {
+                            position: 'right',
+                            html: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4z"></path><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
+                            tooltip: 'Next Episode',
+                            click: function () {
+                                if (onEnded && !isDestroyed.current) onEnded();
+                            },
+                            style: {
+                                display: autoNext ? 'flex' : 'none'
+                            }
+                        }
                     ],
                     moreVideoAttr: {
                         crossOrigin: 'anonymous',
@@ -144,31 +207,28 @@ export default function Player({ option, className, style, getInstance, onEnded,
                                     // Auto-play: muted first, then unmute after short delay
                                     if (art.option.autoplay && !isDestroyed.current && art.video.isConnected) {
                                         art.play().then(() => {
-                                            // Unmute after 800ms — gives browser time to register play started
                                             setTimeout(() => {
                                                 if (!isDestroyed.current) art.muted = false;
                                             }, 800);
                                         }).catch(() => {
-                                            // Muted fallback guaranteed to work on all mobile browsers
                                             art.muted = true;
                                             art.play().catch(() => {});
                                         });
                                     }
                                 });
 
-                                // Listen for level changes to update the settings UI if Auto switches it
+                                // Listen for level changes
                                 hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
                                     const level = hls.levels[data.level];
                                     if (level && hls.autoLevelEnabled) {
                                         console.log('[ArtPlayer] Auto-quality switched to:', level.height);
-                                        // Optional: Update UI or show notice if needed, but usually silent is better for Auto
-                                        // art.notice.show = `Auto: ${level.height}P`;
                                     }
                                 });
 
                                 hls.on(Hls.Events.ERROR, function (event, data) {
                                     if (data.fatal) {
                                         console.error('[ArtPlayer] HLS Fatal Error:', data.type, data.details);
+                                        if (onError) onError(data);
                                         switch (data.type) {
                                             case Hls.ErrorTypes.NETWORK_ERROR:
                                                 console.log('[ArtPlayer] Attempting to recover from network error...');
@@ -207,27 +267,43 @@ export default function Player({ option, className, style, getInstance, onEnded,
                     getInstance(art);
                 }
 
+                // Resume playback from saved position
                 art.on('ready', () => {
-                    if (initialTime > 0) {
+                    if (initialTime > 0 && !showResumePrompt) {
                         art.currentTime = initialTime;
                     }
                 });
 
+                // Time update tracking
                 art.on('video:timeupdate', () => {
-                    if (onTimeUpdate && !isDestroyed.current) {
-                        onTimeUpdate(art.currentTime, art.duration);
+                    if (!isDestroyed.current) {
+                        setPlayerTime(art.currentTime);
+                        if (onTimeUpdate) {
+                            onTimeUpdate(art.currentTime, art.duration);
+                        }
                     }
                 });
 
                 art.on('video:ended', () => {
                     if (onEnded && !isDestroyed.current) onEnded();
                 });
+
+                // Keyboard shortcuts
+                art.on('ready', () => {
+                    // 'S' key for skip intro
+                    const handleKeyboard = (e: KeyboardEvent) => {
+                        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+                        if (e.key === 's' || e.key === 'S') {
+                            if (showSkipButton) handleSkipIntro();
+                        }
+                    };
+                    document.addEventListener('keydown', handleKeyboard);
+                    art.on('destroy', () => document.removeEventListener('keydown', handleKeyboard));
+                });
             } catch (e) {
                 console.error('[ArtPlayer] Initialization Error:', e);
             }
         } else {
-            // This block is less critical now as we force remount, 
-            // but keeping simple switch logic just in case.
             const art = playerRef.current;
             if (option.url && option.url !== art.option.url) {
                 console.log('[ArtPlayer] Switching URL:', option.url);
@@ -239,30 +315,33 @@ export default function Player({ option, className, style, getInstance, onEnded,
         // Handle Auto-Next Logic dynamically
         if (playerRef.current) {
             const art = playerRef.current;
-            art.off('video:ended');
-            art.on('video:ended', () => {
-                // STRICT CHECK: Only proceed if autoNext is explicitly TRUE
-                if (autoNext && onEnded && !isDestroyed.current) {
-                    setShowCountdown(true);
-                    setCountdown(5);
-                    countdownIntervalRef.current = setInterval(() => {
-                        setCountdown(prev => {
-                            if (prev <= 1) {
-                                if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-                                setShowCountdown(false);
-                                // Use setTimeout to avoid setState during render
-                                setTimeout(() => {
-                                    if (onEnded && !isDestroyed.current) onEnded();
-                                }, 0);
-                                return 0;
-                            }
-                            return prev - 1;
-                        });
-                    }, 1000);
+            art.off('video:timeupdate', handleTimeUpdateForNext);
+            
+            function handleTimeUpdateForNext() {
+                // If within 1 second of the end, trigger auto-next
+                if (art.video.duration > 0 && art.video.duration - art.video.currentTime < 1) {
+                    if (autoNext && onEnded && !isDestroyed.current && !showCountdown) {
+                        art.off('video:timeupdate', handleTimeUpdateForNext); // Prevent multiple triggers
+                        setShowCountdown(true);
+                        setCountdown(5);
+                        countdownIntervalRef.current = setInterval(() => {
+                            setCountdown(prev => {
+                                if (prev <= 1) {
+                                    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+                                    setShowCountdown(false);
+                                    setTimeout(() => {
+                                        if (onEnded && !isDestroyed.current) onEnded();
+                                    }, 0);
+                                    return 0;
+                                }
+                                return prev - 1;
+                            });
+                        }, 1000);
+                    }
                 }
-                // If autoNext is FALSE, do NOTHING. 
-                // The user must manually click to next episode.
-            });
+            }
+            
+            art.on('video:timeupdate', handleTimeUpdateForNext);
         }
 
         return () => {
@@ -297,6 +376,12 @@ export default function Player({ option, className, style, getInstance, onEnded,
         setCountdown(5);
     };
 
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
     return (
         <div className="relative w-full">
             <div
@@ -305,24 +390,62 @@ export default function Player({ option, className, style, getInstance, onEnded,
                 style={{
                     ...style,
                     width: '100%',
-                    aspectRatio: '16/9', // Enforce aspect ratio
+                    aspectRatio: '16/9',
                 }}
             />
 
-            {/* Auto-Next Countdown Overlay */}
-            {showCountdown && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-[var(--bg-main)] border border-purple-500/30 rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
-                        <div className="mb-4">
-                            <div className="w-20 h-20 mx-auto rounded-full border-4 border-purple-500 flex items-center justify-center text-3xl font-bold text-white mb-4">
-                                {countdown}
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Next Episode Starting Soon</h3>
-                            <p className="text-sm text-[var(--text-muted)]">Playing next episode in {countdown} seconds...</p>
+            {/* Skip Intro Button */}
+            {showSkipButton && (
+                <button
+                    onClick={handleSkipIntro}
+                    className="skip-intro-btn"
+                >
+                    Skip Intro →
+                </button>
+            )}
+
+            {/* Resume Playback Prompt */}
+            {showResumePrompt && resumeTime > 0 && (
+                <div className="absolute bottom-20 left-4 z-50 animate-fadeSlideUp">
+                    <div className="bg-black/90 backdrop-blur-md border border-white/15 rounded-xl px-4 py-3 flex items-center gap-3 shadow-2xl max-w-sm">
+                        <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-bold">Resume from {formatTime(resumeTime)}?</p>
                         </div>
                         <button
+                            onClick={handleResume}
+                            className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-colors shrink-0"
+                        >
+                            Resume
+                        </button>
+                        <button
+                            onClick={handleStartFromBeginning}
+                            className="text-white/50 hover:text-white text-xs font-medium shrink-0"
+                        >
+                            Start Over
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Auto-Next Countdown — Non-blocking corner notification */}
+            {showCountdown && (
+                <div className="auto-next-corner">
+                    {/* Countdown ring */}
+                    <svg className="countdown-ring shrink-0" viewBox="0 0 100 100">
+                        <circle className="ring-bg" cx="50" cy="50" r="45" />
+                        <circle className="ring-progress" cx="50" cy="50" r="45" />
+                    </svg>
+                    <div className="flex flex-col min-w-0">
+                        <p className="text-white text-xs font-bold">Next episode in {countdown}s</p>
+                        <button
                             onClick={cancelAutoNext}
-                            className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg font-medium transition-all"
+                            className="text-white/50 hover:text-white text-[10px] font-medium text-left mt-0.5"
                         >
                             Cancel
                         </button>

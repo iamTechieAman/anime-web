@@ -1,20 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Home, Compass, Calendar, Clock, TrendingUp, LayoutGrid, Star, Sparkles, Shuffle, Film, Tv, Zap } from "lucide-react";
-import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { Home, Compass, Clock, TrendingUp, LayoutGrid, Star, Sparkles, Shuffle, Film, Zap } from "lucide-react";
 
 export default function DesktopSidebar() {
     const pathname = usePathname();
-    const router = useRouter();
 
     const navItems = [
-        { name: "Movies", href: "/", icon: Film, color: "text-blue-400" },
-        { name: "Anime", href: "/az-list/all", icon: Zap, color: "text-purple-400" },
-        { name: "Randomize", href: "/randomize", icon: Shuffle, color: "text-pink-400" },
-        { name: "History", href: "/history", icon: Clock, color: "text-orange-400" },
-        { name: "About", href: "/about", icon: Star, color: "text-purple-400" },
+        { name: "Movies", href: "/", icon: Film, color: "text-blue-400", tooltip: "Browse Movies" },
+        { name: "Anime", href: "/az-list/all", icon: Zap, color: "text-purple-400", tooltip: "Browse Anime" },
+        { name: "Random", href: "/randomize", icon: Shuffle, color: "text-pink-400", tooltip: "Random Pick" },
+        { name: "History", href: "/history", icon: Clock, color: "text-orange-400", tooltip: "Watch History" },
+        { name: "About", href: "/about", icon: Star, color: "text-purple-400", tooltip: "About Us" },
     ];
 
     const exploreItems = [
@@ -26,32 +24,41 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="sticky left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/80 backdrop-blur-lg border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-2 z-40 overflow-y-auto hide-scrollbar shadow-[20px_0_40px_-20px_rgba(0,0,0,0.5)]">
+        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/95 backdrop-blur-xl border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-1.5 z-40 overflow-y-auto hide-scrollbar">
+            {/* Logo */}
+            <Link href="/" className="mb-4 group">
+                <div className="w-10 h-10 relative flex items-center justify-center">
+                    <img 
+                        src="/logo.webp" 
+                        alt="ToonPlayer" 
+                        className="w-full h-full object-contain mix-blend-screen group-hover:scale-110 transition-transform duration-300"
+                    />
+                </div>
+            </Link>
+
             {/* Main Navigation */}
-            {navItems.map((item, i) => {
+            {navItems.map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
                 const Icon = item.icon;
                 
                 return (
-                    <motion.div
+                    <Link 
                         key={item.href}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.08, duration: 0.3 }}
+                        href={item.href}
+                        className={`tooltip relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-14 group ${
+                            isActive 
+                            ? `${item.color} bg-white/5 border border-purple-500/20` 
+                            : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
+                        }`}
+                        data-tooltip={item.tooltip || item.name}
                     >
-                        <Link 
-                            href={item.href}
-                            className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-500 w-14 group ${
-                                isActive 
-                                ? `${item.color} bg-white/5 shadow-[0_0_20px_rgba(139,92,246,0.1)] border border-purple-500/20` 
-                                : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
-                            }`}
-                            title={item.name}
-                        >
-                            <Icon className={`w-5 h-5 transition-all duration-500 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_currentColor]' : 'group-hover:scale-110 group-hover:text-white'}`} />
-                            <span className={`text-[9px] font-bold tracking-tight transition-colors duration-500 ${isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>{item.name}</span>
-                        </Link>
-                    </motion.div>
+                        {/* Active indicator */}
+                        {isActive && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gradient-to-b from-purple-500 to-blue-500 rounded-r-full" />
+                        )}
+                        <Icon className={`w-5 h-5 transition-all duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_currentColor]' : 'group-hover:scale-110'}`} />
+                        <span className={`text-[9px] font-bold tracking-tight transition-colors duration-300 ${isActive ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}>{item.name}</span>
+                    </Link>
                 );
             })}
 
@@ -59,40 +66,36 @@ export default function DesktopSidebar() {
             <div className="w-8 h-px bg-[var(--border-color)] my-2" />
 
             {/* Explore Section */}
-            <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1"
-            >
+            <p className="text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">
                 Explore
-            </motion.p>
-            {exploreItems.map((item, i) => {
+            </p>
+            {exploreItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
                 
                 return (
-                    <motion.div
+                    <Link 
                         key={item.href}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + i * 0.08, duration: 0.3 }}
+                        href={item.href}
+                        className={`tooltip flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-14 group ${
+                            isActive 
+                            ? `${item.color} bg-[var(--bg-card)] border border-[var(--border-color)]` 
+                            : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card)]/50"
+                        }`}
+                        data-tooltip={item.name}
                     >
-                        <Link 
-                            href={item.href}
-                            className={`flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all duration-300 w-14 ${
-                                isActive 
-                                ? `${item.color} bg-[var(--bg-card)] shadow-lg border border-[var(--border-color)]` 
-                                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card)]/50"
-                            }`}
-                            title={item.name}
-                        >
-                            <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
-                            <span className="text-[8px] font-bold tracking-tight">{item.name}</span>
-                        </Link>
-                    </motion.div>
+                        <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                        <span className="text-[8px] font-bold tracking-tight">{item.name}</span>
+                    </Link>
                 );
             })}
+
+            {/* Version badge at bottom */}
+            <div className="mt-auto pt-4">
+                <div className="text-[7px] font-black text-[var(--text-muted)]/30 uppercase tracking-widest text-center">
+                    V2.0
+                </div>
+            </div>
         </aside>
     );
 }

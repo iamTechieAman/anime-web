@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-import { Play, ChevronLeft, ChevronRight, Clock, Calendar } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Clock, Calendar, Info } from "lucide-react";
 import axios from "axios";
+import { HeroSkeleton } from "@/components/SkeletonLoader";
 
 interface Slide {
     id: number | string;
@@ -26,14 +26,15 @@ export default function HeroCarousel() {
     const [current, setCurrent] = useState(0);
     const [slides, setSlides] = useState<Slide[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Use SWR for real-time updates and auto-revalidation
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
-    // Increase refresh interval to 5min — prevents excessive API calls
-    const { data: trendingData, error, isLoading: isSwrLoading } = useSWR('/api/prime/trending', fetcher, {
+    const { data: trendingData, error } = useSWR('/api/prime/trending', fetcher, {
         refreshInterval: 300000,
-        revalidateOnFocus: false, // Prevents API burst on tab switch
+        revalidateOnFocus: false,
         dedupingInterval: 60000,
     });
 
@@ -46,20 +47,12 @@ export default function HeroCarousel() {
         }
     }, [trendingData, error]);
 
-    const normalizeUrl = (url: string | null | undefined): string => {
-        if (!url) return '';
-        if (url.startsWith('//')) return `https:${url}`;
-        if (url.startsWith('/')) return `https://hianime.to${url}`; // Fallback for relative hianime paths
-        return url;
-    };
-
-    const processSlides = async (rawSlides: any[]) => {
-        console.log("[HeroCarousel] Processing slides from TMDB...");
+    const processSlides = (rawSlides: any[]) => {
         try {
-            const formattedSlides: Slide[] = rawSlides.slice(0, 15).map((item: any) => {
+            const formattedSlides: Slide[] = rawSlides.slice(0, 12).map((item: any) => {
                 const isTv = item.media_type === 'tv' || !item.title;
                 const title = item.title || item.name;
-                const description = item.overview || "No description.";
+                const description = item.overview || "No description available.";
                 const image = item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : '';
                 const cover = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
                 const rating = item.vote_average ? `${(item.vote_average * 10).toFixed(0)}%` : "?";
@@ -67,27 +60,11 @@ export default function HeroCarousel() {
                 const type = isTv ? "TV" : "MOVIE";
                 const link = `/watch/${isTv ? 'tv' : 'movie'}/${item.id}`;
 
-                return {
-                    id: item.id,
-                    title,
-                    description,
-                    image,
-                    cover,
-                    tags: ["HD", "Trending"],
-                    rating,
-                    release,
-                    quality: "HD",
-                    type,
-                    link
-                };
+                return { id: item.id, title, description, image, cover, tags: ["HD", "Trending"], rating, release, quality: "HD", type, link };
             });
 
             const validSlides = formattedSlides.filter(s => s.image && s.image !== '');
-            if (validSlides.length > 0) {
-                setSlides(validSlides);
-            } else {
-                setSlides(formattedSlides);
-            }
+            setSlides(validSlides.length > 0 ? validSlides : formattedSlides);
         } catch (err) {
             console.error("Error processing slides:", err);
         } finally {
@@ -95,177 +72,181 @@ export default function HeroCarousel() {
         }
     };
 
-    // Auto-rotate
+    // Auto-rotate with pause on interaction
+    const startAutoRotate = useCallback(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+            setCurrent(prev => (prev + 1) % (slides.length || 1));
+        }, 6000);
+    }, [slides.length]);
+
     useEffect(() => {
         if (slides.length === 0) return;
-        const timer = setInterval(() => {
-            nextSlide();
-        }, 5000); // Snappier auto-play (was 8000)
-        return () => clearInterval(timer);
-    }, [current, slides.length]);
+        startAutoRotate();
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, [slides.length, startAutoRotate]);
 
-    const nextSlide = () => {
-        setCurrent((prev) => (prev + 1) % slides.length);
+    const goToSlide = (index: number) => {
+        setCurrent(index);
+        startAutoRotate(); // Reset timer on manual navigation
     };
 
-    const prevSlide = () => {
-        setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+    const nextSlide = () => goToSlide((current + 1) % slides.length);
+    const prevSlide = () => goToSlide((current - 1 + slides.length) % slides.length);
+
+    // Swipe gesture handlers
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
     };
 
-    if (isLoading) {
-        return (
-            <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] bg-[var(--bg-main)] flex items-center justify-center border-b border-[var(--border-color)]">
-                <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
-    }
+    const handleTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
 
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const minSwipeDistance = 50;
+
+        if (distance > minSwipeDistance) nextSlide();
+        if (distance < -minSwipeDistance) prevSlide();
+
+        setTouchStart(0);
+        setTouchEnd(0);
+    };
+
+    if (isLoading) return <HeroSkeleton />;
     if (slides.length === 0) return null;
 
     const activeSlide = slides[current];
 
     return (
-        <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] overflow-hidden group bg-black">
-            <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                    key={activeSlide.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute inset-0"
+        <div 
+            className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] overflow-hidden group bg-black"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            {/* Background Image — CSS crossfade for 60fps */}
+            {slides.map((slide, i) => (
+                <div
+                    key={slide.id}
+                    className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                    style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
                 >
-                    {/* Background Image (optimized) */}
-                    <div className="absolute inset-0 overflow-hidden bg-black">
-                        <div className="absolute inset-0">
-                            <Image
-                                src={activeSlide.image}
-                                alt={activeSlide.title}
-                                fill
-                                priority
-                                fetchPriority="high"
-                                className="object-cover object-center opacity-70"
-                                sizes="(max-width: 768px) 100vw, 100vw"
-                            />
-                        </div>
-                        
-                        {/* Premium Vignette & Gradients - justanime.to style */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a]/30 z-10" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent z-10" />
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#0a0a0a_100%)] opacity-40 z-10" />
+                    <div className="absolute inset-0">
+                        <Image
+                            src={slide.image}
+                            alt={slide.title}
+                            fill
+                            priority={i < 2}
+                            fetchPriority={i === 0 ? "high" : "low"}
+                            className="object-cover object-center opacity-70"
+                            sizes="100vw"
+                        />
                     </div>
-                </motion.div>
-            </AnimatePresence>
+                </div>
+            ))}
 
-            {/* Countdown Badge (Top Left) */}
+            {/* Vignette & Gradient overlays */}
+            <div className="hero-vignette" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/50 to-transparent z-10" />
+
+            {/* Trending Badge */}
             <div className="absolute top-24 left-4 md:left-24 z-30">
-                <motion.div 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-purple-600 border border-purple-500/50 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded-sm shadow-xl flex items-center gap-2"
-                >
+                <div className="bg-gradient-to-r from-red-600 to-red-700 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded flex items-center gap-2 shadow-lg animate-fadeSlideDown">
                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                    TRENDING SELECTION
-                </motion.div>
-            </div>
-
-            {/* Slide Index (Top Right) */}
-            <div className="absolute top-24 right-4 md:right-8 z-30 font-bold text-xs md:text-sm text-white/50">
-                <span className="text-white">{current + 1}</span> / {slides.length}
-            </div>
-
-            {/* Content Container */}
-            <div className="absolute inset-0 flex items-center z-20">
-                <div className="w-full max-w-[2400px] mx-auto px-6 md:px-12 w-full pt-20 md:pt-10">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeSlide.id + "-content"}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="max-w-2xl"
-                        >
-                            {/* Metadata Badges */}
-                            <div className="flex flex-wrap items-center gap-2 mb-4">
-                                <span className="bg-[#FF5722] text-white px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider">
-                                    {activeSlide.type}
-                                </span>
-                                <span className="bg-black/40 text-white px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase border border-white/10">
-                                    {activeSlide.quality}
-                                </span>
-                                <span className="text-xs font-bold text-white/70 flex items-center gap-1 ml-1">
-                                    <Clock className="w-3.5 h-3.5" /> 24m
-                                </span>
-                                <span className="text-xs font-bold text-white/70 flex items-center gap-1">
-                                    <Calendar className="w-3.5 h-3.5" /> {activeSlide.release}
-                                </span>
-                            </div>
-
-                            {/* Title - Stagger 2 */}
-                            <motion.h1
-                                initial={{ y: 12, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.3, delay: 0.05 }}
-                                className="text-4xl md:text-6xl font-black leading-tight text-white mb-4 line-clamp-2 font-sora tracking-tighter"
-                            >
-                                {activeSlide.title}
-                            </motion.h1>
-
-                            {/* Description - Stagger 3 */}
-                            <motion.p
-                                initial={{ y: 10, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.3, delay: 0.1 }}
-                                className="text-white/70 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-8 font-medium"
-                            >
-                                {activeSlide.description}
-                            </motion.p>
-
-                            {/* Action Buttons - Stagger 4 */}
-                            <motion.div
-                                initial={{ y: 10, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.25, delay: 0.15 }}
-                                className="flex items-center gap-3 md:gap-4"
-                            >
-                                <Link href={activeSlide.link}>
-                                    <button className="flex items-center gap-2.5 px-8 md:px-10 py-3.5 md:py-4 bg-white text-black hover:bg-white/90 font-black rounded-sm transition-colors active:scale-95 group/btn shadow-[0_4px_20px_rgba(255,255,255,0.1)]">
-                                        <Play className="w-5 h-5 fill-current" />
-                                        WATCH NOW
-                                    </button>
-                                </Link>
-                                <button className="flex items-center gap-2.5 px-6 py-3.5 md:py-4 bg-black/40 hover:bg-black/60 text-white font-bold rounded-sm border border-white/10 transition-colors group/details">
-                                    Details <ChevronRight className="w-4 h-4 transition-transform group-hover/details:translate-x-1" />
-                                </button>
-                            </motion.div>
-                        </motion.div>
-                    </AnimatePresence>
+                    TRENDING NOW
                 </div>
             </div>
 
-            <div className="absolute bottom-10 right-4 md:right-8 flex items-center gap-2 z-30">
+            {/* Content */}
+            <div className="absolute inset-0 flex items-end z-20 pb-16 md:pb-20">
+                <div className="w-full px-6 md:px-12">
+                    <div className="max-w-2xl">
+                        {/* Metadata Badges */}
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                            <span className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
+                                {activeSlide.type}
+                            </span>
+                            <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-white/10">
+                                {activeSlide.quality}
+                            </span>
+                            <span className="text-xs font-bold text-white/60 flex items-center gap-1">
+                                <Calendar className="w-3 h-3" /> {activeSlide.release}
+                            </span>
+                            {activeSlide.rating !== "?" && (
+                                <span className="text-xs font-bold text-green-400">
+                                    {activeSlide.rating} Match
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.05] text-white mb-3 line-clamp-2 font-sora tracking-tighter drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+                            {activeSlide.title}
+                        </h1>
+
+                        {/* Description */}
+                        <p className="text-white/60 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-6 font-medium">
+                            {activeSlide.description}
+                        </p>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-3">
+                            <Link href={activeSlide.link}>
+                                <button className="flex items-center gap-2.5 px-8 md:px-10 py-3 md:py-3.5 bg-white text-black hover:bg-white/90 font-black rounded transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.15)] text-sm md:text-base">
+                                    <Play className="w-5 h-5 fill-current" />
+                                    PLAY
+                                </button>
+                            </Link>
+                            <Link href={activeSlide.link}>
+                                <button className="flex items-center gap-2.5 px-6 py-3 md:py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded border border-white/10 transition-all text-sm md:text-base">
+                                    <Info className="w-5 h-5" />
+                                    More Info
+                                </button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="absolute bottom-6 right-4 md:right-8 flex items-center gap-3 z-30">
+                {/* Dot indicators */}
+                <div className="hero-dots hidden md:flex">
+                    {slides.slice(0, 8).map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => goToSlide(i)}
+                            className={`hero-dot ${i === current ? 'active' : ''}`}
+                            aria-label={`Go to slide ${i + 1}`}
+                        />
+                    ))}
+                </div>
+
+                {/* Arrow buttons */}
                 <button
                     onClick={prevSlide}
-                    className="p-3 md:p-4 bg-black/40 hover:bg-black/60 text-white rounded-sm border border-white/10 transition-colors active:scale-90"
+                    className="p-2.5 md:p-3 bg-black/40 hover:bg-black/60 text-white rounded border border-white/10 transition-colors active:scale-90"
+                    aria-label="Previous slide"
                 >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 <button
                     onClick={nextSlide}
-                    className="p-3 md:p-4 bg-black/40 hover:bg-black/60 text-white rounded-sm border border-white/10 transition-colors active:scale-90"
+                    className="p-2.5 md:p-3 bg-black/40 hover:bg-black/60 text-white rounded border border-white/10 transition-colors active:scale-90"
+                    aria-label="Next slide"
                 >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
             </div>
 
-            {/* Bottom Accent Line */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-30">
-                <motion.div 
-                    className="h-full bg-[#FF5722]" 
-                    initial={{ width: "0%" }}
-                    animate={{ width: `${((current + 1) / slides.length) * 100}%` }}
-                    transition={{ duration: 0.5 }}
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 z-30">
+                <div 
+                    className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500 ease-out" 
+                    style={{ width: `${((current + 1) / slides.length) * 100}%` }}
                 />
             </div>
         </div>

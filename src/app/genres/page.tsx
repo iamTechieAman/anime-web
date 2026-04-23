@@ -31,7 +31,7 @@ const genres = [
 export default function GenresPage() {
     return (
         <main className="min-h-screen pt-24 pb-20 px-4 md:px-8 bg-[var(--bg-main)]">
-            <div className="max-w-7xl mx-auto">
+            <div className="w-full">
                 <header className="mb-12">
                     <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">
                         Explore <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">Genres</span>

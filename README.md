@@ -152,6 +152,7 @@ The development of ToonPlayer was structured into 10 major phases, focusing on c
 - **Phase 10: Premium Branding & Clean Scraping** - Finalized the ToonPlayer brand, added Smart Tab Selection, and refined scrapers for direct, clean player links.
 - **Phase 11: Final Polish & UI Optimization (v1.7)** - Eliminated all mobile UI lag by optimizing CSS 3D transforms, introduced the `ToonNortan` server, built an automatic server-fallback system for broken streams, and mapped out fully working LocalStorage Watchlist and Web Share functionalities.
 - **Phase 12: Universal Fixed & Branding (v1.8)** - Integrated the high-performance **Anime-Alpha** (AnimeSalt) server using the Pyppeteer-driven `OpenClaw` engine. Performed a universal "Hard Reset" of all player restrictions, removing all `sandbox` attributes to fix "disable sandbox" errors forever. Renamed and obfuscated providers for a cleaner, unified branding.
+- **Phase 13: Edge-To-Edge Overhaul & Global SEO (v1.9)** - Modernized the entire application with a fully responsive, edge-to-edge Netflix-style layout. Removed all fixed-width containers (`max-w-7xl`) to utilize the full width of 4K and Ultra-wide screens. Implemented robust technical SEO (Sitemap scaling, Schema.org Organization) and hardened security with CSP headers and mandatory trust pages (Privacy, Terms, Contact).
 
 👉 **[Read the full Dev Journey & Learnings here](./DEV_JOURNEY.md)**
 

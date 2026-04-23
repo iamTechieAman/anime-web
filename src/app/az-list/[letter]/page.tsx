@@ -52,7 +52,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans">
             {/* Navbar */}
             <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)]">
-                <div className="max-w-7xl mx-auto flex items-center gap-4">
+                <div className="w-full flex items-center gap-4">
                     <Link href="/" className="p-2 hover:bg-white/10 rounded-full transition-colors">
                         <ArrowLeft className="w-5 h-5 text-zinc-400" />
                     </Link>
@@ -65,7 +65,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                 </div>
             </div>
 
-            <div className="pt-20 pb-24 md:pb-12 max-w-7xl mx-auto px-4 md:px-6 space-y-6">
+            <div className="pt-20 pb-24 md:pb-12 w-full px-4 md:px-6 space-y-6">
                 {/* A-Z Filter Bar */}
                 <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] sticky top-16 z-40 shadow-xl">
                     <AZFilter />

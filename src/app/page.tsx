@@ -73,8 +73,8 @@ export default function MoviesPage() {
     }, [userData]);
 
     const { data: movieTrending } = useSWR('/api/prime/trending', fetcher);
-    const { data: moviePopular } = useSWR('/api/prime/?category=popular', fetcher);
-    const { data: movieUpcoming } = useSWR('/api/prime/?category=now_playing', fetcher);
+    const { data: moviePopular } = useSWR('/api/prime?category=popular', fetcher);
+    const { data: movieUpcoming } = useSWR('/api/prime?category=now_playing', fetcher);
     const { data: moviePeople } = useSWR('/api/prime/trending?type=person', fetcher);
 
     // Scroll-to-top visibility
@@ -108,7 +108,7 @@ export default function MoviesPage() {
             // Fetch top rated movies, tv popular, tv top rated
             try {
                 const [topRatedRes, tvPopRes, tvTopRes] = await Promise.all([
-                    axios.get("/api/prime/?category=top_rated"),
+                    axios.get("/api/prime?category=top_rated"),
                     axios.get("/api/prime/tv?category=popular"),
                     axios.get("/api/prime/tv?category=top_rated"),
                 ]);
@@ -197,7 +197,7 @@ export default function MoviesPage() {
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden transition-colors duration-300">
             {/* Background Ambience */}
-            <div className="fixed inset-0 z-0 pointer-events-none bg-[var(--bg-main)]">
+            <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 to-transparent opacity-50" />
             </div>
 
@@ -206,7 +206,7 @@ export default function MoviesPage() {
 
                 {/* Genres & Categories Sub-Nav */}
                 <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-0 z-40">
-                    <div className="w-full max-w-[2560px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
+                    <div className="w-full mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
                         <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50">
                             {TABS.map((tab) => (
                                 <button
@@ -237,7 +237,7 @@ export default function MoviesPage() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-[2560px] mx-auto px-3 md:px-6 py-4 md:py-8">
+                <div className="w-full px-4 md:px-8 py-4 md:py-8">
                     {searchQuery ? (
                         <div className="space-y-8">
                             <h2 className="text-2xl font-black text-white flex items-center gap-3">
@@ -245,7 +245,7 @@ export default function MoviesPage() {
                                 {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
                             </h2>
                             {searchResults.length > 0 ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                                <div className="responsive-grid">
                                     {searchResults.map((item: any) => (
                                         <Link
                                             key={`${item.type}-${item.id}`}
@@ -406,19 +406,6 @@ export default function MoviesPage() {
                     )}
                 </div>
             </div>
-
-            {/* Footer */}
-            <footer className="border-t border-[var(--border-color)] py-8 px-4 mt-10">
-                <div className="w-full max-w-[2560px] mx-auto text-center text-zinc-600 text-xs">
-                    <p className="font-medium mb-1">
-                        <span className="text-[var(--text-main)]">ToonPlayer</span>
-                        <span className="text-[var(--text-muted)] ml-1">Movies</span>
-                        {" "} — Powered by TMDB
-                    </p>
-                    <p>This platform serves as a content aggregator and does not host any media files directly.</p>
-                    <p className="mt-1">© 2026 ToonPlayer Movies. All rights reserved.</p>
-                </div>
-            </footer>
 
             {/* Scroll to Top */}
             <AnimatePresence>

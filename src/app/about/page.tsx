@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function AboutPage() {
     return (
         <main className="min-h-screen pt-24 pb-20 px-4 md:px-8 bg-[var(--bg-main)] overflow-x-hidden">
-            <div className="max-w-4xl mx-auto space-y-20">
+            <div className="w-full px-6 md:px-12 space-y-20">
                 
                 {/* Hero Section */}
                 <section className="text-center space-y-6">
