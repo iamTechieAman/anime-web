@@ -1084,6 +1084,27 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     </div>
                                 </div>
 
+                                {/* Multi-Audio Quick Select */}
+                                <button
+                                    onClick={() => {
+                                        const peachify = servers.find(s => s.serverId === "peachify");
+                                        if (peachify) {
+                                            setSelectedServer("peachify");
+                                            toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
+                                        } else {
+                                            toast.error("Multi-Audio server not available for this title");
+                                        }
+                                    }}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                                        selectedServer === "peachify" 
+                                        ? "bg-purple-600/20 border-purple-500/50 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]" 
+                                        : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
+                                    }`}
+                                >
+                                    <Sparkles className={`w-4 h-4 ${selectedServer === "peachify" ? "animate-pulse" : ""}`} />
+                                    <span className="text-xs font-black uppercase tracking-wider">Multi-Audio</span>
+                                </button>
+
                                 {/* Server Selection Dropdown */}
                                 <div className="flex items-center gap-3 relative" ref={serverRef}>
                                     <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Server:</span>

@@ -121,6 +121,15 @@ export default function Player({
                     plugins: [
                         artplayerPluginChromecast({}),
                     ],
+                    moreVideoAttr: {
+                        crossOrigin: 'anonymous',
+                        playsInline: true,
+                        'webkit-playsinline': 'true',
+                        'x5-playsinline': 'true',
+                        style: {
+                            touchAction: 'pan-y !important'
+                        }
+                    } as any,
                     controls: [
                         // Next Episode Button
                         {
@@ -135,12 +144,6 @@ export default function Player({
                             }
                         }
                     ],
-                    moreVideoAttr: {
-                        crossOrigin: 'anonymous',
-                        playsInline: true,
-                        'webkit-playsinline': 'true',
-                        'x5-playsinline': 'true',
-                    } as any,
                     type: option.type || (option.url.includes('.m3u8') ? 'm3u8' : 'auto'),
                     customType: {
                         m3u8: function (video: HTMLVideoElement, url: string, art: Artplayer) {
@@ -202,6 +205,27 @@ export default function Player({
                                             },
                                         };
                                         art.setting.add(qualitySelector);
+                                    }
+                                    
+                                    // Add Audio Track Selector
+                                    if (hls.audioTracks.length > 1) {
+                                        const audioSelector = {
+                                            width: 150,
+                                            html: 'Audio',
+                                            tooltip: hls.audioTracks[hls.audioTrack].name || 'Default',
+                                            icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>',
+                                            selector: hls.audioTracks.map((track, index) => ({
+                                                html: track.name || `Track ${index + 1}`,
+                                                index: index,
+                                                default: hls.audioTrack === index,
+                                            })),
+                                            onSelect: function (item: any) {
+                                                hls.audioTrack = item.index;
+                                                art.notice.show = `Audio switched to ${item.html}`;
+                                                return item.html;
+                                            },
+                                        };
+                                        art.setting.add(audioSelector);
                                     }
 
                                     // Auto-play: muted first, then unmute after short delay
@@ -391,6 +415,7 @@ export default function Player({
                     ...style,
                     width: '100%',
                     aspectRatio: '16/9',
+                    touchAction: 'pan-y'
                 }}
             />
 

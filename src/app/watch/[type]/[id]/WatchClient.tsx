@@ -1147,6 +1147,27 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                     Trailer
                                 </button>
                             )}
+
+                            {/* Multi-Audio Quick Select */}
+                            <button
+                                onClick={() => {
+                                    const peachify = SERVERS.find(s => s.id === "peachify");
+                                    if (peachify) {
+                                        setActiveServer(peachify);
+                                        toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
+                                    } else {
+                                        toast.error("Multi-Audio not available for this title");
+                                    }
+                                }}
+                                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg border transition-all ${
+                                    activeServer.id === "peachify" 
+                                    ? "bg-amber-600/20 border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]" 
+                                    : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
+                                }`}
+                            >
+                                <Sparkles className={`w-3.5 h-3.5 ${activeServer.id === "peachify" ? "animate-pulse" : ""}`} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Multi-Audio</span>
+                            </button>
                         </div>
                     </div>
                 </div>
