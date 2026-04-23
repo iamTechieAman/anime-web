@@ -8,35 +8,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: ['/api/', '/_next/'],
       },
-      {
-        userAgent: 'GPTBot',
+      ...['GPTBot', 'ChatGPT-User', 'Google-Extended', 'CCBot', 'anthropic-ai', 'Claude-Web', 'PerplexityBot'].map(agent => ({
+        userAgent: agent,
         allow: '/',
-      },
-      {
-        userAgent: 'ChatGPT-User',
-        allow: '/',
-      },
-      {
-        userAgent: 'Google-Extended',
-        allow: '/',
-      },
-      {
-        userAgent: 'CCBot',
-        allow: '/',
-      },
-      {
-        userAgent: 'anthropic-ai',
-        allow: '/',
-      },
-      {
-        userAgent: 'Claude-Web',
-        allow: '/',
-      },
-      {
-        userAgent: 'PerplexityBot',
-        allow: '/',
-      }
+      }))
     ],
-    sitemap: 'https://toonplayer.in/sitemap.xml',
+    sitemap: 'https://www.toonplayer.in/sitemap.xml',
   }
 }
