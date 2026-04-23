@@ -33,7 +33,7 @@ export async function GET(request: Request) {
             url = `${TMDB_BASE}/discover/tv?api_key=${TMDB_KEY}&page=${page}&language=en-US&with_genres=${genreId}&sort_by=popularity.desc`;
         }
 
-        const res = await fetch(url, { next: { revalidate: 60 } });
+        const res = await fetch(url, { next: { revalidate: 3600 } });
         if (!res.ok) throw new Error(`TMDB API error: ${res.status}`);
 
         const data = await res.json();

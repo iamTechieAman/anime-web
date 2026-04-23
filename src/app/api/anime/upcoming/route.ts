@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);

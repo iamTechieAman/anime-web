@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -42,11 +42,7 @@ export async function GET(request: Request) {
                     __typename: "Show"
                 }));
 
-                return NextResponse.json({ shows }, {
-                    headers: {
-                        'Cache-Control': 'no-store, max-age=0'
-                    }
-                });
+                return NextResponse.json({ shows });
             } else {
                 console.warn(`[Popular] Provider ${providerName} returned 0 results.`);
                 errors.push({ provider: providerName, error: "No results found" });

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 
-export const revalidate = 0;
+export const revalidate = 3600;
 
 // Helper: wrap a promise with a timeout
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string = ''): Promise<T> {

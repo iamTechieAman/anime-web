@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     const res = await fetch(
       `${TMDB_BASE}/trending/${type}/${timeWindow}?api_key=${TMDB_KEY}&page=${page}`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 3600 } }
     );
 
     if (!res.ok) throw new Error(`TMDB API error: ${res.status}`);

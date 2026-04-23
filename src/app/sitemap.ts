@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next'
  
-export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // Cache for 24 hours to prevent 429 timeouts to TMDB
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

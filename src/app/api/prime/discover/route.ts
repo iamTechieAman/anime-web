@@ -42,7 +42,7 @@ export async function GET(req: Request) {
 
         const res = await fetch(
             `${TMDB_BASE}/discover/${mediaType}?${params.toString()}`,
-            { next: { revalidate: 60 } } // Live updates: refreshes every 60 seconds
+            { next: { revalidate: 3600 } } // Cached for 1 hour at edge limit protection
         );
         const data = await res.json();
 

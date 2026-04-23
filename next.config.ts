@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
     workerThreads: false,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: 's4.anilist.co' },
       { protocol: 'https', hostname: 'allanime.day' },
