@@ -34,39 +34,34 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://toonplayer.in'),
   title: {
-    default: "ToonPlayer — Watch Free HD Movies, Anime & TV Shows Online",
+    default: "ToonPlayer - Watch Movies & Anime Online in HD",
     template: "%s | ToonPlayer",
   },
-  description: "ToonPlayer is the #1 free streaming platform for HD movies, anime, and TV shows. Watch Naruto, One Piece, Breaking Bad, and thousands more — ad-free with zero buffering. No sign-up required.",
+  description: "ToonPlayer is a premium platform to watch movies, anime, and TV shows online in HD. Explore trending content with a fast and smooth experience.",
   keywords: [
-    "ToonPlayer",
-    "free movies online",
-    "watch anime free",
-    "HD anime streaming",
-    "free TV shows",
+    "toonplayer",
+    "toon player",
+    "watch anime online",
+    "free movies streaming",
+    "HD movies",
+    "anime streaming",
     "watch movies online free",
-    "anime streaming site",
+    "toonplayer online",
     "toonplayer.in",
-    "free movie streaming",
-    "watch series online",
-    "Netflix alternative free",
-    "ad-free anime",
-    "latest anime episodes",
-    "premium anime player",
   ],
   openGraph: {
-    title: "ToonPlayer — Free HD Movies, Anime & TV Shows Streaming",
-    description: "Watch thousands of movies, anime, and TV shows for free in HD quality. No ads, no sign-up, just stream.",
+    title: "ToonPlayer - Watch Movies & Anime Online in HD",
+    description: "ToonPlayer is a premium platform to watch movies, anime, and TV shows online in HD. Explore trending content with a fast and smooth experience.",
     url: 'https://toonplayer.in',
     siteName: 'ToonPlayer',
-    images: [{ url: '/icon.png', width: 512, height: 512, alt: 'ToonPlayer Logo' }],
+    images: [{ url: '/icon.png', width: 512, height: 512, alt: 'ToonPlayer (Toon Player) - Watch Movies & Anime Online in HD' }],
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ToonPlayer — Watch Free HD Movies & Anime Online',
-    description: 'The ultimate free streaming platform for movies, anime, and TV shows. Zero ads, instant playback.',
+    title: 'ToonPlayer - Watch Movies & Anime Online in HD',
+    description: 'ToonPlayer is a premium platform to watch movies, anime, and TV shows online in HD. Explore trending content with a fast and smooth experience.',
     images: ['/icon.png'],
     creator: '@toonplayer',
   },
@@ -87,6 +82,8 @@ export const metadata: Metadata = {
   category: 'entertainment',
 };
 
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -95,39 +92,48 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        {/* JSON-LD Structured Data for the Website */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
              __html: JSON.stringify({
                "@context": "https://schema.org",
-               "@type": "WebSite",
-               "name": "ToonPlayer",
-               "url": "https://toonplayer.in",
-               "potentialAction": {
-                 "@type": "SearchAction",
-                 "target": "https://toonplayer.in/search?query={search_term_string}",
-                 "query-input": "required name=search_term_string"
-               }
-             })
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-             __html: JSON.stringify({
-               "@context": "https://schema.org",
-               "@type": "Organization",
-               "name": "ToonPlayer",
-               "url": "https://toonplayer.in",
-               "logo": "https://toonplayer.in/icon.png",
-               "sameAs": [
-                 "https://twitter.com/toonplayer",
-                 "https://github.com/iamTechieAman"
+               "@graph": [
+                 {
+                   "@type": "WebSite",
+                   "@id": "https://toonplayer.in/#website",
+                   "url": "https://toonplayer.in",
+                   "name": "ToonPlayer",
+                   "alternateName": "Toon Player",
+                   "description": "Premium free streaming platform for HD movies and anime.",
+                   "potentialAction": {
+                     "@type": "SearchAction",
+                     "target": "https://toonplayer.in/search?query={search_term_string}",
+                     "query-input": "required name=search_term_string"
+                   },
+                   "inLanguage": "en-US"
+                 },
+                 {
+                   "@type": "Organization",
+                   "@id": "https://toonplayer.in/#organization",
+                   "name": "ToonPlayer",
+                   "alternateName": "Toon Player",
+                   "url": "https://toonplayer.in",
+                   "logo": {
+                     "@type": "ImageObject",
+                     "url": "https://toonplayer.in/icon.png",
+                     "width": 512,
+                     "height": 512
+                   },
+                   "sameAs": [
+                     "https://twitter.com/toonplayer",
+                     "https://github.com/iamTechieAman"
+                   ]
+                 }
                ]
              })
           }}
         />
+
         {/* DNS Prefetch & Preconnect for critical third-party domains */}
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
@@ -150,56 +156,16 @@ export default function RootLayout({
         <meta name="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" content="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" />
       </head>
       <body
-        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30 overflow-x-hidden`}
+        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30`}
         suppressHydrationWarning
       >
+
         <AdBlockProvider>
           <MobileUIProvider>
             <NotificationProvider>
               <WatchProvider>
-                {/* JSON-LD Structured Data for Search Engine Optimization */}
-                <script
-                  type="application/ld+json"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                      "@context": "https://schema.org",
-                      "@type": "WebSite",
-                      "name": "ToonPlayer",
-                      "alternateName": ["Toon Player", "ToonPlayer.in"],
-                      "url": "https://toonplayer.in/",
-                      "description": "ToonPlayer is a free streaming platform for HD movies, anime, and TV shows. Watch thousands of titles instantly with no ads and no sign-up.",
-                      "inLanguage": "en",
-                      "creator": {
-                          "@type": "Person",
-                          "name": "Aman Kumar",
-                          "jobTitle": "Full-Stack Developer"
-                      },
-                      "potentialAction": {
-                        "@type": "SearchAction",
-                        "target": {
-                          "@type": "EntryPoint",
-                          "urlTemplate": "https://toonplayer.in/search?query={search_term_string}"
-                        },
-                        "query-input": "required name=search_term_string"
-                      }
-                    })
-                  }}
-                />
-                {/* Organization Schema */}
-                <script
-                  type="application/ld+json"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                      "@context": "https://schema.org",
-                      "@type": "Organization",
-                      "name": "ToonPlayer",
-                      "url": "https://toonplayer.in",
-                      "logo": "https://toonplayer.in/icon.png",
-                      "sameAs": []
-                    })
-                  }}
-                />
                 <ProfileGate />
+
                 <LayoutContent>
                   {children}
                 </LayoutContent>

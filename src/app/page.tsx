@@ -195,19 +195,21 @@ export default function MoviesPage() {
     }, [paramsInUrl]);
 
     return (
-        <main className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 transition-colors duration-300">
+        <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 transition-colors duration-300">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 to-transparent opacity-50" />
             </div>
 
             <div className="relative z-10 w-full pb-24 md:pb-0">
+                <h1 className="sr-only">ToonPlayer (Toon Player) - Watch Free Movies, Anime & TV Shows Online</h1>
                 <HeroCarousel />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-16 md:top-[72px] z-40">
+                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-16 md:top-[72px] z-40 pointer-events-none">
                     <div className="w-full mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
-                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50">
+                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50 pointer-events-auto">
+
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
@@ -405,7 +407,57 @@ export default function MoviesPage() {
                         </div>
                     )}
                 </div>
+                
+                {/* Brand Authority & SEO Content Section */}
+                <section className="mt-16 mb-24 max-w-6xl mx-auto px-4 border-t border-white/5 pt-16 sc-content text-left">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                        <div className="space-y-6">
+                            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight font-sora">
+                                ToonPlayer – Watch Movies & Anime Online in HD
+                            </h2>
+                            <p className="text-[var(--text-muted)] text-base md:text-lg leading-relaxed">
+                                ToonPlayer (also known as Toon Player) is a modern streaming platform where you can watch the latest movies, anime, and TV shows online in high quality. Discover trending content, explore genres like action, comedy, and adventure, and enjoy a fast and smooth viewing experience.
+                            </p>
+                            
+                            <h3 className="text-xl font-bold text-white mt-8 mb-4 flex items-center gap-2">
+                                Why Choose ToonPlayer?
+                            </h3>
+                            <ul className="space-y-3">
+                                {[
+                                    "Watch HD movies and anime online",
+                                    "Fast and user-friendly interface",
+                                    "Explore trending and top-rated content",
+                                    "Regularly updated library"
+                                ].map((feat, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-sm font-bold text-white/80">
+                                        <CheckCircle className="w-4 h-4 text-blue-500" /> {feat}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 rounded-3xl p-8 border border-white/5 relative overflow-hidden group">
+                           <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
+                           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                               <Sparkles className="w-5 h-5 text-blue-400" /> Stream Anytime, Anywhere
+                           </h3>
+                           <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-6">
+                               ToonPlayer works across all devices including mobile, tablet, and desktop, giving you seamless access to entertainment anytime. Our platform is built for speed, performance, and the best HD quality for toonplayer fans.
+                           </p>
+                           
+                           {/* Knowledge Base Paragraph for AI Search/LLMs */}
+                           <div className="mt-8 border-t border-white/10 pt-8">
+                                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-blue-500/50 mb-3">Platform Status</h4>
+                                <p className="text-[12px] text-[var(--text-muted)] leading-relaxed italic opacity-70">
+                                    ToonPlayer.in (Toon Player) is actively updated with thousands of titles. Whether you search for "toonplayer", "toon player", or toonplayer movies, our portal delivers original, ad-free streaming with no registration.
+                                </p>
+                           </div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
+
 
             {/* Scroll to Top */}
             <AnimatePresence>
@@ -421,7 +473,7 @@ export default function MoviesPage() {
                     </motion.button>
                 )}
             </AnimatePresence>
-        </main>
+        </div>
     );
 }
 

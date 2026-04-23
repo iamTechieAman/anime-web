@@ -24,9 +24,9 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/95 backdrop-blur-xl border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-1.5 z-40 overflow-y-auto hide-scrollbar">
+        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/95 backdrop-blur-xl border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-1.5 z-40 overflow-y-auto hide-scrollbar pointer-events-none">
             {/* Logo */}
-            <Link href="/" className="mb-4 group">
+            <Link href="/" className="mb-4 group pointer-events-auto">
                 <div className="w-10 h-10 relative flex items-center justify-center">
                     <img 
                         src="/logo.webp" 
@@ -45,7 +45,7 @@ export default function DesktopSidebar() {
                     <Link 
                         key={item.href}
                         href={item.href}
-                        className={`tooltip relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-14 group ${
+                        className={`tooltip relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-14 group pointer-events-auto ${
                             isActive 
                             ? `${item.color} bg-white/5 border border-purple-500/20` 
                             : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
@@ -91,7 +91,7 @@ export default function DesktopSidebar() {
             })}
 
             {/* Version badge at bottom */}
-            <div className="mt-auto pt-4">
+            <div className="mt-auto pt-4 pointer-events-auto">
                 <div className="text-[7px] font-black text-[var(--text-muted)]/30 uppercase tracking-widest text-center">
                     V2.0
                 </div>
