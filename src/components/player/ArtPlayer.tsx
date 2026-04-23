@@ -29,7 +29,7 @@ interface PlayerProps {
 export default function Player({ 
     option, className, style, getInstance, onEnded, onError, onTimeUpdate, 
     initialTime = 0, autoPlay = false, autoNext = false,
-    showSkipIntro = true, skipIntroDuration = 90
+    showSkipIntro = true, skipIntroDuration = 85
 }: PlayerProps) {
     const artRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<Artplayer | null>(null);
@@ -46,6 +46,10 @@ export default function Player({
     useEffect(() => {
         if (!showSkipIntro || !playerRef.current) return;
         
+        const duration = playerRef.current.duration || 0;
+        // Don't show skip button if the video is too short (e.g. trailers)
+        if (duration > 0 && duration < skipIntroDuration + 60) return;
+
         if (playerTime >= 5 && playerTime <= skipIntroDuration) {
             setShowSkipButton(true);
         } else {
@@ -66,8 +70,14 @@ export default function Player({
 
     const handleSkipIntro = useCallback(() => {
         if (playerRef.current && !isDestroyed.current) {
-            playerRef.current.currentTime = skipIntroDuration;
+            const duration = playerRef.current.duration;
+            // Never skip beyond 10% of the total duration or 5 minutes (whichever is smaller) if it's a short clip
+            // Actually, for anime 90s is standard. For movies, we should check.
+            const targetTime = Math.min(skipIntroDuration, duration * 0.9);
+            
+            playerRef.current.currentTime = targetTime;
             setShowSkipButton(false);
+            playerRef.current.notice.show = `Skipped to ${Math.floor(targetTime)}s`;
         }
     }, [skipIntroDuration]);
 
@@ -423,8 +433,11 @@ export default function Player({
             {/* Skip Intro Button */}
             {showSkipButton && (
                 <button
-                    onClick={handleSkipIntro}
-                    className="skip-intro-btn"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleSkipIntro();
+                    }}
+                    className="skip-intro-btn z-[100] touch-auto"
                 >
                     Skip Intro →
                 </button>

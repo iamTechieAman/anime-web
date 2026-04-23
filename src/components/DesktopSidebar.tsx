@@ -77,7 +77,7 @@ export default function DesktopSidebar() {
                     <Link 
                         key={item.href}
                         href={item.href}
-                        className={`tooltip flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-14 group ${
+                        className={`tooltip flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 w-14 group pointer-events-auto ${
                             isActive 
                             ? `${item.color} bg-[var(--bg-card)] border border-[var(--border-color)]` 
                             : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card)]/50"

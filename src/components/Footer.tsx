@@ -12,9 +12,13 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-1 space-y-4">
-                        <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                <span className="text-white font-black text-lg">T</span>
+                        <Link href="/" className="flex items-center gap-3 group">
+                            <div className="w-10 h-10 relative flex items-center justify-center">
+                                <img 
+                                    src="/logo.webp" 
+                                    alt="ToonPlayer" 
+                                    className="w-full h-full object-contain mix-blend-screen group-hover:scale-110 transition-transform duration-300"
+                                />
                             </div>
                             <span className="text-xl font-black tracking-tighter text-white">ToonPlayer</span>
                         </Link>
