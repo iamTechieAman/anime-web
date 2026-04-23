@@ -602,7 +602,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         if (!autoNext) return;
         
         const availableEps = show?.availableEpisodesDetail?.[mode] || [];
-        const currentIndex = availableEps.indexOf(currentEp);
+        const currentIndex = availableEps.map(String).indexOf(String(currentEp));
         
         if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
             // Trigger Netflix-style countdown overlay
@@ -620,7 +620,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         setShowNextOverlay(false);
                         
                         const nextEp = availableEps[currentIndex + 1];
-                        setCurrentEp(nextEp);
+                        setCurrentEp(String(nextEp));
                         toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
                         return 0;
                     }
@@ -939,9 +939,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                             onClick={() => {
                                                                 if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
                                                                 setShowNextOverlay(false);
-                                                                const currentIndex = availableEps.indexOf(currentEp);
-                                                                if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
-                                                                    setCurrentEp(availableEps[currentIndex + 1]);
+                                        const currentIndex = availableEps.map(String).indexOf(String(currentEp));
+                                        if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
+                                            const nextEp = availableEps[currentIndex + 1];
+                                            setCurrentEp(String(nextEp));
                                                                 }
                                                             }}
                                                             className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg font-black text-xs transition-all flex items-center gap-1.5"
@@ -966,10 +967,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         {/* Safe Stream & Stats */}
                         <div className="flex flex-wrap items-center gap-3 pt-4">
                             {/* Next Episode Button */}
-                            {availableEps && currentEp && availableEps.indexOf(currentEp) < availableEps.length - 1 && (
+                            {availableEps && currentEp && availableEps.map(String).indexOf(String(currentEp)) < availableEps.length - 1 && (
                                 <button
                                     onClick={() => {
-                                        const currentIndex = availableEps.indexOf(currentEp);
+                                        const currentIndex = availableEps.map(String).indexOf(String(currentEp));
                                         if (currentIndex !== -1 && currentIndex < availableEps.length - 1) {
                                             const nextEp = availableEps[currentIndex + 1];
                                             router.push(`/watch/anime/${id}?ep=${nextEp}&mode=${mode}`);

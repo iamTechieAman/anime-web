@@ -111,6 +111,7 @@ export default function Player({
                     pip: false,
                     autoSize: true,
                     autoMini: false,
+                    lockWheel: false, // Allow page scroll on PC
                     screenshot: true,
                     setting: true,
                     loop: false,

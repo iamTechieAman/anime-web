@@ -292,7 +292,7 @@ export default function Header() {
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
-              className="relative flex items-center bg-[var(--bg-card)]/50 backdrop-blur-sm border border-[var(--border-color)] rounded-2xl px-4 py-3 group hover:border-white/20 focus-within:border-purple-500/50 focus-within:ring-4 focus-within:ring-purple-500/5 transition-all duration-300"
+              className="relative flex items-center bg-[var(--bg-card)]/50 backdrop-blur-sm border border-[var(--border-color)] rounded-2xl px-4 py-3 group hover:border-white/20 focus-within:border-purple-500/50 focus-within:ring-0 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300"
             >
               <Search className="w-[18px] h-[18px] text-[var(--text-muted)] group-focus-within:text-purple-400 shrink-0 transition-colors" />
               <input
