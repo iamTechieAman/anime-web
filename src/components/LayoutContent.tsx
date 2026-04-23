@@ -25,9 +25,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   }, []);
   
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--bg-main)] relative overflow-hidden">
+    <div className="flex flex-col min-h-full bg-[var(--bg-main)] relative">
       <DesktopSidebar />
-      <div className="flex-1 flex flex-col min-w-0 relative min-h-screen overflow-x-hidden scrollbar-none md:pl-[72px]">
+      <div className="flex-1 flex flex-col min-w-0 relative md:pl-[72px]">
         <Suspense fallback={<div className="h-16 w-full skeleton-shine" />}>
           <Header />
         </Suspense>
