@@ -759,13 +759,14 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
             <div className="pt-14">
                 {/* Video Player with Anti-Redirect Protection */}
-                <div className="relative w-full bg-black">
-                    <div className="w-full">
+                <div className="relative w-full bg-black touch-pan-y">
+                    <div className="w-full touch-pan-y">
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden shadow-2xl shadow-blue-500/10"
+                            className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden shadow-2xl shadow-blue-500/10 touch-pan-y"
+                            style={{ touchAction: 'pan-y !important' }}
                         >
                             {/* Loading skeleton */}
                             {!playerLoaded && (

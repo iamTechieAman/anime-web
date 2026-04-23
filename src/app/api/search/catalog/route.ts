@@ -71,9 +71,13 @@ async function fetchCatalog() {
         console.error('[Catalog API] AniList fetch failed:', e);
     }
 
-    cachedCatalog = catalog;
+    cachedCatalog = catalog.map(item => ({
+        ...item,
+        // Pre-normalize for faster searching
+        _searchTitle: item.title.toLowerCase().trim()
+    }));
     cacheTimestamp = now;
-    return catalog;
+    return cachedCatalog;
 }
 
 export async function GET() {

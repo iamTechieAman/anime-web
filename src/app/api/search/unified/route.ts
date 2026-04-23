@@ -97,8 +97,28 @@ export async function GET(request: Request) {
             });
         }
 
-        // Sort by relevance or just return merged (already limited)
-        return NextResponse.json({ results: results.slice(0, 10) });
+        // Sort by relevance (Normalized Title distance)
+        const sortedResults = results.sort((a, b) => {
+            const aTitle = (a.title || "").toLowerCase();
+            const bTitle = (b.title || "").toLowerCase();
+            const q = query.toLowerCase();
+            
+            // Exact match priority
+            const aExact = aTitle === q;
+            const bExact = bTitle === q;
+            if (aExact && !bExact) return -1;
+            if (bExact && !aExact) return 1;
+
+            // Starts with match priority
+            const aStarts = aTitle.startsWith(q);
+            const bStarts = bTitle.startsWith(q);
+            if (aStarts && !bStarts) return -1;
+            if (bStarts && !aStarts) return 1;
+
+            return 0;
+        });
+
+        return NextResponse.json({ results: sortedResults.slice(0, 10) });
 
     } catch (error: any) {
         console.error("[UnifiedSearch] Error:", error.message);

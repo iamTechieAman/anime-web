@@ -407,15 +407,16 @@ export default function Player({
     };
 
     return (
-        <div className="relative w-full">
+        <div className="relative w-full overflow-visible touch-pan-y">
             <div
                 ref={artRef}
-                className={className}
+                className={`${className} touch-pan-y`}
                 style={{
                     ...style,
                     width: '100%',
                     aspectRatio: '16/9',
-                    touchAction: 'pan-y'
+                    touchAction: 'pan-y !important',
+                    pointerEvents: 'auto'
                 }}
             />
 

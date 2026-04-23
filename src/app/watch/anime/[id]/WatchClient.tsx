@@ -763,8 +763,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                     {/* Player Column */}
-                    <div className="flex-1 w-full min-w-0">
-                        <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative z-20 shadow-2xl">
+                    <div className="flex-1 w-full min-w-0 touch-pan-y">
+                        <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative z-20 shadow-2xl touch-pan-y" style={{ touchAction: 'pan-y !important' }}>
                             {loadingSource ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                                     <div className="relative">

@@ -59,10 +59,12 @@ export default function Header() {
 
         setGlobalCatalog(catalog);
         fuseRef.current = new Fuse(catalog, {
-            keys: ["title", "type"],
-            threshold: 0.4,
+            keys: ["title", "_searchTitle", "type"],
+            threshold: 0.45,
             ignoreLocation: true,
-            minMatchCharLength: 2
+            distance: 100,
+            minMatchCharLength: 2,
+            shouldSort: true
         });
       } catch (e) {
         console.warn('[Header] Catalog preload failed:', e);
@@ -131,14 +133,25 @@ export default function Header() {
         const networkItems = response.data.results || [];
         
         if (networkItems.length > 0) {
-            // Apply Fuzzy Search against network items to strictly rank typo anomalies
-            const networkFuse = new Fuse(networkItems, { keys: ["title"], threshold: 0.4 });
+            // Apply Fuzzy Search against network items
+            const networkFuse = new Fuse(networkItems, { 
+                keys: ["title"], 
+                threshold: 0.45,
+                distance: 100
+            });
             const rankedNetwork = networkFuse.search(cleanQuery).map(r => r.item);
             const finalNetwork = rankedNetwork.length > 0 ? rankedNetwork : networkItems;
             
             setSuggestions((prev) => {
                 const combined = [...prev, ...finalNetwork];
-                const unique = combined.filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i);
+                // Deep deduplication by normalized title and ID
+                const seenKeys = new Set();
+                const unique = combined.filter((item) => {
+                    const key = `${item.id}-${(item.title || "").toLowerCase().trim()}`;
+                    if (seenKeys.has(key)) return false;
+                    seenKeys.add(key);
+                    return true;
+                });
                 return unique.slice(0, 10);
             });
         }
@@ -201,11 +214,11 @@ export default function Header() {
     const escapedHighlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const parts = text.split(new RegExp(`(${escapedHighlight})`, "gi"));
     return (
-      <span>
+      <span className="truncate">
         {parts.map((part, i) => 
-          part.toLowerCase() === highlight.toLowerCase() 
-            ? <b key={i} className="text-purple-400">{part}</b> 
-            : part
+          part.toLowerCase() === highlight.toLowerCase().trim() 
+            ? <b key={i} className="text-blue-400 font-black">{part}</b> 
+            : <span key={i} className="text-white/70">{part}</span>
         )}
       </span>
     );
