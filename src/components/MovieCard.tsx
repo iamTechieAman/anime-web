@@ -76,7 +76,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie" }: { ite
                             src={`${IMG_BASE}/w342${item.poster_path}`}
                             srcSet={`${IMG_BASE}/w185${item.poster_path} 185w, ${IMG_BASE}/w342${item.poster_path} 342w`}
                             sizes="(max-width: 640px) 28vw, 180px"
-                            alt={title}
+                            alt={`${title} (${year}) - Stream HD on ToonPlayer`}
                             width={180}
                             height={270}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

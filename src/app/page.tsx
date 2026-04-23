@@ -205,7 +205,7 @@ export default function MoviesPage() {
                 <HeroCarousel />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-0 z-40">
+                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-16 md:top-[72px] z-40">
                     <div className="w-full mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
                         <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50">
                             {TABS.map((tab) => (

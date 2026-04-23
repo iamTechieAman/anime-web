@@ -89,8 +89,8 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
   height: auto !important;
   min-height: 100%;
   background: var(--bg-main);

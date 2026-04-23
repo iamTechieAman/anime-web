@@ -57,7 +57,7 @@ export default function DesktopSidebar() {
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gradient-to-b from-purple-500 to-blue-500 rounded-r-full" />
                         )}
                         <Icon className={`w-5 h-5 transition-all duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_currentColor]' : 'group-hover:scale-110'}`} />
-                        <span className={`text-[9px] font-bold tracking-tight transition-colors duration-300 ${isActive ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}>{item.name}</span>
+                        <span className={`text-[10px] font-bold tracking-tight transition-colors duration-300 ${isActive ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}>{item.name}</span>
                     </Link>
                 );
             })}
@@ -85,7 +85,7 @@ export default function DesktopSidebar() {
                         data-tooltip={item.name}
                     >
                         <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                        <span className="text-[8px] font-bold tracking-tight">{item.name}</span>
+                        <span className="text-[10px] font-bold tracking-tight">{item.name}</span>
                     </Link>
                 );
             })}

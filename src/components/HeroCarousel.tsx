@@ -188,7 +188,7 @@ export default function HeroCarousel() {
                         </h1>
 
                         {/* Description */}
-                        <p className="text-white/60 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl mb-6 font-medium">
+                        <p className="text-white/80 text-sm md:text-lg line-clamp-2 md:line-clamp-3 leading-relaxed max-w-2xl mb-8 font-medium drop-shadow-md">
                             {activeSlide.description}
                         </p>
 

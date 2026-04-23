@@ -93,10 +93,10 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
                     {show.thumbnail && !imageError ? (
                         <img
                             src={show.thumbnail}
-                            alt={show.name}
+                            alt={`${show.name} - Watch on ToonPlayer`}
                             width={180}
                             height={270}
-                        onError={() => setImageError(true)}
+                            onError={() => setImageError(true)}
                             loading="lazy"
                             decoding="async"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -209,7 +209,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                 {show.thumbnail && !imageError ? (
                     <img
                         src={show.thumbnail}
-                        alt={show.name}
+                        alt={`${show.name} - Stream Online on ToonPlayer`}
                         width={56}
                         height={80}
                         onError={() => setImageError(true)}
