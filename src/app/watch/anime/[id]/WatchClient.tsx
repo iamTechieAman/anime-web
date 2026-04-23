@@ -649,7 +649,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const fallbackEmbedUrl2 = `https://vidsrc.to/embed/anime/${id}/1`;
         
         return (
-            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col">
+            <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 {/* Navbar */}
                 <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] pt-[max(0.75rem,env(safe-area-inset-top))]">
                     <div className="flex items-center gap-3">
@@ -717,7 +717,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const episodes = show.availableEpisodesDetail?.[mode] || [];
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col font-sans selection:bg-purple-500/30 transition-colors duration-300">
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-purple-500/30 transition-colors duration-300">
             {/* No JavaScript Fallback */}
             <noscript>
                 <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">

@@ -698,7 +698,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         const fallbackId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
         const embedUrl = SERVERS[0].getUrl((type === "anime" || type === "cartoon") ? "tv" : type, fallbackId, 1, 1);
         return (
-            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
+            <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
                     <div className="w-full flex items-center justify-between gap-4">
                         <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
@@ -744,7 +744,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         : activeServer.getUrl((type === "anime" || type === "cartoon") ? "tv" : type, activeId, selectedSeason, selectedEpisode);
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Top Navigation Bar */}
             <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
                 <div className="w-full flex items-center justify-between gap-4">

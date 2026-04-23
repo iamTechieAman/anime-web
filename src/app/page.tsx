@@ -195,7 +195,7 @@ export default function MoviesPage() {
     }, [paramsInUrl]);
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 overflow-x-hidden transition-colors duration-300">
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 transition-colors duration-300">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 to-transparent opacity-50" />

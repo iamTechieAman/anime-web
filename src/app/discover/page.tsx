@@ -161,7 +161,7 @@ export default function DiscoverPage() {
     const activeMood = MOODS.find(m => m.id === selectedMood);
 
     return (
-        <main className="min-h-[100dvh] bg-[var(--bg-main)] text-[var(--text-main)] pt-[max(4rem,env(safe-area-inset-top))] md:pt-16 pb-24 md:pl-[72px]">
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)] pt-[max(4rem,env(safe-area-inset-top))] md:pt-16 pb-24 md:pl-[72px]">
             <div className="w-full px-4 md:px-8 py-6 space-y-12">
 
                 {/* Header */}
