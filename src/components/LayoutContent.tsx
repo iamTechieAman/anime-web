@@ -27,7 +27,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] relative overflow-x-hidden">
       <DesktopSidebar />
-      <div className="flex flex-col min-h-screen relative md:pl-[72px] overflow-y-visible">
+      <div className="flex flex-col min-h-screen relative md:pl-[72px] overflow-y-visible overflow-x-hidden">
 
 
 

@@ -1024,9 +1024,8 @@ body, html {
 }
 
 /* Fix right-side blank space by ensuring no overflow leakage */
-.min-h-screen, .w-full, main, section {
+.min-h-screen, .w-full, main {
   max-width: 100vw !important;
-  overflow-x: hidden !important;
 }
 
 /* Ensure movie grid fills width properly */

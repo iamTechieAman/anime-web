@@ -88,6 +88,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // A-Z List pages
+  const azLetters = ['all', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), '0-9'];
+  const azPages: MetadataRoute.Sitemap = azLetters.map(letter => ({
+    url: `${baseUrl}/az-list/${letter.toLowerCase()}`,
+    lastModified: now,
+    changeFrequency: 'daily' as const,
+    priority: 0.6,
+  }));
+
   // Dynamic trending content — fetch top movies/shows for indexing
   let dynamicPages: MetadataRoute.Sitemap = [];
   try {
@@ -142,7 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Deduplicate by URL
-  const allPages = [...staticPages, ...genrePages, ...dynamicPages];
+  const allPages = [...staticPages, ...genrePages, ...azPages, ...dynamicPages];
   const seen = new Set<string>();
   const deduped = allPages.filter(page => {
     if (seen.has(page.url)) return false;

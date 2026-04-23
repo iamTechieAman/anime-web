@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         return NextResponse.json({
             results: filtered.map((item: any) => ({
                 ...item,
-                id: `tmdb:${item.id}`,
+                id: item.id,
                 media_type: item.media_type || (item.title ? "movie" : "tv")
             })),
             page: data.page || 1,

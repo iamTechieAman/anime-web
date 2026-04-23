@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, CheckCircle, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
+import { Calendar, CheckCircle, ChevronDown, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
 import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
 import HeroCarousel from "@/components/HeroCarousel";
 import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
@@ -453,6 +453,75 @@ export default function MoviesPage() {
                                 </p>
                            </div>
                         </div>
+                    </div>
+                </section>
+
+                {/* FAQ Schema + Visual FAQ for SEO */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "FAQPage",
+                            "mainEntity": [
+                                {
+                                    "@type": "Question",
+                                    "name": "What is ToonPlayer?",
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": "ToonPlayer (toonplayer.in) is a free online streaming platform where you can watch movies, anime, and TV shows in HD quality without signing up."
+                                    }
+                                },
+                                {
+                                    "@type": "Question",
+                                    "name": "Is ToonPlayer free to use?",
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": "Yes, ToonPlayer is completely free. You can stream movies, anime, and TV shows without any subscription or registration."
+                                    }
+                                },
+                                {
+                                    "@type": "Question",
+                                    "name": "What devices does ToonPlayer support?",
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": "ToonPlayer works on all devices including smartphones (Android & iOS), tablets, laptops, desktops, and smart TVs through a web browser."
+                                    }
+                                },
+                                {
+                                    "@type": "Question",
+                                    "name": "Does ToonPlayer have anime?",
+                                    "acceptedAnswer": {
+                                        "@type": "Answer",
+                                        "text": "Yes, ToonPlayer has a large collection of anime with sub and dub options. You can browse anime by genre or search for your favorites."
+                                    }
+                                }
+                            ]
+                        })
+                    }}
+                />
+
+                <section className="mb-24 max-w-4xl mx-auto px-4">
+                    <h2 className="text-xl font-bold text-white mb-6 font-sora flex items-center gap-2">
+                        <Info className="w-5 h-5 text-blue-400" /> Frequently Asked Questions
+                    </h2>
+                    <div className="space-y-3">
+                        {[
+                            { q: "What is ToonPlayer?", a: "ToonPlayer is a free online streaming platform where you can watch movies, anime, and TV shows in HD quality without signing up." },
+                            { q: "Is ToonPlayer free to use?", a: "Yes, ToonPlayer is completely free. Stream movies, anime, and TV shows without any subscription or registration." },
+                            { q: "What devices does ToonPlayer support?", a: "ToonPlayer works on all devices — smartphones, tablets, laptops, desktops, and smart TVs through any modern web browser." },
+                            { q: "Does ToonPlayer have anime?", a: "Yes! ToonPlayer has a massive anime library with sub and dub options. Browse by genre or search for your favorites." },
+                        ].map((faq, i) => (
+                            <details key={i} className="group bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden">
+                                <summary className="flex items-center justify-between cursor-pointer px-5 py-4 text-sm font-bold text-white hover:text-blue-400 transition-colors list-none">
+                                    {faq.q}
+                                    <ChevronDown className="w-4 h-4 text-[var(--text-muted)] group-open:rotate-180 transition-transform" />
+                                </summary>
+                                <div className="px-5 pb-4 text-sm text-[var(--text-muted)] leading-relaxed">
+                                    {faq.a}
+                                </div>
+                            </details>
+                        ))}
                     </div>
                 </section>
 

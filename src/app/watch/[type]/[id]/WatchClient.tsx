@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
@@ -206,15 +206,17 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { addToHistory, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     const [details, setDetails] = useState<MovieDetails | null>(null);
-    const [activeServer, setActiveServer] = useState<any>(null); // Start null, require auto-fetch
+    const [activeServer, setActiveServer] = useState<any>(SERVERS[0]); // Start with first server immediately
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [showTrailer, setShowTrailer] = useState(false);
     const [showServers, setShowServers] = useState(false);
     const [isAutoChecking, setIsAutoChecking] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
+    const autoSwitchAttempts = useRef(0); // Cap auto-switch to prevent infinite loop
 
     // Netflix-style Auto Next States
     const [showNextOverlay, setShowNextOverlay] = useState(false);
@@ -274,6 +276,16 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const [loadingEpisodes, setLoadingEpisodes] = useState(false);
     const [mode, setMode] = useState<"sub" | "dub">("sub");
     const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+
+    // Read season/episode from URL params on mount
+    useEffect(() => {
+        const s = searchParams?.get('s');
+        const e = searchParams?.get('e');
+        const ep = searchParams?.get('ep');
+        if (s) setSelectedSeason(parseInt(s) || 1);
+        if (e) setSelectedEpisode(parseInt(e) || 1);
+        if (ep) setSelectedEpisode(parseInt(ep) || 1);
+    }, []);
 
     // Auto Server Check — probes top servers and picks the first working one
     const autoCheckServers = useCallback(async () => {
@@ -440,18 +452,23 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         setSourceError(false);
     }, [activeServer]);
 
-    // Intelligent Auto-Switching
+    // Intelligent Auto-Switching (capped at 3 attempts to prevent infinite loop)
     const autoSwitchToNext = useCallback((failedId: string) => {
-        if (!smartSwitchEnabled) return; // Respect user settings
+        if (!smartSwitchEnabled) return;
+        if (autoSwitchAttempts.current >= 3) {
+            console.warn('[WatchPage] Max auto-switch attempts reached. Stopping.');
+            toast.error('Could not find a working server. Try selecting one manually.', { id: 'autoSwitchToggle' });
+            return;
+        }
         
-        console.warn(`[WatchPage] Server ${failedId} failed or timed out. Marking as failed.`);
+        autoSwitchAttempts.current += 1;
+        console.warn(`[WatchPage] Server ${failedId} failed. Attempt ${autoSwitchAttempts.current}/3`);
         setFailedServers(prev => {
             const newSet = new Set(prev);
             newSet.add(failedId);
             return newSet;
         });
 
-        // Find next available
         const baseServers = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList;
         const nextServer = baseServers.find(s => s.id !== failedId && !failedServers.has(s.id));
         
@@ -459,41 +476,38 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
             toast(`Auto-switching to ${nextServer.name}...`, { icon: '🔄', id: 'autoSwitchToggle' });
             setActiveServer(nextServer);
         } else {
-            toast.error("All auto-check servers failed. Please try a manual selection.", { id: 'autoSwitchToggle' });
+            toast.error('All servers checked. Try selecting one manually.', { id: 'autoSwitchToggle' });
         }
     }, [failedServers, type, smartSwitchEnabled, serversList]);
 
-    // Automatic Auto-Server Selection if initial server is slow/error
-    useEffect(() => {
-        if (loading || isAutoChecking || playerLoaded || !details || !activeServer) return;
+    // Reset auto-switch counter when user manually selects a server
+    const handleManualServerSelect = useCallback((server: any) => {
+        autoSwitchAttempts.current = 0;
+        setFailedServers(new Set());
+        setActiveServer(server);
+    }, []);
 
+    // Consolidated auto-switch monitoring (replaces 3 separate effects)
+    useEffect(() => {
+        if (loading || isAutoChecking || !details || !activeServer) return;
+        if (autoSwitchAttempts.current >= 3) return; // Stop monitoring after cap
+
+        // Handle immediate source errors
+        if (sourceError && !playerLoaded) {
+            autoSwitchToNext(activeServer.id);
+            return;
+        }
+
+        // 8-second timeout for stuck players
         const timer = setTimeout(() => {
-            // If after 6 seconds, player hasn't loaded and no source error,
-            // we assume it's stuck/blocked. Auto switch visually.
             if (!playerLoaded && !sourceError) {
-                console.log("[WatchPage] Initial server taking too long, auto-switching.");
+                console.log('[WatchPage] Server taking too long, auto-switching.');
                 autoSwitchToNext(activeServer.id);
             }
-        }, 6000); // 6 second threshold
+        }, 8000);
 
         return () => clearTimeout(timer);
     }, [loading, playerLoaded, sourceError, details, isAutoChecking, activeServer, autoSwitchToNext]);
-
-    // Monitor for strict iframe errors
-    useEffect(() => {
-        if (playerLoaded && sourceError && activeServer) {
-            console.log("Iframe loaded but reported error state. Auto-switching.");
-            autoSwitchToNext(activeServer.id);
-        }
-    }, [loading, playerLoaded, sourceError, details, activeServer, autoSwitchToNext]);
-
-    // Handle generic source errors safely
-    useEffect(() => {
-        if (!isAutoChecking && sourceError && activeServer && !playerLoaded) {
-            console.log("iframe onload error or generic error, auto-switching.");
-            autoSwitchToNext(activeServer.id);
-        }
-    }, [sourceError, isAutoChecking, activeServer, playerLoaded, autoSwitchToNext]);
 
     // Keyboard shortcuts: 1-9 to switch servers, Escape to close modals
     useEffect(() => {
@@ -658,7 +672,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         setIframeKey((prev) => prev + 1);
         setSourceError(false); // Reset error on change
 
-        // Save to watch history
+        // Save to watch history (including season for TV resume)
         if (details && (id || tmdbIdForAnime)) {
             try {
                 const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
@@ -671,8 +685,9 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     episodeId: String(selectedEpisode),
                     episodeNumber: selectedEpisode,
                     currentTime: 0,
-                    duration: 0
-                });
+                    duration: 0,
+                    season: selectedSeason,
+                } as any);
             } catch (e) {
                 console.error("Failed to save history:", e);
             }
@@ -1031,10 +1046,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                             {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
                                 <button
                                     key={server.id}
-                                    onClick={() => {
-                                        setFailedServers(new Set()); // Reset failures on manual click
-                                        setActiveServer(server);
-                                    }}
+                                    onClick={() => handleManualServerSelect(server)}
                                     className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id
                                         ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 font-bold"
                                         : failedServers.has(server.id)
@@ -1077,7 +1089,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                     {type === "anime" ? [...SERVERS, ...ANIME_SERVERS].map((server) => (
                                         <button
                                             key={server.id}
-                                            onClick={() => { setActiveServer(server); setShowServers(false); }}
+                                            onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
                                             className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
                                                 }`}
                                         >
@@ -1096,7 +1108,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                     )) : SERVERS.map((server) => (
                                         <button
                                             key={server.id}
-                                            onClick={() => { setActiveServer(server); setShowServers(false); }}
+                                            onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
                                             className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
                                                 }`}
                                         >

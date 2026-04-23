@@ -46,10 +46,14 @@ export default function HistoryPage() {
   };
 
   const getHistoryLink = (entry: typeof history[0]) => {
-    if (entry.type === 'movie' || entry.type === 'tv') {
-      return `/watch/${entry.type}/${entry.showId}?e=${entry.episodeId || ''}`;
+    if (entry.type === 'movie') {
+      return `/watch/movie/${entry.showId}`;
     }
-    // Anime
+    if (entry.type === 'tv') {
+      const season = (entry as any).season || 1;
+      const episode = entry.episodeId || entry.episodeNumber || 1;
+      return `/watch/tv/${entry.showId}?s=${season}&e=${episode}`;
+    }
     return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
   };
 

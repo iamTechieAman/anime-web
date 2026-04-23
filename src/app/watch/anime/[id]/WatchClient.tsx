@@ -852,7 +852,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         ></iframe>
                                     ) : (
                                         <ArtPlayer
-                                            key={`${sourceUrl}-${currentEp}`}
+                                            key={`${id}-${currentEp}`}
                                             option={{
                                                 url: sourceUrl,
                                                 type: videoType,

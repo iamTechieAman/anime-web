@@ -13,8 +13,13 @@ export default function ContinueWatchingRow() {
     if (!history || history.length === 0) return null;
 
     const getHistoryLink = (entry: any) => {
-        if (entry.type === 'movie' || entry.type === 'tv') {
-            return `/watch/${entry.type}/${entry.showId}?e=${entry.episodeId || ''}`;
+        if (entry.type === 'movie') {
+            return `/watch/movie/${entry.showId}`;
+        }
+        if (entry.type === 'tv') {
+            const season = entry.season || 1;
+            const episode = entry.episodeId || entry.episodeNumber || 1;
+            return `/watch/tv/${entry.showId}?s=${season}&e=${episode}`;
         }
         return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
     };
