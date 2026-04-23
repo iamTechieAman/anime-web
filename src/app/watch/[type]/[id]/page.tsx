@@ -72,7 +72,20 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
 }
 
 export default async function WatchPage({ params }: { params: Promise<{ type: string; id: string }> }) {
-    const { type, id } = await params;
+    const { type, id: rawId } = await params;
+    const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
+
+    let metaTitle = "Video Content";
+    let metaDesc = "Watch free HD content on ToonPlayer";
+    let metaImage = "https://toonplayer.in/icon.png";
+
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/${type === 'anime' ? 'tv' : type}/${id}?api_key=${TMDB_KEY}`);
+        const data = await res.json();
+        metaTitle = data.title || data.name || metaTitle;
+        metaDesc = data.overview || metaDesc;
+        metaImage = data.backdrop_path ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}` : metaImage;
+    } catch (e) {}
 
     return (
         <>
@@ -83,11 +96,12 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "VideoObject",
-                        "name": "Video Content",
-                        "description": "Watch free HD content on ToonPlayer",
+                        "name": metaTitle,
+                        "description": metaDesc.slice(0, 160),
+                        "thumbnailUrl": [metaImage],
+                        "uploadDate": new Date().toISOString(),
                         "contentUrl": `https://toonplayer.in/watch/${type}/${id}`,
                         "embedUrl": `https://toonplayer.in/watch/${type}/${id}`,
-                        "uploadDate": new Date().toISOString(),
                         "publisher": {
                             "@type": "Organization",
                             "name": "ToonPlayer",
@@ -109,7 +123,7 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
                         "itemListElement": [
                             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://toonplayer.in" },
                             { "@type": "ListItem", "position": 2, "name": type === 'tv' ? 'TV Shows' : type === 'anime' ? 'Anime' : 'Movies', "item": `https://toonplayer.in/${type === 'anime' ? 'az-list/all' : 'discover'}` },
-                            { "@type": "ListItem", "position": 3, "name": "Watch", "item": `https://toonplayer.in/watch/${type}/${id}` },
+                            { "@type": "ListItem", "position": 3, "name": metaTitle, "item": `https://toonplayer.in/watch/${type}/${id}` },
                         ]
                     })
                 }}
