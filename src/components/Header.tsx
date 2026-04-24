@@ -59,10 +59,13 @@ export default function Header() {
 
         setGlobalCatalog(catalog);
         fuseRef.current = new Fuse(catalog, {
-            keys: ["title", "_searchTitle", "type"],
-            threshold: 0.45,
-            ignoreLocation: true,
-            distance: 100,
+            keys: [
+                { name: 'title', weight: 2 },
+                { name: '_searchTitle', weight: 1.5 },
+                { name: 'type', weight: 0.5 }
+            ],
+            threshold: 0.3,
+            distance: 50,
             minMatchCharLength: 2,
             shouldSort: true
         });
@@ -135,9 +138,13 @@ export default function Header() {
         if (networkItems.length > 0) {
             // Apply Fuzzy Search against network items
             const networkFuse = new Fuse(networkItems, { 
-                keys: ["title"], 
-                threshold: 0.45,
-                distance: 100
+                keys: [
+                    { name: 'title', weight: 2 },
+                    { name: 'format', weight: 1 }
+                ], 
+                threshold: 0.3,
+                distance: 100,
+                shouldSort: true
             });
             const rankedNetwork = networkFuse.search(cleanQuery).map(r => r.item);
             const finalNetwork = rankedNetwork.length > 0 ? rankedNetwork : networkItems;
@@ -356,7 +363,7 @@ export default function Header() {
                           {globalCatalog.slice(0, 5).map((item, i) => (
                             <Link
                               key={i}
-                              href={item.id ? `/watch/${item.type}/${item.id}` : '#'}
+                              href={item.href || (item.id ? `/watch/${item.type || 'anime'}/${item.id}` : '#')}
                               className="flex items-center gap-4 p-2.5 hover:bg-white/5 rounded-2xl transition-all group hover:pl-4"
                               onClick={() => setShowSuggestions(false)}
                             >

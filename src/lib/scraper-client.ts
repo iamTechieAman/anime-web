@@ -28,6 +28,9 @@ export async function fetchFromScraper(params: {
     of_info?: string;
     of_type?: string;
     of_source?: string;
+    anw_query?: string;
+    anw_info?: string;
+    anw_source?: string;
 }) {
     if (SCRAPER_API_URL) {
         // Use remote API
@@ -94,9 +97,17 @@ export async function fetchFromScraper(params: {
                 queryParams.id = params.of_info;
                 queryParams.type = params.of_type || "series";
             } else if (params.of_source) {
-                endpoint = "/source/onoflix";
                 queryParams.id = params.of_source;
                 queryParams.type = params.of_type || "series";
+            } else if (params.anw_query) {
+                endpoint = "/search/aniwaves";
+                queryParams.q = params.anw_query;
+            } else if (params.anw_info) {
+                endpoint = "/info/aniwaves";
+                queryParams.id = params.anw_info;
+            } else if (params.anw_source) {
+                endpoint = "/source/aniwaves";
+                queryParams.id = params.anw_source;
             }
 
             if (endpoint) {
@@ -122,6 +133,9 @@ export async function fetchFromScraper(params: {
                     else if (params.universal_ep) result.universal_source = response.data;
                     else result.universal_search = response.data;
                 }
+                if (params.anw_query) result.aniwaves = response.data;
+                if (params.anw_info) result.anw_info = response.data;
+                if (params.anw_source) result.anw_source = response.data;
                 
                 return result;
             }
@@ -153,6 +167,9 @@ export async function fetchFromScraper(params: {
     if (params.of_info) command += ` --of_info "${params.of_info.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
     if (params.of_source) command += ` --of_source "${params.of_source.replace(/"/g, '\\"')}" --of_type "${params.of_type || 'series'}"`;
     if (params.slug) command += ` --slug "${params.slug.replace(/"/g, '\\"')}"`;
+    if (params.anw_query) command += ` --anw_query "${params.anw_query.replace(/"/g, '\\"')}"`;
+    if (params.anw_info) command += ` --anw_info "${params.anw_info.replace(/"/g, '\\"')}"`;
+    if (params.anw_source) command += ` --anw_source "${params.anw_source.replace(/"/g, '\\"')}"`;
 
     console.log("[Scraper Client] Executing local command:", command);
     try {

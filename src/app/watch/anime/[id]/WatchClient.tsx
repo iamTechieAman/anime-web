@@ -306,9 +306,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 }
                 setMode(initialMode);
 
+                // Use watch history if available to resume playback
+                const historyItem = getHistoryItem(fullId);
                 const epParam = new URLSearchParams(window.location.search).get("ep");
+                
                 if (epParam && eps.includes(epParam)) {
                     setCurrentEp(epParam);
+                } else if (historyItem && historyItem.episodeId && eps.includes(historyItem.episodeId)) {
+                    setCurrentEp(historyItem.episodeId);
                 } else if (eps.length > 0) {
                     setCurrentEp(eps.includes("1") ? "1" : eps[0]);
                 }
@@ -847,6 +852,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             className="w-full h-full border-0 bg-black"
                                             allowFullScreen
                                             allow="autoplay; fullscreen"
+                                            sandbox={isAdBlockEnabled ? "allow-scripts allow-same-origin allow-presentation" : undefined}
                                             onLoad={() => setLoadingSource(false)}
                                             onError={() => autoSwitchServer(selectedServer!)}
                                         ></iframe>

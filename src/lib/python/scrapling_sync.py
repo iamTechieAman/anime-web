@@ -818,6 +818,74 @@ def scrape_animesalt_info(item_id):
         
     return {"id": item_id, "title": title, "episodes": episodes, "type": "movie" if "/movies/" in response.url else "series"}
 
+def scrape_aniwaves_search(query):
+    fetcher = StealthyFetcher()
+    url = f"https://aniwaves.ru/search?keyword={query}"
+    response = fetcher.fetch(url, engine='chrome')
+    results = []
+    if not response: return []
+    items = response.css('a[href*="/watch/"]')
+    seen_ids = set()
+    for item in items:
+        href = item.attrib.get('href', '')
+        match = re.search(r'/watch/([^/]+)', href)
+        if match:
+            item_id = match.group(1)
+            if item_id in seen_ids: continue
+            seen_ids.add(item_id)
+            title_el = item.css('.name, .title, h3')
+            title = title_el[0].text.strip() if title_el else item_id.replace('-', ' ').title()
+            img_el = item.css('img')
+            img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            results.append({
+                "id": f"anw:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://aniwaves.ru{img}",
+                "type": "anime",
+                "href": href
+            })
+    return results
+
+def scrape_aniwaves_info(item_id):
+    fetcher = StealthyFetcher()
+    url = f"https://aniwaves.ru/watch/{item_id}"
+    response = fetcher.fetch(url, engine='chrome')
+    episodes = []
+    if not response: return {"id": item_id, "episodes": []}
+    
+    ep_links = response.css('.episodes a, a[data-ep], a[href*="/watch/"]')
+    for link in ep_links:
+        href = link.attrib.get('href', '')
+        if item_id not in href: continue
+        ep_id = href.split('/')[-1]
+        ep_num = link.attrib.get('data-ep') or link.text.strip()
+        if ep_num and ep_num.isdigit():
+            episodes.append({"id": ep_id, "number": ep_num, "href": href})
+            
+    title_el = response.css('h1, .title')
+    title = title_el[0].text.strip() if title_el else item_id.replace('-', ' ').title()
+    return {"id": item_id, "title": title, "episodes": episodes, "type": "anime"}
+
+def scrape_aniwaves_source(ep_id):
+    fetcher = StealthyFetcher()
+    url = f"https://aniwaves.ru/watch/{ep_id}"
+    response = fetcher.fetch(url, engine='chrome')
+    sources = []
+    if not response: return {"url": "", "sources": []}
+    
+    iframes = response.css('iframe')
+    for iframe in iframes:
+        src = iframe.attrib.get('src')
+        if src and not src.startswith('#'):
+             u = clean_source_url(src, "aniwaves.ru")
+             if u: sources.append({"name": "Server", "url": u})
+             
+    direct = extract_direct_video_links(response.text)
+    for d in direct:
+        if d not in [s['url'] for s in sources]: sources.append({"name": "Direct", "url": d})
+        
+    return {"url": sources[0]['url'] if sources else "", "sources": sources}
+
 async def open_claw_engine(url):
     import pyppeteer
     import logging
@@ -899,10 +967,13 @@ if __name__ == "__main__":
     parser.add_argument("--of_info", help="Onoflix info ID")
     parser.add_argument("--of_type", default="series", help="Onoflix item type (movie/series)")
     parser.add_argument("--of_source", help="Onoflix source ID")
+    parser.add_argument("--anw_query", help="Aniwaves search query")
+    parser.add_argument("--anw_info", help="Aniwaves info ID")
+    parser.add_argument("--anw_source", help="Aniwaves source ID")
     parser.add_argument("--adaptive", help="Use adaptive pyppeteer unblocking on specific URL")
     
     args = parser.parse_args()
-    output = {"onoflix": [], "watchanimeworld": [], "cinemacity": [], "filmex": [], "cinezo": [], "pstream": [], "wa_info": {}, "wa_source": {}, "aniwatch": [], "universal_search": [], "universal_info": {}, "universal_source": {}, "animesalt": []}
+    output = {"onoflix": [], "watchanimeworld": [], "cinemacity": [], "filmex": [], "cinezo": [], "pstream": [], "wa_info": {}, "wa_source": {}, "aniwatch": [], "universal_search": [], "universal_info": {}, "universal_source": {}, "animesalt": [], "aniwaves": []}
     
     if args.universal_site:
         if args.query: output["universal_search"] = scrape_universal_search(args.universal_site, args.query)
@@ -923,6 +994,9 @@ if __name__ == "__main__":
     if args.ax_query: output["animex"] = scrape_animex_search(args.ax_query)
     if args.ax_info: output["ax_info"] = scrape_animex_info(args.ax_info, args.slug)
     if args.ax_source: output["ax_source"] = scrape_animex_source(args.ax_source)
+    if args.anw_query: output["aniwaves"] = scrape_aniwaves_search(args.anw_query)
+    if args.anw_info: output["anw_info"] = scrape_aniwaves_info(args.anw_info)
+    if args.anw_source: output["anw_source"] = scrape_aniwaves_source(args.anw_source)
     
     if args.slug and "as:" in str(args.slug): # Custom check for animesalt info
         output["as_info"] = scrape_animesalt_info(args.slug.replace("as:", ""))

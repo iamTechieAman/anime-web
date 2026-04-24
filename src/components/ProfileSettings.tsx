@@ -62,6 +62,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
     const [smartSwitch, setSmartSwitch] = useState(true);
     const [multiAudio, setMultiAudio] = useState(true);
     const [dataSaver, setDataSaver] = useState(false);
+    const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
 
     const { preferences, updatePreference } = useNotifications();
 
@@ -88,6 +89,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                     if (parsed.smartSwitch !== undefined) setSmartSwitch(parsed.smartSwitch);
                     if (parsed.multiAudio !== undefined) setMultiAudio(parsed.multiAudio);
                     if (parsed.dataSaver !== undefined) setDataSaver(parsed.dataSaver);
+                    if (parsed.aggressiveSandbox !== undefined) setAggressiveSandbox(parsed.aggressiveSandbox);
                 } catch {}
             }
         }
@@ -104,6 +106,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
             case 'smartSwitch': setSmartSwitch(value); break;
             case 'multiAudio': setMultiAudio(value); break;
             case 'dataSaver': setDataSaver(value); break;
+            case 'aggressiveSandbox': setAggressiveSandbox(value); break;
         }
     };
 
@@ -142,10 +145,9 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                     />
 
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-2xl overflow-hidden shadow-purple-500/10 flex flex-col max-h-[90vh]"
+                        style={{ transform: 'translateZ(0)' }}
+                        className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-2xl overflow-hidden shadow-purple-500/10 flex flex-col max-h-[90vh] will-change-transform"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-[var(--border-color)] flex items-center justify-between bg-white/5 shrink-0">
@@ -236,6 +238,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-purple-500' },
                                             { key: 'multiAudio', label: 'Prioritize Multi-Audio', desc: 'Favor ToonPlayer VIP streams', value: multiAudio, color: 'bg-purple-500' },
                                             { key: 'dataSaver', label: 'Data & Battery Saver', desc: 'Reduce blur effects for smoother UI', value: dataSaver, color: 'bg-green-500' },
+                                            { key: 'aggressiveSandbox', label: 'Aggressive Ad-Blocker', desc: 'Prevents external popups and redirects', value: aggressiveSandbox, color: 'bg-red-500', badge: 'Secure' },
                                         ].map((item, i, arr) => (
                                             <div key={item.key}>
                                                 <div className="flex items-center justify-between">

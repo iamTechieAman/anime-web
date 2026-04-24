@@ -358,18 +358,22 @@ p, h1, h2, h3, h4, h5, h6, span, .selectable {
 .page-transition-wrapper {
   animation: pageReveal 0.25s cubic-bezier(0.2, 0, 0.2, 1) both;
   will-change: opacity, transform;
+  transform: translateZ(0);
 }
 
 .animate-fadeSlideUp {
   animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: translateZ(0);
 }
 
 .animate-fadeSlideDown {
   animation: fadeSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: translateZ(0);
 }
 
 .animate-scaleIn {
   animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: translateZ(0);
 }
 
 .animate-slideInRight {
@@ -385,9 +389,10 @@ p, h1, h2, h3, h4, h5, h6, span, .selectable {
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   border: 1px solid var(--border-color);
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  will-change: transform, box-shadow;
 }
 
 .premium-card::before {
