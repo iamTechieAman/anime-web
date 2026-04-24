@@ -163,6 +163,8 @@ export default function MoviesPage() {
 
             // Fetch Anime Home (Aniwaves)
             try {
+                // Add random delay to mimic human behavior
+                await new Promise(resolve => setTimeout(resolve, Math.random() * (2500 - 1200) + 1200));
                 const animeRes = await axios.get("/api/anime/home");
                 if (animeRes.data.latest) setAnimeLatest(animeRes.data.latest);
                 if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending);
@@ -288,10 +290,13 @@ export default function MoviesPage() {
                     ) : (
                         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                             {/* Main Feed */}
-                            <div className="flex-1 space-y-12 min-w-0">
-                                <ContinueWatchingRow />
+                            <div className="flex-1 min-w-0">
+                                <div className="mb-12">
+                                    <ContinueWatchingRow />
+                                </div>
+                                
                                 {activeTab === "movies" && (
-                                    <>
+                                    <div className="space-y-12">
                                         <section>
                                             <SectionHeader icon={Flame} title="Trending Movies" color="text-red-400" />
                                             {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" /> : <RowSkeleton />}
@@ -316,11 +321,11 @@ export default function MoviesPage() {
                                                 </section>
                                             )
                                         ))}
-                                    </>
+                                    </div>
                                 )}
 
                                 {activeTab === "tv" && (
-                                    <>
+                                    <div className="space-y-12">
                                         <section>
                                             <SectionHeader icon={Flame} title="Trending TV Shows" color="text-purple-400" />
                                             {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" /> : <RowSkeleton />}
@@ -341,11 +346,11 @@ export default function MoviesPage() {
                                                 </section>
                                             )
                                         ))}
-                                    </>
+                                    </div>
                                 )}
                                 
                                 {activeTab === "anime" && (
-                                    <>
+                                    <div className="space-y-12 mt-8">
                                         <section>
                                             <SectionHeader icon={Flame} title="Trending Anime" color="text-purple-400" />
                                             {animeTrending.length > 0 ? (
@@ -362,11 +367,11 @@ export default function MoviesPage() {
                                                 </div>
                                             ) : <RowSkeleton />}
                                         </section>
-                                    </>
+                                    </div>
                                 )}
 
                                 {activeTab === "trending" && (
-                                    <>
+                                    <div className="space-y-12">
                                         <section>
                                             <SectionHeader icon={TrendingUp} title="Global Trending" color="text-red-400" />
                                             {trending.length > 0 ? <MovieRow items={trending} title="global-trending" /> : <RowSkeleton />}
@@ -379,7 +384,7 @@ export default function MoviesPage() {
                                             <SectionHeader icon={Tv} title="Trending Series" color="text-purple-400" />
                                             {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
                                         </section>
-                                    </>
+                                    </div>
                                 )}
                             </div>
 

@@ -185,9 +185,20 @@ export async function fetchFromScraper(params: {
             throw new Error(stderr);
         }
 
-        return JSON.parse(stdout);
+        if (!stdout) {
+            console.warn("[Scraper Client] No stdout from local command");
+            return {}; // Empty but valid
+        }
+
+        try {
+            return JSON.parse(stdout);
+        } catch (parseError) {
+            console.error("[Scraper Client] JSON Parse Error!");
+            console.error("[Scraper Client] Raw stdout:", stdout.substring(0, 500) + (stdout.length > 500 ? "..." : ""));
+            throw parseError;
+        }
     } catch (err: any) {
-        console.error("[Scraper Client] Local command exception:", err);
+        console.error("[Scraper Client] Local command exception:", err.message);
         throw err;
     }
 }

@@ -6,22 +6,26 @@ import { Play, Star } from "lucide-react";
 
 export interface Show {
     _id: string;
-    name: string;
-    availableEpisodes: {
+    name?: string;
+    title?: string;
+    availableEpisodes?: {
         sub: number;
         dub: number;
         raw: number;
     };
     thumbnail?: string;
+    image?: string;
     provider?: string;
     __typename: string;
+    score?: number;
+    type?: string;
 }
 
-export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBanner = false, rank }: { show: any, showScore?: boolean, isBanner?: boolean, rank?: number }) {
+export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBanner = false, rank }: { show: Show, showScore?: boolean, isBanner?: boolean, rank?: number }) {
     const [imageError, setImageError] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
-    const isHD = show.availableEpisodes?.sub > 0 || show.availableEpisodes?.dub > 0;
+    const isHD = (show.availableEpisodes?.sub ?? 0) > 0 || (show.availableEpisodes?.dub ?? 0) > 0;
 
     // Intersection Observer — replaces whileInView (zero JS animation cost)
     useEffect(() => {
@@ -90,10 +94,10 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
 
                 <div className="relative w-full h-full">
                     {/* Thumbnail Image */}
-                    {show.thumbnail && !imageError ? (
+                    {(show.thumbnail || show.image) && !imageError ? (
                         <img
-                            src={show.thumbnail}
-                            alt={`${show.name} - Watch on ToonPlayer`}
+                            src={show.thumbnail || show.image}
+                            alt={`${show.name || show.title} - Watch on ToonPlayer`}
                             width={240}
                             height={360}
                             onError={() => setImageError(true)}
@@ -105,7 +109,7 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 flex flex-col items-center justify-center p-4">
                             <Play className="w-12 h-12 text-white/20 mb-3" />
-                            <p className="text-[var(--text-main)] text-xs font-bold text-center line-clamp-3 opacity-60 font-sora">{show.name}</p>
+                            <p className="text-[var(--text-main)] text-xs font-bold text-center line-clamp-3 opacity-60 font-sora">{show.name || show.title}</p>
                         </div>
                     )}
 
@@ -117,21 +121,21 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
                     <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 flex flex-col justify-end transform transition-all duration-300 z-10 group-hover:translate-y-[-4px]">
                         {/* Title */}
                         <h3 className="text-white font-bold text-sm md:text-base leading-tight line-clamp-2 md:line-clamp-1 group-hover:line-clamp-2 transition-all duration-300 text-shadow-sm font-sora">
-                            {show.name}
+                            {show.name || show.title}
                         </h3>
 
                         {/* Metadata Row */}
                         <div className="flex items-center gap-2 mt-1.5 md:mt-2 text-[10px] md:text-xs text-white/70 overflow-hidden">
-                            {(show.availableEpisodes?.sub > 0 || show.availableEpisodes?.dub > 0) && (
+                            {((show.availableEpisodes?.sub ?? 0) > 0 || (show.availableEpisodes?.dub ?? 0) > 0) && (
                                 <div className="flex gap-1 items-center shrink-0 border border-white/20 rounded-sm bg-black/40 overflow-hidden">
-                                    {show.availableEpisodes?.sub > 0 && (
+                                    {(show.availableEpisodes?.sub ?? 0) > 0 && (
                                         <span className="px-1 md:px-1.5 py-0.5 font-medium border-r border-white/20 flex items-center gap-1 text-[#4ade80]">
-                                            <span className="hidden sm:inline">CC</span> {show.availableEpisodes.sub}
+                                            <span className="hidden sm:inline">CC</span> {show.availableEpisodes?.sub}
                                         </span>
                                     )}
-                                    {show.availableEpisodes?.dub > 0 && (
+                                    {(show.availableEpisodes?.dub ?? 0) > 0 && (
                                         <span className="px-1 md:px-1.5 py-0.5 font-medium text-[#c084fc] flex items-center gap-1">
-                                            <span className="hidden sm:inline">MIC</span> {show.availableEpisodes.dub}
+                                            <span className="hidden sm:inline">MIC</span> {show.availableEpisodes?.dub}
                                         </span>
                                     )}
                                 </div>
@@ -177,8 +181,7 @@ export function AnimeGrid({ shows, prefix = "anime" }: { shows: Show[], prefix?:
 // Horizontal Anime Card for Sidebars
 export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number }) {
     const [imageError, setImageError] = useState(false);
-    const showWithScore = show as any;
-    const matchScore = showWithScore.score ? Math.round(showWithScore.score * 10) : null;
+    const matchScore = show.score ? Math.round(show.score * 10) : null;
 
     // Route TMDB content to movie watch page
     const isTmdbContent = show._id?.startsWith('tmdb:');
@@ -207,10 +210,10 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             
             {/* Thumbnail */}
             <div className="relative w-14 h-20 rounded-sm overflow-hidden shrink-0 bg-[var(--bg-card)] shadow-md">
-                {show.thumbnail && !imageError ? (
+                {(show.thumbnail || show.image) && !imageError ? (
                     <img
-                        src={show.thumbnail}
-                        alt={`${show.name} - Stream Online on ToonPlayer`}
+                        src={show.thumbnail || show.image}
+                        alt={`${show.name || show.title} - Stream Online on ToonPlayer`}
                         width={56}
                         height={80}
                         onError={() => setImageError(true)}
@@ -228,14 +231,14 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             {/* Info */}
             <div className="flex border-b border-[var(--border-color)] group-hover:border-transparent pb-3 flex-col justify-center min-w-0 flex-1">
                 <h4 className="font-semibold text-sm text-[var(--text-main)] group-hover:text-[#FF5722] transition-colors line-clamp-2 leading-snug font-sora">
-                    {show.name}
+                    {show.name || show.title}
                 </h4>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    {show.availableEpisodes?.sub > 0 && (
-                        <span className="text-[9px] px-1 bg-[#FF5722]/10 text-[#FF5722] border border-[#FF5722]/20 rounded-sm font-bold">CC {show.availableEpisodes.sub}</span>
+                    {(show.availableEpisodes?.sub ?? 0) > 0 && (
+                        <span className="text-[9px] px-1 bg-[#FF5722]/10 text-[#FF5722] border border-[#FF5722]/20 rounded-sm font-bold">CC {show.availableEpisodes?.sub}</span>
                     )}
-                    {show.availableEpisodes?.dub > 0 && (
-                        <span className="text-[9px] px-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-sm font-bold">MIC {show.availableEpisodes.dub}</span>
+                    {(show.availableEpisodes?.dub ?? 0) > 0 && (
+                        <span className="text-[9px] px-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-sm font-bold">MIC {show.availableEpisodes?.dub}</span>
                     )}
                     <span className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                         <span className="w-1 h-1 rounded-full bg-[var(--text-muted)]/50"></span>

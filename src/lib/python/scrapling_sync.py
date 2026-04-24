@@ -821,22 +821,39 @@ def scrape_animesalt_info(item_id):
 def scrape_aniwaves_search(query):
     fetcher = StealthyFetcher()
     url = f"https://aniwaves.ru/search?keyword={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=30000)
     results = []
     if not response: return []
-    items = response.css('a[href*="/watch/"]')
+    items = response.css('div.item, .flw-item')
     seen_ids = set()
     for item in items:
-        href = item.attrib.get('href', '')
+        # Link is in a.item-link or just a
+        href_el = item.css('a.item-link, a')
+        href = href_el[0].attrib.get('href', '') if href_el else ""
+        if not href: continue
+        
         match = re.search(r'/watch/([^/]+)', href)
         if match:
             item_id = match.group(1)
             if item_id in seen_ids: continue
             seen_ids.add(item_id)
-            title_el = item.css('.name, .title, h3')
+            
+            title_el = item.css('.name, .title, .film-name')
             title = title_el[0].text.strip() if title_el else item_id.replace('-', ' ').title()
-            img_el = item.css('img')
-            img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            
+            # Image is often in background-image style of div.img
+            img_div = item.css('.img')
+            img = ""
+            if img_div:
+                style = img_div[0].attrib.get('style', '')
+                img_match = re.search(r'url\((.*?)\)', style)
+                if img_match:
+                    img = img_match.group(1).strip("'\"")
+            
+            if not img:
+                img_el = item.css('img')
+                img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+                
             results.append({
                 "id": f"anw:{item_id}",
                 "title": title,
@@ -849,22 +866,33 @@ def scrape_aniwaves_search(query):
 def scrape_aniwaves_info(item_id):
     fetcher = StealthyFetcher()
     url = f"https://aniwaves.ru/watch/{item_id}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=30000)
     episodes = []
     if not response: return {"id": item_id, "episodes": []}
     
-    ep_links = response.css('.episodes a, a[data-ep], a[href*="/watch/"]')
+    ep_links = response.css('.episodes a, a[data-ep], a[href*="/watch/"], .ep-item a')
     for link in ep_links:
         href = link.attrib.get('href', '')
         if item_id not in href: continue
         ep_id = href.split('/')[-1]
         ep_num = link.attrib.get('data-ep') or link.text.strip()
-        if ep_num and ep_num.isdigit():
-            episodes.append({"id": ep_id, "number": ep_num, "href": href})
+        if ep_num and (ep_num.isdigit() or 'Episode' in ep_num):
+            num = re.search(r'\d+', ep_num)
+            clean_num = num.group(0) if num else ep_num
+            episodes.append({"id": ep_id, "number": clean_num, "href": href})
             
-    title_el = response.css('h1, .title')
+    title_el = response.css('h1, .title, .film-name')
     title = title_el[0].text.strip() if title_el else item_id.replace('-', ' ').title()
-    return {"id": item_id, "title": title, "episodes": episodes, "type": "anime"}
+    image_el = response.css('.film-poster img, .img img')
+    image = image_el[0].attrib.get('src') or image_el[0].attrib.get('data-src') if image_el else ""
+
+    return {
+        "id": item_id, 
+        "title": title, 
+        "image": image if image.startswith('http') else f"https://aniwaves.ru{image}" if image else "",
+        "episodes": episodes, 
+        "type": "anime"
+    }
 
 def scrape_aniwaves_source(ep_id):
     fetcher = StealthyFetcher()
@@ -888,22 +916,53 @@ def scrape_aniwaves_source(ep_id):
 
 def scrape_aniwaves_home():
     fetcher = StealthyFetcher()
+    import time
+    time.sleep(random.uniform(1.0, 2.5))
     url = "https://aniwaves.ru/home"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=40000)
     results = {"slides": [], "latest": [], "trending": []}
     if not response: return results
-    # Generic selectors based on common styles
-    items = response.css('.flw-item, .item, .swiper-slide')
+    
+    items = response.css('div.item, .flw-item')
     for item in items:
+        title_el = item.css('.name, .title, .film-name')
+        title = title_el[0].text.strip() if title_el else ""
+        
+        href_el = item.css('a.item-link, a')
+        href = href_el[0].attrib.get('href', '') if href_el else ""
+        if "/watch/" not in href: continue
+        item_id = href.split('/')[-1]
+        
+        img_div = item.css('.img')
+        img = ""
+        if img_div:
+            style = img_div[0].attrib.get('style', '')
+            img_match = re.search(r'url\((.*?)\)', style)
+            if img_match:
+                img = img_match.group(1).strip("'\"")
+        
+        if not img:
+            img_el = item.css('img')
+            img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            
+        if title and item_id:
+            results["latest"].append({
+                "id": f"anw:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://aniwaves.ru{img}",
+                "type": "anime"
+            })
+    # Also capture trending if they are in a different block
+    trending_items = response.css('.trending-anime .item, .trending .flw-item')
+    for item in trending_items:
         title_el = item.css('.name, .title, .film-name')
         title = title_el[0].text.strip() if title_el else ""
         href = item.css('a').attrib.get('href', '')
         if "/watch/" not in href: continue
         item_id = href.split('/')[-1]
-        img_el = item.css('img')
-        img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+        img = item.css('img').attrib.get('src') or item.css('img').attrib.get('data-src') or ""
         if title and item_id:
-            results["latest"].append({
+            results["trending"].append({
                 "id": f"anw:{item_id}",
                 "title": title,
                 "image": img if img.startswith('http') else f"https://aniwaves.ru{img}",
@@ -916,15 +975,28 @@ def scrape_aniwaves_az(letter, page=1):
     path = letter.lower()
     if path == '0-9': path = 'other'
     url = f"https://aniwaves.ru/az-list/{path}?page={page}" if path != 'all' else f"https://aniwaves.ru/az-list?page={page}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url, engine='chrome', timeout=35000)
     results = []
     if not response: return []
-    items = response.css('.flw-item')
+    items = response.css('div.item, .flw-item')
     for item in items:
-        title = item.css('.film-name').text.strip()
+        title_el = item.css('.name, .title, .film-name')
+        title = title_el[0].text.strip() if title_el else ""
         href = item.css('a').attrib.get('href', '')
         item_id = href.split('/')[-1] if href else ""
-        img = item.css('img').attrib.get('src') or item.css('img').attrib.get('data-src') or ""
+        
+        img_div = item.css('.img')
+        img = ""
+        if img_div:
+            style = img_div[0].attrib.get('style', '')
+            img_match = re.search(r'url\((.*?)\)', style)
+            if img_match:
+                img = img_match.group(1).strip("'\"")
+        
+        if not img:
+            img_el = item.css('img')
+            img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+            
         if title and item_id:
             results.append({
                 "id": f"anw:{item_id}",
