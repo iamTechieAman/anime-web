@@ -313,7 +313,7 @@ export default function Header() {
                 onFocus={() => setShowSuggestions(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="Find movies, shows & more..."
-                className="w-full bg-transparent border-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight"
+                className="w-full bg-transparent border-0 ring-0 focus:ring-0 outline-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
                 autoComplete="off"
               />
               {searchQuery && (

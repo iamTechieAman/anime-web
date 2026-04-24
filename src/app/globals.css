@@ -127,7 +127,7 @@ body {
   user-select: auto;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.3s ease, color 0.3s ease;
-  touch-action: pan-y !important;
+  /* Fixed: Removed touch-action: pan-y to allow horizontal carousel scrolling */
 }
 
 
@@ -437,6 +437,8 @@ p, h1, h2, h3, h4, h5, h6, span, .selectable {
   transform: translateY(16px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
   will-change: opacity, transform;
+  /* Prevent layout shifts */
+  contain-intrinsic-size: 180px 270px;
 }
 .card-reveal.card-visible {
   opacity: 1;
@@ -591,7 +593,7 @@ p, h1, h2, h3, h4, h5, h6, span, .selectable {
 .responsive-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
 }
 

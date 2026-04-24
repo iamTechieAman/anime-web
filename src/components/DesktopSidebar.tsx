@@ -24,7 +24,7 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/95 backdrop-blur-xl border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-1.5 z-40 overflow-y-auto hide-scrollbar pointer-events-none">
+        <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-[var(--bg-main)]/95 backdrop-blur-xl border-r border-[var(--border-color)] hidden md:flex flex-col items-center py-6 gap-1.5 z-40 overflow-y-auto hide-scrollbar">
             {/* Logo */}
             <Link href="/" className="mb-4 group pointer-events-auto">
                 <div className="w-10 h-10 relative flex items-center justify-center">

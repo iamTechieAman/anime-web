@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
-import { AnikaiProvider } from "@/lib/providers/anikai";
-
-export const revalidate = 3600;
+import { getProvider } from "@/lib/providers";
 
 export async function GET() {
     try {
-        const provider = new AnikaiProvider();
-        const data = await provider.getHome();
+        const provider = getProvider('aniwaves');
+        if (!provider.getTrending || !provider.getRecent) {
+            return NextResponse.json({ error: "Provider not fully implemented" }, { status: 400 });
+        }
 
-        // Enhance slides with fallback images if needed (client side can handle too)
-        return NextResponse.json(data);
+        const [trending, latest] = await Promise.all([
+            provider.getTrending(),
+            provider.getRecent()
+        ]);
+
+        return NextResponse.json({ trending, latest });
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("[AnimeHome] Failed:", error.message);
+        return NextResponse.json({ error: "Failed to fetch anime home" }, { status: 500 });
     }
 }

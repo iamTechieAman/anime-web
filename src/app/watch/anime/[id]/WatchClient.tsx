@@ -58,14 +58,6 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.net/embed/movie/${id}?autoplay=true`,
     },
     {
-        id: "vidsrc_xyz",
-        name: "VidSrc XYZ",
-        badge: "New",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.xyz/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.xyz/embed/movie/${id}?autoplay=true`,
-    },
-    {
         id: "vidsrc_me",
         name: "VidSrc US",
         badge: "Fast",
@@ -90,41 +82,9 @@ const MOVIE_SERVERS = [
             type === "tv" ? `https://player.autoembed.cc/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://player.autoembed.cc/embed/movie/${id}?autoplay=true`,
     },
     {
-        id: "smashy",
-        name: "SmashyStream",
-        badge: null,
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=true` : `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=true`,
-    },
-    {
-        id: "2embed",
-        name: "2Embed",
-        badge: null,
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}&autoplay=true` : `https://www.2embed.cc/embed/${id}?autoplay=true`,
-    },
-    {
-        id: "vidsrc_pm",
-        name: "VidSrc PM",
-        badge: "Stable",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.pm/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.pm/embed/movie/${id}?autoplay=true`,
-    },
-    {
-        id: "vidsrc_pro",
-        name: "VidSrc Pro",
-        badge: "VIP",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.pro/embed/movie/${id}?autoplay=true`,
-    },
-    {
         id: "vidsrc_in",
         name: "VidSrc IN",
-        badge: "Fast",
+        badge: "Backup",
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === "tv" ? `https://vidsrc.in/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.in/embed/movie/${id}?autoplay=true`,
@@ -240,6 +200,21 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         };
     }, [id, autoNext, currentEp, mode, show]);
 
+    // Sync URL with state
+    useEffect(() => {
+        if (!show) return;
+        const params = new URLSearchParams(window.location.search);
+        let changed = false;
+        if (params.get('ep') !== currentEp) { params.set('ep', currentEp); changed = true; }
+        if (params.get('mode') !== mode) { params.set('mode', mode); changed = true; }
+        if (params.get('provider') !== provider) { params.set('provider', provider || ''); changed = true; }
+        
+        if (changed) {
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            router.replace(newUrl, { scroll: false });
+        }
+    }, [currentEp, mode, provider, show]);
+
     const isBookmarked = isInWatchlist(fullId);
 
     const toggleBookmark = () => {
@@ -307,15 +282,23 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 setMode(initialMode);
 
                 // Use watch history if available to resume playback
+                // Use URL parameter > history > default
                 const historyItem = getHistoryItem(fullId);
                 const epParam = new URLSearchParams(window.location.search).get("ep");
+                const modeParam = new URLSearchParams(window.location.search).get("mode") as "sub" | "dub";
                 
-                if (epParam && eps.includes(epParam)) {
-                    setCurrentEp(epParam);
-                } else if (historyItem && historyItem.episodeId && eps.includes(historyItem.episodeId)) {
-                    setCurrentEp(historyItem.episodeId);
-                } else if (eps.length > 0) {
-                    setCurrentEp(eps.includes("1") ? "1" : eps[0]);
+                if (modeParam && ["sub", "dub"].includes(modeParam)) {
+                    setMode(modeParam);
+                }
+
+                const currentEps = fetchedShow.availableEpisodesDetail?.[modeParam || initialMode] || [];
+                
+                if (epParam && currentEps.map(String).includes(String(epParam))) {
+                    setCurrentEp(String(epParam));
+                } else if (historyItem && historyItem.episodeId && currentEps.map(String).includes(String(historyItem.episodeId))) {
+                    setCurrentEp(String(historyItem.episodeId));
+                } else if (currentEps.length > 0) {
+                    setCurrentEp(currentEps.includes("1") ? "1" : String(currentEps[0]));
                 }
 
                 // Parallelly fetch TMDB ID if name is available

@@ -99,7 +99,6 @@ export default function Player({
                     pip: false,
                     autoSize: true,
                     autoMini: false,
-                    lockWheel: false,
                     screenshot: true,
                     setting: true,
                     loop: false,
@@ -149,18 +148,18 @@ export default function Player({
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
                                 const hls = new Hls({
-                                    maxBufferLength: 8,
-                                    maxMaxBufferLength: 20,
-                                    maxBufferSize: 8 * 1000 * 1000,
+                                    maxBufferLength: 30,
+                                    maxMaxBufferLength: 60,
+                                    maxBufferSize: 60 * 1000 * 1000,
                                     renderTextTracksNatively: false,
                                     initialLiveManifestSize: 1,
                                     nudgeMaxRetry: 10,
                                     enableWorker: true,
-                                    lowLatencyMode: false,
-                                    backBufferLength: 10,
-                                    manifestLoadingTimeOut: 5000,
-                                    levelLoadingTimeOut: 5000,
-                                    fragLoadingTimeOut: 8000,
+                                    lowLatencyMode: true,
+                                    backBufferLength: 90,
+                                    manifestLoadingTimeOut: 10000,
+                                    levelLoadingTimeOut: 10000,
+                                    fragLoadingTimeOut: 15000,
                                     startLevel: -1,
                                 });
 
@@ -317,6 +316,7 @@ export default function Player({
                 });
 
                 art.on('video:ended', () => {
+                    // Logic moved to Parent (WatchClient) to use centralized Netflix-style overlay
                     if (onEnded && !isDestroyed.current) onEnded();
                 });
 
@@ -342,29 +342,7 @@ export default function Player({
 
         if (playerRef.current) {
             const art = playerRef.current;
-            art.off('video:timeupdate', handleTimeUpdateForNext);
-            
-            function handleTimeUpdateForNext() {
-                if (art.video.duration > 0 && art.video.duration - art.video.currentTime < 1) {
-                    if (autoNext && onEnded && !isDestroyed.current && !showCountdown) {
-                        art.off('video:timeupdate', handleTimeUpdateForNext);
-                        setShowCountdown(true);
-                        setCountdown(5);
-                        countdownIntervalRef.current = setInterval(() => {
-                            setCountdown(prev => {
-                                if (prev <= 1) {
-                                    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-                                    setShowCountdown(false);
-                                    setTimeout(() => { if (onEnded && !isDestroyed.current) onEnded(); }, 0);
-                                    return 0;
-                                }
-                                return prev - 1;
-                            });
-                        }, 1000);
-                    }
-                }
-            }
-            art.on('video:timeupdate', handleTimeUpdateForNext);
+            // Internal ArtPlayer countdown removed to favor WatchClient overlay
         }
 
         return () => {
@@ -423,23 +401,7 @@ export default function Player({
 
             {/* Resume Prompt Removed (Auto-resumes now) */}
 
-            {showCountdown && (
-                <div className="auto-next-corner">
-                    <svg className="countdown-ring shrink-0" viewBox="0 0 100 100">
-                        <circle className="ring-bg" cx="50" cy="50" r="45" />
-                        <circle className="ring-progress" cx="50" cy="50" r="45" />
-                    </svg>
-                    <div className="flex flex-col min-w-0">
-                        <p className="text-white text-xs font-bold">Next episode in {countdown}s</p>
-                        <button
-                            onClick={cancelAutoNext}
-                            className="text-white/50 hover:text-white text-[10px] font-medium text-left mt-0.5"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Auto-Next Countdown UI is now handled by WatchClient.tsx for consistency */}
         </div>
     );
 }

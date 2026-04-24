@@ -31,6 +31,9 @@ export async function fetchFromScraper(params: {
     anw_query?: string;
     anw_info?: string;
     anw_source?: string;
+    anw_home?: boolean;
+    anw_az?: string;
+    anw_page?: string | number;
 }) {
     if (SCRAPER_API_URL) {
         // Use remote API
@@ -170,6 +173,8 @@ export async function fetchFromScraper(params: {
     if (params.anw_query) command += ` --anw_query "${params.anw_query.replace(/"/g, '\\"')}"`;
     if (params.anw_info) command += ` --anw_info "${params.anw_info.replace(/"/g, '\\"')}"`;
     if (params.anw_source) command += ` --anw_source "${params.anw_source.replace(/"/g, '\\"')}"`;
+    if (params.anw_home) command += ` --anw_home`;
+    if (params.anw_az) command += ` --anw_az "${params.anw_az}" --anw_page "${params.anw_page || 1}"`;
 
     console.log("[Scraper Client] Executing local command:", command);
     try {

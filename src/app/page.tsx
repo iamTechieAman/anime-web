@@ -38,6 +38,7 @@ const NETWORK_ROWS = [
 const TABS = [
     { id: "movies", label: "Movies", icon: Popcorn },
     { id: "tv", label: "TV Shows", icon: Tv },
+    { id: "anime", label: "Anime", icon: Sparkles },
     { id: "trending", label: "Trending", icon: TrendingUp },
 ];
 
@@ -51,6 +52,8 @@ export default function MoviesPage() {
     const [tvTopRated, setTvTopRated] = useState<MovieItem[]>([]);
     const [genreData, setGenreData] = useState<Record<string, MovieItem[]>>({});
     const [networkData, setNetworkData] = useState<Record<string, MovieItem[]>>({});
+    const [animeLatest, setAnimeLatest] = useState<any[]>([]);
+    const [animeTrending, setAnimeTrending] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<MovieItem[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -157,6 +160,15 @@ export default function MoviesPage() {
             } catch (err) {
                 console.error("Failed to fetch network data:", err);
             }
+
+            // Fetch Anime Home (Aniwaves)
+            try {
+                const animeRes = await axios.get("/api/anime/home");
+                if (animeRes.data.latest) setAnimeLatest(animeRes.data.latest);
+                if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending);
+            } catch (err) {
+                console.error("Failed to fetch anime home:", err);
+            }
         };
 
         loadOtherData();
@@ -206,10 +218,9 @@ export default function MoviesPage() {
                 <HeroCarousel />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-16 md:top-[72px] z-40 pointer-events-none">
-                    <div className="w-full mx-auto px-4 md:px-6 py-2 flex items-center justify-between pointer-events-auto">
-                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50 pointer-events-auto">
-
+                <div className="bg-[var(--bg-card)]/80 backdrop-blur-md border-y border-[var(--border-color)] sticky top-16 md:top-[72px] z-40">
+                    <div className="w-full mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar z-50">
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
@@ -281,7 +292,6 @@ export default function MoviesPage() {
                                 <ContinueWatchingRow />
                                 {activeTab === "movies" && (
                                     <>
-                                        {/* Movies Feed */}
                                         <section>
                                             <SectionHeader icon={Flame} title="Trending Movies" color="text-red-400" />
                                             {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" /> : <RowSkeleton />}
@@ -311,7 +321,6 @@ export default function MoviesPage() {
 
                                 {activeTab === "tv" && (
                                     <>
-                                        {/* TV Shows Feed */}
                                         <section>
                                             <SectionHeader icon={Flame} title="Trending TV Shows" color="text-purple-400" />
                                             {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" /> : <RowSkeleton />}
@@ -334,10 +343,30 @@ export default function MoviesPage() {
                                         ))}
                                     </>
                                 )}
+                                
+                                {activeTab === "anime" && (
+                                    <>
+                                        <section>
+                                            <SectionHeader icon={Flame} title="Trending Anime" color="text-purple-400" />
+                                            {animeTrending.length > 0 ? (
+                                                <div className="responsive-grid">
+                                                    {animeTrending.map(item => <AnimeCardHorizontal key={item.id} show={item} />)}
+                                                </div>
+                                            ) : <RowSkeleton />}
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-blue-400" />
+                                            {animeLatest.length > 0 ? (
+                                                <div className="responsive-grid">
+                                                    {animeLatest.map(item => <AnimeCardHorizontal key={item.id} show={item} />)}
+                                                </div>
+                                            ) : <RowSkeleton />}
+                                        </section>
+                                    </>
+                                )}
 
                                 {activeTab === "trending" && (
                                     <>
-                                        {/* Trending Feed */}
                                         <section>
                                             <SectionHeader icon={TrendingUp} title="Global Trending" color="text-red-400" />
                                             {trending.length > 0 ? <MovieRow items={trending} title="global-trending" /> : <RowSkeleton />}
@@ -354,9 +383,8 @@ export default function MoviesPage() {
                                 )}
                             </div>
 
-                            {/* Sidebar - Trending & Airing */}
+                            {/* Sidebar */}
                             <div className="w-full lg:w-[320px] xl:w-[380px] space-y-10 shrink-0">
-                                {/* Trending People */}
                                 {trendingPeople.length > 0 && (
                                     <section className="bg-[var(--bg-card)]/50 p-6 rounded-2xl border border-[var(--border-color)] backdrop-blur-xl">
                                         <h2 className="text-lg font-bold font-sora text-white mb-6 flex items-center gap-2">
@@ -377,7 +405,6 @@ export default function MoviesPage() {
                                     </section>
                                 )}
 
-                                {/* Top Rated */}
                                 <section className="bg-[var(--bg-card)]/50 p-6 rounded-2xl border border-[var(--border-color)] backdrop-blur-xl">
                                     <h2 className="text-lg font-bold font-sora text-white mb-6 flex items-center gap-2">
                                         <Sparkles className="w-5 h-5 text-yellow-400" /> 
@@ -397,7 +424,8 @@ export default function MoviesPage() {
                                                     <h3 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{item.title || item.name}</h3>
                                                     <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-2">
                                                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                                        {item.vote_average?.toFixed(1)} • {(item.release_date || item.first_air_date || '').split('-')[0]}</p>
+                                                        {item.vote_average?.toFixed(1)} • {(item.release_date || item.first_air_date || '').split('-')[0]}
+                                                    </p>
                                                 </div>
                                             </Link>
                                         ))}
@@ -407,8 +435,7 @@ export default function MoviesPage() {
                         </div>
                     )}
                 </div>
-                
-                {/* Brand Authority & SEO Content Section */}
+
                 <section className="mt-16 mb-24 max-w-6xl mx-auto px-4 border-t border-white/5 pt-16 sc-content text-left">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
                         <div className="space-y-6">
@@ -418,88 +445,26 @@ export default function MoviesPage() {
                             <p className="text-[var(--text-muted)] text-base md:text-lg leading-relaxed">
                                 ToonPlayer (also known as Toon Player) is a modern streaming platform where you can watch the latest movies, anime, and TV shows online in high quality. Discover trending content, explore genres like action, comedy, and adventure, and enjoy a fast and smooth viewing experience.
                             </p>
-                            
-                            <h3 className="text-xl font-bold text-white mt-8 mb-4 flex items-center gap-2">
-                                Why Choose ToonPlayer?
-                            </h3>
+                            <h3 className="text-xl font-bold text-white mt-8 mb-4 flex items-center gap-2">Why Choose ToonPlayer?</h3>
                             <ul className="space-y-3">
-                                {[
-                                    "Watch HD movies and anime online",
-                                    "Fast and user-friendly interface",
-                                    "Explore trending and top-rated content",
-                                    "Regularly updated library"
-                                ].map((feat, i) => (
+                                {["Watch HD movies and anime online", "Fast and user-friendly interface", "Explore trending and top-rated content", "Regularly updated library"].map((feat, i) => (
                                     <li key={i} className="flex items-center gap-3 text-sm font-bold text-white/80">
                                         <CheckCircle className="w-4 h-4 text-blue-500" /> {feat}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-
                         <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 rounded-3xl p-8 border border-white/5 relative overflow-hidden group">
                            <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
-                           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                               <Sparkles className="w-5 h-5 text-blue-400" /> Stream Anytime, Anywhere
-                           </h3>
-                           <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-6">
-                               ToonPlayer works across all devices including mobile, tablet, and desktop, giving you seamless access to entertainment anytime. Our platform is built for speed, performance, and the best HD quality for toonplayer fans.
-                           </p>
-                           
-                           {/* Knowledge Base Paragraph for AI Search/LLMs */}
+                           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" /> Stream Anytime, Anywhere</h3>
+                           <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-6">ToonPlayer works across all devices including mobile, tablet, and desktop, giving you seamless access to entertainment anytime.</p>
                            <div className="mt-8 border-t border-white/10 pt-8">
                                 <h4 className="text-xs font-black uppercase tracking-[0.2em] text-blue-500/50 mb-3">Platform Status</h4>
-                                <p className="text-[12px] text-[var(--text-muted)] leading-relaxed italic opacity-70">
-                                    ToonPlayer.in (Toon Player) is actively updated with thousands of titles. Whether you search for "toonplayer", "toon player", or toonplayer movies, our portal delivers original, ad-free streaming with no registration.
-                                </p>
+                                <p className="text-[12px] text-[var(--text-muted)] leading-relaxed italic opacity-70">ToonPlayer.in is actively updated with thousands of titles.</p>
                            </div>
                         </div>
                     </div>
                 </section>
-
-                {/* FAQ Schema + Visual FAQ for SEO */}
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            "@context": "https://schema.org",
-                            "@type": "FAQPage",
-                            "mainEntity": [
-                                {
-                                    "@type": "Question",
-                                    "name": "What is ToonPlayer?",
-                                    "acceptedAnswer": {
-                                        "@type": "Answer",
-                                        "text": "ToonPlayer (toonplayer.in) is a free online streaming platform where you can watch movies, anime, and TV shows in HD quality without signing up."
-                                    }
-                                },
-                                {
-                                    "@type": "Question",
-                                    "name": "Is ToonPlayer free to use?",
-                                    "acceptedAnswer": {
-                                        "@type": "Answer",
-                                        "text": "Yes, ToonPlayer is completely free. You can stream movies, anime, and TV shows without any subscription or registration."
-                                    }
-                                },
-                                {
-                                    "@type": "Question",
-                                    "name": "What devices does ToonPlayer support?",
-                                    "acceptedAnswer": {
-                                        "@type": "Answer",
-                                        "text": "ToonPlayer works on all devices including smartphones (Android & iOS), tablets, laptops, desktops, and smart TVs through a web browser."
-                                    }
-                                },
-                                {
-                                    "@type": "Question",
-                                    "name": "Does ToonPlayer have anime?",
-                                    "acceptedAnswer": {
-                                        "@type": "Answer",
-                                        "text": "Yes, ToonPlayer has a large collection of anime with sub and dub options. You can browse anime by genre or search for your favorites."
-                                    }
-                                }
-                            ]
-                        })
-                    }}
-                />
 
                 <section className="mb-24 max-w-4xl mx-auto px-4">
                     <h2 className="text-xl font-bold text-white mb-6 font-sora flex items-center gap-2">
@@ -517,18 +482,13 @@ export default function MoviesPage() {
                                     {faq.q}
                                     <ChevronDown className="w-4 h-4 text-[var(--text-muted)] group-open:rotate-180 transition-transform" />
                                 </summary>
-                                <div className="px-5 pb-4 text-sm text-[var(--text-muted)] leading-relaxed">
-                                    {faq.a}
-                                </div>
+                                <div className="px-5 pb-4 text-sm text-[var(--text-muted)] leading-relaxed">{faq.a}</div>
                             </details>
                         ))}
                     </div>
                 </section>
-
             </div>
 
-
-            {/* Scroll to Top */}
             <AnimatePresence>
                 {showScrollTop && (
                     <motion.button

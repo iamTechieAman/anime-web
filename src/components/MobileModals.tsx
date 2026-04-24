@@ -202,7 +202,7 @@ export default function MobileModals() {
                                             name="query"
                                             placeholder={searchPlaceholder}
                                             autoFocus
-                                            className="w-full bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-3 outline-none focus:border-purple-500/60 transition-colors text-sm"
+                                            className="w-full bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-3 ring-0 focus:ring-0 outline-none focus:outline-none focus:border-purple-500/60 transition-colors text-sm shadow-none"
                                         />
                                     </form>
                                 </div>

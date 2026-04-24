@@ -877,14 +877,62 @@ def scrape_aniwaves_source(ep_id):
     for iframe in iframes:
         src = iframe.attrib.get('src')
         if src and not src.startswith('#'):
-             u = clean_source_url(src, "aniwaves.ru")
-             if u: sources.append({"name": "Server", "url": u})
-             
+              u = clean_source_url(src, "aniwaves.ru")
+              if u: sources.append({"name": "Server", "url": u})
+              
     direct = extract_direct_video_links(response.text)
     for d in direct:
         if d not in [s['url'] for s in sources]: sources.append({"name": "Direct", "url": d})
         
     return {"url": sources[0]['url'] if sources else "", "sources": sources}
+
+def scrape_aniwaves_home():
+    fetcher = StealthyFetcher()
+    url = "https://aniwaves.ru/home"
+    response = fetcher.fetch(url, engine='chrome')
+    results = {"slides": [], "latest": [], "trending": []}
+    if not response: return results
+    # Generic selectors based on common styles
+    items = response.css('.flw-item, .item, .swiper-slide')
+    for item in items:
+        title_el = item.css('.name, .title, .film-name')
+        title = title_el[0].text.strip() if title_el else ""
+        href = item.css('a').attrib.get('href', '')
+        if "/watch/" not in href: continue
+        item_id = href.split('/')[-1]
+        img_el = item.css('img')
+        img = img_el[0].attrib.get('src') or img_el[0].attrib.get('data-src') or ""
+        if title and item_id:
+            results["latest"].append({
+                "id": f"anw:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://aniwaves.ru{img}",
+                "type": "anime"
+            })
+    return results
+
+def scrape_aniwaves_az(letter, page=1):
+    fetcher = StealthyFetcher()
+    path = letter.lower()
+    if path == '0-9': path = 'other'
+    url = f"https://aniwaves.ru/az-list/{path}?page={page}" if path != 'all' else f"https://aniwaves.ru/az-list?page={page}"
+    response = fetcher.fetch(url, engine='chrome')
+    results = []
+    if not response: return []
+    items = response.css('.flw-item')
+    for item in items:
+        title = item.css('.film-name').text.strip()
+        href = item.css('a').attrib.get('href', '')
+        item_id = href.split('/')[-1] if href else ""
+        img = item.css('img').attrib.get('src') or item.css('img').attrib.get('data-src') or ""
+        if title and item_id:
+            results.append({
+                "id": f"anw:{item_id}",
+                "title": title,
+                "image": img if img.startswith('http') else f"https://aniwaves.ru{img}",
+                "type": "anime"
+            })
+    return results
 
 async def open_claw_engine(url):
     import pyppeteer
@@ -970,6 +1018,9 @@ if __name__ == "__main__":
     parser.add_argument("--anw_query", help="Aniwaves search query")
     parser.add_argument("--anw_info", help="Aniwaves info ID")
     parser.add_argument("--anw_source", help="Aniwaves source ID")
+    parser.add_argument("--anw_home", action="store_true", help="Fetch Aniwaves home")
+    parser.add_argument("--anw_az", help="Aniwaves A-Z letter")
+    parser.add_argument("--anw_page", type=int, default=1, help="Aniwaves page number")
     parser.add_argument("--adaptive", help="Use adaptive pyppeteer unblocking on specific URL")
     
     args = parser.parse_args()
@@ -997,6 +1048,8 @@ if __name__ == "__main__":
     if args.anw_query: output["aniwaves"] = scrape_aniwaves_search(args.anw_query)
     if args.anw_info: output["anw_info"] = scrape_aniwaves_info(args.anw_info)
     if args.anw_source: output["anw_source"] = scrape_aniwaves_source(args.anw_source)
+    if args.anw_home: output["anw_home"] = scrape_aniwaves_home()
+    if args.anw_az: output["anw_az"] = scrape_aniwaves_az(args.anw_az, args.anw_page)
     
     if args.slug and "as:" in str(args.slug): # Custom check for animesalt info
         output["as_info"] = scrape_animesalt_info(args.slug.replace("as:", ""))

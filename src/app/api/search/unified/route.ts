@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 import { OnoflixProvider } from "@/lib/providers/onoflix";
+import { AniwavesProvider } from "@/lib/providers/aniwaves";
 
 const ANILIST_URL = 'https://graphql.anilist.co';
 const TMDB_SEARCH_URL = 'https://api.themoviedb.org/3/search/multi';
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const [anilistRes, tmdbRes, onoflixResults] = await Promise.allSettled([
+        const [anilistRes, tmdbRes, onoflixResults, aniwavesResults] = await Promise.allSettled([
             axios.post(ANILIST_URL, {
                 query: ANILIST_QUERY,
                 variables: { search: query }
@@ -45,7 +46,8 @@ export async function GET(request: Request) {
                     include_adult: false
                 }
             }),
-            new OnoflixProvider().search(query)
+            new OnoflixProvider().search(query),
+            new AniwavesProvider().search(query)
         ]);
 
         const results: any[] = [];
@@ -93,6 +95,20 @@ export async function GET(request: Request) {
                     href: type === 'tv' 
                         ? `/watch/tv/${realId}?provider=onoflix`
                         : `/watch/movie/${realId}?provider=onoflix`
+                });
+            });
+        }
+
+        // Process Aniwaves Results
+        if (aniwavesResults.status === 'fulfilled') {
+            aniwavesResults.value.slice(0, 5).forEach((item: any) => {
+                results.push({
+                    id: `anw:${item.id}`,
+                    title: item.title,
+                    image: item.image,
+                    type: 'anime',
+                    provider: 'aniwaves',
+                    href: `/watch/anime/${item.id}?provider=aniwaves`
                 });
             });
         }

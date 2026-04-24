@@ -94,12 +94,13 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
                         <img
                             src={show.thumbnail}
                             alt={`${show.name} - Watch on ToonPlayer`}
-                            width={180}
-                            height={270}
+                            width={240}
+                            height={360}
                             onError={() => setImageError(true)}
                             loading="lazy"
                             decoding="async"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-1"
+                            style={{ transform: 'translateZ(0)' }}
                         />
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 flex flex-col items-center justify-center p-4">
@@ -113,7 +114,7 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-300" />
 
                     {/* Info Container */}
-                    <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 flex flex-col justify-end transform transition-transform duration-300">
+                    <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 flex flex-col justify-end transform transition-all duration-300 z-10 group-hover:translate-y-[-4px]">
                         {/* Title */}
                         <h3 className="text-white font-bold text-sm md:text-base leading-tight line-clamp-2 md:line-clamp-1 group-hover:line-clamp-2 transition-all duration-300 text-shadow-sm font-sora">
                             {show.name}
