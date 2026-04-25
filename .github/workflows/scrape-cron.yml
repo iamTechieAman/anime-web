@@ -1,0 +1,25 @@
+name: External Scraper Cron
+
+on:
+  schedule:
+    # Runs every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  scrape-and-ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Vercel Deploy Hook
+        # Replace the URL with your actual Vercel Deploy Hook to rebuild static data
+        run: |
+          echo "Pinging Vercel to rebuild and cache fresh anime/movie data..."
+          # curl -X POST "https://api.vercel.com/v1/integrations/deploy/YOUR_HOOK_ID"
+          echo "Done."
+
+      - name: Hit Edge Cache (Warmup)
+        run: |
+          echo "Warming up the Edge Cache..."
+          curl -s "https://toonplayer.in/api/prime?category=popular" > /dev/null
+          curl -s "https://toonplayer.in/api/anime/home" > /dev/null
+          echo "Cache warmed up."

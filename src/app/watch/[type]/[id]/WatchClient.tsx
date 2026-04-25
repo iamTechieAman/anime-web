@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import React from "react";
+import Script from "next/script";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -218,6 +220,10 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const [iframeKey, setIframeKey] = useState(0);
     const autoSwitchAttempts = useRef(0); // Cap auto-switch to prevent infinite loop
 
+    // Cast & Auto-Next state
+    const [rawVideoSource, setRawVideoSource] = useState<string | null>(null);
+    const [castAvailable, setCastAvailable] = useState(false);
+
     // Netflix-style Auto Next States
     const [showNextOverlay, setShowNextOverlay] = useState(false);
     const [nextCountdown, setNextCountdown] = useState(5);
@@ -233,6 +239,107 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     
     // Watchlist
     const inWatchlist = isInWatchlist(id);
+
+
+    // TV Auto-Next logic
+    const handleVideoEnded = () => {
+        if (type !== 'tv' || episodes.length === 0) return;
+        
+        const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        
+        if (currentIndex !== -1 && currentIndex + 1 < episodes.length) {
+            if (showNextOverlay) return;
+            
+            setShowNextOverlay(true);
+            setNextCountdown(5);
+            
+            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+            
+            nextIntervalRef.current = setInterval(() => {
+                setNextCountdown(prev => {
+                    if (prev <= 1) {
+                        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                        setShowNextOverlay(false);
+                        
+                        const nextEp = episodes[currentIndex + 1].episode_number;
+                        setSelectedEpisode(nextEp);
+                        toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        } else {
+            toast("You have reached the latest available episode.", { icon: "✅" });
+        }
+    };
+
+    const handleVideoEndedRef = useRef<Function | null>(null);
+    useEffect(() => {
+        handleVideoEndedRef.current = handleVideoEnded;
+    });
+
+    // Listen for events from proxy iframe
+    useEffect(() => {
+        const handleMessage = (e: MessageEvent) => {
+            if (e.data?.type === 'VIDEO_ENDED') {
+                if (handleVideoEndedRef.current) handleVideoEndedRef.current();
+            } else if (e.data?.type === 'VIDEO_SOURCE_FOUND' && e.data.source) {
+                setRawVideoSource(e.data.source);
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
+
+    // Cast initialization
+    useEffect(() => {
+        (window as any).__onGCastApiAvailable = function (isAvailable: boolean) {
+            if (isAvailable) {
+                try {
+                    const castContext = (window as any).cast.framework.CastContext.getInstance();
+                    castContext.setOptions({
+                        receiverApplicationId: (window as any).chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                        autoJoinPolicy: (window as any).chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+                    });
+                    setCastAvailable(true);
+                } catch (e) {
+                    console.error("Cast initialization failed", e);
+                }
+            }
+        };
+    }, []);
+
+    // Cast session listener
+    useEffect(() => {
+        if (!castAvailable || !rawVideoSource) return;
+        const castContext = (window as any).cast.framework.CastContext.getInstance();
+        
+        const handleSessionStateChanged = (event: any) => {
+            if (event.sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
+                const castSession = castContext.getCurrentSession();
+                const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(rawVideoSource, rawVideoSource.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4');
+                const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
+                
+                castSession.loadMedia(request).then(
+                    () => toast.success("Casting started!"),
+                    (e: any) => toast.error("Casting failed.")
+                );
+            }
+        };
+
+        castContext.addEventListener(
+            (window as any).cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+            handleSessionStateChanged
+        );
+
+        return () => {
+            castContext.removeEventListener(
+                (window as any).cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+                handleSessionStateChanged
+            );
+        };
+    }, [castAvailable, rawVideoSource]);
 
     const toggleWatchlist = () => {
         if (inWatchlist) {
@@ -759,6 +866,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         : activeServer.getUrl((type === "anime" || type === "cartoon") ? "tv" : type, activeId, selectedSeason, selectedEpisode);
 
     return (
+        <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Top Navigation Bar */}
             <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
@@ -990,7 +1098,12 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                                         // This will be caught by the next tick or I can manually trigger redirect here
                                                         setShowNextOverlay(false);
                                                         
+                                                        const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
                                                         let nextEp = selectedEpisode + 1;
+                                                        if (currentIndex !== -1 && currentIndex + 1 < episodes.length) {
+                                                            nextEp = episodes[currentIndex + 1].episode_number;
+                                                            setSelectedEpisode(nextEp);
+                                                        }
                                                         let nextSeason = selectedSeason;
                                                         const seasons = details?.seasons;
                                                         const currentSeasonData = seasons?.find(s => s.season_number === selectedSeason);
@@ -1697,5 +1810,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 )}
             </AnimatePresence>
         </main>
+        <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
+        </>
     );
 }

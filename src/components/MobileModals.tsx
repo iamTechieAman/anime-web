@@ -20,6 +20,7 @@ export default function MobileModals() {
     const router = useRouter();
     const [autoPlay, setAutoPlay] = useState(false);
     const [autoNext, setAutoNext] = useState(false);
+    const [isDiscoverMode, setIsDiscoverMode] = useState(false);
 
     const isMovies = pathname?.startsWith('/');
     const searchAction = "/search";
@@ -194,16 +195,31 @@ export default function MobileModals() {
                                         const input = form.elements.namedItem('query') as HTMLInputElement;
                                         if (input.value.trim()) {
                                             setSearchOpen(false);
-                                            router.push(`${searchAction}?query=${encodeURIComponent(input.value.trim())}`);
+                                            if (isDiscoverMode) {
+                                                router.push(`/discover?prompt=${encodeURIComponent(input.value.trim())}`);
+                                            } else {
+                                                router.push(`${searchAction}?query=${encodeURIComponent(input.value.trim())}`);
+                                            }
                                         }
                                     }}>
                                         <input
                                             type="text"
                                             name="query"
-                                            placeholder={searchPlaceholder}
+                                            placeholder={isDiscoverMode ? "Describe what you want..." : searchPlaceholder}
                                             autoFocus
-                                            className="w-full bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-3 ring-0 focus:ring-0 outline-none focus:outline-none focus:border-purple-500/60 transition-colors text-sm shadow-none"
+                                            className={`w-full text-[var(--text-main)] border rounded-xl pl-10 pr-[88px] py-3 ring-0 focus:ring-0 outline-none focus:outline-none transition-all text-sm shadow-none ${isDiscoverMode ? 'bg-purple-900/20 border-purple-500/50 focus:border-purple-500' : 'bg-[var(--bg-card)] border-[var(--border-color)] focus:border-purple-500/60'}`}
                                         />
+                                        <button 
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setIsDiscoverMode(!isDiscoverMode);
+                                            }}
+                                            className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30' : 'bg-[var(--bg-main)] text-[var(--text-muted)] hover:text-white border border-[var(--border-color)]'}`}
+                                        >
+                                            <Sparkles className="w-3 h-3" />
+                                            AI
+                                        </button>
                                     </form>
                                 </div>
                                 <button

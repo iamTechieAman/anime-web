@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next'
 export const revalidate = 86400; // Cache for 24 hours to prevent 429 timeouts to TMDB
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.toonplayer.in';
+  const baseUrl = 'https://toonplayer.in';
   const now = new Date();
 
   // Static pages

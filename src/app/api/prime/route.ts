@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
+const TMDB_KEY = process.env.TMDB_API_KEY || "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
 export async function GET(request: Request) {
@@ -43,12 +43,16 @@ export async function GET(request: Request) {
             page: data.page,
             total_pages: data.total_pages,
             total_results: data.total_results,
+        }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+            }
         });
     } catch (error: any) {
         console.error("Prime Root API error:", error);
         return NextResponse.json(
-            { error: "Failed to fetch content" },
-            { status: 500 }
+            { error: "Failed to fetch content", results: [], page: 1, total_pages: 1 },
+            { status: 200 }
         );
     }
 }

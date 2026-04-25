@@ -31,10 +31,10 @@ export async function GET(request: Request) {
     const format = searchParams.get("format");
     const requestedProvider = searchParams.get("provider") as ProviderName;
 
-    // Priority: AllAnime (Verified) -> AniWatch (Verified) -> HiAnime (Mirror)
+    // Priority: Aniwaves -> AllAnime (Verified) -> AniWatch (Verified) -> HiAnime (Mirror)
     const providersToTry: ProviderName[] = requestedProvider
         ? [requestedProvider]
-        : ["allanime", "hianime", "aniwatch"];
+        : ["aniwaves", "allanime", "hianime", "aniwatch"];
 
     if (!query && !genre && !status && !format) {
         return NextResponse.json({ shows: [] });
@@ -107,11 +107,11 @@ export async function GET(request: Request) {
 
         const allResults = await Promise.all(searchPromises);
 
-        // Flatten and de-duplicate by name to provide a clean list
+        // Flatten and de-duplicate by ID to provide a clean list that preserves different seasons
         const flattened = allResults.flat();
         const seen = new Set();
         const uniqueShows = flattened.filter(show => {
-            const key = show.name.toLowerCase().trim();
+            const key = show._id || show.name.toLowerCase().trim();
             if (seen.has(key)) return false;
             seen.add(key);
             return true;

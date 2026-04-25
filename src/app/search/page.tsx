@@ -37,18 +37,27 @@ function MovieSearchContent() {
     
     const [results, setResults] = useState<MovieItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
     const performSearch = useCallback(() => {
         setLoading(true);
+        setError(null);
         const params = new URLSearchParams();
         if (query) params.set("query", query);
         if (genre && !query) params.set("genre", genre);
         if (status && !query) params.set("status", status);
 
         axios.get(`/api/prime/search?${params.toString()}`)
-            .then(res => setResults(res.data.results || []))
-            .catch(err => console.error(err))
+            .then(res => {
+                setResults(res.data.results || []);
+                setError(null);
+            })
+            .catch(err => {
+                console.error("Search failed:", err);
+                setError("Failed to connect to the database. Please try again.");
+                setResults([]);
+            })
             .finally(() => setLoading(false));
     }, [query, genre, status]);
 
@@ -153,6 +162,28 @@ function MovieSearchContent() {
                         <Search className="absolute inset-0 m-auto w-6 h-6 text-blue-400 z-10" />
                     </div>
                     <p className="text-sm font-medium tracking-widest uppercase text-blue-400/80 animate-pulse">Searching Database</p>
+                </motion.div>
+            ) : error ? (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col flex-1 items-center justify-center text-center py-20"
+                >
+                    <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20">
+                        <X className="w-8 h-8 text-red-500" />
+                    </div>
+                    <p className="text-xl font-bold mb-2 text-white">
+                        Something went wrong
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)] max-w-xs mb-6">
+                        {error}
+                    </p>
+                    <button 
+                        onClick={performSearch}
+                        className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors"
+                    >
+                        Try Again
+                    </button>
                 </motion.div>
             ) : results.length > 0 ? (
                 <motion.div

@@ -4,10 +4,11 @@ import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { MobileUIProvider } from "@/context/MobileUIContext";
-import ProfileGate from "@/components/ProfileGate";
+import ProfileGate from "@/components/ProfileGate"; // Deprecated
 import LayoutContent from "@/components/LayoutContent";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { WatchProvider } from "@/context/WatchContext";
+import GlobalErrorListener from "@/components/GlobalErrorListener";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
@@ -34,10 +35,10 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://toonplayer.in'),
   title: {
-    default: "ToonPlayer - Watch Movies & Anime Online in HD",
+    default: "ToonPlayer - Watch Free Anime & Movies",
     template: "%s | ToonPlayer",
   },
-  description: "ToonPlayer is a premium platform to watch movies, anime, and TV shows online in HD. Explore trending content with a fast and smooth experience.",
+  description: "Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.",
   keywords: [
     "toonplayer",
     "toon player",
@@ -60,8 +61,8 @@ export const metadata: Metadata = {
     "anime watch free",
   ],
   openGraph: {
-    title: "ToonPlayer - Watch Movies & Anime Online in HD",
-    description: "ToonPlayer is a premium platform to watch movies, anime, and TV shows online in HD. Explore trending content with a fast and smooth experience.",
+    title: "ToonPlayer - Watch Free Anime & Movies",
+    description: "Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.",
     url: 'https://toonplayer.in',
     siteName: 'ToonPlayer',
     images: [{ url: '/icon.png', width: 512, height: 512, alt: 'ToonPlayer (Toon Player) - Watch Movies & Anime Online in HD' }],
@@ -70,8 +71,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ToonPlayer - Watch Movies & Anime Online in HD',
-    description: 'ToonPlayer is a premium platform to watch movies, anime, and TV shows online in HD. Explore trending content with a fast and smooth experience.',
+    title: 'ToonPlayer - Watch Free Anime & Movies',
+    description: 'Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.',
     images: ['/icon.png'],
     creator: '@toonplayer',
   },
@@ -174,7 +175,9 @@ export default function RootLayout({
           <MobileUIProvider>
             <NotificationProvider>
               <WatchProvider>
-                <ProfileGate />
+                <GlobalErrorListener />
+
+
 
                 <LayoutContent>
                   {children}

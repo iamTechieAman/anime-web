@@ -16,24 +16,12 @@ export async function POST(req: Request) {
     const item = await req.json();
     await connectToDatabase();
     
-    // Add to history (remove old instance if exists, unshift new one, cap at 50)
-    await User.updateOne(
-      { _id: payload.userId },
-      { $pull: { history: { id: item.id } } }
-    );
-    
-    await User.updateOne(
-      { _id: payload.userId },
-      { 
-        $push: { 
-          history: { 
-            $each: [{ ...item, updatedAt: Date.now() }], 
-            $position: 0, 
-            $slice: 50 
-          } 
-        } 
-      }
-    );
+    // Add to watchlist if not exists
+    const user = await User.findById(payload.userId);
+    if (user && !user.watchlist.some((w: any) => w.id === item.id)) {
+      user.watchlist.unshift({ ...item, addedAt: Date.now() });
+      await user.save();
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -54,12 +42,7 @@ export async function DELETE(req: Request) {
     const id = searchParams.get('id');
 
     await connectToDatabase();
-    
-    if (id === 'all') {
-      await User.updateOne({ _id: payload.userId }, { $set: { history: [] } });
-    } else {
-      await User.updateOne({ _id: payload.userId }, { $pull: { history: { id } } });
-    }
+    await User.updateOne({ _id: payload.userId }, { $pull: { watchlist: { id } } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

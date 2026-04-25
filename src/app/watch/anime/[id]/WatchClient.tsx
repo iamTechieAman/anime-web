@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, use, useRef } from "react";
+import { useState, useEffect, use, useRef, useCallback } from "react";
+import React from "react";
+import Script from "next/script";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -146,7 +148,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     // Server State
     const [servers, setServers] = useState<any[]>([]);
     const [selectedServer, setSelectedServer] = useState<string | null>(null);
+    const [audioUnlocked, setAudioUnlocked] = useState(false);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
     const [loadingServers, setLoadingServers] = useState(false);
+
+    // Cast & Auto-Next state
+    const [rawVideoSource, setRawVideoSource] = useState<string | null>(null);
+    const [castAvailable, setCastAvailable] = useState(false);
 
     // Show loading and error states
     const [showError, setShowError] = useState<string | null>(null);
@@ -200,6 +208,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         };
     }, [id, autoNext, currentEp, mode, show]);
 
+    // Override window.open globally to prevent popups bubbling from iframes
+    useEffect(() => {
+        const originalWindowOpen = window.open;
+        window.open = function() {
+            console.warn('[WatchClient] Blocked malicious popup attempt from iframe.');
+            return null;
+        };
+        return () => {
+            window.open = originalWindowOpen;
+        };
+    }, []);
+
     // Sync URL with state
     useEffect(() => {
         if (!show) return;
@@ -217,12 +237,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     const isBookmarked = isInWatchlist(fullId);
 
+    // Auto-dispatch postMessage if audio was already unlocked in a previous session/server
+    useEffect(() => {
+        if (!loadingSource && audioUnlocked && iframeRef.current) {
+            iframeRef.current.contentWindow?.postMessage({ type: 'PLAY_WITH_SOUND' }, '*');
+        }
+    }, [loadingSource, audioUnlocked]);
+
     const toggleBookmark = () => {
         if (!show) return;
 
         if (isBookmarked) {
             removeFromWatchlist(fullId);
-            toast.success('Removed from Watchlist');
+            toast("Removed from Watchlist", { icon: "🗑️" });
         } else {
             addToWatchlist({
                 id: fullId,
@@ -231,11 +258,82 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 title: show.name || 'Unknown',
                 poster: show.thumbnail || ((show as any).image) || '/placeholder.jpg',
             });
-            toast.success('Added to Watchlist');
+            toast.success("Added to Watchlist", { icon: "⭐" });
         }
     };
 
-    // Auto-play and Auto-next logic removed (now permanent)
+    // Keep handleVideoEnded fresh for message event
+    const handleVideoEndedRef = useRef<Function | null>(null);
+    useEffect(() => {
+        handleVideoEndedRef.current = handleVideoEnded;
+    });
+
+    // Listen for events from proxy iframe
+    useEffect(() => {
+        const handleMessage = (e: MessageEvent) => {
+            if (e.data?.type === 'VIDEO_ENDED') {
+                if (handleVideoEndedRef.current) handleVideoEndedRef.current();
+            } else if (e.data?.type === 'VIDEO_SOURCE_FOUND' && e.data.source) {
+                setRawVideoSource(e.data.source);
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
+
+    // Cast initialization
+    useEffect(() => {
+        (window as any).__onGCastApiAvailable = function (isAvailable: boolean) {
+            if (isAvailable) {
+                try {
+                    const castContext = (window as any).cast.framework.CastContext.getInstance();
+                    castContext.setOptions({
+                        receiverApplicationId: (window as any).chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                        autoJoinPolicy: (window as any).chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+                    });
+                    setCastAvailable(true);
+                } catch (e) {
+                    console.error("Cast initialization failed", e);
+                }
+            }
+        };
+    }, []);
+
+    // Cast session listener
+    useEffect(() => {
+        if (!castAvailable) return;
+        const castContext = (window as any).cast.framework.CastContext.getInstance();
+        
+        const handleSessionStateChanged = (event: any) => {
+            if (event.sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
+                const sourceToCast = videoType === "iframe" ? rawVideoSource : sourceUrl;
+                if (!sourceToCast) {
+                    toast.error("This stream cannot be casted. Try a different server.");
+                    return;
+                }
+                const castSession = castContext.getCurrentSession();
+                const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(sourceToCast, sourceToCast.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4');
+                const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
+                
+                castSession.loadMedia(request).then(
+                    () => toast.success("Casting started!"),
+                    (e: any) => toast.error("Casting failed.")
+                );
+            }
+        };
+
+        castContext.addEventListener(
+            (window as any).cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+            handleSessionStateChanged
+        );
+
+        return () => {
+            castContext.removeEventListener(
+                (window as any).cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+                handleSessionStateChanged
+            );
+        };
+    }, [castAvailable, rawVideoSource, sourceUrl, videoType]);
 
     const handleShare = async () => {
         try {
@@ -555,8 +653,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         ? selected.link
                         : `${window.location.origin}${selected.link}`;
 
-                    setSourceUrl(absoluteUrl);
-                    setVideoType(selected.isIframe ? "iframe" : selected.hls ? "m3u8" : "auto");
+                    const proxiedUrl = `/api/proxy/video?url=${encodeURIComponent(absoluteUrl)}`;
+                    setSourceUrl(proxiedUrl);
+                    setVideoType("iframe");
                     setCheckingStatus(null);
                     // toast.success(`Episode ${currentEp} loaded successfully`); // Remove annoying toasts for fast switches
 
@@ -652,7 +751,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     {/* Fallback Player */}
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe
-                            src={fallbackEmbedUrl}
+                            src={`/api/proxy/video?url=${encodeURIComponent(fallbackEmbedUrl)}`}
+                            sandbox="allow-scripts allow-presentation"
                             className="absolute inset-0 w-full h-full border-0"
                             allowFullScreen
                             allow="autoplay; encrypted-media; picture-in-picture"
@@ -705,6 +805,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const episodes = show.availableEpisodesDetail?.[mode] || [];
 
     return (
+        <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-purple-500/30 transition-colors duration-300">
             {/* No JavaScript Fallback */}
             <noscript>
@@ -825,20 +926,52 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         >
                                             <RefreshCw className="w-3.5 h-3.5" /> Retry All
                                         </button>
+                                        
+                                        {castAvailable && (
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-blue-500/50">
+                                                {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : sourceUrl ? (
                                 <div className="relative w-full h-full">
                                     {videoType === "iframe" ? (
-                                        <iframe
-                                            src={sourceUrl}
-                                            className="w-full h-full border-0 bg-black"
-                                            allowFullScreen
-                                            allow="autoplay; fullscreen"
-                                            sandbox={isAdBlockEnabled ? "allow-scripts allow-same-origin allow-presentation" : undefined}
-                                            onLoad={() => setLoadingSource(false)}
-                                            onError={() => autoSwitchServer(selectedServer!)}
-                                        ></iframe>
+                                        <>
+                                            <iframe
+                                                ref={iframeRef}
+                                                src={sourceUrl}
+                                                className="w-full h-full border-0 bg-black"
+                                                allowFullScreen
+                                                sandbox="allow-scripts allow-presentation"
+                                                allow="autoplay; fullscreen"
+                                                onLoad={() => setLoadingSource(false)}
+                                                onError={() => autoSwitchServer(selectedServer!)}
+                                            ></iframe>
+                                            
+                                            {/* Global Audio Unlocker Overlay */}
+                                            <AnimatePresence>
+                                                {!audioUnlocked && !loadingSource && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0 }}
+                                                        animate={{ opacity: 1 }}
+                                                        exit={{ opacity: 0 }}
+                                                        onClick={() => {
+                                                            setAudioUnlocked(true);
+                                                            if (iframeRef.current) {
+                                                                iframeRef.current.contentWindow?.postMessage({ type: 'PLAY_WITH_SOUND' }, '*');
+                                                            }
+                                                        }}
+                                                        className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
+                                                    >
+                                                        <div className="bg-blue-600/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform">
+                                                            <Play className="w-5 h-5 fill-current" />
+                                                            Tap anywhere to enable audio
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </>
                                     ) : (
                                         <ArtPlayer
                                             key={`${id}-${currentEp}`}
@@ -1274,5 +1407,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 </div>
             </div>
         </main>
+        <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
+        </>
     );
 }

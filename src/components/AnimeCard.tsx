@@ -161,22 +161,16 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
 });
 
 // Anime Grid Component
-export function AnimeGrid({ shows, prefix = "anime" }: { shows: Show[], prefix?: string }) {
-    if (!shows || shows.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-[var(--text-muted)] mb-2">No anime found.</p>
-            </div>
-        )
-    }
+export const AnimeGrid = memo(function AnimeGrid({ shows }: { shows: Show[] }) {
+    const validShows = shows.filter(show => show && (show.image || show.thumbnail));
     return (
         <div className="responsive-grid">
-            {shows.map((show, idx) => (
-                <AnimeCard key={`${prefix}-${show._id}-${idx}`} show={show} />
+            {validShows.map((show, i) => (
+                <AnimeCard key={`${show._id}-${i}`} show={show} />
             ))}
         </div>
     );
-}
+});
 
 // Horizontal Anime Card for Sidebars
 export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number }) {
@@ -219,7 +213,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
                         onError={() => setImageError(true)}
                         loading="lazy"
                         decoding="async"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                 ) : (
                     <div className="absolute inset-0 bg-white/5 flex items-center justify-center">

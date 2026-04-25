@@ -87,11 +87,11 @@ export default function MoviesPage() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Update state from SWR data
     useEffect(() => {
         if (movieTrending?.results) {
             const rawTrending = movieTrending.results || [];
-            const enhancedTrending = rawTrending.map((item: MovieItem, index: number) => ({
+            const validTrending = rawTrending.filter((item: MovieItem) => item && (item.poster_path || item.backdrop_path));
+            const enhancedTrending = validTrending.map((item: MovieItem, index: number) => ({
                 ...item,
                 rank: index < 10 ? index + 1 : undefined,
                 isMostViewed: index < 3,
@@ -101,9 +101,9 @@ export default function MoviesPage() {
         }
     }, [movieTrending]);
 
-    useEffect(() => { if (moviePopular?.results) setPopular(moviePopular.results); }, [moviePopular]);
-    useEffect(() => { if (movieUpcoming?.results) setNowPlaying(movieUpcoming.results); }, [movieUpcoming]);
-    useEffect(() => { if (moviePeople?.results) setTrendingPeople(moviePeople.results.slice(0, 6)); }, [moviePeople]);
+    useEffect(() => { if (moviePopular?.results) setPopular(moviePopular.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [moviePopular]);
+    useEffect(() => { if (movieUpcoming?.results) setNowPlaying(movieUpcoming.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [movieUpcoming]);
+    useEffect(() => { if (moviePeople?.results) setTrendingPeople(moviePeople.results.filter((i: any) => i && i.profile_path).slice(0, 6)); }, [moviePeople]);
 
     // Fetch main data sequentially (remaining axios calls)
     useEffect(() => {
@@ -116,9 +116,9 @@ export default function MoviesPage() {
                     axios.get("/api/prime/tv?category=top_rated"),
                 ]);
 
-                setTopRated(topRatedRes.data.results || []);
-                setTvPopular(tvPopRes.data.results || []);
-                setTvTopRated(tvTopRes.data.results || []);
+                setTopRated((topRatedRes.data.results || []).filter((i: any) => i && (i.poster_path || i.backdrop_path)));
+                setTvPopular((tvPopRes.data.results || []).filter((i: any) => i && (i.poster_path || i.backdrop_path)));
+                setTvTopRated((tvTopRes.data.results || []).filter((i: any) => i && (i.poster_path || i.backdrop_path)));
             } catch (err) {
                 console.error("Failed to fetch main data:", err);
             }
@@ -133,7 +133,7 @@ export default function MoviesPage() {
                 GENRE_ROWS.forEach((genre, i) => {
                     const res = results[i];
                     if (res.status === "fulfilled" && res.value.data.results?.length > 0) {
-                        newGenreData[genre.title] = res.value.data.results;
+                        newGenreData[genre.title] = res.value.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path));
                     }
                 });
                 setGenreData(newGenreData);
@@ -166,8 +166,8 @@ export default function MoviesPage() {
                 // Add random delay to mimic human behavior
                 await new Promise(resolve => setTimeout(resolve, Math.random() * (2500 - 1200) + 1200));
                 const animeRes = await axios.get("/api/anime/home");
-                if (animeRes.data.latest) setAnimeLatest(animeRes.data.latest);
-                if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending);
+                if (animeRes.data.latest) setAnimeLatest(animeRes.data.latest.filter((i: any) => i && i.image));
+                if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
             } catch (err) {
                 console.error("Failed to fetch anime home:", err);
             }
@@ -216,7 +216,7 @@ export default function MoviesPage() {
             </div>
 
             <div className="relative z-10 w-full pb-24 md:pb-0">
-                <h1 className="sr-only">ToonPlayer (Toon Player) - Watch Free Movies, Anime & TV Shows Online</h1>
+                <h1 className="sr-only">ToonPlayer - Watch Free Anime & Movies</h1>
                 <HeroCarousel />
 
                 {/* Genres & Categories Sub-Nav */}

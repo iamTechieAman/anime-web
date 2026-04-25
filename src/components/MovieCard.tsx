@@ -79,7 +79,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie" }: { ite
                             alt={`${title} (${year}) - Stream HD on ToonPlayer`}
                             width={180}
                             height={270}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="w-full h-full object-cover aspect-[2/3] transition-transform duration-500 group-hover:scale-105"
                             onError={() => setImgError(true)}
                             loading="lazy"
                             decoding="async"
@@ -179,9 +179,10 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie" }: { ite
 
 // === MOVIE GRID ===
 export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
+    const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path));
     return (
         <div className="responsive-grid">
-            {items.map((item, idx) => (
+            {validItems.map((item, idx) => (
                 <MovieCard key={`${item.id}-${idx}`} item={item} type={item.media_type || type} />
             ))}
         </div>
@@ -223,7 +224,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title }:
                 id={scrollId}
                 className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar scroll-smooth-x"
             >
-                {items.map((item, idx) => (
+                {items.filter(item => item && (item.poster_path || item.backdrop_path)).map((item, idx) => (
                     <div key={`${item.id}-${idx}`} className="flex-shrink-0 w-[28vw] sm:w-[155px] md:w-[170px] lg:w-[180px] max-w-[180px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>

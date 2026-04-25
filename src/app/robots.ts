@@ -13,6 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       }))
     ],
-    sitemap: 'https://www.toonplayer.in/sitemap.xml',
+    sitemap: 'https://toonplayer.in/sitemap.xml',
   }
 }

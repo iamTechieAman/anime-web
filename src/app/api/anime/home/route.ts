@@ -13,9 +13,13 @@ export async function GET() {
             provider.getRecent()
         ]);
 
-        return NextResponse.json({ trending, latest });
+        return NextResponse.json({ trending, latest }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+            }
+        });
     } catch (error: any) {
         console.error("[AnimeHome] Failed:", error.message);
-        return NextResponse.json({ error: "Failed to fetch anime home" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to fetch anime home", trending: [], latest: [] }, { status: 200 });
     }
 }

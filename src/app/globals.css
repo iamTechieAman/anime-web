@@ -593,6 +593,8 @@ p, h1, h2, h3, h4, h5, h6, span, .selectable {
 .responsive-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-auto-rows: minmax(min-content, max-content);
+  align-items: start;
   gap: 1.25rem;
   width: 100%;
 }

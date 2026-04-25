@@ -85,6 +85,38 @@ export default function Footer() {
                     </div>
                 </div>
 
+                {/* Support / Link to Us Section */}
+                <div className="mt-10 p-5 bg-white/5 border border-white/10 rounded-xl max-w-3xl">
+                    <h3 className="text-white font-bold text-sm uppercase tracking-widest mb-2">Support Us (Link to ToonPlayer)</h3>
+                    <p className="text-[var(--text-muted)] text-xs mb-3">
+                        Love our ad-free platform? Help us grow and climb the search rankings by adding this link to your blog, website, or forum!
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center gap-2">
+                        <input 
+                            type="text" 
+                            readOnly 
+                            value='<a href="https://toonplayer.in" title="Watch Free Anime & Movies">Watch on ToonPlayer</a>' 
+                            className="flex-1 w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-[11px] font-mono text-purple-300 outline-none focus:border-purple-500 transition-colors"
+                        />
+                        <button 
+                            onClick={(e) => {
+                                navigator.clipboard.writeText('<a href="https://toonplayer.in" title="Watch Free Anime & Movies">Watch on ToonPlayer</a>');
+                                const btn = e.currentTarget;
+                                const originalText = btn.innerText;
+                                btn.innerText = 'Copied!';
+                                btn.classList.replace('bg-purple-600', 'bg-green-600');
+                                setTimeout(() => {
+                                    btn.innerText = originalText;
+                                    btn.classList.replace('bg-green-600', 'bg-purple-600');
+                                }, 2000);
+                            }}
+                            className="w-full sm:w-auto px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold rounded transition-colors whitespace-nowrap"
+                        >
+                            Copy HTML
+                        </button>
+                    </div>
+                </div>
+
                 <div className="mt-12 pt-8 border-t border-[var(--border-color)] flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-[var(--text-muted)] text-[10px] font-medium tracking-wider uppercase">
                         © {currentYear} ToonPlayer.in • Built for HD Streaming Excellence

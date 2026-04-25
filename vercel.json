@@ -1,3 +1,28 @@
 {
-    "installCommand": "npm install --legacy-peer-deps"
+    "installCommand": "npm install --legacy-peer-deps",
+    "functions": {
+        "src/app/api/**/*": {
+            "maxDuration": 10
+        }
+    },
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "index, follow"
+                }
+            ]
+        },
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+                }
+            ]
+        }
+    ]
 }

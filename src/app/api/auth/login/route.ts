@@ -4,15 +4,13 @@ import { comparePassword } from '@/lib/hashing';
 import { signToken } from '@/lib/auth';
 import { logSecurityEvent, isRateLimited } from '@/lib/security';
 import { sanitizeObject } from '@/lib/sanitizer';
-import fs from 'fs';
-import path from 'path';
+import connectToDatabase from '@/lib/db';
+import { User } from '@/models/User';
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
-
-const DB_PATH = path.join(process.cwd(), 'users.json');
 
 export async function POST(req: Request) {
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
@@ -27,30 +25,25 @@ export async function POST(req: Request) {
     body = sanitizeObject(body); // SANITIZE INPUT
     const validated = loginSchema.parse(body);
 
-    // Load users
-    let users = [];
-    if (fs.existsSync(DB_PATH)) {
-      users = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    }
+    await connectToDatabase();
+    const user = await User.findOne({ email: validated.email });
 
-    const user = users.find((u: any) => u.email === validated.email);
-
-    if (!user || !(await comparePassword(validated.password, user.password))) {
+    if (!user || !(await comparePassword(validated.password, user.password || ''))) {
       logSecurityEvent({ event: 'auth_failure', ip, details: `Invalid login for ${validated.email}` });
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     // AUTH SUCCESS - Generate JWT
     const token = await signToken({
-      userId: user.id,
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
     });
 
-    logSecurityEvent({ event: 'auth_success', ip, userId: user.id, details: 'Login successful' });
+    logSecurityEvent({ event: 'auth_success', ip, userId: user._id.toString(), details: 'Login successful' });
 
     const response = NextResponse.json({ 
-      user: { id: user.id, name: user.name, email: user.email } 
+      user: { id: user._id.toString(), name: user.name, email: user.email } 
     });
 
     // SET SECURE COOKIE

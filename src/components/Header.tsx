@@ -25,6 +25,7 @@ export default function Header() {
   const pathname = usePathname();
   
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDiscoverMode, setIsDiscoverMode] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -182,6 +183,14 @@ export default function Header() {
     
     if (q.trim()) saveRecentSearch(q);
 
+    // AI Discover routing
+    if (isDiscoverMode && q.trim()) {
+      setShowSuggestions(false);
+      setShowFilters(false);
+      router.push(`/discover?prompt=${encodeURIComponent(q.trim())}`);
+      return;
+    }
+
     const params = new URLSearchParams();
     if (q.trim()) params.set("query", q);
     if (filterGenre) params.set("genre", filterGenre);
@@ -299,28 +308,39 @@ export default function Header() {
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
-              className="relative flex items-center bg-[var(--bg-card)]/50 backdrop-blur-sm border border-[var(--border-color)] rounded-2xl px-4 py-3 group hover:border-white/20 focus-within:border-purple-500/50 focus-within:ring-0 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300"
+              className={`relative flex items-center backdrop-blur-sm border rounded-2xl px-4 py-3 group focus-within:ring-0 transition-all duration-300 ${isDiscoverMode ? 'bg-purple-900/20 border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.2)]' : 'bg-[var(--bg-card)]/50 border-[var(--border-color)] hover:border-white/20 focus-within:border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.1)]'}`}
             >
-              <Search className="w-[18px] h-[18px] text-[var(--text-muted)] group-focus-within:text-purple-400 shrink-0 transition-colors" />
+              <Search className={`w-[18px] h-[18px] shrink-0 transition-colors ${isDiscoverMode ? 'text-purple-400' : 'text-[var(--text-muted)] group-focus-within:text-purple-400'}`} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setActiveIndex(-1);
-                  if (e.target.value.length >= 2) setShowSuggestions(true);
+                  if (e.target.value.length >= 2 && !isDiscoverMode) setShowSuggestions(true);
                 }}
-                onFocus={() => setShowSuggestions(true)}
+                onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
                 onKeyDown={handleKeyDown}
-                placeholder="Find movies, shows & more..."
+                placeholder={isDiscoverMode ? "Describe what you want to watch..." : "Find movies, shows & more..."}
                 className="w-full bg-transparent border-0 ring-0 focus:ring-0 outline-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
                 autoComplete="off"
               />
               {searchQuery && (
-                <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1.5 hover:bg-white/5 rounded-full transition-colors">
+                <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1.5 hover:bg-white/5 rounded-full transition-colors mr-2">
                   <X className="w-4 h-4 text-[var(--text-muted)]" />
                 </button>
               )}
+              
+              {/* AI Discover Toggle */}
+              <button 
+                type="button"
+                onClick={() => setIsDiscoverMode(!isDiscoverMode)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30' : 'bg-white/5 text-[var(--text-muted)] hover:bg-white/10 hover:text-white'}`}
+                title="AI Discovery Search"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">AI</span>
+              </button>
             </form>
 
             {/* Suggestions Dropdown */}
@@ -719,28 +739,18 @@ export default function Header() {
                         <p className="text-[10px] text-[var(--text-muted)]">Saved shows & movies</p>
                       </div>
                     </Link>
-                    <button 
-                      onClick={() => { 
-                        setShowProfileSettings(true); 
-                        setShowProfileDropdown(false);
-                      }}
+                    <Link 
+                      href="/profile"
                       className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group"
                     >
                       <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
                         <User className="w-4 h-4 text-blue-400" />
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-bold text-white">Profile Settings</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Customize your experience</p>
+                        <p className="text-sm font-bold text-white">My Profile</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">Settings & Notifications</p>
                       </div>
-                    </button>
-                    <div className="my-2 border-t border-[var(--border-color)] mx-2" />
-                    <button onClick={() => { localStorage.removeItem("toonplayer_profile"); window.location.href = "/"; }} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl transition-colors group text-red-400">
-                      <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-                        <LogOut className="w-4 h-4" />
-                      </div>
-                      <span className="text-sm font-bold">Switch Profile</span>
-                    </button>
+                    </Link>
                   </div>
                 </motion.div>
               )}
