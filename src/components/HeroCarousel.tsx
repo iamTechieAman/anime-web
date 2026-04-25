@@ -116,7 +116,20 @@ export default function HeroCarousel() {
     };
 
     if (isLoading) return <HeroSkeleton />;
-    if (slides.length === 0) return null;
+    if (slides.length === 0) return (
+        <div className="relative w-full h-[35vh] md:h-[45vh] overflow-hidden bg-gradient-to-br from-[#0a0a1a] via-[#111133] to-[#0a0a1a]">
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center px-6">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                        <Play className="w-7 h-7 text-white/30" />
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-black text-white/60 font-sora">Trending Now</h2>
+                    <p className="text-sm text-white/30 mt-1">Loading the latest hits...</p>
+                </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
+        </div>
+    );
 
     const activeSlide = slides[current];
 

@@ -291,9 +291,7 @@ export default function MoviesPage() {
                         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                             {/* Main Feed */}
                             <div className="flex-1 min-w-0">
-                                <div className="mb-12">
-                                    <ContinueWatchingRow />
-                                </div>
+                                <ContinueWatchingRow />
                                 
                                 {activeTab === "movies" && (
                                     <div className="space-y-12">
