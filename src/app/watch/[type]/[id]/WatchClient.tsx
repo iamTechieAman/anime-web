@@ -398,7 +398,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const autoCheckServers = useCallback(async () => {
         if (isAutoChecking) return;
         setIsAutoChecking(true);
-        const serversToCheck = SERVERS.slice(0, 8); // Check top 8 servers
+        const serversToCheck = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList;
         const results: { name: string; ok: boolean }[] = [];
         setAutoCheckProgress({ current: 0, total: serversToCheck.length, serverName: '', results: [] });
 
@@ -431,7 +431,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         }
         // If none worked, stay on first server
         setIsAutoChecking(false);
-    }, [type, id, selectedSeason, selectedEpisode, tmdbIdForAnime, isAutoChecking]);
+    }, [type, id, selectedSeason, selectedEpisode, tmdbIdForAnime, isAutoChecking, serversList]);
 
 
     // Scroll-to-top visibility
@@ -539,8 +539,8 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         // Load initially
         loadSettings();
         
-        // Auto-start server selection if not yet set
-        if (!activeServer && !isAutoChecking) {
+        // Auto-start server selection on mount
+        if (!isAutoChecking) {
             autoCheckServers();
         }
 
