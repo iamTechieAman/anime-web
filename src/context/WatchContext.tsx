@@ -79,7 +79,7 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('toonplayer_watchlist', JSON.stringify(watchlist));
     }, [watchlist, isLoaded, isLoggedIn]);
 
-    const addToHistory = async (item: Omit<WatchHistoryItem, 'updatedAt'>) => {
+    const addToHistory = React.useCallback(async (item: Omit<WatchHistoryItem, 'updatedAt'>) => {
         const fullItem = { ...item, updatedAt: Date.now() };
         setHistory(prev => {
             const filtered = prev.filter(i => i.id !== item.id);
@@ -93,25 +93,27 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
                 body: JSON.stringify(fullItem)
             }).catch(console.error);
         }
-    };
+    }, [isLoggedIn]);
 
-    const removeFromHistory = async (id: string) => {
+    const removeFromHistory = React.useCallback(async (id: string) => {
         setHistory(prev => prev.filter(i => i.id !== id));
         if (isLoggedIn) {
             fetch(`/api/user/history?id=${id}`, { method: 'DELETE' }).catch(console.error);
         }
-    };
+    }, [isLoggedIn]);
 
-    const getHistoryItem = (id: string) => history.find(i => i.id === id);
+    const getHistoryItem = React.useCallback((id: string) => history.find(i => i.id === id), [history]);
 
-    const clearHistory = async () => {
+    const clearHistory = React.useCallback(async () => {
         setHistory([]);
         if (isLoggedIn) {
             fetch(`/api/user/history?id=all`, { method: 'DELETE' }).catch(console.error);
         }
-    };
+    }, [isLoggedIn]);
 
-    const addToWatchlist = async (item: Omit<WatchlistItem, 'addedAt'>) => {
+    const isInWatchlist = React.useCallback((id: string) => watchlist.some(i => i.id === id), [watchlist]);
+
+    const addToWatchlist = React.useCallback(async (item: Omit<WatchlistItem, 'addedAt'>) => {
         if (isInWatchlist(item.id)) return;
         const fullItem = { ...item, addedAt: Date.now() };
         
@@ -124,16 +126,14 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
                 body: JSON.stringify(fullItem)
             }).catch(console.error);
         }
-    };
+    }, [isInWatchlist, isLoggedIn]);
 
-    const removeFromWatchlist = async (id: string) => {
+    const removeFromWatchlist = React.useCallback(async (id: string) => {
         setWatchlist(prev => prev.filter(i => i.id !== id));
         if (isLoggedIn) {
             fetch(`/api/user/favorites?id=${id}`, { method: 'DELETE' }).catch(console.error);
         }
-    };
-
-    const isInWatchlist = (id: string) => watchlist.some(i => i.id === id);
+    }, [isLoggedIn]);
 
     return (
         <WatchContext.Provider value={{

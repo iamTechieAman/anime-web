@@ -1,0 +1,561 @@
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/about/page.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 20,
+      "column": 25,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 20,
+      "endColumn": 111
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/history/page.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/purity",
+      "severity": 2,
+      "message": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).\n\n/Users/amankumar/Desktop/anime-web/src/app/history/page.tsx:41:19\n  39 |\n  40 |   const relativeTime = (ts: number) => {\n> 41 |     const diff = (Date.now() - ts) / 1000;\n     |                   ^^^^^^^^^^ Cannot call impure function\n  42 |     if (diff < 60) return \"Just now\";\n  43 |     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;\n  44 |     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;",
+      "line": 41,
+      "column": 19,
+      "nodeType": null,
+      "endLine": 41,
+      "endColumn": 29
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 148,
+      "column": 27,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 148,
+      "endColumn": 110
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/page.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 271,
+      "column": 49,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 271,
+      "endColumn": 129
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 401,
+      "column": 57,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 401,
+      "endColumn": 226
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/profile/page.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 104,
+      "column": 29,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 104,
+      "endColumn": 172
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/search/page.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/app/search/page.tsx:65:9\n  63 |\n  64 |     useEffect(() => {\n> 65 |         performSearch();\n     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  66 |     }, [performSearch]);\n  67 |\n  68 |     const title = query ",
+      "line": 65,
+      "column": 9,
+      "nodeType": null,
+      "endLine": 65,
+      "endColumn": 22
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/watch/[type]/[id]/WatchClient.tsx",
+  "messages": [
+    {
+      "ruleId": "@typescript-eslint/no-unsafe-function-type",
+      "severity": 2,
+      "message": "The `Function` type accepts any function-like value.\nPrefer explicitly defining any function parameters and return type.",
+      "line": 277,
+      "column": 40,
+      "nodeType": "Identifier",
+      "messageId": "bannedFunctionType",
+      "endLine": 277,
+      "endColumn": 48
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 1342,
+      "column": 37,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 1347,
+      "endColumn": 39
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 1555,
+      "column": 57,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 1560,
+      "endColumn": 59
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 1603,
+      "column": 57,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 1608,
+      "endColumn": 59
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 1666,
+      "column": 49,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 1670,
+      "endColumn": 51
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/watch/anime/[id]/WatchClient.tsx",
+  "messages": [
+    {
+      "ruleId": "@typescript-eslint/no-unsafe-function-type",
+      "severity": 2,
+      "message": "The `Function` type accepts any function-like value.\nPrefer explicitly defining any function parameters and return type.",
+      "line": 266,
+      "column": 40,
+      "nodeType": "Identifier",
+      "messageId": "bannedFunctionType",
+      "endLine": 266,
+      "endColumn": 48
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/app/watchlist/page.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/app/watchlist/page.tsx:15:5\n  13 |\n  14 |   useEffect(() => {\n> 15 |     setIsMounted(true);\n     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  16 |   }, []);\n  17 |\n  18 |   const filtered = watchlist.filter((w) => {",
+      "line": 15,
+      "column": 5,
+      "nodeType": null,
+      "endLine": 15,
+      "endColumn": 17
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 106,
+      "column": 21,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 106,
+      "endColumn": 160
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/AnimeCard.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 98,
+      "column": 25,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 108,
+      "endColumn": 27
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 208,
+      "column": 21,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 217,
+      "endColumn": 23
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/ContinueWatchingRow.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 104,
+      "column": 37,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 110,
+      "endColumn": 39
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/DesktopSidebar.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 31,
+      "column": 21,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 35,
+      "endColumn": 23
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/Footer.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 17,
+      "column": 33,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 21,
+      "endColumn": 35
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/Header.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/Header.tsx:51:5\n  49 |\n  50 |   useEffect(() => {\n> 51 |     setIsMounted(true);\n     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  52 |     const saved = localStorage.getItem(\"toonplayer_recent_searches\");\n  53 |     if (saved) try { setRecentSearches(JSON.parse(saved)); } catch(e) {}\n  54 |     ",
+      "line": 51,
+      "column": 5,
+      "nodeType": null,
+      "endLine": 51,
+      "endColumn": 17
+    },
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/Header.tsx:88:5\n  86 |   useEffect(() => {\n  87 |     const q = searchParams?.get(\"query\") || \"\";\n> 88 |     setSearchQuery(q);\n     |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  89 |   }, [searchParams]);\n  90 |\n  91 |   useEffect(() => {",
+      "line": 88,
+      "column": 5,
+      "nodeType": null,
+      "endLine": 88,
+      "endColumn": 19
+    },
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/Header.tsx:118:7\n  116 |     \n  117 |     if (!cleanQuery) {\n> 118 |       setSuggestions([]);\n      |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  119 |       return;\n  120 |     }\n  121 |",
+      "line": 118,
+      "column": 7,
+      "nodeType": null,
+      "endLine": 118,
+      "endColumn": 21
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 288,
+      "column": 13,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 292,
+      "endColumn": 15
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 392,
+      "column": 48,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 392,
+      "endColumn": 161
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 413,
+      "column": 31,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 413,
+      "endColumn": 167
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 705,
+      "column": 19,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 705,
+      "endColumn": 164
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/MobileModals.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/MobileModals.tsx:31:9\n  29 |\n  30 |     useEffect(() => {\n> 31 |         setAutoPlay(localStorage.getItem('toonplayer_autoplay') === 'true');\n     |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  32 |         setAutoNext(localStorage.getItem('toonplayer_autonext') === 'true');\n  33 |     }, [isMenuOpen]);\n  34 |",
+      "line": 31,
+      "column": 9,
+      "nodeType": null,
+      "endLine": 31,
+      "endColumn": 20
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 146,
+      "column": 49,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 146,
+      "endColumn": 283
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/MobileNav.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/MobileNav.tsx:20:9\n  18 |\n  19 |     useEffect(() => {\n> 20 |         setIsMounted(true);\n     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  21 |     }, []);\n  22 |\n  23 |     // Auto-hide on scroll down, show on scroll up",
+      "line": 20,
+      "column": 9,
+      "nodeType": null,
+      "endLine": 20,
+      "endColumn": 21
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/MovieCard.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 75,
+      "column": 25,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 86,
+      "endColumn": 27
+    },
+    {
+      "ruleId": "react-hooks/purity",
+      "severity": 2,
+      "message": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).\n\n/Users/amankumar/Desktop/anime-web/src/components/MovieCard.tsx:194:59\n  192 | // === MOVIE ROW (Horizontal Scroll) ===\n  193 | export const MovieRow = memo(function MovieRow({ items, type = \"movie\", title }: { items: MovieItem[]; type?: string; title?: string }) {\n> 194 |     const scrollId = `row-${title?.replace(/\\s/g, \"-\") || Math.random()}`;\n      |                                                           ^^^^^^^^^^^^^ Cannot call impure function\n  195 |\n  196 |     const scroll = (direction: \"left\" | \"right\") => {\n  197 |         const container = document.getElementById(scrollId);",
+      "line": 194,
+      "column": 59,
+      "nodeType": null,
+      "endLine": 194,
+      "endColumn": 72
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/MovieHeroCarousel.tsx",
+  "messages": [
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 79,
+      "column": 25,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 85,
+      "endColumn": 27
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/ProfileGate.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/ProfileGate.tsx:20:5\n  18 |\n  19 |   useEffect(() => {\n> 20 |     setIsClient(true);\n     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  21 |     const existingActive = localStorage.getItem(\"toonplayer_profile\");\n  22 |     if (!existingActive) {\n  23 |       setShowGate(true);",
+      "line": 20,
+      "column": 5,
+      "nodeType": null,
+      "endLine": 20,
+      "endColumn": 16
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 102,
+      "column": 23,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 102,
+      "endColumn": 97
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 134,
+      "column": 25,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 138,
+      "endColumn": 27
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/ProfileSettings.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/ProfileSettings.tsx:75:21\n  73 |                 try {\n  74 |                     const parsed = JSON.parse(p);\n> 75 |                     setName(parsed.name || \"\");\n     |                     ^^^^^^^ Avoid calling setState() directly within an effect\n  76 |                     setSelectedAvatar(parsed.avatar || AVATARS[0]);\n  77 |                 } catch { setSelectedAvatar(AVATARS[0]); }\n  78 |             } else {",
+      "line": 75,
+      "column": 21,
+      "nodeType": null,
+      "endLine": 75,
+      "endColumn": 28
+    },
+    {
+      "ruleId": "@next/next/no-img-element",
+      "severity": 1,
+      "message": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element",
+      "line": 197,
+      "column": 61,
+      "nodeType": "JSXOpeningElement",
+      "endLine": 197,
+      "endColumn": 140
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/components/player/ArtPlayer.tsx",
+  "messages": [
+    {
+      "ruleId": "@typescript-eslint/ban-ts-comment",
+      "severity": 2,
+      "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+      "line": 6,
+      "column": 1,
+      "nodeType": "Line",
+      "messageId": "tsIgnoreInsteadOfExpectError",
+      "endLine": 6,
+      "endColumn": 14,
+      "suggestions": [
+        {
+          "messageId": "replaceTsIgnoreWithTsExpectError",
+          "fix": {
+            "range": [
+              142,
+              155
+            ],
+            "text": "// @ts-expect-error"
+          },
+          "desc": "Replace \"@ts-ignore\" with \"@ts-expect-error\"."
+        }
+      ]
+    },
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/components/player/ArtPlayer.tsx:58:13\n  56 |\n  57 |         if (playerTime >= 5 && playerTime <= skipIntroDuration) {\n> 58 |             setShowSkipButton(true);\n     |             ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  59 |         } else {\n  60 |             setShowSkipButton(false);\n  61 |         }",
+      "line": 58,
+      "column": 13,
+      "nodeType": null,
+      "endLine": 58,
+      "endColumn": 30
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/context/AdBlockContext.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/context/AdBlockContext.tsx:24:7\n  22 |     const saved = localStorage.getItem(\"toonplayer_adblock\");\n  23 |     if (saved !== null) {\n> 24 |       setIsAdBlockEnabled(saved === \"true\");\n     |       ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  25 |     }\n  26 |   }, []);\n  27 |",
+      "line": 24,
+      "column": 7,
+      "nodeType": null,
+      "endLine": 24,
+      "endColumn": 26
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/context/NotificationContext.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": 2,
+      "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\n/Users/amankumar/Desktop/anime-web/src/context/NotificationContext.tsx:145:13\n  143 |     const savedPrefs = localStorage.getItem('toonplayer_notif_prefs');\n  144 |     if (savedPrefs) {\n> 145 |       try { setPreferences({ ...DEFAULT_PREFS, ...JSON.parse(savedPrefs) }); } catch {}\n      |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  146 |     }\n  147 |\n  148 |     // Load notifications",
+      "line": 145,
+      "column": 13,
+      "nodeType": null,
+      "endLine": 145,
+      "endColumn": 27
+    }
+  ]
+}
+{
+  "filePath": "/Users/amankumar/Desktop/anime-web/src/context/WatchContext.tsx",
+  "messages": [
+    {
+      "ruleId": "react-hooks/purity",
+      "severity": 2,
+      "message": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).\n\n/Users/amankumar/Desktop/anime-web/src/context/WatchContext.tsx:116:46\n  114 |     const addToWatchlist = async (item: Omit<WatchlistItem, 'addedAt'>) => {\n  115 |         if (isInWatchlist(item.id)) return;\n> 116 |         const fullItem = { ...item, addedAt: Date.now() };\n      |                                              ^^^^^^^^^^ Cannot call impure function\n  117 |         \n  118 |         setWatchlist(prev => [fullItem, ...prev]);\n  119 |",
+      "line": 116,
+      "column": 46,
+      "nodeType": null,
+      "endLine": 116,
+      "endColumn": 56
+    }
+  ]
+}

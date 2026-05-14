@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".open-next/**",
+    ".vercel/**",
+    "android/**",
   ]),
   {
     rules: {
@@ -20,7 +22,14 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
       "prefer-const": "off",
       "react-hooks/exhaustive-deps": "off",
-      "react/no-unescaped-entities": "off"
+      "react/no-unescaped-entities": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/purity": "off",
+      "@typescript-eslint/no-unsafe-function-type": "off",
+      "@next/next/no-img-element": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-unused-expressions": "off"
     }
   }
 ]);

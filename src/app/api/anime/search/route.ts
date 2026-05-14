@@ -121,7 +121,7 @@ export async function GET(request: Request) {
             shows: uniqueShows.slice(0, 30), // Limit to top 30 unique results
             count: uniqueShows.length
         }, {
-            headers: { 'Cache-Control': 'no-store, max-age=0' }
+            headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400' }
         });
 
     } catch (error: any) {

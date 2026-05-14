@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { Play, Star, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import React from "react";
 
 // Shared movie item type
 export interface MovieItem {
@@ -191,7 +192,8 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
 
 // === MOVIE ROW (Horizontal Scroll) ===
 export const MovieRow = memo(function MovieRow({ items, type = "movie", title }: { items: MovieItem[]; type?: string; title?: string }) {
-    const scrollId = `row-${title?.replace(/\s/g, "-") || Math.random()}`;
+    const backupId = React.useId();
+    const scrollId = `row-${title?.replace(/\s/g, "-") || backupId}`;
 
     const scroll = (direction: "left" | "right") => {
         const container = document.getElementById(scrollId);

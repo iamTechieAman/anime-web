@@ -396,9 +396,10 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
     // Auto Server Check — probes top servers and picks the first working one
     const autoCheckServers = useCallback(async () => {
-        if (isAutoChecking) return;
+        if (isAutoChecking || serversList.length === 0) return;
         setIsAutoChecking(true);
-        const serversToCheck = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList;
+        // serversList already contains either movie/tv servers or anime servers from the API
+        const serversToCheck = serversList;
         const results: { name: string; ok: boolean }[] = [];
         setAutoCheckProgress({ current: 0, total: serversToCheck.length, serverName: '', results: [] });
 
@@ -417,8 +418,19 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     iframe.onerror = () => { clearTimeout(timer); resolve(false); try { document.body.removeChild(iframe); } catch {} };
                     document.body.appendChild(iframe);
                 });
+                
                 results.push({ name: server.name, ok });
                 setAutoCheckProgress(prev => ({ ...prev, results: [...results] }));
+                
+                // Report health to DB
+                if (server.id && typeof server.id === 'string' && server.id !== 'fallback') {
+                    fetch('/api/servers/report', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ serverId: server.id, success: ok })
+                    }).catch(console.error);
+                }
+
                 if (ok) {
                     setActiveServer(server);
                     setIsAutoChecking(false);
@@ -427,6 +439,14 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
             } catch {
                 results.push({ name: server.name, ok: false });
                 setAutoCheckProgress(prev => ({ ...prev, results: [...results] }));
+                
+                if (server.id && typeof server.id === 'string' && server.id !== 'fallback') {
+                    fetch('/api/servers/report', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ serverId: server.id, success: false })
+                    }).catch(console.error);
+                }
             }
         }
         // If none worked, stay on first server
@@ -498,10 +518,10 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         return () => window.removeEventListener("message", handleMessage);
     }, [activeServer, selectedSeason, selectedEpisode, type, details?.seasons, router]);
 
-    // Load App Settings Live
+    // Load App Settings & Fetch DB Servers
     useEffect(() => {
         let isFirstLoad = true;
-        const loadSettings = () => {
+        const loadServersAndSettings = async () => {
             try {
                 let parsed = { smartSwitch: true, multiAudio: true };
                 const s = localStorage.getItem("toonplayer_settings");
@@ -512,9 +532,34 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 if (parsed.smartSwitch !== undefined) setSmartSwitchEnabled(parsed.smartSwitch);
                 else setSmartSwitchEnabled(true);
                 
+                // Fetch dynamic servers from MongoDB
+                let fetchedServers = [];
+                try {
+                    const reqType = type === 'anime' ? 'anime' : 'movie';
+                    const res = await axios.get(`/api/servers?type=${reqType}`);
+                    if (res.data && res.data.servers && res.data.servers.length > 0) {
+                        fetchedServers = res.data.servers.map((srv: any) => ({
+                            id: srv.serverId,
+                            name: srv.name,
+                            badge: srv.badge,
+                            getUrl: (_type: string, _id: string, s?: number, e?: number) => {
+                                return srv.urlTemplate
+                                    .replace('{id}', _id)
+                                    .replace('{s}', String(s || 1))
+                                    .replace('{e}', String(e || 1));
+                            }
+                        }));
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch servers, using fallback', err);
+                }
+
+                // Use DB servers or fallback to hardcoded
+                const baseServers = fetchedServers.length > 0 ? fetchedServers : (type === 'anime' ? ANIME_SERVERS : SERVERS);
+
                 // Re-sort servers if MultiAudio prioritize is on
                 if (parsed.multiAudio === true || parsed.multiAudio === undefined) {
-                    const sortedServers = [...SERVERS].sort((a, b) => {
+                    const sortedServers = [...baseServers].sort((a, b) => {
                         if (a.id === "peachify") return -1;
                         if (b.id === "peachify") return 1;
                         if (a.id === "vidlink") return -1; // Vidlink is best fallback
@@ -527,31 +572,33 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         isFirstLoad = false;
                     }
                 } else {
-                    setServersList([...SERVERS]);
+                    setServersList([...baseServers]);
                     if (isFirstLoad) {
-                        setActiveServer(SERVERS[0]);
+                        setActiveServer(baseServers[0]);
                         isFirstLoad = false;
                     }
                 }
+                
+                // Once servers are loaded, trigger auto check
+                if (!isAutoChecking) {
+                    // Slight delay to ensure state is set
+                    setTimeout(() => autoCheckServers(), 100);
+                }
+
             } catch (e) {}
         };
 
         // Load initially
-        loadSettings();
-        
-        // Auto-start server selection on mount
-        if (!isAutoChecking) {
-            autoCheckServers();
-        }
+        loadServersAndSettings();
 
         // Listen for live updates from ProfileSettings modal
         const handleProfileUpdate = () => {
             isFirstLoad = false; // Never forcibly swap server on live toggles to prevent deep lag!
-            loadSettings();
+            loadServersAndSettings();
         };
         window.addEventListener("profileUpdated", handleProfileUpdate);
         return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
-    }, []);
+    }, [type, autoCheckServers, isAutoChecking]);
 
     // Reset states on server change
     useEffect(() => {

@@ -62,6 +62,8 @@ export async function GET(request: Request) {
             page: data.page || 1,
             total_pages: data.total_pages || 0,
             total_results: data.total_results || 0,
+        }, {
+            headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400' }
         });
     } catch (error: any) {
         console.error("Search API error:", error);
