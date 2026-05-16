@@ -408,93 +408,85 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
         try {
             // Reset progress
-            setAutoCheckProgress({ current: 0, total, serverName: 'Initializing...', results: [] });
-            await new Promise(r => setTimeout(r, 400)); // Brief intro pause
+            setAutoCheckProgress({ current: 0, total, serverName: 'Routing Stream...', results: [] });
+            await new Promise(r => setTimeout(r, 400)); 
 
-            let firstWorking: any = null;
+            let firstWorkingFound = false;
 
             for (let i = 0; i < serversToCheck.length; i++) {
                 const server = serversToCheck[i];
-                let retryCount = 0;
                 let ok = false;
 
-                // Update UI state for current step
+                // 1. Update UI for current step
                 setAutoCheckProgress(prev => ({
                     ...prev,
                     current: i + 1,
                     serverName: server.name,
                 }));
 
-                // Robust step execution with retries
-                while (retryCount < 2 && !ok) {
-                    try {
-                        const probeOk = await new Promise<boolean>((resolve, reject) => {
-                            const controller = new AbortController();
-                            const timeout = setTimeout(() => {
-                                controller.abort();
-                                resolve(false); // Timeout = fail
-                            }, 3000); // 3s per probe
+                // 2. Perform background probe
+                try {
+                    const probeOk = await new Promise<boolean>((resolve) => {
+                        const controller = new AbortController();
+                        const timeout = setTimeout(() => {
+                            controller.abort();
+                            resolve(false); 
+                        }, 2500); // 2.5s per probe
 
-                            const hostUrl = (() => {
-                                try { return new URL(server.getUrl('movie', '1234')).origin + '/'; } 
-                                catch { return null; }
-                            })();
+                        const hostUrl = (() => {
+                            try { return new URL(server.getUrl('movie', '1234')).origin + '/'; } 
+                            catch { return null; }
+                        })();
 
-                            if (!hostUrl) {
-                                clearTimeout(timeout);
-                                resolve(true); // If we can't probe, assume it might work
-                                return;
-                            }
+                        if (!hostUrl) {
+                            clearTimeout(timeout);
+                            resolve(true); 
+                            return;
+                        }
 
-                            fetch(hostUrl, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' })
-                                .then(() => {
-                                    clearTimeout(timeout);
-                                    resolve(true);
-                                })
-                                .catch((err) => {
-                                    clearTimeout(timeout);
-                                    // If it's an abort, we already resolved false
-                                    if (err.name !== 'AbortError') resolve(true); // CORS/Network error often still means host is up
-                                });
-                        });
-
-                        ok = probeOk;
-                    } catch (e) {
-                        console.warn(`Probe failed for ${server.name}, retrying...`, e);
-                    }
-                    if (!ok) retryCount++;
+                        fetch(hostUrl, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' })
+                            .then(() => { clearTimeout(timeout); resolve(true); })
+                            .catch(() => { clearTimeout(timeout); resolve(true); }); // Assume OK on CORS err
+                    });
+                    ok = probeOk;
+                } catch (e) {
+                    ok = true; // Fallback to true if probe logic crashes
                 }
 
-                // Log result
+                // 3. Set content in background IMMEDIATELY if it's the first working one
+                if (ok && !firstWorkingFound) {
+                    firstWorkingFound = true;
+                    setActiveServer(server);
+                    // Don't wait for this to resolve, let it load in background
+                }
+
+                // 4. Log result for UI
                 setAutoCheckProgress(prev => ({
                     ...prev,
                     results: [...prev.results, { name: server.name, ok }],
                 }));
 
-                if (ok && !firstWorking) {
-                    firstWorking = server;
-                }
-
-                // Dynamic delay to prevent UI "jumpiness"
-                await new Promise(r => setTimeout(r, 150));
+                // Visual pacing
+                await new Promise(r => setTimeout(r, 100));
             }
 
-            // Pick best server
-            const chosen = firstWorking ?? serversList[0];
-            setActiveServer(chosen);
+            // If none worked, fallback
+            if (!firstWorkingFound) {
+                setActiveServer(serversList[0]);
+            }
 
-            // Final step: Success message
-            setAutoCheckProgress(prev => ({ ...prev, serverName: `Success: ${chosen.name} Connected` }));
-            await new Promise(r => setTimeout(r, 1000));
+            // Final step: Success message (non-blocking)
+            setAutoCheckProgress(prev => ({ ...prev, serverName: `Connected` }));
+            await new Promise(r => setTimeout(r, 800));
 
         } catch (error) {
-            console.error("AutoCheck failed critically:", error);
-            // Fallback to first server if whole process crashes
-            setActiveServer(serversList[0]);
+            console.error("Critical Scanner Error:", error);
+            if (serversList[0]) setActiveServer(serversList[0]);
         } finally {
+            // Guarantee dismissal
             setIsAutoChecking(false);
         }
-    }, [serversList, isAutoChecking]);
+    }, [serversList, isAutoChecking]); // isAutoChecking is still here to prevent manual double-click
 
 
     // Scroll-to-top visibility
@@ -641,7 +633,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         };
         window.addEventListener("profileUpdated", handleProfileUpdate);
         return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
-    }, [type, autoCheckServers, isAutoChecking]);
+    }, [type, autoCheckServers]); // Removed isAutoChecking to break infinite loop
 
     // Reset states on server change
     useEffect(() => {
