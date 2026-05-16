@@ -520,7 +520,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         isFirstLoadRef.current = false;
                     }
                 }
-                }
             } catch (e) {
                 console.error("Failed to initialize servers:", e);
             }
