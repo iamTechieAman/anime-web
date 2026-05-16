@@ -64,7 +64,6 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "ToonPlayer - Watch Free Anime & Movies",
-  alternates: { canonical: "https://toonplayer.in" },
 
     description: "Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.",
     url: 'https://toonplayer.in',

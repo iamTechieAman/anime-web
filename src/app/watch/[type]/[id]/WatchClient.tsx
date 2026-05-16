@@ -216,7 +216,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const [loading, setLoading] = useState(true);
     const [showTrailer, setShowTrailer] = useState(false);
     const [showServers, setShowServers] = useState(false);
-    const [isAutoChecking, setIsAutoChecking] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
     const autoSwitchAttempts = useRef(0); // Cap auto-switch to prevent infinite loop
 
@@ -373,7 +372,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         }
     };
     // Auto Server Selection State
-    const [autoCheckProgress, setAutoCheckProgress] = useState({ current: 0, total: 0, serverName: '', results: [] as { name: string; ok: boolean }[] });
+
 
     // Unified State
     const [animeData, setAnimeData] = useState<ShowData | null>(null);
@@ -394,99 +393,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         if (ep) setSelectedEpisode(parseInt(ep) || 1);
     }, []);
 
-    // Auto Server Check — scans servers one-by-one with real animated progress
-    const autoCheckServers = useCallback(async () => {
-        if (serversList.length === 0) return;
-        if (isAutoChecking) return;
 
-        const serversToCheck = serversList.slice(0, 5); 
-        const total = serversToCheck.length;
-
-        setIsAutoChecking(true);
-        autoSwitchAttempts.current = 0;
-        setFailedServers(new Set());
-
-        try {
-            // Reset progress
-            setAutoCheckProgress({ current: 0, total, serverName: 'Routing Stream...', results: [] });
-            await new Promise(r => setTimeout(r, 400)); 
-
-            let firstWorkingFound = false;
-
-            for (let i = 0; i < serversToCheck.length; i++) {
-                const server = serversToCheck[i];
-                let ok = false;
-
-                // 1. Update UI for current step
-                setAutoCheckProgress(prev => ({
-                    ...prev,
-                    current: i + 1,
-                    serverName: server.name,
-                }));
-
-                // 2. Perform background probe
-                try {
-                    const probeOk = await new Promise<boolean>((resolve) => {
-                        const controller = new AbortController();
-                        const timeout = setTimeout(() => {
-                            controller.abort();
-                            resolve(false); 
-                        }, 2500); // 2.5s per probe
-
-                        const hostUrl = (() => {
-                            try { return new URL(server.getUrl('movie', '1234')).origin + '/'; } 
-                            catch { return null; }
-                        })();
-
-                        if (!hostUrl) {
-                            clearTimeout(timeout);
-                            resolve(true); 
-                            return;
-                        }
-
-                        fetch(hostUrl, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' })
-                            .then(() => { clearTimeout(timeout); resolve(true); })
-                            .catch(() => { clearTimeout(timeout); resolve(true); }); // Assume OK on CORS err
-                    });
-                    ok = probeOk;
-                } catch (e) {
-                    ok = true; // Fallback to true if probe logic crashes
-                }
-
-                // 3. Set content in background IMMEDIATELY if it's the first working one
-                if (ok && !firstWorkingFound) {
-                    firstWorkingFound = true;
-                    setActiveServer(server);
-                    // Don't wait for this to resolve, let it load in background
-                }
-
-                // 4. Log result for UI
-                setAutoCheckProgress(prev => ({
-                    ...prev,
-                    results: [...prev.results, { name: server.name, ok }],
-                }));
-
-                // Visual pacing
-                await new Promise(r => setTimeout(r, 100));
-            }
-
-            // If none worked, fallback
-            if (!firstWorkingFound) {
-                setActiveServer(serversList[0]);
-            }
-
-            // Final step: Success message (non-blocking)
-            setAutoCheckProgress(prev => ({ ...prev, serverName: `Connected` }));
-            await new Promise(r => setTimeout(r, 800));
-
-        } catch (error) {
-            console.error("Critical Scanner Error:", error);
-            if (serversList[0]) setActiveServer(serversList[0]);
-        } finally {
-            // Guarantee dismissal
-            setIsAutoChecking(false);
-        }
-    }, [serversList, isAutoChecking]); // isAutoChecking is still here to prevent manual double-click
 
 
     // Scroll-to-top visibility
@@ -553,9 +460,9 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         return () => window.removeEventListener("message", handleMessage);
     }, [activeServer, selectedSeason, selectedEpisode, type, details?.seasons, router]);
 
+    const isFirstLoadRef = useRef(true);
     // Load App Settings & Fetch DB Servers
     useEffect(() => {
-        let isFirstLoad = true;
         const loadServersAndSettings = async () => {
             try {
                 let parsed = { smartSwitch: true, multiAudio: true };
@@ -602,25 +509,21 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     });
                     setServersList(sortedServers);
                     
-                    if (isFirstLoad) {
+                    if (isFirstLoadRef.current) {
                         setActiveServer(sortedServers[0]);
-                        isFirstLoad = false;
+                        isFirstLoadRef.current = false;
                     }
                 } else {
                     setServersList([...baseServers]);
-                    if (isFirstLoad) {
+                    if (isFirstLoadRef.current) {
                         setActiveServer(baseServers[0]);
-                        isFirstLoad = false;
+                        isFirstLoadRef.current = false;
                     }
                 }
-                
-                // Once servers are loaded, trigger auto check
-                if (!isAutoChecking) {
-                    // Slight delay to ensure state is set
-                    setTimeout(() => autoCheckServers(), 100);
                 }
-
-            } catch (e) {}
+            } catch (e) {
+                console.error("Failed to initialize servers:", e);
+            }
         };
 
         // Load initially
@@ -628,12 +531,12 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
         // Listen for live updates from ProfileSettings modal
         const handleProfileUpdate = () => {
-            isFirstLoad = false; // Never forcibly swap server on live toggles to prevent deep lag!
+            isFirstLoadRef.current = false; // Never forcibly swap server on live toggles to prevent deep lag!
             loadServersAndSettings();
         };
         window.addEventListener("profileUpdated", handleProfileUpdate);
         return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
-    }, [type, autoCheckServers]); // Removed isAutoChecking to break infinite loop
+    }, [type]);
 
     // Reset states on server change
     useEffect(() => {
@@ -699,7 +602,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
     // Consolidated auto-switch monitoring (replaces 3 separate effects)
     useEffect(() => {
-        if (loading || isAutoChecking || !details || !activeServer) return;
+        if (loading || !details || !activeServer) return;
         if (autoSwitchAttempts.current >= 3) return; // Stop monitoring after cap
 
         // Handle immediate source errors
@@ -711,13 +614,13 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         // 8-second timeout for stuck players
         const timer = setTimeout(() => {
             if (!playerLoaded && !sourceError) {
-                console.log('[WatchPage] Server taking too long, auto-switching.');
+
                 autoSwitchToNext(activeServer.id);
             }
         }, 8000);
 
         return () => clearTimeout(timer);
-    }, [loading, playerLoaded, sourceError, details, isAutoChecking, activeServer, autoSwitchToNext]);
+    }, [loading, playerLoaded, sourceError, details, activeServer, autoSwitchToNext]);
 
     // Keyboard shortcuts: 1-9 to switch servers, Escape to close modals
     useEffect(() => {
@@ -1026,7 +929,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 </div>
                             )}
                             {/* Source Error Fallback */}
-                            {sourceError && !isAnimeServer && !isAutoChecking && (
+                            {sourceError && !isAnimeServer && (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center">
                                     <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
                                         <X className="w-8 h-8 text-red-500" />
@@ -1037,98 +940,22 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                     </p>
                                     <div className="flex gap-3">
                                         <button 
-                                            onClick={autoCheckServers}
+                                            onClick={() => setIframeKey(prev => prev + 1)}
                                             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                                         >
-                                            <Zap className="w-4 h-4" /> Auto Find Working Server
+                                            <Zap className="w-4 h-4" /> Try Refreshing
                                         </button>
                                         {type === 'anime' && (
                                             <button 
                                                 onClick={() => setActiveServer(ANIME_SERVERS[0])}
                                                 className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold transition-all flex items-center gap-2"
                                             >
-                                                <Server className="w-4 h-4" /> Anime Server
+                                        <Server className="w-4 h-4" /> Anime Server
                                             </button>
                                         )}
                                     </div>
                                 </div>
                             )}
-
-                            {/* Premium Auto Server Check Overlay */}
-                            <AnimatePresence>
-                            {isAutoChecking && (
-                                <motion.div 
-                                    initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-                                    animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
-                                    exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-                                    className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 p-6"
-                                >
-                                    <div className="w-full max-w-sm bg-[var(--bg-main)]/80 p-6 rounded-2xl border border-blue-500/20 shadow-[0_0_40px_rgba(59,130,246,0.15)] relative overflow-hidden">
-                                        {/* Decorative glow */}
-                                        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
-                                        
-                                        <div className="flex items-center gap-4 mb-6 relative z-10">
-                                            <div className="relative flex shrink-0">
-                                                <div className={`absolute inset-0 blur-xl opacity-20 animate-pulse rounded-full ${autoCheckProgress.serverName.startsWith('Connected') ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                                                <div className={`w-12 h-12 rounded-full border flex items-center justify-center transition-colors duration-500 ${autoCheckProgress.serverName.startsWith('Connected') ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-blue-500/30 bg-blue-500/10'}`}>
-                                                    {autoCheckProgress.serverName.startsWith('Connected')
-                                                        ? <Check className="w-6 h-6 text-emerald-400" />
-                                                        : <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold text-white">
-                                                    {autoCheckProgress.serverName.startsWith('Connected') ? 'Server Found' : 'Routing Stream'}
-                                                </h3>
-                                                <p className={`text-xs font-medium mt-0.5 ${autoCheckProgress.serverName.startsWith('Connected') ? 'text-emerald-300/90' : 'text-blue-300/80'}`}>
-                                                    {autoCheckProgress.serverName.startsWith('Connected')
-                                                        ? autoCheckProgress.serverName
-                                                        : autoCheckProgress.total === 0
-                                                            ? 'Initializing...'
-                                                            : `Scanning ${autoCheckProgress.serverName || '...'} (${autoCheckProgress.current}/${autoCheckProgress.total})`
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Progress bar */}
-                                        <div className="w-full h-1 bg-white/5 rounded-full mb-5 overflow-hidden relative z-10">
-                                            <motion.div 
-                                                className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full relative"
-                                                animate={{ width: `${(autoCheckProgress.current / Math.max(autoCheckProgress.total, 1)) * 100}%` }}
-                                                transition={{ duration: 0.4, ease: "easeOut" }}
-                                            >
-                                                <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_1s_infinite]" />
-                                            </motion.div>
-                                        </div>
-
-                                        {/* Server results list with stagger */}
-                                        <div className="space-y-2 max-h-[160px] overflow-y-auto scrollbar-none relative z-10 hide-scrollbar mask-image-bottom">
-                                            {autoCheckProgress.results.map((r, i) => (
-                                                <motion.div 
-                                                    key={i}
-                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                    transition={{ delay: 0.05, type: 'spring' }}
-                                                    className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                                                        r.ok 
-                                                            ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
-                                                            : 'bg-white/5 border border-white/5 text-zinc-500'
-                                                    }`}
-                                                >
-                                                    <span>{r.name}</span>
-                                                    {r.ok ? (
-                                                        <Check className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-                                                    ) : (
-                                                        <span className="text-[10px] uppercase tracking-widest text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded">Failed</span>
-                                                    )}
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                            </AnimatePresence>
 
                             <iframe
                                 key={iframeKey}
@@ -1139,7 +966,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 referrerPolicy="no-referrer"
                                 onError={() => {
                                     setSourceError(true);
-                                    if (!isAnimeServer && !isAutoChecking) {
+                                    if (!isAnimeServer) {
                                         autoSwitchToNext(activeServer.id);
                                     }
                                 }}
@@ -1256,15 +1083,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                             <Server className="w-3.5 h-3.5" /> Server:
                         </span>
 
-                        {/* Auto Find Server Button */}
-                        <button
-                            onClick={autoCheckServers}
-                            disabled={isAutoChecking}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-bold hover:from-blue-600/30 hover:to-purple-600/30 transition-all shrink-0 disabled:opacity-50"
-                        >
-                            {isAutoChecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                            Auto
-                        </button>
+
 
                         {/* Server Buttons — scrollable row on desktop */}
                         <div className="hidden md:flex items-center gap-2 overflow-x-auto max-w-[calc(100vw-280px)] pb-2 pr-4 custom-scrollbar">
