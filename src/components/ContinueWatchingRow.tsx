@@ -3,7 +3,7 @@
 import { useWatch } from "@/context/WatchContext";
 import { Play, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export default function ContinueWatchingRow() {
     const { history, removeFromHistory } = useWatch();
@@ -57,13 +57,36 @@ export default function ContinueWatchingRow() {
         });
     };
 
+    // Progress Bar Sub-component to handle animation on mount
+    const AnimatedProgressBar = ({ current, total }: { current: number, total: number }) => {
+        const [width, setWidth] = useState('0%');
+        useEffect(() => {
+            // Small delay to trigger CSS transition on mount
+            const timer = setTimeout(() => {
+                setWidth(formatProgress(current, total));
+            }, 300);
+            return () => clearTimeout(timer);
+        }, [current, total]);
+
+        return (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-30 overflow-hidden">
+                <div 
+                    className="h-full bg-red-600 transition-[width] duration-1000 ease-out" 
+                    style={{ width }}
+                />
+            </div>
+        );
+    };
+
     return (
         <section className="mb-10 w-full overflow-hidden">
             <div className="section-header">
                 <div className="accent-bar" />
                 <Clock className="w-5 h-5 text-purple-400" />
                 <h2 className="text-lg md:text-xl font-bold font-sora">Continue Watching</h2>
-                <span className="text-xs text-[var(--text-muted)] font-medium ml-auto">{history.length} items</span>
+                <span className="ml-auto flex items-center gap-2">
+                    <span className="text-xs text-[var(--text-muted)] font-semibold">{history.length} items</span>
+                </span>
             </div>
             
             <div className="relative group/cw">
@@ -95,12 +118,12 @@ export default function ContinueWatchingRow() {
                             <Link
                                 key={entry.id}
                                 href={getHistoryLink(entry)}
-                                className={`group relative flex-none w-[200px] md:w-[280px] aspect-video rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-300 hover:border-purple-500/40 hover:shadow-[0_0_25px_rgba(139,92,246,0.15)] snap-start ${
+                                className={`group relative flex-none w-[220px] md:w-[300px] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-purple-500/50 hover:shadow-[0_8px_40px_-8px_rgba(139,92,246,0.4)] hover:-translate-y-2 snap-start ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 }`}
                             >
-                                {/* Poster/Backdrop */}
-                                <div className="absolute inset-0 w-full h-full">
+                                {/* Thumbnail with aspect-video */}
+                                <div className="relative aspect-video overflow-hidden">
                                     <img 
                                         src={entry.poster || "https://api.dicebear.com/9.x/shapes/svg?seed=fallback"} 
                                         alt={entry.title} 
@@ -108,50 +131,63 @@ export default function ContinueWatchingRow() {
                                         loading="lazy"
                                         decoding="async"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+                                    {/* Gradient overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+                                    {/* Remove button */}
+                                    <button
+                                        onClick={(e) => handleRemove(e, entry.id)}
+                                        className="absolute top-2.5 right-2.5 z-20 p-1.5 bg-black/70 hover:bg-red-500/90 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/10 backdrop-blur-sm"
+                                        aria-label="Remove from history"
+                                    >
+                                        <X className="w-3 h-3 text-white" />
+                                    </button>
+
+                                    {/* Play overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                                        <div className="w-14 h-14 rounded-full bg-white/95 flex items-center justify-center border-2 border-white shadow-[0_0_30px_rgba(255,255,255,0.3)] transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                                            <Play className="w-6 h-6 text-black fill-black ml-0.5" />
+                                        </div>
+                                    </div>
+
+                                    {/* Animated Progress Bar */}
+                                    <AnimatedProgressBar current={entry.currentTime} total={entry.duration} />
                                 </div>
 
-                                {/* Remove button */}
-                                <button
-                                    onClick={(e) => handleRemove(e, entry.id)}
-                                    className="absolute top-2 right-2 z-20 p-1.5 bg-black/60 hover:bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-all border border-white/10"
-                                    aria-label="Remove from history"
-                                >
-                                    <X className="w-3 h-3 text-white" />
-                                </button>
-
-                                {/* Title and info */}
-                                <div className="absolute bottom-3 left-3 right-3 z-10">
-                                    <h3 className="font-bold text-sm md:text-base text-white line-clamp-1 font-sora drop-shadow-lg">
+                                {/* Metadata section */}
+                                <div className="p-3.5 space-y-2">
+                                    {/* Title */}
+                                    <h3 className="font-bold text-sm text-white line-clamp-1 font-sora tracking-tight">
                                         {entry.title}
                                     </h3>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        {entry.episodeId && (
-                                            <p className="text-[10px] md:text-xs text-purple-300 font-medium">
-                                                {entry.type === 'tv' ? `S1 E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
-                                            </p>
-                                        )}
-                                        {timeLeft && (
-                                            <p className="text-[10px] text-white/40 font-medium">
-                                                • {timeLeft}
-                                            </p>
+                                    {/* Episode + time meta row */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            {entry.episodeId && (
+                                                <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                                                    {entry.type === 'tv' ? `S1 · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
+                                                </span>
+                                            )}
+                                            {timeLeft && (
+                                                <span className="text-[10px] text-[var(--text-muted)] font-medium flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />{timeLeft}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {/* Progress percentage */}
+                                        {entry.duration > 0 && (
+                                            <span className="text-[10px] font-bold text-[var(--text-muted)]">
+                                                {formatProgress(entry.currentTime, entry.duration)}
+                                            </span>
                                         )}
                                     </div>
-                                </div>
-
-                                {/* Play overlay */}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg">
-                                        <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                    {/* Resume button */}
+                                    <div className="pt-1">
+                                        <div className="w-full py-2 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-500/30 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 group-hover:bg-purple-500/15 group-hover:border-purple-500/30">
+                                            <Play className="w-3.5 h-3.5 fill-current" />
+                                            Resume
+                                        </div>
                                     </div>
-                                </div>
-
-                                {/* Progress Bar */}
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-30">
-                                    <div 
-                                        className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all" 
-                                        style={{ width: formatProgress(entry.currentTime, entry.duration) }}
-                                    />
                                 </div>
                             </Link>
                         );

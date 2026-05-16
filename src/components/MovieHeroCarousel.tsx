@@ -64,7 +64,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
     const type = item.media_type || "movie";
 
     return (
-        <div className="relative w-full h-[55vh] md:h-[70vh] lg:h-[80vh] overflow-hidden bg-[var(--bg-main)]">
+        <div className="relative w-full h-[50vh] md:h-[65vh] lg:h-[75vh] overflow-hidden bg-[var(--bg-main)]">
             {/* Background images with crossfade */}
             <AnimatePresence mode="wait">
                 <motion.div
@@ -79,7 +79,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                         <img
                             src={`${IMG_BASE}/original${item.backdrop_path}`}
                             alt={title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-[10000ms] ease-linear hover:scale-110"
                             loading={current === 0 ? "eager" : "lazy"}
                             decoding="async"
                         />
@@ -88,59 +88,64 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
             </AnimatePresence>
 
             {/* Multi-layer gradient overlays for cinematic look */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/40 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
+            {/* Base darkening for contrast */}
+            <div className="absolute inset-0 bg-black/20" />
+            {/* Radial spotlight behind the title */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.8)_100%)]" />
+            {/* Left-to-right fade for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-3/4" />
+            {/* Smooth gradient fade into the bottom content rows */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 md:h-64 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent" />
 
             {/* Content */}
-            <div className="absolute inset-0 flex items-end pb-16 md:pb-24">
-                <div className="w-full max-w-[2000px] mx-auto px-6 md:px-12 w-full">
+            <div className="absolute inset-0 flex items-end pb-16 md:pb-28">
+                <div className="w-full max-w-[2000px] mx-auto px-6 md:px-12">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={current}
-                            initial={{ opacity: 0, y: 30 }}
+                            initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.6, ease: "easeOut" }}
-                            className="max-w-2xl"
+                            transition={{ duration: 0.7, ease: "easeOut" }}
+                            className="max-w-3xl flex flex-col gap-5"
                         >
-                            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-3 tracking-tight leading-tight drop-shadow-2xl">
+                            <h1 className="text-4xl md:text-6xl lg:text-[4.5rem] font-black text-white tracking-tighter leading-[1.05] drop-shadow-2xl">
                                 {title}
                             </h1>
 
                             {/* Meta info */}
-                            <div className="flex items-center gap-3 mb-4 flex-wrap">
+                            <div className="flex items-center gap-4 flex-wrap mt-1">
                                 {matchPercent > 0 && (
-                                    <span className={`text-sm font-bold ${matchPercent >= 70 ? "text-green-400" : "text-yellow-400"}`}>
+                                    <span className={`text-base font-bold ${matchPercent >= 70 ? "text-green-400" : "text-yellow-400"}`}>
                                         {matchPercent}% Match
                                     </span>
                                 )}
-                                {year && <span className="text-[var(--text-muted)] text-sm">{year}</span>}
-                                <span className="flex items-center gap-1 text-yellow-400 text-sm">
-                                    <Star className="w-3.5 h-3.5 fill-yellow-400" /> {item.vote_average?.toFixed(1)}
+                                {year && <span className="text-[var(--text-muted)] text-base font-medium">{year}</span>}
+                                <span className="flex items-center gap-1.5 text-yellow-400 text-base font-bold">
+                                    <Star className="w-4 h-4 fill-yellow-400" /> {item.vote_average?.toFixed(1)}
                                 </span>
-                                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded tracking-wider border border-blue-500/30">HD</span>
+                                <span className="px-2.5 py-0.5 bg-white/20 text-white text-xs font-bold rounded shadow-sm backdrop-blur-sm tracking-widest border border-white/20">HD</span>
                             </div>
 
                             {/* Description */}
-                            <p className="text-[var(--text-main)] text-sm md:text-base leading-relaxed mb-6 line-clamp-3 max-w-xl drop-shadow-lg">
+                            <p className="text-[#d1d5db] text-sm md:text-lg leading-relaxed line-clamp-3 md:line-clamp-4 max-w-2xl drop-shadow-md">
                                 {item.overview}
                             </p>
 
                             {/* Action buttons */}
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-4 pt-4">
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
-                                    className="flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-xl"
+                                    className="flex items-center justify-center gap-2 px-8 py-3.5 md:py-4 bg-white text-black font-extrabold text-base md:text-lg rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.3)]"
                                 >
-                                    <Play className="w-5 h-5 fill-black" />
-                                    Play
+                                    <Play className="w-6 h-6 fill-black" />
+                                    Play Now
                                 </Link>
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
-                                    className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors border border-white/10"
+                                    className="flex items-center justify-center gap-2 px-6 py-3.5 md:py-4 bg-white/10 backdrop-blur-md text-white font-bold text-base md:text-lg rounded-xl hover:bg-white/20 transition-colors border border-white/20 shadow-xl hover:scale-105 active:scale-95"
                                 >
-                                    <Info className="w-5 h-5" />
+                                    <Info className="w-6 h-6" />
                                     More Info
                                 </Link>
                             </div>

@@ -7,8 +7,10 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="w-full border-t border-[var(--border-color)] bg-[var(--bg-main)]/50 backdrop-blur-sm mt-auto">
-            <div className="w-full px-4 md:px-8 py-12">
+        <footer className="footer-wrap w-full mt-auto">
+            {/* Gradient fade top connector */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+            <div className="w-full px-4 md:px-8 py-8 bg-gradient-to-b from-[var(--bg-card)]/30 to-[var(--bg-main)] backdrop-blur-sm">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-1 space-y-4">

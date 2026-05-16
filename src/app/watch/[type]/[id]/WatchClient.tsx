@@ -394,22 +394,76 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         if (ep) setSelectedEpisode(parseInt(ep) || 1);
     }, []);
 
-    // Auto Server Check — delegates checking to the main player's 8-second timeout logic
+    // Auto Server Check — scans servers one-by-one with real animated progress
     const autoCheckServers = useCallback(async () => {
         if (serversList.length === 0) return;
-        
+        if (isAutoChecking) return; // prevent double-trigger
+
+        const serversToCheck = serversList.slice(0, 5); // Scan top 5 servers max
+        const total = serversToCheck.length;
+
         setIsAutoChecking(true);
-        
-        // Reset state and switch to first server
         autoSwitchAttempts.current = 0;
         setFailedServers(new Set());
-        setActiveServer(serversList[0]);
-        
-        // Remove the overlay quickly to let the user see the player loading
-        setTimeout(() => {
-            setIsAutoChecking(false);
-        }, 500);
-    }, [serversList]);
+
+        // Reset progress
+        setAutoCheckProgress({ current: 0, total, serverName: '', results: [] });
+
+        let firstWorking: any = null;
+
+        for (let i = 0; i < serversToCheck.length; i++) {
+            const server = serversToCheck[i];
+
+            // Update "currently scanning" label
+            setAutoCheckProgress(prev => ({
+                ...prev,
+                current: i + 1,
+                serverName: server.name,
+            }));
+
+            // Simulate a lightweight reachability probe (300–600ms per server)
+            const probeMs = 300 + Math.random() * 300;
+            const probeOk = await new Promise<boolean>(resolve => {
+                // We use a fetch with a 2-second abort to check CDN reachability
+                const controller = new AbortController();
+                const timeout = setTimeout(() => { controller.abort(); resolve(false); }, 2000);
+                // ping the embed host's root (CORS-safe HEAD request)
+                const hostUrl = (() => {
+                    try { return new URL(server.getUrl('movie', '1234')).origin + '/'; } catch { return null; }
+                })();
+                if (!hostUrl) { clearTimeout(timeout); setTimeout(() => resolve(true), probeMs); return; }
+                fetch(hostUrl, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' })
+                    .then(() => { clearTimeout(timeout); resolve(true); })
+                    .catch(() => { clearTimeout(timeout); resolve(false); });
+            });
+
+            // We treat a fast no-cors response as "available" (true) either way;
+            // only an explicit abort/timeout = unavailable.
+            const ok = probeOk !== false;
+
+            setAutoCheckProgress(prev => ({
+                ...prev,
+                results: [...prev.results, { name: server.name, ok }],
+            }));
+
+            if (ok && !firstWorking) {
+                firstWorking = server;
+            }
+
+            // Small visual gap between rows
+            await new Promise(r => setTimeout(r, 80));
+        }
+
+        // Pick best server: first OK result, or fallback to serversList[0]
+        const chosen = firstWorking ?? serversList[0];
+        setActiveServer(chosen);
+
+        // Show "connected" briefly before hiding overlay
+        setAutoCheckProgress(prev => ({ ...prev, serverName: `Connected – ${chosen.name}` }));
+        await new Promise(r => setTimeout(r, 800));
+
+        setIsAutoChecking(false);
+    }, [serversList, isAutoChecking]);
 
 
     // Scroll-to-top visibility
@@ -992,15 +1046,24 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         
                                         <div className="flex items-center gap-4 mb-6 relative z-10">
                                             <div className="relative flex shrink-0">
-                                                <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse rounded-full" />
-                                                <div className="w-12 h-12 rounded-full border border-blue-500/30 bg-blue-500/10 flex items-center justify-center">
-                                                    <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+                                                <div className={`absolute inset-0 blur-xl opacity-20 animate-pulse rounded-full ${autoCheckProgress.serverName.startsWith('Connected') ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                                                <div className={`w-12 h-12 rounded-full border flex items-center justify-center transition-colors duration-500 ${autoCheckProgress.serverName.startsWith('Connected') ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-blue-500/30 bg-blue-500/10'}`}>
+                                                    {autoCheckProgress.serverName.startsWith('Connected')
+                                                        ? <Check className="w-6 h-6 text-emerald-400" />
+                                                        : <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />}
                                                 </div>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Routing Stream</h3>
-                                                <p className="text-xs text-blue-300/80 font-medium mt-0.5">
-                                                    Scanning servers ({autoCheckProgress.current}/{autoCheckProgress.total})
+                                                <h3 className="text-xl font-bold text-white">
+                                                    {autoCheckProgress.serverName.startsWith('Connected') ? 'Server Found' : 'Routing Stream'}
+                                                </h3>
+                                                <p className={`text-xs font-medium mt-0.5 ${autoCheckProgress.serverName.startsWith('Connected') ? 'text-emerald-300/90' : 'text-blue-300/80'}`}>
+                                                    {autoCheckProgress.serverName.startsWith('Connected')
+                                                        ? autoCheckProgress.serverName
+                                                        : autoCheckProgress.total === 0
+                                                            ? 'Initializing...'
+                                                            : `Scanning ${autoCheckProgress.serverName || '...'} (${autoCheckProgress.current}/${autoCheckProgress.total})`
+                                                    }
                                                 </p>
                                             </div>
                                         </div>

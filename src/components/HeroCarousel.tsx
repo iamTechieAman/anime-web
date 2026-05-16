@@ -232,9 +232,13 @@ export default function HeroCarousel() {
                         <button
                             key={i}
                             onClick={() => goToSlide(i)}
-                            className={`hero-dot ${i === current ? 'active' : ''}`}
+                            className={`hero-dot relative overflow-hidden transition-all duration-300 ${i === current ? '!w-12 !bg-white/20' : ''}`}
                             aria-label={`Go to slide ${i + 1}`}
-                        />
+                        >
+                            {i === current && (
+                                <div className="absolute top-0 left-0 bottom-0 bg-white animate-[progressBar_6s_linear]" />
+                            )}
+                        </button>
                     ))}
                 </div>
 

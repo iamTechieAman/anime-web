@@ -35,7 +35,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <Suspense fallback={<div className="h-16 w-full skeleton-shine" />}>
           <Header />
         </Suspense>
-        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-20'}`}>
+        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-20'} bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-main)]/90`}>
+          {/* Subtle global bottom ambient glow for short pages */}
+          <div className="absolute bottom-0 left-0 right-0 h-[30vh] bg-gradient-to-t from-purple-900/5 to-transparent pointer-events-none z-0" />
           <ErrorBoundary>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-[50vh]">

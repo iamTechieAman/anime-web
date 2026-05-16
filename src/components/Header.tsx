@@ -272,6 +272,21 @@ export default function Header() {
   return (
     <>
     <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-sm border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
+      
+      {/* Search Focus Overlay */}
+      <AnimatePresence>
+        {showSuggestions && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 w-[100vw] h-[100vh] bg-black/60 backdrop-blur-md z-[-1] cursor-pointer"
+            onClick={() => setShowSuggestions(false)}
+            style={{ marginLeft: '-50vw', left: '50%' }}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
@@ -304,11 +319,11 @@ export default function Header() {
         </Link>
 
         {/* Search Bar + Filter */}
-        <div className="flex-1 max-w-xl hidden md:flex items-center gap-2 relative">
+        <div className="flex-1 max-w-xl hidden md:flex items-center gap-1.5 relative p-1.5 bg-[var(--bg-card)]/30 backdrop-blur-xl border border-white/10 rounded-2xl focus-within:border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300">
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
-              className={`relative flex items-center backdrop-blur-sm border rounded-2xl px-4 py-3 group focus-within:ring-0 transition-all duration-300 ${isDiscoverMode ? 'bg-purple-900/20 border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.2)]' : 'bg-[var(--bg-card)]/50 border-[var(--border-color)] hover:border-white/20 focus-within:border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.1)]'}`}
+              className={`relative flex items-center px-3 py-2 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-purple-900/20' : 'bg-transparent'}`}
             >
               <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
                 <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-purple-400' : 'text-[var(--text-muted)] group-focus-within:text-purple-400'}`} />
@@ -463,14 +478,14 @@ export default function Header() {
           </div>
 
           {/* Filter Button */}
-          <div ref={filterRef} className="relative shrink-0">
+          <div ref={filterRef} className="relative shrink-0 border-l border-white/10 pl-1.5">
             <button
               aria-label="Filter Options"
               onClick={() => { setShowFilters(v => !v); setShowNotifications(false); setShowProfileDropdown(false); }}
-              className={`h-[44px] px-4 bg-[var(--bg-card)] border rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
+              className={`h-[40px] px-4 rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
                 showFilters || filterGenre || filterFormat || filterStatus
-                  ? 'border-purple-500 text-purple-400 bg-purple-500/5'
-                  : 'border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20'
+                  ? 'bg-purple-500/10 text-purple-400'
+                  : 'bg-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/5'
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
