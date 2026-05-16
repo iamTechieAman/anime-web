@@ -56,6 +56,47 @@ export async function GET(request: Request) {
                 errors.push({ provider: providerName, error: error.message });
             }
         }
+
+        // Fallback to TMDB for Anime if scraping failed
+        if (animeShows.length === 0) {
+            console.log(`[A-Z] Scraping failed, falling back to TMDB for anime`);
+            try {
+                if (letter === "all") {
+                    const res = await fetch(`${TMDB_BASE}/discover/tv?api_key=${TMDB_KEY}&language=en-US&with_original_language=ja&with_genres=16&page=${page}&sort_by=popularity.desc`);
+                    const data = res.ok ? await res.json() : { results: [] };
+                    animeShows = (data.results || []).map((item: any) => ({
+                        _id: `tmdb:tv:${item.id}`,
+                        name: item.name || item.original_name,
+                        thumbnail: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+                        availableEpisodes: { sub: 0, dub: 0 },
+                        provider: "tmdb",
+                        __typename: "Show",
+                        type: "Anime"
+                    })).filter((m: any) => m.thumbnail);
+                } else {
+                    const searchLetter = letter === "0-9" ? "1" : letter;
+                    const res = await fetch(`${TMDB_BASE}/search/tv?api_key=${TMDB_KEY}&language=en-US&query=${encodeURIComponent(searchLetter)}&page=${page}&include_adult=false`);
+                    const data = res.ok ? await res.json() : { results: [] };
+                    animeShows = (data.results || [])
+                        .filter((item: any) => item.original_language === 'ja' || (item.origin_country && item.origin_country.includes('JP')))
+                        .filter((item: any) => {
+                            if (letter === "0-9") return /^[0-9]/.test(item.name || item.original_name || "");
+                            return (item.name || item.original_name || "").toLowerCase().startsWith(letter.toLowerCase());
+                        })
+                        .map((item: any) => ({
+                            _id: `tmdb:tv:${item.id}`,
+                            name: item.name || item.original_name,
+                            thumbnail: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+                            availableEpisodes: { sub: 0, dub: 0 },
+                            provider: "tmdb",
+                            __typename: "Show",
+                            type: "Anime"
+                        })).filter((m: any) => m.thumbnail);
+                }
+            } catch (err: any) {
+                console.error(`[A-Z] TMDB fallback for anime failed:`, err.message);
+            }
+        }
     }
 
     // 2. Fetch Movies/TV from TMDB (skip if tab is "anime")

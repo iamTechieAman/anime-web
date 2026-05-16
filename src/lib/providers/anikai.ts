@@ -370,7 +370,10 @@ export class AnikaiProvider implements AnimeProvider {
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
-            $('.film_list-wrap .flw-item').each((_, element) => {
+            let items = $('.film_list-wrap .flw-item');
+            if (items.length === 0) items = $('.aitem-wrapper');
+
+            items.each((_, element) => {
                 const $el = $(element);
                 const href = $el.find('.film-poster a').attr('href');
                 const id = href?.includes('/watch/')

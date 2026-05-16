@@ -1054,7 +1054,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 onError={() => {
                                     setSourceError(true);
                                     if (!isAnimeServer && !isAutoChecking) {
-                                        autoCheckServers();
+                                        autoSwitchToNext(activeServer.id);
                                     }
                                 }}
                                 onLoad={() => setPlayerLoaded(true)}
