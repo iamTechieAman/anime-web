@@ -163,7 +163,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const serverRef = useRef<HTMLDivElement>(null);
 
     const processingRef = useRef<string | null>(null);
-    const failedServersRef = useRef<Set<string>>(new Set());
 
     const [isSafeStream, setIsSafeStream] = useState(true);
     const [showSafeGuide, setShowSafeGuide] = useState(false);
@@ -426,8 +425,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     // Fetch Servers when Episode/Mode Changes
     useEffect(() => {
         if (!show?._id) return;
-        // Reset failed servers when episode changes
-        failedServersRef.current = new Set();
+
 
         // ALWAYS include movie servers — they are the guaranteed fallback
         const movieServersList = MOVIE_SERVERS.map(ms => ({
@@ -480,9 +478,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
 
         const fetchServers = async () => {
-            if (!currentEp || currentEp === 'undefined' || currentEp === 'null') return; // Guard against invalid episode ID
             setLoadingServers(true);
-            setCheckingStatus("Searching for best source...");
             try {
                 const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}&provider=${provider || ''}`);
                 let nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
@@ -497,20 +493,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 setServers(allServers);
 
-                // Auto-selection logic: Find first working server
+                // Auto-selection logic: Pick first available
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists) {
-                        setCheckingStatus("Scanning servers...");
-                        // Try to find the first native server that works
-                        let bestServer = null;
-                        
-                        // Just pick the first one and let fetchSource handle the fallback/auto-switch
-                        // but prioritize native ones that aren't known to be down
-                        const firstNative = nativeServers.find((s: any) => !failedServersRef.current.has(s.serverId));
-                        const peachify = allServers.find((s: any) => s.serverId === "peachify" && !failedServersRef.current.has(s.serverId));
-                        
-                        setSelectedServer(firstNative?.serverId || peachify?.serverId || allServers[0].serverId);
+                        setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);
@@ -530,46 +517,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         fetchServers();
     }, [currentEp, mode, show, tmdbId]);
 
-    // Auto-switch to next server on failure — smart: skip to movie servers after 2 native failures
-    const autoSwitchServer = (failedServerId: string) => {
-        failedServersRef.current.add(failedServerId);
-        
-        // Count how many native servers have failed
-        const failedNativeCount = servers.filter(s => !s.isMovieServer && failedServersRef.current.has(s.serverId)).length;
-        
-        let nextServer;
-        if (failedNativeCount >= 1) {
-            // After 2 native failures, jump directly to movie servers
-            nextServer = servers.find(s => s.isMovieServer && !failedServersRef.current.has(s.serverId));
-        }
-        if (!nextServer) {
-            nextServer = servers.find(s => !failedServersRef.current.has(s.serverId));
-        }
-        
-        if (nextServer) {
-            setError(null); // Clear any previous errors
-            setCheckingStatus(`Switching to ${nextServer.serverName}...`);
-            toast(`Switching to ${nextServer.serverName}...`, { icon: '🔄' });
-            setSelectedServer(nextServer.serverId);
-        } else {
-            // All servers exhausted — try forcing ToonPlayer VIP one more time
-            const peachify = servers.find(s => s.serverId === "peachify");
-            if (peachify && failedServersRef.current.has("peachify")) {
-                // Reset and try peachify again as absolute last resort
-                failedServersRef.current.delete("peachify");
-                setError(null);
-                setCheckingStatus('Retrying ToonPlayer VIP...');
-                toast('Retrying ToonPlayer VIP...', { icon: '🔄' });
-                setSelectedServer("peachify");
-            } else {
-                setCheckingStatus(null);
-                setError("All servers are currently unavailable. Try switching servers manually below.");
-                toast.error("Servers unavailable — try switching manually");
-            }
-        }
-    };
 
-    const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
 
     // Fetch Source
     useEffect(() => {
@@ -598,10 +546,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 } else {
                     // Regular movie server requires TMDB ID
                     if (!tmdbId || tmdbId === "0") {
-                        console.warn('[WatchClient] No valid TMDB ID, skipping movie server');
-                        autoSwitchServer(selectedServer);
-                        processingRef.current = null;
-                        return;
+                    console.warn('[WatchClient] No valid TMDB ID, skipping movie server');
+                    setError("TMDB Metadata missing for this title. Try a native server.");
+                    processingRef.current = null;
+                    return;
                     }
                     const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
                     setSourceUrl(iframeUrl);
@@ -619,8 +567,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const availableEps = show.availableEpisodesDetail[mode] || [];
                 if (!availableEps.includes(currentEp)) {
                     // Auto-switch to a movie server instead of showing error
-                    console.warn(`EP ${currentEp} not in ${mode}, auto-switching to movie server`);
-                    autoSwitchServer(selectedServer);
+                    console.warn(`EP ${currentEp} not in ${mode}`);
+                    setError(`Episode ${currentEp} is not available in ${mode.toUpperCase()} mode.`);
                     processingRef.current = null;
                     return;
                 }
@@ -656,21 +604,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     const proxiedUrl = `/api/proxy/video?url=${encodeURIComponent(absoluteUrl)}`;
                     setSourceUrl(proxiedUrl);
                     setVideoType("iframe");
-                    setCheckingStatus(null);
                     // toast.success(`Episode ${currentEp} loaded successfully`); // Remove annoying toasts for fast switches
 
-                    setCheckingStatus(null);
+
                 } else {
                     // No links found — auto-switch to next server
-                    console.warn('[WatchPage] No links from native server, auto-switching...');
-                    autoSwitchServer(selectedServer);
+                    console.warn('[WatchPage] No links from native server');
+                    setError("This server returned no playable links. Please try another server.");
                 }
             } catch (err: any) {
                 if (processingRef.current !== key) return;
                 console.error('[WatchPage] Native server failed:', err.message);
-                // Auto-switch instead of showing error
-                setCheckingStatus(`Server ${selectedServerObj.serverName} failed, trying next...`);
-                autoSwitchServer(selectedServer);
+                setError(`Server ${selectedServerObj.serverName} failed to provide a source. Try switching servers.`);
             } finally {
                 if (processingRef.current === key) {
                     setLoadingSource(false);
@@ -679,8 +624,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
         };
 
-        const currentServerName = servers.find(s => s.serverId === selectedServer)?.serverName || 'server';
-        setCheckingStatus(`Validating ${currentServerName}...`);
+
         fetchSource();
 
     }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
@@ -864,20 +808,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
                                             Initializing Stream
                                         </h3>
-                                        {checkingStatus ? (
-                                            <div className="flex flex-col items-center gap-2">
-                                                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                                                    <RefreshCw className="w-3 h-3 text-purple-400 animate-spin" />
-                                                    <p className="text-[10px] text-purple-300 font-bold uppercase tracking-tighter">
-                                                        {checkingStatus}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
-                                                Bypassing protections...
-                                            </p>
-                                        )}
+                                        <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
+                                            Bypassing protections...
+                                        </p>
                                     </div>
                                 </div>
                             ) : error ? (
@@ -892,7 +825,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         {servers.find(s => s.serverId === "peachify") && (
                                             <button
                                                 onClick={() => {
-                                                    failedServersRef.current.clear();
                                                     setError(null);
                                                     setSelectedServer("peachify");
                                                 }}
@@ -905,7 +837,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         {servers.find(s => s.serverId === "fmovies") && (
                                             <button
                                                 onClick={() => {
-                                                    failedServersRef.current.clear();
                                                     setError(null);
                                                     setSelectedServer("fmovies");
                                                 }}
@@ -916,7 +847,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         )}
                                         <button
                                             onClick={() => {
-                                                failedServersRef.current.clear();
                                                 setError(null);
                                                 setSourceUrl(null);
                                                 const firstNative = servers.find(s => !s.isMovieServer);
@@ -946,7 +876,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 sandbox="allow-scripts allow-presentation"
                                                 allow="autoplay; fullscreen"
                                                 onLoad={() => setLoadingSource(false)}
-                                                onError={() => autoSwitchServer(selectedServer!)}
+                                                onError={() => setError("Iframe failed to load.")}
                                             ></iframe>
                                             
                                             {/* Global Audio Unlocker Overlay */}
@@ -994,7 +924,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 });
                                             }}
                                             onEnded={handleVideoEnded}
-                                            onError={() => autoSwitchServer(selectedServer!)}
+                                            onError={() => setError("Player failed to load video.")}
                                             autoPlay={autoPlay}
                                             autoNext={autoNext}
                                             className="w-full h-full"
@@ -1079,9 +1009,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </div>
                             ) : (
                                 <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
-                                    <div className="w-10 h-10 rounded-full border-2 border-[var(--border-color)] border-t-purple-500 animate-spin"></div>
                                     <p>Initializing...</p>
-                                    {checkingStatus && <p className="text-[10px] text-purple-400 font-bold uppercase tracking-tighter opacity-60">{checkingStatus}</p>}
                                 </div>
                             )}
                         </div>
@@ -1253,20 +1181,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                                                     <div className="flex flex-col">
                                                         <span className="text-xs font-black uppercase text-white tracking-widest">Select Source</span>
-                                                        <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-tighter">Scanning {servers.length} active servers</span>
                                                     </div>
-                                                    <button 
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            failedServersRef.current.clear();
-                                                            const firstNative = servers.find(s => !s.isMovieServer);
-                                                            setSelectedServer(firstNative?.serverId || servers[0]?.serverId);
-                                                            setShowServerDropdown(false);
-                                                        }}
-                                                        className="text-[10px] text-purple-400 font-bold px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 rounded-md transition-colors border border-purple-500/20"
-                                                    >
-                                                        Auto Scan
-                                                    </button>
                                                 </div>
                                                 <div className="max-h-64 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
                                                     {servers.map((server, index) => (
