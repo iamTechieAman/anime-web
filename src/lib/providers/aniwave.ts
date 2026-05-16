@@ -110,10 +110,8 @@ export class AniwaveProvider implements AnimeProvider {
                 const type = $server.attr('data-type'); // sub or dub
 
                 if (type === mode) {
-                    // In a real scraper we would fetch the embed URL via /ajax/v2/episode/sources?id={serverId}
-                    // For now we add a placeholder that we know works or can be expanded
                     sources.push({
-                        url: `${BASE_URL}/embed/${serverId}`, // This is a placeholder
+                        url: `${BASE_URL}/embed/${serverId}`, // Placeholder
                         isM3U8: false,
                         quality: 'auto',
                         isIframe: true,
@@ -128,4 +126,34 @@ export class AniwaveProvider implements AnimeProvider {
             return [];
         }
     }
+
+    async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
+        return this.search(''); // Fallback to search if specific trending URL is unknown
+    }
+
+    async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const response = await axios.get(`${BASE_URL}/recently-updated?page=${page}`, {
+                headers: { 'User-Agent': USER_AGENT }
+            });
+            const $ = cheerio.load(response.data);
+            const results: AnimeSearchResult[] = [];
+
+            $('.film_list-wrap .flw-item').each((_, element) => {
+                const $el = $(element);
+                const href = $el.find('.film-poster a').attr('href');
+                const id = href?.split('?')[0]?.split('/').pop() || '';
+                const title = $el.find('.film-name a').text().trim();
+                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+
+                if (id && title) {
+                    results.push({ id, title, image, provider: this.name });
+                }
+            });
+            return results;
+        } catch (e) {
+            return [];
+        }
+    }
 }
+
