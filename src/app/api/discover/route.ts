@@ -61,7 +61,6 @@ export async function GET(request: Request) {
 
             const recommendations = JSON.parse(aiResponse.data.choices[0].message.content);
             
-            // Map AI titles to our actual TMDB catalog
             const mappedResults = await Promise.all(recommendations.map(async (rec: any) => {
                 const searchRes = await axios.get(TMDB_SEARCH_URL, {
                     params: { api_key: TMDB_API_KEY, query: rec.title, language: 'en-US', page: 1 }
@@ -69,14 +68,10 @@ export async function GET(request: Request) {
                 const item = searchRes.data.results?.[0];
                 if (!item) return null;
                 
+                // Keep original properties and ensure media_type exists
                 return {
-                    id: item.id,
-                    title: item.title || item.name,
-                    image: item.poster_path ? `https://image.tmdb.org/t/p/w300${item.poster_path}` : null,
-                    type: item.media_type === 'movie' ? 'movie' : 'tv',
-                    year: (item.release_date || item.first_air_date || '').split('-')[0],
-                    overview: item.overview,
-                    href: `/watch/${item.media_type}/${item.id}`
+                    ...item,
+                    media_type: item.media_type || (rec.type === 'tv' || rec.type === 'anime' ? 'tv' : 'movie')
                 };
             }));
 
@@ -119,13 +114,8 @@ export async function GET(request: Request) {
             });
 
             const results = res.data.results.slice(0, 10).map((item: any) => ({
-                id: item.id,
-                title: item.title || item.name,
-                image: item.poster_path ? `https://image.tmdb.org/t/p/w300${item.poster_path}` : null,
-                type: isAnime ? 'anime' : (isTv ? 'tv' : 'movie'),
-                year: (item.release_date || item.first_air_date || '').split('-')[0],
-                overview: item.overview,
-                href: `/watch/${isAnime ? 'anime' : (isTv ? 'tv' : 'movie')}/${item.id}`
+                ...item,
+                media_type: isAnime ? 'anime' : (isTv ? 'tv' : 'movie')
             }));
             return NextResponse.json({ results });
         }
@@ -143,13 +133,8 @@ export async function GET(request: Request) {
         });
 
         const results = searchRes.data.results.slice(0, 10).filter((i: any) => i.media_type !== 'person').map((item: any) => ({
-            id: item.id,
-            title: item.title || item.name,
-            image: item.poster_path ? `https://image.tmdb.org/t/p/w300${item.poster_path}` : null,
-            type: item.media_type === 'movie' ? 'movie' : 'tv',
-            year: (item.release_date || item.first_air_date || '').split('-')[0],
-            overview: item.overview,
-            href: `/watch/${item.media_type}/${item.id}`
+            ...item,
+            media_type: item.media_type || 'movie'
         }));
 
         return NextResponse.json({ results });
