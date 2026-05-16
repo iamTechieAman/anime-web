@@ -452,17 +452,18 @@ export class HiAnimeProvider implements AnimeProvider {
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
-            // HiAnime trending items are usually in #trending-home .item
-            $('#trending-home .item').each((_, element) => {
+            // HiAnime trending items are in #anime-trending #trending-home .swiper-slide
+            $('#anime-trending #trending-home .swiper-slide').each((_, element) => {
                 const $el = $(element);
-                const id = $el.find('a').attr('href')?.split('/')[1] || '';
-                const title = $el.find('.film-name').text().trim();
+                const id = $el.find('a').attr('href')?.split('/').pop() || '';
+                const title = $el.find('.film-title').text().trim();
                 const image = $el.find('img').attr('data-src') || $el.find('img').attr('src');
-
+                
                 if (id && title) {
                     results.push({ id, title, image, provider: this.name });
                 }
             });
+
 
             // Fallback to latest records if trending is empty
             if (results.length === 0) {
