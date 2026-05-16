@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
+ 
+// Helper: wrap a promise with a timeout
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string = ''): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout (${ms}ms): ${label}`)), ms))
+    ]);
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -84,43 +92,40 @@ export async function GET(request: Request) {
         console.error("[SourceAPI] Error:", error.message);
 
         // ==========================================
-        // AGGRESSIVE SOURCE SCRAMBLING (Multi-Provider Fallback)
+        // RESILIENT RECOVERY (Multi-Provider Fallback)
         // ==========================================
         try {
-            console.log(`[SourceAPI] Primary provider ${providerName} failed. Initiating Scrambling...`);
+            console.log(`[SourceAPI] Primary provider ${providerName} failed. Initiating Resilient Recovery...`);
 
             // 1. Resolve Show Title if not provided
             let searchTitle = searchParams.get("title") || "";
             if (!searchTitle) {
                 try {
-                    const infoProviders: ProviderName[] = ["allanime", "hianime", "consumet"];
+                    const infoProviders: ProviderName[] = ["hianime", "allanime", "aniwatch"];
                     for (const ip of infoProviders) {
                         try {
-                            const info = await getProvider(ip).getInfo(showId);
+                            const info = await withTimeout(getProvider(ip).getInfo(showId), 3000, `title info ${ip}`);
                             if (info?.title) { searchTitle = info.title; break; }
                         } catch (e) { }
                     }
                 } catch (e) { }
             }
 
-            // 2. Define and SHUFFLE fallback providers
-            const fallbacks: ProviderName[] = ["consumet", "allanime", "hianime", "aniwatch", "anikai", "vidsrc"];
-            const otherProviders = fallbacks
-                .filter(p => p !== providerName)
-                .sort(() => Math.random() - 0.5); // Randomize to avoid repeated failures
+            // 2. Define fallback providers
+            const fallbacks: ProviderName[] = ["hianime", "allanime", "aniwatch", "anikai", "vidsrc"];
+            const otherProviders = fallbacks.filter(p => p !== providerName);
 
-            console.log(`[SourceAPI] Scrambling: ${otherProviders.join(', ')}`);
+            console.log(`[SourceAPI] Recovery Fallbacks: ${otherProviders.join(', ')}`);
 
-            // 3. Try to get sources from other providers
-            for (const fbName of otherProviders) {
-                try {
-                    console.log(`[SourceAPI] Trying scrambled fallback: ${fbName}`);
+            // 3. Try fallback providers in parallel (limit to top 3)
+            const recoveryResults = await Promise.allSettled(
+                otherProviders.slice(0, 3).map(async (fbName) => {
                     const fbProvider = getProvider(fbName);
                     let fbId = showId;
 
                     if (searchTitle) {
-                        const results = await fbProvider.search(searchTitle);
-                        if (results.length > 0) {
+                        const results = await withTimeout(fbProvider.search(searchTitle), 4000, `search ${fbName}`);
+                        if (results && results.length > 0) {
                             const match = results.find(r => 
                                 r.title.toLowerCase().includes(searchTitle.toLowerCase()) || 
                                 searchTitle.toLowerCase().includes(r.title.toLowerCase())
@@ -129,26 +134,34 @@ export async function GET(request: Request) {
                         }
                     }
 
-                    const sources = await fbProvider.getSources(fbId, episodeString, mode);
-
+                    const sources = await withTimeout(fbProvider.getSources(fbId, episodeString, mode), 5000, `source ${fbName}`);
                     if (sources && sources.length > 0) {
-                        console.log(`[SourceAPI] ✓ Scrambling succeeded with ${fbName}!`);
-                        const links = sources.map(s => ({
-                            link: s.url,
-                            hls: s.isM3U8,
-                            resolutionStr: s.quality || "auto",
-                            isIframe: s.isIframe || false,
-                            fromCache: new Date().toISOString()
-                        }));
-                        return NextResponse.json({ links, provider: fbName });
+                        return { sources, provider: fbName };
                     }
-                } catch (fbErr) {
-                    continue; // try next
-                }
+                    throw new Error("No sources");
+                })
+            );
+
+            const successful = recoveryResults
+                .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value)
+                .map(r => r.value);
+
+            if (successful.length > 0) {
+                const best = successful[0];
+                console.log(`[SourceAPI] ✓ Recovery succeeded with ${best.provider}!`);
+                const links = best.sources.map((s: any) => ({
+                    link: s.url,
+                    hls: s.isM3U8,
+                    resolutionStr: s.quality || "auto",
+                    isIframe: s.isIframe || false,
+                    fromCache: new Date().toISOString()
+                }));
+                return NextResponse.json({ links, provider: best.provider });
             }
-        } catch (scrambleErr: any) {
-            console.error(`[SourceAPI] Scrambling failed completely:`, scrambleErr.message);
+        } catch (recoveryErr: any) {
+            console.error(`[SourceAPI] Recovery failed completely:`, recoveryErr.message);
         }
+
 
         // Provide helpful error message with context if everything fails
         const status = error.message.includes("not found") ? 404 : 500;

@@ -169,16 +169,15 @@ export default function MoviesPage() {
                 console.error("Failed to fetch network data:", err);
             }
 
-            // Fetch Anime Home (Aniwaves)
+            // Fetch Anime Home
             try {
-                // Add random delay to mimic human behavior
-                await new Promise(resolve => setTimeout(resolve, Math.random() * (2500 - 1200) + 1200));
                 const animeRes = await axios.get("/api/anime/home");
                 if (animeRes.data.latest) setAnimeLatest(animeRes.data.latest.filter((i: any) => i && i.image));
                 if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
             } catch (err) {
                 console.error("Failed to fetch anime home:", err);
             }
+
 
             // Fetch Premium Extra Content
             try {

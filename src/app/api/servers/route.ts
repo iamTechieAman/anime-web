@@ -7,8 +7,9 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const type = searchParams.get('type') || 'movie';
 
-        // Wait for DB connection
-        await connectToDatabase();
+        // Wait for DB connection with timeout
+        const dbTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("DB Timeout")), 5000));
+        await Promise.race([connectToDatabase(), dbTimeout]);
 
         // Fetch servers, sort descending by qualityScore
         // To prevent servers from completely dying off if they were temporarily down,
