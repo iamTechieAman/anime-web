@@ -324,7 +324,7 @@ export default function Header() {
                 onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
                 onKeyDown={handleKeyDown}
                 placeholder={isDiscoverMode ? "Describe what you want to watch..." : "Find movies, shows & more..."}
-                className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none outline-none px-2 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
+                className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none focus-visible:outline-none outline-none px-2 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
                 autoComplete="off"
               />
               {searchQuery && (
