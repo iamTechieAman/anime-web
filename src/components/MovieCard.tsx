@@ -7,7 +7,7 @@ import React from "react";
 
 // Shared movie item type
 export interface MovieItem {
-    id: number;
+    id: number | string;
     title?: string;
     name?: string;
     poster_path: string | null;
@@ -20,6 +20,11 @@ export interface MovieItem {
     rank?: number;
     liveViewers?: number;
     isMostViewed?: boolean;
+    availableEpisodes?: {
+        sub?: number;
+        dub?: number;
+        raw?: number;
+    };
 }
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
@@ -157,8 +162,29 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie" }: { ite
                                     {matchPercent}% Match
                                 </span>
                             )}
-                            {year && <span>• {year}</span>}
-                            <span className="ml-auto uppercase text-[var(--text-muted)] text-[9px] font-medium">{mediaType}</span>
+                            {/* Anime Badges */}
+                            {(item.availableEpisodes?.sub || item.availableEpisodes?.dub) && (
+                                <div className="flex gap-1 items-center shrink-0 border border-white/20 rounded-sm bg-black/40 overflow-hidden">
+                                    {(item.availableEpisodes?.sub ?? 0) > 0 && (
+                                        <span className="px-1 md:px-1.5 py-0.5 font-medium border-r border-white/20 flex items-center gap-1 text-[#4ade80]">
+                                            <span className="hidden sm:inline">CC</span> {item.availableEpisodes.sub}
+                                        </span>
+                                    )}
+                                    {(item.availableEpisodes?.dub ?? 0) > 0 && (
+                                        <span className="px-1 md:px-1.5 py-0.5 font-medium text-[#c084fc] flex items-center gap-1">
+                                            <span className="hidden sm:inline">MIC</span> {item.availableEpisodes.dub}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-2 ml-auto">
+                                <span className={`flex items-center gap-1 font-bold ${rating ? getRatingColor(Number(rating)) : 'text-[var(--text-muted)]'}`}>
+                                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" />
+                                    {rating ? rating : 'NR'}
+                                </span>
+                                {year && <span>• {year}</span>}
+                            </div>
                         </div>
                     </div>
                 </div>

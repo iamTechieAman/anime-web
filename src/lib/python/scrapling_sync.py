@@ -92,7 +92,7 @@ def scrape_watchanimeworld(query=None, category=None):
         url = "https://watchanimeworld.net/"
 
     # Force Chrome for WA
-    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=20000)
+    response = fetcher.fetch(url, wait_until='domcontentloaded', timeout=20000)
     results = []
     
     if not response: return []
@@ -157,7 +157,7 @@ def scrape_watchanimeworld_az(letter, page=1):
     fetcher = StealthyFetcher()
     url = f"https://watchanimeworld.net/letter/{letter.upper()}/" if page == 1 else f"https://watchanimeworld.net/letter/{letter.upper()}/page/{page}/"
     
-    response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
+    response = fetcher.fetch(url, wait_until='domcontentloaded')
     results = []
     
     if not response: return []
@@ -202,7 +202,7 @@ def scrape_watchanimeworld_info(item_id):
     for url in urls_to_try:
         try:
             # Always use chrome for info and WAIT for DOM to ensure dynamic content loads
-            temp_resp = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=25000)
+            temp_resp = fetcher.fetch(url, wait_until='domcontentloaded', timeout=25000)
             status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
             if temp_resp and status < 400:
                 # Basic validation that we are on a valid content page
@@ -320,11 +320,11 @@ def scrape_watchanimeworld_info(item_id):
 def scrape_watchanimeworld_source(episode_id):
     fetcher = StealthyFetcher()
     url = f"https://watchanimeworld.net/episode/{episode_id}/"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     
     if not response or getattr(response, 'status_code', 200) >= 400:
         url = f"https://watchanimeworld.net//{episode_id}/"
-        response = fetcher.fetch(url, engine='chrome')
+        response = fetcher.fetch(url)
 
     if not response or getattr(response, 'status_code', 200) >= 400:
         clean_title = re.sub(r'-(episode|part)-\d+', '', episode_id.lower())
@@ -334,7 +334,7 @@ def scrape_watchanimeworld_source(episode_id):
         if search_res:
             new_url = search_res[0].get('href')
             if new_url:
-                response = fetcher.fetch(new_url, engine='chrome')
+                response = fetcher.fetch(new_url)
 
     if not response: return {"url": "", "sources": []}
     
@@ -381,7 +381,7 @@ def scrape_watchanimeworld_source(episode_id):
 def scrape_cinemacity(query):
     fetcher = StealthyFetcher()
     url = f"https://cinemacity.cc/index.php?do=search&subaction=search&story={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     items = response.css('.dar-short_item, .sect-item')
@@ -405,7 +405,7 @@ def scrape_cinemacity(query):
 def scrape_filmex(query):
     fetcher = StealthyFetcher()
     url = f"https://filmex.to/search?q={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     items = response.css('.grid a, .item')
@@ -429,7 +429,7 @@ def scrape_filmex(query):
 def scrape_cinezo(query):
     fetcher = StealthyFetcher()
     url = f"https://www.cinezo.net/search?q={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     items = response.css('a[href^="/movie/"], a[href^="/tv/"]')
@@ -452,8 +452,8 @@ def scrape_cinezo(query):
 
 def scrape_justanime_search(query):
     fetcher = StealthyFetcher()
-    url = f"https://justanime.to/search?keyword={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    url = f"https://justanime.to/filter?keyword={query}"
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     items = response.css('a[href*="/anime/"]')
@@ -481,7 +481,7 @@ def scrape_justanime_search(query):
 def scrape_justanime_info(item_id, slug):
     fetcher = StealthyFetcher()
     url = f"https://justanime.to/anime/{item_id}/{slug}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     episodes = []
     if not response: return {"id": item_id, "episodes": []}
     ep_links = response.css('a[href*="/watch/"]')
@@ -499,7 +499,7 @@ def scrape_justanime_info(item_id, slug):
 def scrape_justanime_source(ep_id):
     fetcher = StealthyFetcher()
     url = f"https://justanime.to/watch/{ep_id}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     sources = []
     if not response: return {"url": "", "sources": []}
     iframes = response.css('iframe')
@@ -516,7 +516,7 @@ def scrape_justanime_source(ep_id):
 def scrape_animex_search(query):
     fetcher = StealthyFetcher()
     url = f"https://animex.one/search?q={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     items = response.css('a[href*="/anime/"]')
@@ -538,7 +538,7 @@ def scrape_animex_search(query):
 def scrape_animex_info(item_id, slug):
     fetcher = StealthyFetcher()
     url = f"https://animex.one/anime/{slug}-{item_id}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     episodes = []
     if not response: return {"id": item_id, "episodes": []}
     ep_links = response.css('a[href*="/watch/"]')
@@ -556,7 +556,7 @@ def scrape_animex_info(item_id, slug):
 def scrape_animex_source(ep_id):
     fetcher = StealthyFetcher()
     url = f"https://animex.one/watch/{ep_id}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     sources = []
     if not response: return {"url": "", "sources": []}
     iframes = response.css('iframe')
@@ -573,7 +573,7 @@ def scrape_animex_source(ep_id):
 def scrape_pstream(query):
     fetcher = StealthyFetcher()
     url = f"https://pstream.net/search/{query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     items = response.css('a[href^="/media/"]')
@@ -594,7 +594,7 @@ def scrape_universal_search(site_url, query):
     results = []
     for url in urls:
         try:
-            response = fetcher.fetch(url, engine='chrome')
+            response = fetcher.fetch(url)
             if not response: continue
             items = response.css('.movie-item, .item, article, .post, a[href*="/movie/"], a[href*="/tv/"], a[href*="/series/"]')
             for item in items:
@@ -618,7 +618,7 @@ def scrape_universal_info(site_url, item_id):
     response = None
     for url in urls:
         try:
-            temp = fetcher.fetch(url, engine='chrome')
+            temp = fetcher.fetch(url)
             if temp and getattr(temp, 'status_code', 200) < 400:
                 response = temp
                 break
@@ -738,7 +738,7 @@ def scrape_universal_source(site_url, ep_id):
     response = None
     for url in urls:
         try:
-            temp = fetcher.fetch(url, engine='chrome')
+            temp = fetcher.fetch(url)
             if temp and getattr(temp, 'status_code', 200) < 400:
                 response = temp
                 break
@@ -760,7 +760,7 @@ def scrape_universal_source(site_url, ep_id):
 def scrape_animesalt_search(query):
     fetcher = StealthyFetcher()
     url = f"https://animesalt.ac/?s={query}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     results = []
     if not response: return []
     
@@ -791,7 +791,7 @@ def scrape_animesalt_info(item_id):
     response = None
     for url in urls:
         try:
-            temp = fetcher.fetch(url, engine='chrome')
+            temp = fetcher.fetch(url)
             if temp and getattr(temp, 'status_code', 200) < 400:
                 response = temp
                 break
@@ -820,8 +820,8 @@ def scrape_animesalt_info(item_id):
 
 def scrape_aniwaves_search(query):
     fetcher = StealthyFetcher()
-    url = f"https://aniwaves.ru/search?keyword={query}"
-    response = fetcher.fetch(url, engine='chrome', timeout=30000)
+    url = f"https://aniwaves.ru/filter?keyword={query}"
+    response = fetcher.fetch(url, timeout=30000)
     results = []
     if not response: return []
     items = response.css('div.item, .flw-item')
@@ -866,8 +866,10 @@ def scrape_aniwaves_search(query):
 def scrape_aniwaves_info(item_id):
     fetcher = StealthyFetcher()
     url = f"https://aniwaves.ru/watch/{item_id}"
-    response = fetcher.fetch(url, engine='chrome', timeout=30000)
+    response = fetcher.fetch(url, timeout=30000)
     episodes = []
+    sub_count = 0
+    dub_count = 0
     if not response: return {"id": item_id, "episodes": []}
     
     ep_links = response.css('.episodes a, a[data-ep], a[href*="/watch/"], .ep-item a')
@@ -876,10 +878,22 @@ def scrape_aniwaves_info(item_id):
         if item_id not in href: continue
         ep_id = href.split('/')[-1]
         ep_num = link.attrib.get('data-ep') or link.text.strip()
+        
+        is_sub = link.attrib.get('data-sub') == '1'
+        is_dub = link.attrib.get('data-dub') == '1'
+        if is_sub: sub_count += 1
+        if is_dub: dub_count += 1
+        
         if ep_num and (ep_num.isdigit() or 'Episode' in ep_num):
             num = re.search(r'\d+', ep_num)
             clean_num = num.group(0) if num else ep_num
-            episodes.append({"id": ep_id, "number": clean_num, "href": href})
+            episodes.append({
+                "id": ep_id, 
+                "number": clean_num, 
+                "href": href,
+                "isSub": is_sub,
+                "isDub": is_dub
+            })
             
     title_el = response.css('h1, .title, .film-name')
     title = title_el[0].text.strip() if title_el else item_id.replace('-', ' ').title()
@@ -891,13 +905,14 @@ def scrape_aniwaves_info(item_id):
         "title": title, 
         "image": image if image.startswith('http') else f"https://aniwaves.ru{image}" if image else "",
         "episodes": episodes, 
-        "type": "anime"
+        "type": "anime",
+        "subOrDub": {"sub": sub_count, "dub": dub_count}
     }
 
 def scrape_aniwaves_source(ep_id):
     fetcher = StealthyFetcher()
     url = f"https://aniwaves.ru/watch/{ep_id}"
-    response = fetcher.fetch(url, engine='chrome')
+    response = fetcher.fetch(url)
     sources = []
     if not response: return {"url": "", "sources": []}
     
@@ -919,7 +934,7 @@ def scrape_aniwaves_home():
     import time
     time.sleep(random.uniform(1.0, 2.5))
     url = "https://aniwaves.ru/home"
-    response = fetcher.fetch(url, engine='chrome', timeout=40000)
+    response = fetcher.fetch(url, timeout=40000)
     results = {"slides": [], "latest": [], "trending": []}
     if not response: return results
     
@@ -975,7 +990,7 @@ def scrape_aniwaves_az(letter, page=1):
     path = letter.lower()
     if path == '0-9': path = 'other'
     url = f"https://aniwaves.ru/az-list/{path}?page={page}" if path != 'all' else f"https://aniwaves.ru/az-list?page={page}"
-    response = fetcher.fetch(url, engine='chrome', timeout=35000)
+    response = fetcher.fetch(url, timeout=35000)
     results = []
     if not response: return []
     items = response.css('div.item, .flw-item')
