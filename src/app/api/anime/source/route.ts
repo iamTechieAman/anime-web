@@ -43,7 +43,8 @@ export async function GET(request: Request) {
             'ja': 'justanime',
             'ax': 'animex',
             'cb': 'cinebolt',
-            'un': 'cinebolt'
+            'un': 'cinebolt',
+            'wv': 'aniwave'
         };
         if (prefixMap[prefix]) {
             providerName = prefixMap[prefix];
@@ -112,7 +113,7 @@ export async function GET(request: Request) {
             }
 
             // 2. Define fallback providers
-            const fallbacks: ProviderName[] = ["hianime", "allanime", "aniwatch", "anikai", "vidsrc"];
+            const fallbacks: ProviderName[] = ["hianime", "allanime", "aniwatch", "aniwave", "anikai", "vidsrc"];
             const otherProviders = fallbacks.filter(p => p !== providerName);
 
             console.log(`[SourceAPI] Recovery Fallbacks: ${otherProviders.join(', ')}`);

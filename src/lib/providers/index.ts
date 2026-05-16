@@ -12,9 +12,10 @@ import { AnimexProvider } from './animex';
 import { CineBoltProvider } from './cinebolt';
 import { CinEvoProvider } from './cinevo';
 import { AniwavesProvider } from './aniwaves';
+import { AniwaveProvider } from './aniwave';
 import type { AnimeProvider } from './types';
 
-export type ProviderName = 'allanime' | 'animesalt' | 'hianime' | 'anikai' | 'aniwatch' | 'consumet' | 'vidsrc' | 'onoflix' | 'watchanimeworld' | 'justanime' | 'animex' | 'cinebolt' | 'cinevo' | 'aniwaves';
+export type ProviderName = 'allanime' | 'animesalt' | 'hianime' | 'anikai' | 'aniwatch' | 'consumet' | 'vidsrc' | 'onoflix' | 'watchanimeworld' | 'justanime' | 'animex' | 'cinebolt' | 'cinevo' | 'aniwaves' | 'aniwave';
 
 const providers = new Map<ProviderName, AnimeProvider>([
     ['allanime', new AllAnimeProvider()],
@@ -30,7 +31,8 @@ const providers = new Map<ProviderName, AnimeProvider>([
     ['animex', new AnimexProvider()],
     ['cinebolt', new CineBoltProvider()],
     ['cinevo', new CinEvoProvider()],
-    ['aniwaves', new AniwavesProvider()]
+    ['aniwaves', new AniwavesProvider()],
+    ['aniwave', new AniwaveProvider()]
 ]);
 
 export function getProvider(name: ProviderName): AnimeProvider {

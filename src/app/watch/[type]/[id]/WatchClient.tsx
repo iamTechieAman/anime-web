@@ -719,8 +719,8 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
                     showId: finalId,
                     type: type as any,
-                    title: details.title || details.name || animeData?.name || "Untitled",
-                    poster: details.poster_path ? `https://image.tmdb.org/t/p/w200${details.poster_path}` : (animeData?.thumbnail || ""),
+                    title: details?.title || details?.name || animeData?.name || "Untitled",
+                    poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
                     episodeId: String(selectedEpisode),
                     episodeNumber: selectedEpisode,
                     currentTime: 0,
@@ -784,10 +784,10 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     }
 
     const title = details!.title || details!.name || animeData?.name || "Untitled";
-    const year = (details.release_date || details.first_air_date || "").slice(0, 4);
-    const matchPercent = Math.round((details.vote_average || 0) * 10);
-    const director = details.crew?.find((c) => c.job === "Director");
-    const isUpcoming = details.release_date && new Date(details.release_date) > new Date();
+    const year = (details?.release_date || details?.first_air_date || "").slice(0, 4);
+    const matchPercent = Math.round((details?.vote_average || 0) * 10);
+    const director = details?.crew?.find((c: any) => c.job === "Director");
+    const isUpcoming = details?.release_date && new Date(details.release_date) > new Date();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
     const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
@@ -1105,9 +1105,9 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         if (currentIndex !== -1 && currentIndex < episodes.length - 1) {
                                             router.push(`/watch/${type}/${id}?season=${selectedSeason}&ep=${episodes[currentIndex + 1].episode_number}`);
                                         } else if (details?.seasons && details.seasons.length > 0) {
-                                            const currentSeasonIndex = details.seasons.findIndex((s: any) => s.season_number === selectedSeason);
-                                            if (currentSeasonIndex !== -1 && currentSeasonIndex < details.seasons.length - 1) {
-                                                router.push(`/watch/${type}/${id}?season=${details.seasons[currentSeasonIndex + 1].season_number}&ep=1`);
+                                            const currentSeasonIndex = details?.seasons?.findIndex((s: any) => s.season_number === selectedSeason);
+                                            if (currentSeasonIndex !== undefined && currentSeasonIndex !== -1 && currentSeasonIndex < (details?.seasons?.length || 0) - 1) {
+                                                router.push(`/watch/${type}/${id}?season=${details.seasons![currentSeasonIndex + 1].season_number}&ep=1`);
                                             }
                                         }
                                     }}
@@ -1214,14 +1214,13 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         <Sparkles className="w-4 h-4" /> {matchPercent}% Match
                                     </span>
                                     <span>{year}</span>
-                                    {details.runtime ? (
+                                    {details?.runtime ? (
                                         <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span>
                                     ) : (
-                                        <span>{type === "tv" ? `${details.number_of_seasons} Seasons` : type === "anime" ? "Anime" : ""}</span>
-                                    )
-                                    }
+                                        <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>
+                                    )}
                                     <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[10px] font-bold tracking-widest uppercase">
-                                        {details.status || "Released"}
+                                        {details?.status || "Released"}
                                     </span>
                                 </div>
                             </div>
@@ -1325,7 +1324,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         <span className="text-[var(--text-muted)] text-xs uppercase tracking-wider flex items-center gap-1">
                                             <Globe className="w-3 h-3" /> Language
                                         </span>
-                                        <p className="text-white font-medium mt-0.5">{details.spoken_languages[0].english_name}</p>
+                                        <p className="text-white font-medium mt-0.5">{details?.spoken_languages?.[0]?.english_name || "English"}</p>
                                     </div>
                                 )}
                                 {details.status && (
@@ -1337,7 +1336,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 {details.vote_count && (
                                     <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]">
                                         <span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Votes</span>
-                                        <p className="text-white font-medium mt-0.5">{details.vote_count.toLocaleString()}</p>
+                                        <p className="text-white font-medium mt-0.5">{details?.vote_count?.toLocaleString() || "0"}</p>
                                     </div>
                                 )}
                             </div>

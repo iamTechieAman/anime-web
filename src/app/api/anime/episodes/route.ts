@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         const prefixMap: Record<string, ProviderName> = {
             'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
             'on': 'onoflix', 'of': 'onoflix', 'wa': 'watchanimeworld',
-            'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt'
+            'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt', 'wv': 'aniwave'
         };
         if (prefixMap[prefix]) provider = prefixMap[prefix];
     }
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
             if (media) {
                 // Limit titles to avoid too many searches
                 const titles = [media.title.english, media.title.romaji].filter(Boolean).slice(0, 2);
-                const searchProviders: ProviderName[] = ["hianime", "allanime", "aniwatch"];
+                const searchProviders: ProviderName[] = ["hianime", "allanime", "aniwatch", "aniwave"];
                 
                 // Run all searches in parallel with a shared timeout
                 const results = await Promise.allSettled(
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
         }
 
         // 3. FALLBACK CHAIN
-        const fallbacks: ProviderName[] = ["hianime", "allanime", "aniwatch"];
+        const fallbacks: ProviderName[] = ["hianime", "allanime", "aniwatch", "aniwave"];
         const fallbackResults = await Promise.allSettled(
             fallbacks.filter(f => f !== provider).map(async (fb) => {
                 const p = getProvider(fb);
