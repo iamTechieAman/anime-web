@@ -397,72 +397,103 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     // Auto Server Check — scans servers one-by-one with real animated progress
     const autoCheckServers = useCallback(async () => {
         if (serversList.length === 0) return;
-        if (isAutoChecking) return; // prevent double-trigger
+        if (isAutoChecking) return;
 
-        const serversToCheck = serversList.slice(0, 5); // Scan top 5 servers max
+        const serversToCheck = serversList.slice(0, 5); 
         const total = serversToCheck.length;
 
         setIsAutoChecking(true);
         autoSwitchAttempts.current = 0;
         setFailedServers(new Set());
 
-        // Reset progress
-        setAutoCheckProgress({ current: 0, total, serverName: '', results: [] });
+        try {
+            // Reset progress
+            setAutoCheckProgress({ current: 0, total, serverName: 'Initializing...', results: [] });
+            await new Promise(r => setTimeout(r, 400)); // Brief intro pause
 
-        let firstWorking: any = null;
+            let firstWorking: any = null;
 
-        for (let i = 0; i < serversToCheck.length; i++) {
-            const server = serversToCheck[i];
+            for (let i = 0; i < serversToCheck.length; i++) {
+                const server = serversToCheck[i];
+                let retryCount = 0;
+                let ok = false;
 
-            // Update "currently scanning" label
-            setAutoCheckProgress(prev => ({
-                ...prev,
-                current: i + 1,
-                serverName: server.name,
-            }));
+                // Update UI state for current step
+                setAutoCheckProgress(prev => ({
+                    ...prev,
+                    current: i + 1,
+                    serverName: server.name,
+                }));
 
-            // Simulate a lightweight reachability probe (300–600ms per server)
-            const probeMs = 300 + Math.random() * 300;
-            const probeOk = await new Promise<boolean>(resolve => {
-                // We use a fetch with a 2-second abort to check CDN reachability
-                const controller = new AbortController();
-                const timeout = setTimeout(() => { controller.abort(); resolve(false); }, 2000);
-                // ping the embed host's root (CORS-safe HEAD request)
-                const hostUrl = (() => {
-                    try { return new URL(server.getUrl('movie', '1234')).origin + '/'; } catch { return null; }
-                })();
-                if (!hostUrl) { clearTimeout(timeout); setTimeout(() => resolve(true), probeMs); return; }
-                fetch(hostUrl, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' })
-                    .then(() => { clearTimeout(timeout); resolve(true); })
-                    .catch(() => { clearTimeout(timeout); resolve(false); });
-            });
+                // Robust step execution with retries
+                while (retryCount < 2 && !ok) {
+                    try {
+                        const probeOk = await new Promise<boolean>((resolve, reject) => {
+                            const controller = new AbortController();
+                            const timeout = setTimeout(() => {
+                                controller.abort();
+                                resolve(false); // Timeout = fail
+                            }, 3000); // 3s per probe
 
-            // We treat a fast no-cors response as "available" (true) either way;
-            // only an explicit abort/timeout = unavailable.
-            const ok = probeOk !== false;
+                            const hostUrl = (() => {
+                                try { return new URL(server.getUrl('movie', '1234')).origin + '/'; } 
+                                catch { return null; }
+                            })();
 
-            setAutoCheckProgress(prev => ({
-                ...prev,
-                results: [...prev.results, { name: server.name, ok }],
-            }));
+                            if (!hostUrl) {
+                                clearTimeout(timeout);
+                                resolve(true); // If we can't probe, assume it might work
+                                return;
+                            }
 
-            if (ok && !firstWorking) {
-                firstWorking = server;
+                            fetch(hostUrl, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' })
+                                .then(() => {
+                                    clearTimeout(timeout);
+                                    resolve(true);
+                                })
+                                .catch((err) => {
+                                    clearTimeout(timeout);
+                                    // If it's an abort, we already resolved false
+                                    if (err.name !== 'AbortError') resolve(true); // CORS/Network error often still means host is up
+                                });
+                        });
+
+                        ok = probeOk;
+                    } catch (e) {
+                        console.warn(`Probe failed for ${server.name}, retrying...`, e);
+                    }
+                    if (!ok) retryCount++;
+                }
+
+                // Log result
+                setAutoCheckProgress(prev => ({
+                    ...prev,
+                    results: [...prev.results, { name: server.name, ok }],
+                }));
+
+                if (ok && !firstWorking) {
+                    firstWorking = server;
+                }
+
+                // Dynamic delay to prevent UI "jumpiness"
+                await new Promise(r => setTimeout(r, 150));
             }
 
-            // Small visual gap between rows
-            await new Promise(r => setTimeout(r, 80));
+            // Pick best server
+            const chosen = firstWorking ?? serversList[0];
+            setActiveServer(chosen);
+
+            // Final step: Success message
+            setAutoCheckProgress(prev => ({ ...prev, serverName: `Success: ${chosen.name} Connected` }));
+            await new Promise(r => setTimeout(r, 1000));
+
+        } catch (error) {
+            console.error("AutoCheck failed critically:", error);
+            // Fallback to first server if whole process crashes
+            setActiveServer(serversList[0]);
+        } finally {
+            setIsAutoChecking(false);
         }
-
-        // Pick best server: first OK result, or fallback to serversList[0]
-        const chosen = firstWorking ?? serversList[0];
-        setActiveServer(chosen);
-
-        // Show "connected" briefly before hiding overlay
-        setAutoCheckProgress(prev => ({ ...prev, serverName: `Connected – ${chosen.name}` }));
-        await new Promise(r => setTimeout(r, 800));
-
-        setIsAutoChecking(false);
     }, [serversList, isAutoChecking]);
 
 

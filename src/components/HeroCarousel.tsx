@@ -49,7 +49,7 @@ export default function HeroCarousel() {
 
     const processSlides = (rawSlides: any[]) => {
         try {
-            const formattedSlides: Slide[] = rawSlides.slice(0, 12).map((item: any) => {
+            const formattedSlides: Slide[] = rawSlides.slice(0, 15).map((item: any) => {
                 const isTv = item.media_type === 'tv' || !item.title;
                 const title = item.title || item.name;
                 const description = item.overview || "No description available.";
@@ -63,7 +63,15 @@ export default function HeroCarousel() {
                 return { id: item.id, title, description, image, cover, tags: ["HD", "Trending"], rating, release, quality: "HD", type, link };
             });
 
-            const validSlides = formattedSlides.filter(s => s.image && s.image !== '');
+            // Prioritize Michael Jackson's "Michael" (2026) for the theme
+            const mjSlideIndex = formattedSlides.findIndex(s => s.id === 936075 || s.title?.toLowerCase().includes("michael"));
+            if (mjSlideIndex > -1) {
+                const mjSlide = formattedSlides.splice(mjSlideIndex, 1)[0];
+                mjSlide.tags = ["BIOPIC", "FEATURED", "PREMIUM"];
+                formattedSlides.unshift(mjSlide);
+            }
+
+            const validSlides = formattedSlides.slice(0, 12).filter(s => s.image && s.image !== '');
             setSlides(validSlides.length > 0 ? validSlides : formattedSlides);
         } catch (err) {
             console.error("Error processing slides:", err);

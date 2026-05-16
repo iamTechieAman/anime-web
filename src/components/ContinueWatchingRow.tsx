@@ -10,7 +10,29 @@ export default function ContinueWatchingRow() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
 
-    if (!history || history.length === 0) return null;
+    const demoItems = [
+        {
+            id: 'demo-1',
+            showId: '936075',
+            title: 'Michael',
+            type: 'movie',
+            currentTime: 2400,
+            duration: 12000, // 20%
+            poster: 'https://image.tmdb.org/t/p/w500/tBtqTCimYm3DKck3t8A2mgJaKVK.jpg'
+        },
+        {
+            id: 'demo-2',
+            showId: '16933',
+            title: 'The Wiz',
+            type: 'movie',
+            currentTime: 5400,
+            duration: 12000, // 45%
+            poster: 'https://image.tmdb.org/t/p/w500/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg'
+        }
+    ];
+
+    const displayHistory = history && history.length > 0 ? history : demoItems;
+
 
     const getHistoryLink = (entry: any) => {
         if (entry.type === 'movie') {
@@ -85,7 +107,7 @@ export default function ContinueWatchingRow() {
                 <Clock className="w-5 h-5 text-purple-400" />
                 <h2 className="text-lg md:text-xl font-bold font-sora">Continue Watching</h2>
                 <span className="ml-auto flex items-center gap-2">
-                    <span className="text-xs text-[var(--text-muted)] font-semibold">{history.length} items</span>
+                    <span className="text-xs text-[var(--text-muted)] font-semibold">{displayHistory.length} {history.length === 0 ? 'Featured' : 'items'}</span>
                 </span>
             </div>
             
@@ -110,7 +132,7 @@ export default function ContinueWatchingRow() {
                     ref={scrollContainerRef}
                     className="flex items-center gap-3 md:gap-4 overflow-x-auto hide-scrollbar pb-4 scroll-smooth-x"
                 >
-                    {history.slice(0, 12).map((entry) => {
+                    {displayHistory.slice(0, 12).map((entry) => {
                         const timeLeft = formatTimeLeft(entry.currentTime, entry.duration);
                         const isRemoving = removingId === entry.id;
                         

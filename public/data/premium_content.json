@@ -1,0 +1,65 @@
+{
+  "continue_watching": [
+    {
+      "id": 936075,
+      "title": "Michael",
+      "year": 2026,
+      "type": "movie",
+      "progress": 20,
+      "poster": "/tBtqTCimYm3DKck3t8A2mgJaKVK.jpg",
+      "backdrop": "/xBT0oNq6rsTFv4SxG5uGRIEOrq6.jpg"
+    },
+    {
+      "id": 16933,
+      "title": "The Wiz",
+      "year": 1978,
+      "type": "movie",
+      "progress": 45,
+      "poster": "/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg"
+    }
+  ],
+  "trending_movies": [
+    { "title": "Michael", "year": 2026, "type": "movie", "poster": "/tBtqTCimYm3DKck3t8A2mgJaKVK.jpg" },
+    { "title": "The Godfather", "year": 1972, "type": "movie", "poster": "/3bhkrjOiERvSTq9kPeeABwARthn.jpg" },
+    { "title": "The Godfather Part II", "year": 1974, "type": "movie", "poster": "/hek3j9pBdtjRlyzfkBr3mUvST7z.jpg" },
+    { "title": "The Godfather Part III", "year": 1990, "type": "movie", "poster": "/m679s14L7t9OkaZ09Z7pP923h6z.jpg" },
+    { "title": "Moonwalker", "year": 1988, "type": "movie", "poster": "/vA8X4P0r8hY1C3U6QWv2m8S6v6f.jpg" }
+  ],
+  "top_rated_movies": [
+    { "title": "The Godfather", "year": 1972, "type": "movie" },
+    { "title": "The Godfather Part II", "year": 1974, "type": "movie" },
+    { "title": "This Is It", "year": 2009, "type": "movie" },
+    { "title": "The Shawshank Redemption", "year": 1994, "type": "movie" }
+  ],
+  "new_releases": [
+    { "title": "Project Hail Mary", "year": 2026, "type": "movie" },
+    { "title": "Michael", "year": 2026, "type": "movie" },
+    { "title": "Mortal Kombat II", "year": 2026, "type": "movie" }
+  ],
+  "trending_tv_shows": [
+    { "title": "The Jacksons: An American Dream", "year": 1992, "type": "tv" },
+    { "title": "Stranger Things", "year": 2016, "type": "tv" },
+    { "title": "The Boys", "year": 2019, "type": "tv" }
+  ],
+  "trending_podcasts": [
+    { "title": "The Michael Jackson Podcast", "year": 2024, "type": "podcast" },
+    { "title": "Pop Culture Confidential", "year": 2024, "type": "podcast" },
+    { "title": "60 Songs That Explain the '90s", "year": 2023, "type": "podcast" }
+  ],
+  "trending_books": [
+    { "title": "Moonwalk", "author": "Michael Jackson", "year": 1988, "type": "book" },
+    { "title": "The King of Style", "author": "Michael Bush", "year": 2012, "type": "book" },
+    { "title": "Michael Jackson: The Magic, The Madness, The Whole Story", "author": "J. Randy Taraborrelli", "year": 2009, "type": "book" }
+  ],
+  "trending_songs": [
+    { "title": "Billie Jean", "artist": "Michael Jackson", "year": 1982, "type": "song" },
+    { "title": "Thriller", "artist": "Michael Jackson", "year": 1982, "type": "song" },
+    { "title": "Beat It", "artist": "Michael Jackson", "year": 1982, "type": "song" },
+    { "title": "Smooth Criminal", "artist": "Michael Jackson", "year": 1987, "type": "song" }
+  ],
+  "trending_videos": [
+    { "title": "Thriller (Music Video)", "year": 1983, "type": "video" },
+    { "title": "Black or White (Short Film)", "year": 1991, "type": "video" },
+    { "title": "Michael Jackson: The Making of Thriller", "year": 1983, "type": "video" }
+  ]
+}

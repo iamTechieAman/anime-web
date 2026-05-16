@@ -40,6 +40,7 @@ const TABS = [
     { id: "tv", label: "TV Shows", icon: Tv },
     { id: "anime", label: "Anime", icon: Sparkles },
     { id: "trending", label: "Trending", icon: TrendingUp },
+    { id: "discover", label: "Discover", icon: Zap },
 ];
 
 export default function MoviesPage() {
@@ -60,6 +61,13 @@ export default function MoviesPage() {
     const [trendingPeople, setTrendingPeople] = useState<any[]>([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+
+    // Premium Extra Categories
+    const [podcasts, setPodcasts] = useState<any[]>([]);
+    const [books, setBooks] = useState<any[]>([]);
+    const [songs, setSongs] = useState<any[]>([]);
+    const [videos, setVideos] = useState<any[]>([]);
+    const [mjItems, setMjItems] = useState<any[]>([]);
 
     // Fetch Movie Data for Unified Home
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
@@ -170,6 +178,30 @@ export default function MoviesPage() {
                 if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
             } catch (err) {
                 console.error("Failed to fetch anime home:", err);
+            }
+
+            // Fetch Premium Extra Content
+            try {
+                const premiumRes = await axios.get("/data/premium_content.json");
+                const data = premiumRes.data;
+                setPodcasts(data.trending_podcasts || []);
+                setBooks(data.trending_books || []);
+                setSongs(data.trending_songs || []);
+                setVideos(data.trending_videos || []);
+                
+                // Group MJ items for theme alignment
+                const allMj = [
+                    ...(data.trending_movies || []),
+                    ...(data.trending_tv_shows || []),
+                    ...(data.trending_podcasts || []),
+                    ...(data.trending_books || []),
+                    ...(data.trending_songs || []),
+                    ...(data.trending_videos || [])
+                ].filter(item => item.title?.toLowerCase().includes('michael jackson') || item.artist?.toLowerCase().includes('michael jackson') || item.author?.toLowerCase().includes('michael jackson') || item.title === "Michael" || item.title === "The Wiz" || item.title === "Moonwalker" || item.title === "This Is It");
+                
+                setMjItems(allMj.slice(0, 8));
+            } catch (err) {
+                console.error("Failed to fetch premium content:", err);
             }
         };
 
@@ -395,6 +427,98 @@ export default function MoviesPage() {
                                         <section>
                                             <SectionHeader icon={Tv} title="Trending Series" color="text-purple-400" />
                                             {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
+                                        </section>
+                                    </div>
+                                )}
+
+                                {activeTab === "discover" && (
+                                    <div className="space-y-16 md:space-y-24">
+                                        {mjItems.length > 0 && (
+                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/20 overflow-hidden">
+                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
+                                                <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-yellow-400" isFeatured />
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+                                                    {mjItems.map((item, i) => (
+                                                        <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer group">
+                                                            <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
+                                                                {item.poster ? (
+                                                                    <img src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                                ) : (
+                                                                    <div className="text-zinc-600 font-bold text-lg">{item.title?.charAt(0)}</div>
+                                                                )}
+                                                            </div>
+                                                            <h3 className="text-xs font-bold text-white truncate">{item.title}</h3>
+                                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider">{item.type} • {item.year}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        )}
+                                        <section>
+                                            <SectionHeader icon={Zap} title="Trending Podcasts" color="text-emerald-400" />
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                {podcasts.map((pod, i) => (
+                                                    <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all cursor-pointer group">
+                                                        <div className="w-16 h-16 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 flex-shrink-0 group-hover:bg-emerald-500/20">
+                                                            <Play className="w-6 h-6 text-emerald-400" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <h3 className="text-sm font-bold text-white truncate">{pod.title}</h3>
+                                                            <p className="text-xs text-zinc-500 mt-1">{pod.year} • Podcast</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Popcorn} title="Trending Books" color="text-orange-400" />
+                                            <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
+                                                {books.map((book, i) => (
+                                                    <div key={i} className="flex-shrink-0 w-[160px] group cursor-pointer">
+                                                        <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-orange-500/40 transition-all flex flex-col items-center justify-center p-4 text-center">
+                                                            <div className="w-10 h-1 bg-orange-500 mb-4" />
+                                                            <h3 className="text-xs font-bold text-white leading-tight mb-2">{book.title}</h3>
+                                                            <p className="text-[9px] text-zinc-500">{book.author}</p>
+                                                        </div>
+                                                        <p className="text-[10px] text-center font-bold text-zinc-500 uppercase">{book.year}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Flame} title="Trending Songs" color="text-red-400" />
+                                            <div className="space-y-2">
+                                                {songs.map((song, i) => (
+                                                    <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)]/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
+                                                        <span className="text-xs font-bold text-zinc-600 w-4">{i + 1}</span>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="text-sm font-bold text-white truncate">{song.title}</h3>
+                                                            <p className="text-[10px] text-zinc-500">{song.artist}</p>
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-zinc-500">{song.year}</span>
+                                                        <Play className="w-4 h-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Film} title="Trending Videos" color="text-blue-400" />
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {videos.map((vid, i) => (
+                                                    <div key={i} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                                                        <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                                                                <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute bottom-4 left-4 z-20">
+                                                            <h3 className="text-sm font-bold text-white">{vid.title}</h3>
+                                                            <p className="text-[10px] text-zinc-300 mt-0.5">{vid.year} • HD Video</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </section>
                                     </div>
                                 )}
