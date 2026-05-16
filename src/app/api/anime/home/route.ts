@@ -38,11 +38,26 @@ export async function GET() {
                     return { trending, latest };
                 }
             } catch (e) {
-                console.warn("[AnimeHome] Consumet failed, trying Aniwaves:", e);
+                console.warn("[AnimeHome] Consumet failed, trying Aniwave:", e);
             }
 
             try {
-                // Fallback to Aniwaves (slowest, uses scraper)
+                // Try the new Aniwave (singular) scraper
+                const aniwave = getProvider('aniwave');
+                const [trending, latest] = await Promise.all([
+                    aniwave.getTrending(),
+                    aniwave.getRecent()
+                ]);
+                if (trending.length > 0 || latest.length > 0) {
+                    return { trending, latest };
+                }
+            } catch (e) {
+                console.warn("[AnimeHome] Aniwave (singular) failed, trying Aniwaves:", e);
+            }
+
+            try {
+                // Fallback to Aniwaves (plural, uses scraper client)
+                const aniwaves = getProvider('aniwaves');
                 const data = await aniwaves.getRecent();
                 const trending = await aniwaves.getTrending();
                 return { trending, latest: data };

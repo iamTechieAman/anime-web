@@ -787,7 +787,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const year = (details?.release_date || details?.first_air_date || "").slice(0, 4);
     const matchPercent = Math.round((details?.vote_average || 0) * 10);
     const director = details?.crew?.find((c: any) => c.job === "Director");
-    const isUpcoming = details?.release_date && new Date(details.release_date) > new Date();
+    const isUpcoming = details?.release_date && new Date(details?.release_date || "") > new Date();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
     const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;

@@ -48,7 +48,7 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
             const tmdbId = parts[2];
             return `/watch/${type}/${tmdbId}`;
         }
-        const provider = show.provider || (show._id.startsWith('hi:') ? 'hianime' : show._id.startsWith('aw:') ? 'aniwatch' : 'allanime');
+        const provider = show.provider || (show._id?.startsWith('hi:') ? 'hianime' : show._id?.startsWith('aw:') ? 'aniwatch' : 'allanime');
         return `/watch/anime/${show._id}?provider=${provider}`;
     };
 
@@ -186,7 +186,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number 
             const tmdbId = parts[2];
             return `/watch/${type}/${tmdbId}`;
         }
-        const provider = show.provider || (show._id.startsWith('hi:') ? 'hianime' : show._id.startsWith('aw:') ? 'aniwatch' : 'allanime');
+        const provider = show.provider || (show._id?.startsWith('hi:') ? 'hianime' : show._id?.startsWith('aw:') ? 'aniwatch' : 'allanime');
         return `/watch/anime/${show._id}?provider=${provider}`;
     };
     

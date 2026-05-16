@@ -155,7 +155,6 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vidsrc.me" />
 
         <link rel="manifest" href="/manifest.json" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#050505" />

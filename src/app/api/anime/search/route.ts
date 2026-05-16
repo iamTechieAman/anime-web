@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     // Priority: Aniwaves -> AllAnime (Verified) -> AniWatch (Verified) -> HiAnime (Mirror)
     const providersToTry: ProviderName[] = requestedProvider
         ? [requestedProvider]
-        : ["aniwaves", "allanime", "hianime", "aniwatch"];
+        : ["aniwave", "aniwaves", "allanime", "hianime", "aniwatch"];
 
     if (!query && !genre && !status && !format) {
         return NextResponse.json({ shows: [] });
@@ -55,12 +55,6 @@ export async function GET(request: Request) {
                     results = await animeProvider.getGenre(genreSlug);
                 } else if (status && animeProvider.getRecent) {
                     results = await animeProvider.getRecent();
-                }
-
-                // Apply basic format/status filtering if they were passed but provider didn't handle it
-                // (This is a naive filter on search results)
-                if (results && results.length > 0) {
-                     // ... could add filter logic here if results had metadata ...
                 }
 
                 return (results || []).map(result => ({
@@ -111,7 +105,7 @@ export async function GET(request: Request) {
         const flattened = allResults.flat();
         const seen = new Set();
         const uniqueShows = flattened.filter(show => {
-            const key = show._id || show.name.toLowerCase().trim();
+            const key = show._id || show.name?.toLowerCase().trim() || Math.random().toString();
             if (seen.has(key)) return false;
             seen.add(key);
             return true;

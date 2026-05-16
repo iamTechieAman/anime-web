@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-import { App } from '@capacitor/app';
 
 interface MobileUIContextType {
     isSearchOpen: boolean;
@@ -30,28 +29,37 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
         let backListener: any = null;
 
         const setupListener = async () => {
-            backListener = await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
-                if (isSearchOpen || isMenuOpen) {
-                    setIsSearchOpen(false);
-                    setIsMenuOpen(false);
-                    return;
-                }
+            try {
+                // Only import and use Capacitor if we are in a browser environment
+                if (typeof window !== 'undefined') {
+                    const { App } = await import('@capacitor/app');
+                    
+                    backListener = await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+                        if (isSearchOpen || isMenuOpen) {
+                            setIsSearchOpen(false);
+                            setIsMenuOpen(false);
+                            return;
+                        }
 
-                if (canGoBack) {
-                    window.history.back();
-                } else {
-                    App.exitApp();
+                        if (canGoBack) {
+                            window.history.back();
+                        } else {
+                            App.exitApp();
+                        }
+                    });
                 }
-            });
+            } catch (error) {
+                console.warn("[MobileUIContext] Capacitor App plugin not available:", error);
+            }
         };
 
-        if (typeof window !== 'undefined') {
-            setupListener();
-        }
+        setupListener();
 
         return () => {
             if (backListener) {
-                backListener.remove();
+                try {
+                    backListener.remove();
+                } catch (e) {}
             }
         };
     }, [isSearchOpen, isMenuOpen]);
