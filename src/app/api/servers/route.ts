@@ -24,7 +24,8 @@ export async function GET(request: Request) {
 
         return NextResponse.json({ success: true, servers });
     } catch (error: any) {
-        console.error('Failed to fetch servers from DB:', error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        console.error('Failed to fetch servers from DB (falling back to empty):', error);
+        // Returning success: true but empty servers list triggers hardcoded fallbacks in frontend
+        return NextResponse.json({ success: true, servers: [], isFallback: true });
     }
 }

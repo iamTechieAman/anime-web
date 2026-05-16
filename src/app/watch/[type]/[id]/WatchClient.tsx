@@ -212,12 +212,11 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const { addToHistory, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]); // Start with first server immediately
-    const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [showTrailer, setShowTrailer] = useState(false);
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
-    const autoSwitchAttempts = useRef(0); // Cap auto-switch to prevent infinite loop
+
 
     // Cast & Auto-Next state
     const [rawVideoSource, setRawVideoSource] = useState<string | null>(null);
@@ -229,7 +228,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
     
     // User Settings Support
-    const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
     const [serversList, setServersList] = useState<any[]>(SERVERS);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
@@ -543,83 +541,12 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         setSourceError(false);
     }, [activeServer]);
 
-    // Report successful load to DB
-    useEffect(() => {
-        if (playerLoaded && activeServer?.id && activeServer.id !== 'fallback') {
-            fetch('/api/servers/report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ serverId: activeServer.id, success: true })
-            }).catch(console.error);
-        }
-    }, [playerLoaded, activeServer]);
-
-    // Intelligent Auto-Switching (capped at 3 attempts to prevent infinite loop)
-    const autoSwitchToNext = useCallback((failedId: string) => {
-        if (!smartSwitchEnabled) return;
-        
-        // Report failure to DB
-        if (failedId && typeof failedId === 'string' && failedId !== 'fallback') {
-            fetch('/api/servers/report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ serverId: failedId, success: false })
-            }).catch(console.error);
-        }
-        
-        if (autoSwitchAttempts.current >= 3) {
-            console.warn('[WatchPage] Max auto-switch attempts reached. Stopping.');
-            toast.error('Could not find a working server. Try selecting one manually.', { id: 'autoSwitchToggle' });
-            return;
-        }
-        
-        autoSwitchAttempts.current += 1;
-        console.warn(`[WatchPage] Server ${failedId} failed. Attempt ${autoSwitchAttempts.current}/3`);
-        setFailedServers(prev => {
-            const newSet = new Set(prev);
-            newSet.add(failedId);
-            return newSet;
-        });
-
-        const baseServers = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList;
-        const nextServer = baseServers.find(s => s.id !== failedId && !failedServers.has(s.id));
-        
-        if (nextServer) {
-            toast(`Auto-switching to ${nextServer.name}...`, { icon: '🔄', id: 'autoSwitchToggle' });
-            setActiveServer(nextServer);
-        } else {
-            toast.error('All servers checked. Try selecting one manually.', { id: 'autoSwitchToggle' });
-        }
-    }, [failedServers, type, smartSwitchEnabled, serversList]);
-
-    // Reset auto-switch counter when user manually selects a server
+    // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
-        autoSwitchAttempts.current = 0;
-        setFailedServers(new Set());
         setActiveServer(server);
     }, []);
 
-    // Consolidated auto-switch monitoring (replaces 3 separate effects)
-    useEffect(() => {
-        if (loading || !details || !activeServer) return;
-        if (autoSwitchAttempts.current >= 3) return; // Stop monitoring after cap
 
-        // Handle immediate source errors
-        if (sourceError && !playerLoaded) {
-            autoSwitchToNext(activeServer.id);
-            return;
-        }
-
-        // 8-second timeout for stuck players
-        const timer = setTimeout(() => {
-            if (!playerLoaded && !sourceError) {
-
-                autoSwitchToNext(activeServer.id);
-            }
-        }, 8000);
-
-        return () => clearTimeout(timer);
-    }, [loading, playerLoaded, sourceError, details, activeServer, autoSwitchToNext]);
 
     // Keyboard shortcuts: 1-9 to switch servers, Escape to close modals
     useEffect(() => {
@@ -965,9 +892,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 referrerPolicy="no-referrer"
                                 onError={() => {
                                     setSourceError(true);
-                                    if (!isAnimeServer) {
-                                        autoSwitchToNext(activeServer.id);
-                                    }
                                 }}
                                 onLoad={() => setPlayerLoaded(true)}
                             />
