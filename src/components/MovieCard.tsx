@@ -12,8 +12,10 @@ export interface MovieItem {
     name?: string;
     poster_path: string | null;
     backdrop_path?: string | null;
-    vote_average: number;
+    image?: string;
+    vote_average?: number;
     release_date?: string;
+
     first_air_date?: string;
     media_type?: string;
     overview?: string;
@@ -95,10 +97,10 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-white/5 group-hover:border-purple-500/40 transition-all duration-500 group-hover:shadow-[0_20px_50px_-12px_rgba(168,85,247,0.6)] group-hover:scale-[1.03] group-hover:-translate-y-2 group-hover:-rotate-1 premium-card flex flex-col">
                 {/* Poster / Simulated Trailer Box */}
                 <div className="relative flex-1 min-h-0 aspect-[2/3] overflow-hidden">
-                    {item.poster_path && !imgError ? (
+                    {((item.poster_path || item.image) && !imgError) ? (
                         <img
-                            src={`${IMG_BASE}/w342${item.poster_path}`}
-                            srcSet={`${IMG_BASE}/w185${item.poster_path} 185w, ${IMG_BASE}/w342${item.poster_path} 342w`}
+                            src={item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image}
+                            srcSet={item.poster_path ? `${IMG_BASE}/w185${item.poster_path} 185w, ${IMG_BASE}/w342${item.poster_path} 342w` : undefined}
                             sizes="(max-width: 640px) 28vw, 180px"
                             alt={`${title} (${year}) - Stream HD on ToonPlayer`}
                             width={180}
@@ -113,6 +115,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             <span className="text-zinc-600 text-3xl font-bold">{title.charAt(0)}</span>
                         </div>
                     )}
+
 
                     {/* Simulated Trailer Overlay (Backdrop Image) */}
                     {isHovered && item.backdrop_path && (
@@ -260,7 +263,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
 // === MOVIE GRID ===
 export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
-    const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path));
+    const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
     return (
         <div className="responsive-grid">
             {validItems.map((item, idx) => (
@@ -307,7 +310,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
                 id={scrollId}
                 className="flex overflow-x-auto gap-4 md:gap-5 pb-8 pt-2 hide-scrollbar scroll-smooth-x snap-x snap-mandatory"
             >
-                {items.filter(item => item && (item.poster_path || item.backdrop_path)).map((item, idx) => (
+                {items.filter(item => item && (item.poster_path || item.backdrop_path || item.image)).map((item, idx) => (
                     <div key={`${item.id}-${idx}`} className={`flex-shrink-0 snap-start transition-all duration-500 ${isLarge ? 'w-[45vw] sm:w-[220px] md:w-[260px] lg:w-[280px] max-w-[280px]' : 'w-[32vw] sm:w-[155px] md:w-[170px] lg:w-[180px] max-w-[180px]'}`}>
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
