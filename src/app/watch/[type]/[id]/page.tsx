@@ -42,9 +42,6 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
                 title: `Watch ${title} - ToonPlayer`,
                 description: `Stream ${title} in HD for free. ${rating ? `${rating} match. ` : ''}No ads, no sign-up.`,
                 url: `https://toonplayer.in/watch/${type}/${id}`,
-            },
-            alternates: {
-                canonical: `https://toonplayer.in/watch/${type}/${id}`
                 type: 'video.other',
                 images: [
                     { url: backdrop, width: 1920, height: 1080, alt: title },
