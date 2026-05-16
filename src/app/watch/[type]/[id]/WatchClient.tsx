@@ -394,64 +394,22 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         if (ep) setSelectedEpisode(parseInt(ep) || 1);
     }, []);
 
-    // Auto Server Check — probes top servers and picks the first working one
+    // Auto Server Check — delegates checking to the main player's 8-second timeout logic
     const autoCheckServers = useCallback(async () => {
-        if (isAutoChecking || serversList.length === 0) return;
+        if (serversList.length === 0) return;
+        
         setIsAutoChecking(true);
-        // serversList already contains either movie/tv servers or anime servers from the API
-        const serversToCheck = serversList;
-        const results: { name: string; ok: boolean }[] = [];
-        setAutoCheckProgress({ current: 0, total: serversToCheck.length, serverName: '', results: [] });
-
-        for (let i = 0; i < serversToCheck.length; i++) {
-            const server = serversToCheck[i];
-            setAutoCheckProgress(prev => ({ ...prev, current: i + 1, serverName: server.name }));
-            
-            try {
-                const testUrl = server.getUrl(type === "anime" ? "tv" : type, type === "anime" ? (tmdbIdForAnime || "0") : id, selectedSeason, selectedEpisode);
-                const ok = await new Promise<boolean>((resolve) => {
-                    const iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
-                    iframe.src = testUrl;
-                    const timer = setTimeout(() => { resolve(false); try { document.body.removeChild(iframe); } catch {} }, 2500);
-                    iframe.onload = () => { clearTimeout(timer); resolve(true); try { document.body.removeChild(iframe); } catch {} };
-                    iframe.onerror = () => { clearTimeout(timer); resolve(false); try { document.body.removeChild(iframe); } catch {} };
-                    document.body.appendChild(iframe);
-                });
-                
-                results.push({ name: server.name, ok });
-                setAutoCheckProgress(prev => ({ ...prev, results: [...results] }));
-                
-                // Report health to DB
-                if (server.id && typeof server.id === 'string' && server.id !== 'fallback') {
-                    fetch('/api/servers/report', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ serverId: server.id, success: ok })
-                    }).catch(console.error);
-                }
-
-                if (ok) {
-                    setActiveServer(server);
-                    setIsAutoChecking(false);
-                    return;
-                }
-            } catch {
-                results.push({ name: server.name, ok: false });
-                setAutoCheckProgress(prev => ({ ...prev, results: [...results] }));
-                
-                if (server.id && typeof server.id === 'string' && server.id !== 'fallback') {
-                    fetch('/api/servers/report', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ serverId: server.id, success: false })
-                    }).catch(console.error);
-                }
-            }
-        }
-        // If none worked, stay on first server
-        setIsAutoChecking(false);
-    }, [type, id, selectedSeason, selectedEpisode, tmdbIdForAnime, isAutoChecking, serversList]);
+        
+        // Reset state and switch to first server
+        autoSwitchAttempts.current = 0;
+        setFailedServers(new Set());
+        setActiveServer(serversList[0]);
+        
+        // Remove the overlay quickly to let the user see the player loading
+        setTimeout(() => {
+            setIsAutoChecking(false);
+        }, 500);
+    }, [serversList]);
 
 
     // Scroll-to-top visibility
@@ -606,9 +564,30 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         setSourceError(false);
     }, [activeServer]);
 
+    // Report successful load to DB
+    useEffect(() => {
+        if (playerLoaded && activeServer?.id && activeServer.id !== 'fallback') {
+            fetch('/api/servers/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serverId: activeServer.id, success: true })
+            }).catch(console.error);
+        }
+    }, [playerLoaded, activeServer]);
+
     // Intelligent Auto-Switching (capped at 3 attempts to prevent infinite loop)
     const autoSwitchToNext = useCallback((failedId: string) => {
         if (!smartSwitchEnabled) return;
+        
+        // Report failure to DB
+        if (failedId && typeof failedId === 'string' && failedId !== 'fallback') {
+            fetch('/api/servers/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serverId: failedId, success: false })
+            }).catch(console.error);
+        }
+        
         if (autoSwitchAttempts.current >= 3) {
             console.warn('[WatchPage] Max auto-switch attempts reached. Stopping.');
             toast.error('Could not find a working server. Try selecting one manually.', { id: 'autoSwitchToggle' });
@@ -1202,7 +1181,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         </button>
 
                         {/* Server Buttons — scrollable row on desktop */}
-                        <div className="hidden md:flex items-center gap-2 overflow-x-auto scrollbar-none max-w-[calc(100vw-280px)] pb-1">
+                        <div className="hidden md:flex items-center gap-2 overflow-x-auto max-w-[calc(100vw-280px)] pb-2 pr-4 custom-scrollbar">
                             {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
                                 <button
                                     key={server.id}

@@ -310,7 +310,9 @@ export default function Header() {
               onSubmit={(e) => handleSearch(e)} 
               className={`relative flex items-center backdrop-blur-sm border rounded-2xl px-4 py-3 group focus-within:ring-0 transition-all duration-300 ${isDiscoverMode ? 'bg-purple-900/20 border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.2)]' : 'bg-[var(--bg-card)]/50 border-[var(--border-color)] hover:border-white/20 focus-within:border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.1)]'}`}
             >
-              <Search className={`w-[18px] h-[18px] shrink-0 transition-colors ${isDiscoverMode ? 'text-purple-400' : 'text-[var(--text-muted)] group-focus-within:text-purple-400'}`} />
+              <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
+                <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-purple-400' : 'text-[var(--text-muted)] group-focus-within:text-purple-400'}`} />
+              </button>
               <input
                 type="text"
                 value={searchQuery}
@@ -322,7 +324,7 @@ export default function Header() {
                 onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
                 onKeyDown={handleKeyDown}
                 placeholder={isDiscoverMode ? "Describe what you want to watch..." : "Find movies, shows & more..."}
-                className="w-full bg-transparent border-0 ring-0 focus:ring-0 outline-none focus:outline-none px-3 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
+                className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none outline-none px-2 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
                 autoComplete="off"
               />
               {searchQuery && (
