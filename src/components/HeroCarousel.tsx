@@ -48,6 +48,10 @@ export default function HeroCarousel() {
     }, [trendingData, error]);
 
     const processSlides = (rawSlides: any[]) => {
+        if (!Array.isArray(rawSlides)) {
+            setIsLoading(false);
+            return;
+        }
         try {
             const formattedSlides: Slide[] = rawSlides.slice(0, 15).map((item: any) => {
                 const isTv = item.media_type === 'tv' || !item.title;
@@ -71,8 +75,8 @@ export default function HeroCarousel() {
                 formattedSlides.unshift(mjSlide);
             }
 
-            const validSlides = formattedSlides.slice(0, 12).filter(s => s.image && s.image !== '');
-            setSlides(validSlides.length > 0 ? validSlides : formattedSlides);
+            const validSlides = formattedSlides.filter(s => s && s.image && s.image !== '');
+            setSlides(validSlides.length > 0 ? validSlides.slice(0, 12) : []);
         } catch (err) {
             console.error("Error processing slides:", err);
         } finally {

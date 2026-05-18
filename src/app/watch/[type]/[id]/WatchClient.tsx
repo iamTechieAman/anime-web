@@ -119,7 +119,7 @@ const SERVERS = [
         name: 'CinemaOS',
         badge: 'Vip',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}?autoplay=1`,
+            `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s || 1}/${e || 1}` : ''}?autoplay=1`,
     }
 ];
 
@@ -228,6 +228,8 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
     
     // User Settings Support
+    const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
+    const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [serversList, setServersList] = useState<any[]>(SERVERS);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
@@ -543,6 +545,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
+        setFailedServers(new Set());
         setActiveServer(server);
     }, []);
 
@@ -619,7 +622,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     }
                     
                     // Initial episode setup
-                    const eps = show.availableEpisodesDetail?.[mode] || [];
+                    const eps = Array.isArray(show.availableEpisodesDetail?.[mode]) ? show.availableEpisodesDetail[mode] : [];
                     setEpisodes(eps);
                     if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
 
@@ -892,6 +895,13 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 referrerPolicy="no-referrer"
                                 onError={() => {
                                     setSourceError(true);
+                                    if (activeServer?.id) {
+                                        setFailedServers(prev => {
+                                            const newSet = new Set(prev);
+                                            newSet.add(activeServer.id);
+                                            return newSet;
+                                        });
+                                    }
                                 }}
                                 onLoad={() => setPlayerLoaded(true)}
                             />

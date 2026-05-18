@@ -1,56 +1,67 @@
 "use client";
 
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Play, Star } from "lucide-react";
+import { Play, Star, Calendar, Clock, ChevronRight } from "lucide-react";
 
-export interface Show {
-    _id: string;
+interface Show {
+    _id?: string;
+    id?: string;
+    title: string;
     name?: string;
-    title?: string;
-    availableEpisodes?: {
-        sub: number;
-        dub: number;
-        raw: number;
-    };
-    thumbnail?: string;
     image?: string;
-    provider?: string;
-    __typename: string;
-    score?: number;
+    poster_path?: string;
+    backdrop_path?: string;
     type?: string;
+    media_type?: string;
+    release_date?: string;
+    first_air_date?: string;
+    vote_average?: number;
+    quality?: string;
+    provider?: string;
+    rank?: number;
 }
 
-export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBanner = false, rank }: { show: Show, showScore?: boolean, isBanner?: boolean, rank?: number }) {
-    const [imageError, setImageError] = useState(false);
+export default function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
     const [isVisible, setIsVisible] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
-    const isHD = (show.availableEpisodes?.sub ?? 0) > 0 || (show.availableEpisodes?.dub ?? 0) > 0;
 
-    // Intersection Observer — replaces whileInView (zero JS animation cost)
     useEffect(() => {
-        const el = cardRef.current;
-        if (!el) return;
         const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
-            { rootMargin: "-30px", threshold: 0.05 }
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                    observer.unobserve(entry.target);
+                }
+            },
+            { threshold: 0.1 }
         );
-        observer.observe(el);
+
+        if (cardRef.current) {
+            observer.observe(cardRef.current);
+        }
+
         return () => observer.disconnect();
     }, []);
 
-    // Route TMDB content to movie watch page
-    const isTmdbContent = show._id?.startsWith('tmdb:');
+    const showId = show._id || show.id;
+    const isTmdbContent = showId?.startsWith('tmdb:');
     const getHref = () => {
+        if (!showId) return '/';
         if (isTmdbContent) {
-            const parts = show._id.split(':');
-            const type = parts[1];
-            const tmdbId = parts[2];
+            const parts = showId.split(':');
+            const type = parts[1] || 'movie';
+            const tmdbId = parts[2] || parts[1];
             return `/watch/${type}/${tmdbId}`;
         }
-        const provider = show.provider || (show._id?.startsWith('hi:') ? 'hianime' : show._id?.startsWith('aw:') ? 'aniwatch' : 'allanime');
-        return `/watch/anime/${show._id}?provider=${provider}`;
+        const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : 'allanime');
+        return `/watch/anime/${showId}?provider=${provider}`;
     };
+
+    const title = show.title || show.name || "Unknown Title";
+    const image = show.image || (show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : show.backdrop_path ? `https://image.tmdb.org/t/p/w500${show.backdrop_path}` : "https://api.dicebear.com/9.x/shapes/svg?seed=fallback");
+    const year = (show.release_date || show.first_air_date || "").split('-')[0];
+    const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
 
     return (
         <div
@@ -58,189 +69,139 @@ export const AnimeCard = memo(function AnimeCard({ show, showScore = true, isBan
             className={`card-reveal ${isVisible ? 'card-visible' : ''}`}
         >
             <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-purple-500/40 transition-colors duration-150 block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}>
-                {/* Ranking Number */}
-                {rank !== undefined && (
-                    <div className="absolute top-0 right-0 z-20 pointer-events-none drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
-                        <div className={`
-                            w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-bl-xl backdrop-blur-md border-b border-l border-white/10
-                            ${rank === 0 ? 'bg-gradient-to-br from-yellow-400/90 to-amber-600/90' : 
-                              rank === 1 ? 'bg-gradient-to-br from-gray-300/90 to-gray-500/90' :
-                              rank === 2 ? 'bg-gradient-to-br from-amber-700/90 to-amber-900/90' :
-                              'bg-black/60'}
-                        `}>
-                            <span className="text-sm md:text-lg font-black text-white shadow-sm">
-                                #{rank + 1}
+                <img
+                    src={image}
+                    alt={title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                />
+                
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_20px_rgba(147,51,234,0.5)]">
+                            <Play className="w-6 h-6 text-white fill-current ml-1" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Top Badges */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    {rating && (
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-yellow-400">
+                            <Star className="w-2.5 h-2.5 fill-current" />
+                            {rating}
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom Info (only if not banner) */}
+                {!isBanner && (
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/95 to-transparent">
+                        <h3 className="text-white text-xs font-bold line-clamp-2 leading-tight group-hover:text-purple-400 transition-colors">
+                            {title}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1.5">
+                            {year && <span className="text-[10px] text-white/50 font-medium">{year}</span>}
+                            <span className="text-[10px] px-1 rounded bg-white/10 text-white/70 font-bold uppercase tracking-tighter">
+                                {show.type || show.media_type || "HD"}
                             </span>
                         </div>
                     </div>
                 )}
-
-                {/* Score badge */}
-                {showScore && show.score && (
-                    <div className="absolute top-2 left-2 z-20 flex items-center gap-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md text-white/90 border border-white/10 shadow-lg">
-                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        <span className="text-xs font-bold tracking-tight">{Math.round(show.score * 10)}%</span>
-                    </div>
-                )}
-
-                {/* HD badge */}
-                {isHD && (
-                    <div className="absolute top-2 right-2 z-20 hidden md:block">
-                        <div className="px-1.5 py-0.5 bg-blue-500/80 backdrop-blur-sm rounded text-[9px] font-black tracking-wider text-white shadow-lg border border-blue-400/30">
-                            HD
-                        </div>
-                    </div>
-                )}
-
-                <div className="relative w-full h-full">
-                    {/* Thumbnail Image */}
-                    {(show.thumbnail || show.image) && !imageError ? (
-                        <img
-                            src={show.thumbnail || show.image}
-                            alt={`${show.name || show.title} - Watch on ToonPlayer`}
-                            width={240}
-                            height={360}
-                            onError={() => setImageError(true)}
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-1"
-                            style={{ transform: 'translateZ(0)' }}
-                        />
-                    ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 flex flex-col items-center justify-center p-4">
-                            <Play className="w-12 h-12 text-white/20 mb-3" />
-                            <p className="text-[var(--text-main)] text-xs font-bold text-center line-clamp-3 opacity-60 font-sora">{show.name || show.title}</p>
-                        </div>
-                    )}
-
-                    {/* Gradient Overlays */}
-                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent opacity-80" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-300" />
-
-                    {/* Info Container */}
-                    <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 flex flex-col justify-end transform transition-all duration-300 z-10 group-hover:translate-y-[-4px]">
-                        {/* Title */}
-                        <h3 className="text-white font-bold text-sm md:text-base leading-tight line-clamp-2 md:line-clamp-1 group-hover:line-clamp-2 transition-all duration-300 text-shadow-sm font-sora">
-                            {show.name || show.title}
-                        </h3>
-
-                        {/* Metadata Row */}
-                        <div className="flex items-center gap-2 mt-1.5 md:mt-2 text-[10px] md:text-xs text-white/70 overflow-hidden">
-                            {((show.availableEpisodes?.sub ?? 0) > 0 || (show.availableEpisodes?.dub ?? 0) > 0) && (
-                                <div className="flex gap-1 items-center shrink-0 border border-white/20 rounded-sm bg-black/40 overflow-hidden">
-                                    {(show.availableEpisodes?.sub ?? 0) > 0 && (
-                                        <span className="px-1 md:px-1.5 py-0.5 font-medium border-r border-white/20 flex items-center gap-1 text-[#4ade80]">
-                                            <span className="hidden sm:inline">CC</span> {show.availableEpisodes?.sub}
-                                        </span>
-                                    )}
-                                    {(show.availableEpisodes?.dub ?? 0) > 0 && (
-                                        <span className="px-1 md:px-1.5 py-0.5 font-medium text-[#c084fc] flex items-center gap-1">
-                                            <span className="hidden sm:inline">MIC</span> {show.availableEpisodes?.dub}
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-                            <span className="w-1 h-1 rounded-full bg-white/30 shrink-0"></span>
-                            <span className="font-medium shrink-0 uppercase tracking-wider">{show.type || "TV"}</span>
-                            {isTmdbContent && (
-                                <span className="px-1 py-0.5 bg-blue-500/20 text-blue-400 text-[8px] font-bold rounded-sm uppercase">TMDB</span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Hover overlay with play button */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-purple-500 text-white flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_20px_rgba(168,85,247,0.6)]">
-                            <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />
-                        </div>
-                    </div>
-                </div>
             </Link>
         </div>
     );
-});
+}
 
-// Anime Grid Component
-export const AnimeGrid = memo(function AnimeGrid({ shows }: { shows: Show[] }) {
-    const validShows = shows.filter(show => show && (show.image || show.thumbnail));
-    return (
-        <div className="responsive-grid">
-            {validShows.map((show, i) => (
-                <AnimeCard key={`${show._id}-${i}`} show={show} />
-            ))}
-        </div>
-    );
-});
-
-// Horizontal Anime Card for Sidebars
-export function AnimeCardHorizontal({ show, rank }: { show: Show, rank?: number }) {
-    const [imageError, setImageError] = useState(false);
-    const matchScore = show.score ? Math.round(show.score * 10) : null;
-
-    // Route TMDB content to movie watch page
-    const isTmdbContent = show._id?.startsWith('tmdb:');
+export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number }) {
+    const showId = show._id || show.id;
+    const isTmdbContent = showId?.startsWith('tmdb:');
     const getHref = () => {
+        if (!showId) return '/';
         if (isTmdbContent) {
-            const parts = show._id.split(':');
-            const type = parts[1];
-            const tmdbId = parts[2];
+            const parts = showId.split(':');
+            const type = parts[1] || 'movie';
+            const tmdbId = parts[2] || parts[1];
             return `/watch/${type}/${tmdbId}`;
         }
-        const provider = show.provider || (show._id?.startsWith('hi:') ? 'hianime' : show._id?.startsWith('aw:') ? 'aniwatch' : 'allanime');
-        return `/watch/anime/${show._id}?provider=${provider}`;
+        const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : 'allanime');
+        return `/watch/anime/${showId}?provider=${provider}`;
     };
     
+    const title = show.title || show.name || "Unknown Title";
+    const image = show.image || (show.poster_path ? `https://image.tmdb.org/t/p/w200${show.poster_path}` : "https://api.dicebear.com/9.x/shapes/svg?seed=fallback");
+    const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
+
     return (
-        <div key={`${show._id}-${rank}`} className="card-reveal card-visible">
-        <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
-            {/* Rank Number (if provided) */}
-            {rank !== undefined && (
-                <div className="w-6 text-center shrink-0">
-                    <span className={`text-xl font-black ${rank < 3 ? 'text-[#FF5722]' : 'text-[var(--text-muted)]'}`}>
-                        {rank + 1}
-                    </span>
-                </div>
-            )}
-            
-            {/* Thumbnail */}
-            <div className="relative w-14 h-20 rounded-sm overflow-hidden shrink-0 bg-[var(--bg-card)] shadow-md">
-                {(show.thumbnail || show.image) && !imageError ? (
-                    <img
-                        src={show.thumbnail || show.image}
-                        alt={`${show.name || show.title} - Stream Online on ToonPlayer`}
-                        width={56}
-                        height={80}
-                        onError={() => setImageError(true)}
-                        loading="lazy"
-                        decoding="async"
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                ) : (
-                    <div className="absolute inset-0 bg-white/5 flex items-center justify-center">
-                        <Play className="w-5 h-5 text-white/20" />
+        <div key={`${showId}-${rank}`} className="card-reveal card-visible">
+            <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
+                {/* Rank Number (if provided) */}
+                {rank !== undefined && (
+                    <div className="w-6 text-center shrink-0">
+                        <span className={`text-xl font-black ${rank < 3 ? 'text-[#FF5722]' : 'text-[var(--text-muted)]'}`}>
+                            {rank + 1}
+                        </span>
                     </div>
                 )}
-            </div>
 
-            {/* Info */}
-            <div className="flex border-b border-[var(--border-color)] group-hover:border-transparent pb-3 flex-col justify-center min-w-0 flex-1">
-                <h4 className="font-semibold text-sm text-[var(--text-main)] group-hover:text-[#FF5722] transition-colors line-clamp-2 leading-snug font-sora">
-                    {show.name || show.title}
-                </h4>
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    {(show.availableEpisodes?.sub ?? 0) > 0 && (
-                        <span className="text-[9px] px-1 bg-[#FF5722]/10 text-[#FF5722] border border-[#FF5722]/20 rounded-sm font-bold">CC {show.availableEpisodes?.sub}</span>
-                    )}
-                    {(show.availableEpisodes?.dub ?? 0) > 0 && (
-                        <span className="text-[9px] px-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-sm font-bold">MIC {show.availableEpisodes?.dub}</span>
-                    )}
-                    <span className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
-                        <span className="w-1 h-1 rounded-full bg-[var(--text-muted)]/50"></span>
-                        TV
-                    </span>
+                {/* Thumbnail */}
+                <div className="relative w-14 aspect-[2/3] rounded-md overflow-hidden bg-[var(--bg-card)] shrink-0 shadow-lg">
+                    <img
+                        src={image}
+                        alt={title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Play className="w-4 h-4 text-white fill-current" />
+                    </div>
                 </div>
-            </div>
-        </Link>
+
+                {/* Meta */}
+                <div className="flex-1 min-w-0 pr-4">
+                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-purple-400 transition-colors tracking-tight">
+                        {title}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-bold text-purple-400/80 uppercase">
+                            {show.type || show.media_type || "TV"}
+                        </span>
+                        {rating && (
+                            <div className="flex items-center gap-1 text-[10px] text-yellow-500 font-bold">
+                                <Star className="w-2.5 h-2.5 fill-current" />
+                                {rating}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+                </div>
+                
+                {/* Glow on hover */}
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-purple-600 transition-all duration-500 group-hover:w-full" />
+            </Link>
         </div>
     );
 }
+
+export function AnimeGrid({ shows }: { shows: Show[] }) {
+    if (!shows || shows.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-[var(--text-muted)] mb-2">No anime found.</p>
+            </div>
+        );
+    }
+    const validShows = shows.filter(show => show && (show.image || show.poster_path || show.backdrop_path || show.title || show.name));
+    return (
+        <div className="responsive-grid">
+            {validShows.map((show, i) => (
+                <AnimeCard key={`${show._id || show.id || i}-${i}`} show={show} />
+            ))}
+        </div>
+    );
+}
+

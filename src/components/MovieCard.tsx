@@ -244,7 +244,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                         {year && <span>{year}</span>}
                         {year && <span className="w-1 h-1 rounded-full bg-white/20" />}
                         <span className="capitalize">{mediaType === 'tv' ? 'Series' : 'Movie'}</span>
-                        {item.vote_average > 0 && (
+                        {(item.vote_average ?? 0) > 0 && (
                             <>
                                 <span className="w-1 h-1 rounded-full bg-white/20" />
                                 <span className="flex items-center gap-0.5 text-yellow-400">
@@ -276,7 +276,7 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
 // === MOVIE ROW (Horizontal Scroll) ===
 export const MovieRow = memo(function MovieRow({ items, type = "movie", title, isLarge = false }: { items: MovieItem[]; type?: string; title?: string; isLarge?: boolean }) {
     const backupId = React.useId();
-    const scrollId = `row-${title?.replace(/\s/g, "-") || backupId}`;
+    const scrollId = `row-${String(title || backupId).replace(/\s/g, "-")}`;
 
     const scroll = (direction: "left" | "right") => {
         const container = document.getElementById(scrollId);

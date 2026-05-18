@@ -109,9 +109,9 @@ export default function MoviesPage() {
         }
     }, [movieTrending]);
 
-    useEffect(() => { if (moviePopular?.results) setPopular(moviePopular.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [moviePopular]);
-    useEffect(() => { if (movieUpcoming?.results) setNowPlaying(movieUpcoming.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [movieUpcoming]);
-    useEffect(() => { if (moviePeople?.results) setTrendingPeople(moviePeople.results.filter((i: any) => i && i.profile_path).slice(0, 6)); }, [moviePeople]);
+    useEffect(() => { if (Array.isArray(moviePopular?.results)) setPopular(moviePopular.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [moviePopular]);
+    useEffect(() => { if (Array.isArray(movieUpcoming?.results)) setNowPlaying(movieUpcoming.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [movieUpcoming]);
+    useEffect(() => { if (Array.isArray(moviePeople?.results)) setTrendingPeople(moviePeople.results.filter((i: any) => i && i.profile_path).slice(0, 6)); }, [moviePeople]);
 
     // Fetch main data sequentially (remaining axios calls)
     useEffect(() => {
@@ -124,9 +124,9 @@ export default function MoviesPage() {
                     axios.get("/api/prime/tv?category=top_rated"),
                 ]);
 
-                setTopRated((topRatedRes.data.results || []).filter((i: any) => i && (i.poster_path || i.backdrop_path)));
-                setTvPopular((tvPopRes.data.results || []).filter((i: any) => i && (i.poster_path || i.backdrop_path)));
-                setTvTopRated((tvTopRes.data.results || []).filter((i: any) => i && (i.poster_path || i.backdrop_path)));
+                setTopRated(Array.isArray(topRatedRes.data.results) ? topRatedRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
+                setTvPopular(Array.isArray(tvPopRes.data.results) ? tvPopRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
+                setTvTopRated(Array.isArray(tvTopRes.data.results) ? tvTopRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
             } catch (err) {
                 console.error("Failed to fetch main data:", err);
             }
@@ -172,8 +172,8 @@ export default function MoviesPage() {
             // Fetch Anime Home
             try {
                 const animeRes = await axios.get("/api/anime/home");
-                if (animeRes.data.latest) setAnimeLatest(animeRes.data.latest.filter((i: any) => i && i.image));
-                if (animeRes.data.trending) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
+                if (Array.isArray(animeRes.data.latest)) setAnimeLatest(animeRes.data.latest.filter((i: any) => i && i.image));
+                if (Array.isArray(animeRes.data.trending)) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
             } catch (err) {
                 console.error("Failed to fetch anime home:", err);
             }
@@ -196,7 +196,7 @@ export default function MoviesPage() {
                     ...(data.trending_books || []),
                     ...(data.trending_songs || []),
                     ...(data.trending_videos || [])
-                ].filter(item => item.title?.toLowerCase().includes('michael jackson') || item.artist?.toLowerCase().includes('michael jackson') || item.author?.toLowerCase().includes('michael jackson') || item.title === "Michael" || item.title === "The Wiz" || item.title === "Moonwalker" || item.title === "This Is It");
+                ].filter(item => item && (item.title?.toLowerCase().includes('michael jackson') || item.artist?.toLowerCase().includes('michael jackson') || item.author?.toLowerCase().includes('michael jackson') || item.title === "Michael" || item.title === "The Wiz" || item.title === "Moonwalker" || item.title === "This Is It"));
                 
                 setMjItems(allMj.slice(0, 8));
             } catch (err) {
@@ -398,7 +398,7 @@ export default function MoviesPage() {
                                             <SectionHeader icon={Flame} title="Trending Anime" color="text-purple-400" />
                                             {animeTrending.length > 0 ? (
                                                 <div className="responsive-grid">
-                                                    {animeTrending.map(item => <AnimeCardHorizontal key={item.id} show={item} />)}
+                                                    {animeTrending.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
                                                 </div>
                                             ) : <RowSkeleton />}
                                         </section>
@@ -406,7 +406,7 @@ export default function MoviesPage() {
                                             <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-blue-400" />
                                             {animeLatest.length > 0 ? (
                                                 <div className="responsive-grid">
-                                                    {animeLatest.map(item => <AnimeCardHorizontal key={item.id} show={item} />)}
+                                                    {animeLatest.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
                                                 </div>
                                             ) : <RowSkeleton />}
                                         </section>

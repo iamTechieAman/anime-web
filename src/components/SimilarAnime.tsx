@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { AnimeCard, Show } from "./AnimeCard";
+import AnimeCard, { type Show } from "./AnimeCard";
 import { Loader2, Sparkles } from "lucide-react";
 
 export default function SimilarAnime({ currentShowId, showName }: { currentShowId: string; showName: string }) {
