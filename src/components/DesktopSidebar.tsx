@@ -24,17 +24,17 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="fixed left-4 top-4 bottom-4 w-[72px] hover:w-[210px] transition-[width,border-color,box-shadow] duration-300 ease-in-out bg-[var(--bg-card)]/50 backdrop-blur-3xl border border-white/[0.07] rounded-[20px] hidden md:flex flex-col py-6 z-40 overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.7)] group/sidebar hover:border-[var(--accent)]/30 hover:shadow-[0_12px_40px_rgba(249,115,22,0.1)]">
+        <aside className="fixed left-3 top-3 bottom-3 w-[72px] hover:w-[210px] transition-[width,border-color,box-shadow] duration-300 ease-in-out bg-[var(--bg-card)]/60 backdrop-blur-3xl border border-white/[0.07] rounded-[18px] hidden md:flex flex-col py-5 z-40 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6)] group/sidebar hover:border-[var(--accent)]/20 hover:shadow-[0_8px_32px_rgba(249,115,22,0.08)]">
             {/* Logo */}
             <Link href="/" className="mb-5 mx-auto group pointer-events-auto flex items-center justify-center w-full px-4 relative">
-                <div className="w-8 h-8 relative flex items-center justify-center shrink-0 bg-gradient-to-tr from-orange-500 to-amber-400 rounded-xl p-[2px] shadow-[0_0_14px_rgba(249,115,22,0.35)]">
+                <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
                     <img 
                         src="/logo.webp" 
                         alt="ToonPlayer" 
-                        className="w-full h-full object-contain mix-blend-screen bg-[#0B0A0F] rounded-[10px]"
+                        className="w-full h-full object-contain"
                     />
                 </div>
-                <span className="text-white font-black font-sora text-sm opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 absolute left-14 tracking-tighter uppercase bg-clip-text bg-gradient-to-r from-white via-orange-300 to-amber-300">
+                <span className="text-white font-black font-sora text-sm opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 absolute left-14 tracking-tighter uppercase">
                     ToonPlayer
                 </span>
             </Link>

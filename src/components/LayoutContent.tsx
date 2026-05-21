@@ -27,7 +27,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <div className={`min-h-screen bg-[var(--bg-main)] relative overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
       <DesktopSidebar />
-      <div className={`flex flex-col min-h-screen relative md:pl-[92px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      <div className={`flex flex-col min-h-screen relative md:pl-[116px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
 
 
@@ -36,7 +36,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <Suspense fallback={<div className="h-16 w-full skeleton-shine" />}>
           <Header />
         </Suspense>
-        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-12 md:pt-16'} bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-main)]/90`}>
+        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-20'} bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-main)]/90`}>
           {/* Subtle global ambient glow */}
           <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-orange-900/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>
