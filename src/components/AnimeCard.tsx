@@ -79,55 +79,52 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
 
     return (
-        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''}`}>
-            <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[2/3]'} premium-card`}>
-                {/* Poster */}
-                {(imageSrc && !imgError) ? (
-                    <img
-                        src={imageSrc}
-                        alt={title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        decoding="async"
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <ImagePlaceholder title={title} />
-                )}
+        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} netflix-card-snap w-full`}>
+            <Link href={getHref()} className="block group w-full h-full">
+                <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
+                    {/* Poster */}
+                    {(imageSrc && !imgError) ? (
+                        <img
+                            src={imageSrc}
+                            alt={title}
+                            className="w-full h-full object-cover aspect-[2/3]"
+                            loading="lazy"
+                            decoding="async"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <ImagePlaceholder title={title} />
+                    )}
 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_20px_rgba(249,115,22,0.5)]">
-                            <Play className="w-6 h-6 text-white fill-current ml-1" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Rating badge */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    {/* Rating badge */}
                     {rating && (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-yellow-400">
+                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/70 z-10 text-[10px] font-bold text-yellow-400">
                             <Star className="w-2.5 h-2.5 fill-current" />
                             {rating}
                         </div>
                     )}
-                </div>
 
-                {/* Bottom info */}
-                {!isBanner && (
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/95 to-transparent">
-                        <h3 className="text-white text-xs font-bold line-clamp-2 leading-tight group-hover:text-orange-400 transition-colors">
-                            {title}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1.5">
-                            {year && <span className="text-[10px] text-white/50 font-medium">{year}</span>}
-                            <span className="text-[10px] px-1 rounded bg-white/10 text-white/70 font-bold uppercase tracking-tighter">
-                                {show.type || show.media_type || "HD"}
+                    {/* Premium Slide-Up Netflix-Style Overlay */}
+                    <div className="premium-card-overlay">
+                        <div className="premium-card-overlay-content space-y-2">
+                            {/* Play CTA Indicator */}
+                            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center shadow-lg mb-1">
+                                <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                            </div>
+                            
+                            <h4 className="text-xs font-black text-white line-clamp-2 leading-tight tracking-tight">{title}</h4>
+                            
+                            <div className="flex items-center gap-2 text-[9px] text-white/90 font-bold">
+                                <span className="text-green-400 font-black">98% Match</span>
+                                {year && <span>• {year}</span>}
+                            </div>
+
+                            <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/10 text-white/90 font-black uppercase tracking-wider w-fit block border border-white/5">
+                                {show.type || show.media_type || "ANIME"}
                             </span>
                         </div>
                     </div>
-                )}
+                </div>
             </Link>
         </div>
     );

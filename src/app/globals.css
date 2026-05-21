@@ -1348,3 +1348,122 @@ main, .relative.z-10 {
 .hero-vignette, .fixed.inset-0.bg-gradient-to-t {
   pointer-events: none !important;
 }
+
+/* ══════════════════════════════════════════════════
+   TOONPLAYER V4.0 — NETFLIX-STYLE PREMIUM OTT ADDITIONS
+   ══════════════════════════════════════════════════ */
+
+/* Netflix Snapping Rows with Hidden Scrollbars & Webkit Performance Acceleration */
+.netflix-row-container {
+  position: relative;
+  width: 100%;
+}
+
+.netflix-row {
+  display: flex !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch !important;
+  gap: 16px !important;
+  padding: 8px 4px 20px 4px !important;
+  margin-bottom: 0 !important;
+  scrollbar-width: none !important; /* Firefox */
+}
+
+.netflix-row::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+}
+
+/* Netflix Snap-Align Cards */
+.netflix-card-snap {
+  scroll-snap-align: start !important;
+  flex: 0 0 auto !important;
+}
+
+/* Premium Card Overlay and Hardware-Accelerated 3D Elevate Transitions */
+.premium-card-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2/3 !important;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, box-shadow;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+              border-color 0.4s ease;
+  z-index: 1;
+}
+
+.premium-card-container:hover {
+  transform: translate3d(0, -6px, 0) scale3d(1.03, 1.03, 1.03);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 15px rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.35);
+  z-index: 10;
+}
+
+/* Smooth Slide-up Overlay Metadata Mask */
+.premium-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(to top, 
+              rgba(11, 10, 15, 0.95) 0%, 
+              rgba(11, 10, 15, 0.7) 45%, 
+              rgba(11, 10, 15, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  pointer-events: none;
+  z-index: 2;
+  padding: 16px;
+}
+
+.premium-card-container:hover .premium-card-overlay {
+  opacity: 1;
+}
+
+.premium-card-overlay-content {
+  transform: translate3d(0, 12px, 0);
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.premium-card-container:hover .premium-card-overlay-content {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Row Edge-Fade Masks (simulating Netflix horizontal row fades) */
+.netflix-row-fade-left, .netflix-row-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.3s ease;
+}
+
+.netflix-row-fade-left {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-main) 0%, transparent 100%);
+}
+
+.netflix-row-fade-right {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-main) 0%, transparent 100%);
+}
+
+@media (max-width: 768px) {
+  .netflix-row-fade-left, .netflix-row-fade-right {
+    display: none !important;
+  }
+  .premium-card-container:hover {
+    transform: none !important;
+  }
+}
+
