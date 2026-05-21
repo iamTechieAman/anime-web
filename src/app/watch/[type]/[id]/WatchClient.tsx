@@ -583,22 +583,17 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         });
     }, [activeServer, serversList, isAnimeServer]);
 
-    // Reset states on server change and boot automatic health checker timeout
+    // Boot automatic health checker timeout
     useEffect(() => {
-        setPlayerLoaded(false);
-        setSourceError(false);
-
-        if (!activeServer || sourceError) return;
+        if (!activeServer || sourceError || playerLoaded || !smartSwitchEnabled) return;
 
         // Fallback after 8.5 seconds if loading fails
         const timer = setTimeout(() => {
-            if (!playerLoaded) {
-                handleAutoFallback();
-            }
+            handleAutoFallback();
         }, 8500);
 
         return () => clearTimeout(timer);
-    }, [activeServer, playerLoaded, sourceError, handleAutoFallback]);
+    }, [activeServer, playerLoaded, sourceError, handleAutoFallback, smartSwitchEnabled]);
 
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
