@@ -182,7 +182,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             </span>
                         </div>
                     ) : (
-                        <div className="absolute top-2 right-2 hidden sm:block bg-blue-500/80 rounded px-1.5 py-0.5 z-10">
+                        <div className="absolute top-2 right-2 hidden sm:block bg-orange-500/80 rounded px-1.5 py-0.5 z-10">
                             <span className="text-[9px] font-bold text-white tracking-wider">HD</span>
                         </div>
                     )}

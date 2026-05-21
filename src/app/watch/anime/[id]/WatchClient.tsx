@@ -1124,7 +1124,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 <Shield className="w-3 h-3" />
                                 SafeStream Protected
                             </button>
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-wider">
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-wider">
                                 <Zap className="w-3 h-3" />
                                 Edge Optimized
                             </div>
@@ -1177,21 +1177,21 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-400">
                                 <div className="space-y-2">
                                     <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1 flex-shrink-0" />
                                         <span>If video is not found or refused to connect, switch to <b>VidSrc Pro</b> or <b>VidSrc PM</b>.</span>
                                     </p>
                                     <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1 flex-shrink-0" />
                                         <span>Disable <b>Ad-Blockers</b> if you see a blank player or "Connection Refused".</span>
                                     </p>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1 flex-shrink-0" />
                                         <span>Try switching from <b>SUB to DUB</b> (or vice versa) if one source fails.</span>
                                     </p>
                                     <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1 flex-shrink-0" />
                                         <span>If using <b>WatchAnimeWorld</b>, some old links may return 404—switch server.</span>
                                     </p>
                                 </div>
@@ -1284,7 +1284,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                         >
                                                             <div className="flex items-center gap-3">
                                                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                                                    server.isMovieServer ? 'bg-blue-500/10 text-blue-400' : 'bg-orange-500/10 text-orange-400'
+                                                                    server.isMovieServer ? 'bg-orange-500/10 text-orange-400' : 'bg-orange-500/10 text-orange-400'
                                                                 }`}>
                                                                     <Play className={`w-3.5 h-3.5 ${selectedServer === server.serverId ? 'fill-current' : ''}`} />
                                                                 </div>

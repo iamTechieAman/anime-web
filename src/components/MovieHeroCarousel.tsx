@@ -174,7 +174,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                         key={i}
                         onClick={() => setCurrent(i)}
                         className={`transition-all duration-300 rounded-full ${i === current
-                            ? "w-8 h-2 bg-blue-500 shadow-[0_0_10px_#3b82f6]"
+                            ? "w-8 h-2 bg-orange-500 shadow-[0_0_10px_#f97316]"
                             : "w-2 h-2 bg-white/30 hover:bg-white/50"
                             }`}
                     />

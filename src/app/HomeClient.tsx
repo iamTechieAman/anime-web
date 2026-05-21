@@ -836,7 +836,7 @@ export default function MoviesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-blue-500/90 hover:bg-blue-500 text-white rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] backdrop-blur-sm transition-colors"
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-orange-500/90 hover:bg-orange-600 text-white rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)] backdrop-blur-sm transition-colors"
                     >
                         <ChevronUp className="w-5 h-5" />
                     </motion.button>

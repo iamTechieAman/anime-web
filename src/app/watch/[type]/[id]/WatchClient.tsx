@@ -921,7 +921,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                     <div className="flex gap-4">
                                         <Link 
                                             href="/" 
-                                            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-500 transition-all uppercase tracking-widest text-[10px]"
+                                            className="px-6 py-2.5 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-500 transition-all uppercase tracking-widest text-[10px]"
                                         >
                                             Explore Others
                                         </Link>
@@ -1066,7 +1066,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 </div>
 
                 {/* Server disclaimer */}
-                <div className="w-full bg-blue-500/10 border-b border-blue-500/20 px-4 md:px-6 py-2.5 backdrop-blur-md">
+                <div className="w-full bg-orange-500/10 border-b border-orange-500/20 px-4 md:px-6 py-2.5 backdrop-blur-md">
                     <p className="w-full text-xs font-semibold text-blue-300 flex items-center gap-2">
                         <Sparkles className="w-4 h-4 shrink-0 text-yellow-400" />
                         <span>You are watching <span className="font-black text-white px-1">{title}</span>. If the current server doesn't work, please try other servers below.</span>
@@ -1131,7 +1131,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         <button
                                             key={server.id}
                                             onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
-                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
+                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-orange-400 bg-orange-500/10" : "text-[var(--text-main)]"
                                                 }`}
                                         >
                                             <div className="flex items-center">
@@ -1150,7 +1150,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         <button
                                             key={server.id}
                                             onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
-                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-blue-400 bg-blue-500/10" : "text-[var(--text-main)]"
+                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-orange-400 bg-orange-500/10" : "text-[var(--text-main)]"
                                                 }`}
                                         >
                                             <div className="flex items-center">
@@ -1421,7 +1421,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         <section className="mt-10 xl:hidden">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
+                                    <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#f97316]" />
                                     <h2 className="text-xl font-bold">Episodes</h2>
                                     {episodes.length > 0 && (
                                         <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">
@@ -1471,7 +1471,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                                 }}
                                                 className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
                                                     selectedEpisode === ep.episode_number
-                                                        ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_12px_rgba(59,130,246,0.2)]'
+                                                        ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_12px_rgba(249,115,22,0.2)]'
                                                         : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-blue-500/40'
                                                 }`}
                                             >
@@ -1541,7 +1541,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
                                                     {/* Play Icon Overlay */}
                                                     <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${selectedEpisode === ep.episode_number ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                                                        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                                                        <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                                                             <Play className="w-4 h-4 text-white fill-current ml-0.5" />
                                                         </div>
                                                     </div>
@@ -1612,7 +1612,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     {details.recommendations && details.recommendations.length > 0 && (
                         <section className="mt-10">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
+                                <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#f97316]" />
                                 <h2 className="text-lg font-bold">You May Also Like</h2>
                             </div>
                             <MovieRow items={details.recommendations} type={type} />
@@ -1824,7 +1824,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-blue-500/90 hover:bg-blue-500 text-white rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] backdrop-blur-sm transition-colors"
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-orange-500/90 hover:bg-orange-600 text-white rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)] backdrop-blur-sm transition-colors"
                     >
                         <ChevronUp className="w-5 h-5" />
                     </motion.button>
