@@ -147,7 +147,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full xl:max-w-[1600px] xl:mx-auto xl:rounded-[28px] xl:border xl:border-white/10 xl:my-4 h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] overflow-hidden group bg-black shadow-2xl"
+            className="relative w-full xl:max-w-[1600px] xl:mx-auto xl:rounded-[22px] xl:border xl:border-white/[0.07] xl:my-3 h-[42vh] sm:h-[48vh] md:h-[52vh] lg:h-[58vh] max-h-[580px] overflow-hidden group bg-black shadow-2xl"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -189,56 +189,56 @@ export default function HeroCarousel() {
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/50 to-transparent z-10" />
 
             {/* Trending Badge */}
-            <div className="absolute top-24 left-4 md:left-24 z-30">
-                <div className="bg-gradient-to-r from-red-600 to-red-700 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded flex items-center gap-2 shadow-lg animate-fadeSlideDown">
+            <div className="absolute top-14 left-4 md:left-20 z-30">
+                <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-[9px] md:text-[10px] font-black px-2.5 py-1 rounded flex items-center gap-1.5 shadow-lg animate-fadeSlideDown">
                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                     TRENDING NOW
                 </div>
             </div>
 
             {/* Content */}
-            <div className="absolute inset-0 flex items-end z-20 pb-16 md:pb-20">
-                <div className="w-full px-6 md:px-12">
-                    <div className="max-w-2xl">
+            <div className="absolute inset-0 flex items-end z-20 pb-10 md:pb-14">
+                <div className="w-full px-5 md:px-10">
+                    <div className="max-w-xl">
                         {/* Metadata Badges */}
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                            <span className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                            <span className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
                                 {activeSlide.type}
                             </span>
-                            <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-white/10">
+                            <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase border border-white/10">
                                 {activeSlide.quality}
                             </span>
-                            <span className="text-xs font-bold text-white/60 flex items-center gap-1">
+                            <span className="text-[10px] font-bold text-white/60 flex items-center gap-1">
                                 <Calendar className="w-3 h-3" /> {activeSlide.release}
                             </span>
                             {activeSlide.rating !== "?" && (
-                                <span className="text-xs font-bold text-green-400">
+                                <span className="text-[10px] font-bold text-green-400">
                                     {activeSlide.rating} Match
                                 </span>
                             )}
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.05] text-white mb-3 line-clamp-2 font-sora tracking-tighter drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.05] text-white mb-2 line-clamp-2 font-sora tracking-tighter drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
                             {activeSlide.title}
                         </h1>
 
                         {/* Description */}
-                        <p className="text-white/80 text-sm md:text-lg line-clamp-2 md:line-clamp-3 leading-relaxed max-w-2xl mb-8 font-medium drop-shadow-md">
+                        <p className="text-white/75 text-xs md:text-sm line-clamp-2 leading-relaxed max-w-lg mb-5 font-medium drop-shadow-md hidden sm:block">
                             {activeSlide.description}
                         </p>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5">
                             <Link href={activeSlide.link}>
-                                <button className="flex items-center gap-2.5 px-8 md:px-10 py-3 md:py-3.5 bg-white text-black hover:bg-white/90 font-black rounded transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.15)] text-sm md:text-base">
-                                    <Play className="w-5 h-5 fill-current" />
+                                <button className="flex items-center gap-2 px-6 md:px-8 py-2.5 bg-white text-black hover:bg-white/90 font-black rounded transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.12)] text-sm">
+                                    <Play className="w-4 h-4 fill-current" />
                                     PLAY
                                 </button>
                             </Link>
                             <Link href={activeSlide.link}>
-                                <button className="flex items-center gap-2.5 px-6 py-3 md:py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded border border-white/10 transition-all text-sm md:text-base">
-                                    <Info className="w-5 h-5" />
+                                <button className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded border border-white/10 transition-all text-sm">
+                                    <Info className="w-4 h-4" />
                                     More Info
                                 </button>
                             </Link>

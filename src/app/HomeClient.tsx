@@ -314,11 +314,11 @@ export default function MoviesPage() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-[1800px] mx-auto px-6 lg:px-12 py-8 md:py-12">
+                <div className="w-full max-w-[1800px] mx-auto px-5 lg:px-10 py-5 md:py-8">
                     {searchQuery ? (
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                             <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                                <Search className="w-6 h-6 text-purple-400" />
+                                <Search className="w-6 h-6 text-orange-400" />
                                 {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
                             </h2>
                             {searchResults.length > 0 ? (
@@ -327,7 +327,7 @@ export default function MoviesPage() {
                                         <Link
                                             key={`${item.type}-${item.id}`}
                                             href={item.href}
-                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-purple-500/50 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-orange-500/40 transition-all hover:scale-[1.02] duration-300 shadow-lg"
                                         >
                                             <div className="aspect-[2/3] relative">
                                                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
@@ -336,7 +336,7 @@ export default function MoviesPage() {
                                                 </div>
                                             </div>
                                             <div className="p-3">
-                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-purple-400 transition-colors tracking-tight">{item.title}</h3>
+                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-orange-400 transition-colors tracking-tight">{item.title}</h3>
                                                 <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-medium">
                                                     <span>{item.format}</span>
                                                     <span>{item.year}</span>
@@ -350,7 +350,7 @@ export default function MoviesPage() {
                             )}
                         </div>
                     ) : (
-                        <div className="flex flex-col lg:flex-row gap-10 xl:gap-16">
+                        <div className="flex flex-col lg:flex-row gap-8 xl:gap-10">
                             {/* Main Feed */}
                             <div className="flex-1 min-w-0">
 
@@ -374,7 +374,7 @@ export default function MoviesPage() {
                                             </div>
                                             <button
                                                 onClick={() => setActiveProvider("all")}
-                                                className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all"
+                                                className="px-6 py-3 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition-all"
                                             >
                                                 Browse All Content
                                             </button>
@@ -387,18 +387,18 @@ export default function MoviesPage() {
 
                                 {/* Trending row for active provider */}
                                 {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
-                                    <section className="mb-16 md:mb-24 relative">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-32 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-purple-400" isFeatured />
+                                    <section className="mb-10 md:mb-14 relative">
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-orange-600/8 rounded-full blur-[60px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-orange-400" isFeatured />
                                         <MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge />
                                     </section>
                                 )}
 
                                 {/* Smart Recommendations (only when no provider active) */}
                                 {activeProvider === "all" && activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
-                                    <section className="mb-16 md:mb-24 relative">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-32 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-purple-400" isFeatured />
+                                    <section className="mb-10 md:mb-14 relative">
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-orange-600/8 rounded-full blur-[60px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-orange-400" isFeatured />
                                         <MovieRow 
                                             items={[...trending.slice(2, 6), ...popular.slice(2, 6)].sort(() => Math.random() - 0.5)} 
                                             title="smart-recommendations" 
@@ -415,7 +415,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-16 md:space-y-24"
+                                        className="space-y-10 md:space-y-14"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>

@@ -69,7 +69,7 @@ const AppleTVLogo = () => (
 );
 
 const ToonPlayerLogo = () => (
-    <span className="text-sm font-black tracking-tight bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+    <span className="text-sm font-black tracking-tight bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
         ToonPlayer
     </span>
 );
@@ -88,8 +88,8 @@ export const PROVIDERS: ProviderInfo[] = [
         label: "All Providers",
         shortLabel: "All",
         color: "text-white",
-        glowColor: "rgba(168,85,247,0.5)",
-        bgGradient: "from-purple-600 to-blue-600",
+        glowColor: "rgba(249,115,22,0.45)",
+        bgGradient: "from-orange-600 to-amber-600",
         logo: <span className="text-sm font-black">✦ All</span>,
     },
     {
@@ -159,9 +159,9 @@ export const PROVIDERS: ProviderInfo[] = [
         slug: "toonplayer",
         label: "ToonPlayer Originals",
         shortLabel: "ToonPlayer",
-        color: "text-purple-400",
-        glowColor: "rgba(168,85,247,0.6)",
-        bgGradient: "from-purple-700 to-pink-800",
+        color: "text-orange-400",
+        glowColor: "rgba(249,115,22,0.55)",
+        bgGradient: "from-orange-600 to-amber-700",
         logo: <ToonPlayerLogo />,
     },
 ];
@@ -177,7 +177,7 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
 
     return (
         <div
-            className="w-full bg-[#05010A]/90 backdrop-blur-2xl border-b border-white/[0.06] sticky top-[80px] md:top-[96px] z-[39] shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
+            className="w-full bg-[#0B0A0F]/90 backdrop-blur-2xl border-b border-white/[0.05] sticky top-[60px] md:top-[72px] z-[39] shadow-[0_6px_28px_rgba(0,0,0,0.55)]"
             aria-label="Streaming provider filter"
         >
             {/* Loading bar */}
@@ -188,7 +188,7 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
                         animate={{ scaleX: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1.2, ease: "easeInOut" }}
-                        className="absolute top-0 left-0 h-[2px] w-full origin-left bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"
+                        className="absolute top-0 left-0 h-[2px] w-full origin-left bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500"
                     />
                 )}
             </AnimatePresence>

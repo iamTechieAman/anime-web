@@ -271,7 +271,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-4 left-4 md:left-[108px] right-4 z-50 px-6 py-3 bg-[#0B0713]/60 backdrop-blur-2xl border border-white/10 rounded-2xl transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+    <nav className="fixed top-3 left-4 md:left-[100px] right-4 z-50 px-4 py-2.5 bg-[#121018]/70 backdrop-blur-2xl border border-white/[0.07] rounded-xl transition-all duration-300 shadow-[0_6px_28px_rgba(0,0,0,0.5)]">
       
       {/* Search Focus Overlay */}
       <AnimatePresence>
@@ -289,41 +289,36 @@ export default function Header() {
 
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
-          <div className="w-9 h-9 relative flex items-center justify-center">
-            {/* Original Logo with Premium Glow */}
+        <Link href="/" className="flex items-center gap-2.5 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
+          <div className="w-7 h-7 relative flex items-center justify-center">
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-xl opacity-35 group-hover:opacity-60 transition-opacity"
-              animate={{
-                scale: [1, 1.15, 1],
-              }}
+              className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-lg opacity-30 group-hover:opacity-55 transition-opacity"
+              animate={{ scale: [1, 1.15, 1] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             />
-            
             <img 
               src="/logo.webp" 
               alt="ToonPlayer Logo" 
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform duration-300 mix-blend-screen"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.45)] group-hover:scale-105 transition-transform duration-300 mix-blend-screen"
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] leading-tight uppercase">
+            <span className="text-lg md:text-xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_12px_rgba(249,115,22,0.4)] leading-tight uppercase">
               Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
             </span>
-            <div className="flex items-center gap-1.5 -mt-0.5 ml-0.5">
-              <span className="text-[9px] uppercase tracking-[0.3em] font-black text-zinc-500">Premium</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-secondary)] animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.8)]" />
-              <span className="text-[8px] font-bold text-[var(--accent)] uppercase tracking-wider">Infinity</span>
+            <div className="flex items-center gap-1 -mt-0.5 ml-0.5">
+              <span className="text-[8px] uppercase tracking-[0.3em] font-black text-zinc-500">Premium</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shadow-[0_0_6px_rgba(249,115,22,0.7)]" />
             </div>
           </div>
         </Link>
 
         {/* Search Bar + Filter */}
-        <div className="flex-1 max-w-xl hidden md:flex items-center gap-1.5 relative p-1 bg-white/5 border border-white/10 rounded-xl focus-within:border-[var(--accent)]/50 focus-within:shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all duration-300">
+        <div className="flex-1 max-w-[320px] lg:max-w-[400px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
-              className={`relative flex items-center px-3 py-2 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-purple-900/20' : 'bg-transparent'}`}
+              className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-orange-900/15' : 'bg-transparent'}`}
             >
               <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
                 <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[var(--accent-secondary)] animate-pulse' : 'text-[var(--text-secondary)] group-focus-within:text-[var(--accent)]'}`} />
@@ -352,7 +347,7 @@ export default function Header() {
               <button 
                 type="button"
                 onClick={() => setIsDiscoverMode(!isDiscoverMode)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30' : 'bg-white/5 text-[var(--text-muted)] hover:bg-white/10 hover:text-white'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-500/30' : 'bg-white/[0.04] text-[var(--text-muted)] hover:bg-white/10 hover:text-white'}`}
                 title="AI Discovery Search"
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -478,20 +473,20 @@ export default function Header() {
           </div>
 
           {/* Filter Button */}
-          <div ref={filterRef} className="relative shrink-0 border-l border-white/10 pl-1.5">
+          <div ref={filterRef} className="relative shrink-0 border-l border-white/[0.06] pl-1">
             <button
               aria-label="Filter Options"
               onClick={() => { setShowFilters(v => !v); setShowNotifications(false); setShowProfileDropdown(false); }}
-              className={`h-[40px] px-4 rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
+              className={`h-[36px] px-3 rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
                 showFilters || filterGenre || filterFormat || filterStatus
-                  ? 'bg-purple-500/10 text-purple-400'
-                  : 'bg-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  ? 'bg-orange-500/10 text-orange-400'
+                  : 'bg-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
               <span className="hidden lg:block">Filter</span>
               {(filterGenre || filterFormat || filterStatus) && (
-                <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
               )}
             </button>
 
@@ -501,11 +496,11 @@ export default function Header() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] overflow-hidden z-50 backdrop-blur-3xl"
+                  className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(249,115,22,0.1)] overflow-hidden z-50 backdrop-blur-3xl"
                 >
                   <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                     <span className="font-bold text-sm">Fine-tune Search</span>
-                    <button onClick={clearFilters} className="text-xs text-purple-400 hover:text-purple-300 font-medium">Reset</button>
+                    <button onClick={clearFilters} className="text-xs text-orange-400 hover:text-orange-300 font-medium">Reset</button>
                   </div>
                   <div className="p-4 space-y-5">
                     <div>
@@ -513,7 +508,7 @@ export default function Header() {
                       <select 
                         value={filterGenre}
                         onChange={(e) => setFilterGenre(e.target.value)}
-                        className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500/50"
+                        className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none focus:border-orange-500/50"
                       >
                         <option value="">All Genres</option>
                         {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
@@ -526,7 +521,7 @@ export default function Header() {
                           <button
                             key={f}
                             onClick={() => setFilterFormat(filterFormat === f ? "" : f)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-purple-500 border-purple-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
                           >
                             {f}
                           </button>
@@ -540,7 +535,7 @@ export default function Header() {
                           <button
                             key={s}
                             onClick={() => setFilterStatus(filterStatus === s ? "" : s)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-purple-500 border-purple-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
                           >
                             {s}
                           </button>
@@ -549,7 +544,7 @@ export default function Header() {
                     </div>
                   </div>
                   <div className="p-3 bg-white/5 border-t border-[var(--border-color)]">
-                    <button onClick={applyFilter} className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20">
+                    <button onClick={applyFilter} className="w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
                       Apply Filters
                     </button>
                   </div>
@@ -604,8 +599,8 @@ export default function Header() {
                 }}
                 className={`p-2 rounded-full transition-all border ${
                   showNotifications 
-                    ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' 
-                    : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20'
+                    ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' 
+                    : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/15'
                 }`}
               >
                 <div className="relative">
@@ -622,16 +617,16 @@ export default function Header() {
                      initial={{ opacity: 0, y: 12, scale: 0.95 }}
                      animate={{ opacity: 1, y: 0, scale: 1 }}
                      exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                     className="absolute top-full right-[-48px] sm:right-0 mt-3 w-[88vw] max-w-[340px] sm:w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
+                     className="absolute top-full right-[-48px] sm:right-0 mt-3 w-[88vw] max-w-[340px] sm:w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(249,115,22,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
                    >
                       <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                          <div className="flex items-center gap-2">
                            <span className="font-bold text-sm">Notifications</span>
-                           {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-black">{unreadCount}</span>}
+                           {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-black">{unreadCount}</span>}
                          </div>
                          <button
                            onClick={() => markAllAsRead()}
-                           className="text-[10px] uppercase tracking-widest text-purple-400 font-black hover:text-purple-300 transition-colors"
+                           className="text-[10px] uppercase tracking-widest text-orange-400 font-black hover:text-orange-300 transition-colors"
                          >
                            Mark all read
                          </button>
@@ -641,7 +636,7 @@ export default function Header() {
                            <div className="divide-y divide-[var(--border-color)]">
                              {notifications.map((notif: any) => {
                                const CATEGORY_META: Record<string, { label: string; color: string }> = {
-                                 episodes: { label: 'New Episode', color: 'text-purple-400 bg-purple-500/10' },
+                                 episodes: { label: 'New Episode', color: 'text-orange-400 bg-orange-500/10' },
                                  trending: { label: 'Trending', color: 'text-red-400 bg-red-500/10' },
                                  recommendations: { label: 'AI Pick', color: 'text-amber-400 bg-amber-500/10' },
                                  watchlist: { label: 'Watchlist', color: 'text-blue-400 bg-blue-500/10' },
@@ -652,13 +647,13 @@ export default function Header() {
                                return (
                                  <div
                                    key={notif.id}
-                                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-purple-500/5' : ''}`}
+                                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-orange-500/5' : ''}`}
                                    onClick={() => {
                                      markAsRead(notif.id);
                                      if (notif.link) router.push(notif.link);
                                    }}
                                  >
-                                   {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-r" />}
+                                   {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-r" />}
                                    <div className="flex justify-between items-start mb-1 gap-2">
                                      <div className="flex-1 min-w-0">
                                        <div className="flex items-center gap-1.5 mb-0.5">
@@ -688,7 +683,7 @@ export default function Header() {
                       <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
                         <button
                           onClick={() => { setShowNotifications(false); setShowProfileSettings(true); }}
-                          className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-purple-400 font-black hover:bg-purple-500/5 transition-all"
+                          className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-orange-400 font-black hover:bg-orange-500/5 transition-all"
                         >
                           ⚙ Manage Alerts
                         </button>
@@ -717,7 +712,7 @@ export default function Header() {
               }}
               className="flex items-center gap-3 p-1 pr-3 hover:bg-[var(--bg-card)] rounded-full transition-all border border-transparent hover:border-[var(--border-color)] group"
             >
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-purple-500/20">
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-orange-500/20">
                 <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
                   <img src={profile?.avatar || "https://api.dicebear.com/9.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
                 </div>
@@ -739,8 +734,8 @@ export default function Header() {
                   </div>
                   <div className="p-2">
                     <Link href="/history" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-                        <HistoryIcon className="w-4 h-4 text-purple-400" />
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+                        <HistoryIcon className="w-4 h-4 text-orange-400" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-bold text-white">Watch History</p>

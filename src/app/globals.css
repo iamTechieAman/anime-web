@@ -5,112 +5,112 @@
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* ToonPlayer V2.0 — Dark Cinematic AAA Streaming System */
-  --bg-main: #05010A;             /* Canvas Background */
-  --bg-card: #0B0713;             /* Secondary Surface */
-  --bg-elevated: #11101A;         /* Card Surface */
-  --bg-surface: #0B0713;
-  --bg-overlay: rgba(5, 1, 10, 0.85);
+  /* ToonPlayer V4.0 — Crunchyroll-Inspired Orange Anime Streaming System */
+  --bg-main: #0B0A0F;             /* Canvas Background */
+  --bg-card: #121018;             /* Secondary Surface */
+  --bg-elevated: #17141F;         /* Card Surface */
+  --bg-surface: #121018;
+  --bg-overlay: rgba(11, 10, 15, 0.88);
   
   --text-main: #FFFFFF;           /* Primary Text */
-  --text-secondary: #A1A1AA;      /* Secondary Text */
-  --text-muted: #71717A;          /* Muted Gray Text */
+  --text-secondary: #B3B3BD;      /* Secondary Text */
+  --text-muted: #6B6B7A;          /* Muted Text */
   
-  --border-color: rgba(255, 255, 255, 0.08); /* Transparent borders */
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-color: rgba(255, 255, 255, 0.06); /* Subtle borders */
+  --border-subtle: rgba(255, 255, 255, 0.03);
   
-  --accent: #A855F7;              /* Primary Neon Purple Accent */
-  --accent-secondary: #EC4899;    /* Secondary Neon Pink Accent */
-  --accent-glow: rgba(168, 85, 247, 0.35);
+  --accent: #F97316;              /* Primary Orange Accent */
+  --accent-secondary: #FB923C;    /* Soft Orange Secondary */
+  --accent-glow: rgba(249, 115, 22, 0.28);
   
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
-  --glass-bg: rgba(11, 7, 19, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(18, 16, 24, 0.80);
+  --glass-border: rgba(255, 255, 255, 0.06);
 
-  /* Gradient system */
-  --gradient-primary: linear-gradient(135deg, #A855F7, #EC4899);
-  --gradient-hot: linear-gradient(135deg, #EC4899, #F43F5E);
-  --gradient-cool: linear-gradient(135deg, #60A5FA, #A855F7);
-  --gradient-gold: linear-gradient(135deg, #F59E0B, #EC4899);
+  /* Gradient system — orange anime cinematic */
+  --gradient-primary: linear-gradient(135deg, #F97316, #FB923C);
+  --gradient-hot: linear-gradient(135deg, #EF4444, #F97316);
+  --gradient-cool: linear-gradient(135deg, #60A5FA, #818CF8);
+  --gradient-gold: linear-gradient(135deg, #F59E0B, #F97316);
 
   /* Shadows */
-  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
-  --shadow-elevated: 0 12px 40px -8px rgba(0, 0, 0, 0.8);
-  --shadow-glow-purple: 0 0 30px rgba(168, 85, 247, 0.35);
-  --shadow-glow-blue: 0 0 30px rgba(96, 165, 250, 0.35);
+  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
+  --shadow-elevated: 0 10px 36px -8px rgba(0, 0, 0, 0.85);
+  --shadow-glow-orange: 0 0 24px rgba(249, 115, 22, 0.3);
+  --shadow-glow-blue: 0 0 24px rgba(96, 165, 250, 0.3);
 
-  /* Spacing scale */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
+  /* Spacing scale — compact streaming rhythm */
+  --space-xs: 3px;
+  --space-sm: 6px;
+  --space-md: 12px;
+  --space-lg: 20px;
+  --space-xl: 28px;
+  --space-2xl: 40px;
+  --space-3xl: 56px;
 
   /* Border radius scale */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
   --radius-full: 9999px;
 }
 
 .dark {
-  --bg-main: #05010A;
-  --bg-card: #0B0713;
-  --bg-overlay: rgba(5, 1, 10, 0.85);
-  --bg-elevated: #11101A;
-  --bg-surface: #0B0713;
+  --bg-main: #0B0A0F;
+  --bg-card: #121018;
+  --bg-overlay: rgba(11, 10, 15, 0.88);
+  --bg-elevated: #17141F;
+  --bg-surface: #121018;
   
   --text-main: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
+  --text-secondary: #B3B3BD;
+  --text-muted: #6B6B7A;
   
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --glass-bg: rgba(11, 7, 19, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --glass-bg: rgba(18, 16, 24, 0.80);
+  --glass-border: rgba(255, 255, 255, 0.06);
   
-  --accent: #A855F7;
-  --accent-glow: rgba(168, 85, 247, 0.35);
+  --accent: #F97316;
+  --accent-secondary: #FB923C;
+  --accent-glow: rgba(249, 115, 22, 0.28);
 
-  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
-  --shadow-elevated: 0 12px 40px -8px rgba(0, 0, 0, 0.8);
+  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
+  --shadow-elevated: 0 10px 36px -8px rgba(0, 0, 0, 0.85);
 }
 
-/* 🌙 Special Dark Navy Product Surface overrides (for Desktop Sidebar, Footer, Watch Page etc.) */
+/* 🌙 Anime dark surface overrides */
 .theme-dark,
 .watch-page,
 footer,
 aside {
-  --bg-main: #05010A !important;
-  --bg-card: #0B0713 !important;
-  --bg-elevated: #11101A !important;
-  --bg-surface: #0B0713 !important;
-  --bg-overlay: rgba(5, 1, 10, 0.9) !important;
+  --bg-main: #0B0A0F !important;
+  --bg-card: #121018 !important;
+  --bg-elevated: #17141F !important;
+  --bg-surface: #121018 !important;
+  --bg-overlay: rgba(11, 10, 15, 0.92) !important;
   
   --text-main: #FFFFFF !important;
-  --text-secondary: #A1A1AA !important;
-  --text-muted: #71717A !important;
+  --text-secondary: #B3B3BD !important;
+  --text-muted: #6B6B7A !important;
   
-  --border-color: rgba(255, 255, 255, 0.08) !important;
-  --border-subtle: rgba(255, 255, 255, 0.04) !important;
-  --glass-bg: rgba(11, 7, 19, 0.75) !important;
-  --glass-border: rgba(255, 255, 255, 0.08) !important;
+  --border-color: rgba(255, 255, 255, 0.06) !important;
+  --border-subtle: rgba(255, 255, 255, 0.03) !important;
+  --glass-bg: rgba(18, 16, 24, 0.80) !important;
+  --glass-border: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Handle children elements inside dark containers */
 .theme-dark *,
 .watch-page *,
 footer *,
 aside * {
   --text-main: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
-  --border-color: rgba(255, 255, 255, 0.08);
+  --text-secondary: #B3B3BD;
+  --text-muted: #6B6B7A;
+  --border-color: rgba(255, 255, 255, 0.06);
 }
 
 :root {
@@ -218,24 +218,24 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 0;
 }
 
-/* Display and Primary Titles */
+/* Display and Primary Titles — compact streaming scale */
 h1, .text-display {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.75rem, 4vw, 3rem);
   line-height: 1.1;
   letter-spacing: -0.03em;
 }
 
 /* Section Headers */
 h2, .text-heading {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-size: clamp(1.25rem, 2.5vw, 1.875rem);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 /* Card Titles */
 h3, .text-title {
-  font-size: clamp(1.125rem, 2vw, 1.25rem);
-  line-height: 1.3;
+  font-size: clamp(1rem, 1.8vw, 1.125rem);
+  line-height: 1.35;
   letter-spacing: -0.01em;
 }
 
