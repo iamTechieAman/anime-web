@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getUA } from "@/lib/user-agents";
 
 // Domain-to-Referer lookup for anime CDNs
 const CDN_REFERERS: Record<string, string> = {
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     try {
         const referer = getReferer(targetUrl, refererOverride);
         const headers = new Headers();
-        headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0");
+        headers.set("User-Agent", getUA());
         headers.set("Referer", referer);
         headers.set("Origin", referer);
 

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { decryptSource } from '@/lib/cipher';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { getUA } from '@/lib/user-agents';
+import { scrampleApiHeaders, scrampleHeaders, withRetry } from '@/lib/request-scrambler';
 
 const ALLANIME_API = "https://api.allanime.day/api";
 const ALLANIME_BASE = "https://allanime.day";
@@ -75,14 +76,14 @@ export class AllAnimeProvider implements AnimeProvider {
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(ALLANIME_API, {
+            const response = await withRetry(() => axios.get(ALLANIME_API, {
                 params: {
                     variables: JSON.stringify({ search: { allowAdult: false, allowUnknown: false, query }, limit: 40, page: 1 }),
                     query: SEARCH_GQL
                 },
-                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
-                timeout: 10000
-            });
+                headers: scrampleApiHeaders(ALLANIME_REFR),
+                timeout: 8000
+            }), 3, 400);
 
             const shows = response.data?.data?.shows?.edges || [];
             return shows.map((show: any) => {

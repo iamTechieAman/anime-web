@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
 import { getUA } from '@/lib/user-agents';
+import { scrampleHeaders, withRetry } from '@/lib/request-scrambler';
 
 const BASE_URL = 'https://hianime.to';
 
