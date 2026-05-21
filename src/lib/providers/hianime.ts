@@ -2,9 +2,9 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
+import { getUA } from '@/lib/user-agents';
 
 const BASE_URL = 'https://hianime.to';
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0';
 
 export class HiAnimeProvider implements AnimeProvider {
     name = 'hianime';
@@ -13,7 +13,7 @@ export class HiAnimeProvider implements AnimeProvider {
         try {
             const response = await axios.get(`${BASE_URL}/search`, {
                 params: { keyword: query },
-                headers: { 'User-Agent': USER_AGENT }
+                headers: { 'User-Agent': getUA() }
             });
 
             const $ = cheerio.load(response.data);
@@ -42,7 +42,7 @@ export class HiAnimeProvider implements AnimeProvider {
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
             const response = await axios.get(`${BASE_URL}/${id}`, {
-                headers: { 'User-Agent': USER_AGENT }
+                headers: { 'User-Agent': getUA() }
             });
 
             const $ = cheerio.load(response.data);
@@ -77,7 +77,7 @@ export class HiAnimeProvider implements AnimeProvider {
             if (dataId) {
                 const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
                     headers: {
-                        'User-Agent': USER_AGENT,
+                        'User-Agent': getUA(),
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
@@ -150,7 +150,7 @@ export class HiAnimeProvider implements AnimeProvider {
             const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
                 params: { episodeId },
                 headers: {
-                    'User-Agent': USER_AGENT,
+                    'User-Agent': getUA(),
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
@@ -198,7 +198,7 @@ export class HiAnimeProvider implements AnimeProvider {
                     const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
                         params: { id: server.id },
                         headers: {
-                            'User-Agent': USER_AGENT,
+                            'User-Agent': getUA(),
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
@@ -277,7 +277,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 : `${BASE_URL}/az-list?page=${page}`;
 
             console.log(`[HiAnime] Fetching A-Z List: ${url}`);
-            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const response = await axios.get(url, { headers: { 'User-Agent': getUA() } });
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
@@ -321,7 +321,7 @@ export class HiAnimeProvider implements AnimeProvider {
             const url = `${BASE_URL}/genre/${genre}?page=${page}`;
             console.log(`[HiAnime] Fetching Genre: ${url}`);
 
-            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const response = await axios.get(url, { headers: { 'User-Agent': getUA() } });
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
@@ -359,7 +359,7 @@ export class HiAnimeProvider implements AnimeProvider {
             const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
                 params: { episodeId },
                 headers: {
-                    'User-Agent': USER_AGENT,
+                    'User-Agent': getUA(),
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
@@ -403,7 +403,7 @@ export class HiAnimeProvider implements AnimeProvider {
             const url = `${BASE_URL}/recently-updated?page=${page}`;
             console.log(`[HiAnime] Fetching Recent Updates: ${url}`);
 
-            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            const response = await axios.get(url, { headers: { 'User-Agent': getUA() } });
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
@@ -448,7 +448,7 @@ export class HiAnimeProvider implements AnimeProvider {
     async getTrending(): Promise<AnimeSearchResult[]> {
         try {
             const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': USER_AGENT }
+                headers: { 'User-Agent': getUA() }
             });
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
@@ -489,7 +489,7 @@ export class HiAnimeProvider implements AnimeProvider {
     async getCompleted(): Promise<AnimeSearchResult[]> {
         try {
             const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': USER_AGENT }
+                headers: { 'User-Agent': getUA() }
             });
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
@@ -516,7 +516,7 @@ export class HiAnimeProvider implements AnimeProvider {
     async getUpcoming(): Promise<AnimeSearchResult[]> {
         try {
             const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': USER_AGENT }
+                headers: { 'User-Agent': getUA() }
             });
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];

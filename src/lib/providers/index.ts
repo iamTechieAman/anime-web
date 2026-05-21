@@ -14,9 +14,15 @@ import { CinEvoProvider } from './cinevo';
 import { AniwavesProvider } from './aniwaves';
 import { AniwaveProvider } from './aniwave';
 import { JikanProvider } from './jikan';
+import { AnimePaheProvider } from './animepahe';
+import { GogoanimeProvider } from './gogoanime';
 import type { AnimeProvider } from './types';
 
-export type ProviderName = 'allanime' | 'animesalt' | 'hianime' | 'anikai' | 'aniwatch' | 'consumet' | 'vidsrc' | 'onoflix' | 'watchanimeworld' | 'justanime' | 'animex' | 'cinebolt' | 'cinevo' | 'aniwaves' | 'aniwave' | 'jikan';
+export type ProviderName =
+    | 'allanime' | 'animesalt' | 'hianime' | 'anikai' | 'aniwatch'
+    | 'consumet' | 'vidsrc' | 'onoflix' | 'watchanimeworld' | 'justanime'
+    | 'animex' | 'cinebolt' | 'cinevo' | 'aniwaves' | 'aniwave'
+    | 'jikan' | 'animepahe' | 'gogoanime';
 
 const providers = new Map<ProviderName, AnimeProvider>([
     ['allanime', new AllAnimeProvider()],
@@ -35,6 +41,8 @@ const providers = new Map<ProviderName, AnimeProvider>([
     ['aniwaves', new AniwavesProvider()],
     ['aniwave', new AniwaveProvider()],
     ['jikan', new JikanProvider()],
+    ['animepahe', new AnimePaheProvider()],
+    ['gogoanime', new GogoanimeProvider()],
 ]);
 
 export function getProvider(name: ProviderName): AnimeProvider {
@@ -49,5 +57,5 @@ export function getAllProviders(): AnimeProvider[] {
     return Array.from(providers.values());
 }
 
-export { AllAnimeProvider, AnimeSaltProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, OnoflixProvider, WatchAnimeWorldProvider, JustAnimeProvider, AnimexProvider, CineBoltProvider, CinEvoProvider, JikanProvider };
+export { AllAnimeProvider, AnimeSaltProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, OnoflixProvider, WatchAnimeWorldProvider, JustAnimeProvider, AnimexProvider, CineBoltProvider, CinEvoProvider, JikanProvider, AnimePaheProvider, GogoanimeProvider };
 export * from './types';

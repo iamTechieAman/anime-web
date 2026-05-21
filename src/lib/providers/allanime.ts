@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { decryptSource } from '@/lib/cipher';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
+import { getUA } from '@/lib/user-agents';
 
 const ALLANIME_API = "https://api.allanime.day/api";
 const ALLANIME_BASE = "https://allanime.day";
 const ALLANIME_REFR = "https://allmanga.to";
 const ALLANIME_CDN = "https://wp.youtube-anime.com/aln.youtube-anime.com";
-const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0";
 
 // Helper function to convert thumbnail paths to full URLs
 function getThumbnailUrl(thumbnail: string | null | undefined): string {
@@ -80,7 +80,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     variables: JSON.stringify({ search: { allowAdult: false, allowUnknown: false, query }, limit: 40, page: 1 }),
                     query: SEARCH_GQL
                 },
-                headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
                 timeout: 10000
             });
 
@@ -112,7 +112,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     variables: JSON.stringify({ showId: id }),
                     query: EPISODE_LIST_GQL
                 },
-                headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
                 timeout: 10000
             });
 
@@ -163,7 +163,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     variables: JSON.stringify({ showId: id, translationType: mode, episodeString }),
                     query: EPISODE_EMBED_GQL
                 },
-                headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
                 timeout: 8000  // Reduced from 15000ms to 8000ms  
             });
 
@@ -219,7 +219,7 @@ export class AllAnimeProvider implements AnimeProvider {
                 // Fetch stream URL with proper anime CDN headers
                 const streamResponse = await axios.get(finalUrl, {
                     headers: {
-                        "User-Agent": USER_AGENT,
+                        "User-Agent": getUA(),
                         "Referer": ALLANIME_REFR,
                         "Origin": ALLANIME_REFR,
                         "Accept": "application/json, text/plain, */*",
@@ -307,7 +307,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     }),
                     query: RECENT_GQL  // Reuse the working search query structure
                 },
-                headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
                 timeout: 10000
             });
 
@@ -342,7 +342,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     }),
                     query: RECENT_GQL
                 },
-                headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
                 timeout: 10000
             });
 
@@ -376,7 +376,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     }),
                     query: RECENT_GQL
                 },
-                headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
+                headers: { "User-Agent": getUA(), Referer: ALLANIME_REFR },
                 timeout: 10000
             });
 

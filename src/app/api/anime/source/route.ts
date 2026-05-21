@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
+import { recordSuccess, recordFailure, sortByHealth } from "@/lib/provider-health";
 
 // Helper: wrap a promise with a timeout
 function withTimeout<T>(promise: Promise<T>, ms: number, label = ''): Promise<T> {
@@ -69,9 +70,9 @@ function buildLink(s: any, provider: string) {
     };
 }
 
-// Provider priority order for sources — most reliable first
-const PRIMARY_PROVIDERS: ProviderName[] = ['allanime', 'hianime', 'anikai', 'aniwatch'];
-const FALLBACK_PROVIDERS: ProviderName[] = ['consumet', 'aniwave', 'vidsrc'];
+// Provider priority order — stable providers first; health scoring reorders dynamically
+const PRIMARY_PROVIDERS: ProviderName[] = ['allanime', 'hianime', 'anikai', 'aniwatch', 'gogoanime'];
+const FALLBACK_PROVIDERS: ProviderName[] = ['consumet', 'animepahe', 'aniwave', 'vidsrc'];
 
 // Auto-detect provider from ID prefix
 const PREFIX_MAP: Record<string, ProviderName> = {
@@ -109,29 +110,40 @@ export async function GET(request: Request) {
         if (PREFIX_MAP[prefix]) detectedProvider = PREFIX_MAP[prefix];
     }
 
-    // Build ordered provider list: explicit > detected > primary chain > fallback chain
+    // Build ordered provider list: explicit > detected > health-sorted primary > fallback
     const orderedProviders: ProviderName[] = [];
     if (providerParam && !orderedProviders.includes(providerParam)) orderedProviders.push(providerParam);
     if (detectedProvider && !orderedProviders.includes(detectedProvider)) orderedProviders.push(detectedProvider);
-    for (const p of PRIMARY_PROVIDERS) if (!orderedProviders.includes(p)) orderedProviders.push(p);
-    for (const p of FALLBACK_PROVIDERS) if (!orderedProviders.includes(p)) orderedProviders.push(p);
 
-    console.log(`[SourceAPI] ID=${showId}, Ep=${episodeString}, Mode=${mode} | Chain: ${orderedProviders.slice(0, 4).join(' → ')}`);
+    // Sort primaries by health score dynamically
+    const healthSortedPrimary = sortByHealth(PRIMARY_PROVIDERS) as ProviderName[];
+    const healthSortedFallback = sortByHealth(FALLBACK_PROVIDERS) as ProviderName[];
+    for (const p of healthSortedPrimary) if (!orderedProviders.includes(p)) orderedProviders.push(p);
+    for (const p of healthSortedFallback) if (!orderedProviders.includes(p)) orderedProviders.push(p);
+
+    console.log(`[SourceAPI] ID=${showId}, Ep=${episodeString}, Mode=${mode} | Chain: ${orderedProviders.slice(0, 5).join(' → ')}`);
 
     // ─── STRATEGY: Race top 3 providers in parallel, take first winner ───────
     const [first, ...rest] = orderedProviders;
 
-    // Attempt to get sources from a single provider
+    // Attempt to get sources from a single provider — records health
     async function tryProvider(name: ProviderName): Promise<{ links: any[]; provider: string }> {
-        const p = getProvider(name);
-        const sources = await withTimeout(
-            p.getSources(showId!, episodeString!, mode, serverId),
-            8000,
-            `getSources ${name}`
-        );
-        if (!sources || sources.length === 0) throw new Error(`No sources from ${name}`);
-        const links = sources.map(s => buildLink(s, name));
-        return { links, provider: name };
+        const start = Date.now();
+        try {
+            const p = getProvider(name);
+            const sources = await withTimeout(
+                p.getSources(showId!, episodeString!, mode, serverId),
+                8000,
+                `getSources ${name}`
+            );
+            if (!sources || sources.length === 0) throw new Error(`No sources from ${name}`);
+            const links = sources.map(s => buildLink(s, name));
+            recordSuccess(name, Date.now() - start);
+            return { links, provider: name };
+        } catch (e: any) {
+            recordFailure(name);
+            throw e;
+        }
     }
 
     // Race top 3 providers
