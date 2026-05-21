@@ -771,7 +771,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     <div className="relative w-full bg-black">
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
-                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture; presentation; remote-playback; clipboard-write; clipboard-read" referrerPolicy="origin" />
+                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="origin" />
                             </div>
                         </div>
                     </div>
@@ -897,7 +897,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allowFullScreen
-                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write; remote-playback"
+                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
                                 referrerPolicy="no-referrer"
                                 onError={() => {
                                     setSourceError(true);
@@ -1188,7 +1188,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 <iframe
                                     src={`https://www.youtube.com/embed/${details.trailer.key}?autoplay=1`}
                                     className="w-full h-full"
-                                    allow="autoplay; encrypted-media; remote-playback"
+                                    allow="autoplay; encrypted-media"
                                     allowFullScreen
                                 />
                             </motion.div>
@@ -1620,7 +1620,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         : `https://dl.vidsrc.vip/movie/${id}`}
                                     className="w-full h-full border-0"
                                     allowFullScreen
-                                    allow="autoplay; encrypted-media; fullscreen; remote-playback"
+                                    allow="autoplay; encrypted-media; fullscreen"
                                     referrerPolicy="no-referrer"
                                 />
                             </div>

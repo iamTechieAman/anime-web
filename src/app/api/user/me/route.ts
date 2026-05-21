@@ -10,19 +10,22 @@ export async function GET() {
     const token = cookieStore.get('toonplayer_session')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      // Guest user — return silent 200 so browser doesn't log a 401
+      return NextResponse.json({ user: null });
     }
 
     const payload = await verifyToken(token);
     if (!payload || !payload.userId) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      // Invalid or expired token — clear it silently
+      return NextResponse.json({ user: null });
     }
 
     await connectToDatabase();
     const user = await User.findById(payload.userId).select('-password');
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      // Account deleted — return null silently
+      return NextResponse.json({ user: null });
     }
 
     return NextResponse.json({ user });

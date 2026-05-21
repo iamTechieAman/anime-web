@@ -77,7 +77,18 @@ export default function MoviesPage() {
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
     
     // Fetch current user from secure API
-    const { data: userData } = useSWR('/api/auth/me', fetcher);
+    const { data: userData } = useSWR('/api/auth/me', fetcher, {
+        revalidateOnFocus: false,       // don't re-fetch auth when user alt-tabs
+        shouldRetryOnError: false,      // don't retry 4xx auth failures
+        dedupingInterval: 60000,        // cache result for 60s
+        onErrorRetry: (err, _key, _cfg, revalidate, { retryCount }) => {
+            const status = err?.status ?? err?.response?.status;
+            if (status === 401 || status === 403 || status === 404) return; // never retry auth failures
+            if (retryCount >= 2) return;
+            setTimeout(() => revalidate({ retryCount }), 5000);
+        },
+    });
+
     
     useEffect(() => {
         if (userData?.user) {

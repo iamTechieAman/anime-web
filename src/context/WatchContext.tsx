@@ -47,27 +47,43 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const loadInitialData = async () => {
             try {
-                // Try fetching from DB first
                 const res = await fetch('/api/user/me');
                 if (res.ok) {
                     const data = await res.json();
-                    setHistory(data.user.history || []);
-                    setWatchlist(data.user.watchlist || []);
-                    setIsLoggedIn(true);
+                    if (data.user) {
+                        // Logged-in user — load from DB
+                        setHistory(data.user.history || []);
+                        setWatchlist(data.user.watchlist || []);
+                        setIsLoggedIn(true);
+                    } else {
+                        // Guest user (API returned { user: null }) — use localStorage
+                        const storedHistory = localStorage.getItem('toonplayer_history');
+                        const storedWatchlist = localStorage.getItem('toonplayer_watchlist');
+                        if (storedHistory) setHistory(JSON.parse(storedHistory));
+                        if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
+                    }
                 } else {
-                    // Fallback to local storage if not logged in
+                    // Non-200 (should not happen with new API, but guard anyway)
                     const storedHistory = localStorage.getItem('toonplayer_history');
                     const storedWatchlist = localStorage.getItem('toonplayer_watchlist');
                     if (storedHistory) setHistory(JSON.parse(storedHistory));
                     if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
                 }
             } catch (e) {
-                console.error('Failed to load watch data:', e);
+                // Network-level failure — silently fall back to localStorage
+                // (don't log to console in production to avoid noise)
+                try {
+                    const storedHistory = localStorage.getItem('toonplayer_history');
+                    const storedWatchlist = localStorage.getItem('toonplayer_watchlist');
+                    if (storedHistory) setHistory(JSON.parse(storedHistory));
+                    if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
+                } catch (_) {}
             }
             setIsLoaded(true);
         };
         loadInitialData();
     }, []);
+
 
     useEffect(() => {
         if (!isLoaded || isLoggedIn) return;

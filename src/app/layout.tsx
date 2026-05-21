@@ -162,9 +162,6 @@ export default function RootLayout({
         
         {/* Google Search Console Verification */}
         <meta name="google-site-verification" content="google555e8d2c84c218f0" />
-        
-        {/* HilltopAds Verification */}
-        <meta name="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" content="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" />
       </head>
       <body
         className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-orange-500/25`}
@@ -197,12 +194,6 @@ export default function RootLayout({
                 />
                 <SpeedInsights />
                 <Analytics />
-                
-                {/* HilltopAds — Loaded lazily to avoid blocking page render */}
-                <Script 
-                  src="//poweredbyhilltopads.com/ad3ad63b7ceec379be5a929cd5e988238fbeaf17.js"
-                  strategy="lazyOnload"
-                />
               </WatchProvider>
             </NotificationProvider>
           </MobileUIProvider>
