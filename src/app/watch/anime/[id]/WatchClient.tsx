@@ -782,7 +782,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe
                             src={`/api/proxy/video?url=${encodeURIComponent(fallbackEmbedUrl)}`}
-                            sandbox="allow-scripts allow-same-origin allow-forms"
                             className="absolute inset-0 w-full h-full border-0"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
@@ -957,7 +956,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 ref={iframeRef}
                                                 src={sourceUrl}
                                                 className="w-full h-full border-0 bg-black"
-                                                sandbox="allow-scripts allow-same-origin allow-forms"
                                                 allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                                 onLoad={() => setLoadingSource(false)}
                                                 onError={() => setError("Iframe failed to load.")}

@@ -183,10 +183,9 @@ function serveFallbackIframe(targetUrl: string) {
         <div id="cover">
             <div id="click-to-play">Click to Play Ad-Free</div>
         </div>
-        <!-- Strict Sandbox: allows scripts to run the player, but NO popups (allow-popups is missing), NO top-level navigation (allow-top-navigation is missing) -->
+        <!-- Removed strict sandbox to fix provider playback issues -->
         <iframe 
             src="${targetUrl.replace(/"/g, '&quot;')}" 
-            sandbox="allow-scripts allow-same-origin allow-forms" 
             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
             referrerpolicy="no-referrer"
         ></iframe>

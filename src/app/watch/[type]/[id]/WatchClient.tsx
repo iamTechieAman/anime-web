@@ -828,7 +828,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 <iframe 
                                     src={embedUrl} 
                                     className="absolute inset-0 w-full h-full border-0" 
-                                    sandbox="allow-scripts allow-same-origin allow-forms"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
                                 />
@@ -956,7 +955,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 key={iframeKey}
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
-                                sandbox="allow-scripts allow-same-origin allow-forms"
                                 allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="no-referrer"
                                 onError={() => {
@@ -1671,7 +1669,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
                                         : `https://dl.vidsrc.vip/movie/${id}`}
                                     className="w-full h-full border-0"
-                                    sandbox="allow-scripts allow-same-origin allow-forms"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                     referrerPolicy="no-referrer"
                                 />
