@@ -287,9 +287,9 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <div className="w-full mx-auto flex items-center justify-between gap-4">
+      <div className="w-full mx-auto grid grid-cols-2 md:grid-cols-3 items-center gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
+        <Link href="/" className="justify-self-start flex items-center gap-2.5 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-7 h-7 relative flex items-center justify-center">
             <motion.div 
               className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-lg opacity-30 group-hover:opacity-55 transition-opacity"
@@ -314,7 +314,7 @@ export default function Header() {
         </Link>
 
         {/* Search Bar + Filter */}
-        <div className="flex-1 max-w-[320px] lg:max-w-[400px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
+        <div className="justify-self-center w-full max-w-[340px] lg:max-w-[440px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
@@ -555,7 +555,7 @@ export default function Header() {
         </div>
 
         {/* Right side icons */}
-        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+        <div className="justify-self-end flex items-center gap-2 md:gap-4 shrink-0">
           <div className="flex items-center gap-1.5 md:gap-3">
              {/* AdBlock Toggle Button */}
              {isMounted && (

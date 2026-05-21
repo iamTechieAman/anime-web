@@ -44,10 +44,10 @@ export default function Footer() {
                     <div className="space-y-4">
                         <h3 className="text-white font-bold text-sm uppercase tracking-widest">Browse content</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/discover" className="text-[var(--text-muted)] hover:text-blue-400 transition-colors">Movies & TV</Link></li>
-                            <li><Link href="/az-list/all" className="text-[var(--text-muted)] hover:text-blue-400 transition-colors">Anime Catalog</Link></li>
-                            <li><Link href="/genres" className="text-[var(--text-muted)] hover:text-blue-400 transition-colors">Browse Genres</Link></li>
-                            <li><Link href="/search" className="text-[var(--text-muted)] hover:text-blue-400 transition-colors">Advanced Search</Link></li>
+                            <li><Link href="/discover" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors">Movies & TV</Link></li>
+                            <li><Link href="/az-list/all" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors">Anime Catalog</Link></li>
+                            <li><Link href="/genres" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors">Browse Genres</Link></li>
+                            <li><Link href="/search" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors">Advanced Search</Link></li>
                         </ul>
                     </div>
 

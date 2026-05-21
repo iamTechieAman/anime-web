@@ -38,9 +38,9 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
 
     if (!heroItems.length) {
         return (
-            <div className="relative w-full h-[55vh] md:h-[70vh] lg:h-[80vh] bg-[var(--bg-main)]">
+            <div className="relative w-full h-[40vh] md:h-[48vh] lg:h-[54vh] bg-[var(--bg-main)]">
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
-                <div className="absolute bottom-16 md:bottom-24 left-0 max-w-7xl mx-auto px-4 md:px-6 w-full space-y-4">
+                <div className="absolute bottom-10 md:bottom-16 left-0 max-w-7xl mx-auto px-4 md:px-6 w-full space-y-4">
                     <div className="h-10 md:h-14 w-[60%] bg-[var(--bg-card)] rounded-xl animate-pulse" />
                     <div className="flex gap-3">
                         <div className="h-5 w-20 bg-[var(--bg-card)] rounded-md animate-pulse" />
@@ -64,7 +64,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
     const type = item.media_type || "movie";
 
     return (
-        <div className="relative w-full h-[50vh] md:h-[65vh] lg:h-[75vh] overflow-hidden bg-[var(--bg-main)]">
+        <div className="relative w-full h-[40vh] md:h-[48vh] lg:h-[54vh] overflow-hidden bg-[var(--bg-main)]">
             {/* Background images with crossfade */}
             <AnimatePresence mode="wait">
                 <motion.div
@@ -95,10 +95,10 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
             {/* Left-to-right fade for text readability */}
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-3/4" />
             {/* Smooth gradient fade into the bottom content rows */}
-            <div className="absolute bottom-0 left-0 right-0 h-48 md:h-64 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 md:h-44 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent" />
 
             {/* Content */}
-            <div className="absolute inset-0 flex items-end pb-16 md:pb-28">
+            <div className="absolute inset-0 flex items-end pb-8 md:pb-12">
                 <div className="w-full max-w-[2000px] mx-auto px-6 md:px-12">
                     <AnimatePresence mode="wait">
                         <motion.div

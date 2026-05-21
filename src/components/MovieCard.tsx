@@ -94,7 +94,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchEnd={handleMouseLeave}
         >
         <Link href={`/watch/${mediaType}/${item.id}`} className="block group w-full h-full">
-            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-white/5 group-hover:border-orange-500/40 transition-all duration-500 group-hover:shadow-[0_20px_50px_-12px_rgba(249,115,22,0.6)] group-hover:scale-[1.03] group-hover:-translate-y-2 group-hover:-rotate-1 premium-card flex flex-col">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-white/5 premium-card flex flex-col">
                 {/* Poster / Simulated Trailer Box */}
                 <div className="relative flex-1 min-h-0 aspect-[2/3] overflow-hidden">
                     {((item.poster_path || item.image) && !imgError) ? (

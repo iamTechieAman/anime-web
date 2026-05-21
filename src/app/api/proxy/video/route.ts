@@ -186,8 +186,8 @@ function serveFallbackIframe(targetUrl: string) {
         <!-- Strict Sandbox: allows scripts to run the player, but NO popups (allow-popups is missing), NO top-level navigation (allow-top-navigation is missing) -->
         <iframe 
             src="${targetUrl.replace(/"/g, '&quot;')}" 
-            sandbox="allow-scripts allow-presentation allow-same-origin" 
-            allow="autoplay; fullscreen; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-forms" 
+            allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
             referrerpolicy="no-referrer"
         ></iframe>
 

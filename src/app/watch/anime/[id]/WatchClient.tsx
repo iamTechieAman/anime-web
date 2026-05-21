@@ -183,6 +183,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     // Server State
     const [servers, setServers] = useState<any[]>([]);
     const [selectedServer, setSelectedServer] = useState<string | null>(null);
+    const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [audioUnlocked, setAudioUnlocked] = useState(false);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [loadingServers, setLoadingServers] = useState(false);
@@ -206,6 +207,55 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     const { addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     
+    // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
+    const handleAutoFallback = useCallback(() => {
+        if (!selectedServer || servers.length === 0) return;
+
+        console.warn(`[ToonPlayer Fallback] Server ${selectedServer} timed out or failed. Initiating rotation...`);
+
+        setFailedServers(prev => {
+            const next = new Set(prev);
+            next.add(selectedServer);
+
+            // Find next server in the list that hasn't failed yet
+            const nextServer = servers.find(s => !next.has(s.serverId) && s.serverId !== selectedServer);
+
+            if (nextServer) {
+                toast.error(`Server failed. Auto-switching to ${nextServer.serverName}...`, {
+                    icon: "🔄",
+                    style: {
+                        background: "rgba(20, 20, 20, 0.95)",
+                        color: "#fff",
+                        border: "1px solid rgba(249, 115, 22, 0.3)",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }
+                });
+                setTimeout(() => setSelectedServer(nextServer.serverId), 50);
+            } else {
+                setError("All streaming servers failed for this episode. Please try another episode or mirror.");
+            }
+            return next;
+        });
+    }, [selectedServer, servers]);
+
+    // Reset failed servers when episode or mode changes
+    useEffect(() => {
+        setFailedServers(new Set());
+    }, [currentEp, mode]);
+
+    // Automatic loading timeout recovery (8.5 seconds)
+    useEffect(() => {
+        if (!loadingSource || error || !selectedServer) return;
+
+        const timer = setTimeout(() => {
+            console.warn(`[ToonPlayer Anime] Provider timed out while loading source. Triggering fallback.`);
+            handleAutoFallback();
+        }, 8500);
+
+        return () => clearTimeout(timer);
+    }, [loadingSource, error, selectedServer, handleAutoFallback]);
+
     // Load Settings & Bookmark
     useEffect(() => {
         // null means first visit → default to true. Only disable if explicitly set to 'false'.
@@ -645,13 +695,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 } else {
                     // No links found — auto-switch to next server
-                    console.warn('[WatchPage] No links from native server');
-                    setError("This server returned no playable links. Please try another server.");
+                    console.warn('[WatchPage] No links from native server. Rotating...');
+                    handleAutoFallback();
                 }
             } catch (err: any) {
                 if (processingRef.current !== key) return;
                 console.error('[WatchPage] Native server failed:', err.message);
-                setError(`Server ${selectedServerObj.serverName} failed to provide a source. Try switching servers.`);
+                handleAutoFallback();
             } finally {
                 if (processingRef.current === key) {
                     setLoadingSource(false);
@@ -732,10 +782,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe
                             src={`/api/proxy/video?url=${encodeURIComponent(fallbackEmbedUrl)}`}
-                            sandbox="allow-scripts allow-presentation"
+                            sandbox="allow-scripts allow-same-origin allow-forms"
                             className="absolute inset-0 w-full h-full border-0"
-                            allowFullScreen
-                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
                         />
                     </div>
@@ -908,9 +957,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 ref={iframeRef}
                                                 src={sourceUrl}
                                                 className="w-full h-full border-0 bg-black"
-                                                allowFullScreen
-                                                sandbox="allow-scripts allow-presentation"
-                                                allow="autoplay; fullscreen"
+                                                sandbox="allow-scripts allow-same-origin allow-forms"
+                                                allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                                 onLoad={() => setLoadingSource(false)}
                                                 onError={() => setError("Iframe failed to load.")}
                                             ></iframe>

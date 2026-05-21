@@ -217,6 +217,8 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
 
+    const isAnimeServer = activeServer ? ANIME_SERVERS.some(s => s.id === activeServer.id) : false;
+
 
     // Cast & Auto-Next state
     const [rawVideoSource, setRawVideoSource] = useState<string | null>(null);
@@ -537,15 +539,72 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
     }, [type]);
 
-    // Reset states on server change
+    // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
+    const handleAutoFallback = useCallback(() => {
+        if (!activeServer) return;
+        
+        console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) timed out or failed. Initiating rotation...`);
+        
+        setFailedServers(prev => {
+            const next = new Set(prev);
+            next.add(activeServer.id);
+            
+            // Find next server in the list that hasn't failed yet
+            const listToUse = isAnimeServer ? ANIME_SERVERS : serversList;
+            const nextServer = listToUse.find(s => !next.has(s.id) && s.id !== activeServer.id);
+
+            if (nextServer) {
+                toast.error(`Server ${activeServer.name} is unresponsive. Rotating to ${nextServer.name}...`, {
+                    icon: "🔄",
+                    style: {
+                        background: "rgba(20, 20, 20, 0.95)",
+                        color: "#fff",
+                        border: "1px solid rgba(249, 115, 22, 0.3)",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }
+                });
+                // Update active server state on the next tick to avoid state sync locks
+                setTimeout(() => setActiveServer(nextServer), 50);
+            } else {
+                setSourceError(true);
+                toast.error("All available streaming sources are currently unreachable. Please try the alternative mirrors below or download.", {
+                    duration: 6000,
+                    style: {
+                        background: "rgba(20, 20, 20, 0.95)",
+                        color: "#fff",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }
+                });
+            }
+            return next;
+        });
+    }, [activeServer, serversList, isAnimeServer]);
+
+    // Reset states on server change and boot automatic health checker timeout
     useEffect(() => {
         setPlayerLoaded(false);
         setSourceError(false);
-    }, [activeServer]);
+
+        if (!activeServer || sourceError) return;
+
+        // Fallback after 8.5 seconds if loading fails
+        const timer = setTimeout(() => {
+            if (!playerLoaded) {
+                handleAutoFallback();
+            }
+        }, 8500);
+
+        return () => clearTimeout(timer);
+    }, [activeServer, playerLoaded, sourceError, handleAutoFallback]);
 
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
         setFailedServers(new Set());
+        setSourceError(false);
+        setPlayerLoaded(false);
         setActiveServer(server);
     }, []);
 
@@ -771,7 +830,13 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     <div className="relative w-full bg-black">
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
-                                <iframe src={embedUrl} className="absolute inset-0 w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media; picture-in-picture" referrerPolicy="origin" />
+                                <iframe 
+                                    src={embedUrl} 
+                                    className="absolute inset-0 w-full h-full border-0" 
+                                    sandbox="allow-scripts allow-same-origin allow-forms"
+                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
+                                    referrerPolicy="origin" 
+                                />
                             </div>
                         </div>
                     </div>
@@ -796,7 +861,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
     const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
-    const isAnimeServer = ANIME_SERVERS.some(s => s.id === activeServer.id);
+    // isAnimeServer is declared at the top of the component
     
     const embedUrl = isAnimeServer 
         ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
@@ -896,18 +961,11 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                 key={iframeKey}
                                 src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
-                                allowFullScreen
-                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
+                                sandbox="allow-scripts allow-same-origin allow-forms"
+                                allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="no-referrer"
                                 onError={() => {
-                                    setSourceError(true);
-                                    if (activeServer?.id) {
-                                        setFailedServers(prev => {
-                                            const newSet = new Set(prev);
-                                            newSet.add(activeServer.id);
-                                            return newSet;
-                                        });
-                                    }
+                                    handleAutoFallback();
                                 }}
                                 onLoad={() => setPlayerLoaded(true)}
                             />
@@ -940,7 +998,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                                         cx="48"
                                                         cy="48"
                                                         r="40"
-                                                        stroke="#a855f7"
+                                                        stroke="#f97316"
                                                         strokeWidth="8"
                                                         fill="none"
                                                         strokeDasharray="251.2"
@@ -1187,9 +1245,8 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                             >
                                 <iframe
                                     src={`https://www.youtube.com/embed/${details.trailer.key}?autoplay=1`}
-                                    className="w-full h-full"
-                                    allow="autoplay; encrypted-media"
-                                    allowFullScreen
+                                    className="w-full h-full border-0"
+                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                 />
                             </motion.div>
                             <button
@@ -1619,8 +1676,8 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                                         ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
                                         : `https://dl.vidsrc.vip/movie/${id}`}
                                     className="w-full h-full border-0"
-                                    allowFullScreen
-                                    allow="autoplay; encrypted-media; fullscreen"
+                                    sandbox="allow-scripts allow-same-origin allow-forms"
+                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                     referrerPolicy="no-referrer"
                                 />
                             </div>

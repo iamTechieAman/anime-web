@@ -41,13 +41,13 @@
   --shadow-glow-blue: 0 0 24px rgba(96, 165, 250, 0.3);
 
   /* Spacing scale — compact streaming rhythm */
-  --space-xs: 3px;
-  --space-sm: 6px;
+  --space-xs: 4px;
+  --space-sm: 8px;
   --space-md: 12px;
-  --space-lg: 20px;
-  --space-xl: 28px;
-  --space-2xl: 40px;
-  --space-3xl: 56px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
 
   /* Border radius scale */
   --radius-sm: 6px;
@@ -520,7 +520,9 @@ p, .text-body {
 .premium-card {
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid var(--border-color);
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -534,7 +536,7 @@ p, .text-body {
   inset: 0;
   background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(249, 115, 22, 0.12) 0%, transparent 80%);
   opacity: 0;
-  transition: opacity 0.5s;
+  transition: opacity 0.4s ease;
   z-index: 1;
   pointer-events: none;
 }
@@ -542,9 +544,9 @@ p, .text-body {
 .premium-card:hover::before { opacity: 1; }
 
 .premium-card:hover {
-  transform: translateY(-4px) scale(1.015);
-  border-color: rgba(249, 115, 22, 0.35);
-  box-shadow: var(--shadow-elevated), 0 0 20px rgba(249, 115, 22, 0.1);
+  transform: translate3d(0, -6px, 0) scale(1.02);
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow: var(--shadow-elevated), 0 0 25px rgba(249, 115, 22, 0.15);
 }
 
 /* Netflix-style card hover expand */

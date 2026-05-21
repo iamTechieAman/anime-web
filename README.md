@@ -21,6 +21,11 @@
 
 ToonPlayer is a high-performance content aggregator that lets users discover and stream anime, movies, and TV shows — all from a single, ad-free interface. It aggregates video sources from multiple providers, applies an intelligent server-scanning pipeline, and delivers content through a sandboxed proxy player that blocks popups and malicious redirects.
 
+### 🏆 Recent Releases & Major System Upgrades (v4.0+)
+
+- 🚀 **Centralized Self-Healing Stream Provider Engine (v4.0)**: Built-in automated provider health checking, smart loading timeout rotators (8.5-second fallback triggers), Axios-level failover chains, silent mirror redirections, and unified notification toast alerts.
+- 🎨 **Premium UI Optimization & Crunchyroll-Style Polish**: GPU hardware-accelerated transforms (`translate3d(0, -6px, 0)`), 15-20% vertical spacing compression for massive above-the-fold catalog visibility, custom 3-column CSS Grid navbar layout, and increased sidebar z-index stack handling (`z-[60]`) to completely remove content overlapping.
+
 ---
 
 ## ✨ Features

@@ -80,7 +80,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
 
     return (
         <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''}`}>
-            <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-[var(--accent)]/40 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 hover:shadow-[0_20px_50px_-12px_rgba(249,115,22,0.5)] block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'} premium-card`}>
+            <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[2/3]'} premium-card`}>
                 {/* Poster */}
                 {(imageSrc && !imgError) ? (
                     <img
