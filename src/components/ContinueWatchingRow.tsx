@@ -1,6 +1,6 @@
 "use client";
 
-import { useWatch } from "@/context/WatchContext";
+import { useWatch, type WatchHistoryItem } from "@/context/WatchContext";
 import { Play, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
@@ -10,7 +10,7 @@ export default function ContinueWatchingRow() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
 
-    const demoItems = [
+    const demoItems: WatchHistoryItem[] = [
         {
             id: 'demo-1',
             showId: '936075',
@@ -18,7 +18,8 @@ export default function ContinueWatchingRow() {
             type: 'movie',
             currentTime: 2400,
             duration: 12000, // 20%
-            poster: 'https://image.tmdb.org/t/p/w500/tBtqTCimYm3DKck3t8A2mgJaKVK.jpg'
+            poster: 'https://image.tmdb.org/t/p/w500/tBtqTCimYm3DKck3t8A2mgJaKVK.jpg',
+            updatedAt: Date.now()
         },
         {
             id: 'demo-2',
@@ -27,7 +28,8 @@ export default function ContinueWatchingRow() {
             type: 'movie',
             currentTime: 5400,
             duration: 12000, // 45%
-            poster: 'https://image.tmdb.org/t/p/w500/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg'
+            poster: 'https://image.tmdb.org/t/p/w500/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg',
+            updatedAt: Date.now()
         }
     ];
 

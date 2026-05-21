@@ -25,9 +25,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   }, []);
   
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] relative overflow-x-hidden">
+    <div className={`min-h-screen bg-[var(--bg-main)] relative overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
       <DesktopSidebar />
-      <div className="flex flex-col min-h-screen relative md:pl-[84px] overflow-y-visible overflow-x-hidden">
+      <div className={`flex flex-col min-h-screen relative md:pl-[84px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
 
 

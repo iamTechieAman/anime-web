@@ -233,8 +233,8 @@ export default function Header() {
       <span className="truncate">
         {parts.map((part, i) => 
           part.toLowerCase() === highlight.toLowerCase().trim() 
-            ? <b key={i} className="text-blue-400 font-black">{part}</b> 
-            : <span key={i} className="text-white/70">{part}</span>
+            ? <b key={i} className="text-[var(--accent)] font-bold">{part}</b> 
+            : <span key={i} className="text-[var(--text-secondary)]">{part}</span>
         )}
       </span>
     );
@@ -307,13 +307,13 @@ export default function Header() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] leading-tight uppercase">
-              Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Player</span>
+            <span className="text-xl md:text-2xl font-black tracking-tighter text-[var(--text-main)] font-sora block drop-shadow-[0_0_10px_rgba(204,120,92,0.15)] leading-tight uppercase">
+              Toon<span className="text-[var(--accent)]">Player</span>
             </span>
             <div className="flex items-center gap-1.5 -mt-0.5 ml-0.5">
-              <span className="text-[9px] uppercase tracking-[0.3em] font-black text-white/40">Premium</span>
-              <div className="w-1 h-1 rounded-full bg-purple-500 animate-pulse" />
-              <span className="text-[8px] font-bold text-purple-400/80 uppercase">Infinity</span>
+              <span className="text-[9px] uppercase tracking-[0.3em] font-black text-[var(--text-muted)]">Premium</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+              <span className="text-[8px] font-bold text-[var(--accent)] uppercase">Infinity</span>
             </div>
           </div>
         </Link>

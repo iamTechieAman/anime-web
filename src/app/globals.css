@@ -5,34 +5,36 @@
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* Light Mode (Refined) */
-  --bg-main: #ffffff;
-  --bg-card: #f4f4f5;
-  --bg-overlay: rgba(255, 255, 255, 0.8);
-  --bg-elevated: #fafafa;
-  --text-main: #18181b;
-  --text-muted: #71717a;
-  --text-secondary: #52525b;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --accent: #8b5cf6;
-  --accent-secondary: #3b82f6;
-  --accent-glow: rgba(139, 92, 246, 0.3);
+  /* ToonPlayer V2.0 — Anthropic Claude Cream Editorial Theme */
+  --bg-main: #faf9f5;             /* canvas: warm tinted cream */
+  --bg-card: #efe9de;             /* surface-card: slightly darker cream */
+  --bg-overlay: rgba(250, 249, 245, 0.85); /* canvas tinted with transparency */
+  --bg-elevated: #f5f0e8;         /* surface-soft */
+  --text-main: #141413;           /* ink: warm charcoal */
+  --text-muted: #6c6a64;          /* muted: warm gray */
+  --text-secondary: #3d3d3a;      /* body: humanist dark brown-gray */
+  --border-color: #e6dfd8;        /* hairline */
+  --border-subtle: #ebe6df;       /* hairline-soft */
+  
+  --accent: #cc785c;              /* primary warm coral */
+  --accent-secondary: #cc785c;
+  --accent-glow: rgba(204, 120, 92, 0.2);
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(250, 249, 245, 0.03);
+  --glass-border: rgba(230, 223, 216, 0.1);
 
   /* Gradient system */
-  --gradient-primary: linear-gradient(135deg, #8b5cf6, #3b82f6);
-  --gradient-hot: linear-gradient(135deg, #ef4444, #f97316);
-  --gradient-cool: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  --gradient-gold: linear-gradient(135deg, #f59e0b, #ef4444);
+  --gradient-primary: linear-gradient(135deg, #cc785c, #a9583e);
+  --gradient-hot: linear-gradient(135deg, #cc785c, #a9583e);
+  --gradient-cool: linear-gradient(135deg, #5db8a6, #cc785c);
+  --gradient-gold: linear-gradient(135deg, #e8a55a, #cc785c);
 
   /* Shadows */
-  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.08);
-  --shadow-elevated: 0 12px 40px -8px rgba(0, 0, 0, 0.15);
-  --shadow-glow-purple: 0 0 30px rgba(139, 92, 246, 0.25);
-  --shadow-glow-blue: 0 0 30px rgba(59, 130, 246, 0.25);
+  --shadow-card: 0 4px 24px -4px rgba(20, 20, 19, 0.08);
+  --shadow-elevated: 0 12px 40px -8px rgba(20, 20, 19, 0.15);
+  --shadow-glow-purple: 0 0 30px rgba(204, 120, 92, 0.25);
+  --shadow-glow-blue: 0 0 30px rgba(204, 120, 92, 0.25);
 
   /* Spacing scale */
   --space-xs: 4px;
@@ -53,32 +55,59 @@
 }
 
 .dark {
-  /* Cyber-Cinematic Premium Dark Mode — Layered Depth */
-  --bg-main: #060609;       /* Deepest midnight */
-  --bg-card: #0d0d14;       /* Elevated card surface */
-  --bg-elevated: #13131e;   /* High elevation — modals, dropdowns */
-  --bg-surface: #1a1a28;    /* Surface layer — hover states */
-  --bg-overlay: rgba(6, 6, 9, 0.88);
+  /* Match root cream canvas since app forces dark mode */
+  --bg-main: #faf9f5;
+  --bg-card: #efe9de;
+  --bg-overlay: rgba(250, 249, 245, 0.85);
+  --bg-elevated: #f5f0e8;
+  --bg-surface: #efe9de;
   
-  /* High Contrast Typography */
-  --text-main: #f1f5f9;     /* Slate-100: crisp white */
-  --text-secondary: #cbd5e1; /* Slate-300: readable body */
-  --text-muted: #8892a4;    /* Slate-400 desaturated: metadata */
+  --text-main: #141413;
+  --text-secondary: #3d3d3a;
+  --text-muted: #6c6a64;
   
-  /* Layered Borders & Glassmorphism */
-  --border-color: rgba(139, 92, 246, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --glass-bg: rgba(13, 13, 20, 0.72);
-  --glass-border: rgba(139, 92, 246, 0.18);
+  --border-color: #e6dfd8;
+  --border-subtle: #ebe6df;
+  --glass-bg: rgba(239, 233, 222, 0.72);
+  --glass-border: rgba(204, 120, 92, 0.18);
   
-  /* Ambient Accents */
-  --accent: #9d72ff;
-  --accent-glow: rgba(157, 114, 255, 0.28);
+  --accent: #cc785c;
+  --accent-glow: rgba(204, 120, 92, 0.28);
 
-  /* Depth & Shadows */
-  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255,255,255,0.03);
-  --shadow-elevated: 0 16px 48px -12px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255,255,255,0.04);
-  --shadow-glow-purple: 0 0 40px rgba(139, 92, 246, 0.2), 0 0 80px rgba(139, 92, 246, 0.06);
+  --shadow-card: 0 4px 24px -4px rgba(20, 20, 19, 0.08);
+  --shadow-elevated: 0 12px 40px -8px rgba(20, 20, 19, 0.15);
+}
+
+/* 🌙 Special Dark Navy Product Surface overrides (for Desktop Sidebar, Footer, Watch Page etc.) */
+.theme-dark,
+.watch-page,
+footer,
+aside {
+  --bg-main: #181715 !important;             /* surface-dark: warm dark navy */
+  --bg-card: #1f1e1b !important;             /* surface-dark-soft */
+  --bg-elevated: #252320 !important;         /* surface-dark-elevated */
+  --bg-surface: #252320 !important;
+  --bg-overlay: rgba(24, 23, 21, 0.9) !important;
+  
+  --text-main: #faf9f5 !important;           /* on-dark: cream-tinted white */
+  --text-secondary: #a09d96 !important;      /* on-dark-soft */
+  --text-muted: #8e8b82 !important;
+  
+  --border-color: #252320 !important;
+  --border-subtle: #1f1e1b !important;
+  --glass-bg: rgba(31, 30, 27, 0.72) !important;
+  --glass-border: rgba(250, 249, 245, 0.1) !important;
+}
+
+/* Handle children elements inside dark navy containers */
+.theme-dark *,
+.watch-page *,
+footer *,
+aside * {
+  --text-main: #faf9f5;
+  --text-secondary: #a09d96;
+  --text-muted: #8e8b82;
+  --border-color: #252320;
 }
 
 :root {

@@ -62,7 +62,7 @@ export async function GET(request: Request) {
                 );
 
                 const successful = results
-                    .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value)
+                    .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && !!r.value)
                     .map(r => r.value)
                     .sort((a, b) => (b.availableEpisodesDetail.sub.length + b.availableEpisodesDetail.dub.length) - 
                                    (a.availableEpisodesDetail.sub.length + a.availableEpisodesDetail.dub.length));
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
         );
         
         const bestFallback = fallbackResults
-            .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value)
+            .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && !!r.value)
             .map(r => r.value)
             .find(v => v.availableEpisodesDetail.sub.length > 0 || v.availableEpisodesDetail.dub.length > 0);
 

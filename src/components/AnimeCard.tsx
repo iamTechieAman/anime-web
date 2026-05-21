@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Play, Star, Calendar, Clock, ChevronRight } from "lucide-react";
 
-interface Show {
+export interface Show {
     _id?: string;
     id?: string;
     title: string;

@@ -259,8 +259,8 @@ export default function MoviesPage() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white border-transparent shadow-[0_0_20px_rgba(139,92,246,0.3)]"
-                                        : "bg-[var(--bg-card)] border-white/5 text-[var(--text-muted)] hover:text-white hover:bg-white/10"
+                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-white border-transparent shadow-[0_0_20px_rgba(204,120,92,0.3)]"
+                                        : "bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)]"
                                     }`}
                                 >
                                     <tab.icon className="w-4 h-4" />
@@ -688,14 +688,14 @@ function SectionHeader({ icon: Icon, title, color, isFeatured = false }: { icon:
     return (
         <div className={`flex items-end gap-3 md:gap-4 mb-6 text-[var(--text-main)] transition-all ${isFeatured ? 'ml-2' : ''}`}>
             {isFeatured ? (
-                <div className="w-1.5 h-10 bg-gradient-to-t from-purple-500 to-blue-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.6)]" />
+                <div className="w-1.5 h-10 bg-gradient-to-t from-[var(--accent)] to-[var(--accent)] rounded-full shadow-[0_0_15px_rgba(204,120,92,0.6)]" />
             ) : (
-                <div className="w-1 h-6 bg-blue-500/80 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.4)]" />
+                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_rgba(204,120,92,0.4)]" />
             )}
             <div className="flex flex-col">
                 <div className="flex items-center gap-2 md:gap-3">
-                    <Icon className={`${isFeatured ? 'w-6 h-6 md:w-7 md:h-7' : 'w-5 h-5'} ${color} drop-shadow-md`} />
-                    <h2 className={`${isFeatured ? 'text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm' : 'text-lg md:text-xl font-bold tracking-tight'}`}>{title}</h2>
+                    <Icon className={`${isFeatured ? 'w-6 h-6 md:w-7 md:h-7' : 'w-5 h-5'} text-[var(--accent)] drop-shadow-md`} />
+                    <h2 className={`${isFeatured ? 'text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-lg md:text-xl font-bold tracking-tight font-sora'}`}>{title}</h2>
                 </div>
                 {isFeatured && (
                     <p className="text-[11px] md:text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1 ml-1 opacity-80">Featured Collection</p>

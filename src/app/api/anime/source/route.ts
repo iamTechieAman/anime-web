@@ -144,7 +144,7 @@ export async function GET(request: Request) {
             );
 
             const successful = recoveryResults
-                .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value)
+                .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && !!r.value)
                 .map(r => r.value);
 
             if (successful.length > 0) {

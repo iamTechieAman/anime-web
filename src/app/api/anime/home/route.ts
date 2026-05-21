@@ -16,8 +16,8 @@ export async function GET() {
             try {
                 // Try HiAnime first (fastest, no scraper needed)
                 const [trending, latest] = await Promise.all([
-                    hianime.getTrending(),
-                    hianime.getRecent()
+                    hianime.getTrending?.() ?? Promise.resolve([]),
+                    hianime.getRecent?.() ?? Promise.resolve([])
                 ]);
 
                 if (trending.length > 0 || latest.length > 0) {
@@ -30,8 +30,8 @@ export async function GET() {
             try {
                 // Try Consumet (API-based, usually reliable)
                 const [trending, latest] = await Promise.all([
-                    consumet.getTrending(),
-                    consumet.getRecent()
+                    consumet.getTrending?.() ?? Promise.resolve([]),
+                    consumet.getRecent?.() ?? Promise.resolve([])
                 ]);
 
                 if (trending.length > 0 || latest.length > 0) {
@@ -45,8 +45,8 @@ export async function GET() {
                 // Try the new Aniwave (singular) scraper
                 const aniwave = getProvider('aniwave');
                 const [trending, latest] = await Promise.all([
-                    aniwave.getTrending(),
-                    aniwave.getRecent()
+                    aniwave.getTrending?.() ?? Promise.resolve([]),
+                    aniwave.getRecent?.() ?? Promise.resolve([])
                 ]);
                 if (trending.length > 0 || latest.length > 0) {
                     return { trending, latest };
@@ -58,8 +58,8 @@ export async function GET() {
             try {
                 // Fallback to Aniwaves (plural, uses scraper client)
                 const aniwaves = getProvider('aniwaves');
-                const data = await aniwaves.getRecent();
-                const trending = await aniwaves.getTrending();
+                const data = await aniwaves.getRecent?.() ?? Promise.resolve([]);
+                const trending = await aniwaves.getTrending?.() ?? Promise.resolve([]);
                 return { trending, latest: data };
             } catch (e) {
                 console.error("[AnimeHome] All providers failed:", e);

@@ -106,7 +106,7 @@ export default function MobileNav() {
                                 item.onClick();
                             }}
                             className={`tap-scale flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition-colors duration-150 relative ${
-                                item.active ? item.color : "text-[var(--text-muted)]"
+                                item.active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
                             }`}
                         >
                             <div className="relative">
