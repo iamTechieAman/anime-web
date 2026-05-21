@@ -622,7 +622,7 @@ export default function Header() {
                      initial={{ opacity: 0, y: 12, scale: 0.95 }}
                      animate={{ opacity: 1, y: 0, scale: 1 }}
                      exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                     className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
+                     className="absolute top-full right-[-48px] sm:right-0 mt-3 w-[88vw] max-w-[340px] sm:w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
                    >
                       <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                          <div className="flex items-center gap-2">

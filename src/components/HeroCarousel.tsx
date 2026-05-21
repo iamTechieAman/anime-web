@@ -147,7 +147,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] overflow-hidden group bg-black"
+            className="relative w-full xl:max-w-[1600px] xl:mx-auto xl:rounded-[28px] xl:border xl:border-white/10 xl:my-4 h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] max-h-[700px] overflow-hidden group bg-black shadow-2xl"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -160,13 +160,24 @@ export default function HeroCarousel() {
                     style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
                 >
                     <div className="absolute inset-0">
+                        {/* Desktop Backdrop */}
                         <Image
                             src={slide.image}
                             alt={slide.title}
                             fill
                             priority={i < 2}
                             fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-center opacity-70"
+                            className="object-cover object-center opacity-70 hidden md:block"
+                            sizes="100vw"
+                        />
+                        {/* Mobile Cover Poster */}
+                        <Image
+                            src={slide.cover}
+                            alt={slide.title}
+                            fill
+                            priority={i < 2}
+                            fetchPriority={i === 0 ? "high" : "low"}
+                            className="object-cover object-center opacity-40 block md:hidden"
                             sizes="100vw"
                         />
                     </div>

@@ -815,7 +815,11 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 </div>
             </div>
 
-            <div className="pt-14">
+            <div className="pt-14 w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-6">
+                <div className="flex flex-col xl:flex-row gap-6 items-start">
+                    
+                    {/* Left Pane (Main content: Player, Cast, Info, alt etc.) */}
+                    <div className="flex-1 w-full min-w-0">
                 {/* Video Player with Anti-Redirect Protection */}
                 <div className="relative w-full bg-black touch-pan-y">
                     <div className="w-full touch-pan-y">
@@ -1353,9 +1357,9 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         </div>
                     </div>
 
-                    {/* TV Show Seasons & Episodes */}
+                    {/* TV Show Seasons & Episodes (Bottom list for mobile/tablet screens) */}
                     {type === 'tv' && details.seasons && details.seasons.length > 0 && (
-                        <section className="mt-10">
+                        <section className="mt-10 xl:hidden">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <div className="flex items-center gap-3">
                                     <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
@@ -1655,7 +1659,102 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+                </div> {/* End Left column */}
+
+                {/* Right Column: Episode List (TV Shows Only) */}
+                {type === "tv" && details.seasons && details.seasons.length > 0 && (
+                    <div className="hidden xl:block w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:overflow-y-auto pr-2 custom-scrollbar bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_#a855f7]" />
+                                    <h2 className="text-base font-bold text-white">Episodes</h2>
+                                </div>
+                                <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-main)] px-2 py-0.5 rounded-md font-bold">
+                                    {episodes.length} EP{episodes.length !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+
+                            {/* Season Selector */}
+                            <div className="relative">
+                                <select
+                                    value={selectedSeason}
+                                    onChange={(e) => {
+                                        setSelectedSeason(Number(e.target.value));
+                                        setSelectedEpisode(1);
+                                    }}
+                                    className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-purple-500 transition-colors cursor-pointer text-xs"
+                                >
+                                    {details.seasons
+                                        .filter(s => s.season_number > 0)
+                                        .sort((a, b) => a.season_number - b.season_number)
+                                        .map((season) => (
+                                            <option key={season.id} value={season.season_number}>
+                                                Season {season.season_number} ({season.episode_count} eps)
+                                            </option>
+                                        ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                            </div>
+                        </div>
+
+                        {/* Episode List Scroll Area */}
+                        {loadingEpisodes ? (
+                            <div className="flex justify-center items-center py-12">
+                                <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-2 max-h-[50vh] xl:max-h-[calc(100vh-240px)] overflow-y-auto pr-1 scrollbar-thin">
+                                {episodes.map((ep) => (
+                                    <button
+                                        key={ep.id}
+                                        onClick={() => {
+                                            setSelectedEpisode(ep.episode_number);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${
+                                            selectedEpisode === ep.episode_number
+                                                ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                                                : 'border-[var(--border-color)] bg-[var(--bg-main)] hover:border-purple-500/40'
+                                        }`}
+                                    >
+                                        {/* Compact Image */}
+                                        <div className="w-20 h-12 rounded-lg overflow-hidden bg-[var(--bg-card)] flex-shrink-0 relative">
+                                            {ep.still_path ? (
+                                                <img
+                                                    src={`${IMG_BASE}/w185${ep.still_path}`}
+                                                    alt={ep.name}
+                                                    loading="lazy"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>
+                                            )}
+                                            {selectedEpisode === ep.episode_number && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                                    <Play className="w-4 h-4 text-white fill-current" />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Detail */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-xs font-bold line-clamp-1 ${
+                                                selectedEpisode === ep.episode_number ? 'text-purple-400' : 'text-white'
+                                            }`}>
+                                                E{ep.episode_number}. {ep.name}
+                                            </p>
+                                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">{ep.runtime > 0 ? `${ep.runtime}m` : 'TV Show'}</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+            </div> {/* End xl:flex-row */}
+        </div> {/* End pt-14 wrapper */}
 
 
             {/* Scroll to Top */}

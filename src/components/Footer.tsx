@@ -11,9 +11,9 @@ export default function Footer() {
             {/* Gradient fade top connector */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
             <div className="w-full px-4 md:px-8 py-8 bg-gradient-to-b from-[var(--bg-card)]/30 to-[var(--bg-main)] backdrop-blur-sm">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                     {/* Brand Section */}
-                    <div className="col-span-1 md:col-span-1 space-y-4">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-1 space-y-4">
                         <Link href="/" className="flex items-center gap-3 group">
                             <div className="w-10 h-10 relative flex items-center justify-center">
                                 <img 
