@@ -79,15 +79,15 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
 
     return (
-        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} netflix-card-snap w-full`}>
-            <Link href={getHref()} className="block group w-full h-full">
+        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-300 hover:scale-[1.06] hover:z-30 w-full h-full`}>
+            <Link href={getHref()} className="block w-full h-full">
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
                     {(imageSrc && !imgError) ? (
                         <img
                             src={imageSrc}
                             alt={title}
-                            className="w-full h-full object-cover aspect-[2/3]"
+                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
                             decoding="async"
                             onError={() => setImgError(true)}
@@ -214,7 +214,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
 export function AnimeGrid({ shows }: { shows: Show[] }) {
     if (!shows || shows.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex flex-col items-center justify-center py-4 md:py-6 text-center">
                 <p className="text-[var(--text-muted)] mb-2">No anime found.</p>
             </div>
         );

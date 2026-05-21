@@ -82,7 +82,7 @@ export default function GenrePage() {
                 ) : shows.length > 0 ? (
                     <AnimeGrid shows={shows} />
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="flex flex-col items-center justify-center py-4 md:py-6 text-center">
                         <div className="w-20 h-20 bg-[var(--bg-card)] rounded-full flex items-center justify-center mb-4">
                             <Grid className="w-10 h-10 text-[var(--text-muted)]" />
                         </div>

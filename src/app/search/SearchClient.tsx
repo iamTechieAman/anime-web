@@ -167,7 +167,7 @@ function MovieSearchContent() {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col flex-1 items-center justify-center text-center py-20"
+                    className="flex flex-col flex-1 items-center justify-center text-center py-4 md:py-6"
                 >
                     <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20">
                         <X className="w-8 h-8 text-red-500" />
@@ -203,7 +203,7 @@ function MovieSearchContent() {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col flex-1 items-center justify-center text-center py-20"
+                    className="flex flex-col flex-1 items-center justify-center text-center py-4 md:py-6"
                 >
                     <div className="w-20 h-20 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mb-6 border border-[var(--border-color)]">
                         <Search className="w-8 h-8 text-[var(--text-muted)]" />

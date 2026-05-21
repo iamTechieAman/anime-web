@@ -25,7 +25,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   }, []);
   
   return (
-    <div className={`min-h-screen bg-[var(--bg-main)] relative overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+    <main className="min-h-screen bg-[#0b0b0f] text-white overflow-x-hidden">
+      <div className="mx-auto w-full max-w-[1800px] px-3 md:px-5 lg:px-6">
       <DesktopSidebar />
       <div className={`flex flex-col min-h-screen relative md:pl-[116px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
@@ -62,6 +63,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
           onClose={() => setShowProfileSettings(false)} 
         />
       )}
-    </div>
+      </div>
+    </main>
   );
 }

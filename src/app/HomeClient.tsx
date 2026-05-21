@@ -357,7 +357,7 @@ export default function MoviesPage() {
                                     ))}
                                 </div>
                             ) : (
-                                !isSearching && <div className="text-center py-20 text-[var(--text-muted)]">No results found for your search.</div>
+                                !isSearching && <div className="text-center py-4 md:py-6 text-[var(--text-muted)]">No results found for your search.</div>
                             )}
                         </div>
                     ) : (
@@ -374,7 +374,7 @@ export default function MoviesPage() {
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className="flex flex-col items-center justify-center py-24 text-center gap-6"
+                                            className="flex flex-col items-center justify-center py-4 md:py-6 text-center gap-6"
                                         >
                                             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-4xl border border-white/10">
                                                 🎬
@@ -398,7 +398,7 @@ export default function MoviesPage() {
 
                                 {/* Trending row for active provider */}
                                 {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
-                                    <section className="mb-10 md:mb-14 relative">
+                                    <section className="mb-6 md:mb-8 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-[var(--accent)]" isFeatured />
                                         <MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge />
@@ -407,7 +407,7 @@ export default function MoviesPage() {
 
                                 {/* Smart Recommendations (only when no provider active) */}
                                 {activeProvider === "all" && activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
-                                    <section className="mb-10 md:mb-14 relative">
+                                    <section className="mb-6 md:mb-8 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-[var(--accent)]" isFeatured />
                                         <MovieRow 
@@ -426,7 +426,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-10 md:space-y-14"
+                                        className="space-y-6 md:space-y-8"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -483,7 +483,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-16 md:space-y-24"
+                                        className="space-y-6 md:space-y-8"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -577,7 +577,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "trending" && (
-                                    <div className="space-y-16 md:space-y-24">
+                                    <div className="space-y-6 md:space-y-8">
                                         <section>
                                             <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
                                             {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
@@ -594,7 +594,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "discover" && (
-                                    <div className="space-y-16 md:space-y-24">
+                                    <div className="space-y-6 md:space-y-8">
                                         {mjItems.length > 0 && (
                                             <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-[var(--accent)]/20 overflow-hidden">
                                                 <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
@@ -760,7 +760,7 @@ export default function MoviesPage() {
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 </div>
 
-                <section className="mb-16 md:mb-20 max-w-[1400px] mx-auto px-6 lg:px-12 relative">
+                <section className="mb-6 md:mb-8 max-w-[1400px] mx-auto px-6 lg:px-12 relative">
                     {/* Subtle ambient glow for the bottom region */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-[var(--accent)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
                     
@@ -807,7 +807,7 @@ export default function MoviesPage() {
                 </section>
 
                 <section className="mb-32 max-w-[900px] mx-auto px-6 lg:px-12">
-                    <h2 className="text-heading mb-10 flex items-center gap-4 justify-center">
+                    <h2 className="text-heading mb-6 md:mb-8 flex items-center gap-4 justify-center">
                         <Info className="w-6 h-6 text-[var(--accent)]" /> Frequently Asked Questions
                     </h2>
                     <div className="space-y-4">

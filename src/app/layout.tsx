@@ -164,7 +164,7 @@ export default function RootLayout({
         <meta name="google-site-verification" content="google555e8d2c84c218f0" />
       </head>
       <body
-        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-orange-500/25`}
+        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[#0b0b0f] text-white overflow-x-hidden transition-colors duration-300 selection:bg-orange-500/25`}
         suppressHydrationWarning
       >
 

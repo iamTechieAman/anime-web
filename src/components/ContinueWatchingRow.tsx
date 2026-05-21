@@ -103,7 +103,7 @@ export default function ContinueWatchingRow() {
     };
 
     return (
-        <section className="mb-10 w-full overflow-hidden">
+        <section className="mb-6 md:mb-8 w-full overflow-hidden">
             <div className="section-header">
                 <div className="accent-bar" />
                 <Clock className="w-5 h-5 text-orange-400" />

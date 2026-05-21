@@ -110,7 +110,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="flex flex-col items-center justify-center py-20"
+                            className="flex flex-col items-center justify-center py-4 md:py-6"
                         >
                             <div className="relative">
                                 <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
@@ -126,7 +126,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="flex flex-col items-center justify-center py-20 text-center"
+                            className="flex flex-col items-center justify-center py-4 md:py-6 text-center"
                         >
                             <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 max-w-md">
                                 <p className="text-red-400 font-medium mb-4">{error}</p>
@@ -144,7 +144,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="flex flex-col items-center justify-center py-20 text-center"
+                            className="flex flex-col items-center justify-center py-4 md:py-6 text-center"
                         >
                             <Search className="w-12 h-12 text-[var(--text-muted)] mb-4 opacity-50" />
                             <p className="text-[var(--text-muted)] text-lg font-medium">No results found for "{displayLetter}"</p>

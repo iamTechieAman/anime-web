@@ -87,22 +87,22 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     return (
         <div
             ref={cardRef}
-            className={`card-reveal ${isVisible ? 'card-visible' : ''} ${isFeatured ? 'grid-featured' : ''} netflix-card-snap w-full`}
+            className={`card-reveal ${isVisible ? 'card-visible' : ''} ${isFeatured ? 'grid-featured' : ''} group relative transition-all duration-300 hover:scale-[1.06] hover:z-30 w-full h-full`}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onTouchStart={handleMouseEnter}
             onTouchEnd={handleMouseLeave}
         >
-        <Link href={`/watch/${mediaType}/${item.id}`} className="block group w-full h-full">
-            <div className="premium-card-container w-full">
+        <Link href={`/watch/${mediaType}/${item.id}`} className="block w-full h-full">
+            <div className="aspect-[2/3] overflow-hidden rounded-2xl bg-[#16161d] relative w-full">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (
                     <img
                         src={item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image}
                         srcSet={item.poster_path ? `${IMG_BASE}/w185${item.poster_path} 185w, ${IMG_BASE}/w342${item.poster_path} 342w` : undefined}
-                        sizes="(max-width: 640px) 28vw, 180px"
+                        sizes="(max-width: 640px) 50vw, 20vw"
                         alt={`${title} (${year}) - Stream HD on ToonPlayer`}
-                        className="w-full h-full object-cover aspect-[2/3]"
+                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                         onError={() => setImgError(true)}
                         loading="lazy"
                         decoding="async"
@@ -233,7 +233,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
     };
 
     return (
-        <div className="netflix-row-container group/row -mx-4 md:-mx-8 px-4 md:px-8">
+        <div className="relative w-full overflow-hidden group/row mb-6 md:mb-8">
             {/* Ambient vignette fades for Netflix-style rows */}
             <div className="netflix-row-fade-left" />
             <div className="netflix-row-fade-right" />
@@ -254,10 +254,10 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
 
             <div
                 id={scrollId}
-                className="netflix-row"
+                className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 px-4 md:px-8"
             >
                 {items.filter(item => item && (item.poster_path || item.backdrop_path || item.image)).map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} className={`flex-shrink-0 snap-start transition-all duration-500 ${isLarge ? 'w-[45vw] sm:w-[220px] md:w-[260px] lg:w-[280px] max-w-[280px]' : 'w-[32vw] sm:w-[155px] md:w-[170px] lg:w-[180px] max-w-[180px]'}`}>
+                    <div key={`${item.id}-${idx}`} className="flex-shrink-0 w-[150px] sm:w-[170px] md:w-[190px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}
