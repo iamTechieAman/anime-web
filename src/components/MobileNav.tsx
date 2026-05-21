@@ -87,11 +87,11 @@ export default function MobileNav() {
     return (
         <div
             className={`
-                fixed bottom-0 left-0 right-0 z-50 
-                bg-[var(--bg-main)]/95 border-t border-[var(--border-color)]
+                fixed bottom-4 left-4 right-4 z-50 
+                bg-[#0B0713]/85 backdrop-blur-2xl border border-white/10 rounded-2xl
                 pb-[env(safe-area-inset-bottom)] transition-all duration-300 md:hidden
-                ${isScrolledDown ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}
-                shadow-[0_-8px_30px_rgba(0,0,0,0.5)]
+                ${isScrolledDown ? "translate-y-24 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}
+                shadow-[0_8px_32px_rgba(0,0,0,0.6)]
             `}
         >
             <div className="flex justify-around items-center h-16 px-1">
@@ -105,23 +105,23 @@ export default function MobileNav() {
                                 if (navigator.vibrate) navigator.vibrate(10);
                                 item.onClick();
                             }}
-                            className={`tap-scale flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition-colors duration-150 relative ${
-                                item.active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+                            className={`tap-scale flex flex-col items-center justify-center gap-0.5 flex-1 py-2 transition-all duration-200 relative ${
+                                item.active ? "text-white" : "text-[var(--text-secondary)] hover:text-white"
                             }`}
                         >
                             <div className="relative">
-                                <Icon className={`${item.active ? "w-5 h-5" : "w-[18px] h-[18px]"} transition-all duration-200`} />
+                                <Icon className={`${item.active ? "w-5 h-5 text-[var(--accent)] drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]" : "w-[18px] h-[18px]"} transition-all duration-200`} />
                                 {/* Notification badge */}
                                 {'badge' in item && item.badge && (
-                                    <span className="absolute -top-1 -right-2 min-w-[14px] h-[14px] flex items-center justify-center bg-red-500 text-white text-[8px] font-black rounded-full px-0.5">
+                                    <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] flex items-center justify-center bg-gradient-to-tr from-pink-500 to-rose-500 text-white text-[8px] font-black rounded-full px-0.5 shadow-[0_0_8px_rgba(236,72,153,0.6)]">
                                         {item.badge > 9 ? '9+' : item.badge}
                                     </span>
                                 )}
                             </div>
-                            <span className={`text-[10px] font-bold tracking-tight ${item.active ? 'opacity-100' : 'opacity-50'}`}>{item.label}</span>
+                            <span className={`text-[10px] font-bold tracking-tight ${item.active ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
                             {/* Active dot indicator */}
                             {item.active && (
-                                <div className="absolute bottom-0.5 w-1 h-1 rounded-full bg-current" />
+                                <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse" />
                             )}
                         </button>
                     );

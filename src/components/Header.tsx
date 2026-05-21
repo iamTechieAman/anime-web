@@ -271,7 +271,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-[var(--bg-overlay)] backdrop-blur-sm border-b border-[var(--border-color)] pt-[max(2.5rem,env(safe-area-inset-top))] md:pt-4 transition-all duration-300">
+    <nav className="fixed top-4 left-4 md:left-[108px] right-4 z-50 px-6 py-3 bg-[#0B0713]/60 backdrop-blur-2xl border border-white/10 rounded-2xl transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
       
       {/* Search Focus Overlay */}
       <AnimatePresence>
@@ -290,12 +290,12 @@ export default function Header() {
       <div className="w-full mx-auto flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
-          <div className="w-10 h-10 md:w-12 md:h-12 relative flex items-center justify-center">
+          <div className="w-9 h-9 relative flex items-center justify-center">
             {/* Original Logo with Premium Glow */}
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"
+              className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-xl opacity-35 group-hover:opacity-60 transition-opacity"
               animate={{
-                scale: [1, 1.1, 1],
+                scale: [1, 1.15, 1],
               }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             />
@@ -307,26 +307,26 @@ export default function Header() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl md:text-2xl font-black tracking-tighter text-[var(--text-main)] font-sora block drop-shadow-[0_0_10px_rgba(204,120,92,0.15)] leading-tight uppercase">
-              Toon<span className="text-[var(--accent)]">Player</span>
+            <span className="text-xl md:text-2xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] leading-tight uppercase">
+              Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
             </span>
             <div className="flex items-center gap-1.5 -mt-0.5 ml-0.5">
-              <span className="text-[9px] uppercase tracking-[0.3em] font-black text-[var(--text-muted)]">Premium</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-              <span className="text-[8px] font-bold text-[var(--accent)] uppercase">Infinity</span>
+              <span className="text-[9px] uppercase tracking-[0.3em] font-black text-zinc-500">Premium</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-secondary)] animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.8)]" />
+              <span className="text-[8px] font-bold text-[var(--accent)] uppercase tracking-wider">Infinity</span>
             </div>
           </div>
         </Link>
 
         {/* Search Bar + Filter */}
-        <div className="flex-1 max-w-xl hidden md:flex items-center gap-1.5 relative p-1.5 bg-[var(--bg-card)]/30 backdrop-blur-xl border border-white/10 rounded-2xl focus-within:border-purple-500/50 focus-within:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300">
+        <div className="flex-1 max-w-xl hidden md:flex items-center gap-1.5 relative p-1 bg-white/5 border border-white/10 rounded-xl focus-within:border-[var(--accent)]/50 focus-within:shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all duration-300">
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
               className={`relative flex items-center px-3 py-2 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-purple-900/20' : 'bg-transparent'}`}
             >
               <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
-                <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-purple-400' : 'text-[var(--text-muted)] group-focus-within:text-purple-400'}`} />
+                <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[var(--accent-secondary)] animate-pulse' : 'text-[var(--text-secondary)] group-focus-within:text-[var(--accent)]'}`} />
               </button>
               <input
                 type="text"
@@ -501,7 +501,7 @@ export default function Header() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-md"
+                  className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] overflow-hidden z-50 backdrop-blur-3xl"
                 >
                   <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                     <span className="font-bold text-sm">Fine-tune Search</span>
@@ -622,7 +622,7 @@ export default function Header() {
                      initial={{ opacity: 0, y: 12, scale: 0.95 }}
                      animate={{ opacity: 1, y: 0, scale: 1 }}
                      exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                     className="absolute top-full right-0 mt-3 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
+                     className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
                    >
                       <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                          <div className="flex items-center gap-2">
@@ -731,7 +731,7 @@ export default function Header() {
                   initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md"
+                  className="absolute top-full right-0 mt-3 w-64 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
                 >
                   <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
                     <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Account</p>

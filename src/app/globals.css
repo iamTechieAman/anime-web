@@ -5,36 +5,40 @@
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* ToonPlayer V2.0 — Anthropic Claude Cream Editorial Theme */
-  --bg-main: #faf9f5;             /* canvas: warm tinted cream */
-  --bg-card: #efe9de;             /* surface-card: slightly darker cream */
-  --bg-overlay: rgba(250, 249, 245, 0.85); /* canvas tinted with transparency */
-  --bg-elevated: #f5f0e8;         /* surface-soft */
-  --text-main: #141413;           /* ink: warm charcoal */
-  --text-muted: #6c6a64;          /* muted: warm gray */
-  --text-secondary: #3d3d3a;      /* body: humanist dark brown-gray */
-  --border-color: #e6dfd8;        /* hairline */
-  --border-subtle: #ebe6df;       /* hairline-soft */
+  /* ToonPlayer V2.0 — Dark Cinematic AAA Streaming System */
+  --bg-main: #05010A;             /* Canvas Background */
+  --bg-card: #0B0713;             /* Secondary Surface */
+  --bg-elevated: #11101A;         /* Card Surface */
+  --bg-surface: #0B0713;
+  --bg-overlay: rgba(5, 1, 10, 0.85);
   
-  --accent: #cc785c;              /* primary warm coral */
-  --accent-secondary: #cc785c;
-  --accent-glow: rgba(204, 120, 92, 0.2);
+  --text-main: #FFFFFF;           /* Primary Text */
+  --text-secondary: #A1A1AA;      /* Secondary Text */
+  --text-muted: #71717A;          /* Muted Gray Text */
+  
+  --border-color: rgba(255, 255, 255, 0.08); /* Transparent borders */
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  
+  --accent: #A855F7;              /* Primary Neon Purple Accent */
+  --accent-secondary: #EC4899;    /* Secondary Neon Pink Accent */
+  --accent-glow: rgba(168, 85, 247, 0.35);
+  
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
-  --glass-bg: rgba(250, 249, 245, 0.03);
-  --glass-border: rgba(230, 223, 216, 0.1);
+  --glass-bg: rgba(11, 7, 19, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
   /* Gradient system */
-  --gradient-primary: linear-gradient(135deg, #cc785c, #a9583e);
-  --gradient-hot: linear-gradient(135deg, #cc785c, #a9583e);
-  --gradient-cool: linear-gradient(135deg, #5db8a6, #cc785c);
-  --gradient-gold: linear-gradient(135deg, #e8a55a, #cc785c);
+  --gradient-primary: linear-gradient(135deg, #A855F7, #EC4899);
+  --gradient-hot: linear-gradient(135deg, #EC4899, #F43F5E);
+  --gradient-cool: linear-gradient(135deg, #60A5FA, #A855F7);
+  --gradient-gold: linear-gradient(135deg, #F59E0B, #EC4899);
 
   /* Shadows */
-  --shadow-card: 0 4px 24px -4px rgba(20, 20, 19, 0.08);
-  --shadow-elevated: 0 12px 40px -8px rgba(20, 20, 19, 0.15);
-  --shadow-glow-purple: 0 0 30px rgba(204, 120, 92, 0.25);
-  --shadow-glow-blue: 0 0 30px rgba(204, 120, 92, 0.25);
+  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
+  --shadow-elevated: 0 12px 40px -8px rgba(0, 0, 0, 0.8);
+  --shadow-glow-purple: 0 0 30px rgba(168, 85, 247, 0.35);
+  --shadow-glow-blue: 0 0 30px rgba(96, 165, 250, 0.35);
 
   /* Spacing scale */
   --space-xs: 4px;
@@ -55,27 +59,26 @@
 }
 
 .dark {
-  /* Match root cream canvas since app forces dark mode */
-  --bg-main: #faf9f5;
-  --bg-card: #efe9de;
-  --bg-overlay: rgba(250, 249, 245, 0.85);
-  --bg-elevated: #f5f0e8;
-  --bg-surface: #efe9de;
+  --bg-main: #05010A;
+  --bg-card: #0B0713;
+  --bg-overlay: rgba(5, 1, 10, 0.85);
+  --bg-elevated: #11101A;
+  --bg-surface: #0B0713;
   
-  --text-main: #141413;
-  --text-secondary: #3d3d3a;
-  --text-muted: #6c6a64;
+  --text-main: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
   
-  --border-color: #e6dfd8;
-  --border-subtle: #ebe6df;
-  --glass-bg: rgba(239, 233, 222, 0.72);
-  --glass-border: rgba(204, 120, 92, 0.18);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --glass-bg: rgba(11, 7, 19, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
   
-  --accent: #cc785c;
-  --accent-glow: rgba(204, 120, 92, 0.28);
+  --accent: #A855F7;
+  --accent-glow: rgba(168, 85, 247, 0.35);
 
-  --shadow-card: 0 4px 24px -4px rgba(20, 20, 19, 0.08);
-  --shadow-elevated: 0 12px 40px -8px rgba(20, 20, 19, 0.15);
+  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
+  --shadow-elevated: 0 12px 40px -8px rgba(0, 0, 0, 0.8);
 }
 
 /* 🌙 Special Dark Navy Product Surface overrides (for Desktop Sidebar, Footer, Watch Page etc.) */
@@ -83,31 +86,31 @@
 .watch-page,
 footer,
 aside {
-  --bg-main: #181715 !important;             /* surface-dark: warm dark navy */
-  --bg-card: #1f1e1b !important;             /* surface-dark-soft */
-  --bg-elevated: #252320 !important;         /* surface-dark-elevated */
-  --bg-surface: #252320 !important;
-  --bg-overlay: rgba(24, 23, 21, 0.9) !important;
+  --bg-main: #05010A !important;
+  --bg-card: #0B0713 !important;
+  --bg-elevated: #11101A !important;
+  --bg-surface: #0B0713 !important;
+  --bg-overlay: rgba(5, 1, 10, 0.9) !important;
   
-  --text-main: #faf9f5 !important;           /* on-dark: cream-tinted white */
-  --text-secondary: #a09d96 !important;      /* on-dark-soft */
-  --text-muted: #8e8b82 !important;
+  --text-main: #FFFFFF !important;
+  --text-secondary: #A1A1AA !important;
+  --text-muted: #71717A !important;
   
-  --border-color: #252320 !important;
-  --border-subtle: #1f1e1b !important;
-  --glass-bg: rgba(31, 30, 27, 0.72) !important;
-  --glass-border: rgba(250, 249, 245, 0.1) !important;
+  --border-color: rgba(255, 255, 255, 0.08) !important;
+  --border-subtle: rgba(255, 255, 255, 0.04) !important;
+  --glass-bg: rgba(11, 7, 19, 0.75) !important;
+  --glass-border: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Handle children elements inside dark navy containers */
+/* Handle children elements inside dark containers */
 .theme-dark *,
 .watch-page *,
 footer *,
 aside * {
-  --text-main: #faf9f5;
-  --text-secondary: #a09d96;
-  --text-muted: #8e8b82;
-  --border-color: #252320;
+  --text-main: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --border-color: rgba(255, 255, 255, 0.08);
 }
 
 :root {
@@ -303,16 +306,14 @@ p, .text-body {
 }
 
 .glass-premium {
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.05) 0%,
-    rgba(59, 130, 246, 0.03) 50%,
-    rgba(139, 92, 246, 0.05) 100%
-  );
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background: rgba(11, 7, 19, 0.65);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 15px rgba(168, 85, 247, 0.05);
 }
 
 /* ══════════════════════════════════════════════════

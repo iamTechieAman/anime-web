@@ -251,19 +251,19 @@ export default function MoviesPage() {
                 <HeroCarousel />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[var(--bg-main)]/90 backdrop-blur-xl border-y border-white/5 sticky top-16 md:top-[72px] z-40 shadow-xl">
-                    <div className="w-full max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50 pb-1">
+                <div className="bg-[#05010A]/85 backdrop-blur-3xl border-b border-white/5 sticky top-[80px] md:top-[96px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-1 transition-all duration-300">
+                    <div className="w-full max-w-[1800px] mx-auto px-6 lg:px-12 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 overflow-x-auto hide-scrollbar z-50 pb-1">
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-white border-transparent shadow-[0_0_20px_rgba(204,120,92,0.3)]"
-                                        : "bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-main)] hover:bg-[var(--bg-elevated)]"
+                                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
+                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(168,85,247,0.45)] scale-105"
+                                        : "bg-[#0B0713]/40 border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
                                     }`}
                                 >
-                                    <tab.icon className="w-4 h-4" />
+                                    <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
                                     {tab.label}
                                 </button>
                             ))}
