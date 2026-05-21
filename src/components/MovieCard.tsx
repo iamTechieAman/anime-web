@@ -123,7 +123,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                         />
                         {/* Trailer Progress Bar Simulation */}
                         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                            <div className="h-full bg-orange-500 w-1/3 animate-[pulse_2s_ease-in-out_infinite]" />
+                            <div className="h-full bg-[var(--accent)] w-1/3 animate-[pulse_2s_ease-in-out_infinite]" />
                         </div>
                         <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white tracking-widest border border-white/10">
                             Trailer Playing
@@ -133,7 +133,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
                 {/* Most Viewed badge */}
                 {item.isMostViewed && (
-                    <div className="absolute top-0 left-0 flex items-center gap-1 bg-orange-600/90 rounded-br-lg px-1.5 py-0.5 sm:px-2 sm:py-1 z-20 shadow-lg">
+                    <div className="absolute top-0 left-0 flex items-center gap-1 bg-[var(--accent)]/90 rounded-br-lg px-1.5 py-0.5 sm:px-2 sm:py-1 z-20 shadow-lg">
                         <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white fill-white" />
                         <span className="text-[7px] sm:text-[9px] font-bold text-white uppercase tracking-wider">
                             Most Viewed
@@ -143,19 +143,19 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
                 {/* Rating badge */}
                 <div className={`absolute left-2 flex items-center gap-1 bg-black/70 rounded-md px-2 py-0.5 z-10 ${item.isMostViewed ? 'top-8' : 'top-2'}`}>
-                    <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                    <Star className="w-3 h-3 text-[var(--accent-warm)] fill-[var(--accent-warm)]" />
                     <span className="text-[11px] font-bold text-white">{rating}</span>
                 </div>
 
                 {/* Upcoming or HD badge */}
                 {isUpcoming ? (
-                    <div className="absolute top-2 right-2 bg-orange-500/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-orange-500/30">
+                    <div className="absolute top-2 right-2 bg-[var(--accent)]/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-[var(--accent)]/30">
                         <span className="text-[9px] font-black text-white uppercase tracking-wider">
                             Upcoming
                         </span>
                     </div>
                 ) : (
-                    <div className="absolute top-2 right-2 hidden sm:block bg-orange-500/80 rounded px-1.5 py-0.5 z-10">
+                    <div className="absolute top-2 right-2 hidden sm:block bg-[var(--accent)]/80 rounded px-1.5 py-0.5 z-10">
                         <span className="text-[9px] font-bold text-white tracking-wider">HD</span>
                     </div>
                 )}
@@ -164,7 +164,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                 <div className="premium-card-overlay">
                     <div className="premium-card-overlay-content space-y-2">
                         {/* Play CTA Indicator */}
-                        <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center shadow-lg mb-1">
+                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg mb-1">
                             <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                         </div>
                         

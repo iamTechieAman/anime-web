@@ -278,7 +278,7 @@ export default function MoviesPage() {
         <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-orange-500/25 transition-colors duration-300">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-orange-950/[0.06] to-transparent" />
+                <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[var(--accent)]/[0.03] to-transparent" />
             </div>
 
             <div className="relative z-10 w-full pb-24 md:pb-0">
@@ -293,7 +293,7 @@ export default function MoviesPage() {
                 />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[#05010A]/85 backdrop-blur-3xl border-b border-white/5 sticky top-[80px] md:top-[96px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-1 transition-all duration-300">
+                <div className="bg-[var(--bg-card)]/85 backdrop-blur-3xl border-b border-white/5 sticky top-[80px] md:top-[96px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-1 transition-all duration-300">
                     <div className="w-full max-w-[1800px] mx-auto px-6 lg:px-12 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-2.5 overflow-x-auto hide-scrollbar z-50 pb-1">
                             {TABS.map((tab) => (
@@ -301,8 +301,8 @@ export default function MoviesPage() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(249,115,22,0.35)] scale-105"
-                                        : "bg-[#0B0713]/40 border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
+                                        : "bg-[var(--bg-card)] border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
                                     }`}
                                 >
                                     <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
@@ -329,7 +329,7 @@ export default function MoviesPage() {
                     {searchQuery ? (
                         <div className="space-y-6">
                             <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                                <Search className="w-6 h-6 text-orange-400" />
+                                <Search className="w-6 h-6 text-[var(--accent)]" />
                                 {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
                             </h2>
                             {searchResults.length > 0 ? (
@@ -338,7 +338,7 @@ export default function MoviesPage() {
                                         <Link
                                             key={`${item.type}-${item.id}`}
                                             href={item.href}
-                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-orange-500/40 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--accent)]/40 transition-all hover:scale-[1.02] duration-300 shadow-lg"
                                         >
                                             <div className="aspect-[2/3] relative">
                                                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
@@ -347,7 +347,7 @@ export default function MoviesPage() {
                                                 </div>
                                             </div>
                                             <div className="p-3">
-                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-orange-400 transition-colors tracking-tight">{item.title}</h3>
+                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-[var(--accent)] transition-colors tracking-tight">{item.title}</h3>
                                                 <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-medium">
                                                     <span>{item.format}</span>
                                                     <span>{item.year}</span>
@@ -385,7 +385,7 @@ export default function MoviesPage() {
                                             </div>
                                             <button
                                                 onClick={() => setActiveProvider("all")}
-                                                className="px-6 py-3 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition-all"
+                                                className="px-6 py-3 rounded-full bg-[var(--accent)] hover:opacity-90 text-white font-bold text-sm transition-all"
                                             >
                                                 Browse All Content
                                             </button>
@@ -399,8 +399,8 @@ export default function MoviesPage() {
                                 {/* Trending row for active provider */}
                                 {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
                                     <section className="mb-10 md:mb-14 relative">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-orange-600/8 rounded-full blur-[60px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-orange-400" isFeatured />
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-[var(--accent)]" isFeatured />
                                         <MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge />
                                     </section>
                                 )}
@@ -408,8 +408,8 @@ export default function MoviesPage() {
                                 {/* Smart Recommendations (only when no provider active) */}
                                 {activeProvider === "all" && activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
                                     <section className="mb-10 md:mb-14 relative">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-orange-600/8 rounded-full blur-[60px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-orange-400" isFeatured />
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-[var(--accent)]" isFeatured />
                                         <MovieRow 
                                             items={[...trending.slice(2, 6), ...popular.slice(2, 6)].sort(() => Math.random() - 0.5)} 
                                             title="smart-recommendations" 
@@ -432,13 +432,13 @@ export default function MoviesPage() {
                                             <>
                                                 {providerData[activeProvider].movies?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-red-400" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-[var(--accent)]" isFeatured />
                                                         <MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-movies`} isLarge />
                                                     </section>
                                                 )}
                                                 {providerData[activeProvider].topRated?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated" color="text-yellow-400" />
+                                                        <SectionHeader icon={Star} title="Top Rated" color="text-[var(--accent-warm)]" />
                                                         <MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !i.name)} type="movie" title={`${activeProvider}-toprated`} />
                                                     </section>
                                                 )}
@@ -446,25 +446,25 @@ export default function MoviesPage() {
                                         ) : (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title="Trending Movies" color="text-red-400" isFeatured />
+                                                    <SectionHeader icon={Flame} title="Trending Movies" color="text-[var(--accent)]" isFeatured />
                                                     {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /> : <RowSkeleton />}
                                                 </section>
                                                 <section>
-                                                    <SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" />
+                                                    <SectionHeader icon={Film} title="Popular Movies" color="text-[var(--accent)]" />
                                                     {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular" /> : <RowSkeleton />}
                                                 </section>
                                                 <section>
-                                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
+                                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-[var(--accent-warm)]" />
                                                     {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
                                                 </section>
                                                 <section>
-                                                    <SectionHeader icon={Star} title="Top Rated Movies" color="text-yellow-400" isFeatured />
+                                                    <SectionHeader icon={Star} title="Top Rated Movies" color="text-[var(--accent-warm)]" isFeatured />
                                                     {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" isLarge /> : <RowSkeleton />}
                                                 </section>
                                                 {GENRE_ROWS.map((genre) => (
                                                     genreData[genre.title] && (
                                                         <section key={genre.title} id={`genre-${genre.genreId}`}>
-                                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
+                                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-[var(--accent)]" />
                                                             <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
                                                         </section>
                                                     )
@@ -489,13 +489,13 @@ export default function MoviesPage() {
                                             <>
                                                 {providerData[activeProvider].tv?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-orange-400" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-[var(--accent)]" isFeatured />
                                                         <MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-tv`} isLarge />
                                                     </section>
                                                 )}
                                                 {providerData[activeProvider].topRated?.filter((i:any) => !!i.name).length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-yellow-400" />
+                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-[var(--accent-warm)]" />
                                                         <MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !!i.name)} type="tv" title={`${activeProvider}-toprated-tv`} />
                                                     </section>
                                                 )}
@@ -503,21 +503,21 @@ export default function MoviesPage() {
                                         ) : (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title="Trending TV Shows" color="text-orange-400" isFeatured />
+                                                    <SectionHeader icon={Flame} title="Trending TV Shows" color="text-[var(--accent)]" isFeatured />
                                                     {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /> : <RowSkeleton />}
                                                 </section>
                                                 <section>
-                                                    <SectionHeader icon={Tv} title="Popular TV Shows" color="text-blue-400" />
+                                                    <SectionHeader icon={Tv} title="Popular TV Shows" color="text-[var(--accent)]" />
                                                     {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular" /> : <RowSkeleton />}
                                                 </section>
                                                 <section>
-                                                    <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-yellow-400" isFeatured />
+                                                    <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-[var(--accent-warm)]" isFeatured />
                                                     {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" isLarge /> : <RowSkeleton />}
                                                 </section>
                                                 {NETWORK_ROWS.map((net, idx) => (
                                                     networkData[net.title] && (
                                                         <section key={net.title} id={`network-${net.networkId}`}>
-                                                            <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-pink-400" />
+                                                            <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-[var(--accent-secondary)]" />
                                                             <MovieRow items={networkData[net.title]} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} />
                                                         </section>
                                                     )
@@ -542,12 +542,12 @@ export default function MoviesPage() {
                                         {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-orange-400" isFeatured />
+                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-[var(--accent)]" isFeatured />
                                                     <MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-anime`} isLarge />
                                                 </section>
                                                 {providerData[activeProvider].movies?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-pink-400" />
+                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-[var(--accent-secondary)]" />
                                                         <MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-anime-movies`} />
                                                     </section>
                                                 )}
@@ -555,7 +555,7 @@ export default function MoviesPage() {
                                         ) : (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-orange-400" />
+                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-[var(--accent)]" />
                                                     {animeTrending.length > 0 ? (
                                                         <div className="responsive-grid">
                                                             {animeTrending.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
@@ -563,7 +563,7 @@ export default function MoviesPage() {
                                                     ) : <RowSkeleton />}
                                                 </section>
                                                 <section>
-                                                    <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-blue-400" />
+                                                    <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-[var(--accent)]" />
                                                     {animeLatest.length > 0 ? (
                                                         <div className="responsive-grid">
                                                             {animeLatest.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
@@ -579,15 +579,15 @@ export default function MoviesPage() {
                                 {activeTab === "trending" && (
                                     <div className="space-y-16 md:space-y-24">
                                         <section>
-                                            <SectionHeader icon={TrendingUp} title="Global Trending" color="text-red-400" isFeatured />
+                                            <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
                                             {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-emerald-400" />
+                                            <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-[var(--accent-secondary)]" />
                                             {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Tv} title="Trending Series" color="text-orange-400" />
+                                            <SectionHeader icon={Tv} title="Trending Series" color="text-[var(--accent)]" />
                                             {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
                                         </section>
                                     </div>
@@ -596,12 +596,12 @@ export default function MoviesPage() {
                                 {activeTab === "discover" && (
                                     <div className="space-y-16 md:space-y-24">
                                         {mjItems.length > 0 && (
-                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-orange-500/20 overflow-hidden">
-                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl" />
-                                                <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-yellow-400" isFeatured />
+                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-[var(--accent)]/20 overflow-hidden">
+                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
+                                                <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-[var(--accent-warm)]" isFeatured />
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                                                     {mjItems.map((item, i) => (
-                                                        <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-orange-500/30 transition-all cursor-pointer group">
+                                                        <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent)]/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
                                                                     <img src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -617,12 +617,12 @@ export default function MoviesPage() {
                                             </section>
                                         )}
                                         <section>
-                                            <SectionHeader icon={Zap} title="Trending Podcasts" color="text-emerald-400" />
+                                            <SectionHeader icon={Zap} title="Trending Podcasts" color="text-[var(--accent-secondary)]" />
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 {podcasts.map((pod, i) => (
-                                                    <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all cursor-pointer group">
-                                                        <div className="w-16 h-16 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 flex-shrink-0 group-hover:bg-emerald-500/20">
-                                                            <Play className="w-6 h-6 text-emerald-400" />
+                                                    <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent-secondary)]/30 transition-all cursor-pointer group">
+                                                        <div className="w-16 h-16 rounded-xl bg-[var(--accent-secondary)]/10 flex items-center justify-center border border-[var(--accent-secondary)]/20 flex-shrink-0 group-hover:bg-[var(--accent-secondary)]/20">
+                                                            <Play className="w-6 h-6 text-[var(--accent-secondary)]" />
                                                         </div>
                                                         <div className="min-w-0">
                                                             <h3 className="text-sm font-bold text-white truncate">{pod.title}</h3>
@@ -633,12 +633,12 @@ export default function MoviesPage() {
                                             </div>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Popcorn} title="Trending Books" color="text-orange-400" />
+                                            <SectionHeader icon={Popcorn} title="Trending Books" color="text-[var(--accent)]" />
                                             <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
                                                 {books.map((book, i) => (
                                                     <div key={i} className="flex-shrink-0 w-[160px] group cursor-pointer">
-                                                        <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-orange-500/40 transition-all flex flex-col items-center justify-center p-4 text-center">
-                                                            <div className="w-10 h-1 bg-orange-500 mb-4" />
+                                                        <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-[var(--accent)]/40 transition-all flex flex-col items-center justify-center p-4 text-center">
+                                                            <div className="w-10 h-1 bg-[var(--accent)] mb-4" />
                                                             <h3 className="text-xs font-bold text-white leading-tight mb-2">{book.title}</h3>
                                                             <p className="text-[9px] text-zinc-500">{book.author}</p>
                                                         </div>
@@ -648,7 +648,7 @@ export default function MoviesPage() {
                                             </div>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Flame} title="Trending Songs" color="text-red-400" />
+                                            <SectionHeader icon={Flame} title="Trending Songs" color="text-[var(--accent)]" />
                                             <div className="space-y-2">
                                                 {songs.map((song, i) => (
                                                     <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)]/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
@@ -658,19 +658,19 @@ export default function MoviesPage() {
                                                             <p className="text-[10px] text-zinc-500">{song.artist}</p>
                                                         </div>
                                                         <span className="text-[10px] font-bold text-zinc-500">{song.year}</span>
-                                                        <Play className="w-4 h-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        <Play className="w-4 h-4 text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </div>
                                                 ))}
                                             </div>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Film} title="Trending Videos" color="text-blue-400" />
+                                            <SectionHeader icon={Film} title="Trending Videos" color="text-[var(--accent)]" />
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {videos.map((vid, i) => (
                                                     <div key={i} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
                                                         <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                                                            <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center">
                                                                 <Play className="w-6 h-6 text-white fill-white ml-1" />
                                                             </div>
                                                         </div>
@@ -690,21 +690,21 @@ export default function MoviesPage() {
                             <div className="w-full lg:w-[320px] xl:w-[380px] space-y-12 shrink-0">
                                 {trendingPeople.length > 0 && (
                                     <section className="bg-gradient-to-b from-[var(--bg-card)] to-transparent p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group/sidebar">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl" />
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-secondary)]/10 rounded-full blur-3xl" />
                                         <h2 className="text-xl font-black font-sora text-white mb-8 flex items-center gap-3">
-                                            <div className="p-2 bg-teal-500/10 rounded-lg">
-                                                <User className="w-5 h-5 text-teal-400" /> 
+                                            <div className="p-2 bg-[var(--accent-secondary)]/10 rounded-lg">
+                                                <User className="w-5 h-5 text-[var(--accent-secondary)]" /> 
                                             </div>
                                             Trending Stars
                                         </h2>
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-8 relative z-10">
                                             {trendingPeople.map((person: any) => (
                                                 <div key={person.id} className="flex flex-col items-center text-center group cursor-pointer">
-                                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-transparent group-hover:border-teal-500/50 transition-all duration-500 shadow-xl mb-3 relative">
+                                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[var(--accent-secondary)]/50 transition-all duration-500 shadow-xl mb-3 relative">
                                                         <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
                                                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                     </div>
-                                                    <p className="text-xs font-bold text-white group-hover:text-teal-400 truncate w-full transition-colors">{person.name}</p>
+                                                    <p className="text-xs font-bold text-white group-hover:text-[var(--accent-secondary)] truncate w-full transition-colors">{person.name}</p>
                                                     <p className="text-[10px] text-zinc-500 truncate w-full mt-0.5 uppercase tracking-wider font-semibold">{person.known_for_department}</p>
                                                 </div>
                                             ))}
@@ -713,10 +713,10 @@ export default function MoviesPage() {
                                 )}
 
                                 <section className="bg-gradient-to-b from-[var(--bg-card)] to-transparent p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group/sidebar">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl" />
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-warm)]/10 rounded-full blur-3xl" />
                                     <h2 className="text-xl font-black font-sora text-white mb-6 flex items-center gap-3">
-                                        <div className="p-2 bg-yellow-500/10 rounded-lg">
-                                            <Sparkles className="w-5 h-5 text-yellow-400" /> 
+                                        <div className="p-2 bg-[var(--accent-warm)]/10 rounded-lg">
+                                            <Sparkles className="w-5 h-5 text-[var(--accent-warm)]" /> 
                                         </div>
                                         {activeTab === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'}
                                     </h2>
@@ -728,15 +728,15 @@ export default function MoviesPage() {
                                                 className="flex items-center gap-5 group cursor-pointer p-3 -mx-3 rounded-xl hover:bg-white/5 transition-all duration-300 relative"
                                             >
                                                 {/* Left structural rank */}
-                                                <span className={`text-3xl font-black w-6 text-right tabular-nums tracking-tighter transition-colors duration-300 ${i < 3 ? 'text-white/20 group-hover:text-yellow-400/50' : 'text-white/5 group-hover:text-blue-400/30'}`}>
+                                                <span className={`text-3xl font-black w-6 text-right tabular-nums tracking-tighter transition-colors duration-300 ${i < 3 ? 'text-white/20 group-hover:text-[var(--accent-warm)]/50' : 'text-white/5 group-hover:text-[var(--accent)]/30'}`}>
                                                     {i + 1}
                                                 </span>
                                                 
                                                 <div className="flex-1 min-w-0 flex flex-col justify-center transform transition-transform duration-300 group-hover:translate-x-1">
                                                     <h3 className="text-sm font-bold text-white/90 truncate group-hover:text-white transition-colors">{item.title || item.name}</h3>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <span className="flex items-center gap-1 text-[11px] font-bold text-yellow-400">
-                                                            <Star className="w-3 h-3 fill-yellow-400" />
+                                                        <span className="flex items-center gap-1 text-[11px] font-bold text-[var(--accent-warm)]">
+                                                            <Star className="w-3 h-3 fill-[var(--accent-warm)]" />
                                                             {item.vote_average?.toFixed(1)}
                                                         </span>
                                                         <span className="w-1 h-1 rounded-full bg-zinc-700" />
@@ -762,7 +762,7 @@ export default function MoviesPage() {
 
                 <section className="mb-16 md:mb-20 max-w-[1400px] mx-auto px-6 lg:px-12 relative">
                     {/* Subtle ambient glow for the bottom region */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-orange-900/10 rounded-full blur-[120px] pointer-events-none z-0" />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-[var(--accent)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
                         <div className="space-y-8">
@@ -774,32 +774,32 @@ export default function MoviesPage() {
                             </p>
                             <div className="pt-4">
                                 <h3 className="text-title mb-6 flex items-center gap-3">
-                                    <Sparkles className="w-6 h-6 text-orange-400" />
+                                    <Sparkles className="w-6 h-6 text-[var(--accent)]" />
                                     Why Choose ToonPlayer?
                                 </h3>
                                 <ul className="space-y-4">
                                     {["Watch HD movies and anime online", "Fast and user-friendly interface", "Explore trending and top-rated content", "Regularly updated library"].map((feat, i) => (
                                         <li key={i} className="flex items-center gap-4 text-body font-bold text-white/90">
-                                            <CheckCircle className="w-5 h-5 text-orange-400" /> {feat}
+                                            <CheckCircle className="w-5 h-5 text-[var(--accent)]" /> {feat}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                         </div>
                         <div className="bg-gradient-to-br from-[var(--bg-card)] to-transparent rounded-[2rem] p-10 border border-white/5 relative overflow-hidden group shadow-2xl">
-                           <div className="absolute -right-20 -top-20 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl" />
+                           <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
                            <h3 className="text-2xl font-black text-white mb-4 flex items-center gap-3 font-sora">
-                               <Flame className="w-6 h-6 text-red-500" /> 
+                               <Flame className="w-6 h-6 text-[var(--accent)]" /> 
                                Stream Anytime, Anywhere
                            </h3>
                            <p className="text-body mb-8">ToonPlayer works beautifully across all devices including mobile, tablet, and desktop, giving you seamless access to entertainment on the go.</p>
                            <div className="mt-8 border-t border-white/10 pt-8 flex items-center justify-between">
                                 <div>
-                                    <h4 className="text-metadata text-orange-400 mb-2">Platform Status</h4>
+                                    <h4 className="text-metadata text-[var(--accent)] mb-2">Platform Status</h4>
                                     <p className="text-sm font-medium text-white/50 italic">Actively updated with thousands of titles.</p>
                                 </div>
                                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                    <Zap className="w-5 h-5 text-green-400" />
+                                    <Zap className="w-5 h-5 text-[var(--accent-secondary)]" />
                                 </div>
                            </div>
                         </div>
@@ -808,7 +808,7 @@ export default function MoviesPage() {
 
                 <section className="mb-32 max-w-[900px] mx-auto px-6 lg:px-12">
                     <h2 className="text-heading mb-10 flex items-center gap-4 justify-center">
-                        <Info className="w-6 h-6 text-orange-400" /> Frequently Asked Questions
+                        <Info className="w-6 h-6 text-[var(--accent)]" /> Frequently Asked Questions
                     </h2>
                     <div className="space-y-4">
                         {[
@@ -817,8 +817,8 @@ export default function MoviesPage() {
                             { q: "What devices does ToonPlayer support?", a: "ToonPlayer works on all devices — smartphones, tablets, laptops, desktops, and smart TVs through any modern web browser." },
                             { q: "Does ToonPlayer have anime?", a: "Yes! ToonPlayer has a massive anime library with sub and dub options. Browse by genre or search for your favorites." },
                         ].map((faq, i) => (
-                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-orange-500/30 transition-all duration-300 shadow-lg">
-                                <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-orange-400 transition-colors list-none">
+                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-[var(--accent)]/30 transition-all duration-300 shadow-lg">
+                                <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-[var(--accent)] transition-colors list-none">
                                     {faq.q}
                                     <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-300" />
                                 </summary>
@@ -836,7 +836,7 @@ export default function MoviesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-orange-500/90 hover:bg-orange-600 text-white rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)] backdrop-blur-sm transition-colors"
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)] hover:opacity-90 text-white rounded-full shadow-[0_0_20px_rgba(88,101,242,0.4)] backdrop-blur-sm transition-colors"
                     >
                         <ChevronUp className="w-5 h-5" />
                     </motion.button>
@@ -851,9 +851,9 @@ const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, is
     return (
         <div className={`flex items-end gap-3 md:gap-4 mb-6 text-[var(--text-main)] transition-all ${isFeatured ? 'ml-2' : ''}`}>
             {isFeatured ? (
-                <div className="w-1.5 h-10 bg-gradient-to-t from-[var(--accent)] to-[var(--accent)] rounded-full shadow-[0_0_15px_rgba(204,120,92,0.6)]" />
+                <div className="w-1.5 h-10 bg-gradient-to-t from-[var(--accent)] to-[var(--accent)] rounded-full shadow-[0_0_15px_rgba(88,101,242,0.6)]" />
             ) : (
-                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_rgba(204,120,92,0.4)]" />
+                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_rgba(88,101,242,0.4)]" />
             )}
             <div className="flex flex-col">
                 <div className="flex items-center gap-2 md:gap-3">

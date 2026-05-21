@@ -69,7 +69,7 @@ const AppleTVLogo = () => (
 );
 
 const ToonPlayerLogo = () => (
-    <span className="text-sm font-black tracking-tight bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+    <span className="text-sm font-black tracking-tight bg-gradient-to-r from-[#5865F2] to-[#229ED9] bg-clip-text text-transparent">
         ToonPlayer
     </span>
 );
@@ -88,8 +88,8 @@ export const PROVIDERS: ProviderInfo[] = [
         label: "All Providers",
         shortLabel: "All",
         color: "text-white",
-        glowColor: "rgba(249,115,22,0.45)",
-        bgGradient: "from-orange-600 to-amber-600",
+        glowColor: "rgba(88,101,242,0.45)",
+        bgGradient: "from-[#5865F2] to-[#229ED9]",
         logo: <span className="text-sm font-black">✦ All</span>,
     },
     {
@@ -123,9 +123,9 @@ export const PROVIDERS: ProviderInfo[] = [
         slug: "crunchyroll",
         label: "Crunchyroll",
         shortLabel: "Crunchyroll",
-        color: "text-orange-500",
-        glowColor: "rgba(245,120,0,0.5)",
-        bgGradient: "from-orange-700 to-orange-900",
+        color: "text-[var(--accent)]",
+        glowColor: "rgba(88,101,242,0.5)",
+        bgGradient: "from-[#5865F2] to-[#229ED9]",
         logo: <span className="flex items-center gap-1.5"><CrunchyrollLogo /><span className="text-xs font-black hidden sm:inline">Crunchyroll</span></span>,
     },
     {
@@ -141,9 +141,9 @@ export const PROVIDERS: ProviderInfo[] = [
         slug: "hbo",
         label: "HBO Max",
         shortLabel: "HBO",
-        color: "text-orange-400",
-        glowColor: "rgba(120,68,200,0.5)",
-        bgGradient: "from-[#1a0a00] to-[#2d1500]",
+        color: "text-[#F3F3F1]",
+        glowColor: "rgba(88,101,242,0.5)",
+        bgGradient: "from-[#1F1C16] to-[#374151]",
         logo: <HBOLogo />,
     },
     {
@@ -159,9 +159,9 @@ export const PROVIDERS: ProviderInfo[] = [
         slug: "toonplayer",
         label: "ToonPlayer Originals",
         shortLabel: "ToonPlayer",
-        color: "text-orange-400",
-        glowColor: "rgba(249,115,22,0.55)",
-        bgGradient: "from-orange-600 to-amber-700",
+        color: "text-[var(--accent)]",
+        glowColor: "rgba(88,101,242,0.55)",
+        bgGradient: "from-[#5865F2] to-[#229ED9]",
         logo: <ToonPlayerLogo />,
     },
 ];
@@ -177,7 +177,7 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
 
     return (
         <div
-            className="w-full bg-[#0B0A0F]/90 backdrop-blur-2xl border-b border-white/[0.05] sticky top-[54px] md:top-[62px] z-[39] shadow-[0_6px_28px_rgba(0,0,0,0.55)]"
+            className="w-full bg-[#171611]/90 backdrop-blur-2xl border-b border-white/[0.05] sticky top-[54px] md:top-[62px] z-[39] shadow-[0_6px_28px_rgba(0,0,0,0.55)]"
             aria-label="Streaming provider filter"
         >
             {/* Loading bar */}
@@ -188,7 +188,7 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
                         animate={{ scaleX: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1.2, ease: "easeInOut" }}
-                        className="absolute top-0 left-0 h-[2px] w-full origin-left bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500"
+                        className="absolute top-0 left-0 h-[2px] w-full origin-left bg-gradient-to-r from-[#5865F2] via-[#229ED9] to-[#5865F2]"
                     />
                 )}
             </AnimatePresence>

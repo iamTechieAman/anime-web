@@ -98,7 +98,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
 
                     {/* Rating badge */}
                     {rating && (
-                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/70 z-10 text-[10px] font-bold text-yellow-400">
+                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/70 z-10 text-[10px] font-bold text-[var(--accent-warm)]">
                             <Star className="w-2.5 h-2.5 fill-current" />
                             {rating}
                         </div>
@@ -108,7 +108,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
                     <div className="premium-card-overlay">
                         <div className="premium-card-overlay-content space-y-2">
                             {/* Play CTA Indicator */}
-                            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center shadow-lg mb-1">
+                            <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg mb-1">
                                 <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                             </div>
                             
@@ -155,7 +155,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
             <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
                 {rank !== undefined && (
                     <div className="w-6 text-center shrink-0">
-                        <span className={`text-xl font-black ${rank < 3 ? 'text-[#FF5722]' : 'text-[var(--text-muted)]'}`}>
+                        <span className={`text-xl font-black ${rank < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}>
                             {rank + 1}
                         </span>
                     </div>
@@ -184,15 +184,15 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
 
                 {/* Meta */}
                 <div className="flex-1 min-w-0 pr-4">
-                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-orange-400 transition-colors tracking-tight">
+                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-[var(--accent)] transition-colors tracking-tight">
                         {title}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-bold text-orange-400/80 uppercase">
+                        <span className="text-[10px] font-bold text-[var(--accent)]/80 uppercase">
                             {show.type || show.media_type || "TV"}
                         </span>
                         {rating && (
-                            <div className="flex items-center gap-1 text-[10px] text-yellow-500 font-bold">
+                            <div className="flex items-center gap-1 text-[10px] text-[var(--accent-warm)] font-bold">
                                 <Star className="w-2.5 h-2.5 fill-current" />
                                 {rating}
                             </div>
@@ -205,7 +205,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
                 </div>
 
                 {/* Glow on hover */}
-                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-orange-500 transition-all duration-500 group-hover:w-full" />
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-[var(--accent)] transition-all duration-500 group-hover:w-full" />
             </Link>
         </div>
     );
