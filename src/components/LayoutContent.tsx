@@ -27,7 +27,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   return (
     <div className={`min-h-screen bg-[var(--bg-main)] relative overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
       <DesktopSidebar />
-      <div className={`flex flex-col min-h-screen relative md:pl-[112px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      <div className={`flex flex-col min-h-screen relative md:pl-[92px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
 
 
@@ -36,14 +36,14 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <Suspense fallback={<div className="h-16 w-full skeleton-shine" />}>
           <Header />
         </Suspense>
-        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-20'} bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-main)]/90`}>
-          {/* Subtle global bottom ambient glow for short pages */}
-          <div className="absolute bottom-0 left-0 right-0 h-[30vh] bg-gradient-to-t from-purple-900/5 to-transparent pointer-events-none z-0" />
+        <main className={`flex-1 flex flex-col min-w-0 relative ${(isWatchPage || isHomePage) ? '' : 'pt-12 md:pt-16'} bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-main)]/90`}>
+          {/* Subtle global ambient glow */}
+          <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-orange-900/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold animate-pulse">Loading</p>
                 </div>
               </div>

@@ -599,7 +599,9 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
                     if (tmdbMatch) {
                         setTmdbIdForAnime(tmdbMatch.id.toString());
-                        const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${tmdbMatch.media_type}`);
+                        // Normalize media_type — TMDB multi-search can omit it
+                        const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
+                        const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`);
                         setDetails(detailsRes.data);
                     } else {
                         setSourceError(true);

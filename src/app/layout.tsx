@@ -167,7 +167,7 @@ export default function RootLayout({
         <meta name="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" content="ad3ad63b7ceec379be5a929cd5e988238fbeaf17" />
       </head>
       <body
-        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-purple-500/30`}
+        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[var(--bg-main)] text-[var(--text-main)] transition-colors duration-300 selection:bg-orange-500/25`}
         suppressHydrationWarning
       >
 

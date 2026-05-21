@@ -7,10 +7,13 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
-        const type = searchParams.get("type") || "movie"; // movie or tv
+        const rawType = searchParams.get("type") || "movie";
 
-        if (!id) {
-            return NextResponse.json({ error: "Missing id parameter" }, { status: 400 });
+        // Strict validation — only TMDB-valid types allowed
+        const type = rawType === "tv" ? "tv" : "movie";
+
+        if (!id || id === "undefined" || id === "null" || isNaN(Number(id))) {
+            return NextResponse.json({ error: "Missing or invalid id parameter" }, { status: 400 });
         }
 
         // Fetch details, credits, videos, similar, and recommendations in parallel
@@ -22,7 +25,15 @@ export async function GET(request: Request) {
             fetch(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
         ]);
 
-        if (!detailsRes.ok) throw new Error(`TMDB details error: ${detailsRes.status}`);
+        if (!detailsRes.ok) {
+            const status = detailsRes.status;
+            // If TMDB says 404, it's a bad id/type combo — return 404, not 500
+            if (status === 404) {
+                return NextResponse.json({ error: "Content not found on TMDB" }, { status: 404 });
+            }
+            // Rate limit or upstream error
+            throw new Error(`TMDB details error: ${status}`);
+        }
 
         const [details, credits, videos, similar, recommendations] = await Promise.all([
             detailsRes.json(),
@@ -44,11 +55,13 @@ export async function GET(request: Request) {
             trailer: trailer ? { key: trailer.key, name: trailer.name, site: trailer.site } : null,
             similar: similar.results?.slice(0, 12) || [],
             recommendations: recommendations.results?.slice(0, 12) || [],
+        }, {
+            headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' }
         });
     } catch (error: any) {
-        console.error("Details API error:", error);
+        console.error("Details API error:", error?.message || error);
         return NextResponse.json(
-            { error: "Failed to fetch details" },
+            { error: "Failed to fetch details", message: error?.message },
             { status: 500 }
         );
     }

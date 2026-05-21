@@ -264,10 +264,10 @@ export default function MoviesPage() {
     }, [paramsInUrl]);
 
     return (
-        <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-purple-500/30 transition-colors duration-300">
+        <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-orange-500/25 transition-colors duration-300">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 to-transparent opacity-50" />
+                <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-orange-950/[0.06] to-transparent" />
             </div>
 
             <div className="relative z-10 w-full pb-24 md:pb-0">
