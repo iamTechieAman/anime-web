@@ -1,17 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Domain-to-Referer lookup for anime CDNs
+const CDN_REFERERS: Record<string, string> = {
+    'gogocdn.net': 'https://gogoanime.hu',
+    'playtaku.net': 'https://gogoanime.hu',
+    'vidstreaming.io': 'https://gogoanime.hu',
+    'megacloud.tv': 'https://hianime.to',
+    'rapid-cloud.co': 'https://hianime.to',
+    'rabbitstream.net': 'https://zoro.to',
+    'allanime.day': 'https://allmanga.to',
+    'youtube-anime.com': 'https://allmanga.to',
+    'animepahe.ru': 'https://animepahe.ru',
+    'kwik.si': 'https://animepahe.ru',
+    'files.cache.luluvdo.com': 'https://hianime.to',
+};
+
+function getReferer(url: string, override?: string | null): string {
+    if (override) return override;
+    try {
+        const host = new URL(url).hostname;
+        for (const [domain, ref] of Object.entries(CDN_REFERERS)) {
+            if (host.includes(domain)) return ref;
+        }
+    } catch (_) {}
+    return 'https://allmanga.to';
+}
+
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const targetUrl = searchParams.get("url");
+    const refererOverride = searchParams.get("referer");
 
     if (!targetUrl) {
         return new NextResponse("Missing url parameter", { status: 400 });
     }
 
     try {
+        const referer = getReferer(targetUrl, refererOverride);
         const headers = new Headers();
-        headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0");
-        headers.set("Referer", "https://allmanga.to");
+        headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0");
+        headers.set("Referer", referer);
+        headers.set("Origin", referer);
 
         const range = request.headers.get("range");
         if (range) {

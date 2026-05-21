@@ -214,21 +214,55 @@ export class AllAnimeProvider implements AnimeProvider {
                     finalUrl = `https://${decryptedPath}`;
                 }
 
-                // Fetch stream URL with strict timeout
+                console.log(`[AllAnime] CDN fetch: ${finalUrl.substring(0, 80)}...`);
+
+                // Fetch stream URL with proper anime CDN headers
                 const streamResponse = await axios.get(finalUrl, {
-                    headers: { "User-Agent": USER_AGENT, Referer: ALLANIME_REFR },
-                    timeout: 4000 // Faster timeout for parallel validation
+                    headers: {
+                        "User-Agent": USER_AGENT,
+                        "Referer": ALLANIME_REFR,
+                        "Origin": ALLANIME_REFR,
+                        "Accept": "application/json, text/plain, */*",
+                    },
+                    timeout: 5000,
                 });
 
-                let videoUrl = streamResponse.data?.links?.[0]?.link || streamResponse.data?.link;
+                const data = streamResponse.data;
+
+                // Try multiple known response structures from AllAnime CDN
+                let videoUrl: string | null = null;
+
+                if (typeof data === 'string' && data.startsWith('http')) {
+                    // Raw URL string
+                    videoUrl = data;
+                } else if (Array.isArray(data) && data[0]?.link) {
+                    videoUrl = data[0].link;
+                } else if (Array.isArray(data) && data[0]?.url) {
+                    videoUrl = data[0].url;
+                } else if (data?.links?.[0]?.link) {
+                    videoUrl = data.links[0].link;
+                } else if (data?.links?.[0]?.url) {
+                    videoUrl = data.links[0].url;
+                } else if (data?.link) {
+                    videoUrl = data.link;
+                } else if (data?.url) {
+                    videoUrl = data.url;
+                } else if (data?.src) {
+                    videoUrl = data.src;
+                } else if (data?.file) {
+                    videoUrl = data.file;
+                }
+
                 if (videoUrl && typeof videoUrl === 'string') {
                     return {
                         url: videoUrl,
                         isM3U8: videoUrl.includes('.m3u8'),
-                        quality: source.sourceName
+                        quality: source.sourceName,
                     };
                 }
-                throw new Error("No video URL found");
+
+                console.warn(`[AllAnime] Unknown CDN response structure for ${source.sourceName}:`, JSON.stringify(data).substring(0, 200));
+                throw new Error("No video URL found in CDN response");
             };
 
             try {

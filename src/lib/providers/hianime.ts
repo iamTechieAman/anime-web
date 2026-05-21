@@ -206,13 +206,16 @@ export class HiAnimeProvider implements AnimeProvider {
                     const embedLink = sourcesResponse.data.link;
                     if (!embedLink) return null;
 
+                    // Proxy the embed through our server-side embed proxy to bypass CORS
+                    const proxiedEmbed = `/api/proxy/embed?url=${encodeURIComponent(embedLink)}&referer=${encodeURIComponent('https://hianime.to')}`;
+
                     return {
-                        url: embedLink,
+                        url: proxiedEmbed,
                         isM3U8: false,
                         isIframe: true,
                         quality: 'auto',
                         server: server.name,
-                        type: server.type as any
+                        type: server.type as any,
                     };
                 } catch (e: any) {
                     console.error(`[HiAnime] Failed to fetch source for server ${server.name}:`, e.message);
@@ -253,15 +256,13 @@ export class HiAnimeProvider implements AnimeProvider {
     }
 
     private async extractSources(embedLink: string): Promise<VideoSource[]> {
-        console.log('[HiAnime] Returning embed link as iframe source:', embedLink);
-        
-        // Return the embed link directly as an iframe to avoid CORS/Referer issues
-        // that occur when trying to play the extracted m3u8 directly in the browser.
+        console.log('[HiAnime] Returning proxied embed link:', embedLink);
+        const proxiedEmbed = `/api/proxy/embed?url=${encodeURIComponent(embedLink)}&referer=${encodeURIComponent('https://hianime.to')}`;
         return [{
-            url: embedLink,
+            url: proxiedEmbed,
             isM3U8: false,
             isIframe: true,
-            quality: 'auto'
+            quality: 'auto',
         }];
     }
     async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
