@@ -260,7 +260,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                 {activeTab === 'Notifications' && (
                                     <motion.div key="notifications" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
                                         {/* AI Smart Alert Banner */}
-                                        <div className="relative overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-orange-500/30 rounded-2xl p-4">
+                                        <div className="relative overflow-hidden bg-gradient-to-r from-orange-500/20 to-pink-600/20 border border-orange-500/30 rounded-2xl p-4">
                                             <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-xl" />
                                             <div className="flex items-start gap-3 relative">
                                                 <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shrink-0">
@@ -269,9 +269,9 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <p className="text-sm font-black text-white">AI Smart Alerts</p>
-                                                        <span className="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded bg-orange-500/30 text-purple-300 border border-orange-500/30">New</span>
+                                                        <span className="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded bg-orange-500/30 text-orange-300 border border-orange-500/30">New</span>
                                                     </div>
-                                                    <p className="text-xs text-purple-200/70 leading-relaxed">ToonPlayer analyzes your viewing patterns and sends personalized alerts — like notifying you when your usual watch time begins. It learns your taste to surface content you'll love.</p>
+                                                    <p className="text-xs text-orange-200/70 leading-relaxed">ToonPlayer analyzes your viewing patterns and sends personalized alerts — like notifying you when your usual watch time begins. It learns your taste to surface content you'll love.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -317,7 +317,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                             </button>
                             {activeTab !== 'Notifications' && (
                                 <button onClick={handleSaveProfile} disabled={isSaving}
-                                    className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-orange-500 hover:to-blue-500 text-white font-black shadow-lg shadow-orange-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+                                    className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-500 hover:to-blue-500 text-white font-black shadow-lg shadow-orange-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
                                 >
                                     {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" />Save Profile</>}
                                 </button>

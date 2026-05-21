@@ -49,13 +49,13 @@ export default class ErrorBoundary extends Component<Props, State> {
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <button
                                 onClick={this.handleRetry}
-                                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20"
+                                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
                             >
                                 Try Again
                             </button>
                             <button
                                 onClick={() => window.location.href = '/'}
-                                className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-bold rounded-xl transition-all hover:border-purple-500/30"
+                                className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-bold rounded-xl transition-all hover:border-orange-500/30"
                             >
                                 Go Home
                             </button>

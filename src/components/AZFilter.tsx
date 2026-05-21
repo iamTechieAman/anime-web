@@ -28,7 +28,7 @@ export default function AZFilter() {
                             className={`
                 px-3 py-1.5 rounded-lg text-sm font-bold transition-all duration-200
                 ${active === letter
-                                    ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40 border border-purple-500/50"
+                                    ? "bg-orange-500 text-white shadow-lg shadow-orange-900/40 border border-orange-500/50"
                                     : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)]"
                                 }
               `}

@@ -99,7 +99,7 @@ export default function ProfilePage() {
                 
                 {/* Profile Header */}
                 <div className="flex items-center gap-6 mb-12 p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)]">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 p-[3px]">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[3px]">
                         <div className="w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden">
                             <img src={user.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.name}`} alt="Avatar" className="w-full h-full object-cover" />
                         </div>
@@ -115,9 +115,9 @@ export default function ProfilePage() {
                     
                     {/* Quick Links */}
                     <div className="space-y-4">
-                        <h2 className="text-lg font-bold font-sora mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-purple-400" /> Account Hub</h2>
+                        <h2 className="text-lg font-bold font-sora mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-orange-400" /> Account Hub</h2>
                         
-                        <Link href="/history" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-purple-500/50 transition-colors">
+                        <Link href="/history" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
                             <div className="flex items-center gap-3">
                                 <Clock className="w-5 h-5 text-[var(--text-muted)]" />
                                 <span className="font-medium">Watch History</span>
@@ -125,7 +125,7 @@ export default function ProfilePage() {
                             <span className="text-xs text-[var(--text-muted)] bg-white/5 px-2 py-1 rounded-md">{user.history?.length || 0} items</span>
                         </Link>
 
-                        <Link href="/watchlist" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-purple-500/50 transition-colors">
+                        <Link href="/watchlist" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
                             <div className="flex items-center gap-3">
                                 <Bookmark className="w-5 h-5 text-[var(--text-muted)]" />
                                 <span className="font-medium">My Watchlist</span>
@@ -141,11 +141,11 @@ export default function ProfilePage() {
 
                     {/* Notifications Panel */}
                     <div className="space-y-4">
-                        <h2 className="text-lg font-bold font-sora mb-4 flex items-center gap-2"><Bell className="w-5 h-5 text-purple-400" /> Notifications</h2>
+                        <h2 className="text-lg font-bold font-sora mb-4 flex items-center gap-2"><Bell className="w-5 h-5 text-orange-400" /> Notifications</h2>
                         
                         <div className="p-6 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] text-center">
-                            <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
-                                <BellRing className={`w-8 h-8 ${pushEnabled ? 'text-purple-400' : 'text-[var(--text-muted)]'}`} />
+                            <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
+                                <BellRing className={`w-8 h-8 ${pushEnabled ? 'text-orange-400' : 'text-[var(--text-muted)]'}`} />
                             </div>
                             <h3 className="font-bold mb-2">Episode Updates</h3>
                             <p className="text-sm text-[var(--text-muted)] mb-6">
@@ -159,7 +159,7 @@ export default function ProfilePage() {
                             ) : (
                                 <button 
                                     onClick={enablePush}
-                                    className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-colors"
+                                    className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-500 text-white rounded-xl font-bold transition-colors"
                                 >
                                     Enable Notifications
                                 </button>

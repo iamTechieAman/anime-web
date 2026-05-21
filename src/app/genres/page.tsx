@@ -11,7 +11,7 @@ import {
 const genres = [
     { name: "Action", icon: Sword, color: "bg-rose-500", desc: "Adrenaline-fueled adventures" },
     { name: "Adventure", icon: Map, color: "bg-orange-500", desc: "Epic journeys and quests" },
-    { name: "Animation", icon: Sparkles, color: "bg-purple-500", desc: "Animated worlds and stories" },
+    { name: "Animation", icon: Sparkles, color: "bg-orange-500", desc: "Animated worlds and stories" },
     { name: "Comedy", icon: Laugh, color: "bg-yellow-500", desc: "Laughter and fun moments" },
     { name: "Crime", icon: Shield, color: "bg-zinc-500", desc: "Detectives and outlaws" },
     { name: "Drama", icon: Heart, color: "bg-pink-500", desc: "Emotional and powerful tales" },
@@ -34,7 +34,7 @@ export default function GenresPage() {
             <div className="w-full">
                 <header className="mb-12">
                     <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">
-                        Explore <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">Genres</span>
+                        Explore <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-400">Genres</span>
                     </h1>
                     <p className="text-[var(--text-muted)] text-lg max-w-2xl">
                         Discover your next favorite show by browsing through our curated categories.
@@ -64,7 +64,7 @@ export default function GenresPage() {
                                         <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center ${genre.color} shadow-lg group-hover:scale-110 transition-transform duration-500`}>
                                             <Icon className="w-6 h-6 text-white" />
                                         </div>
-                                        <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">
+                                        <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">
                                             {genre.name}
                                         </h3>
                                         <p className="text-[10px] text-[var(--text-muted)] mt-1 opacity-100 group-hover:text-white/60 transition-colors">

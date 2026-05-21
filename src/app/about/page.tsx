@@ -15,7 +15,7 @@ export default function AboutPage() {
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="w-24 h-24 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.3)] mb-8 p-4"
+                        className="w-24 h-24 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(249, 115, 22, 0.3)] mb-8 p-4"
                     >
                         <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain" />
                     </motion.div>
@@ -27,7 +27,7 @@ export default function AboutPage() {
                         className="text-4xl md:text-6xl font-black text-white tracking-tight"
                     >
                         Crafting the Future of <br />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">Digital Entertainment</span>
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-400">Digital Entertainment</span>
                     </motion.h1>
                     
                     <motion.p 
@@ -45,7 +45,7 @@ export default function AboutPage() {
                         transition={{ delay: 0.4 }}
                         className="flex items-center justify-center gap-4 pt-4"
                     >
-                        <a href="https://github.com/iamTechieAman" target="_blank" className="p-3 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-purple-500/50 transition-colors">
+                        <a href="https://github.com/iamTechieAman" target="_blank" className="p-3 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
                             <Github className="w-6 h-6 text-white" />
                         </a>
                         <a href="#" className="p-3 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-blue-500/50 transition-colors">
@@ -78,8 +78,8 @@ export default function AboutPage() {
                             title: "Unified Search", 
                             desc: "Search across Movies, TV, Anime, and Cartoons simultaneously without switching tabs.",
                             icon: Sparkles,
-                            color: "text-purple-400",
-                            bg: "bg-purple-500/10"
+                            color: "text-orange-400",
+                            bg: "bg-orange-500/10"
                         },
                         { 
                             title: "Open Source", 
@@ -113,7 +113,7 @@ export default function AboutPage() {
                     <h2 className="text-2xl font-bold text-white">The Tech Stack</h2>
                     <div className="flex flex-wrap justify-center gap-4 text-sm font-bold">
                         {["Next.js 14", "TypeScript", "TailwindCSS", "Framer Motion", "Python (Scrapling)", "Edge Runtime", "Lucide Icons", "Axios"].map((tech) => (
-                            <span key={tech} className="px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-white hover:border-purple-500/50 transition-all cursor-default">
+                            <span key={tech} className="px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-white hover:border-orange-500/50 transition-all cursor-default">
                                 {tech}
                             </span>
                         ))}
@@ -123,16 +123,16 @@ export default function AboutPage() {
                 {/* Creator & Disclaimer Section */}
                 <section className="space-y-12">
                     <div className="bg-[var(--bg-card)] rounded-3xl p-8 md:p-12 border border-[var(--border-color)] relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[100px] -z-10 group-hover:bg-purple-500/20 transition-colors duration-700" />
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[100px] -z-10 group-hover:bg-orange-500/20 transition-colors duration-700" />
                         
                         <div className="flex flex-col md:flex-row gap-10 items-center">
-                            <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-purple-500/30 p-1 shrink-0">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-orange-500/30 p-1 shrink-0">
                                 <div className="w-full h-full rounded-full bg-[var(--bg-main)] flex items-center justify-center">
-                                    <User className="w-12 h-12 text-purple-400" />
+                                    <User className="w-12 h-12 text-orange-400" />
                                 </div>
                             </div>
                             <div className="space-y-4 text-center md:text-left transition-all">
-                                <span className="px-3 py-1 bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-purple-500/20">Lead Developer</span>
+                                <span className="px-3 py-1 bg-orange-500/10 text-orange-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-orange-500/20">Lead Developer</span>
                                 <h2 className="text-3xl font-black text-white">Aman Kumar</h2>
                                 <p className="text-[var(--text-muted)] leading-relaxed max-w-xl">
                                     I am a passionate <span className="text-white font-bold">college student</span> and full-stack developer dedicated to building innovative open-source projects. ToonPlayer is a personal project developed for educational purposes, focusing on high-performance web architecture and unified search experiences.

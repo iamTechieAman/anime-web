@@ -98,7 +98,7 @@ export default function ProfileGate() {
                     className="relative group cursor-pointer flex flex-col items-center gap-3"
                     onClick={() => handleSelectProfile(p)}
                   >
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-purple-500 transition-all duration-300 shadow-xl group-hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[var(--bg-card)]">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all duration-300 shadow-xl group-hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[var(--bg-card)]">
                       <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
                     </div>
                     <span className="text-sm md:text-base font-bold text-[var(--text-muted)] group-hover:text-white transition-colors">{p.name}</span>
@@ -128,7 +128,7 @@ export default function ProfileGate() {
             ) : (
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-sm mx-auto">
                 <div className="group relative w-full">
-                  <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 p-[3px] mb-6 shadow-2xl transition-transform duration-300 group-hover:scale-105">
+                  <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[3px] mb-6 shadow-2xl transition-transform duration-300 group-hover:scale-105">
                     <div className="w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden flex items-center justify-center">
                       {profileName.trim() ? (
                         <img 
@@ -148,7 +148,7 @@ export default function ProfileGate() {
                     onChange={(e) => setProfileName(e.target.value)}
                     placeholder="Enter your name"
                     maxLength={15}
-                    className="w-full bg-[var(--bg-card)] border-2 border-[var(--border-color)] focus:border-purple-500 rounded-2xl px-6 py-4 text-xl text-center font-bold outline-none transition-all placeholder:font-normal placeholder:opacity-50"
+                    className="w-full bg-[var(--bg-card)] border-2 border-[var(--border-color)] focus:border-orange-500 rounded-2xl px-6 py-4 text-xl text-center font-bold outline-none transition-all placeholder:font-normal placeholder:opacity-50"
                     autoFocus
                   />
                 </div>

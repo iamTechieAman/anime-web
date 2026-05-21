@@ -106,7 +106,7 @@ export default function ContinueWatchingRow() {
         <section className="mb-10 w-full overflow-hidden">
             <div className="section-header">
                 <div className="accent-bar" />
-                <Clock className="w-5 h-5 text-purple-400" />
+                <Clock className="w-5 h-5 text-orange-400" />
                 <h2 className="text-lg md:text-xl font-bold font-sora">Continue Watching</h2>
                 <span className="ml-auto flex items-center gap-2">
                     <span className="text-xs text-[var(--text-muted)] font-semibold">{displayHistory.length} {history.length === 0 ? 'Featured' : 'items'}</span>
@@ -142,7 +142,7 @@ export default function ContinueWatchingRow() {
                             <Link
                                 key={entry.id}
                                 href={getHistoryLink(entry)}
-                                className={`group relative flex-none w-[220px] md:w-[300px] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-purple-500/50 hover:shadow-[0_8px_40px_-8px_rgba(139,92,246,0.4)] hover:-translate-y-2 snap-start ${
+                                className={`group relative flex-none w-[220px] md:w-[300px] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-orange-500/50 hover:shadow-[0_8px_40px_-8px_rgba(249, 115, 22, 0.4)] hover:-translate-y-2 snap-start ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 }`}
                             >
@@ -188,7 +188,7 @@ export default function ContinueWatchingRow() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             {entry.episodeId && (
-                                                <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                                                <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
                                                     {entry.type === 'tv' ? `S1 · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
                                                 </span>
                                             )}
@@ -207,7 +207,7 @@ export default function ContinueWatchingRow() {
                                     </div>
                                     {/* Resume button */}
                                     <div className="pt-1">
-                                        <div className="w-full py-2 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-500/30 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 group-hover:bg-purple-500/15 group-hover:border-purple-500/30">
+                                        <div className="w-full py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-500/30 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 group-hover:bg-orange-500/15 group-hover:border-orange-500/30">
                                             <Play className="w-3.5 h-3.5 fill-current" />
                                             Resume
                                         </div>

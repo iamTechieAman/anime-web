@@ -388,7 +388,7 @@ export default function Header() {
                       
                       {/* Trending Section when empty */}
                       <div className="p-5">
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-purple-400 mb-4 flex items-center gap-2">
+                        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-orange-400 mb-4 flex items-center gap-2">
                           <TrendingUp className="w-3 h-3" /> Trending Hits
                         </p>
                         <div className="space-y-1">
@@ -399,12 +399,12 @@ export default function Header() {
                               className="flex items-center gap-4 p-2.5 hover:bg-white/5 rounded-2xl transition-all group hover:pl-4"
                               onClick={() => setShowSuggestions(false)}
                             >
-                              <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-purple-500 transition-colors">0{i + 1}</span>
+                              <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-orange-500 transition-colors">0{i + 1}</span>
                               <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-zinc-900 border border-white/5">
                                 {item.image && <img src={item.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />}
                               </div>
                               <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{item.title}</span>
-                              <Sparkles className="w-3.5 h-3.5 text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
+                              <Sparkles className="w-3.5 h-3.5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                             </Link>
                           ))}
                         </div>
@@ -431,11 +431,11 @@ export default function Header() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-sm font-black text-white truncate group-hover:text-purple-400 transition-colors">
+                              <h4 className="text-sm font-black text-white truncate group-hover:text-orange-400 transition-colors">
                                 <HighlightText text={item.title} highlight={searchQuery} />
                               </h4>
                               <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
-                                item.type === 'anime' ? 'bg-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                item.type === 'anime' ? 'bg-orange-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
                               }`}>
                                 {item.type}
                               </span>
@@ -447,13 +447,13 @@ export default function Header() {
                             </div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0 -translate-x-2">
-                            <ChevronDown className="w-5 h-5 text-purple-500 -rotate-90" />
+                            <ChevronDown className="w-5 h-5 text-orange-500 -rotate-90" />
                           </div>
                         </Link>
                       ))}
                       <button 
                         onClick={() => handleSearch(null)}
-                        className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-purple-400 hover:text-white hover:bg-purple-600 rounded-2xl transition-all duration-300"
+                        className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-orange-400 hover:text-white hover:bg-orange-500 rounded-2xl transition-all duration-300"
                       >
                         All results for "{searchQuery}"
                       </button>

@@ -68,11 +68,11 @@ export default function HistoryPage() {
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-0 pb-24 md:pb-10 md:pl-[72px]">
       {/* Sticky header with glassmorphism */}
       <div className="sticky top-0 z-40 bg-[var(--bg-main)]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
         <div className="w-full px-6 md:px-12 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/25 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-purple-400" />
+            <div className="w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/25 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-orange-400" />
             </div>
             <div>
               <h1 className="text-xl font-black font-sora tracking-tight text-white">Watch History</h1>
@@ -100,7 +100,7 @@ export default function HistoryPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search your history..."
-                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-white/10 focus:border-purple-500/50 rounded-xl pl-10 pr-10 py-2.5 text-sm outline-none transition-all placeholder-[var(--text-muted)]"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-white/10 focus:border-orange-500/50 rounded-xl pl-10 pr-10 py-2.5 text-sm outline-none transition-all placeholder-[var(--text-muted)]"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/5 rounded-full">
@@ -115,7 +115,7 @@ export default function HistoryPage() {
                   onClick={() => setFilterType(type)}
                   className={`px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all duration-200 ${
                     filterType === type
-                      ? "bg-purple-600 text-white shadow-[0_0_16px_rgba(139,92,246,0.35)]"
+                      ? "bg-orange-500 text-white shadow-[0_0_16px_rgba(249,115,22,0.25)]"
                       : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/15"
                   }`}
                 >
@@ -135,7 +135,7 @@ export default function HistoryPage() {
             </div>
             <p className="text-xl font-black font-sora text-white mb-2">No Watch History</p>
             <p className="text-sm text-[var(--text-muted)] mb-8">Content you watch will appear here automatically</p>
-            <Link href="/" className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full text-sm font-bold hover:shadow-[0_0_25px_rgba(139,92,246,0.4)] transition-all duration-300">
+            <Link href="/" className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-full text-sm font-bold hover:shadow-[0_0_25px_rgba(249,115,22,0.3)] transition-all duration-300">
               Browse Movies &amp; Anime
             </Link>
           </div>
@@ -150,9 +150,9 @@ export default function HistoryPage() {
               <div key={date}>
                 {/* Date Group Header */}
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(139,92,246,0.7)]" />
+                  <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249, 115, 22, 0.7)]" />
                   <h2 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.15em]">{date}</h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-purple-500/20 to-transparent" />
+                  <div className="flex-1 h-px bg-gradient-to-r from-orange-500/20 to-transparent" />
                   <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-0.5 rounded-full border border-[var(--border-color)]">
                     {entries.length} {entries.length === 1 ? "title" : "titles"}
                   </span>
@@ -168,7 +168,7 @@ export default function HistoryPage() {
                     return (
                       <div
                         key={entry.id}
-                        className="group flex items-stretch rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/30 hover:shadow-[0_4px_30px_-8px_rgba(139,92,246,0.3)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+                        className="group flex items-stretch rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-orange-500/30 hover:shadow-[0_4px_30px_-8px_rgba(249,115,22,0.2)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
                       >
                         {/* Left color accent bar */}
                         <div
@@ -210,14 +210,14 @@ export default function HistoryPage() {
                         <div className="flex-1 min-w-0 flex flex-col justify-between p-4 py-3.5">
                           <div className="space-y-1.5">
                             <Link href={getHistoryLink(entry)} className="block group/link">
-                              <h3 className="font-black text-sm md:text-base text-white line-clamp-1 font-sora group-hover/link:text-purple-400 transition-colors tracking-tight">
+                              <h3 className="font-black text-sm md:text-base text-white line-clamp-1 font-sora group-hover/link:text-orange-400 transition-colors tracking-tight">
                                 {entry.title}
                               </h3>
                             </Link>
                             <div className="flex items-center gap-2 flex-wrap">
                               {entry.type && (
                                 <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                                  entry.type === 'anime' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20'
+                                  entry.type === 'anime' ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
                                   : entry.type === 'movie' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
                                   : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
                                 }`}>
@@ -237,7 +237,7 @@ export default function HistoryPage() {
                             <div className="mt-2.5 space-y-1">
                               <div className="flex items-center justify-between">
                                 <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Progress</span>
-                                <span className={`text-[9px] font-black ${progressNum > 80 ? 'text-green-400' : 'text-purple-400'}`}>{progressPct}</span>
+                                <span className={`text-[9px] font-black ${progressNum > 80 ? 'text-green-400' : 'text-orange-400'}`}>{progressPct}</span>
                               </div>
                               <div className="w-full h-1 rounded-full bg-white/10 overflow-hidden">
                                 <div
@@ -256,7 +256,7 @@ export default function HistoryPage() {
                         <div className="flex flex-col items-center justify-center gap-2 px-3 md:px-4 py-3 shrink-0 border-l border-[var(--border-color)]">
                           <Link
                             href={getHistoryLink(entry)}
-                            className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-600/80 hover:bg-purple-600 text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] whitespace-nowrap"
+                            className="flex items-center gap-1.5 px-3.5 py-2 bg-orange-500/80 hover:bg-orange-500 text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_rgba(249,115,22,0.3)] whitespace-nowrap"
                           >
                             <Play className="w-3 h-3 fill-white" />
                             <span className="hidden sm:inline">Resume</span>

@@ -43,7 +43,7 @@ export default function WatchlistPage() {
       <div className="sticky top-0 z-40 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)]">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Bookmark className="w-6 h-6 text-purple-400" />
+            <Bookmark className="w-6 h-6 text-orange-400" />
             <h1 className="text-xl md:text-2xl font-bold font-sora">Watchlist</h1>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function WatchlistPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search watchlist..."
-                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg pl-10 pr-10 py-2.5 text-sm outline-none focus:border-purple-500 transition-colors"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg pl-10 pr-10 py-2.5 text-sm outline-none focus:border-orange-500 transition-colors"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -72,7 +72,7 @@ export default function WatchlistPage() {
                   key={type}
                   onClick={() => setFilterType(type)}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
-                    filterType === type ? "bg-purple-600 text-white" : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20"
+                    filterType === type ? "bg-orange-500 text-white" : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/20"
                   }`}
                 >
                   {type === "all" ? "All Items" : type === "anime" ? "Anime" : type === "movie" ? "Movies" : "TV Shows"}
@@ -89,7 +89,7 @@ export default function WatchlistPage() {
             <Bookmark className="w-16 h-16 mb-4 text-[var(--text-muted)]" />
             <p className="text-xl font-bold">Watchlist is Empty</p>
             <p className="text-sm text-[var(--text-muted)] mt-2">Save shows and movies to watch later</p>
-            <Link href="/" className="mt-6 px-6 py-2 bg-purple-600 text-white rounded-full text-sm font-bold hover:bg-purple-700 transition-colors">
+            <Link href="/" className="mt-6 px-6 py-2 bg-orange-500 text-white rounded-full text-sm font-bold hover:bg-orange-600 transition-colors">
               Browse Content
             </Link>
           </div>
@@ -100,7 +100,7 @@ export default function WatchlistPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filtered.map((entry) => (
-              <div key={entry.id} className="group relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 hover:shadow-lg transition-all aspect-[2/3]">
+              <div key={entry.id} className="group relative rounded-xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-orange-500/50 hover:shadow-lg transition-all aspect-[2/3]">
                 <Link href={getWatchlistLink(entry)} className="block w-full h-full">
                   {entry.poster ? (
                     <img src={entry.poster} alt={entry.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -111,7 +111,7 @@ export default function WatchlistPage() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform">
+                    <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform">
                       <Play className="w-6 h-6 text-white fill-current ml-1" />
                     </div>
                   </div>

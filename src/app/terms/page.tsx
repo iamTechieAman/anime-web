@@ -35,9 +35,9 @@ export default function TermsPage() {
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="w-16 h-16 bg-purple-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6"
+                        className="w-16 h-16 bg-orange-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6"
                     >
-                        <FileText className="w-8 h-8 text-purple-400" />
+                        <FileText className="w-8 h-8 text-orange-400" />
                     </motion.div>
                     <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">Terms of Service</h1>
                     <p className="text-[var(--text-muted)] text-lg">Agreement for Using ToonPlayer.in</p>
@@ -55,7 +55,7 @@ export default function TermsPage() {
                             className="p-8 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-4"
                         >
                             <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center">
-                                <section.icon className="w-5 h-5 text-purple-400" />
+                                <section.icon className="w-5 h-5 text-orange-400" />
                             </div>
                             <h2 className="text-xl font-bold text-white">{section.title}</h2>
                             <p className="text-[var(--text-muted)] text-sm leading-relaxed">

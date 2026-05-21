@@ -47,12 +47,12 @@ export default function DiscoverPage() {
                     <div>
                         <button 
                             onClick={() => router.back()} 
-                            className="flex items-center gap-2 text-[var(--text-muted)] hover:text-purple-400 font-bold mb-3 transition-colors text-sm"
+                            className="flex items-center gap-2 text-[var(--text-muted)] hover:text-orange-400 font-bold mb-3 transition-colors text-sm"
                         >
                             <ArrowLeft className="w-4 h-4" /> Back
                         </button>
-                        <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500 flex items-center gap-3">
-                            <Sparkles className="w-8 h-8 text-purple-500 shrink-0" />
+                        <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500 flex items-center gap-3">
+                            <Sparkles className="w-8 h-8 text-orange-500 shrink-0" />
                             AI Discovery
                         </h1>
                         <p className="text-[var(--text-muted)] mt-2 font-medium">
@@ -65,10 +65,10 @@ export default function DiscoverPage() {
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center space-y-4">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-purple-500 blur-xl opacity-20 rounded-full animate-pulse" />
-                            <Loader2 className="w-12 h-12 text-purple-500 animate-spin relative z-10" />
+                            <div className="absolute inset-0 bg-orange-500 blur-xl opacity-20 rounded-full animate-pulse" />
+                            <Loader2 className="w-12 h-12 text-orange-500 animate-spin relative z-10" />
                         </div>
-                        <p className="text-sm font-black text-purple-400 uppercase tracking-widest animate-pulse">Analyzing Prompt...</p>
+                        <p className="text-sm font-black text-orange-400 uppercase tracking-widest animate-pulse">Analyzing Prompt...</p>
                     </div>
                 ) : error ? (
                     <div className="py-20 flex flex-col items-center justify-center text-center max-w-md mx-auto">
@@ -80,7 +80,7 @@ export default function DiscoverPage() {
                     </div>
                 ) : !prompt ? (
                     <div className="py-20 flex flex-col items-center justify-center text-center opacity-60 hover:opacity-100 transition-opacity max-w-md mx-auto">
-                        <Sparkles className="w-16 h-16 text-purple-500 mb-6" />
+                        <Sparkles className="w-16 h-16 text-orange-500 mb-6" />
                         <h3 className="text-xl font-bold text-white mb-2">What are you in the mood for?</h3>
                         <p className="text-[var(--text-muted)] text-sm leading-relaxed">
                             Try searching for things like "sad romance anime with good animation" or "action movies in space".
