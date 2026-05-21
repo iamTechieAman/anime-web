@@ -11,6 +11,7 @@ import HeroCarousel from "@/components/HeroCarousel";
 import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
 import ContinueWatchingRow from "@/components/ContinueWatchingRow";
 import useSWR from 'swr';
+import ProviderBar, { type ProviderSlug } from "@/components/ProviderBar";
 
 // CineVibe-style category sections with TMDB genre IDs
 const GENRE_ROWS = [
@@ -45,6 +46,9 @@ const TABS = [
 
 export default function MoviesPage() {
     const [activeTab, setActiveTab] = useState("movies");
+    const [activeProvider, setActiveProvider] = useState<ProviderSlug>("all");
+    const [providerData, setProviderData] = useState<Record<string, any>>({}); // keyed by slug
+    const [providerLoading, setProviderLoading] = useState(false);
     const [trending, setTrending] = useState<MovieItem[]>([]);
     const [popular, setPopular] = useState<MovieItem[]>([]);
     const [topRated, setTopRated] = useState<MovieItem[]>([]);
@@ -207,6 +211,26 @@ export default function MoviesPage() {
         loadOtherData();
     }, []);
 
+    // Provider switching: fetch from /api/provider when activeProvider changes
+    useEffect(() => {
+        if (activeProvider === "all") return; // reset handled below
+        if (providerData[activeProvider]) return; // already cached
+
+        setProviderLoading(true);
+        const controller = new AbortController();
+        axios
+            .get(`/api/provider?provider=${activeProvider}`, { signal: controller.signal })
+            .then((res) => {
+                setProviderData((prev) => ({ ...prev, [activeProvider]: res.data }));
+            })
+            .catch((err) => {
+                if (!axios.isCancel(err)) console.error("Provider fetch error:", err);
+            })
+            .finally(() => setProviderLoading(false));
+
+        return () => controller.abort();
+    }, [activeProvider]);
+
 
 
     // Search handler
@@ -249,6 +273,13 @@ export default function MoviesPage() {
             <div className="relative z-10 w-full pb-24 md:pb-0">
                 <h1 className="sr-only">ToonPlayer - Watch Free Anime & Movies</h1>
                 <HeroCarousel />
+
+                {/* Provider Bar — sticky, below hero */}
+                <ProviderBar
+                    activeProvider={activeProvider}
+                    onProviderChange={(slug) => setActiveProvider(slug)}
+                    isLoading={providerLoading}
+                />
 
                 {/* Genres & Categories Sub-Nav */}
                 <div className="bg-[#05010A]/85 backdrop-blur-3xl border-b border-white/5 sticky top-[80px] md:top-[96px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-1 transition-all duration-300">
@@ -322,12 +353,50 @@ export default function MoviesPage() {
                         <div className="flex flex-col lg:flex-row gap-10 xl:gap-16">
                             {/* Main Feed */}
                             <div className="flex-1 min-w-0">
+
+                            {/* Provider empty state */}
+                            {activeProvider !== "all" && !providerLoading && providerData[activeProvider] && (
+                                (() => {
+                                    const pd = providerData[activeProvider];
+                                    const hasContent = (pd.trending?.length || 0) + (pd.movies?.length || 0) + (pd.tv?.length || 0) > 0;
+                                    if (!hasContent) return (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex flex-col items-center justify-center py-24 text-center gap-6"
+                                        >
+                                            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-4xl border border-white/10">
+                                                🎬
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-black text-white mb-2">{pd.label} — No content found</h3>
+                                                <p className="text-[var(--text-muted)] text-sm">This provider may have limited availability in your region.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setActiveProvider("all")}
+                                                className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all"
+                                            >
+                                                Browse All Content
+                                            </button>
+                                        </motion.div>
+                                    );
+                                    return null;
+                                })()
+                            )}
                                 <ContinueWatchingRow />
 
-                                {/* Smart Recommendations */}
-                                {activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
+                                {/* Trending row for active provider */}
+                                {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
                                     <section className="mb-16 md:mb-24 relative">
-                                        {/* Ambient Glow for Recommendations */}
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-32 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-purple-400" isFeatured />
+                                        <MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge />
+                                    </section>
+                                )}
+
+                                {/* Smart Recommendations (only when no provider active) */}
+                                {activeProvider === "all" && activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
+                                    <section className="mb-16 md:mb-24 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-32 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-purple-400" isFeatured />
                                         <MovieRow 
@@ -339,78 +408,161 @@ export default function MoviesPage() {
                                 )}
                                 
                                 {activeTab === "movies" && (
-                                    <div className="space-y-16 md:space-y-24">
-                                        <section>
-                                            <SectionHeader icon={Flame} title="Trending Movies" color="text-red-400" isFeatured />
-                                            {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" />
-                                            {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular" /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
-                                            {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Star} title="Top Rated Movies" color="text-yellow-400" isFeatured />
-                                            {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" isLarge /> : <RowSkeleton />}
-                                        </section>
-                                        {GENRE_ROWS.map((genre, idx) => (
-                                            genreData[genre.title] && (
-                                                <section key={genre.title} id={`genre-${genre.genreId}`}>
-                                                    <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
-                                                    <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
+                                    <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`movies-${activeProvider}`}
+                                        initial={{ opacity: 0, y: 18 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -12 }}
+                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        className="space-y-16 md:space-y-24"
+                                    >
+                                        {activeProvider !== "all" && providerData[activeProvider] ? (
+                                            <>
+                                                {providerData[activeProvider].movies?.length > 0 && (
+                                                    <section>
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-red-400" isFeatured />
+                                                        <MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-movies`} isLarge />
+                                                    </section>
+                                                )}
+                                                {providerData[activeProvider].topRated?.length > 0 && (
+                                                    <section>
+                                                        <SectionHeader icon={Star} title="Top Rated" color="text-yellow-400" />
+                                                        <MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !i.name)} type="movie" title={`${activeProvider}-toprated`} />
+                                                    </section>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <section>
+                                                    <SectionHeader icon={Flame} title="Trending Movies" color="text-red-400" isFeatured />
+                                                    {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /> : <RowSkeleton />}
                                                 </section>
-                                            )
-                                        ))}
-                                    </div>
+                                                <section>
+                                                    <SectionHeader icon={Film} title="Popular Movies" color="text-blue-400" />
+                                                    {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular" /> : <RowSkeleton />}
+                                                </section>
+                                                <section>
+                                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-yellow-400" />
+                                                    {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
+                                                </section>
+                                                <section>
+                                                    <SectionHeader icon={Star} title="Top Rated Movies" color="text-yellow-400" isFeatured />
+                                                    {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" isLarge /> : <RowSkeleton />}
+                                                </section>
+                                                {GENRE_ROWS.map((genre) => (
+                                                    genreData[genre.title] && (
+                                                        <section key={genre.title} id={`genre-${genre.genreId}`}>
+                                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-blue-400" />
+                                                            <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
+                                                        </section>
+                                                    )
+                                                ))}
+                                            </>
+                                        )}
+                                    </motion.div>
+                                    </AnimatePresence>
                                 )}
 
                                 {activeTab === "tv" && (
-                                    <div className="space-y-16 md:space-y-24">
-                                        <section>
-                                            <SectionHeader icon={Flame} title="Trending TV Shows" color="text-purple-400" isFeatured />
-                                            {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Tv} title="Popular TV Shows" color="text-blue-400" />
-                                            {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular" /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-yellow-400" isFeatured />
-                                            {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" isLarge /> : <RowSkeleton />}
-                                        </section>
-                                        {NETWORK_ROWS.map((net, idx) => (
-                                            networkData[net.title] && (
-                                                <section key={net.title} id={`network-${net.networkId}`}>
-                                                    <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-pink-400" />
-                                                    <MovieRow items={networkData[net.title]} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} />
+                                    <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`tv-${activeProvider}`}
+                                        initial={{ opacity: 0, y: 18 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -12 }}
+                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        className="space-y-16 md:space-y-24"
+                                    >
+                                        {activeProvider !== "all" && providerData[activeProvider] ? (
+                                            <>
+                                                {providerData[activeProvider].tv?.length > 0 && (
+                                                    <section>
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-purple-400" isFeatured />
+                                                        <MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-tv`} isLarge />
+                                                    </section>
+                                                )}
+                                                {providerData[activeProvider].topRated?.filter((i:any) => !!i.name).length > 0 && (
+                                                    <section>
+                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-yellow-400" />
+                                                        <MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !!i.name)} type="tv" title={`${activeProvider}-toprated-tv`} />
+                                                    </section>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <section>
+                                                    <SectionHeader icon={Flame} title="Trending TV Shows" color="text-purple-400" isFeatured />
+                                                    {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /> : <RowSkeleton />}
                                                 </section>
-                                            )
-                                        ))}
-                                    </div>
+                                                <section>
+                                                    <SectionHeader icon={Tv} title="Popular TV Shows" color="text-blue-400" />
+                                                    {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular" /> : <RowSkeleton />}
+                                                </section>
+                                                <section>
+                                                    <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-yellow-400" isFeatured />
+                                                    {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" isLarge /> : <RowSkeleton />}
+                                                </section>
+                                                {NETWORK_ROWS.map((net, idx) => (
+                                                    networkData[net.title] && (
+                                                        <section key={net.title} id={`network-${net.networkId}`}>
+                                                            <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-pink-400" />
+                                                            <MovieRow items={networkData[net.title]} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} />
+                                                        </section>
+                                                    )
+                                                ))}
+                                            </>
+                                        )}
+                                    </motion.div>
+                                    </AnimatePresence>
                                 )}
                                 
                                 {activeTab === "anime" && (
-                                    <div className="space-y-12 mt-8">
-                                        <section>
-                                            <SectionHeader icon={Flame} title="Trending Anime" color="text-purple-400" />
-                                            {animeTrending.length > 0 ? (
-                                                <div className="responsive-grid">
-                                                    {animeTrending.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
-                                                </div>
-                                            ) : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-blue-400" />
-                                            {animeLatest.length > 0 ? (
-                                                <div className="responsive-grid">
-                                                    {animeLatest.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
-                                                </div>
-                                            ) : <RowSkeleton />}
-                                        </section>
-                                    </div>
+                                    <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`anime-${activeProvider}`}
+                                        initial={{ opacity: 0, y: 18 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -12 }}
+                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        className="space-y-12 mt-8"
+                                    >
+                                        {/* Provider anime content (Crunchyroll / ToonPlayer Originals) */}
+                                        {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
+                                            <>
+                                                <section>
+                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-orange-400" isFeatured />
+                                                    <MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-anime`} isLarge />
+                                                </section>
+                                                {providerData[activeProvider].movies?.length > 0 && (
+                                                    <section>
+                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-pink-400" />
+                                                        <MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-anime-movies`} />
+                                                    </section>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <section>
+                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-purple-400" />
+                                                    {animeTrending.length > 0 ? (
+                                                        <div className="responsive-grid">
+                                                            {animeTrending.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
+                                                        </div>
+                                                    ) : <RowSkeleton />}
+                                                </section>
+                                                <section>
+                                                    <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-blue-400" />
+                                                    {animeLatest.length > 0 ? (
+                                                        <div className="responsive-grid">
+                                                            {animeLatest.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
+                                                        </div>
+                                                    ) : <RowSkeleton />}
+                                                </section>
+                                            </>
+                                        )}
+                                    </motion.div>
+                                    </AnimatePresence>
                                 )}
 
                                 {activeTab === "trending" && (

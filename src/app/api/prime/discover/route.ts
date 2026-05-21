@@ -12,6 +12,8 @@ export async function GET(req: Request) {
     const genreId = searchParams.get("genre_id");
     const year = searchParams.get("year");
     const voteAvgGte = searchParams.get("vote_average_gte");
+    const watchProviderId = searchParams.get("watch_provider_id");
+    const watchRegion = searchParams.get("watch_region") || "US";
 
     try {
         const params = new URLSearchParams({
@@ -25,6 +27,10 @@ export async function GET(req: Request) {
 
         if (networkId && mediaType === "tv") {
             params.set("with_networks", networkId);
+        }
+        if (watchProviderId) {
+            params.set("with_watch_providers", watchProviderId);
+            params.set("watch_region", watchRegion);
         }
         if (genreId) {
             params.set("with_genres", genreId);
@@ -42,7 +48,7 @@ export async function GET(req: Request) {
 
         const res = await fetch(
             `${TMDB_BASE}/discover/${mediaType}?${params.toString()}`,
-            { next: { revalidate: 3600 } } // Cached for 1 hour at edge limit protection
+            { next: { revalidate: 3600 } }
         );
         const data = await res.json();
 
