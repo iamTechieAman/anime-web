@@ -18,6 +18,40 @@ import { useWatch } from "@/context/WatchContext";
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
 
+/** Memoized episode button to prevent full list re-render on every currentEp change */
+const EpisodeButton = React.memo(function EpisodeButton({
+    ep, currentEp, onClick
+}: { ep: string | number; currentEp: string; onClick: () => void }) {
+    const isActive = String(currentEp) === String(ep);
+    const ref = React.useRef<HTMLButtonElement>(null);
+
+    // Auto-scroll into view when this episode becomes active
+    React.useEffect(() => {
+        if (isActive && ref.current) {
+            ref.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }, [isActive]);
+
+    return (
+        <button
+            ref={ref}
+            onClick={onClick}
+            className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-colors group ${
+                isActive ? "bg-orange-500/15 border border-orange-500/30" : "hover:bg-white/5 border border-transparent"
+            }`}
+        >
+            <span className={`text-sm font-semibold transition-colors ${isActive ? 'text-orange-400' : 'text-[var(--text-muted)] group-hover:text-white'}`}>
+                Episode {ep}
+            </span>
+            {isActive && (
+                <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center shadow-[0_0_10px_rgba(249,115,22,0.4)]">
+                    <Play className="w-3 h-3 text-white fill-white ml-0.5" />
+                </div>
+            )}
+        </button>
+    );
+});
+
 const MOVIE_SERVERS = [
     {
         id: "peachify",
@@ -129,6 +163,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     const [currentEp, setCurrentEp] = useState<string>("1");
     const [mode, setMode] = useState<"sub" | "dub">("sub");
+    const [epFilter, setEpFilter] = useState("");
 
     const availableEps = show?.availableEpisodesDetail?.[mode] || [];
 
@@ -187,8 +222,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 e.data.type === "player_ended"
             );
 
-            if (isEndEvent && autoNext) {
-                handleVideoEnded();
+            // Use ref to avoid stale closure
+            if (isEndEvent && handleVideoEndedRef.current) {
+                (handleVideoEndedRef.current as Function)();
             }
         };
 
@@ -667,7 +703,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     if (loadingShow) {
         return (
             <div className="min-h-screen bg-[var(--bg-main)] flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+                <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
                 <p className="text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Initializing Experience</p>
             </div>
         );
@@ -727,7 +763,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <div className="mt-8 flex flex-col gap-3">
                             <Link 
                                 href="/"
-                                className="w-full max-w-xs py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                className="w-full max-w-xs py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                             >
                                 <ChevronLeft className="w-4 h-4" /> Return Home
                             </Link>
@@ -750,7 +786,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     return (
         <>
-        <main className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-purple-500/30 transition-colors duration-300">
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-orange-500/20 transition-colors duration-300">
             {/* No JavaScript Fallback */}
             <noscript>
                 <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">
@@ -760,7 +796,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <p className="text-[var(--text-muted)] mb-6">
                             Video streaming requires JavaScript to function. Please enable JavaScript in your browser to watch anime.
                         </p>
-                        <Link href="/" className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold inline-block">
+                        <Link href="/" className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold inline-block">
                             Return Home
                         </Link>
                     </div>
@@ -769,7 +805,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Background Glow - Hidden on mobile for performance */}
             <div className="fixed inset-0 pointer-events-none z-0 hidden md:block">
-                <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-purple-900/10 rounded-full blur-[120px] mix-blend-screen opacity-20"></div>
+                <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-orange-900/10 rounded-full blur-[120px] mix-blend-screen opacity-20"></div>
             </div>
 
             {/* Navbar with Safe Area Support */}
@@ -783,7 +819,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             {show.name || "Anime Stream"}
                         </h1>
                         <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                            <span className="text-purple-500 font-bold">EP {currentEp}</span>
+                            <span className="text-orange-400 font-bold">EP {currentEp}</span>
                             <span className="w-1 h-1 bg-[var(--text-muted)]/30 rounded-full"></span>
                             <span className="uppercase">{mode}</span>
                         </div>
@@ -801,11 +837,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             {loadingSource ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                                     <div className="relative">
-                                        <div className="absolute inset-0 bg-purple-600/30 blur-2xl rounded-full scale-150 animate-pulse"></div>
-                                        <Loader2 className="w-16 h-16 animate-spin text-purple-500 relative z-10" />
+                                        <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full scale-150 animate-pulse"></div>
+                                        <Loader2 className="w-16 h-16 animate-spin text-orange-400 relative z-10" />
                                     </div>
                                     <div className="text-center relative z-10 px-4">
-                                        <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                                        <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
                                             Initializing Stream
                                         </h3>
                                         <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
@@ -828,7 +864,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                     setError(null);
                                                     setSelectedServer("peachify");
                                                 }}
-                                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
+                                                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
                                             >
                                                 <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
                                             </button>
@@ -840,7 +876,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                     setError(null);
                                                     setSelectedServer("fmovies");
                                                 }}
-                                                className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-purple-500/50"
+                                                className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-orange-500/40"
                                             >
                                                 FMovies
                                             </button>
@@ -852,7 +888,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 const firstNative = servers.find(s => !s.isMovieServer);
                                                 setSelectedServer(firstNative?.serverId || servers[0]?.serverId || null);
                                             }}
-                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-purple-500/50 flex items-center gap-1.5"
+                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-orange-500/40 flex items-center gap-1.5"
                                         >
                                             <RefreshCw className="w-3.5 h-3.5" /> Retry All
                                         </button>
@@ -959,7 +995,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                                 cx="40"
                                                                 cy="40"
                                                                 r="36"
-                                                                stroke="#a855f7"
+                                                                stroke="#f97316"
                                                                 strokeWidth="6"
                                                                 fill="none"
                                                                 strokeDasharray="226.08"
@@ -1023,10 +1059,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         const currentIndex = availableEps.map(String).indexOf(String(currentEp));
                                         if (currentIndex !== -1 && currentIndex < availableEps.length - 1) {
                                             const nextEp = availableEps[currentIndex + 1];
-                                            router.push(`/watch/anime/${id}?ep=${nextEp}&mode=${mode}`);
+                                            setCurrentEp(String(nextEp));
+                                            toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
                                         }
                                     }}
-                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] mr-auto"
+                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_rgba(249,115,22,0.4)] mr-auto"
                                 >
                                     Next Episode <Play className="w-3.5 h-3.5 fill-current" />
                                 </button>
@@ -1066,7 +1103,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         <div className="bg-black/40 rounded-xl p-4 border border-white/5 space-y-3">
                                             <div className="flex items-center justify-between text-xs">
                                                 <span className="text-[var(--text-muted)]">DNS Server:</span>
-                                                <code className="text-purple-400 font-bold selection:bg-purple-500/30">dns.adguard.com</code>
+                                                <code className="text-orange-400 font-bold selection:bg-orange-500/20">dns.adguard.com</code>
                                             </div>
                                             <p className="text-[9px] text-[var(--text-muted)] italic">
                                                 * This will block ads across all streaming sites and providers automatically.
@@ -1148,7 +1185,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     }}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
                                         selectedServer === "peachify" 
-                                        ? "bg-purple-600/20 border-purple-500/50 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]" 
+                                        ? "bg-orange-500/10 border-orange-500/40 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.2)]" 
                                         : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
@@ -1164,7 +1201,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] hover:bg-white/5 border border-[var(--border-color)] rounded-lg text-sm font-bold text-white transition-all min-w-[180px] justify-between group"
                                     >
                                         <div className="flex items-center gap-2">
-                                            <Server className="w-4 h-4 text-purple-500" />
+                                            <Server className="w-4 h-4 text-orange-400" />
                                             <span>{servers.find(s => s.serverId === selectedServer)?.serverName || "Select Server"}</span>
                                         </div>
                                         <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] group-hover:text-white transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
@@ -1193,13 +1230,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                             }}
                                                             className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
                                                                 selectedServer === server.serverId
-                                                                    ? "bg-purple-600/10 text-white border border-purple-500/30 shadow-lg"
+                                                                    ? "bg-orange-500/10 text-white border border-orange-500/30 shadow-lg"
                                                                     : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
                                                             }`}
                                                         >
                                                             <div className="flex items-center gap-3">
                                                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                                                    server.isMovieServer ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'
+                                                                    server.isMovieServer ? 'bg-blue-500/10 text-blue-400' : 'bg-orange-500/10 text-orange-400'
                                                                 }`}>
                                                                     <Play className={`w-3.5 h-3.5 ${selectedServer === server.serverId ? 'fill-current' : ''}`} />
                                                                 </div>
@@ -1211,7 +1248,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                                 </div>
                                                             </div>
                                                             {selectedServer === server.serverId && (
-                                                                <Check className="w-4 h-4 text-purple-400" />
+                                                                <Check className="w-4 h-4 text-orange-400" />
                                                             )}
                                                         </button>
                                                     ))}
@@ -1224,7 +1261,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                             {/* Auto Toggles Removed — Now Permanent */}
                             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
-                                <div className="flex items-center gap-2 text-purple-400">
+                                <div className="flex items-center gap-2 text-orange-400">
                                     <Sparkles className="w-4 h-4" />
                                     Premium Auto-Features Active
                                 </div>
@@ -1243,7 +1280,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     onClick={toggleBookmark}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shrink-0 ${
                                         isBookmarked 
-                                            ? "bg-purple-600/20 text-purple-400 border-purple-500/50 hover:bg-purple-600/30" 
+                                            ? "bg-orange-500/10 text-orange-400 border-orange-500/40 hover:bg-orange-500/20" 
                                             : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
                                     }`}
                                 >
@@ -1282,39 +1319,28 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     <input 
                                         type="number"
                                         placeholder="Search episode..."
-                                        className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-white/20 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
-                                        onChange={(e) => {
-                                            const v = e.target.value;
-                                            if (!v) {
-                                                // If empty, we can just show all. I'll omit local filtering state for brevity,
-                                                // but add visual cue it's a search box. It needs local state to function properly.
-                                            }
-                                        }}
+                                        value={epFilter}
+                                        className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-orange-500/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
+                                        onChange={(e) => setEpFilter(e.target.value)}
                                     />
                                 </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
-                                {episodes.map((ep) => (
-                                    <button
-                                        key={ep}
-                                        onClick={() => setCurrentEp(ep)}
-                                        className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-colors group
-                                            ${currentEp === ep
-                                                ? "bg-white/10"
-                                                : "hover:bg-white/5"
-                                            }`}
-                                    >
-                                        <span className={`text-sm font-semibold transition-colors ${currentEp === ep ? 'text-white' : 'text-[var(--text-muted)] group-hover:text-white'}`}>
-                                            Episode {ep}
-                                        </span>
-                                        {currentEp === ep && (
-                                            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-[0_0_10px_rgba(255,255,255,0.4)]">
-                                                <Play className="w-3 h-3 text-black fill-black ml-0.5" />
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
+                                {(() => {
+                                    const filteredEpisodes = epFilter
+                                        ? episodes.filter(ep => String(ep).includes(epFilter))
+                                        : episodes;
+                                    return filteredEpisodes.map((ep) => (
+                                        <EpisodeButton
+                                            key={ep}
+                                            ep={ep}
+                                            currentEp={currentEp}
+                                            onClick={() => setCurrentEp(ep)}
+                                        />
+                                    ));
+                                })()
+                                }
                             </div>
                         </div>
                     </div>

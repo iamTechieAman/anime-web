@@ -141,9 +141,9 @@ export const PROVIDERS: ProviderInfo[] = [
         slug: "hbo",
         label: "HBO Max",
         shortLabel: "HBO",
-        color: "text-purple-400",
+        color: "text-orange-400",
         glowColor: "rgba(120,68,200,0.5)",
-        bgGradient: "from-purple-800 to-violet-900",
+        bgGradient: "from-[#1a0a00] to-[#2d1500]",
         logo: <HBOLogo />,
     },
     {

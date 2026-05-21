@@ -98,7 +98,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
                 {/* Bottom Info (only if not banner) */}
                 {!isBanner && (
                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/95 to-transparent">
-                        <h3 className="text-white text-xs font-bold line-clamp-2 leading-tight group-hover:text-purple-400 transition-colors">
+                        <h3 className="text-white text-xs font-bold line-clamp-2 leading-tight group-hover:text-orange-400 transition-colors">
                             {title}
                         </h3>
                         <div className="flex items-center gap-2 mt-1.5">
@@ -160,11 +160,11 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
 
                 {/* Meta */}
                 <div className="flex-1 min-w-0 pr-4">
-                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-purple-400 transition-colors tracking-tight">
+                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-orange-400 transition-colors tracking-tight">
                         {title}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-bold text-purple-400/80 uppercase">
+                        <span className="text-[10px] font-bold text-orange-400/80 uppercase">
                             {show.type || show.media_type || "TV"}
                         </span>
                         {rating && (
@@ -181,7 +181,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
                 </div>
                 
                 {/* Glow on hover */}
-                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-purple-600 transition-all duration-500 group-hover:w-full" />
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-orange-500 transition-all duration-500 group-hover:w-full" />
             </Link>
         </div>
     );

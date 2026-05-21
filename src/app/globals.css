@@ -270,7 +270,7 @@ p, .text-body {
   color: var(--text-muted);
 }
 
-/* Primary label override — purple tinted */
+/* Primary label override — orange tinted */
 .text-label-accent {
   color: var(--accent);
   font-size: 0.625rem;
@@ -716,7 +716,7 @@ p, .text-body {
   box-shadow: 0 0 20px rgba(249, 115, 22, 0.35), 0 0 60px rgba(249, 115, 22, 0.12);
 }
 
-.glow-purple {
+.glow-orange {
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1);
 }
 
@@ -947,7 +947,7 @@ p, .text-body {
 }
 
 .badge-orange { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
-.badge-purple { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+.badge-orange { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
 .badge-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
 .badge-red { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 .badge-green { background: rgba(34, 197, 94, 0.15); color: #4ade80; }

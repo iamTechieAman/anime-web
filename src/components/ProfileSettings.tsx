@@ -22,7 +22,7 @@ const AVATARS = [
     "https://api.dicebear.com/9.x/avataaars/svg?seed=Frost",
 ];
 
-function ToggleSwitch({ value, onChange, color = "bg-purple-500" }: { value: boolean; onChange: (v: boolean) => void; color?: string }) {
+function ToggleSwitch({ value, onChange, color = "bg-orange-500" }: { value: boolean; onChange: (v: boolean) => void; color?: string }) {
     return (
         <button
             onClick={() => onChange(!value)}
@@ -38,12 +38,12 @@ function ToggleSwitch({ value, onChange, color = "bg-purple-500" }: { value: boo
 }
 
 const NOTIF_CATEGORIES: { key: keyof NotificationPreferences; label: string; desc: string; icon: any; color: string; toggleColor: string }[] = [
-    { key: 'episodes', label: 'New Episodes', desc: 'Alert when new episodes drop for shows you follow', icon: Play, color: 'text-purple-400', toggleColor: 'bg-purple-500' },
+    { key: 'episodes', label: 'New Episodes', desc: 'Alert when new episodes drop for shows you follow', icon: Play, color: 'text-orange-400', toggleColor: 'bg-orange-500' },
     { key: 'trending', label: 'Trending Shows', desc: 'Discover what\'s hot on the platform right now', icon: TrendingUp, color: 'text-red-400', toggleColor: 'bg-red-500' },
     { key: 'recommendations', label: 'Recommendations', desc: 'Personalized picks curated just for your taste', icon: Sparkles, color: 'text-amber-400', toggleColor: 'bg-amber-500' },
     { key: 'watchlist', label: 'Watchlist Updates', desc: 'When new seasons or episodes arrive for saved shows', icon: Bookmark, color: 'text-blue-400', toggleColor: 'bg-blue-500' },
     { key: 'community', label: 'Community Activity', desc: 'What ToonPlayer users in your region are watching', icon: Users, color: 'text-green-400', toggleColor: 'bg-green-500' },
-    { key: 'aiSmartAlerts', label: 'AI Smart Alerts', desc: 'Personalized nudges based on your watch patterns', icon: Brain, color: 'text-pink-400', toggleColor: 'bg-gradient-to-r from-purple-500 to-pink-500' },
+    { key: 'aiSmartAlerts', label: 'AI Smart Alerts', desc: 'Personalized nudges based on your watch patterns', icon: Brain, color: 'text-pink-400', toggleColor: 'bg-gradient-to-r from-orange-500 to-amber-500' },
 ];
 
 const TABS = ['Account', 'Playback', 'Notifications'] as const;
@@ -147,13 +147,13 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                     <motion.div
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         style={{ transform: 'translateZ(0)' }}
-                        className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-2xl overflow-hidden shadow-purple-500/10 flex flex-col max-h-[90vh] will-change-transform"
+                        className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-2xl overflow-hidden shadow-orange-500/10 flex flex-col max-h-[90vh] will-change-transform"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-[var(--border-color)] flex items-center justify-between bg-white/5 shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                                    <Settings2 className="w-5 h-5 text-purple-400" />
+                                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                                    <Settings2 className="w-5 h-5 text-orange-400" />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-black text-white tracking-tight font-sora">App Settings</h2>
@@ -175,7 +175,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                 >
                                     {tab}
                                     {activeTab === tab && (
-                                        <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" />
+                                        <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full" />
                                     )}
                                 </button>
                             ))}
@@ -192,11 +192,11 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                                 <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
                                                     {AVATARS.map((avatar) => (
                                                         <button key={avatar} onClick={() => setSelectedAvatar(avatar)}
-                                                            className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all ${selectedAvatar === avatar ? "border-purple-500 scale-110 shadow-lg shadow-purple-500/20" : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"}`}
+                                                            className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all ${selectedAvatar === avatar ? "border-orange-500 scale-110 shadow-lg shadow-orange-500/20" : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"}`}
                                                         >
                                                             <img src={avatar} alt="Avatar option" className="w-full h-full object-cover" />
                                                             {selectedAvatar === avatar && (
-                                                                <div className="absolute inset-0 bg-purple-500/20 flex items-center justify-center">
+                                                                <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
                                                                     <Check className="w-4 h-4 text-white drop-shadow-md" />
                                                                 </div>
                                                             )}
@@ -208,7 +208,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                                 <label className="text-xs font-bold text-white">Display Name</label>
                                                 <div className="relative">
                                                     <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name"
-                                                        className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] focus:border-purple-500/50 rounded-xl px-4 py-3 text-sm text-white outline-none transition-all shadow-inner font-bold"
+                                                        className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] focus:border-orange-500/50 rounded-xl px-4 py-3 text-sm text-white outline-none transition-all shadow-inner font-bold"
                                                         maxLength={20} />
                                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[var(--text-muted)]">{name.length}/20</div>
                                                 </div>
@@ -225,7 +225,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                                 <p className="text-xs text-[var(--text-muted)]">Select preferred stream resolution</p>
                                             </div>
                                             <select value={quality} onChange={(e) => updateSetting('quality', e.target.value)}
-                                                className="bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-sm font-bold text-white outline-none focus:border-purple-500/50">
+                                                className="bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-sm font-bold text-white outline-none focus:border-orange-500/50">
                                                 <option value="Auto">Auto</option>
                                                 <option value="1080p">1080p FHD</option>
                                                 <option value="720p">720p HD</option>
@@ -233,10 +233,10 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                         </div>
                                         <div className="w-full h-px bg-[var(--border-color)]" />
                                         {[
-                                            { key: 'autoplay', label: 'Autoplay Next Episode', desc: 'Seamlessly start the next episode', value: autoplay, color: 'bg-purple-500' },
+                                            { key: 'autoplay', label: 'Autoplay Next Episode', desc: 'Seamlessly start the next episode', value: autoplay, color: 'bg-orange-500' },
                                             { key: 'autoSkip', label: 'Auto-skip Intro', desc: 'Automatically bypass anime openings', value: autoSkip, color: 'bg-blue-500', badge: 'Beta' },
-                                            { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-purple-500' },
-                                            { key: 'multiAudio', label: 'Prioritize Multi-Audio', desc: 'Favor ToonPlayer VIP streams', value: multiAudio, color: 'bg-purple-500' },
+                                            { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-orange-500' },
+                                            { key: 'multiAudio', label: 'Prioritize Multi-Audio', desc: 'Favor ToonPlayer VIP streams', value: multiAudio, color: 'bg-orange-500' },
                                             { key: 'dataSaver', label: 'Data & Battery Saver', desc: 'Reduce blur effects for smoother UI', value: dataSaver, color: 'bg-green-500' },
                                             { key: 'aggressiveSandbox', label: 'Aggressive Ad-Blocker', desc: 'Prevents external popups and redirects', value: aggressiveSandbox, color: 'bg-red-500', badge: 'Secure' },
                                         ].map((item, i, arr) => (
@@ -260,16 +260,16 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                 {activeTab === 'Notifications' && (
                                     <motion.div key="notifications" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
                                         {/* AI Smart Alert Banner */}
-                                        <div className="relative overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-2xl p-4">
-                                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl" />
+                                        <div className="relative overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-orange-500/30 rounded-2xl p-4">
+                                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-xl" />
                                             <div className="flex items-start gap-3 relative">
-                                                <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0">
-                                                    <Brain className="w-5 h-5 text-purple-400" />
+                                                <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shrink-0">
+                                                    <Brain className="w-5 h-5 text-orange-400" />
                                                 </div>
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <p className="text-sm font-black text-white">AI Smart Alerts</p>
-                                                        <span className="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded bg-purple-500/30 text-purple-300 border border-purple-500/30">New</span>
+                                                        <span className="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded bg-orange-500/30 text-purple-300 border border-orange-500/30">New</span>
                                                     </div>
                                                     <p className="text-xs text-purple-200/70 leading-relaxed">ToonPlayer analyzes your viewing patterns and sends personalized alerts — like notifying you when your usual watch time begins. It learns your taste to surface content you'll love.</p>
                                                 </div>
@@ -317,7 +317,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                             </button>
                             {activeTab !== 'Notifications' && (
                                 <button onClick={handleSaveProfile} disabled={isSaving}
-                                    className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black shadow-lg shadow-purple-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+                                    className="flex-[2] py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-orange-500 hover:to-blue-500 text-white font-black shadow-lg shadow-orange-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
                                 >
                                     {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" />Save Profile</>}
                                 </button>

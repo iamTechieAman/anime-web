@@ -37,9 +37,9 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
     return (
         <div className="mt-12 mb-8">
             <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
+                <Sparkles className="w-5 h-5 text-orange-400 animate-pulse" />
                 <h2 className="text-lg md:text-xl font-bold text-white font-sora">
-                    Because you watched <span className="text-purple-400">{showName.split(' ')[0]}</span>...
+                    Because you watched <span className="text-orange-400">{showName.split(' ')[0]}</span>...
                 </h2>
             </div>
             

@@ -9,7 +9,7 @@ export default function Footer() {
     return (
         <footer className="footer-wrap w-full mt-auto">
             {/* Gradient fade top connector */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
             <div className="w-full px-4 md:px-8 py-8 bg-gradient-to-b from-[var(--bg-card)]/30 to-[var(--bg-main)] backdrop-blur-sm">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                     {/* Brand Section */}
@@ -56,17 +56,17 @@ export default function Footer() {
                         <h3 className="text-white font-bold text-sm uppercase tracking-widest">Legal & Trust</h3>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <Link href="/privacy" className="text-[var(--text-muted)] hover:text-purple-400 transition-colors flex items-center gap-2">
+                                <Link href="/privacy" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors flex items-center gap-2">
                                     <ShieldCheck className="w-3.5 h-3.5" /> Privacy Policy
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/terms" className="text-[var(--text-muted)] hover:text-purple-400 transition-colors flex items-center gap-2">
+                                <Link href="/terms" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors flex items-center gap-2">
                                     <FileText className="w-3.5 h-3.5" /> Terms of Service
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/contact" className="text-[var(--text-muted)] hover:text-purple-400 transition-colors flex items-center gap-2">
+                                <Link href="/contact" className="text-[var(--text-muted)] hover:text-orange-400 transition-colors flex items-center gap-2">
                                     <MessageSquare className="w-3.5 h-3.5" /> Contact & Support
                                 </Link>
                             </li>
@@ -98,7 +98,7 @@ export default function Footer() {
                             type="text" 
                             readOnly 
                             value='<a href="https://toonplayer.in" title="Watch Free Anime & Movies">Watch on ToonPlayer</a>' 
-                            className="flex-1 w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-[11px] font-mono text-purple-300 outline-none focus:border-purple-500 transition-colors"
+                            className="flex-1 w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-[11px] font-mono text-orange-300 outline-none focus:border-orange-500 transition-colors"
                         />
                         <button 
                             onClick={(e) => {
@@ -106,13 +106,13 @@ export default function Footer() {
                                 const btn = e.currentTarget;
                                 const originalText = btn.innerText;
                                 btn.innerText = 'Copied!';
-                                btn.classList.replace('bg-purple-600', 'bg-green-600');
+                                btn.classList.replace('bg-orange-500', 'bg-green-600');
                                 setTimeout(() => {
                                     btn.innerText = originalText;
-                                    btn.classList.replace('bg-green-600', 'bg-purple-600');
+                                    btn.classList.replace('bg-green-600', 'bg-orange-500');
                                 }, 2000);
                             }}
-                            className="w-full sm:w-auto px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold rounded transition-colors whitespace-nowrap"
+                            className="w-full sm:w-auto px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold rounded transition-colors whitespace-nowrap"
                         >
                             Copy HTML
                         </button>

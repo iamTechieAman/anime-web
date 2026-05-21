@@ -94,7 +94,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchEnd={handleMouseLeave}
         >
         <Link href={`/watch/${mediaType}/${item.id}`} className="block group w-full h-full">
-            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-white/5 group-hover:border-purple-500/40 transition-all duration-500 group-hover:shadow-[0_20px_50px_-12px_rgba(168,85,247,0.6)] group-hover:scale-[1.03] group-hover:-translate-y-2 group-hover:-rotate-1 premium-card flex flex-col">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-white/5 group-hover:border-orange-500/40 transition-all duration-500 group-hover:shadow-[0_20px_50px_-12px_rgba(249,115,22,0.6)] group-hover:scale-[1.03] group-hover:-translate-y-2 group-hover:-rotate-1 premium-card flex flex-col">
                 {/* Poster / Simulated Trailer Box */}
                 <div className="relative flex-1 min-h-0 aspect-[2/3] overflow-hidden">
                     {((item.poster_path || item.image) && !imgError) ? (
@@ -176,7 +176,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
                     {/* Upcoming or HD badge */}
                     {isUpcoming ? (
-                        <div className="absolute top-2 right-2 bg-purple-600/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-purple-500/30">
+                        <div className="absolute top-2 right-2 bg-orange-500/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-orange-500/30">
                             <span className="text-[9px] font-black text-white uppercase tracking-wider">
                                 Upcoming
                             </span>
@@ -189,7 +189,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
                     {/* Quick action buttons on hover */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 translate-y-4 group-hover:translate-y-0">
-                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.6)] border border-white/20 transform hover:scale-110 transition-transform cursor-pointer">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.6)] border border-white/20 transform hover:scale-110 transition-transform cursor-pointer">
                             <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white ml-1" />
                         </div>
                         <div className="flex gap-2">
@@ -239,7 +239,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
                 {/* Title and Metadata */}
                 <div className="p-3.5 bg-gradient-to-b from-[var(--bg-card)] to-black/40">
-                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-purple-400 transition-colors duration-300 tracking-tight">{title}</h3>
+                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-orange-400 transition-colors duration-300 tracking-tight">{title}</h3>
                     <div className="flex items-center gap-2 mt-1.5 text-[11px] font-medium text-[var(--text-muted)]">
                         {year && <span>{year}</span>}
                         {year && <span className="w-1 h-1 rounded-full bg-white/20" />}
