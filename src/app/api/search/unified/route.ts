@@ -9,11 +9,11 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY || "522103f166160100778c1995804369
 
 const ANILIST_QUERY = `
 query($search: String) {
-  Page(page: 1, perPage: 5) {
+  Page(page: 1, perPage: 8) {
     media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
       id
       title { romaji english native }
-      coverImage { medium }
+      coverImage { extraLarge large medium }
       format
       seasonYear
       type
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
                 results.push({
                     id: item.id,
                     title: item.title.english || item.title.romaji,
-                    image: item.coverImage.medium,
+                    image: item.coverImage.extraLarge || item.coverImage.large || item.coverImage.medium,
                     type: 'anime',
                     year: item.seasonYear,
                     format: item.format,

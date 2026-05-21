@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Play, Star, Calendar, Clock, ChevronRight } from "lucide-react";
+import { Play, Star, ChevronRight } from "lucide-react";
 
 export interface Show {
     _id?: string;
@@ -22,8 +22,26 @@ export interface Show {
     rank?: number;
 }
 
+/** Gradient placeholder shown when image is missing or fails to load */
+function ImagePlaceholder({ title }: { title: string }) {
+    return (
+        <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+            <span className="text-zinc-600 text-3xl font-black select-none">{title.charAt(0).toUpperCase()}</span>
+        </div>
+    );
+}
+
+/** Resolves the best available image URL from a Show object */
+function resolveImage(show: Show): string | null {
+    if (show.image) return show.image;
+    if (show.poster_path) return `https://image.tmdb.org/t/p/w342${show.poster_path}`;
+    if (show.backdrop_path) return `https://image.tmdb.org/t/p/w500${show.backdrop_path}`;
+    return null;
+}
+
 export default function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
     const [isVisible, setIsVisible] = useState(false);
+    const [imgError, setImgError] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -34,13 +52,10 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
                     observer.unobserve(entry.target);
                 }
             },
-            { threshold: 0.1 }
+            { threshold: 0.05, rootMargin: "100px" }
         );
 
-        if (cardRef.current) {
-            observer.observe(cardRef.current);
-        }
-
+        if (cardRef.current) observer.observe(cardRef.current);
         return () => observer.disconnect();
     }, []);
 
@@ -59,33 +74,37 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
     };
 
     const title = show.title || show.name || "Unknown Title";
-    const image = show.image || (show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : show.backdrop_path ? `https://image.tmdb.org/t/p/w500${show.backdrop_path}` : "https://api.dicebear.com/9.x/shapes/svg?seed=fallback");
+    const imageSrc = resolveImage(show);
     const year = (show.release_date || show.first_air_date || "").split('-')[0];
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
 
     return (
-        <div
-            ref={cardRef}
-            className={`card-reveal ${isVisible ? 'card-visible' : ''}`}
-        >
-            <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-[var(--accent)]/40 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 hover:-rotate-1 hover:shadow-[0_20px_50px_-12px_rgba(168,85,247,0.6)] block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'}`}>
-                <img
-                    src={image}
-                    alt={title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                />
-                
-                {/* Overlay */}
+        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''}`}>
+            <Link href={getHref()} className={`group relative overflow-hidden rounded-xl bg-[var(--bg-card)] border border-white/5 hover:border-[var(--accent)]/40 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 hover:shadow-[0_20px_50px_-12px_rgba(249,115,22,0.5)] block w-full h-full ${isBanner ? 'aspect-[16/9]' : 'aspect-[3/4.5]'} premium-card`}>
+                {/* Poster */}
+                {(imageSrc && !imgError) ? (
+                    <img
+                        src={imageSrc}
+                        alt={title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        onError={() => setImgError(true)}
+                    />
+                ) : (
+                    <ImagePlaceholder title={title} />
+                )}
+
+                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_20px_rgba(168,85,247,0.5)]">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_20px_rgba(249,115,22,0.5)]">
                             <Play className="w-6 h-6 text-white fill-current ml-1" />
                         </div>
                     </div>
                 </div>
 
-                {/* Top Badges */}
+                {/* Rating badge */}
                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
                     {rating && (
                         <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-yellow-400">
@@ -95,7 +114,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
                     )}
                 </div>
 
-                {/* Bottom Info (only if not banner) */}
+                {/* Bottom info */}
                 {!isBanner && (
                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/95 to-transparent">
                         <h3 className="text-white text-xs font-bold line-clamp-2 leading-tight group-hover:text-orange-400 transition-colors">
@@ -115,6 +134,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
 }
 
 export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number }) {
+    const [imgError, setImgError] = useState(false);
     const showId = show._id || show.id;
     const isTmdbContent = showId?.startsWith('tmdb:');
     const getHref = () => {
@@ -128,15 +148,14 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
         const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : 'allanime');
         return `/watch/anime/${showId}?provider=${provider}`;
     };
-    
+
     const title = show.title || show.name || "Unknown Title";
-    const image = show.image || (show.poster_path ? `https://image.tmdb.org/t/p/w200${show.poster_path}` : "https://api.dicebear.com/9.x/shapes/svg?seed=fallback");
+    const imageSrc = resolveImage(show);
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
 
     return (
         <div key={`${showId}-${rank}`} className="card-reveal card-visible">
             <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
-                {/* Rank Number (if provided) */}
                 {rank !== undefined && (
                     <div className="w-6 text-center shrink-0">
                         <span className={`text-xl font-black ${rank < 3 ? 'text-[#FF5722]' : 'text-[var(--text-muted)]'}`}>
@@ -147,12 +166,20 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
 
                 {/* Thumbnail */}
                 <div className="relative w-14 aspect-[2/3] rounded-md overflow-hidden bg-[var(--bg-card)] shrink-0 shadow-lg">
-                    <img
-                        src={image}
-                        alt={title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                    />
+                    {(imageSrc && !imgError) ? (
+                        <img
+                            src={imageSrc}
+                            alt={title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            loading="lazy"
+                            decoding="async"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                            <span className="text-zinc-600 text-lg font-black">{title.charAt(0)}</span>
+                        </div>
+                    )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Play className="w-4 h-4 text-white fill-current" />
                     </div>
@@ -179,7 +206,7 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                     <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
                 </div>
-                
+
                 {/* Glow on hover */}
                 <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-orange-500 transition-all duration-500 group-hover:w-full" />
             </Link>
@@ -204,4 +231,3 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
         </div>
     );
 }
-

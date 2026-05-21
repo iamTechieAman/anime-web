@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
@@ -290,7 +290,7 @@ export default function MoviesPage() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(168,85,247,0.45)] scale-105"
+                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(249,115,22,0.35)] scale-105"
                                         : "bg-[#0B0713]/40 border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
                                     }`}
                                 >
@@ -478,7 +478,7 @@ export default function MoviesPage() {
                                             <>
                                                 {providerData[activeProvider].tv?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-purple-400" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-orange-400" isFeatured />
                                                         <MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-tv`} isLarge />
                                                     </section>
                                                 )}
@@ -492,7 +492,7 @@ export default function MoviesPage() {
                                         ) : (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title="Trending TV Shows" color="text-purple-400" isFeatured />
+                                                    <SectionHeader icon={Flame} title="Trending TV Shows" color="text-orange-400" isFeatured />
                                                     {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /> : <RowSkeleton />}
                                                 </section>
                                                 <section>
@@ -544,7 +544,7 @@ export default function MoviesPage() {
                                         ) : (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-purple-400" />
+                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-orange-400" />
                                                     {animeTrending.length > 0 ? (
                                                         <div className="responsive-grid">
                                                             {animeTrending.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
@@ -576,7 +576,7 @@ export default function MoviesPage() {
                                             {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Tv} title="Trending Series" color="text-purple-400" />
+                                            <SectionHeader icon={Tv} title="Trending Series" color="text-orange-400" />
                                             {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
                                         </section>
                                     </div>
@@ -585,12 +585,12 @@ export default function MoviesPage() {
                                 {activeTab === "discover" && (
                                     <div className="space-y-16 md:space-y-24">
                                         {mjItems.length > 0 && (
-                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/20 overflow-hidden">
-                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
+                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-orange-500/20 overflow-hidden">
+                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl" />
                                                 <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-yellow-400" isFeatured />
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                                                     {mjItems.map((item, i) => (
-                                                        <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer group">
+                                                        <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-orange-500/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
                                                                     <img src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -751,7 +751,7 @@ export default function MoviesPage() {
 
                 <section className="mb-16 md:mb-20 max-w-[1400px] mx-auto px-6 lg:px-12 relative">
                     {/* Subtle ambient glow for the bottom region */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-purple-900/10 rounded-full blur-[120px] pointer-events-none z-0" />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-orange-900/10 rounded-full blur-[120px] pointer-events-none z-0" />
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
                         <div className="space-y-8">
@@ -763,20 +763,20 @@ export default function MoviesPage() {
                             </p>
                             <div className="pt-4">
                                 <h3 className="text-title mb-6 flex items-center gap-3">
-                                    <Sparkles className="w-6 h-6 text-purple-400" />
+                                    <Sparkles className="w-6 h-6 text-orange-400" />
                                     Why Choose ToonPlayer?
                                 </h3>
                                 <ul className="space-y-4">
                                     {["Watch HD movies and anime online", "Fast and user-friendly interface", "Explore trending and top-rated content", "Regularly updated library"].map((feat, i) => (
                                         <li key={i} className="flex items-center gap-4 text-body font-bold text-white/90">
-                                            <CheckCircle className="w-5 h-5 text-purple-500" /> {feat}
+                                            <CheckCircle className="w-5 h-5 text-orange-400" /> {feat}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                         </div>
                         <div className="bg-gradient-to-br from-[var(--bg-card)] to-transparent rounded-[2rem] p-10 border border-white/5 relative overflow-hidden group shadow-2xl">
-                           <div className="absolute -right-20 -top-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
+                           <div className="absolute -right-20 -top-20 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl" />
                            <h3 className="text-2xl font-black text-white mb-4 flex items-center gap-3 font-sora">
                                <Flame className="w-6 h-6 text-red-500" /> 
                                Stream Anytime, Anywhere
@@ -784,7 +784,7 @@ export default function MoviesPage() {
                            <p className="text-body mb-8">ToonPlayer works beautifully across all devices including mobile, tablet, and desktop, giving you seamless access to entertainment on the go.</p>
                            <div className="mt-8 border-t border-white/10 pt-8 flex items-center justify-between">
                                 <div>
-                                    <h4 className="text-metadata text-purple-400 mb-2">Platform Status</h4>
+                                    <h4 className="text-metadata text-orange-400 mb-2">Platform Status</h4>
                                     <p className="text-sm font-medium text-white/50 italic">Actively updated with thousands of titles.</p>
                                 </div>
                                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
@@ -797,7 +797,7 @@ export default function MoviesPage() {
 
                 <section className="mb-32 max-w-[900px] mx-auto px-6 lg:px-12">
                     <h2 className="text-heading mb-10 flex items-center gap-4 justify-center">
-                        <Info className="w-6 h-6 text-purple-400" /> Frequently Asked Questions
+                        <Info className="w-6 h-6 text-orange-400" /> Frequently Asked Questions
                     </h2>
                     <div className="space-y-4">
                         {[
@@ -806,8 +806,8 @@ export default function MoviesPage() {
                             { q: "What devices does ToonPlayer support?", a: "ToonPlayer works on all devices — smartphones, tablets, laptops, desktops, and smart TVs through any modern web browser." },
                             { q: "Does ToonPlayer have anime?", a: "Yes! ToonPlayer has a massive anime library with sub and dub options. Browse by genre or search for your favorites." },
                         ].map((faq, i) => (
-                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all duration-300 shadow-lg">
-                                <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-purple-400 transition-colors list-none">
+                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-orange-500/30 transition-all duration-300 shadow-lg">
+                                <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-orange-400 transition-colors list-none">
                                     {faq.q}
                                     <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-300" />
                                 </summary>
@@ -835,8 +835,8 @@ export default function MoviesPage() {
     );
 }
 
-// Section Header Component
-function SectionHeader({ icon: Icon, title, color, isFeatured = false }: { icon: any; title: string; color: string; isFeatured?: boolean }) {
+// Section Header Component — memoized to avoid re-renders on tab/provider changes
+const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, isFeatured = false }: { icon: any; title: string; color: string; isFeatured?: boolean }) {
     return (
         <div className={`flex items-end gap-3 md:gap-4 mb-6 text-[var(--text-main)] transition-all ${isFeatured ? 'ml-2' : ''}`}>
             {isFeatured ? (
@@ -855,10 +855,10 @@ function SectionHeader({ icon: Icon, title, color, isFeatured = false }: { icon:
             </div>
         </div>
     );
-}
+});
 
-// Row Skeleton for Anime
-function RowSkeleton() {
+// Row Skeleton for Anime — memoized (static, never changes)
+const RowSkeleton = memo(function RowSkeleton() {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
             {[...Array(6)].map((_, i) => (
@@ -866,4 +866,4 @@ function RowSkeleton() {
             ))}
         </div>
     );
-}
+});
