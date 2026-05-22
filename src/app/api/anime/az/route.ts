@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     if (tab !== "movies") {
         const providersToTry: ProviderName[] = providerParam
             ? [providerParam as ProviderName]
-            : ["aniwaves", "anikai", "hianime"];
+            : ["anikai", "hianime"];
 
         for (const providerName of providersToTry) {
             try {

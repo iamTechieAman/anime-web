@@ -560,19 +560,36 @@ export default function MoviesPage() {
                                         ) : (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-[var(--accent)]" />
+                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-[var(--accent)]" isFeatured />
                                                     {animeTrending.length > 0 ? (
-                                                        <div className="responsive-grid">
-                                                            {animeTrending.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
-                                                        </div>
+                                                        <MovieRow
+                                                            items={animeTrending.map((item: any) => ({
+                                                                id: item.id || item._id,
+                                                                title: item.title || item.name,
+                                                                poster_path: null,
+                                                                image: item.image || item.thumbnail,
+                                                                media_type: 'anime',
+                                                            }))}
+                                                            type="anime"
+                                                            title="anime-trending-row"
+                                                            isLarge
+                                                        />
                                                     ) : <RowSkeleton />}
                                                 </section>
                                                 <section>
                                                     <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-[var(--accent)]" />
                                                     {animeLatest.length > 0 ? (
-                                                        <div className="responsive-grid">
-                                                            {animeLatest.map((item, idx) => <AnimeCardHorizontal key={item.id || item._id || idx} show={item} />)}
-                                                        </div>
+                                                        <MovieRow
+                                                            items={animeLatest.map((item: any) => ({
+                                                                id: item.id || item._id,
+                                                                title: item.title || item.name,
+                                                                poster_path: null,
+                                                                image: item.image || item.thumbnail,
+                                                                media_type: 'anime',
+                                                            }))}
+                                                            type="anime"
+                                                            title="anime-latest-row"
+                                                        />
                                                     ) : <RowSkeleton />}
                                                 </section>
                                             </>
@@ -691,7 +708,8 @@ export default function MoviesPage() {
                                 )}
                             </div>
 
-                            {/* Sidebar */}
+                            {/* Sidebar - hidden on anime/discover tabs which have full-width layouts */}
+                            {(activeTab !== 'anime' && activeTab !== 'discover') && (
                             <div className="w-full lg:w-[320px] xl:w-[380px] space-y-12 shrink-0">
                                 {trendingPeople.length > 0 && (
                                     <section className="bg-gradient-to-b from-[var(--bg-card)] to-transparent p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group/sidebar">
@@ -757,6 +775,7 @@ export default function MoviesPage() {
                                     </Link>
                                 </section>
                             </div>
+                            )} {/* End sidebar conditional */}
                         </div>
                     )}
                 </div>

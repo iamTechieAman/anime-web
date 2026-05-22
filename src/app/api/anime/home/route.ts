@@ -4,7 +4,7 @@ import { getProvider } from "@/lib/providers";
 export async function GET() {
     try {
         const hianime = getProvider('hianime');
-        const aniwaves = getProvider('aniwaves');
+        const anikai = getProvider('anikai');
         const consumet = getProvider('consumet');
 
         // Parallelize fetching with a total timeout
@@ -14,56 +14,54 @@ export async function GET() {
 
         const fetchHome = async () => {
             try {
-                // Try HiAnime first (fastest, no scraper needed)
+                // Try Anikai first (verified working scraper — anikai.to)
+                const homeData = await anikai.getHome?.() ?? { trending: [], latest: [], slides: [], completed: [], upcoming: [] };
+                const { trending, latest, slides } = homeData;
+                if (trending.length > 0 || latest.length > 0) {
+                    return { trending, latest, slides: slides || [] };
+                }
+            } catch (e) {
+                console.warn("[AnimeHome] Anikai getHome failed, trying HiAnime:", e);
+            }
+
+            try {
+                // Try HiAnime as fallback
                 const [trending, latest] = await Promise.all([
                     hianime.getTrending?.() ?? Promise.resolve([]),
                     hianime.getRecent?.() ?? Promise.resolve([])
                 ]);
 
                 if (trending.length > 0 || latest.length > 0) {
-                    return { trending, latest };
+                    return { trending, latest, slides: [] };
                 }
             } catch (e) {
                 console.warn("[AnimeHome] HiAnime failed, trying Consumet:", e);
             }
 
             try {
-                // Try Consumet (API-based, usually reliable)
+                // Try Consumet (API-based)
                 const [trending, latest] = await Promise.all([
                     consumet.getTrending?.() ?? Promise.resolve([]),
                     consumet.getRecent?.() ?? Promise.resolve([])
                 ]);
 
                 if (trending.length > 0 || latest.length > 0) {
-                    return { trending, latest };
+                    return { trending, latest, slides: [] };
                 }
             } catch (e) {
-                console.warn("[AnimeHome] Consumet failed, trying Aniwave:", e);
+                console.warn("[AnimeHome] Consumet failed, trying Anikai fallback methods:", e);
             }
 
             try {
-                // Try the new Aniwave (singular) scraper
-                const aniwave = getProvider('aniwave');
+                // Anikai getTrending + getRecent fallback
                 const [trending, latest] = await Promise.all([
-                    aniwave.getTrending?.() ?? Promise.resolve([]),
-                    aniwave.getRecent?.() ?? Promise.resolve([])
+                    anikai.getTrending?.() ?? Promise.resolve([]),
+                    anikai.getRecent?.() ?? Promise.resolve([])
                 ]);
-                if (trending.length > 0 || latest.length > 0) {
-                    return { trending, latest };
-                }
-            } catch (e) {
-                console.warn("[AnimeHome] Aniwave (singular) failed, trying Aniwaves:", e);
-            }
-
-            try {
-                // Fallback to Aniwaves (plural, uses scraper client)
-                const aniwaves = getProvider('aniwaves');
-                const data = await aniwaves.getRecent?.() ?? Promise.resolve([]);
-                const trending = await aniwaves.getTrending?.() ?? Promise.resolve([]);
-                return { trending, latest: data };
+                return { trending, latest, slides: [] };
             } catch (e) {
                 console.error("[AnimeHome] All providers failed:", e);
-                return { trending: [], latest: [] };
+                return { trending: [], latest: [], slides: [] };
             }
         };
 

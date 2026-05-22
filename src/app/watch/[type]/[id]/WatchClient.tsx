@@ -1600,29 +1600,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                             </div>
                         </section>
                     )}
-
-                    {/* Recommendations */}
-                    {details.recommendations && details.recommendations.length > 0 && (
-                        <section className="mt-10">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#f97316]" />
-                                <h2 className="text-lg font-bold">You May Also Like</h2>
-                            </div>
-                            <MovieRow items={details.recommendations} type={type} />
-                        </section>
-                    )}
-
-                    {/* Similar */}
-                    {details.similar && details.similar.length > 0 && (
-                        <section className="mt-10">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#a855f7]" />
-                                <h2 className="text-lg font-bold">Similar</h2>
-                            </div>
-                            <MovieRow items={details.similar} type={type} />
-                        </section>
-                    )}
-                </div>
+                </div> {/* End Left column */}
 
                 {/* Download Modal */}
                 <AnimatePresence>
@@ -1805,6 +1783,29 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 )}
 
             </div> {/* End xl:flex-row */}
+
+            {/* Recommendations - Full Width Below Player+Sidebar */}
+            {details.recommendations && details.recommendations.length > 0 && (
+                <section className="mt-10 px-0 sm:px-4 md:px-6 lg:px-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#f97316]" />
+                        <h2 className="text-lg font-bold">You May Also Like</h2>
+                    </div>
+                    <MovieRow items={details.recommendations} type={type} />
+                </section>
+            )}
+
+            {/* Similar - Full Width Below Player+Sidebar */}
+            {details.similar && details.similar.length > 0 && (
+                <section className="mt-6 mb-12 px-0 sm:px-4 md:px-6 lg:px-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#a855f7]" />
+                        <h2 className="text-lg font-bold">Similar</h2>
+                    </div>
+                    <MovieRow items={details.similar} type={type} />
+                </section>
+            )}
+
         </div> {/* End pt-14 wrapper */}
 
 

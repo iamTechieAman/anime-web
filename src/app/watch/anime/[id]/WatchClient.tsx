@@ -1356,9 +1356,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 Watching Episode {currentEp} in {mode.toUpperCase()}
                             </p>
                         </div>
-
-                        {/* Smart Recommendations */}
-                        <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
                     </div>
 
                     {/* Sidebar - Fixed Height Vertical Episode List */}
@@ -1400,7 +1397,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </div>
                     </div>
 
+                </div> {/* End flex-row */}
+
+                {/* Smart Recommendations - Full Width Below Player+Sidebar */}
+                <div className="mt-6 w-full">
+                    <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
                 </div>
+
             </div>
         </main>
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />

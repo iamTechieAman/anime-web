@@ -93,7 +93,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchStart={handleMouseEnter}
             onTouchEnd={handleMouseLeave}
         >
-        <Link href={`/watch/${mediaType}/${item.id}`} className="block w-full h-full">
+        <Link href={mediaType === 'anime' ? `/watch/anime/${item.id}?provider=anikai` : `/watch/${mediaType}/${item.id}`} className="block w-full h-full">
             <div className="premium-card-container">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (

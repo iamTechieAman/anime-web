@@ -31,10 +31,10 @@ export async function GET(request: Request) {
     const format = searchParams.get("format");
     const requestedProvider = searchParams.get("provider") as ProviderName;
 
-    // Priority: Aniwaves -> AllAnime (Verified) -> AniWatch (Verified) -> HiAnime (Mirror)
+    // Priority: Anikai -> Aniwave -> AllAnime -> AniWatch -> HiAnime
     const providersToTry: ProviderName[] = requestedProvider
         ? [requestedProvider]
-        : ["aniwave", "aniwaves", "allanime", "hianime", "aniwatch"];
+        : ["anikai", "aniwave", "allanime", "hianime", "aniwatch"];
 
     if (!query && !genre && !status && !format) {
         return NextResponse.json({ shows: [] });

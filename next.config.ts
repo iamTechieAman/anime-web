@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'img.hianime.to' },
       { protocol: 'https', hostname: 'image.tmdb.org' },
       { protocol: 'https', hostname: 'img.anikai.to' },
+      { protocol: 'https', hostname: 'static.anikai.to' },
       { protocol: 'https', hostname: 'media.kitsu.io' },
       { protocol: 'https', hostname: 'cdn.myanimelist.net' },
       { protocol: 'https', hostname: 'artworks.thetvdb.com' },

@@ -13,7 +13,7 @@ export class AnikaiProvider implements AnimeProvider {
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/search`, {
+            const response = await axios.get(`${BASE_URL}/browser`, {
                 params: { keyword: query },
                 headers: {
                     'User-Agent': USER_AGENT,
@@ -25,18 +25,16 @@ export class AnikaiProvider implements AnimeProvider {
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
-            // Search results usually use .film_list-wrap .flw-item or .film-list .item
-            // Fallback to multiple selectors if needed
             let items = $('.film_list-wrap .flw-item');
-            if (items.length === 0) items = $('.aitem-wrapper');
+            if (items.length === 0) items = $('.aitem');
 
             items.each((_, element) => {
                 const $el = $(element);
-                const $poster = $el.find('.film-poster, .poster');
+                const $poster = $el.find('.poster, .film-poster');
                 const href = $poster.attr('href') || $el.find('a').attr('href');
 
                 const id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                const title = $el.find('.film-name a, .title').text().trim();
+                const title = $el.find('.title, .film-name a').text().trim();
                 const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
 
                 if (id && title) {
@@ -53,14 +51,6 @@ export class AnikaiProvider implements AnimeProvider {
 
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            // Anikai uses /home for recent updates usually, or we can look for "new-releases"
-            // The user report says "not getting new episode updates".
-            // The home page has "#latest-updates" section.
-            // There is no dedicated /recent page known, maybe /filter?sort=latest
-            // Let's scrape the Home page #latest-updates for page 1 
-            // OR use the proper URL if known. `https://anikai.to/home` is the source.
-
-            // If page > 1, we might need a different URL, but for now let's prioritize Home updates.
             const url = `${BASE_URL}/home`;
             console.log(`[Anikai] Fetching Recent from Home: ${url}`);
 
@@ -68,24 +58,19 @@ export class AnikaiProvider implements AnimeProvider {
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
-            // Selector based on analysis: #latest-updates .tab-body .aitem-wrapper
-            $('#latest-updates .tab-body .aitem-wrapper').each((_, element) => {
+            $('#latest-updates .tab-body .aitem').each((_, element) => {
                 const $el = $(element);
-                const $inner = $el.find('.inner');
-                const $poster = $el.find('.poster'); // Sometimes poster is separate or inside inner
+                const $poster = $el.find('.poster');
 
-                const href = $inner.find('a').attr('href') || $poster.attr('href');
+                const href = $poster.attr('href') || $el.find('a').attr('href');
                 let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                // e.g. /watch/princess-session-orchestra-p3eq#ep=38 => id=princess-session-orchestra-p3eq...
 
                 if (id.includes('#')) id = id.split('#')[0];
 
                 const title = $el.find('.title').text().trim();
                 const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
 
-                // Extract episode number
-                const epText = $el.find('.ep-status, .tick-sub').text().trim(); // Adjust selector as needed
-                // Analysis showed structure, but text is likely in badges.
+                const epText = $el.find('.ep-status, .tick-sub, .tick-dub').text().trim();
 
                 if (id && title) {
                     results.push({
@@ -371,17 +356,18 @@ export class AnikaiProvider implements AnimeProvider {
             const results: AnimeSearchResult[] = [];
 
             let items = $('.film_list-wrap .flw-item');
-            if (items.length === 0) items = $('.aitem-wrapper');
+            if (items.length === 0) items = $('.aitem');
 
             items.each((_, element) => {
                 const $el = $(element);
-                const href = $el.find('.film-poster a').attr('href');
+                const $poster = $el.find('.poster, .film-poster');
+                const href = $poster.attr('href') || $el.find('a').attr('href');
                 const id = href?.includes('/watch/')
                     ? href?.split('/watch/')[1]
                     : href?.split('/').pop() || '';
 
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
+                const title = $el.find('.title, .film-name a').text().trim();
+                const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
 
                 const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
                 const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
@@ -403,26 +389,45 @@ export class AnikaiProvider implements AnimeProvider {
             return [];
         }
     }
+
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = `${BASE_URL}/home`;
-            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
-            const $ = cheerio.load(response.data);
+            const url = `${BASE_URL}/ajax/home/items`;
+            console.log(`[Anikai] Fetching Trending from AJAX: ${url}`);
+            const response = await axios.get(url, {
+                params: { name: 'trending' },
+                headers: {
+                    'User-Agent': USER_AGENT,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Referer': `${BASE_URL}/home`
+                }
+            });
+            
+            let html = response.data;
+            if (response.data && response.data.result) {
+                html = response.data.result;
+            } else if (response.data && response.data.html) {
+                html = response.data.html;
+            }
+            
+            const $ = cheerio.load(html);
             const results: AnimeSearchResult[] = [];
 
-            // Selector for the trending sidebar items observed in curl
-            $('.sidebar-section .aitem').each((_, element) => {
+            $('.aitem').each((_, element) => {
                 const $el = $(element);
-                const href = $el.attr('href');
+                const href = $el.attr('href') || $el.find('a').first().attr('href');
                 let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
                 if (id.includes('#')) id = id.split('#')[0];
 
                 const title = $el.find('.title').text().trim();
-                // Image is in the style attribute background-image
-                const style = $el.attr('style') || "";
+                
+                const style = $el.attr('style') || $el.find('.poster').attr('style') || "";
                 let image = "";
                 if (style.includes('url(')) {
                     image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
+                }
+                if (!image) {
+                    image = $el.find('img').attr('data-src') || $el.find('img').attr('src') || "";
                 }
 
                 if (id && title) {
@@ -443,23 +448,35 @@ export class AnikaiProvider implements AnimeProvider {
     }
 
     async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
-        return this.getTrending(page); // For Anikai, Top and Trending are similar on Home
+        return this.getTrending(page); 
     }
 
     async getGenre(genre: string, page: number = 1) { return []; }
 
     async getHome(): Promise<{ slides: AnimeSearchResult[]; trending: AnimeSearchResult[]; latest: AnimeSearchResult[]; completed: AnimeSearchResult[]; upcoming: AnimeSearchResult[] }> {
         try {
-            console.log(`[Anikai] Fetching Home...`);
-            const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': USER_AGENT }
-            });
-            const $ = cheerio.load(response.data);
+            console.log(`[Anikai] Fetching Home and Trending...`);
+            const [homeResponse, trendingResponse] = await Promise.all([
+                axios.get(`${BASE_URL}/home`, { headers: { 'User-Agent': USER_AGENT } }),
+                axios.get(`${BASE_URL}/ajax/home/items`, {
+                    params: { name: 'trending' },
+                    headers: {
+                        'User-Agent': USER_AGENT,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Referer': `${BASE_URL}/home`
+                    }
+                }).catch(e => {
+                    console.error('[Anikai] Failed to fetch trending items in parallel:', e.message);
+                    return { data: { result: '' } };
+                })
+            ]);
+
+            const $ = cheerio.load(homeResponse.data);
             const slides: AnimeSearchResult[] = [];
 
             let slideElements = $('.swiper-wrapper .swiper-slide');
-            if (slideElements.length === 0) slideElements = $('.deslide-item'); // HiAnime/Zoro style
-            if (slideElements.length === 0) slideElements = $('#slider .item'); // Other clones
+            if (slideElements.length === 0) slideElements = $('.deslide-item'); 
+            if (slideElements.length === 0) slideElements = $('#slider .item'); 
 
             slideElements.each((_, el) => {
                 const $el = $(el);
@@ -468,8 +485,7 @@ export class AnikaiProvider implements AnimeProvider {
                 const href = $el.find('.watch-btn, a').attr('href');
                 const id = href?.split('/watch/')[1]?.split('?')[0] || '';
 
-                // Extract image from multiple possible locations
-                const style = $el.find('.bg-img, .film-poster-img').attr('style') || "";
+                const style = $el.attr('style') || $el.find('.bg-img, .film-poster-img').attr('style') || "";
                 let image = "";
                 if (style.includes('url(')) {
                     image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
@@ -492,14 +508,12 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
-            // Fetch Latest Updates using getRecent logic (but inline here to save requests if on same page)
             const latest: AnimeSearchResult[] = [];
-            $('#latest-updates .tab-body .aitem-wrapper').each((_, element) => {
+            $('#latest-updates .tab-body .aitem').each((_, element) => {
                 const $el = $(element);
-                const $inner = $el.find('.inner');
                 const $poster = $el.find('.poster');
 
-                const href = $inner.find('a').attr('href') || $poster.attr('href');
+                const href = $poster.attr('href') || $el.find('a').attr('href');
                 let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
                 if (id.includes('#')) id = id.split('#')[0];
 
@@ -520,30 +534,42 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
-            // Fetch Trending Updates directly from the same DOM to save another HTTP request!
             const trending: AnimeSearchResult[] = [];
-            $('.sidebar-section .aitem').each((_, element) => {
-                const $el = $(element);
-                const href = $el.attr('href');
-                let trendingId = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                if (trendingId.includes('#')) trendingId = trendingId.split('#')[0];
+            let trendingHtml = trendingResponse.data;
+            if (trendingResponse.data && trendingResponse.data.result) {
+                trendingHtml = trendingResponse.data.result;
+            } else if (trendingResponse.data && trendingResponse.data.html) {
+                trendingHtml = trendingResponse.data.html;
+            }
 
-                const trendingTitle = $el.find('.title').text().trim();
-                const styleAttr = $el.attr('style') || "";
-                let trendingImage = "";
-                if (styleAttr.includes('url(')) {
-                    trendingImage = styleAttr.split('url(')[1].split(')')[0].replace(/['"]/g, '');
-                }
+            if (trendingHtml) {
+                const $t = cheerio.load(trendingHtml);
+                $t('.aitem').each((_, element) => {
+                    const $el = $t(element);
+                    const href = $el.attr('href') || $el.find('a').first().attr('href');
+                    let trendingId = href?.split('/watch/')[1] || href?.split('/').pop() || '';
+                    if (trendingId.includes('#')) trendingId = trendingId.split('#')[0];
 
-                if (trendingId && trendingTitle) {
-                    trending.push({
-                        id: trendingId,
-                        title: trendingTitle,
-                        image: trendingImage || `https://img.anikai.to/i/cache/images/${trendingId}.jpg`,
-                        provider: this.name
-                    });
-                }
-            });
+                    const trendingTitle = $el.find('.title').text().trim();
+                    const styleAttr = $el.attr('style') || $el.find('.poster').attr('style') || "";
+                    let trendingImage = "";
+                    if (styleAttr.includes('url(')) {
+                        trendingImage = styleAttr.split('url(')[1].split(')')[0].replace(/['"]/g, '');
+                    }
+                    if (!trendingImage) {
+                        trendingImage = $el.find('img').attr('data-src') || $el.find('img').attr('src') || "";
+                    }
+
+                    if (trendingId && trendingTitle) {
+                        trending.push({
+                            id: trendingId,
+                            title: trendingTitle,
+                            image: trendingImage || `https://img.anikai.to/i/cache/images/${trendingId}.jpg`,
+                            provider: this.name
+                        });
+                    }
+                });
+            }
 
             if (slides.length === 0) throw new Error("No slides found on Anikai");
 
@@ -553,7 +579,6 @@ export class AnikaiProvider implements AnimeProvider {
             try {
                 const hianime = new HiAnimeProvider();
                 const trendingRes = await hianime.getTrending();
-                // Map trending to slides for the hero
                 const fallbackSlides = trendingRes.slice(0, 10).map((item: AnimeSearchResult) => ({
                     ...item,
                     extra: {
