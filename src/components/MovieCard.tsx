@@ -233,7 +233,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
     };
 
     return (
-        <div className="relative w-full overflow-hidden group/row mb-4">
+        <div className="relative w-full group/row mb-2">
             {/* Ambient vignette fades for Netflix-style rows */}
             <div className="netflix-row-fade-left" />
             <div className="netflix-row-fade-right" />

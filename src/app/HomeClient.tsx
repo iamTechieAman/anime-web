@@ -286,7 +286,7 @@ export default function MoviesPage() {
                 <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[var(--accent)]/[0.03] to-transparent" />
             </div>
 
-            <div className="relative z-10 w-full pb-24 md:pb-0">
+            <div className="relative z-10 w-full">
                 <h1 className="sr-only">ToonPlayer - Watch Free Anime & Movies</h1>
                 <HeroCarousel />
 
@@ -431,7 +431,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-4 md:space-y-5"
+                                        className="space-y-2 md:space-y-3"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -488,7 +488,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-4 md:space-y-5"
+                                        className="space-y-2 md:space-y-3"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -541,7 +541,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-4 md:space-y-5 mt-4"
+                                        className="space-y-2 md:space-y-3 mt-4"
                                     >
                                         {/* Provider anime content (Crunchyroll / ToonPlayer Originals) */}
                                         {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
@@ -582,7 +582,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "trending" && (
-                                    <div className="space-y-4 md:space-y-5">
+                                    <div className="space-y-2 md:space-y-3">
                                         <section>
                                             <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
                                             {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
@@ -599,7 +599,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "discover" && (
-                                    <div className="space-y-4 md:space-y-5">
+                                    <div className="space-y-2 md:space-y-3">
                                         {mjItems.length > 0 && (
                                             <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-[var(--accent)]/20 overflow-hidden">
                                                 <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
