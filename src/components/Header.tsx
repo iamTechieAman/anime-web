@@ -271,7 +271,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-3 left-4 md:left-[88px] right-4 z-50 px-4 py-2.5 bg-[#121018]/75 backdrop-blur-2xl border border-white/[0.07] rounded-xl transition-all duration-300 shadow-[0_6px_28px_rgba(0,0,0,0.5)]">
+    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-[12px] md:px-[20px] lg:px-[24px] py-4 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] transition-all duration-300">
       
       {/* Search Focus Overlay */}
       <AnimatePresence>

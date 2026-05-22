@@ -6,12 +6,17 @@ import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, CheckCircle, ChevronDown, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
-import { MovieRow, MovieGrid, type MovieItem } from "@/components/MovieCard";
-import HeroCarousel from "@/components/HeroCarousel";
-import { AnimeGrid, AnimeCardHorizontal, type Show } from "@/components/AnimeCard";
-import ContinueWatchingRow from "@/components/ContinueWatchingRow";
+import { MovieGrid, type MovieItem } from "@/components/MovieCard";
+import { AnimeGrid, type Show } from "@/components/AnimeCard";
 import useSWR from 'swr';
-import ProviderBar, { type ProviderSlug } from "@/components/ProviderBar";
+import type { ProviderSlug } from "@/components/ProviderBar";
+import dynamic from "next/dynamic";
+
+const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[60vh] md:h-[70vh] bg-zinc-900 animate-pulse rounded-2xl w-full" /> });
+const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
+const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });
+const ContinueWatchingRow = dynamic(() => import("@/components/ContinueWatchingRow"), { ssr: false });
+const ProviderBar = dynamic(() => import("@/components/ProviderBar"), { ssr: false });
 
 // CineVibe-style category sections with TMDB genre IDs
 const GENRE_ROWS = [

@@ -26,80 +26,86 @@ img {
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* Onoflix Dark Cinema — Cinematic, soft surfaces, periwinkle accents */
-  --bg-main: #171611;             /* Neutral: Foundational near-black background */
-  --bg-card: #1F1C16;             /* Surface: Soft dark brown-black surface */
-  --bg-elevated: #26221B;         /* Soft elevated surface */
-  --bg-surface: #1F1C16;
-  --bg-overlay: rgba(23, 22, 17, 0.88);
+  /* ToonPlayer V2.0 Cinematic Dark UI */
+  --bg-main: #0b0b0f;
+  --bg-card: #171720;
+  --bg-elevated: #171720;
+  --bg-surface: #12121a;
+  --bg-overlay: rgba(11, 11, 15, 0.92);
   
-  --text-main: #F3F3F1;           /* Tertiary / On-surface: Main light text */
-  --text-secondary: #F3F3F1;      /* On-surface contrast */
-  --text-muted: #8B8A85;          /* Muted: Secondary text */
+  --text-main: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #9ca3af;
   
-  --border-color: #374151;        /* Border: Subtle gray boundary */
-  --border-subtle: rgba(55, 65, 81, 0.5);
+  --border-color: rgba(255,255,255,0.06);
+  --border-subtle: rgba(255,255,255,0.03);
   
-  --accent: #5865F2;              /* Primary periwinkle action accent */
-  --accent-secondary: #229ED9;    /* Secondary cool blue action */
-  --accent-glow: rgba(88, 101, 242, 0.28);
-  --accent-warm: #D6A34B;         /* Accent-warm: Rating gold */
+  --accent: #f59e0b;
+  --accent-secondary: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.28);
+  --accent-warm: #f59e0b;
+
+  --danger: #ef4444;
+  --success: #22c55e;
   
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
-  --glass-bg: rgba(31, 28, 22, 0.80);
-  --glass-border: rgba(55, 65, 81, 0.2);
+  --glass-bg: rgba(18, 18, 26, 0.80);
+  --glass-border: rgba(255, 255, 255, 0.06);
 
-  /* Gradient system — Onoflix periwinkle/blue */
-  --gradient-primary: linear-gradient(135deg, #5865F2, #229ED9);
-  --gradient-hot: linear-gradient(135deg, #EF4444, #5865F2);
-  --gradient-cool: linear-gradient(135deg, #229ED9, #5865F2);
-  --gradient-gold: linear-gradient(135deg, #D6A34B, #FB923C);
+  /* Gradient system */
+  --gradient-primary: linear-gradient(135deg, #f59e0b, #fb923c);
+  --gradient-hot: linear-gradient(135deg, #ef4444, #f59e0b);
+  --gradient-cool: linear-gradient(135deg, #3b82f6, #f59e0b);
+  --gradient-gold: linear-gradient(135deg, #f59e0b, #fb923c);
 
   /* Shadows */
   --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
   --shadow-elevated: 0 10px 36px -8px rgba(0, 0, 0, 0.85);
-  --shadow-glow-orange: 0 0 24px rgba(88, 101, 242, 0.3);
-  --shadow-glow-blue: 0 0 24px rgba(34, 158, 217, 0.3);
+  --shadow-glow-orange: 0 0 24px rgba(245, 158, 11, 0.3);
+  --shadow-glow-blue: 0 0 24px rgba(59, 130, 246, 0.3);
 
-  /* Spacing scale — Onoflix spacing tokens */
-  --space-xs: 2px;
-  --space-sm: 10px;
-  --space-md: 16px;
-  --space-lg: 22px;
-  --space-xl: 28px;
-  --space-2xl: 32px;
-  --space-3xl: 48px;
+  /* Spacing scale — 4px grid system */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
 
-  /* Border radius scale — Approachable rounded scale */
+  /* Border radius scale */
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-2xl: 20px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
   --radius-full: 9999px;
 }
 
 .dark {
-  --bg-main: #171611;
-  --bg-card: #1F1C16;
-  --bg-overlay: rgba(23, 22, 17, 0.88);
-  --bg-elevated: #26221B;
-  --bg-surface: #1F1C16;
+  --bg-main: #0b0b0f;
+  --bg-card: #171720;
+  --bg-elevated: #171720;
+  --bg-surface: #12121a;
+  --bg-overlay: rgba(11, 11, 15, 0.92);
   
-  --text-main: #F3F3F1;
-  --text-secondary: #F3F3F1;
-  --text-muted: #8B8A85;
+  --text-main: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #9ca3af;
   
-  --border-color: #374151;
-  --border-subtle: rgba(55, 65, 81, 0.5);
-  --glass-bg: rgba(31, 28, 22, 0.80);
-  --glass-border: rgba(55, 65, 81, 0.2);
+  --border-color: rgba(255,255,255,0.06);
+  --border-subtle: rgba(255,255,255,0.03);
+  --glass-bg: rgba(18, 18, 26, 0.80);
+  --glass-border: rgba(255, 255, 255, 0.06);
   
-  --accent: #5865F2;
-  --accent-secondary: #229ED9;
-  --accent-glow: rgba(88, 101, 242, 0.28);
-  --accent-warm: #D6A34B;
+  --accent: #f59e0b;
+  --accent-secondary: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.28);
+  --accent-warm: #f59e0b;
+  
+  --danger: #ef4444;
+  --success: #22c55e;
 
   --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
   --shadow-elevated: 0 10px 36px -8px rgba(0, 0, 0, 0.85);
@@ -110,30 +116,30 @@ img {
 .watch-page,
 footer,
 aside {
-  --bg-main: #171611 !important;
-  --bg-card: #1F1C16 !important;
-  --bg-elevated: #26221B !important;
-  --bg-surface: #1F1C16 !important;
-  --bg-overlay: rgba(23, 22, 17, 0.92) !important;
+  --bg-main: #0b0b0f !important;
+  --bg-card: #171720 !important;
+  --bg-elevated: #171720 !important;
+  --bg-surface: #12121a !important;
+  --bg-overlay: rgba(11, 11, 15, 0.92) !important;
   
-  --text-main: #F3F3F1 !important;
-  --text-secondary: #F3F3F1 !important;
-  --text-muted: #8B8A85 !important;
+  --text-main: #ffffff !important;
+  --text-secondary: #ffffff !important;
+  --text-muted: #9ca3af !important;
   
-  --border-color: #374151 !important;
-  --border-subtle: rgba(55, 65, 81, 0.5) !important;
-  --glass-bg: rgba(31, 28, 22, 0.80) !important;
-  --glass-border: rgba(55, 65, 81, 0.2) !important;
+  --border-color: rgba(255,255,255,0.06) !important;
+  --border-subtle: rgba(255,255,255,0.03) !important;
+  --glass-bg: rgba(18, 18, 26, 0.80) !important;
+  --glass-border: rgba(255, 255, 255, 0.06) !important;
 }
 
 .theme-dark *,
 .watch-page *,
 footer *,
 aside * {
-  --text-main: #F3F3F1;
-  --text-secondary: #F3F3F1;
-  --text-muted: #8B8A85;
-  --border-color: #374151;
+  --text-main: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: rgba(255,255,255,0.06);
 }
 
 :root {
@@ -146,7 +152,7 @@ aside * {
   --color-border: var(--border-color);
   --color-accent: var(--accent);
   --font-sora: 'Noto Sans', system-ui, sans-serif;
-  --font-inter: 'Noto Sans', system-ui, sans-serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
 }
 
 /* ══════════════════════════════════════════════════

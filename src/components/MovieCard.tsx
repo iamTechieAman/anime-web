@@ -94,7 +94,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchEnd={handleMouseLeave}
         >
         <Link href={`/watch/${mediaType}/${item.id}`} className="block w-full h-full">
-            <div className="aspect-[2/3] overflow-hidden rounded-2xl bg-[#16161d] relative w-full">
+            <div className="premium-card-container">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (
                     <img
@@ -254,10 +254,10 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
 
             <div
                 id={scrollId}
-                className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 px-4 md:px-8"
+                className="netflix-row px-0"
             >
                 {items.filter(item => item && (item.poster_path || item.backdrop_path || item.image)).map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} className="flex-shrink-0 w-[150px] sm:w-[170px] md:w-[190px]">
+                    <div key={`${item.id}-${idx}`} className="netflix-card-snap w-[150px] sm:w-[170px] md:w-[190px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}

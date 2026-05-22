@@ -87,8 +87,8 @@ export default function MobileNav() {
     return (
         <div
             className={`
-                fixed bottom-4 left-4 right-4 z-50 
-                bg-[#0B0713]/85 backdrop-blur-2xl border border-white/10 rounded-2xl
+                fixed bottom-4 left-4 right-4 z-[100] 
+                bg-[var(--bg-overlay)] backdrop-blur-2xl border border-[var(--border-color)] rounded-2xl
                 pb-[env(safe-area-inset-bottom)] transition-all duration-300 md:hidden
                 ${isScrolledDown ? "translate-y-24 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}
                 shadow-[0_8px_32px_rgba(0,0,0,0.6)]

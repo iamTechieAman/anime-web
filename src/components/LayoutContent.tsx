@@ -25,10 +25,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   }, []);
   
   return (
-    <main className="min-h-screen bg-[#0b0b0f] text-white overflow-x-hidden">
-      <div className="mx-auto w-full max-w-[1800px] px-3 md:px-5 lg:px-6">
+    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
+      <div className="mx-auto w-full max-w-[1800px] px-[12px] md:px-[20px] lg:px-[24px] box-border">
       <DesktopSidebar />
-      <div className={`flex flex-col min-h-screen relative md:pl-[116px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      <div className={`flex flex-col min-h-screen relative md:pl-[72px] overflow-y-visible overflow-x-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
 
 

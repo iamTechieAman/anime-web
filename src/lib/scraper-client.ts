@@ -2,6 +2,8 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import axios from "axios";
+import crypto from "crypto";
+import { animeCache, TTL } from "./anime-cache";
 
 const execPromise = promisify(exec);
 const SCRAPER_API_URL = process.env.SCRAPER_API_URL;
@@ -35,6 +37,14 @@ export async function fetchFromScraper(params: {
     anw_az?: string;
     anw_page?: string | number;
 }) {
+    const paramsString = JSON.stringify(params);
+    const cacheKey = `scraper_${crypto.createHash('md5').update(paramsString).digest('hex')}`;
+    const cached = animeCache.get<any>(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
+    let finalResult: any = {};
     if (SCRAPER_API_URL) {
         // Use remote API
         try {
@@ -140,7 +150,10 @@ export async function fetchFromScraper(params: {
                 if (params.anw_info) result.anw_info = response.data;
                 if (params.anw_source) result.anw_source = response.data;
                 
-                return result;
+                finalResult = result;
+                const ttl = params.query || params.cartoon_query ? TTL.ANILIST_META : (params.wa_source || params.ja_source || params.of_source || params.universal_ep ? TTL.SOURCES : TTL.EPISODE_LIST);
+                animeCache.set(cacheKey, finalResult, ttl);
+                return finalResult;
             }
         } catch (error: any) {
             console.error("[Scraper Client] Remote API failed, falling back to local:", error.message);
@@ -187,16 +200,20 @@ export async function fetchFromScraper(params: {
 
         if (!stdout) {
             console.warn("[Scraper Client] No stdout from local command");
-            return {}; // Empty but valid
+            finalResult = {};
+        } else {
+            try {
+                finalResult = JSON.parse(stdout);
+            } catch (parseError) {
+                console.error("[Scraper Client] JSON Parse Error!");
+                console.error("[Scraper Client] Raw stdout:", stdout.substring(0, 500) + (stdout.length > 500 ? "..." : ""));
+                throw parseError;
+            }
         }
-
-        try {
-            return JSON.parse(stdout);
-        } catch (parseError) {
-            console.error("[Scraper Client] JSON Parse Error!");
-            console.error("[Scraper Client] Raw stdout:", stdout.substring(0, 500) + (stdout.length > 500 ? "..." : ""));
-            throw parseError;
-        }
+        
+        const ttl = params.query || params.cartoon_query ? TTL.ANILIST_META : (params.wa_source || params.ja_source || params.of_source || params.universal_ep ? TTL.SOURCES : TTL.EPISODE_LIST);
+        animeCache.set(cacheKey, finalResult, ttl);
+        return finalResult;
     } catch (err: any) {
         console.error("[Scraper Client] Local command exception:", err.message);
         throw err;

@@ -24,7 +24,7 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="fixed left-3 top-3 bottom-3 w-[72px] hover:w-[220px] transition-[width,border-color,box-shadow] duration-300 ease-in-out bg-[var(--bg-card)]/60 backdrop-blur-3xl border border-white/[0.07] rounded-[18px] hidden md:flex flex-col py-5 z-[60] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6)] group/sidebar hover:border-[var(--accent)]/20 hover:shadow-[0_8px_32px_rgba(249,115,22,0.08)]">
+        <aside className="fixed left-0 top-0 bottom-0 w-[72px] hover:w-[220px] transition-[width,border-color,box-shadow] duration-300 ease-in-out bg-[var(--bg-surface)] border-r border-[var(--border-color)] hidden md:flex flex-col py-5 z-[60] overflow-hidden group/sidebar">
             {/* Logo */}
             <Link href="/" className="mb-5 mx-auto group pointer-events-auto flex items-center justify-center w-full px-4 relative">
                 <div className="w-8 h-8 relative flex items-center justify-center shrink-0">

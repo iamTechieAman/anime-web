@@ -147,7 +147,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full xl:max-w-[1600px] xl:mx-auto xl:rounded-[22px] xl:border xl:border-white/[0.07] xl:my-3 h-[60vh] md:h-[68vh] max-h-[720px] pb-12 md:pb-16 overflow-hidden group bg-black shadow-2xl"
+            className="relative w-full h-[60vh] md:h-[70vh] max-h-[720px] rounded-2xl border border-[var(--border-color)] mt-2 md:mt-4 mb-8 overflow-hidden group bg-[var(--bg-main)] shadow-2xl"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -185,8 +185,8 @@ export default function HeroCarousel() {
             ))}
 
             {/* Vignette & Gradient overlays */}
-            <div className="hero-vignette" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/50 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/20 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent z-10 w-[80%]" />
 
             {/* Trending Badge */}
             <div className="absolute top-14 left-4 md:left-20 z-30">
