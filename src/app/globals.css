@@ -210,17 +210,24 @@ body {
 /* Base Container Fix */
 .container-full {
   width: 100%;
-  max-width: 100%;
-  padding-left: 24px;
-  padding-right: 24px;
-  margin: 0;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding-left: 12px;
+  padding-right: 12px;
   box-sizing: border-box;
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 768px) {
   .container-full {
-    padding-left: 60px;
-    padding-right: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-full {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 }
 
@@ -641,6 +648,29 @@ p, .text-body {
   overflow: hidden;
 }
 
+.skeleton-hero {
+  width: 100%;
+  height: 42vh;
+  max-height: 600px;
+  background-color: var(--bg-card);
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+}
+@media (min-width: 768px) {
+  .skeleton-hero {
+    height: 60vh;
+  }
+}
+
+.skeleton-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  animation: shimmer 2.5s infinite;
+  transform: translateX(-100%);
+}
+
 .skeleton-card {
   flex-shrink: 0;
   width: 155px;
@@ -673,25 +703,6 @@ p, .text-body {
   width: 60%;
 }
 
-/* Hero skeleton */
-.skeleton-hero {
-  width: 100%;
-  height: 58vh;
-  max-height: 580px;
-  min-height: 300px;
-  background: var(--bg-card);
-  position: relative;
-  overflow: hidden;
-}
-
-.skeleton-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
-  animation: shimmer 2.5s infinite;
-  transform: translateX(-100%);
-}
 
 /* ══════════════════════════════════════════════════
    TOP 10 BADGE SYSTEM
@@ -761,41 +772,32 @@ p, .text-body {
 
 .responsive-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
   width: 100%;
 }
 
 @media (min-width: 640px) {
   .responsive-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
   }
 }
 
 @media (min-width: 768px) {
-  .responsive-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-  }
   .grid-featured {
     grid-column: span 2;
     grid-row: span 2;
   }
   .grid-featured .premium-card {
     height: 100%;
-  }
-}
-
-@media (min-width: 1024px) {
-  .responsive-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .responsive-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
@@ -1384,8 +1386,8 @@ main, .relative.z-10 {
   scroll-snap-type: x mandatory !important;
   scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch !important;
-  gap: 16px !important;
-  padding: 8px 4px 20px 4px !important;
+  gap: 12px !important;
+  padding: 8px 4px 12px 4px !important;
   margin-bottom: 0 !important;
   scrollbar-width: none !important; /* Firefox */
 }

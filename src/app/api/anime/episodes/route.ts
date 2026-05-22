@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
+import { providerHealth } from "@/lib/provider-health";
 
 export const revalidate = 1800; // 30 min ISR
 
@@ -121,6 +122,9 @@ export async function GET(request: Request) {
     }
 
     try {
+        const healthyProviders = providerHealth.getHealthyProviders(SEARCH_PROVIDERS);
+        const providersToSearch = healthyProviders.length > 0 ? healthyProviders : SEARCH_PROVIDERS;
+
         // ─── PATH 1: Numeric AniList/MAL ID ─────────────────────────────────
         if (/^\d+$/.test(id)) {
             console.log(`[Episodes] Numeric ID (${id}) — resolving via AniList...`);
@@ -131,32 +135,39 @@ export async function GET(request: Request) {
                     .filter(Boolean)
                     .slice(0, 2) as string[];
 
-                // Race searches across providers × titles
-                const searchTasks = SEARCH_PROVIDERS.flatMap(pName =>
+                // Race searches across providers × titles using Promise.any for first-to-respond
+                const searchTasks = providersToSearch.flatMap(pName =>
                     titles.map(async (title) => {
-                        const p = getProvider(pName);
-                        const searchRes = await withTimeout(p.search(title), 5000, `search ${pName}`);
-                        if (!searchRes?.length) throw new Error('No results');
-                        const match = findBestMatch(searchRes, title);
-                        if (!match) throw new Error('No match');
-                        const info = await withTimeout(p.getInfo(match.id), 5000, `info ${pName}:${match.id}`);
-                        return { ...mapInfoToShow(info, media), provider: pName };
+                        try {
+                            const p = getProvider(pName);
+                            const searchRes = await withTimeout(p.search(title), 5000, `search ${pName}`);
+                            if (!searchRes?.length) throw new Error('No results');
+                            const match = findBestMatch(searchRes, title);
+                            if (!match) throw new Error('No match');
+                            const info = await withTimeout(p.getInfo(match.id), 5000, `info ${pName}:${match.id}`);
+                            const mapped = mapInfoToShow(info, media);
+                            if (!mapped || (mapped.availableEpisodesDetail.sub.length === 0 && mapped.availableEpisodesDetail.dub.length === 0)) {
+                                throw new Error('No episodes found');
+                            }
+                            providerHealth.reportSuccess(pName);
+                            return { ...mapped, provider: pName };
+                        } catch (err: any) {
+                            if (err.message.includes('Timeout')) {
+                                providerHealth.reportError(pName, true);
+                            } else {
+                                providerHealth.reportError(pName, false);
+                            }
+                            throw err; // Re-throw so Promise.any moves to the next
+                        }
                     })
                 );
 
-                const results = await Promise.allSettled(searchTasks);
-                const successful = results
-                    .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && !!r.value)
-                    .map(r => r.value)
-                    .sort((a, b) =>
-                        (b.availableEpisodesDetail.sub.length + b.availableEpisodesDetail.dub.length) -
-                        (a.availableEpisodesDetail.sub.length + a.availableEpisodesDetail.dub.length)
-                    );
-
-                if (successful.length > 0) {
-                    const best = successful[0];
+                try {
+                    const best = await Promise.any(searchTasks);
                     animeCache.set(cacheKey.episodes(id, best.provider), best, TTL.EPISODE_LIST);
                     return NextResponse.json({ show: best });
+                } catch (aggregateErr) {
+                    console.log(`[Episodes] Provider search failed across all providers for ${id}`);
                 }
 
                 // ─── Jikan fallback for episode count ───────────────────────
@@ -186,32 +197,40 @@ export async function GET(request: Request) {
             const info = await withTimeout(p.getInfo(id), 6000, `getInfo ${provider}`);
             const mapped = mapInfoToShow(info);
             if (mapped && (mapped.availableEpisodesDetail.sub.length > 0 || mapped.availableEpisodesDetail.dub.length > 0)) {
+                providerHealth.reportSuccess(provider);
                 const result = { ...mapped, provider };
                 animeCache.set(epCacheKey, result, TTL.EPISODE_LIST);
                 return NextResponse.json({ show: result });
             }
         } catch (e: any) {
             console.warn(`[Episodes] Direct lookup failed (${provider}): ${e.message}`);
+            if (e.message.includes('Timeout')) providerHealth.reportError(provider, true);
         }
 
         // ─── PATH 3: Fallback chain ──────────────────────────────────────────
-        const fallbacks = SEARCH_PROVIDERS.filter(f => f !== provider);
-        const fallbackResults = await Promise.allSettled(
-            fallbacks.map(async (fb) => {
+        const fallbacks = providersToSearch.filter(f => f !== provider);
+        const fallbackTasks = fallbacks.map(async (fb) => {
+            try {
                 const p = getProvider(fb);
                 const info = await withTimeout(p.getInfo(id), 5000, `fallback ${fb}`);
-                return { ...mapInfoToShow(info), provider: fb };
-            })
-        );
+                const mapped = mapInfoToShow(info);
+                if (!mapped || (mapped.availableEpisodesDetail.sub.length === 0 && mapped.availableEpisodesDetail.dub.length === 0)) {
+                    throw new Error('No episodes found');
+                }
+                providerHealth.reportSuccess(fb);
+                return { ...mapped, provider: fb };
+            } catch (err: any) {
+                if (err.message.includes('Timeout')) providerHealth.reportError(fb, true);
+                throw err;
+            }
+        });
 
-        const bestFallback = fallbackResults
-            .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && !!r.value)
-            .map(r => r.value)
-            .find(v => v.availableEpisodesDetail.sub.length > 0 || v.availableEpisodesDetail.dub.length > 0);
-
-        if (bestFallback) {
+        try {
+            const bestFallback = await Promise.any(fallbackTasks);
             animeCache.set(cacheKey.episodes(id, bestFallback.provider), bestFallback, TTL.EPISODE_LIST);
             return NextResponse.json({ show: bestFallback });
+        } catch (aggregateErr) {
+            console.warn(`[Episodes] All fallbacks failed for ${id}`);
         }
 
         return NextResponse.json({ error: "Anime not found on any provider" }, { status: 404 });

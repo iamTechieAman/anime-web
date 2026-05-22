@@ -233,7 +233,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
     };
 
     return (
-        <div className="relative w-full overflow-hidden group/row mb-6 md:mb-8">
+        <div className="relative w-full overflow-hidden group/row mb-4">
             {/* Ambient vignette fades for Netflix-style rows */}
             <div className="netflix-row-fade-left" />
             <div className="netflix-row-fade-right" />
@@ -257,7 +257,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
                 className="netflix-row px-0"
             >
                 {items.filter(item => item && (item.poster_path || item.backdrop_path || item.image)).map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} className="netflix-card-snap w-[150px] sm:w-[170px] md:w-[190px]">
+                    <div key={`${item.id}-${idx}`} className="netflix-card-snap w-[130px] sm:w-[150px] md:w-[170px] lg:w-[180px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}

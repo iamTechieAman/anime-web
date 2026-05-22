@@ -129,7 +129,7 @@ export default function HeroCarousel() {
 
     if (isLoading) return <HeroSkeleton />;
     if (slides.length === 0) return (
-        <div className="relative w-full h-[35vh] md:h-[45vh] overflow-hidden bg-gradient-to-br from-[#0a0a1a] via-[#111133] to-[#0a0a1a]">
+        <div className="relative w-full h-[42vh] md:h-[60vh] overflow-hidden bg-gradient-to-br from-[#0a0a1a] via-[#111133] to-[#0a0a1a]">
             <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center px-6">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
@@ -147,7 +147,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[60vh] md:h-[70vh] max-h-[720px] rounded-2xl border border-[var(--border-color)] mt-2 md:mt-4 mb-8 overflow-hidden group bg-[var(--bg-main)] shadow-2xl"
+            className="relative w-full h-[42vh] md:h-[60vh] max-h-[600px] rounded-2xl border border-[var(--border-color)] mt-2 md:mt-4 mb-4 overflow-hidden group bg-[var(--bg-main)] shadow-2xl"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}

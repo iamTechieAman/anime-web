@@ -271,7 +271,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-[12px] md:px-[20px] lg:px-[24px] py-4 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] transition-all duration-300">
+    <nav className="fixed top-0 left-0 md:left-[72px] peer-hover/sidebar:md:left-[220px] right-0 z-50 px-3 md:px-5 lg:px-6 h-[64px] flex items-center bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
       
       {/* Search Focus Overlay */}
       <AnimatePresence>
@@ -287,7 +287,7 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <div className="w-full mx-auto grid grid-cols-2 md:grid-cols-3 items-center gap-4">
+      <div className="w-full max-w-[1800px] mx-auto grid grid-cols-2 md:grid-cols-3 items-center gap-4">
         {/* Logo */}
         <Link href="/" className="justify-self-start flex items-center gap-2.5 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-7 h-7 relative flex items-center justify-center">

@@ -298,9 +298,9 @@ export default function MoviesPage() {
                 />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[var(--bg-card)]/85 backdrop-blur-3xl border-b border-white/5 sticky top-[80px] md:top-[96px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-1 transition-all duration-300">
-                    <div className="w-full max-w-[1800px] mx-auto px-6 lg:px-12 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5 overflow-x-auto hide-scrollbar z-50 pb-1">
+                <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 sticky top-[64px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.3)] py-1 transition-all duration-300">
+                    <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
@@ -330,7 +330,7 @@ export default function MoviesPage() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-[1800px] mx-auto px-5 lg:px-10 py-5 md:py-8">
+                <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-4">
                     {searchQuery ? (
                         <div className="space-y-6">
                             <h2 className="text-2xl font-black text-white flex items-center gap-3">
@@ -403,7 +403,7 @@ export default function MoviesPage() {
 
                                 {/* Trending row for active provider */}
                                 {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
-                                    <section className="mb-6 md:mb-8 relative">
+                                    <section className="mb-4 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-[var(--accent)]" isFeatured />
                                         <MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge />
@@ -412,7 +412,7 @@ export default function MoviesPage() {
 
                                 {/* Smart Recommendations (only when no provider active) */}
                                 {activeProvider === "all" && activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
-                                    <section className="mb-6 md:mb-8 relative">
+                                    <section className="mb-4 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-[var(--accent)]" isFeatured />
                                         <MovieRow 
@@ -431,7 +431,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-6 md:space-y-8"
+                                        className="space-y-4 md:space-y-5"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -488,7 +488,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-6 md:space-y-8"
+                                        className="space-y-4 md:space-y-5"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -541,7 +541,7 @@ export default function MoviesPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -12 }}
                                         transition={{ duration: 0.35, ease: "easeOut" }}
-                                        className="space-y-12 mt-8"
+                                        className="space-y-4 md:space-y-5 mt-4"
                                     >
                                         {/* Provider anime content (Crunchyroll / ToonPlayer Originals) */}
                                         {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
@@ -582,7 +582,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "trending" && (
-                                    <div className="space-y-6 md:space-y-8">
+                                    <div className="space-y-4 md:space-y-5">
                                         <section>
                                             <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
                                             {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
@@ -599,7 +599,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "discover" && (
-                                    <div className="space-y-6 md:space-y-8">
+                                    <div className="space-y-4 md:space-y-5">
                                         {mjItems.length > 0 && (
                                             <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-[var(--accent)]/20 overflow-hidden">
                                                 <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />

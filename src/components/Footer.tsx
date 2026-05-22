@@ -10,8 +10,8 @@ export default function Footer() {
         <footer className="footer-wrap w-full mt-auto">
             {/* Gradient fade top connector */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
-            <div className="w-full px-4 md:px-8 py-8 bg-gradient-to-b from-[var(--bg-card)]/30 to-[var(--bg-main)] backdrop-blur-sm">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="w-full bg-gradient-to-b from-[var(--bg-card)]/30 to-[var(--bg-main)] backdrop-blur-sm">
+                <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Brand Section */}
                     <div className="col-span-1 sm:col-span-2 lg:col-span-1 space-y-4">
                         <Link href="/" className="flex items-center gap-3 group">
@@ -88,7 +88,7 @@ export default function Footer() {
                 </div>
 
                 {/* Support / Link to Us Section */}
-                <div className="mt-10 p-5 bg-white/5 border border-white/10 rounded-xl max-w-3xl">
+                <div className="mt-8 mx-4 md:mx-6 p-4 bg-white/5 border border-white/10 rounded-xl max-w-3xl lg:max-w-[1800px] xl:mx-auto">
                     <h3 className="text-white font-bold text-sm uppercase tracking-widest mb-2">Support Us (Link to ToonPlayer)</h3>
                     <p className="text-[var(--text-muted)] text-xs mb-3">
                         Love our ad-free platform? Help us grow and climb the search rankings by adding this link to your blog, website, or forum!
@@ -119,7 +119,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-[var(--border-color)] flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex flex-col md:flex-row items-center justify-between gap-4 max-w-[1800px] mx-auto px-4 md:px-6 w-full">
                     <p className="text-[var(--text-muted)] text-[10px] font-medium tracking-wider uppercase">
                         © {currentYear} ToonPlayer.in • Built for HD Streaming Excellence
                     </p>

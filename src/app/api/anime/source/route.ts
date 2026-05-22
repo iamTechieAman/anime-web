@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
-import { recordSuccess, recordFailure, sortByHealth } from "@/lib/provider-health";
+import { providerHealth } from "@/lib/provider-health";
 
 // Helper: wrap a promise with a timeout
 function withTimeout<T>(promise: Promise<T>, ms: number, label = ''): Promise<T> {
@@ -115,9 +115,9 @@ export async function GET(request: Request) {
     if (providerParam && !orderedProviders.includes(providerParam)) orderedProviders.push(providerParam);
     if (detectedProvider && !orderedProviders.includes(detectedProvider)) orderedProviders.push(detectedProvider);
 
-    // Sort primaries by health score dynamically
-    const healthSortedPrimary = sortByHealth(PRIMARY_PROVIDERS) as ProviderName[];
-    const healthSortedFallback = sortByHealth(FALLBACK_PROVIDERS) as ProviderName[];
+    // Filter out dead providers
+    const healthSortedPrimary = providerHealth.getHealthyProviders(PRIMARY_PROVIDERS) as ProviderName[];
+    const healthSortedFallback = providerHealth.getHealthyProviders(FALLBACK_PROVIDERS) as ProviderName[];
     for (const p of healthSortedPrimary) if (!orderedProviders.includes(p)) orderedProviders.push(p);
     for (const p of healthSortedFallback) if (!orderedProviders.includes(p)) orderedProviders.push(p);
 
@@ -138,10 +138,10 @@ export async function GET(request: Request) {
             );
             if (!sources || sources.length === 0) throw new Error(`No sources from ${name}`);
             const links = sources.map(s => buildLink(s, name));
-            recordSuccess(name, Date.now() - start);
+            providerHealth.reportSuccess(name);
             return { links, provider: name };
         } catch (e: any) {
-            recordFailure(name);
+            providerHealth.reportError(name, e.message.includes('Timeout'));
             throw e;
         }
     }

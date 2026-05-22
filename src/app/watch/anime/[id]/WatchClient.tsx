@@ -687,10 +687,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         ? selected.link
                         : `${window.location.origin}${selected.link}`;
 
-                    const proxiedUrl = `/api/proxy/video?url=${encodeURIComponent(absoluteUrl)}`;
-                    setSourceUrl(proxiedUrl);
-                    setVideoType("iframe");
-                    // toast.success(`Episode ${currentEp} loaded successfully`); // Remove annoying toasts for fast switches
+                    const isM3U8 = selected.hls || absoluteUrl.includes('.m3u8') || selected.isM3U8;
+                    
+                    if (isM3U8 || absoluteUrl.includes('.mp4')) {
+                        // Use ArtPlayer natively via CORS Proxy
+                        const proxiedUrl = `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`;
+                        setSourceUrl(proxiedUrl);
+                        setVideoType(isM3U8 ? "m3u8" : "mp4");
+                    } else {
+                        // Fallback to iframe if it's a raw embed page
+                        const proxiedUrl = `/api/proxy/video?url=${encodeURIComponent(absoluteUrl)}`;
+                        setSourceUrl(proxiedUrl);
+                        setVideoType("iframe");
+                    }
 
 
                 } else {
