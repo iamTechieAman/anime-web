@@ -773,21 +773,35 @@ p, .text-body {
 .responsive-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+  gap: 12px;
   width: 100%;
 }
 
 @media (min-width: 640px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
   }
 }
 
 @media (min-width: 1024px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 24px;
   }
 }
 
@@ -801,11 +815,22 @@ p, .text-body {
   }
 }
 
-@media (min-width: 1536px) {
-  .responsive-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
+/* Sticky Sidebar Utility */
+.sticky-sidebar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 88px;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: none;
 }
+.sticky-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
 
 /* Touch Targets for Mobile */
 .tap-target {
@@ -1406,7 +1431,7 @@ main, .relative.z-10 {
 .premium-card-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 2/3 !important;
+  aspect-ratio: 2/3;
   overflow: hidden;
   border-radius: 12px;
   background-color: var(--bg-card);

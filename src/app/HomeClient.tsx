@@ -93,6 +93,7 @@ export default function MoviesPage() {
     const [trendingPeople, setTrendingPeople] = useState<any[]>([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+    const [loading, setLoading] = useState(true);
 
     // Premium Extra Categories
     const [podcasts, setPodcasts] = useState<any[]>([]);
@@ -245,6 +246,7 @@ export default function MoviesPage() {
             } catch (err) {
                 console.error("Failed to fetch premium content:", err);
             }
+            setLoading(false);
         };
 
         loadOtherData();
@@ -473,30 +475,46 @@ export default function MoviesPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <section>
-                                                    <SectionHeader icon={Flame} title="Trending Movies" color="text-[var(--accent)]" isFeatured />
-                                                    {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /> : <RowSkeleton />}
-                                                </section>
-                                                <section>
-                                                    <SectionHeader icon={Film} title="Popular Movies" color="text-[var(--accent)]" />
-                                                    {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular" /> : <RowSkeleton />}
-                                                </section>
-                                                <section>
-                                                    <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-[var(--accent-warm)]" />
-                                                    {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
-                                                </section>
-                                                <section>
-                                                    <SectionHeader icon={Star} title="Top Rated Movies" color="text-[var(--accent-warm)]" isFeatured />
-                                                    {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" isLarge /> : <RowSkeleton />}
-                                                </section>
-                                                {GENRE_ROWS.map((genre) => (
-                                                    genreData[genre.title] && (
-                                                        <section key={genre.title} id={`genre-${genre.genreId}`}>
-                                                            <SectionHeader icon={genre.icon} title={genre.title} color="text-[var(--accent)]" />
-                                                            <MovieRow items={genreData[genre.title]} type={genre.type} title={genre.title} />
-                                                        </section>
-                                                    )
-                                                ))}
+                                                {((loading && trending.filter(m => (m as any).media_type === 'movie' || !m.name).length === 0) || trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Flame} title="Trending Movies" color="text-[var(--accent)]" isFeatured />
+                                                        {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {((loading && popular.length === 0) || popular.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Film} title="Popular Movies" color="text-[var(--accent)]" />
+                                                        {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular" /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {((loading && nowPlaying.length === 0) || nowPlaying.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-[var(--accent-warm)]" />
+                                                        {nowPlaying.length > 0 ? <MovieRow items={nowPlaying} type="movie" title="now-playing" /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {((loading && topRated.length === 0) || topRated.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Star} title="Top Rated Movies" color="text-[var(--accent-warm)]" isFeatured />
+                                                        {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" isLarge /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {GENRE_ROWS.map((genre) => {
+                                                    const items = genreData[genre.title];
+                                                    if ((loading && !items) || (items && items.length > 0)) {
+                                                        return (
+                                                            <section key={genre.title} id={`genre-${genre.genreId}`}>
+                                                                <SectionHeader icon={genre.icon} title={genre.title} color="text-[var(--accent)]" />
+                                                                {items && items.length > 0 ? (
+                                                                    <MovieRow items={items} type={genre.type} title={genre.title} />
+                                                                ) : (
+                                                                    <RowSkeleton />
+                                                                )}
+                                                            </section>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
                                             </>
                                         )}
                                     </motion.div>
@@ -530,26 +548,40 @@ export default function MoviesPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <section>
-                                                    <SectionHeader icon={Flame} title="Trending TV Shows" color="text-[var(--accent)]" isFeatured />
-                                                    {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /> : <RowSkeleton />}
-                                                </section>
-                                                <section>
-                                                    <SectionHeader icon={Tv} title="Popular TV Shows" color="text-[var(--accent)]" />
-                                                    {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular" /> : <RowSkeleton />}
-                                                </section>
-                                                <section>
-                                                    <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-[var(--accent-warm)]" isFeatured />
-                                                    {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" isLarge /> : <RowSkeleton />}
-                                                </section>
-                                                {NETWORK_ROWS.map((net, idx) => (
-                                                    networkData[net.title] && (
-                                                        <section key={net.title} id={`network-${net.networkId}`}>
-                                                            <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-[var(--accent-secondary)]" />
-                                                            <MovieRow items={networkData[net.title]} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} />
-                                                        </section>
-                                                    )
-                                                ))}
+                                                {((loading && trending.filter(m => (m as any).media_type === 'tv' || m.name).length === 0) || trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Flame} title="Trending TV Shows" color="text-[var(--accent)]" isFeatured />
+                                                        {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Tv} title="Popular TV Shows" color="text-[var(--accent)]" />
+                                                        {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular" /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {((loading && tvTopRated.length === 0) || tvTopRated.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-[var(--accent-warm)]" isFeatured />
+                                                        {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" isLarge /> : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {NETWORK_ROWS.map((net, idx) => {
+                                                    const items = networkData[net.title];
+                                                    if ((loading && !items) || (items && items.length > 0)) {
+                                                        return (
+                                                            <section key={net.title} id={`network-${net.networkId}`}>
+                                                                <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-[var(--accent-secondary)]" />
+                                                                {items && items.length > 0 ? (
+                                                                    <MovieRow items={items} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} />
+                                                                ) : (
+                                                                    <RowSkeleton />
+                                                                )}
+                                                            </section>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
                                             </>
                                         )}
                                     </motion.div>
@@ -582,65 +614,75 @@ export default function MoviesPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <section>
-                                                    <SectionHeader icon={Flame} title="Trending Anime" color="text-[var(--accent)]" isFeatured />
-                                                    {animeTrending.length > 0 ? (
-                                                        <MovieRow
-                                                            items={animeTrending.map((item: any) => ({
-                                                                id: item.id || item._id,
-                                                                title: item.title || item.name,
-                                                                poster_path: null,
-                                                                image: item.image || item.thumbnail,
-                                                                media_type: 'anime',
-                                                            }))}
-                                                            type="anime"
-                                                            title="anime-trending-row"
-                                                            isLarge
-                                                        />
-                                                    ) : <RowSkeleton />}
-                                                </section>
-                                                <section>
-                                                    <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-[var(--accent)]" />
-                                                    {animeLatest.length > 0 ? (
-                                                        <MovieRow
-                                                            items={animeLatest.map((item: any) => ({
-                                                                id: item.id || item._id,
-                                                                title: item.title || item.name,
-                                                                poster_path: null,
-                                                                image: item.image || item.thumbnail,
-                                                                media_type: 'anime',
-                                                            }))}
-                                                            type="anime"
-                                                            title="anime-latest-row"
-                                                        />
-                                                    ) : <RowSkeleton />}
-                                                </section>
+                                                {((loading && animeTrending.length === 0) || animeTrending.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Flame} title="Trending Anime" color="text-[var(--accent)]" isFeatured />
+                                                        {animeTrending.length > 0 ? (
+                                                            <MovieRow
+                                                                items={animeTrending.map((item: any) => ({
+                                                                    id: item.id || item._id,
+                                                                    title: item.title || item.name,
+                                                                    poster_path: null,
+                                                                    image: item.image || item.thumbnail,
+                                                                    media_type: 'anime',
+                                                                }))}
+                                                                type="anime"
+                                                                title="anime-trending-row"
+                                                                isLarge
+                                                            />
+                                                        ) : <RowSkeleton />}
+                                                    </section>
+                                                )}
+                                                {((loading && animeLatest.length === 0) || animeLatest.length > 0) && (
+                                                    <section>
+                                                        <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-[var(--accent)]" />
+                                                        {animeLatest.length > 0 ? (
+                                                            <MovieRow
+                                                                items={animeLatest.map((item: any) => ({
+                                                                    id: item.id || item._id,
+                                                                    title: item.title || item.name,
+                                                                    poster_path: null,
+                                                                    image: item.image || item.thumbnail,
+                                                                    media_type: 'anime',
+                                                                }))}
+                                                                type="anime"
+                                                                title="anime-latest-row"
+                                                            />
+                                                        ) : <RowSkeleton />}
+                                                    </section>
+                                                )}
                                             </>
                                         )}
                                     </motion.div>
                                     </AnimatePresence>
                                 )}
-
+                                
                                 {activeTab === "trending" && (
                                     <div className="space-y-2 md:space-y-3">
-                                        <section>
-                                            <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
-                                            {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-[var(--accent-secondary)]" />
-                                            {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Tv} title="Trending Series" color="text-[var(--accent)]" />
-                                            {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
-                                        </section>
+                                        {((loading && trending.length === 0) || trending.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
+                                                {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
+                                            </section>
+                                        )}
+                                        {((loading && popular.length === 0) || popular.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-[var(--accent-secondary)]" />
+                                                {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
+                                            </section>
+                                        )}
+                                        {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={Tv} title="Trending Series" color="text-[var(--accent)]" />
+                                                {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
+                                            </section>
+                                        )}
                                     </div>
                                 )}
 
                                 {activeTab === "discover" && (
                                     <div className="space-y-2 md:space-y-3">
-                                        {mjItems.length > 0 && (
+                                        {((loading && mjItems.length === 0) || mjItems.length > 0) && (
                                             <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-[var(--accent)]/20 overflow-hidden">
                                                 <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
                                                 <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-[var(--accent-warm)]" isFeatured />
@@ -661,79 +703,87 @@ export default function MoviesPage() {
                                                 </div>
                                             </section>
                                         )}
-                                        <section>
-                                            <SectionHeader icon={Zap} title="Trending Podcasts" color="text-[var(--accent-secondary)]" />
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                {podcasts.map((pod, i) => (
-                                                    <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent-secondary)]/30 transition-all cursor-pointer group">
-                                                        <div className="w-16 h-16 rounded-xl bg-[var(--accent-secondary)]/10 flex items-center justify-center border border-[var(--accent-secondary)]/20 flex-shrink-0 group-hover:bg-[var(--accent-secondary)]/20">
-                                                            <Play className="w-6 h-6 text-[var(--accent-secondary)]" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <h3 className="text-sm font-bold text-white truncate">{pod.title}</h3>
-                                                            <p className="text-xs text-zinc-500 mt-1">{pod.year} • Podcast</p>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Popcorn} title="Trending Books" color="text-[var(--accent)]" />
-                                            <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
-                                                {books.map((book, i) => (
-                                                    <div key={i} className="flex-shrink-0 w-[160px] group cursor-pointer">
-                                                        <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-[var(--accent)]/40 transition-all flex flex-col items-center justify-center p-4 text-center">
-                                                            <div className="w-10 h-1 bg-[var(--accent)] mb-4" />
-                                                            <h3 className="text-xs font-bold text-white leading-tight mb-2">{book.title}</h3>
-                                                            <p className="text-[9px] text-zinc-500">{book.author}</p>
-                                                        </div>
-                                                        <p className="text-[10px] text-center font-bold text-zinc-500 uppercase">{book.year}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Flame} title="Trending Songs" color="text-[var(--accent)]" />
-                                            <div className="space-y-2">
-                                                {songs.map((song, i) => (
-                                                    <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)]/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
-                                                        <span className="text-xs font-bold text-zinc-600 w-4">{i + 1}</span>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h3 className="text-sm font-bold text-white truncate">{song.title}</h3>
-                                                            <p className="text-[10px] text-zinc-500">{song.artist}</p>
-                                                        </div>
-                                                        <span className="text-[10px] font-bold text-zinc-500">{song.year}</span>
-                                                        <Play className="w-4 h-4 text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </section>
-                                        <section>
-                                            <SectionHeader icon={Film} title="Trending Videos" color="text-[var(--accent)]" />
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {videos.map((vid, i) => (
-                                                    <div key={i} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-                                                        <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center">
-                                                                <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                        {((loading && podcasts.length === 0) || podcasts.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={Zap} title="Trending Podcasts" color="text-[var(--accent-secondary)]" />
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                    {podcasts.map((pod, i) => (
+                                                        <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent-secondary)]/30 transition-all cursor-pointer group">
+                                                            <div className="w-16 h-16 rounded-xl bg-[var(--accent-secondary)]/10 flex items-center justify-center border border-[var(--accent-secondary)]/20 flex-shrink-0 group-hover:bg-[var(--accent-secondary)]/20">
+                                                                <Play className="w-6 h-6 text-[var(--accent-secondary)]" />
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <h3 className="text-sm font-bold text-white truncate">{pod.title}</h3>
+                                                                <p className="text-xs text-zinc-500 mt-1">{pod.year} • Podcast</p>
                                                             </div>
                                                         </div>
-                                                        <div className="absolute bottom-4 left-4 z-20">
-                                                            <h3 className="text-sm font-bold text-white">{vid.title}</h3>
-                                                            <p className="text-[10px] text-zinc-300 mt-0.5">{vid.year} • HD Video</p>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        )}
+                                        {((loading && books.length === 0) || books.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={Popcorn} title="Trending Books" color="text-[var(--accent)]" />
+                                                <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
+                                                    {books.map((book, i) => (
+                                                        <div key={i} className="flex-shrink-0 w-[160px] group cursor-pointer">
+                                                            <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-[var(--accent)]/40 transition-all flex flex-col items-center justify-center p-4 text-center">
+                                                                <div className="w-10 h-1 bg-[var(--accent)] mb-4" />
+                                                                <h3 className="text-xs font-bold text-white leading-tight mb-2">{book.title}</h3>
+                                                                <p className="text-[9px] text-zinc-500">{book.author}</p>
+                                                            </div>
+                                                            <p className="text-[10px] text-center font-bold text-zinc-500 uppercase">{book.year}</p>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </section>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        )}
+                                        {((loading && songs.length === 0) || songs.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={Flame} title="Trending Songs" color="text-[var(--accent)]" />
+                                                <div className="space-y-2">
+                                                    {songs.map((song, i) => (
+                                                        <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)]/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
+                                                            <span className="text-xs font-bold text-zinc-600 w-4">{i + 1}</span>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h3 className="text-sm font-bold text-white truncate">{song.title}</h3>
+                                                                <p className="text-[10px] text-zinc-500">{song.artist}</p>
+                                                            </div>
+                                                            <span className="text-[10px] font-bold text-zinc-500">{song.year}</span>
+                                                            <Play className="w-4 h-4 text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        )}
+                                        {((loading && videos.length === 0) || videos.length > 0) && (
+                                            <section>
+                                                <SectionHeader icon={Film} title="Trending Videos" color="text-[var(--accent)]" />
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {videos.map((vid, i) => (
+                                                        <div key={i} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                                                            <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center">
+                                                                    <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                                                </div>
+                                                            </div>
+                                                            <div className="absolute bottom-4 left-4 z-20">
+                                                                <h3 className="text-sm font-bold text-white">{vid.title}</h3>
+                                                                <p className="text-[10px] text-zinc-300 mt-0.5">{vid.year} • HD Video</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        )}
                                     </div>
                                 )}
                             </div>
 
                             {/* Sidebar - hidden on anime/discover tabs which have full-width layouts */}
                             {(activeTab !== 'anime' && activeTab !== 'discover') && (
-                            <div className="w-full lg:w-[320px] xl:w-[380px] space-y-12 shrink-0">
+                            <div className="w-full lg:w-[320px] xl:w-[380px] space-y-12 shrink-0 sticky-sidebar">
                                 {trendingPeople.length > 0 && (
                                     <section className="bg-gradient-to-b from-[var(--bg-card)] to-transparent p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group/sidebar">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-secondary)]/10 rounded-full blur-3xl" />

@@ -14,14 +14,14 @@
     },
     {
       "adult": false,
-      "id": 287,
-      "name": "Brad Pitt",
-      "original_name": "Brad Pitt",
+      "id": 2106,
+      "name": "Walt Disney",
+      "original_name": "Walt Disney",
       "media_type": "person",
-      "popularity": 9.2801,
+      "popularity": 1.6768,
       "gender": 2,
-      "known_for_department": "Acting",
-      "profile_path": "/m09Y1YfPPeNYYUSHnnVqahkrC1o.jpg"
+      "known_for_department": "Production",
+      "profile_path": "/fnB3Yt4dPiVODHzfLwntISAvbhw.jpg"
     },
     {
       "adult": false,
@@ -55,17 +55,6 @@
       "gender": 0,
       "known_for_department": "Acting",
       "profile_path": null
-    },
-    {
-      "adult": false,
-      "id": 2106,
-      "name": "Walt Disney",
-      "original_name": "Walt Disney",
-      "media_type": "person",
-      "popularity": 1.6768,
-      "gender": 2,
-      "known_for_department": "Production",
-      "profile_path": "/fnB3Yt4dPiVODHzfLwntISAvbhw.jpg"
     },
     {
       "adult": false,
@@ -113,6 +102,17 @@
     },
     {
       "adult": false,
+      "id": 500,
+      "name": "Tom Cruise",
+      "original_name": "Tom Cruise",
+      "media_type": "person",
+      "popularity": 12.7419,
+      "gender": 2,
+      "known_for_department": "Acting",
+      "profile_path": "/p17SLq4wabXwIYyjXF1Wf5cNnAm.jpg"
+    },
+    {
+      "adult": false,
       "id": 2891053,
       "name": "Aly Kandil",
       "original_name": "Aly Kandil",
@@ -146,17 +146,6 @@
     },
     {
       "adult": false,
-      "id": 30614,
-      "name": "Ryan Gosling",
-      "original_name": "Ryan Gosling",
-      "media_type": "person",
-      "popularity": 8.9383,
-      "gender": 2,
-      "known_for_department": "Acting",
-      "profile_path": "/lyUyVARQKhGxaxy0FbPJCQRpiaW.jpg"
-    },
-    {
-      "adult": false,
       "id": 86654,
       "name": "Austin Butler",
       "original_name": "Austin Butler",
@@ -165,6 +154,17 @@
       "gender": 2,
       "known_for_department": "Acting",
       "profile_path": "/atdAs4pFGjUQ4m2W8kJYly7N6cC.jpg"
+    },
+    {
+      "adult": false,
+      "id": 6087840,
+      "name": "波多野结衣",
+      "original_name": "波多野结衣",
+      "media_type": "person",
+      "popularity": 0.4851,
+      "gender": 0,
+      "known_for_department": "Acting",
+      "profile_path": null
     },
     {
       "adult": false,
