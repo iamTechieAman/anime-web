@@ -1,39 +1,17 @@
 "use client";
 
 import { useWatch, type WatchHistoryItem } from "@/context/WatchContext";
-import { Play, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Clock, X } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export default function ContinueWatchingRow() {
     const { history, removeFromHistory } = useWatch();
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
 
-    const demoItems: WatchHistoryItem[] = [
-        {
-            id: 'demo-1',
-            showId: '936075',
-            title: 'Michael',
-            type: 'movie',
-            currentTime: 2400,
-            duration: 12000, // 20%
-            poster: 'https://image.tmdb.org/t/p/w500/tBtqTCimYm3DKck3t8A2mgJaKVK.jpg',
-            updatedAt: Date.now()
-        },
-        {
-            id: 'demo-2',
-            showId: '16933',
-            title: 'The Wiz',
-            type: 'movie',
-            currentTime: 5400,
-            duration: 12000, // 45%
-            poster: 'https://image.tmdb.org/t/p/w500/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg',
-            updatedAt: Date.now()
-        }
-    ];
+    const displayHistory = history || [];
 
-    const displayHistory = history && history.length > 0 ? history : demoItems;
+    if (displayHistory.length === 0) return null;
 
 
     const getHistoryLink = (entry: any) => {
@@ -72,15 +50,6 @@ export default function ContinueWatchingRow() {
         }, 200);
     };
 
-    const scroll = (direction: "left" | "right") => {
-        if (!scrollContainerRef.current) return;
-        const scrollAmount = scrollContainerRef.current.clientWidth * 0.75;
-        scrollContainerRef.current.scrollBy({
-            left: direction === "left" ? -scrollAmount : scrollAmount,
-            behavior: "smooth",
-        });
-    };
-
     // Progress Bar Sub-component to handle animation on mount
     const AnimatedProgressBar = ({ current, total }: { current: number, total: number }) => {
         const [width, setWidth] = useState('0%');
@@ -114,26 +83,7 @@ export default function ContinueWatchingRow() {
             </div>
             
             <div className="relative group/cw">
-                {/* Scroll arrows (desktop) */}
-                <button
-                    onClick={() => scroll("left")}
-                    className="absolute left-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-r from-[var(--bg-main)] to-transparent hidden md:flex items-center justify-center opacity-0 group-hover/cw:opacity-100 transition-opacity"
-                    aria-label="Scroll left"
-                >
-                    <ChevronLeft className="w-5 h-5 text-white" />
-                </button>
-                <button
-                    onClick={() => scroll("right")}
-                    className="absolute right-0 top-0 bottom-0 z-10 w-10 bg-gradient-to-l from-[var(--bg-main)] to-transparent hidden md:flex items-center justify-center opacity-0 group-hover/cw:opacity-100 transition-opacity"
-                    aria-label="Scroll right"
-                >
-                    <ChevronRight className="w-5 h-5 text-white" />
-                </button>
-
-                <div 
-                    ref={scrollContainerRef}
-                    className="flex items-center gap-3 md:gap-4 overflow-x-auto hide-scrollbar pb-4 scroll-smooth-x"
-                >
+                <div className="continue-grid">
                     {displayHistory.slice(0, 12).map((entry) => {
                         const timeLeft = formatTimeLeft(entry.currentTime, entry.duration);
                         const isRemoving = removingId === entry.id;
@@ -142,7 +92,7 @@ export default function ContinueWatchingRow() {
                             <Link
                                 key={entry.id}
                                 href={getHistoryLink(entry)}
-                                className={`group relative flex-none w-[220px] md:w-[300px] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-orange-500/50 hover:shadow-[0_8px_40px_-8px_rgba(249, 115, 22, 0.4)] hover:-translate-y-2 snap-start ${
+                                className={`group relative min-w-0 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-orange-500/50 hover:shadow-[0_8px_40px_-8px_rgba(249,115,22,0.4)] hover:-translate-y-2 ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 }`}
                             >

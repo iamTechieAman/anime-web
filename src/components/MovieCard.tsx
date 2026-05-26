@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
-import { Play, Star, ChevronLeft, ChevronRight, Flame, Info } from "lucide-react";
+import { Play, Star, Flame } from "lucide-react";
 import React from "react";
 
 // Shared movie item type
@@ -197,15 +197,16 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                     </div>
                 </div>
             </div>
-            {/* Mobile Title Metadata Block */}
-            <div className="block md:hidden mt-1.5 px-1 pb-1">
-                <h4 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h4>
-                <div className="flex items-center gap-1.5 mt-0.5 text-[9px] text-[var(--text-muted)] font-medium">
+            {/* Always-visible compact metadata keeps dense OTT rows scannable. */}
+            <div className="mt-2 px-0.5 pb-1">
+                <h4 className="text-[11px] md:text-xs font-extrabold text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
+                <div className="flex items-center gap-1.5 mt-1 text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold">
                     {rating && (
                         <span className="text-[var(--accent-warm)] font-extrabold flex items-center gap-0.5">
                             ★{rating}
                         </span>
                     )}
+                    <span className="text-white/25">•</span>
                     {year && <span>{year}</span>}
                 </div>
             </div>
@@ -233,43 +234,13 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
     const backupId = React.useId();
     const scrollId = `row-${String(title || backupId).replace(/\s/g, "-")}`;
 
-    const scroll = (direction: "left" | "right") => {
-        const container = document.getElementById(scrollId);
-        if (container) {
-            const scrollAmount = container.clientWidth - (container.clientWidth * 0.15);
-            container.scrollBy({
-                left: direction === "left" ? -scrollAmount : scrollAmount,
-                behavior: "smooth",
-            });
-        }
-    };
+    const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
 
     return (
-        <div className="relative w-full group/row mb-2">
-            {/* Ambient vignette fades for Netflix-style rows */}
-            <div className="netflix-row-fade-left" />
-            <div className="netflix-row-fade-right" />
-
-            {/* Scroll arrows */}
-            <button
-                onClick={() => scroll("left")}
-                className="absolute left-0 top-0 bottom-0 z-20 w-12 md:w-20 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent flex items-center justify-start pl-2 md:pl-4 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
-            >
-                <ChevronLeft className="w-8 h-8 text-white drop-shadow-lg transform transition-transform hover:scale-125" />
-            </button>
-            <button
-                onClick={() => scroll("right")}
-                className="absolute right-0 top-0 bottom-0 z-20 w-12 md:w-20 bg-gradient-to-l from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent flex items-center justify-end pr-2 md:pr-4 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
-            >
-                <ChevronRight className="w-8 h-8 text-white drop-shadow-lg transform transition-transform hover:scale-125" />
-            </button>
-
-            <div
-                id={scrollId}
-                className="netflix-row px-0"
-            >
-                {items.filter(item => item && (item.poster_path || item.backdrop_path || item.image)).map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} className="netflix-card-snap w-[130px] sm:w-[150px] md:w-[170px] lg:w-[180px]">
+        <div className="relative w-full mb-2">
+            <div id={scrollId} className={`ott-card-grid ${isLarge ? "ott-card-grid-large" : ""}`}>
+                {validItems.map((item, idx) => (
+                    <div key={`${item.id}-${idx}`} className="w-full min-w-0">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}
@@ -277,4 +248,3 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
         </div>
     );
 });
-

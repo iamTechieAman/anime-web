@@ -392,7 +392,7 @@ export default function MoviesPage() {
                             )}
                         </div>
                     ) : (
-                        <div className="flex flex-col lg:flex-row gap-8 xl:gap-10">
+                        <div className="flex flex-col gap-0">
                             {/* Main Feed */}
                             <div className="flex-1 min-w-0">
 
@@ -781,75 +781,6 @@ export default function MoviesPage() {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Sidebar - hidden on anime/discover tabs which have full-width layouts */}
-                            {(activeTab !== 'anime' && activeTab !== 'discover') && (
-                            <div className="w-full lg:w-[320px] xl:w-[380px] space-y-12 shrink-0 sticky-sidebar">
-                                {trendingPeople.length > 0 && (
-                                    <section className="bg-gradient-to-b from-[var(--bg-card)] to-transparent p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group/sidebar">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-secondary)]/10 rounded-full blur-3xl" />
-                                        <h2 className="text-xl font-black font-sora text-white mb-8 flex items-center gap-3">
-                                            <div className="p-2 bg-[var(--accent-secondary)]/10 rounded-lg">
-                                                <User className="w-5 h-5 text-[var(--accent-secondary)]" /> 
-                                            </div>
-                                            Trending Stars
-                                        </h2>
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-8 relative z-10">
-                                            {trendingPeople.map((person: any) => (
-                                                <div key={person.id} className="flex flex-col items-center text-center group cursor-pointer">
-                                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[var(--accent-secondary)]/50 transition-all duration-500 shadow-xl mb-3 relative">
-                                                        <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
-                                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                                    </div>
-                                                    <p className="text-xs font-bold text-white group-hover:text-[var(--accent-secondary)] truncate w-full transition-colors">{person.name}</p>
-                                                    <p className="text-[10px] text-zinc-500 truncate w-full mt-0.5 uppercase tracking-wider font-semibold">{person.known_for_department}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
-
-                                <section className="bg-gradient-to-b from-[var(--bg-card)] to-transparent p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group/sidebar">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-warm)]/10 rounded-full blur-3xl" />
-                                    <h2 className="text-xl font-black font-sora text-white mb-6 flex items-center gap-3">
-                                        <div className="p-2 bg-[var(--accent-warm)]/10 rounded-lg">
-                                            <Sparkles className="w-5 h-5 text-[var(--accent-warm)]" /> 
-                                        </div>
-                                        {activeTab === 'tv' ? 'Top Rated Shows' : 'Top Rated Movies'}
-                                    </h2>
-                                    <div className="flex flex-col">
-                                        {(activeTab === 'tv' ? tvTopRated : topRated).slice(0, 8).map((item, i) => (
-                                            <Link 
-                                                key={item.id} 
-                                                href={`/watch/${activeTab === 'tv' ? 'tv' : 'movie'}/${item.id}`}
-                                                className="flex items-center gap-5 group cursor-pointer p-3 -mx-3 rounded-xl hover:bg-white/5 transition-all duration-300 relative"
-                                            >
-                                                {/* Left structural rank */}
-                                                <span className={`text-3xl font-black w-6 text-right tabular-nums tracking-tighter transition-colors duration-300 ${i < 3 ? 'text-white/20 group-hover:text-[var(--accent-warm)]/50' : 'text-white/5 group-hover:text-[var(--accent)]/30'}`}>
-                                                    {i + 1}
-                                                </span>
-                                                
-                                                <div className="flex-1 min-w-0 flex flex-col justify-center transform transition-transform duration-300 group-hover:translate-x-1">
-                                                    <h3 className="text-sm font-bold text-white/90 truncate group-hover:text-white transition-colors">{item.title || item.name}</h3>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="flex items-center gap-1 text-[11px] font-bold text-[var(--accent-warm)]">
-                                                            <Star className="w-3 h-3 fill-[var(--accent-warm)]" />
-                                                            {item.vote_average?.toFixed(1)}
-                                                        </span>
-                                                        <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                                                        <span className="text-[11px] font-medium text-zinc-500">{(item.release_date || item.first_air_date || '').split('-')[0]}</span>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                    
-                                    <Link href="/discover" className="block w-full py-3 mt-6 text-center text-xs font-bold text-white/60 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300 border border-transparent hover:border-white/10">
-                                        Explore Full Ranking
-                                    </Link>
-                                </section>
-                            </div>
-                            )} {/* End sidebar conditional */}
                         </div>
                     )}
                 </div>
@@ -858,7 +789,7 @@ export default function MoviesPage() {
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 </div>
 
-                <section className="mb-6 md:mb-8 max-w-[1400px] mx-auto px-6 lg:px-12 relative">
+                <section className="mb-6 md:mb-8 max-w-[1400px] mx-auto px-6 lg:px-12 relative hidden">
                     {/* Subtle ambient glow for the bottom region */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-[var(--accent)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
                     
@@ -904,7 +835,7 @@ export default function MoviesPage() {
                     </div>
                 </section>
 
-                <section className="mb-32 max-w-[900px] mx-auto px-6 lg:px-12">
+                <section className="mb-32 max-w-[900px] mx-auto px-6 lg:px-12 hidden">
                     <h2 className="text-heading mb-6 md:mb-8 flex items-center gap-4 justify-center">
                         <Info className="w-6 h-6 text-[var(--accent)]" /> Frequently Asked Questions
                     </h2>
@@ -947,19 +878,19 @@ export default function MoviesPage() {
 // Section Header Component — memoized to avoid re-renders on tab/provider changes
 const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, isFeatured = false }: { icon: any; title: string; color: string; isFeatured?: boolean }) {
     return (
-        <div className={`flex items-end gap-3 md:gap-4 mb-6 text-[var(--text-main)] transition-all ${isFeatured ? 'ml-2' : ''}`}>
+        <div className="flex items-end gap-2.5 md:gap-3 mb-3 md:mb-4 text-[var(--text-main)] transition-all">
             {isFeatured ? (
-                <div className="w-1.5 h-10 bg-gradient-to-t from-[var(--accent)] to-[var(--accent)] rounded-full shadow-[0_0_15px_rgba(88,101,242,0.6)]" />
+                <div className="w-1.5 h-8 bg-gradient-to-t from-[var(--accent)] to-[var(--accent)] rounded-full shadow-[0_0_15px_rgba(249,115,22,0.45)]" />
             ) : (
-                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_rgba(88,101,242,0.4)]" />
+                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.35)]" />
             )}
             <div className="flex flex-col">
                 <div className="flex items-center gap-2 md:gap-3">
-                    <Icon className={`${isFeatured ? 'w-6 h-6 md:w-7 md:h-7' : 'w-5 h-5'} text-[var(--accent)] drop-shadow-md`} />
-                    <h2 className={`${isFeatured ? 'text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-lg md:text-xl font-bold tracking-tight font-sora'}`}>{title}</h2>
+                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-[var(--accent)] drop-shadow-md`} />
+                    <h2 className={`${isFeatured ? 'text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base md:text-lg font-black tracking-tight font-sora'}`}>{title}</h2>
                 </div>
                 {isFeatured && (
-                    <p className="text-[11px] md:text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1 ml-1 opacity-80">Featured Collection</p>
+                    <p className="text-[9px] md:text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mt-0.5 ml-0.5 opacity-75">Featured Collection</p>
                 )}
             </div>
         </div>

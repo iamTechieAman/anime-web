@@ -26,7 +26,7 @@ export default function DesktopSidebar() {
     return (
         <aside className="peer/sidebar fixed left-0 top-0 bottom-0 w-[72px] hover:w-[220px] transition-[width,border-color,box-shadow] duration-300 ease-in-out bg-[var(--bg-surface)] border-r border-[var(--border-color)] hidden md:flex flex-col py-5 z-[60] overflow-hidden group/sidebar">
             {/* Logo */}
-            <Link href="/" className="mb-5 mx-auto group pointer-events-auto flex items-center justify-center w-full px-4 relative">
+            <Link href="/" className="mb-5 mx-auto group pointer-events-auto flex items-center justify-center w-full px-4 relative overflow-hidden">
                 <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
                     <img 
                         src="/logo.webp" 
@@ -34,7 +34,7 @@ export default function DesktopSidebar() {
                         className="w-full h-full object-contain"
                     />
                 </div>
-                <span className="text-white font-black font-sora text-sm opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 absolute left-14 tracking-tighter uppercase">
+                <span className="text-white font-black font-sora text-sm opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 absolute left-14 tracking-tight uppercase whitespace-nowrap">
                     ToonPlayer
                 </span>
             </Link>

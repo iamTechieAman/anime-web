@@ -759,7 +759,7 @@ p, .text-body {
 }
 
 .glow-orange {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.35), 0 0 60px rgba(249, 115, 22, 0.12);
 }
 
 .glow-blue {
@@ -772,35 +772,35 @@ p, .text-body {
 
 .responsive-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(132px, 100%), 1fr));
   gap: 12px;
   width: 100%;
 }
 
 @media (min-width: 640px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
     gap: 16px;
   }
 }
 
 @media (min-width: 1024px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
     gap: 18px;
   }
 }
 
 @media (min-width: 1440px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
   }
 }
 
 @media (min-width: 1920px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 24px;
   }
 }
@@ -1421,6 +1421,73 @@ main, .relative.z-10 {
   display: none !important; /* Chrome, Safari, Opera */
 }
 
+/* Edge-to-edge OTT rows: auto-fit cards fill every pixel of the content width. */
+.ott-card-grid {
+  --ott-card-min: 126px;
+  --ott-card-gap: clamp(8px, 1vw, 16px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--ott-card-min), 100%), 1fr));
+  gap: var(--ott-card-gap);
+  width: 100%;
+  padding: clamp(8px, 1vw, 14px) 0 clamp(18px, 1.8vw, 28px);
+  align-items: stretch;
+}
+
+.ott-card-grid-large {
+  --ott-card-min: 132px;
+}
+
+.continue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: clamp(12px, 1.2vw, 18px);
+  width: 100%;
+  padding-bottom: 18px;
+}
+
+@media (min-width: 1024px) {
+  .continue-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 640px) {
+  .ott-card-grid {
+    --ott-card-min: 140px;
+  }
+  .ott-card-grid-large {
+    --ott-card-min: 150px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ott-card-grid {
+    --ott-card-min: 155px;
+  }
+  .ott-card-grid-large {
+    --ott-card-min: 168px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .ott-card-grid {
+    --ott-card-min: 172px;
+  }
+  .ott-card-grid-large {
+    --ott-card-min: 188px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .ott-card-grid {
+    --ott-card-min: 190px;
+    --ott-card-gap: 18px;
+  }
+  .ott-card-grid-large {
+    --ott-card-min: 210px;
+  }
+}
+
 /* Netflix Snap-Align Cards */
 .netflix-card-snap {
   scroll-snap-align: start !important;
@@ -1436,7 +1503,7 @@ main, .relative.z-10 {
   border-radius: 12px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.58), 0 0 0 1px rgba(255, 255, 255, 0.015);
   transform: translate3d(0, 0, 0);
   will-change: transform, box-shadow;
   transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
@@ -1447,7 +1514,7 @@ main, .relative.z-10 {
 
 .premium-card-container:hover {
   transform: translate3d(0, -6px, 0) scale3d(1.03, 1.03, 1.03);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 15px rgba(249, 115, 22, 0.15);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.82), 0 0 28px rgba(249, 115, 22, 0.22);
   border-color: rgba(249, 115, 22, 0.35);
   z-index: 10;
 }
@@ -1481,6 +1548,84 @@ main, .relative.z-10 {
 
 .premium-card-container:hover .premium-card-overlay-content {
   transform: translate3d(0, 0, 0);
+}
+
+/* Clerk auth surfaces: force a premium dark OTT treatment everywhere. */
+.cl-rootBox,
+.cl-cardBox,
+.cl-userButtonPopoverCard,
+.cl-modalContent,
+.cl-signIn-root,
+.cl-signUp-root {
+  color: #f8fafc !important;
+}
+
+.cl-card,
+.cl-cardBox,
+.cl-userButtonPopoverCard,
+.cl-modalContent {
+  background: rgba(24, 24, 34, 0.98) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.82), 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(22px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.35) !important;
+}
+
+.cl-headerTitle,
+.cl-navbarButton,
+.cl-profileSectionTitle,
+.cl-userButtonPopoverActionButtonText,
+.cl-userPreviewMainIdentifier,
+.cl-formFieldLabel,
+.cl-identityPreviewText,
+.cl-footerActionText {
+  color: #f8fafc !important;
+}
+
+.cl-headerSubtitle,
+.cl-profileSectionContent,
+.cl-userPreviewSecondaryIdentifier,
+.cl-dividerText,
+.cl-formFieldHintText,
+.cl-breadcrumbsItem {
+  color: #a1a1aa !important;
+}
+
+.cl-userButtonPopoverActionButton,
+.cl-menuButton,
+.cl-accordionTriggerButton {
+  color: #e5e7eb !important;
+  border-radius: 12px !important;
+}
+
+.cl-userButtonPopoverActionButton:hover,
+.cl-menuButton:hover,
+.cl-accordionTriggerButton:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.075) !important;
+}
+
+.cl-formFieldInput,
+.cl-otpCodeFieldInput {
+  background: rgba(10, 10, 14, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+}
+
+.cl-formFieldInput:focus,
+.cl-otpCodeFieldInput:focus {
+  border-color: rgba(245, 158, 11, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16) !important;
+}
+
+.cl-formButtonPrimary {
+  background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 34px rgba(249, 115, 22, 0.28) !important;
 }
 
 /* Row Edge-Fade Masks (simulating Netflix horizontal row fades) */
@@ -1608,7 +1753,7 @@ main, .relative.z-10 {
   html { font-size: 14px; }
 
   .responsive-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(118px, 100%), 1fr)) !important;
     gap: 8px !important;
   }
 
@@ -1637,7 +1782,7 @@ main, .relative.z-10 {
   html { font-size: 15px; }
 
   .responsive-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(112px, 100%), 1fr)) !important;
     gap: 8px !important;
   }
 }
@@ -1741,7 +1886,7 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 481px) and (max-width: 1024px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
     gap: 14px !important;
   }
 
@@ -1766,13 +1911,12 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 1025px) and (max-width: 1440px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)) !important;
     gap: 18px !important;
   }
 
-  /* Cap max card width so they don't stretch on 1080p wide layouts */
   .responsive-grid > * {
-    max-width: 200px;
+    max-width: none;
   }
 
   /* Comfortable reading width for long-form content */
@@ -1793,8 +1937,8 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 1441px) and (max-width: 2560px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(175px, 220px)) !important;
-    justify-content: start;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)) !important;
+    justify-content: stretch;
     gap: 22px !important;
   }
 
@@ -1817,9 +1961,9 @@ main, .relative.z-10 {
 
   /* Large grid columns with generous spacing */
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 240px)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
     gap: 28px !important;
-    justify-content: start;
+    justify-content: stretch;
   }
 
   /* Bigger sidebar for TV */
@@ -1921,7 +2065,7 @@ main, .relative.z-10 {
   html { font-size: 22px; }
 
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 280px)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
     gap: 32px !important;
   }
 
@@ -1950,7 +2094,7 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 568px) and (max-width: 820px) and (orientation: landscape) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
     gap: 10px !important;
   }
 

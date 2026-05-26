@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, History as HistoryIcon, LogOut, Bookmark, Clock, TrendingUp, Sparkles } from "lucide-react";
+import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, Bookmark, Clock, TrendingUp, Sparkles, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
@@ -10,7 +10,7 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { formatDistanceToNow } from 'date-fns';
-import { UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 
 import Fuse from "fuse.js";
 
@@ -40,6 +40,7 @@ export default function Header() {
   const [filterStatus, setFilterStatus] = useState("");
   const { setShowProfileSettings } = useMobileUI();
   const { isAdBlockEnabled, toggleAdBlock } = useAdBlock();
+  const { isLoaded: isUserLoaded, isSignedIn } = useUser();
   const [isMounted, setIsMounted] = useState(false);
   const [globalCatalog, setGlobalCatalog] = useState<any[]>([]);
   const fuseRef = useRef<Fuse<any> | null>(null);
@@ -288,10 +289,10 @@ export default function Header() {
       </AnimatePresence>
 
       {/* === FLEX ROW: Logo | Search (desktop) | Actions === */}
-      <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4">
+      <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4 min-w-0">
         {/* ── LOGO ── */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
-          <div className="w-7 h-7 relative flex items-center justify-center">
+        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group max-w-[148px] sm:max-w-none overflow-hidden" onClick={clearSearch}>
+          <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
             <motion.div 
               className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-lg opacity-30 group-hover:opacity-55 transition-opacity"
               animate={{ scale: [1, 1.15, 1] }}
@@ -303,8 +304,8 @@ export default function Header() {
               className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.45)] group-hover:scale-105 transition-transform duration-300 mix-blend-screen"
             />
           </div>
-          <div className="flex flex-col">
-            <span className="text-base md:text-xl font-black tracking-tighter text-white font-sora block leading-tight uppercase">
+          <div className="flex flex-col min-w-0">
+            <span className="text-base md:text-xl font-black tracking-tight text-white font-sora block leading-tight uppercase whitespace-nowrap">
               Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
             </span>
             {/* Hide tagline on small phones */}
@@ -704,27 +705,44 @@ export default function Header() {
             </div>
           </div>
 
-          {/* User Button — always visible */}
-          <div className="flex items-center justify-center pl-1.5 md:pl-2 border-l border-white/[0.08]">
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  label="Watchlist"
-                  labelIcon={<Bookmark className="w-3.5 h-3.5 text-pink-400" />}
-                  href="/watchlist"
-                />
-                <UserButton.Link
-                  label="Watch History"
-                  labelIcon={<Clock className="w-3.5 h-3.5 text-orange-400" />}
-                  href="/history"
-                />
-                <UserButton.Link
-                  label="Profile Settings"
-                  labelIcon={<User className="w-3.5 h-3.5 text-blue-400" />}
-                  href="/profile"
-                />
-              </UserButton.MenuItems>
-            </UserButton>
+          {/* User account — readable signed-out and signed-in states */}
+          <div className="profile-action-shell flex items-center justify-center pl-1.5 md:pl-2 border-l border-white/[0.08]">
+            {isUserLoaded && !isSignedIn && (
+              <SignInButton mode="modal">
+                <button className="h-10 px-3 md:px-4 rounded-full bg-white text-black hover:bg-orange-100 active:scale-95 transition-all font-black text-xs md:text-sm flex items-center gap-2 shadow-[0_10px_24px_rgba(255,255,255,0.12)]">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </button>
+              </SignInButton>
+            )}
+            {isUserLoaded && isSignedIn && (
+              <UserButton
+                appearance={{
+                  elements: {
+                    userButtonAvatarBox: "w-9 h-9 md:w-10 md:h-10 ring-2 ring-orange-500/55 shadow-[0_0_18px_rgba(249,115,22,0.34)]",
+                    userButtonTrigger: "rounded-full focus:shadow-[0_0_0_3px_rgba(249,115,22,0.28)]"
+                  }
+                }}
+              >
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Watchlist"
+                    labelIcon={<Bookmark className="w-3.5 h-3.5 text-pink-400" />}
+                    href="/watchlist"
+                  />
+                  <UserButton.Link
+                    label="Watch History"
+                    labelIcon={<Clock className="w-3.5 h-3.5 text-orange-400" />}
+                    href="/history"
+                  />
+                  <UserButton.Link
+                    label="Profile Settings"
+                    labelIcon={<User className="w-3.5 h-3.5 text-blue-400" />}
+                    href="/profile"
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            )}
           </div>
         </div>
       </div>

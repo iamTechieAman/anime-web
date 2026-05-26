@@ -13,8 +13,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
 import { ClerkProvider } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import NetflixAuthGate from "@/components/NetflixAuthGate";
 
 
 const sora = Sora({
@@ -110,7 +108,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth();
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
@@ -274,13 +271,9 @@ export default async function RootLayout({
                 <WatchProvider>
                   <GlobalErrorListener />
 
-                  {userId ? (
-                    <LayoutContent>
-                      {children}
-                    </LayoutContent>
-                  ) : (
-                    <NetflixAuthGate />
-                  )}
+                  <LayoutContent>
+                    {children}
+                  </LayoutContent>
 
                   <Toaster 
                     position="bottom-center" 
