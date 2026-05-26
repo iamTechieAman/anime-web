@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import WatchClient from "./WatchClient";
 
-export const runtime = 'edge';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
