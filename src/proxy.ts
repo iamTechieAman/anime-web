@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { clerkMiddleware } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 // Allowlisted search engine bots — NEVER block these
 const ALLOWED_BOTS = [
@@ -19,7 +19,7 @@ const BLOCKED_UAS = [
     'harvest', 'emailcollector', 'linkextractor',
 ];
 
-export function middleware(request: NextRequest) {
+export default clerkMiddleware(async (auth, request) => {
     const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
     // Allow requests with empty user agents from internal Next.js prefetching
@@ -60,11 +60,15 @@ export function middleware(request: NextRequest) {
     }
 
     return response;
-}
+});
 
-// Optimize matcher to skip static files and images
 export const config = {
-    matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|_vercel|images|logo|icon|manifest|robots|sitemap|ads.txt|google).*)',
-    ],
-}
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+    // Always run for Clerk-specific frontend API routes
+    '/__clerk/(.*)',
+  ],
+};

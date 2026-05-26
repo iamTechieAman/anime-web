@@ -10,6 +10,7 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { formatDistanceToNow } from 'date-fns';
+import { UserButton } from "@clerk/nextjs";
 
 import Fuse from "fuse.js";
 
@@ -702,71 +703,26 @@ export default function Header() {
             </div>
           </div>
 
-          <div ref={profileRef} className="relative">
-            <button 
-              aria-label="Profile Menu"
-              onClick={() => {
-                setShowProfileDropdown(v => !v);
-                setShowNotifications(false);
-                setShowFilters(false);
-              }}
-              className="flex items-center gap-3 p-1 pr-3 hover:bg-[var(--bg-card)] rounded-full transition-all border border-transparent hover:border-[var(--border-color)] group"
-            >
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[2px] transition-transform group-hover:scale-105 shadow-lg shadow-orange-500/20">
-                <div className="w-full h-full bg-[var(--bg-main)] rounded-full flex items-center justify-center overflow-hidden">
-                  <img src={profile?.avatar || "https://api.dicebear.com/9.x/avataaars/svg?seed=Felix"} alt="User Avatar" className="w-full h-full object-cover" />
-                </div>
-              </div>
-              <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 ${showProfileDropdown ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-              {showProfileDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-64 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(168,85,247,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
-                >
-                  <div className="p-4 border-b border-[var(--border-color)] bg-white/5">
-                    <p className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Account</p>
-                    <p className="text-sm font-bold text-white truncate">{profile?.name || "Guest Account"}</p>
-                  </div>
-                  <div className="p-2">
-                    <Link href="/history" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
-                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-                        <HistoryIcon className="w-4 h-4 text-orange-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-white">Watch History</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Continue where you left off</p>
-                      </div>
-                    </Link>
-                    <Link href="/watchlist" className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group">
-                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
-                        <Bookmark className="w-4 h-4 text-pink-400" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-bold text-white">Watchlist</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Saved shows & movies</p>
-                      </div>
-                    </Link>
-                    <Link 
-                      href="/profile"
-                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-colors group"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                        <User className="w-4 h-4 text-blue-400" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-bold text-white">My Profile</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Settings & Notifications</p>
-                      </div>
-                    </Link>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="flex items-center justify-center pl-2 border-l border-white/[0.08]">
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  label="Watchlist"
+                  labelIcon={<Bookmark className="w-3.5 h-3.5 text-pink-400" />}
+                  href="/watchlist"
+                />
+                <UserButton.Link
+                  label="Watch History"
+                  labelIcon={<Clock className="w-3.5 h-3.5 text-orange-400" />}
+                  href="/history"
+                />
+                <UserButton.Link
+                  label="Profile Settings"
+                  labelIcon={<User className="w-3.5 h-3.5 text-blue-400" />}
+                  href="/profile"
+                />
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
         </div>
       </div>

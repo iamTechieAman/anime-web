@@ -4,29 +4,20 @@ import { useEffect, useState } from "react";
 import { User, Bell, Clock, Bookmark, LogOut, Settings, BellRing } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { useWatch } from "@/context/WatchContext";
 
 export default function ProfilePage() {
-    const [user, setUser] = useState<any>(null);
+    const { user, isLoaded } = useUser();
+    const { signOut } = useClerk();
+    const { history, watchlist } = useWatch();
     const [pushEnabled, setPushEnabled] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/user/me')
-            .then(res => {
-                if (res.ok) return res.json();
-                throw new Error('Not logged in');
-            })
-            .then(data => {
-                setUser(data.user);
-                // Check if browser has push permission
-                if ("Notification" in window && Notification.permission === "granted") {
-                    setPushEnabled(true);
-                }
-            })
-            .catch(() => {
-                window.location.href = '/login';
-            })
-            .finally(() => setLoading(false));
+        // Check if browser has push permission
+        if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+            setPushEnabled(true);
+        }
     }, []);
 
     const urlBase64ToUint8Array = (base64String: string) => {
@@ -80,18 +71,18 @@ export default function ProfilePage() {
         }
     };
 
-    const handleLogout = () => {
-        // Since we use httpOnly cookie, we should clear it. 
-        // For now, we can just delete the cookie if it wasn't httpOnly, 
-        // but since it is, we would need a /api/auth/logout. 
-        // As a quick fix, just redirect to login which could override it, or clear local state.
-        document.cookie = "toonplayer_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    const handleLogout = async () => {
+        await signOut();
         localStorage.clear();
         window.location.href = "/";
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+    if (!isLoaded) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
     if (!user) return null;
+
+    const displayName = user.fullName || user.username || user.primaryEmailAddress?.emailAddress.split('@')[0] || "ToonPlayer User";
+    const displayEmail = user.primaryEmailAddress?.emailAddress || "clerk-auth-user@toonplayer.in";
+    const displayAvatar = user.imageUrl || `https://api.dicebear.com/9.x/avataaars/svg?seed=${displayName}`;
 
     return (
         <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-24 pb-24 md:pl-[72px]">
@@ -101,12 +92,12 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-6 mb-12 p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)]">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[3px]">
                         <div className="w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden">
-                            <img src={user.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.name}`} alt="Avatar" className="w-full h-full object-cover" />
+                            <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold font-sora">{user.name}</h1>
-                        <p className="text-[var(--text-muted)] text-sm">{user.email}</p>
+                        <h1 className="text-2xl font-bold font-sora">{displayName}</h1>
+                        <p className="text-[var(--text-muted)] text-sm">{displayEmail}</p>
                     </div>
                 </div>
 
@@ -122,7 +113,7 @@ export default function ProfilePage() {
                                 <Clock className="w-5 h-5 text-[var(--text-muted)]" />
                                 <span className="font-medium">Watch History</span>
                             </div>
-                            <span className="text-xs text-[var(--text-muted)] bg-white/5 px-2 py-1 rounded-md">{user.history?.length || 0} items</span>
+                            <span className="text-xs text-[var(--text-muted)] bg-white/5 px-2 py-1 rounded-md">{history?.length || 0} items</span>
                         </Link>
 
                         <Link href="/watchlist" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
@@ -130,10 +121,10 @@ export default function ProfilePage() {
                                 <Bookmark className="w-5 h-5 text-[var(--text-muted)]" />
                                 <span className="font-medium">My Watchlist</span>
                             </div>
-                            <span className="text-xs text-[var(--text-muted)] bg-white/5 px-2 py-1 rounded-md">{user.watchlist?.length || 0} items</span>
+                            <span className="text-xs text-[var(--text-muted)] bg-white/5 px-2 py-1 rounded-md">{watchlist?.length || 0} items</span>
                         </Link>
 
-                        <button onClick={handleLogout} className="w-full flex items-center gap-3 p-4 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors text-left">
+                        <button onClick={handleLogout} className="w-full flex items-center gap-3 p-4 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors text-left cursor-pointer">
                             <LogOut className="w-5 h-5" />
                             <span className="font-medium">Log Out</span>
                         </button>
@@ -159,7 +150,7 @@ export default function ProfilePage() {
                             ) : (
                                 <button 
                                     onClick={enablePush}
-                                    className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-500 text-white rounded-xl font-bold transition-colors"
+                                    className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold transition-colors cursor-pointer"
                                 >
                                     Enable Notifications
                                 </button>

@@ -58,6 +58,17 @@
     },
     {
       "adult": false,
+      "id": 2106,
+      "name": "Walt Disney",
+      "original_name": "Walt Disney",
+      "media_type": "person",
+      "popularity": 1.6768,
+      "gender": 2,
+      "known_for_department": "Production",
+      "profile_path": "/fnB3Yt4dPiVODHzfLwntISAvbhw.jpg"
+    },
+    {
+      "adult": false,
       "id": 226099,
       "name": "Sandy Ali",
       "original_name": "Sandy Ali",
@@ -99,17 +110,6 @@
       "gender": 1,
       "known_for_department": null,
       "profile_path": "/by5zJpbvpCJnR6Fmga0wcmmaGvV.jpg"
-    },
-    {
-      "adult": false,
-      "id": 2106,
-      "name": "Walt Disney",
-      "original_name": "Walt Disney",
-      "media_type": "person",
-      "popularity": 1.6768,
-      "gender": 2,
-      "known_for_department": "Production",
-      "profile_path": "/fnB3Yt4dPiVODHzfLwntISAvbhw.jpg"
     },
     {
       "adult": false,

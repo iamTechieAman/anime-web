@@ -18,11 +18,31 @@
       "popularity": 881.7827,
       "first_air_date": "2019-07-25",
       "softcore": false,
-      "vote_average": 8.461,
-      "vote_count": 12677,
+      "vote_average": 8.46,
+      "vote_count": 12679,
       "origin_country": [
         "US"
       ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/1pKFDggvtk23zcn1vUcPiKyuHxM.jpg",
+      "id": 1339713,
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27
+      ],
+      "popularity": 334.7747,
+      "release_date": "2026-04-16",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.878,
+      "vote_count": 271
     },
     {
       "adult": false,
@@ -47,26 +67,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/1pKFDggvtk23zcn1vUcPiKyuHxM.jpg",
-      "id": 1339713,
-      "title": "Obsession",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27
-      ],
-      "popularity": 334.7747,
-      "release_date": "2026-04-16",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.862,
-      "vote_count": 268
-    },
-    {
-      "adult": false,
       "backdrop_path": "/wMrV8SLne1jHLeYS0lLrA1Tf86P.jpg",
       "id": 1304313,
       "title": "Lee Cronin's The Mummy",
@@ -83,8 +83,8 @@
       "release_date": "2026-04-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.035,
-      "vote_count": 1188
+      "vote_average": 8.033,
+      "vote_count": 1191
     },
     {
       "adult": false,
@@ -105,7 +105,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.627,
-      "vote_count": 4099
+      "vote_count": 4101
     },
     {
       "adult": false,
@@ -128,8 +128,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 7.962,
-      "vote_count": 1873
+      "vote_average": 7.964,
+      "vote_count": 1875
     },
     {
       "adult": false,
@@ -150,7 +150,7 @@
       "release_date": "2026-05-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.808,
+      "vote_average": 6.8,
       "vote_count": 299
     },
     {
@@ -196,7 +196,7 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.771,
+      "vote_average": 6.8,
       "vote_count": 229
     },
     {
@@ -246,28 +246,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
-      "id": 85552,
-      "name": "Euphoria",
-      "original_name": "Euphoria",
-      "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
-      "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        18
-      ],
-      "popularity": 323.108,
-      "first_air_date": "2019-06-16",
-      "softcore": false,
-      "vote_average": 8.29,
-      "vote_count": 10697,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
       "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
       "id": 273240,
       "name": "Off Campus",
@@ -284,6 +262,28 @@
       "softcore": false,
       "vote_average": 9.145,
       "vote_count": 259,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
+      "id": 85552,
+      "name": "Euphoria",
+      "original_name": "Euphoria",
+      "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
+      "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18
+      ],
+      "popularity": 323.108,
+      "first_air_date": "2019-06-16",
+      "softcore": false,
+      "vote_average": 8.29,
+      "vote_count": 10697,
       "origin_country": [
         "US"
       ]
@@ -335,6 +335,28 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
+      "id": 1083381,
+      "title": "Backrooms",
+      "original_title": "Backrooms",
+      "overview": "A strange doorway appears in the basement of a furniture showroom.",
+      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "popularity": 38.0123,
+      "release_date": "2026-05-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 9.2,
+      "vote_count": 4
+    },
+    {
+      "adult": false,
       "backdrop_path": "/ewlmL0nxo2lLqBj69upgp2gjHpV.jpg",
       "id": 299167,
       "name": "Dutton Ranch",
@@ -375,30 +397,8 @@
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.43,
-      "vote_count": 1196
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
-      "id": 1083381,
-      "title": "Backrooms",
-      "original_title": "Backrooms",
-      "overview": "A strange doorway appears in the basement of a furniture showroom.",
-      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27,
-        9648,
-        878
-      ],
-      "popularity": 38.0123,
-      "release_date": "2026-05-27",
-      "softcore": false,
-      "video": false,
-      "vote_average": 9.2,
-      "vote_count": 4
+      "vote_average": 8.431,
+      "vote_count": 1197
     },
     {
       "adult": false,
@@ -420,7 +420,7 @@
       "first_air_date": "2013-12-02",
       "softcore": false,
       "vote_average": 8.7,
-      "vote_count": 10871,
+      "vote_count": 10873,
       "origin_country": [
         "US"
       ]

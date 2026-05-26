@@ -16,6 +16,7 @@
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.0.1",
     "@capacitor/core": "^8.0.1",
+    "@clerk/nextjs": "^7.4.1",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",

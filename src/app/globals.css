@@ -1488,3 +1488,10 @@ main, .relative.z-10 {
   }
 }
 
+@media (min-width: 768px) {
+  .peer\/sidebar:hover ~ div nav {
+    left: 220px !important;
+  }
+}
+
+

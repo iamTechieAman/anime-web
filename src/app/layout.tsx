@@ -12,6 +12,9 @@ import GlobalErrorListener from "@/components/GlobalErrorListener";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
+import { ClerkProvider, Show } from "@clerk/nextjs";
+import NetflixAuthGate from "@/components/NetflixAuthGate";
+
 
 const sora = Sora({
   variable: "--font-sora",
@@ -167,37 +170,62 @@ export default function RootLayout({
         className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[#0b0b0f] text-white overflow-x-hidden transition-colors duration-300 selection:bg-orange-500/25`}
         suppressHydrationWarning
       >
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: '#f97316',
+              colorBackground: '#050505',
+              colorInputBackground: '#141414',
+              colorText: '#ffffff',
+              colorTextSecondary: '#a1a1aa',
+              colorDanger: '#ef4444',
+            },
+            elements: {
+              card: 'bg-[#0b0b0f] border border-white/10 rounded-2xl shadow-xl',
+              headerTitle: 'text-white font-sora font-black',
+              headerSubtitle: 'text-zinc-400 font-bold',
+              socialButtonsIconButton: 'bg-white/5 border border-white/10 text-white hover:bg-white/10',
+              formButtonPrimary: 'bg-orange-500 hover:bg-orange-600 text-white font-bold',
+              footerActionText: 'text-zinc-400',
+              footerActionLink: 'text-orange-400 hover:text-orange-300 font-bold',
+            }
+          }}
+        >
+          <AdBlockProvider>
+            <MobileUIProvider>
+              <NotificationProvider>
+                <WatchProvider>
+                  <GlobalErrorListener />
 
-        <AdBlockProvider>
-          <MobileUIProvider>
-            <NotificationProvider>
-              <WatchProvider>
-                <GlobalErrorListener />
+                  <Show when="signed-in">
+                    <LayoutContent>
+                      {children}
+                    </LayoutContent>
+                  </Show>
+                  <Show when="signed-out">
+                    <NetflixAuthGate />
+                  </Show>
 
-
-
-                <LayoutContent>
-                  {children}
-                </LayoutContent>
-                <Toaster 
-                  position="bottom-center" 
-                  toastOptions={{
-                    style: {
-                      background: '#141414',
-                      color: '#fff',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: '12px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                    },
-                  }}
-                />
-                <SpeedInsights />
-                <Analytics />
-              </WatchProvider>
-            </NotificationProvider>
-          </MobileUIProvider>
-        </AdBlockProvider>
+                  <Toaster 
+                    position="bottom-center" 
+                    toastOptions={{
+                      style: {
+                        background: '#141414',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '12px',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                      },
+                    }}
+                  />
+                  <SpeedInsights />
+                  <Analytics />
+                </WatchProvider>
+              </NotificationProvider>
+            </MobileUIProvider>
+          </AdBlockProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

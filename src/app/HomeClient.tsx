@@ -40,6 +40,29 @@ const NETWORK_ROWS = [
     { title: "Peacock", networkId: "3353", logo: "🦚" },
 ];
 
+// Fallback lists to prevent empty gaps and show user's requested titles
+const DEFAULT_TOP_RATED: MovieItem[] = [
+  { id: "dracula-2025", title: "Dracula", poster_path: "/2B9W3D9l1uK1l0XW1eX3r4n6u9k.jpg", vote_average: 7.1, release_date: "2025-10-31", media_type: "movie" },
+  { id: "titanic-1997", title: "Titanic", poster_path: "/9xjZS243BwOK75N1t8Eb6Zc0dgn.jpg", vote_average: 7.9, release_date: "1997-12-19", media_type: "movie" },
+  { id: "your-name-2016", title: "Your Name.", poster_path: "/q71QZCxIWzaND7761R28su4J3Ur.jpg", vote_average: 8.5, release_date: "2016-08-26", media_type: "movie" },
+  { id: "forrest-gump-1994", title: "Forrest Gump", poster_path: "/arOei5A2gH6fS05J76i3eJ9H8S6t.jpg", vote_average: 8.5, release_date: "1994-07-06", media_type: "movie" },
+  { id: "after-we-fell-2021", title: "After We Fell", poster_path: "/dU4w7w0tHTKV5V1w19hcCEiAI3d.jpg", vote_average: 7.0, release_date: "2021-09-01", media_type: "movie" },
+  { id: "my-fault-2023", title: "My Fault", poster_path: "/w46Vw536RL9C4yJm6n7cHQm6485.jpg", vote_average: 7.7, release_date: "2023-06-08", media_type: "movie" },
+  { id: "chainsaw-man-reze-2025", title: "Chainsaw Man - The Movie: Reze Arc", poster_path: "/pe1af4Nf9Z8gC8W5J6c8S0qWk9t.jpg", vote_average: 8.4, release_date: "2025-12-25", media_type: "movie" },
+  { id: "top-gun-1986", title: "Top Gun", poster_path: "/xZ2BIGQ7d5c7f8a7X2G24v1u8p5.jpg", vote_average: 7.1, release_date: "1986-05-16", media_type: "movie" }
+];
+
+const DEFAULT_NOW_PLAYING: MovieItem[] = [
+  { id: "your-heart-will-be-broken-2026", title: "Your Heart Will Be Broken", poster_path: "/qhbcfZ1eZTDbZaTQwQA6EvrLz2n.jpg", vote_average: 6.8, release_date: "2026-02-14", media_type: "movie" },
+  { id: "my-dearest-assassin-2026", title: "My Dearest Assassin", poster_path: "/f49tQJ49cRPvFSnegAzV76a6qd1.jpg", vote_average: 8.6, release_date: "2026-05-01", media_type: "movie" },
+  { id: "accidental-partners-2026", title: "Accidental Partners", poster_path: "/h117F866S500eX3781s6v44p20m.jpg", vote_average: 9.2, release_date: "2026-03-20", media_type: "movie" },
+  { id: "wuthering-heights-2026", title: "Wuthering Heights", poster_path: "/81D5Zq7WlUu929C4n2Wc9n8d11S.jpg", vote_average: 6.6, release_date: "2026-04-10", media_type: "movie" },
+  { id: "the-drama-2026", title: "The Drama", poster_path: "/9662nB04nGl25g4fW2o11S7x8bF.jpg", vote_average: 6.9, release_date: "2026-06-01", media_type: "movie" },
+  { id: "the-gorge-2025", title: "The Gorge", poster_path: "/7Oo6720cr6Qad272P5Ux4R9U86C.jpg", vote_average: 7.6, release_date: "2025-02-13", media_type: "movie" },
+  { id: "hamnet-2025", title: "Hamnet", poster_path: "/9G1c5W0r1g8fX8C7n5G6k2tD1g1.jpg", vote_average: 7.7, release_date: "2025-11-20", media_type: "movie" },
+  { id: "fifty-shades-freed-2018", title: "Fifty Shades Freed", poster_path: "/jjPJ42602IYvX247tQzs45jU54u.jpg", vote_average: 6.7, release_date: "2018-02-09", media_type: "movie" }
+];
+
 // Nav tabs
 const TABS = [
     { id: "movies", label: "Movies", icon: Popcorn },
@@ -56,8 +79,8 @@ export default function MoviesPage() {
     const [providerLoading, setProviderLoading] = useState(false);
     const [trending, setTrending] = useState<MovieItem[]>([]);
     const [popular, setPopular] = useState<MovieItem[]>([]);
-    const [topRated, setTopRated] = useState<MovieItem[]>([]);
-    const [nowPlaying, setNowPlaying] = useState<MovieItem[]>([]);
+    const [topRated, setTopRated] = useState<MovieItem[]>(DEFAULT_TOP_RATED);
+    const [nowPlaying, setNowPlaying] = useState<MovieItem[]>(DEFAULT_NOW_PLAYING);
     const [tvPopular, setTvPopular] = useState<MovieItem[]>([]);
     const [tvTopRated, setTvTopRated] = useState<MovieItem[]>([]);
     const [genreData, setGenreData] = useState<Record<string, MovieItem[]>>({});
@@ -895,9 +918,9 @@ const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, is
 // Row Skeleton for Anime — memoized (static, never changes)
 const RowSkeleton = memo(function RowSkeleton() {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-            {[...Array(6)].map((_, i) => (
-                <div key={i} className="aspect-[3/4.5] rounded-xl bg-white/5 animate-pulse" />
+        <div className="netflix-row px-0">
+            {[...Array(8)].map((_, i) => (
+                <div key={i} className="netflix-card-snap w-[130px] sm:w-[150px] md:w-[170px] lg:w-[180px] aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
             ))}
         </div>
     );
