@@ -34,9 +34,6 @@ export default function DesktopSidebar() {
                         className="w-full h-full object-contain"
                     />
                 </div>
-                <span className="text-white font-black font-sora text-sm opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 absolute left-14 tracking-tight uppercase whitespace-nowrap">
-                    ToonPlayer
-                </span>
             </Link>
 
             {/* Main Navigation */}

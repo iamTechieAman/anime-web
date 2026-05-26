@@ -319,23 +319,13 @@ export default function Header() {
       {/* === FLEX ROW: Logo | Search (desktop) | Actions === */}
       <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4 min-w-0">
         {/* ── LOGO ── */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group overflow-hidden" onClick={clearSearch}>
+        <Link href="/" className="flex items-center cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
             <img 
               src="/logo.webp" 
               alt="ToonPlayer Logo" 
               className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.25)] group-hover:scale-105 transition-transform duration-300"
             />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-base md:text-xl font-black tracking-tight text-white font-sora block leading-tight uppercase whitespace-nowrap">
-              Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
-            </span>
-            {/* Hide tagline on small phones */}
-            <div className="hidden sm:flex items-center gap-1 -mt-0.5 ml-0.5">
-              <span className="text-[8px] uppercase tracking-[0.3em] font-black text-zinc-500">Premium</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shadow-[0_0_6px_rgba(249,115,22,0.7)]" />
-            </div>
           </div>
         </Link>
 
