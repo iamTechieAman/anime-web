@@ -10,6 +10,8 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  // Disable compression since Cloudflare compresses all assets at the Edge
+  compress: false,
   // Prevent OOM errors on Netlify by disabling linting/typescript during the final build
   typescript: {
     ignoreBuildErrors: true,
