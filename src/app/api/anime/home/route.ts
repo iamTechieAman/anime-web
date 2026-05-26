@@ -6,6 +6,8 @@ export async function GET() {
         const hianime = getProvider('hianime');
         const anikai = getProvider('anikai');
         const consumet = getProvider('consumet');
+        const aniwave = getProvider('aniwave');
+        const aniwatchtv = getProvider('aniwatchtv');
 
         // Parallelize fetching with a total timeout
         const timeoutPromise = new Promise((_, reject) => 
@@ -14,14 +16,31 @@ export async function GET() {
 
         const fetchHome = async () => {
             try {
-                // Try Anikai first (verified working scraper — anikai.to)
-                const homeData = await anikai.getHome?.() ?? { trending: [], latest: [], slides: [], completed: [], upcoming: [] };
-                const { trending, latest, slides } = homeData;
+                // Try Aniwave first (aniwaves.ru — live Aniwave mirror)
+                const [trending, latest] = await Promise.all([
+                    aniwave.getTrending?.() ?? Promise.resolve([]),
+                    aniwave.getRecent?.() ?? Promise.resolve([])
+                ]);
                 if (trending.length > 0 || latest.length > 0) {
-                    return { trending, latest, slides: slides || [] };
+                    console.log("[AnimeHome] Successfully fetched from Aniwave");
+                    return { trending, latest, slides: [] };
                 }
             } catch (e) {
-                console.warn("[AnimeHome] Anikai getHome failed, trying HiAnime:", e);
+                console.warn('[AnimeHome] Aniwave failed, trying AniwatchTV:', e);
+            }
+
+            try {
+                // Try AniwatchTV second (aniwatchtv.com.ro — WP site with sub+dub)
+                const [trending, latest] = await Promise.all([
+                    aniwatchtv.getTrending?.() ?? Promise.resolve([]),
+                    aniwatchtv.getRecent?.() ?? Promise.resolve([])
+                ]);
+                if (trending.length > 0 || latest.length > 0) {
+                    console.log("[AnimeHome] Successfully fetched from AniwatchTV");
+                    return { trending, latest, slides: [] };
+                }
+            } catch (e) {
+                console.warn('[AnimeHome] AniwatchTV failed, trying HiAnime:', e);
             }
 
             try {
@@ -32,6 +51,7 @@ export async function GET() {
                 ]);
 
                 if (trending.length > 0 || latest.length > 0) {
+                    console.log("[AnimeHome] Successfully fetched from HiAnime");
                     return { trending, latest, slides: [] };
                 }
             } catch (e) {
@@ -46,23 +66,14 @@ export async function GET() {
                 ]);
 
                 if (trending.length > 0 || latest.length > 0) {
+                    console.log("[AnimeHome] Successfully fetched from Consumet");
                     return { trending, latest, slides: [] };
                 }
             } catch (e) {
-                console.warn("[AnimeHome] Consumet failed, trying Anikai fallback methods:", e);
+                console.error('[AnimeHome] All providers failed:', e);
             }
 
-            try {
-                // Anikai getTrending + getRecent fallback
-                const [trending, latest] = await Promise.all([
-                    anikai.getTrending?.() ?? Promise.resolve([]),
-                    anikai.getRecent?.() ?? Promise.resolve([])
-                ]);
-                return { trending, latest, slides: [] };
-            } catch (e) {
-                console.error("[AnimeHome] All providers failed:", e);
-                return { trending: [], latest: [], slides: [] };
-            }
+            return { trending: [], latest: [], slides: [] };
         };
 
 

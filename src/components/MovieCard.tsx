@@ -93,7 +93,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchStart={handleMouseEnter}
             onTouchEnd={handleMouseLeave}
         >
-        <Link href={mediaType === 'anime' ? `/watch/anime/${item.id}?provider=anikai` : `/watch/${mediaType}/${item.id}`} className="block w-full h-full">
+        <Link href={mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`} className="block w-full h-full">
             <div className="premium-card-container">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (
@@ -195,6 +195,18 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             </div>
                         )}
                     </div>
+                </div>
+            </div>
+            {/* Mobile Title Metadata Block */}
+            <div className="block md:hidden mt-1.5 px-1 pb-1">
+                <h4 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h4>
+                <div className="flex items-center gap-1.5 mt-0.5 text-[9px] text-[var(--text-muted)] font-medium">
+                    {rating && (
+                        <span className="text-[var(--accent-warm)] font-extrabold flex items-center gap-0.5">
+                            ★{rating}
+                        </span>
+                    )}
+                    {year && <span>{year}</span>}
                 </div>
             </div>
         </Link>

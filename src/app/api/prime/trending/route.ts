@@ -27,9 +27,39 @@ export async function GET(request: Request) {
     });
   } catch (error: any) {
     console.error("Trending API error:", error);
+    
+    // Fallback to local static JSON files
+    try {
+      const { searchParams } = new URL(request.url);
+      const type = searchParams.get("type") || "all";
+      
+      let fileName = "trending_all.json";
+      if (type === "movie") {
+        fileName = "trending_movies.json";
+      } else if (type === "person") {
+        fileName = "trending_person.json";
+      }
+      
+      const fallbackUrl = new URL(`/data/${fileName}`, request.url);
+      const fallbackRes = await fetch(fallbackUrl);
+      if (fallbackRes.ok) {
+        const data = await fallbackRes.json();
+        console.log(`[Trending API] Loaded fallback static file: ${fileName}`);
+        return NextResponse.json({
+          results: data.results || [],
+          page: 1,
+          total_pages: 1,
+          total_results: data.results?.length || 0,
+          fromFallback: true
+        });
+      }
+    } catch (fallbackErr: any) {
+      console.error("Trending fallback error:", fallbackErr.message);
+    }
+
     return NextResponse.json(
-      { error: "Failed to fetch trending content" },
-      { status: 500 }
+      { error: "Failed to fetch trending content", results: [], page: 1, total_pages: 1 },
+      { status: 200 }
     );
   }
 }

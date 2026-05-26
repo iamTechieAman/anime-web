@@ -1,0 +1,458 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/ntPgSYKwPg9xKO4VvLJYfInSyZa.jpg",
+      "genre_ids": [
+        18,
+        80,
+        10759,
+        35
+      ],
+      "id": 308014,
+      "origin_country": [
+        "ES"
+      ],
+      "original_language": "es",
+      "original_name": "Berlín y la dama del armiño",
+      "overview": "Hungry for a new heist, Berlin summons the gang to Seville and turns an ambitious duke into the victim of his own plan: to steal a da Vinci masterpiece.",
+      "popularity": 273.1627,
+      "poster_path": "/sTumew0Q01ZHmFneA9cJRi3QUYC.jpg",
+      "first_air_date": "2026-05-15",
+      "softcore": false,
+      "name": "Berlin and the Lady with an Ermine",
+      "vote_average": 8.374,
+      "vote_count": 95
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+      "genre_ids": [
+        10759,
+        9648,
+        10765
+      ],
+      "id": 66732,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Stranger Things",
+      "overview": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
+      "popularity": 147.2972,
+      "poster_path": "/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+      "first_air_date": "2016-07-15",
+      "softcore": false,
+      "name": "Stranger Things",
+      "vote_average": 8.567,
+      "vote_count": 21193
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/y2u7d8evmnTivi3LaVql01Sfea4.jpg",
+      "genre_ids": [
+        10759,
+        35,
+        10765,
+        18
+      ],
+      "id": 259837,
+      "origin_country": [
+        "KR"
+      ],
+      "original_language": "ko",
+      "original_name": "원더풀스",
+      "overview": "A goofy group of townies stumbles into superpowers and fights rising evil as doomsday panic grows in this wild, turn-of-the-century action comedy.",
+      "popularity": 135.4369,
+      "poster_path": "/jj7AYkz2OLRDL1wfJmjTXyWQ5I4.jpg",
+      "first_air_date": "2026-05-15",
+      "softcore": false,
+      "name": "The WONDERfools",
+      "vote_average": 9.2,
+      "vote_count": 96
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
+      "genre_ids": [
+        10765,
+        9648
+      ],
+      "id": 224941,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Boroughs",
+      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
+      "popularity": 142.8969,
+      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
+      "first_air_date": "2026-05-21",
+      "softcore": false,
+      "name": "The Boroughs",
+      "vote_average": 7.141,
+      "vote_count": 46
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/wJxZLiPbXrU601c6e9A6kYLejso.jpg",
+      "genre_ids": [
+        18,
+        10759,
+        80
+      ],
+      "id": 146176,
+      "origin_country": [
+        "ES"
+      ],
+      "original_language": "es",
+      "original_name": "Berlín",
+      "overview": "During his glory days, Berlin and a gang assembled in Paris for one of his greatest plans ever: stealing 44 million euros' worth of jewels in one night.",
+      "popularity": 91.0508,
+      "poster_path": "/69YuvoiWTtK6oyYH2Jl4Q6SgZ59.jpg",
+      "first_air_date": "2023-12-29",
+      "softcore": false,
+      "name": "Berlin",
+      "vote_average": 7.591,
+      "vote_count": 651
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mAXOCbZzvmDa6PCh5dcIPOB51Qc.jpg",
+      "genre_ids": [
+        80,
+        10765
+      ],
+      "id": 63174,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Lucifer",
+      "overview": "Bored and unhappy as the Lord of Hell, Lucifer Morningstar abandoned his throne and retired to Los Angeles, where he has teamed up with LAPD detective Chloe Decker to take down criminals. But the longer he's away from the underworld, the greater the threat that the worst of humanity could escape.",
+      "popularity": 93.7885,
+      "poster_path": "/ekZobS8isE6mA53RAiGDG93hBxL.jpg",
+      "first_air_date": "2016-01-25",
+      "softcore": false,
+      "name": "Lucifer",
+      "vote_average": 8.434,
+      "vote_count": 15448
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jBGjbSDRxOEudW9rmQbWDzJUKq9.jpg",
+      "genre_ids": [
+        10759,
+        80,
+        18
+      ],
+      "id": 67178,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Marvel's The Punisher",
+      "overview": "A former Marine out to punish the criminals responsible for his family's murder finds himself ensnared in a military conspiracy.",
+      "popularity": 88.6539,
+      "poster_path": "/y6wYElX5HaPZItVGJcYGdQO7k8g.jpg",
+      "first_air_date": "2017-11-17",
+      "softcore": false,
+      "name": "Marvel's The Punisher",
+      "vote_average": 8.1,
+      "vote_count": 3104
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qxUGZru2ECF6eYeTATj8a3mn4lX.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 287429,
+      "origin_country": [
+        "JP"
+      ],
+      "original_language": "ja",
+      "original_name": "三人夫婦",
+      "overview": "When a man's ex suggests a three-person marriage with her boyfriend, the trio face jealousy, social stigma and intimacy issues in their unique setup.",
+      "popularity": 132.7656,
+      "poster_path": "/jtfpphgNCoXCeZBE06ui6ipigv7.jpg",
+      "first_air_date": "2025-04-09",
+      "softcore": false,
+      "name": "Two Husbands One Wife",
+      "vote_average": 6.8,
+      "vote_count": 4
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mLKN1dsimKPiXCZ48KED0X8a02t.jpg",
+      "genre_ids": [
+        16,
+        10759,
+        10765
+      ],
+      "id": 45790,
+      "origin_country": [
+        "JP"
+      ],
+      "original_language": "ja",
+      "original_name": "ジョジョの奇妙な冒険",
+      "overview": "Follow the intergenerational feud between the Joestar Family and various forces of evil, the most prominent of which is Dio Brando and his followers.",
+      "popularity": 78.7508,
+      "poster_path": "/ogAWwbh3frWtiTyyXrZaVFtqCgp.jpg",
+      "first_air_date": "2012-10-06",
+      "softcore": false,
+      "name": "JoJo's Bizarre Adventure",
+      "vote_average": 8.558,
+      "vote_count": 1589
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/cLTAda6fMRirkCY1xfO4pmcHVkk.jpg",
+      "genre_ids": [
+        10759,
+        18
+      ],
+      "id": 200709,
+      "origin_country": [
+        "KR"
+      ],
+      "original_language": "ko",
+      "original_name": "약한영웅",
+      "overview": "With the aid of unexpected friends, a gifted but introverted student confronts bullies and violent foes — unaware of how dangerous his world will become.",
+      "popularity": 80.5695,
+      "poster_path": "/dbqNBeLvAWFqpAvdBc0cecaqytT.jpg",
+      "first_air_date": "2022-11-18",
+      "softcore": false,
+      "name": "Weak Hero",
+      "vote_average": 8.666,
+      "vote_count": 427
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/g0UxlBGBBFTYgv4Gk2b3ZlZCjQa.jpg",
+      "genre_ids": [
+        18,
+        9648
+      ],
+      "id": 210268,
+      "origin_country": [
+        "JP"
+      ],
+      "original_language": "ja",
+      "original_name": "御手洗家、炎上する",
+      "overview": "After her mother took the blame for a tragic fire 13 years ago, Anzu plots revenge by working as a housekeeper under a pseudonym for her icy stepmother.",
+      "popularity": 62.3893,
+      "poster_path": "/s4Ot7YP5GjEW8ggmjXbf79u6b2N.jpg",
+      "first_air_date": "2023-07-13",
+      "softcore": false,
+      "name": "Burn the House Down",
+      "vote_average": 7.164,
+      "vote_count": 70
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/eGPH1IwktalozwCmeLTp3aPbHGC.jpg",
+      "genre_ids": [
+        10764
+      ],
+      "id": 4656,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Raw",
+      "overview": "A regularly scheduled, live, year-round program featuring some of the biggest WWE Superstars.",
+      "popularity": 75.5298,
+      "poster_path": "/fstEe6RsyNyPUnMwNcL20iNl0nE.jpg",
+      "first_air_date": "1993-01-11",
+      "softcore": false,
+      "name": "Raw",
+      "vote_average": 6.832,
+      "vote_count": 357
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/dg3OindVAGZBjlT3xYKqIAdukPL.jpg",
+      "genre_ids": [
+        10765,
+        18,
+        9648
+      ],
+      "id": 42009,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "Black Mirror",
+      "overview": "Twisted tales run wild in this mind-bending anthology series that reveals humanity's worst traits, greatest innovations and more.",
+      "popularity": 67.1014,
+      "poster_path": "/seN6rRfN0I6n8iDXjlSMk1QjNcq.jpg",
+      "first_air_date": "2011-12-04",
+      "softcore": false,
+      "name": "Black Mirror",
+      "vote_average": 8.286,
+      "vote_count": 6180
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2meX1nMdScFOoV4370rqHWKmXhY.jpg",
+      "genre_ids": [
+        10759,
+        9648,
+        18
+      ],
+      "id": 93405,
+      "origin_country": [
+        "KR"
+      ],
+      "original_language": "ko",
+      "original_name": "오징어 게임",
+      "overview": "Hundreds of cash-strapped players accept a strange invitation to compete in children's games. Inside, a tempting prize awaits — with deadly high stakes.",
+      "popularity": 73.0453,
+      "poster_path": "/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg",
+      "first_air_date": "2021-09-17",
+      "softcore": false,
+      "name": "Squid Game",
+      "vote_average": 7.856,
+      "vote_count": 17408
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/zhsEnDNCQX5dlI2wbKzV90pV0B9.jpg",
+      "genre_ids": [
+        18,
+        10759,
+        80
+      ],
+      "id": 127529,
+      "origin_country": [
+        "KR"
+      ],
+      "original_language": "ko",
+      "original_name": "사냥개들",
+      "overview": "Faced with ruthless foes with a violent thirst, two young boxers band together — risking life and limb to bring justice and protect their loved ones.",
+      "popularity": 69.8652,
+      "poster_path": "/uSQzD7TXsL96J5ggDrJFdUs8uXU.jpg",
+      "first_air_date": "2023-06-09",
+      "softcore": false,
+      "name": "Bloodhounds",
+      "vote_average": 8.433,
+      "vote_count": 683
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gzOIymABxmetAECXtazEYCpMmfb.jpg",
+      "genre_ids": [
+        9648,
+        80,
+        18
+      ],
+      "id": 78191,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "You",
+      "overview": "A dangerously charming, obsessive man goes to extreme measures to insert himself into the lives of women who fascinate him.",
+      "popularity": 70.4036,
+      "poster_path": "/oANi0vEE92nuijiZQgPZ88FSxqQ.jpg",
+      "first_air_date": "2018-09-09",
+      "softcore": false,
+      "name": "You",
+      "vote_average": 8.01,
+      "vote_count": 3922
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/nh0BS0sLXozmkTpOe1Ve33MyxlK.jpg",
+      "genre_ids": [
+        16,
+        18
+      ],
+      "id": 68854,
+      "origin_country": [
+        "JP"
+      ],
+      "original_language": "ja",
+      "original_name": "君に届け",
+      "overview": "Nicknamed \"Sadako\" for her spooky appearance, high schooler Sawako begins to break out of her shell when she befriends popular boy Kazehaya.",
+      "popularity": 55.655,
+      "poster_path": "/lLUAZzJc6vfyE2TeY56AGGb3E5K.jpg",
+      "first_air_date": "2009-10-07",
+      "softcore": false,
+      "name": "From Me to You: Kimi ni Todoke",
+      "vote_average": 8.4,
+      "vote_count": 355
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/nLyXXIDMpDHvUgxchezxuhoJ4Ej.jpg",
+      "genre_ids": [
+        16,
+        10759,
+        10765
+      ],
+      "id": 235930,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Devil May Cry",
+      "overview": "In this epic battle of good vs. evil, the lines are blurry as hell. But a devilishly handsome demon hunter could be the world's best hope for salvation.",
+      "popularity": 59.9519,
+      "poster_path": "/mX9tqfpjqwreONJHhap7SnSSowe.jpg",
+      "first_air_date": "2025-04-03",
+      "softcore": false,
+      "name": "Devil May Cry",
+      "vote_average": 8.226,
+      "vote_count": 392
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/m6eRgkR1KC6Mr6gKx6gKCzSn6vD.jpg",
+      "genre_ids": [
+        10759,
+        10765,
+        16
+      ],
+      "id": 4194,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Star Wars: The Clone Wars",
+      "overview": "Yoda, Obi-Wan Kenobi, Anakin Skywalker, Mace Windu and other Jedi Knights lead the Grand Army of the Republic against the droid army of the Separatists.",
+      "popularity": 62.0443,
+      "poster_path": "/e1nWfnnCVqxS2LeTO3dwGyAsG2V.jpg",
+      "first_air_date": "2008-10-03",
+      "softcore": false,
+      "name": "Star Wars: The Clone Wars",
+      "vote_average": 8.466,
+      "vote_count": 2338
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6umsRLI7t0ydFwCl0JNEIO0q2LH.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 91239,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Bridgerton",
+      "overview": "Wealth, lust, and betrayal set in the backdrop of Regency era England, seen through the eyes of the powerful Bridgerton family.",
+      "popularity": 58.2219,
+      "poster_path": "/uXTg565ahu9RwonCX1V2Hex1NU6.jpg",
+      "first_air_date": "2020-12-25",
+      "softcore": false,
+      "name": "Bridgerton",
+      "vote_average": 8.063,
+      "vote_count": 3296
+    }
+  ],
+  "total_pages": 138,
+  "total_results": 2757
+}

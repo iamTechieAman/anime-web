@@ -50,6 +50,7 @@ export async function GET(req: Request) {
             `${TMDB_BASE}/discover/${mediaType}?${params.toString()}`,
             { next: { revalidate: 3600 } }
         );
+        if (!res.ok) throw new Error(`TMDB discover failed: ${res.status}`);
         const data = await res.json();
 
         return NextResponse.json({
@@ -60,6 +61,39 @@ export async function GET(req: Request) {
         });
     } catch (error) {
         console.error("Discover API error:", error);
-        return NextResponse.json({ results: [], error: "Failed to fetch" }, { status: 500 });
+        
+        // Fallback to local static files
+        try {
+            let fileName = "popular_movies.json";
+            if (networkId) {
+                fileName = `network_${networkId}.json`;
+            } else if (genreId) {
+                const cleanGenre = genreId.replace(/[^0-9,]/g, '');
+                if (cleanGenre === '28') fileName = 'genre_action.json';
+                else if (cleanGenre === '35') fileName = 'genre_comedy.json';
+                else if (cleanGenre === '10749') fileName = 'genre_romance.json';
+                else if (cleanGenre.includes('27') || cleanGenre.includes('53')) fileName = 'genre_horror.json';
+                else if (cleanGenre === '16') fileName = 'genre_animation.json';
+                else if (cleanGenre === '878') fileName = 'genre_scifi.json';
+            }
+            
+            const fallbackUrl = new URL(`/data/${fileName}`, req.url);
+            const fallbackRes = await fetch(fallbackUrl);
+            if (fallbackRes.ok) {
+                const data = await fallbackRes.json();
+                console.log(`[Discover API] Loaded fallback static file: ${fileName}`);
+                return NextResponse.json({
+                    results: data.results || [],
+                    total_pages: 1,
+                    total_results: data.results?.length || 0,
+                    page: 1,
+                    fromFallback: true
+                });
+            }
+        } catch (fallbackErr: any) {
+            console.error("Discover fallback error:", fallbackErr.message);
+        }
+
+        return NextResponse.json({ results: [], error: "Failed to fetch" }, { status: 200 });
     }
 }

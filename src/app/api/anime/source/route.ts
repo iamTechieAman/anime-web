@@ -71,14 +71,15 @@ function buildLink(s: any, provider: string) {
 }
 
 // Provider priority order — stable providers first; health scoring reorders dynamically
-const PRIMARY_PROVIDERS: ProviderName[] = ['allanime', 'hianime', 'anikai', 'aniwatch', 'gogoanime'];
-const FALLBACK_PROVIDERS: ProviderName[] = ['consumet', 'animepahe', 'aniwave', 'vidsrc'];
+const PRIMARY_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', 'allanime', 'gogoanime'];
+const FALLBACK_PROVIDERS: ProviderName[] = ['consumet', 'animepahe', 'aniwatch', 'vidsrc'];
 
 // Auto-detect provider from ID prefix
 const PREFIX_MAP: Record<string, ProviderName> = {
     'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
     'on': 'onoflix', 'of': 'onoflix', 'wa': 'watchanimeworld',
-    'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt', 'wv': 'aniwave',
+    'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt',
+    'wv': 'aniwave', 'awt': 'aniwatchtv',
 };
 
 export async function GET(request: Request) {

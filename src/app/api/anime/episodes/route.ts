@@ -16,13 +16,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label = ''): Promise<T>
 }
 
 // Provider search order — stable providers first
-const SEARCH_PROVIDERS: ProviderName[] = ['allanime', 'hianime', 'anikai', 'aniwatch'];
+const SEARCH_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', 'allanime', 'aniwatch'];
 
 // ID prefix → provider mapping
 const PREFIX_MAP: Record<string, ProviderName> = {
     'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
     'on': 'onoflix', 'of': 'onoflix', 'wa': 'watchanimeworld',
-    'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt', 'wv': 'aniwave',
+    'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt',
+    'wv': 'aniwave', 'awt': 'aniwatchtv',
 };
 
 const findBestMatch = (results: any[], target: string) => {

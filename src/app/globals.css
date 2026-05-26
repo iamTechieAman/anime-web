@@ -1387,8 +1387,8 @@ main, .relative.z-10 {
   scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch !important;
   gap: 12px !important;
-  padding: 8px 4px 12px 4px !important;
-  margin-bottom: 0 !important;
+  padding: 20px 4px 24px 4px !important;
+  margin: -12px 0 !important;
   scrollbar-width: none !important; /* Firefox */
 }
 

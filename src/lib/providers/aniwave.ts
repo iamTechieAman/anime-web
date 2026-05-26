@@ -2,38 +2,70 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 
-const BASE_URL = 'https://aniwave.com.pl';
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+// aniwaves.ru is the current live mirror of the original Aniwave (9anime successor)
+const BASE_URL = 'https://aniwaves.ru';
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+const HEADERS = {
+    'User-Agent': USER_AGENT,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Referer': BASE_URL,
+    'Origin': BASE_URL,
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+};
+
+function parseAnimeCards($: cheerio.CheerioAPI, selector: string): AnimeSearchResult[] {
+    const results: AnimeSearchResult[] = [];
+    $(selector).each((_, el) => {
+        const $el = $(el);
+        // aniwaves.ru uses flw-item structure (same as 9anime/Zoro)
+        const $link = $el.find('.film-poster, .poster');
+        const href = $link.attr('href') || $el.find('a').first().attr('href') || '';
+        // ID is the slug after /watch/ or the last URL segment
+        const id = href.includes('/watch/')
+            ? href.split('/watch/')[1]?.split('?')[0]
+            : href.split('/').filter(Boolean).pop() || '';
+
+        const title = $el.find('.film-name a, .film-name, .dynamic-name').first().text().trim()
+            || $el.find('a').first().attr('title') || '';
+
+        // Images use data-src (lazy-loaded)
+        const $img = $el.find('img');
+        const image = $img.attr('data-src') || $img.attr('src') || '';
+
+        // Sub/Dub counts
+        const subCount = $el.find('.tick-sub, .sub').text().trim();
+        const dubCount = $el.find('.tick-dub, .dub').text().trim();
+
+        if (id && title) {
+            results.push({
+                id,
+                title,
+                image,
+                provider: 'aniwave',
+                subOrDub: dubCount ? 'both' : 'sub',
+            });
+        }
+    });
+    return results;
+}
 
 export class AniwaveProvider implements AnimeProvider {
     name = 'aniwave';
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/search`, {
+            const response = await axios.get(`${BASE_URL}/filter`, {
                 params: { keyword: query },
-                headers: { 'User-Agent': USER_AGENT }
+                headers: HEADERS,
+                timeout: 10000,
             });
-
             const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            $('.film-name a').each((_, element) => {
-                const $el = $(element);
-                const href = $el.attr('href');
-                const id = href?.split('/').filter(Boolean).pop() || '';
-                const title = $el.text().trim();
-                
-                // For images, we might need to look at the parent film-poster or similar
-                const $poster = $el.closest('.flw-item').find('.film-poster img');
-                const image = $poster.attr('data-src') || $poster.attr('src');
-
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-
-            return results;
+            // aniwaves.ru uses .film_list-wrap .flw-item structure
+            return parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
         } catch (error) {
             console.error('[Aniwave] Search failed:', error);
             return [];
@@ -42,89 +74,70 @@ export class AniwaveProvider implements AnimeProvider {
 
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = page > 1 ? `${BASE_URL}/page/${page}/` : BASE_URL;
-            const response = await axios.get(url, {
-                headers: { 'User-Agent': USER_AGENT }
-            });
+            // /updated shows recently updated anime
+            const url = page > 1 ? `${BASE_URL}/updated?page=${page}` : `${BASE_URL}/updated`;
+            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
             const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            // Updated selectors for aniwave.com.pl
-            $('.film-name a').each((_, element) => {
-                const $el = $(element);
-                const href = $el.attr('href');
-                // The URL is like https://aniwave.com.pl/anime/one-piece/
-                const id = href?.split('/').filter(Boolean).pop() || '';
-                const title = $el.text().trim();
-                
-                const $poster = $el.closest('.flw-item').find('.film-poster img');
-                const image = $poster.attr('data-src') || $poster.attr('src');
-
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-            return results;
+            const results = parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
+            if (results.length > 0) return results;
+            // fallback: try newest
+            return await this.getNewest(page);
         } catch (e) {
             console.error('[Aniwave] getRecent failed:', e);
             return [];
         }
     }
 
+    async getNewest(page: number = 1): Promise<AnimeSearchResult[]> {
+        try {
+            const url = page > 1 ? `${BASE_URL}/newest?page=${page}` : `${BASE_URL}/newest`;
+            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
+            const $ = cheerio.load(response.data);
+            return parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
+        } catch (e) {
+            return [];
+        }
+    }
+
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(BASE_URL, {
-                headers: { 'User-Agent': USER_AGENT }
-            });
+            const url = page > 1 ? `${BASE_URL}/trending?page=${page}` : `${BASE_URL}/trending`;
+            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
             const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            // Popular Today section
-            $('h2:contains("Popular Today")').nextAll('.flw-item').each((_, element) => {
-                const $el = $(element);
-                const $link = $el.find('.film-name a');
-                const href = $link.attr('href');
-                const id = href?.split('/').filter(Boolean).pop() || '';
-                const title = $link.text().trim();
-                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
-
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-
-            if (results.length === 0) {
-                 return this.getRecent(page);
-            }
-
-            return results;
+            const results = parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
+            if (results.length > 0) return results;
+            return await this.getRecent(page);
         } catch (e) {
-            return this.getRecent(page);
+            console.error('[Aniwave] getTrending failed:', e);
+            return [];
         }
+    }
+
+    async getPopular(page: number = 1): Promise<AnimeSearchResult[]> {
+        return this.getTrending(page);
     }
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const response = await axios.get(`${BASE_URL}/anime/${id}/`, {
-                headers: { 'User-Agent': USER_AGENT }
-            });
-
+            // Try /watch/{id} first, then /anime/{id}
+            let url = id.includes('/') ? `${BASE_URL}/${id}` : `${BASE_URL}/watch/${id}`;
+            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
             const $ = cheerio.load(response.data);
-            const title = $('.film-name').first().text().trim();
-            const image = $('.film-poster img').first().attr('src') || $('.film-poster img').first().attr('data-src');
-            const description = $('.film-description').first().text().trim() || $('.description').first().text().trim();
+
+            const title = $('.film-name, h1.film-name, .dynamic-name').first().text().trim();
+            const image = $('.film-poster img, .detail-infor-content img').attr('data-src')
+                || $('.film-poster img').attr('src') || '';
+            const description = $('.film-description, .description').first().text().trim();
 
             const episodes: any[] = [];
-            // aniwave.com.pl seems to list episodes in a grid or list
-            $('.ep-item').each((_, el) => {
+            // Episode list on aniwaves.ru uses .ep-item or server/ep buttons
+            $('.ep-item, .server-item a, a[href*="ep="]').each((_, el) => {
                 const $ep = $(el);
-                const href = $ep.attr('href');
-                const epId = href?.split('/').filter(Boolean).pop() || '';
-                const number = parseInt($ep.attr('data-number') || $ep.text().match(/\d+/)?.[0] || '0');
-                const epTitle = $ep.attr('title') || `Episode ${number}`;
-
-                if (epId && number) {
-                    episodes.push({ id: epId, number, title: epTitle });
+                const href = $ep.attr('href') || '';
+                const epNum = parseInt($ep.attr('data-number') || $ep.text().trim() || '0');
+                const epId = href.split('?')[0].split('/').filter(Boolean).pop() || href;
+                if (epId) {
+                    episodes.push({ id: epId, number: epNum, title: `Episode ${epNum}` });
                 }
             });
 
@@ -135,20 +148,39 @@ export class AniwaveProvider implements AnimeProvider {
         }
     }
 
+    async getServers(episodeId: string): Promise<any[]> {
+        return [
+            { serverName: 'Aniwave Sub', serverId: 'aniwave_sub', type: 'sub' },
+            { serverName: 'Aniwave Dub', serverId: 'aniwave_dub', type: 'dub' }
+        ];
+    }
+
     async getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw' = 'sub'): Promise<VideoSource[]> {
         try {
-            // For now, return a placeholder iframe if we can't find direct sources
-            // aniwave.com.pl usually has embeds on the episode page
+            // Construct episode watch URL
+            let episodeUrl: string;
+            if (episodeId.startsWith('http')) {
+                episodeUrl = episodeId;
+            } else if (episodeId.includes(id)) {
+                episodeUrl = `${BASE_URL}/watch/${episodeId}`;
+            } else {
+                episodeUrl = `${BASE_URL}/watch/${id}?ep=${episodeId}`;
+            }
+
             return [{
-                url: `${BASE_URL}/${episodeId}/`, // Direct link to episode page as iframe
+                url: episodeUrl,
                 isM3U8: false,
                 quality: 'auto',
                 isIframe: true,
-                server: 'Aniwave'
+                server: 'Aniwave',
+                headers: {
+                    Referer: BASE_URL,
+                    Origin: BASE_URL,
+                }
             }];
         } catch (error) {
+            console.error('[Aniwave] getSources failed:', error);
             return [];
         }
     }
 }
-
