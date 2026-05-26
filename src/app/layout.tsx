@@ -12,7 +12,8 @@ import GlobalErrorListener from "@/components/GlobalErrorListener";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
-import { ClerkProvider, Show } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import NetflixAuthGate from "@/components/NetflixAuthGate";
 
 
@@ -98,11 +99,12 @@ export const metadata: Metadata = {
 
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = await auth();
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
@@ -218,14 +220,13 @@ export default function RootLayout({
                 <WatchProvider>
                   <GlobalErrorListener />
 
-                  <Show when="signed-in">
+                  {userId ? (
                     <LayoutContent>
                       {children}
                     </LayoutContent>
-                  </Show>
-                  <Show when="signed-out">
+                  ) : (
                     <NetflixAuthGate />
-                  </Show>
+                  )}
 
                   <Toaster 
                     position="bottom-center" 
