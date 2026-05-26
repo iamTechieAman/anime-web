@@ -142,8 +142,8 @@ export default function MobileModals() {
                                     <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">About</h3>
                                     <div className="p-4 bg-gradient-to-br from-orange-900/20 to-amber-900/20 rounded-xl border border-orange-500/20">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-10 h-10 rounded-xl bg-white/5 p-1 flex items-center justify-center shadow-lg border border-white/10">
-                                                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div class="text-white font-black text-xs">TP</div>'; }} />
+                                            <div className="w-10 h-10 flex items-center justify-center p-1">
+                                                <img src="/logo.webp" alt="Logo" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div class="text-white font-black text-xs">TP</div>'; }} />
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-[var(--text-main)]">ToonPlayer</h4>

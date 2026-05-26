@@ -292,11 +292,16 @@ export default function Header() {
     setFilterStatus('');
   };
 
+  const isWatchPage = pathname?.startsWith('/watch');
+  const showSidebar = deviceMode === "pc" && !isWatchPage;
+
   if (pathname?.startsWith('/watch')) return null;
 
   return (
     <>
-    <nav className="fixed top-0 left-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
+    <nav className={`fixed top-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300 ${
+      showSidebar ? "left-0 md:left-[72px] peer-hover/sidebar:md:left-[220px]" : "left-0"
+    }`}>
       
       {/* Search Focus Overlay */}
       <AnimatePresence>
@@ -316,15 +321,10 @@ export default function Header() {
         {/* ── LOGO ── */}
         <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group max-w-[148px] sm:max-w-none overflow-hidden" onClick={clearSearch}>
           <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
-            <motion.div 
-              className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-lg opacity-30 group-hover:opacity-55 transition-opacity"
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            />
             <img 
               src="/logo.webp" 
               alt="ToonPlayer Logo" 
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.45)] group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.25)] group-hover:scale-105 transition-transform duration-300"
             />
           </div>
           <div className="flex flex-col min-w-0">
@@ -342,7 +342,7 @@ export default function Header() {
         {/* ── NAVIGATION LINKS (desktop & TV) ── */}
         {deviceMode !== "mobile" && (
           <div className="flex items-center gap-2 lg:gap-4 ml-6 mr-auto text-xs lg:text-sm font-black uppercase tracking-wider text-zinc-400">
-            {deviceMode === "tv" ? (
+            {deviceMode === "tv" && (
               <>
                 <Link href="/?tab=movies" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white">
                   <Play className="w-4 h-4 fill-current text-[var(--accent)]" /> Home
@@ -355,24 +355,6 @@ export default function Header() {
                 </button>
                 <Link href="/watchlist" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors">
                   <Bookmark className="w-4 h-4 text-pink-400" /> My List
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
-                  Home
-                </Link>
-                <Link href="/?tab=toons" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
-                  PC Toons
-                </Link>
-                <Link href="/?tab=gaming" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
-                  Gaming Hub
-                </Link>
-                <Link href="/discover" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
-                  Stream Central
-                </Link>
-                <Link href="/watchlist" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
-                  My Library
                 </Link>
               </>
             )}

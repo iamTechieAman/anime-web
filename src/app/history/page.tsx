@@ -65,9 +65,9 @@ export default function HistoryPage() {
   if (!isMounted) return null;
 
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-0 pb-24 md:pb-10 md:pl-[72px]">
+    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
       {/* Sticky header with glassmorphism */}
-      <div className="sticky top-0 z-40 bg-[var(--bg-main)]/80 backdrop-blur-xl border-b border-white/5">
+      <div className="sticky top-[60px] md:top-[64px] z-40 bg-[var(--bg-main)]/80 backdrop-blur-xl border-b border-white/5">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
         <div className="w-full px-6 md:px-12 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
@@ -17,6 +17,28 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isWatchPage = pathname?.startsWith('/watch');
   const isHomePage = pathname === '/';
   
+  const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
+
+  useEffect(() => {
+    const detectDevice = () => {
+      if (typeof window !== "undefined") {
+        const ua = navigator.userAgent;
+        const width = window.innerWidth;
+        const isTVUA = /SmartTV|GoogleTV|AppleTV|Roku|CastTV|Tizen|Web0S|NetCast|Opera TV|Viera|Bravia|PlayStation|Xbox/i.test(ua);
+        if (isTVUA || width >= 2500) {
+          setDeviceMode("tv");
+        } else if (width < 1024) {
+          setDeviceMode("mobile");
+        } else {
+          setDeviceMode("pc");
+        }
+      }
+    };
+    detectDevice();
+    window.addEventListener("resize", detectDevice);
+    return () => window.removeEventListener("resize", detectDevice);
+  }, []);
+
   // Cleanup: showProfileSettings should only be triggered by user action
   useEffect(() => {
     if (showProfileSettings && typeof window !== 'undefined' && !localStorage.getItem("toonplayer_profile")) {
@@ -24,14 +46,20 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     }
   }, []);
   
+  const showSidebar = deviceMode === "pc" && !isWatchPage;
+
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
-      {/* Content area: edge-to-edge layout matching Onoflix top-navigation design */}
-      <div className={`flex flex-col min-h-screen relative pl-0 transition-[padding] duration-300 ease-in-out overflow-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      {showSidebar && <DesktopSidebar />}
+      
+      <Suspense fallback={<div className="h-[60px] md:h-[64px] w-full skeleton-shine animate-pulse" />}>
+        <Header />
+      </Suspense>
 
-        <Suspense fallback={<div className="h-[60px] md:h-[64px] w-full skeleton-shine" />}>
-          <Header />
-        </Suspense>
+      {/* Content area: adaptive padding based on sidebar visibility */}
+      <div className={`flex flex-col min-h-screen relative ${
+        showSidebar ? "pl-0 md:pl-[72px] peer-hover/sidebar:md:pl-[220px]" : "pl-0"
+      } transition-[padding] duration-300 ease-in-out overflow-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${

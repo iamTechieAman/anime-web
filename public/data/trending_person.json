@@ -58,6 +58,17 @@
     },
     {
       "adult": false,
+      "id": 31,
+      "name": "Tom Hanks",
+      "original_name": "Tom Hanks",
+      "media_type": "person",
+      "popularity": 12.5868,
+      "gender": 2,
+      "known_for_department": "Acting",
+      "profile_path": "/oFvZoKI6lvU03n4YoNGAll9rkas.jpg"
+    },
+    {
+      "adult": false,
       "id": 2537152,
       "name": "Amr Medhat",
       "original_name": "Amr Medhat",
@@ -110,17 +121,6 @@
       "gender": 1,
       "known_for_department": "Acting",
       "profile_path": "/21kdujBeL2hrJ50RyMxmuEsHZAT.jpg"
-    },
-    {
-      "adult": false,
-      "id": 31,
-      "name": "Tom Hanks",
-      "original_name": "Tom Hanks",
-      "media_type": "person",
-      "popularity": 12.5868,
-      "gender": 2,
-      "known_for_department": "Acting",
-      "profile_path": "/oFvZoKI6lvU03n4YoNGAll9rkas.jpg"
     },
     {
       "adult": false,

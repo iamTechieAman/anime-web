@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function AboutPage() {
     return (
-        <main className="min-h-screen pt-24 pb-20 px-4 md:px-8 bg-[var(--bg-main)] overflow-x-hidden">
+        <main className="min-h-screen pt-6 pb-20 px-4 md:px-8 bg-[var(--bg-main)] overflow-x-hidden">
             <div className="w-full px-6 md:px-12 space-y-20">
                 
                 {/* Hero Section */}
@@ -15,9 +15,9 @@ export default function AboutPage() {
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="w-24 h-24 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(249, 115, 22, 0.3)] mb-8 p-4"
+                        className="w-24 h-24 mx-auto flex items-center justify-center mb-8"
                     >
-                        <img src="/logo.png" alt="ToonPlayer Logo" className="w-full h-full object-contain" />
+                        <img src="/logo.webp" alt="ToonPlayer Logo" className="w-full h-full object-contain" />
                     </motion.div>
                     
                     <motion.h1 

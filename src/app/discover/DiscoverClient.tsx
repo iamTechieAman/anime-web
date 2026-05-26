@@ -39,7 +39,7 @@ export default function DiscoverPage() {
     }, [prompt]);
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-[max(5rem,env(safe-area-inset-top))] pb-20">
+        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-8 pb-20">
             <div className="max-w-7xl mx-auto px-4 md:px-8">
                 
                 {/* Header */}

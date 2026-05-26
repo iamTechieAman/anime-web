@@ -20,7 +20,7 @@ export default function ContactPage() {
     };
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-24 pb-20 px-4 md:px-8">
+        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 
                 {/* Left Side: Info */}

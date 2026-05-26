@@ -69,8 +69,6 @@ const TABS = [
     { id: "movies", label: "Movies", icon: Popcorn },
     { id: "tv", label: "TV Shows", icon: Tv },
     { id: "anime", label: "Anime", icon: Sparkles },
-    { id: "toons", label: "PC Toons", icon: Tv },
-    { id: "gaming", label: "Gaming Hub", icon: Play },
     { id: "trending", label: "Trending", icon: TrendingUp },
     { id: "discover", label: "Discover", icon: Zap },
 ];

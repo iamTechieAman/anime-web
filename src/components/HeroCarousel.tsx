@@ -199,7 +199,7 @@ export default function HeroCarousel() {
 
             {/* Content - Responsive Widescreen Split Layout */}
             <div className="absolute inset-0 flex items-center md:items-end z-20 pb-10 md:pb-14 pt-16 md:pt-0">
-                <div className="w-full max-w-[1800px] mx-auto px-5 md:px-12 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                <div className="w-full max-w-[1800px] mx-auto px-5 md:px-12 flex flex-col md:flex-row items-center justify-start gap-6 md:gap-10 lg:gap-14">
                     
                     {/* Left: Floating show card (Only visible on md+) */}
                     <div className="hidden md:block w-[160px] lg:w-[200px] aspect-[2/3] relative shrink-0 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_30px_rgba(249,115,22,0.15)] hover:scale-[1.02] transition-transform duration-500 bg-zinc-950">
@@ -212,23 +212,7 @@ export default function HeroCarousel() {
                         />
                     </div>
 
-                    {/* Center: Brand Showcase (logo + text) (Only visible on md+) */}
-                    <div className="hidden md:flex flex-col items-center justify-center text-center shrink-0 max-w-[200px] lg:max-w-[280px] gap-2">
-                        <div className="w-20 h-20 lg:w-28 lg:h-28 relative flex items-center justify-center animate-bounce duration-[8000ms]">
-                            <Image
-                                src="/logo.png"
-                                alt="ToonPlayer Logo"
-                                fill
-                                className="object-contain drop-shadow-[0_0_15px_rgba(249,115,22,0.5)]"
-                                sizes="(max-width: 768px) 0px, 112px"
-                            />
-                        </div>
-                        <h2 className="text-lg lg:text-2xl font-black tracking-widest text-white uppercase font-sora select-none">
-                            Toon<span className="text-[var(--accent)]">Player</span>
-                        </h2>
-                    </div>
-
-                    {/* Right: Show details & CTA Button (Adaptive layout, centered on mobile, right-aligned/left-aligned on md+) */}
+                    {/* Right: Show details & CTA Button (Adaptive layout, centered on mobile, left-aligned on md+) */}
                     <div className="flex-1 max-w-xl text-center md:text-left flex flex-col items-center md:items-start">
                         {/* Metadata Badges */}
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 mb-2.5">

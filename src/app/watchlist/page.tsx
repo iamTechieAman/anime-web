@@ -39,8 +39,8 @@ export default function WatchlistPage() {
   if (!isMounted) return null;
 
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-16 md:pt-0 pb-24 md:pb-10 md:pl-[72px]">
-      <div className="sticky top-0 z-40 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)]">
+    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
+      <div className="sticky top-[60px] md:top-[64px] z-40 bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)]">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Bookmark className="w-6 h-6 text-orange-400" />
