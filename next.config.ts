@@ -19,10 +19,16 @@ const nextConfig: NextConfig = {
   // Silences Turbopack error when using webpack plugins like PWA
   // @ts-ignore
   turbopack: {},
-  // Constrain webpack so it doesn't spin up multiple threads and consume all RAM
   experimental: {
     cpus: 1,
     workerThreads: false,
+  },
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/@vercel/og/dist/yoga.wasm",
+      "node_modules/@vercel/og/dist/resvg.wasm",
+      "node_modules/@vercel/og/dist/index.edge.js"
+    ]
   },
   images: {
     unoptimized: true,
