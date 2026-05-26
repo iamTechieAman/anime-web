@@ -319,7 +319,7 @@ export default function Header() {
       {/* === FLEX ROW: Logo | Search (desktop) | Actions === */}
       <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4 min-w-0">
         {/* ── LOGO ── */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group max-w-[148px] sm:max-w-none overflow-hidden" onClick={clearSearch}>
+        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group overflow-hidden" onClick={clearSearch}>
           <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
             <img 
               src="/logo.webp" 

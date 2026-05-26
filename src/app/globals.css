@@ -1552,16 +1552,20 @@ main, .relative.z-10 {
 
 /* Clerk auth surfaces: force a premium dark OTT treatment everywhere. */
 .cl-rootBox,
-.cl-cardBox,
-.cl-userButtonPopoverCard,
-.cl-modalContent,
 .cl-signIn-root,
 .cl-signUp-root {
   color: #f8fafc !important;
 }
 
+.cl-rootBox,
+.cl-cardBox {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
 .cl-card,
-.cl-cardBox,
 .cl-userButtonPopoverCard,
 .cl-modalContent {
   background: rgba(24, 24, 34, 0.98) !important;
@@ -1579,7 +1583,9 @@ main, .relative.z-10 {
 .cl-userPreviewMainIdentifier,
 .cl-formFieldLabel,
 .cl-identityPreviewText,
-.cl-footerActionText {
+.cl-footerActionText,
+.cl-alternativeMethodsBlockButton,
+.cl-socialButtonsBlockButtonText {
   color: #f8fafc !important;
 }
 
@@ -1614,18 +1620,48 @@ main, .relative.z-10 {
   border-radius: 12px !important;
 }
 
+.cl-formFieldInput::placeholder,
+.cl-otpCodeFieldInput::placeholder {
+  color: #64748b !important;
+}
+
 .cl-formFieldInput:focus,
 .cl-otpCodeFieldInput:focus {
   border-color: rgba(245, 158, 11, 0.7) !important;
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16) !important;
 }
 
+.cl-socialButtonsBlockButton {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
 .cl-formButtonPrimary {
-  background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+  background: linear-gradient(135deg, #ea580c, #d97706) !important;
   color: #ffffff !important;
   font-weight: 900 !important;
   border-radius: 12px !important;
   box-shadow: 0 14px 34px rgba(249, 115, 22, 0.28) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+  box-shadow: 0 14px 34px rgba(249, 115, 22, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.cl-footerActionLink {
+  color: #fb923c !important;
+}
+
+.cl-footerActionLink:hover {
+  color: #fdba74 !important;
 }
 
 /* Row Edge-Fade Masks (simulating Netflix horizontal row fades) */
@@ -1671,80 +1707,7 @@ main, .relative.z-10 {
            Desktop 1441–2560px · Smart TV ≥1920px
    ═══════════════════════════════════════════════════════════ */
 
-/* ──────────────────────────────────────────────────────────
-   CLERK MODAL — FORCE LEGIBILITY ON ALL DARK BACKGROUNDS
-   ────────────────────────────────────────────────────────── */
-
-/* Target the Clerk card/modal root with high specificity */
-.cl-card,
-[data-clerk-component],
-.cl-modalContent,
-.cl-signIn-root,
-.cl-signUp-root,
-.cl-userProfile-root {
-  background: #1c1c2a !important;
-  color: #f1f5f9 !important;
-}
-
-/* All text inside Clerk components */
-.cl-headerTitle,
-.cl-headerSubtitle,
-.cl-formFieldLabel,
-.cl-dividerText,
-.cl-footerActionText,
-.cl-identityPreviewText,
-.cl-formResendCodeLink,
-.cl-alternativeMethodsBlockButton,
-.cl-socialButtonsBlockButtonText {
-  color: #f1f5f9 !important;
-}
-
-/* Input fields inside Clerk */
-.cl-formFieldInput,
-.cl-otpCodeFieldInput {
-  background: #252535 !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: #f1f5f9 !important;
-}
-
-.cl-formFieldInput::placeholder,
-.cl-otpCodeFieldInput::placeholder {
-  color: #64748b !important;
-}
-
-.cl-formFieldInput:focus,
-.cl-otpCodeFieldInput:focus {
-  border-color: #f97316 !important;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2) !important;
-}
-
-/* Social & action buttons inside Clerk */
-.cl-socialButtonsBlockButton {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-}
-
-.cl-socialButtonsBlockButton:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-}
-
-.cl-formButtonPrimary {
-  background: linear-gradient(135deg, #ea580c, #d97706) !important;
-  color: #ffffff !important;
-}
-
-.cl-formButtonPrimary:hover {
-  background: linear-gradient(135deg, #f97316, #f59e0b) !important;
-}
-
-.cl-footerActionLink {
-  color: #fb923c !important;
-}
-
-.cl-footerActionLink:hover {
-  color: #fdba74 !important;
-}
+/* Clerk override block 2 deprecated and consolidated above */
 
 /* ──────────────────────────────────────────────────────────
    SMALL PHONES — up to 360px (very compact screens)
