@@ -174,20 +174,41 @@ export default function RootLayout({
           appearance={{
             variables: {
               colorPrimary: '#f97316',
-              colorBackground: '#050505',
-              colorInputBackground: '#141414',
+              colorBackground: '#0b0b0f',
+              colorInputBackground: '#14141b',
+              colorInputText: '#ffffff',
               colorText: '#ffffff',
-              colorTextSecondary: '#a1a1aa',
+              colorTextSecondary: '#9ca3af',
+              colorTextOnPrimaryBackground: '#ffffff',
               colorDanger: '#ef4444',
             },
             elements: {
-              card: 'bg-[#0b0b0f] border border-white/10 rounded-2xl shadow-xl',
-              headerTitle: 'text-white font-sora font-black',
-              headerSubtitle: 'text-zinc-400 font-bold',
-              socialButtonsIconButton: 'bg-white/5 border border-white/10 text-white hover:bg-white/10',
-              formButtonPrimary: 'bg-orange-500 hover:bg-orange-600 text-white font-bold',
-              footerActionText: 'text-zinc-400',
-              footerActionLink: 'text-orange-400 hover:text-orange-300 font-bold',
+              card: 'bg-[#0b0b0f] border border-white/10 rounded-2xl shadow-2xl',
+              headerTitle: 'text-white font-sora font-black text-xl uppercase tracking-tight',
+              headerSubtitle: 'text-zinc-400 font-bold text-xs',
+              socialButtonsBlockButton: 'bg-white/5 border border-white/10 text-white hover:bg-white/10 text-xs font-bold transition-all',
+              socialButtonsBlockButtonText: 'text-white font-bold',
+              formButtonPrimary: 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black uppercase text-xs tracking-wider transition-all',
+              footerActionText: 'text-zinc-400 text-xs font-medium',
+              footerActionLink: 'text-orange-400 hover:text-orange-300 font-black text-xs',
+              formFieldLabel: 'text-zinc-300 font-bold text-xs uppercase tracking-wider',
+              formFieldInput: 'bg-[#14141b] border border-white/10 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-xl px-4 py-2.5',
+              identityPreviewText: 'text-white',
+              identityPreviewEditButtonIcon: 'text-orange-500',
+            }
+          }}
+          localization={{
+            signIn: {
+              start: {
+                title: "Sign in to ToonPlayer",
+                subtitle: "to access premium movies & anime"
+              }
+            },
+            signUp: {
+              start: {
+                title: "Create ToonPlayer Account",
+                subtitle: "to start watching ad-free"
+              }
             }
           }}
         >
