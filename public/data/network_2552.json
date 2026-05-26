@@ -44,31 +44,8 @@
       "first_air_date": "2023-11-16",
       "softcore": false,
       "name": "Monarch: Legacy of Monsters",
-      "vote_average": 7.752,
-      "vote_count": 1286
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/u6XtMg9Ai9siEbEs0UudPS3EaZY.jpg",
-      "genre_ids": [
-        18,
-        9648,
-        35
-      ],
-      "id": 270476,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Widow's Bay",
-      "overview": "The mayor of a New England town resolves to turn it into the next tourist hot spot, despite local warnings that it's cursed.",
-      "popularity": 47.2127,
-      "poster_path": "/5lcxWLVAEICkFpuAiV1aMy7ZZj3.jpg",
-      "first_air_date": "2026-04-28",
-      "softcore": false,
-      "name": "Widow's Bay",
-      "vote_average": 8.259,
-      "vote_count": 83
+      "vote_average": 7.753,
+      "vote_count": 1287
     },
     {
       "adult": false,
@@ -113,6 +90,29 @@
       "name": "Margo's Got Money Troubles",
       "vote_average": 8.08,
       "vote_count": 87
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/u6XtMg9Ai9siEbEs0UudPS3EaZY.jpg",
+      "genre_ids": [
+        18,
+        9648,
+        35
+      ],
+      "id": 270476,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Widow's Bay",
+      "overview": "The mayor of a New England town resolves to turn it into the next tourist hot spot, despite local warnings that it's cursed.",
+      "popularity": 47.2127,
+      "poster_path": "/5lcxWLVAEICkFpuAiV1aMy7ZZj3.jpg",
+      "first_air_date": "2026-04-28",
+      "softcore": false,
+      "name": "Widow's Bay",
+      "vote_average": 8.3,
+      "vote_count": 83
     },
     {
       "adult": false,
@@ -243,8 +243,8 @@
       "first_air_date": "2022-02-17",
       "softcore": false,
       "name": "Severance",
-      "vote_average": 8.393,
-      "vote_count": 2644
+      "vote_average": 8.392,
+      "vote_count": 2645
     },
     {
       "adult": false,

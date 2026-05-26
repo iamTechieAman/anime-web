@@ -18,8 +18,8 @@
       "release_date": "2026-03-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.624,
-      "vote_count": 4091
+      "vote_average": 8.629,
+      "vote_count": 4109
     },
     {
       "adult": false,
@@ -39,8 +39,8 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.756,
-      "vote_count": 225
+      "vote_average": 6.751,
+      "vote_count": 231
     },
     {
       "adult": false,
@@ -60,8 +60,8 @@
       "release_date": "2025-12-17",
       "softcore": false,
       "video": false,
-      "vote_average": 7.502,
-      "vote_count": 3182
+      "vote_average": 7.501,
+      "vote_count": 3187
     },
     {
       "adult": false,
@@ -83,8 +83,8 @@
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.115,
-      "vote_count": 1224
+      "vote_average": 8.111,
+      "vote_count": 1231
     },
     {
       "adult": false,
@@ -126,7 +126,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.475,
-      "vote_count": 39807
+      "vote_count": 39810
     },
     {
       "adult": false,
@@ -166,8 +166,8 @@
       "release_date": "2026-01-07",
       "softcore": false,
       "video": false,
-      "vote_average": 6.409,
-      "vote_count": 1105
+      "vote_average": 6.402,
+      "vote_count": 1107
     },
     {
       "adult": false,
@@ -188,7 +188,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.742,
-      "vote_count": 2932
+      "vote_count": 2937
     },
     {
       "adult": false,
@@ -209,7 +209,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.03,
-      "vote_count": 37994
+      "vote_count": 37999
     },
     {
       "adult": false,
@@ -250,8 +250,8 @@
       "release_date": "2026-02-12",
       "softcore": false,
       "video": false,
-      "vote_average": 7.331,
-      "vote_count": 1771
+      "vote_average": 7.333,
+      "vote_count": 1774
     },
     {
       "adult": false,
@@ -272,7 +272,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.235,
-      "vote_count": 31975
+      "vote_count": 31979
     },
     {
       "adult": false,
@@ -334,7 +334,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.246,
-      "vote_count": 27872
+      "vote_count": 27876
     },
     {
       "adult": false,
@@ -355,7 +355,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.117,
-      "vote_count": 1221
+      "vote_count": 1222
     },
     {
       "adult": false,
@@ -376,7 +376,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.372,
-      "vote_count": 39244
+      "vote_count": 39247
     },
     {
       "adult": false,
@@ -418,9 +418,9 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.934,
-      "vote_count": 21970
+      "vote_count": 21972
     }
   ],
   "total_pages": 1311,
-  "total_results": 26206
+  "total_results": 26208
 }

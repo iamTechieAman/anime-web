@@ -57,3 +57,7 @@ android/
 /public/ts-sw.js
 toonplayer-vercel/
 vercel_setup_script.sh
+
+# scratch
+scratch/
+

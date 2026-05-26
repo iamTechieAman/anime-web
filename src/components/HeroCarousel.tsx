@@ -197,12 +197,41 @@ export default function HeroCarousel() {
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="absolute inset-0 flex items-end z-20 pb-10 md:pb-14">
-                <div className="w-full px-5 md:px-10">
-                    <div className="max-w-xl">
+            {/* Content - Responsive Widescreen Split Layout */}
+            <div className="absolute inset-0 flex items-center md:items-end z-20 pb-10 md:pb-14 pt-16 md:pt-0">
+                <div className="w-full max-w-[1800px] mx-auto px-5 md:px-12 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                    
+                    {/* Left: Floating show card (Only visible on md+) */}
+                    <div className="hidden md:block w-[160px] lg:w-[200px] aspect-[2/3] relative shrink-0 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_30px_rgba(249,115,22,0.15)] hover:scale-[1.02] transition-transform duration-500 bg-zinc-950">
+                        <Image
+                            src={activeSlide.cover}
+                            alt=""
+                            fill
+                            className="object-cover transition-transform duration-700 hover:scale-105"
+                            sizes="(max-width: 768px) 0px, 200px"
+                        />
+                    </div>
+
+                    {/* Center: Brand Showcase (logo + text) (Only visible on md+) */}
+                    <div className="hidden md:flex flex-col items-center justify-center text-center shrink-0 max-w-[200px] lg:max-w-[280px] gap-2">
+                        <div className="w-20 h-20 lg:w-28 lg:h-28 relative flex items-center justify-center animate-bounce duration-[8000ms]">
+                            <Image
+                                src="/logo.png"
+                                alt="ToonPlayer Logo"
+                                fill
+                                className="object-contain drop-shadow-[0_0_15px_rgba(249,115,22,0.5)]"
+                                sizes="(max-width: 768px) 0px, 112px"
+                            />
+                        </div>
+                        <h2 className="text-lg lg:text-2xl font-black tracking-widest text-white uppercase font-sora select-none">
+                            Toon<span className="text-[var(--accent)]">Player</span>
+                        </h2>
+                    </div>
+
+                    {/* Right: Show details & CTA Button (Adaptive layout, centered on mobile, right-aligned/left-aligned on md+) */}
+                    <div className="flex-1 max-w-xl text-center md:text-left flex flex-col items-center md:items-start">
                         {/* Metadata Badges */}
-                        <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 mb-2.5">
                             <span className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
                                 {activeSlide.type}
                             </span>
@@ -210,7 +239,7 @@ export default function HeroCarousel() {
                                 {activeSlide.quality}
                             </span>
                             <span className="text-[10px] font-bold text-white/60 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" /> {activeSlide.release}
+                                <Clock className="w-3 h-3" /> {activeSlide.release}
                             </span>
                             {activeSlide.rating !== "?" && (
                                 <span className="text-[10px] font-bold text-green-400">
@@ -220,25 +249,25 @@ export default function HeroCarousel() {
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-[1.05] text-white mb-2 line-clamp-2 font-sora tracking-tighter drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black leading-[1.05] text-white mb-2 line-clamp-2 font-sora tracking-tighter drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
                             {activeSlide.title}
                         </h1>
 
                         {/* Description */}
-                        <p className="text-white/75 text-xs md:text-sm line-clamp-2 leading-relaxed max-w-lg mb-5 font-medium drop-shadow-md hidden sm:block">
+                        <p className="text-white/70 text-xs md:text-sm line-clamp-2 md:line-clamp-3 leading-relaxed max-w-lg mb-4.5 font-medium drop-shadow-md hidden sm:block">
                             {activeSlide.description}
                         </p>
 
                         {/* Action Buttons */}
                         <div className="flex items-center gap-2.5">
                             <Link href={activeSlide.link}>
-                                <button className="flex items-center gap-2 px-6 md:px-8 py-2.5 bg-white text-black hover:bg-white/90 font-black rounded transition-all active:scale-95 shadow-[0_4px_20px_rgba(255,255,255,0.12)] text-sm">
+                                <button className="flex items-center gap-2 px-6 lg:px-8 py-2.5 bg-white text-black hover:bg-white/95 font-black rounded-lg transition-all active:scale-95 shadow-[0_10px_24px_rgba(255,255,255,0.15)] text-sm cursor-pointer min-h-[44px]">
                                     <Play className="w-4 h-4 fill-current" />
-                                    PLAY
+                                    WATCH NOW
                                 </button>
                             </Link>
                             <Link href={activeSlide.link}>
-                                <button className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded border border-white/10 transition-all text-sm">
+                                <button className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-lg border border-white/10 transition-all text-sm cursor-pointer min-h-[44px]">
                                     <Info className="w-4 h-4" />
                                     More Info
                                 </button>

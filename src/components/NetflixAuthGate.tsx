@@ -116,7 +116,7 @@ export default function NetflixAuthGate() {
             <img
               src="/logo.webp"
               alt="ToonPlayer Logo"
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_10px_rgba(249,115,22,0.6)] mix-blend-screen"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_10px_rgba(249,115,22,0.6)]"
             />
           </div>
           <span className="text-lg sm:text-xl lg:text-2xl font-black tracking-tighter text-white font-sora uppercase">

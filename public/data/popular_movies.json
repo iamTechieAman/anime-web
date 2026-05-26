@@ -18,8 +18,8 @@
       "release_date": "2026-04-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.022,
-      "vote_count": 1173
+      "vote_average": 8.042,
+      "vote_count": 1198
     },
     {
       "adult": false,
@@ -38,8 +38,8 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.2,
-      "vote_count": 279
+      "vote_average": 7.252,
+      "vote_count": 286
     },
     {
       "adult": false,
@@ -59,8 +59,8 @@
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.425,
-      "vote_count": 1189
+      "vote_average": 8.433,
+      "vote_count": 1201
     },
     {
       "adult": false,
@@ -82,8 +82,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 7.957,
-      "vote_count": 1853
+      "vote_average": 7.977,
+      "vote_count": 1887
     },
     {
       "adult": false,
@@ -102,8 +102,27 @@
       "release_date": "2026-03-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.624,
-      "vote_count": 4086
+      "vote_average": 8.629,
+      "vote_count": 4108
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "genre_ids": [
+        27
+      ],
+      "id": 1339713,
+      "title": "Obsession",
+      "original_language": "en",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "popularity": 334.7747,
+      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
+      "release_date": "2026-04-16",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.9,
+      "vote_count": 275
     },
     {
       "adult": false,
@@ -124,27 +143,8 @@
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.976,
-      "vote_count": 1371
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/1pKFDggvtk23zcn1vUcPiKyuHxM.jpg",
-      "genre_ids": [
-        27
-      ],
-      "id": 1339713,
-      "title": "Obsession",
-      "original_language": "en",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "popularity": 334.7747,
-      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
-      "release_date": "2026-04-16",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.868,
-      "vote_count": 262
+      "vote_average": 8.971,
+      "vote_count": 1385
     },
     {
       "adult": false,
@@ -164,8 +164,8 @@
       "release_date": "2026-03-18",
       "softcore": false,
       "video": false,
-      "vote_average": 7.313,
-      "vote_count": 91
+      "vote_average": 7.3,
+      "vote_count": 92
     },
     {
       "adult": false,
@@ -189,27 +189,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
-      "genre_ids": [
-        28,
-        14,
-        12
-      ],
-      "id": 931285,
-      "title": "Mortal Kombat II",
-      "original_language": "en",
-      "original_title": "Mortal Kombat II",
-      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-      "popularity": 219.2069,
-      "poster_path": "/io7wVbm9VKaanIcuAymCDy9dmjU.jpg",
-      "release_date": "2026-05-06",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.814,
-      "vote_count": 298
-    },
-    {
-      "adult": false,
       "backdrop_path": "/gkh6Nt8DtY1XT4gQsyFq9XAVJlJ.jpg",
       "genre_ids": [
         18,
@@ -230,6 +209,27 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
+      "genre_ids": [
+        28,
+        14,
+        12
+      ],
+      "id": 931285,
+      "title": "Mortal Kombat II",
+      "original_language": "en",
+      "original_title": "Mortal Kombat II",
+      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
+      "popularity": 219.2069,
+      "poster_path": "/io7wVbm9VKaanIcuAymCDy9dmjU.jpg",
+      "release_date": "2026-05-06",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.802,
+      "vote_count": 301
+    },
+    {
+      "adult": false,
       "backdrop_path": "/6ELCZlTA5lGUops70hKdB83WJxH.jpg",
       "genre_ids": [
         28,
@@ -246,8 +246,8 @@
       "release_date": "2021-04-07",
       "softcore": false,
       "video": false,
-      "vote_average": 7.029,
-      "vote_count": 6625
+      "vote_average": 7.03,
+      "vote_count": 6628
     },
     {
       "adult": false,
@@ -270,26 +270,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/oTE4lNs4PSG5iIWjqaTdCIFJ4Bs.jpg",
-      "genre_ids": [
-        28,
-        53
-      ],
-      "id": 1318447,
-      "title": "Apex",
-      "original_language": "en",
-      "original_title": "Apex",
-      "overview": "A grieving woman pushing her limits on a solo adventure in the Australian wild is ensnared in a twisted game with a cunning killer who thinks she's prey.",
-      "popularity": 174.2064,
-      "poster_path": "/eTp7gSPkSF3Aw79mNx1NkBP1PZT.jpg",
-      "release_date": "2026-04-24",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.677,
-      "vote_count": 1223
-    },
-    {
-      "adult": false,
       "backdrop_path": "/7OedxK0BvSKJ0ZWCPRYADViTBx6.jpg",
       "genre_ids": [
         28,
@@ -306,29 +286,28 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.754,
-      "vote_count": 224
+      "vote_average": 6.751,
+      "vote_count": 231
     },
     {
       "adult": false,
-      "backdrop_path": "/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
+      "backdrop_path": "/oTE4lNs4PSG5iIWjqaTdCIFJ4Bs.jpg",
       "genre_ids": [
-        878,
-        12,
-        14
+        28,
+        53
       ],
-      "id": 83533,
-      "title": "Avatar: Fire and Ash",
+      "id": 1318447,
+      "title": "Apex",
       "original_language": "en",
-      "original_title": "Avatar: Fire and Ash",
-      "overview": "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
-      "popularity": 159.6346,
-      "poster_path": "/aabwWZWx6z1aYP4PX2ADvbDKktd.jpg",
-      "release_date": "2025-12-17",
+      "original_title": "Apex",
+      "overview": "A grieving woman pushing her limits on a solo adventure in the Australian wild is ensnared in a twisted game with a cunning killer who thinks she's prey.",
+      "popularity": 174.2064,
+      "poster_path": "/eTp7gSPkSF3Aw79mNx1NkBP1PZT.jpg",
+      "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 7.501,
-      "vote_count": 3181
+      "vote_average": 6.687,
+      "vote_count": 1229
     },
     {
       "adult": false,
@@ -352,6 +331,27 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
+      "genre_ids": [
+        878,
+        12,
+        14
+      ],
+      "id": 83533,
+      "title": "Avatar: Fire and Ash",
+      "original_language": "en",
+      "original_title": "Avatar: Fire and Ash",
+      "overview": "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
+      "popularity": 159.6346,
+      "poster_path": "/aabwWZWx6z1aYP4PX2ADvbDKktd.jpg",
+      "release_date": "2025-12-17",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.501,
+      "vote_count": 3187
+    },
+    {
+      "adult": false,
       "backdrop_path": "/4BtL2vvEufDXDP4u6xQjjQ1Y2aT.jpg",
       "genre_ids": [
         28,
@@ -369,8 +369,8 @@
       "release_date": "2025-08-16",
       "softcore": false,
       "video": false,
-      "vote_average": 7.388,
-      "vote_count": 681
+      "vote_average": 7.373,
+      "vote_count": 683
     },
     {
       "adult": false,
@@ -393,25 +393,25 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/bOy625BjpCskOWnx3tD09MsKVCb.jpg",
+      "backdrop_path": "/hlZGaey4lR9hc4rGxZRAmIEsZOc.jpg",
       "genre_ids": [
-        35,
-        14
+        28,
+        18
       ],
-      "id": 1368881,
-      "title": "Ladies First",
+      "id": 1292415,
+      "title": "Beast",
       "original_language": "en",
-      "original_title": "Ladies First",
-      "overview": "An arrogant but charismatic ladies' man finds his life of money, power and casual flings upended when he wakes up in a parallel world dominated by women.",
-      "popularity": 138.7301,
-      "poster_path": "/kjR56Yv17pbjTVBTMjqepvcus4f.jpg",
-      "release_date": "2026-05-21",
+      "original_title": "Beast",
+      "overview": "MMA legend Patton James, now a commercial fisherman, is pulled back into the cage when his brother is in danger. Reuniting with his old coach Sammy, he commits to one final fight in one championship against the brutal champion Xavier Grau.",
+      "popularity": 130.6204,
+      "poster_path": "/7NrvUI3vnW8H3rD7ExKcTL7KRcQ.jpg",
+      "release_date": "2026-04-10",
       "softcore": false,
       "video": false,
-      "vote_average": 5.83,
-      "vote_count": 106
+      "vote_average": 6.307,
+      "vote_count": 44
     }
   ],
-  "total_pages": 57034,
-  "total_results": 1140663
+  "total_pages": 57038,
+  "total_results": 1140745
 }

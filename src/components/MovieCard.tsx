@@ -22,6 +22,8 @@ export interface MovieItem {
     rank?: number;
     liveViewers?: number;
     isMostViewed?: boolean;
+    isLive?: boolean;
+    viewers?: string;
     availableEpisodes?: {
         sub?: number;
         dub?: number;
@@ -141,11 +143,30 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                     </div>
                 )}
 
-                {/* Rating badge */}
-                <div className={`absolute left-2 flex items-center gap-1 bg-black/70 rounded-md px-2 py-0.5 z-10 ${item.isMostViewed ? 'top-8' : 'top-2'}`}>
-                    <Star className="w-3 h-3 text-[var(--accent-warm)] fill-[var(--accent-warm)]" />
-                    <span className="text-[11px] font-bold text-white">{rating}</span>
-                </div>
+                {/* Live Stream Badge */}
+                {item.isLive && (
+                    <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-600/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-red-500/20 animate-pulse">
+                        <span className="w-1 h-1 bg-white rounded-full" />
+                        <span className="text-[7.5px] sm:text-[8px] font-black text-white uppercase tracking-widest">
+                            LIVE
+                        </span>
+                    </div>
+                )}
+
+                {/* Viewer count for live streams */}
+                {item.isLive && item.viewers && (
+                    <div className="absolute bottom-2 left-2 bg-black/75 px-1.5 py-0.5 rounded text-[8px] font-black text-white tracking-widest border border-white/5 z-20 uppercase">
+                        {item.viewers} VIEWERS
+                    </div>
+                )}
+
+                {/* Rating badge (only when not live) */}
+                {!item.isLive && (
+                    <div className={`absolute left-2 flex items-center gap-1 bg-black/70 rounded-md px-2 py-0.5 z-10 ${item.isMostViewed ? 'top-8' : 'top-2'}`}>
+                        <Star className="w-3 h-3 text-[var(--accent-warm)] fill-[var(--accent-warm)]" />
+                        <span className="text-[11px] font-bold text-white">{rating}</span>
+                    </div>
+                )}
 
                 {/* Upcoming or HD badge */}
                 {isUpcoming ? (
@@ -201,13 +222,21 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             <div className="mt-2 px-0.5 pb-1">
                 <h4 className="text-[11px] md:text-xs font-extrabold text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
                 <div className="flex items-center gap-1.5 mt-1 text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold">
-                    {rating && (
+                    {item.isLive ? (
+                        <span className="text-red-500 font-extrabold flex items-center gap-1 animate-pulse">
+                            ● LIVE
+                        </span>
+                    ) : rating ? (
                         <span className="text-[var(--accent-warm)] font-extrabold flex items-center gap-0.5">
                             ★{rating}
                         </span>
+                    ) : null}
+                    {year && (
+                        <>
+                            <span className="text-white/25">•</span>
+                            <span>{year}</span>
+                        </>
                     )}
-                    <span className="text-white/25">•</span>
-                    {year && <span>{year}</span>}
                 </div>
             </div>
         </Link>

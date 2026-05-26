@@ -21,7 +21,7 @@
       "softcore": false,
       "name": "The Mandalorian",
       "vote_average": 8.407,
-      "vote_count": 10906
+      "vote_count": 10907
     },
     {
       "adult": false,
@@ -43,8 +43,8 @@
       "first_air_date": "2025-03-04",
       "softcore": false,
       "name": "Daredevil: Born Again",
-      "vote_average": 8.172,
-      "vote_count": 930
+      "vote_average": 8.169,
+      "vote_count": 931
     },
     {
       "adult": false,
@@ -140,30 +140,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/sASxGVO6wioRG6jNM2LHOjBAgWu.jpg",
-      "genre_ids": [
-        16,
-        10759,
-        35,
-        10765
-      ],
-      "id": 94404,
-      "origin_country": [
-        "JP"
-      ],
-      "original_language": "ja",
-      "original_name": "ドロヘドロ",
-      "overview": "Amnesiac Caiman seeks to undo his lizard head curse by killing the sorcerer responsible, with his friend Nikaido's help. In the Hole, that's a threat.",
-      "popularity": 29.6103,
-      "poster_path": "/zSMmRTopPIRr6913KX8pyiV6zsK.jpg",
-      "first_air_date": "2020-01-13",
-      "softcore": false,
-      "name": "Dorohedoro",
-      "vote_average": 8.319,
-      "vote_count": 415
-    },
-    {
-      "adult": false,
       "backdrop_path": "/q3jHCb4dMfYF6ojikKuHd6LscxC.jpg",
       "genre_ids": [
         18,
@@ -183,6 +159,30 @@
       "name": "Loki",
       "vote_average": 8.171,
       "vote_count": 12381
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/sASxGVO6wioRG6jNM2LHOjBAgWu.jpg",
+      "genre_ids": [
+        16,
+        10759,
+        35,
+        10765
+      ],
+      "id": 94404,
+      "origin_country": [
+        "JP"
+      ],
+      "original_language": "ja",
+      "original_name": "ドロヘドロ",
+      "overview": "Amnesiac Caiman seeks to undo his lizard head curse by killing the sorcerer responsible, with his friend Nikaido's help. In the Hole, that's a threat.",
+      "popularity": 29.6103,
+      "poster_path": "/zSMmRTopPIRr6913KX8pyiV6zsK.jpg",
+      "first_air_date": "2020-01-13",
+      "softcore": false,
+      "name": "Dorohedoro",
+      "vote_average": 8.3,
+      "vote_count": 415
     },
     {
       "adult": false,
@@ -272,7 +272,7 @@
       "first_air_date": "2023-12-19",
       "softcore": false,
       "name": "Percy Jackson and the Olympians",
-      "vote_average": 7.278,
+      "vote_average": 7.3,
       "vote_count": 763
     },
     {
@@ -339,8 +339,8 @@
       "first_air_date": "2022-10-26",
       "softcore": false,
       "name": "The Boss",
-      "vote_average": 8.154,
-      "vote_count": 286
+      "vote_average": 8.153,
+      "vote_count": 287
     },
     {
       "adult": false,
@@ -408,8 +408,8 @@
       "first_air_date": "2026-04-06",
       "softcore": false,
       "name": "Star Wars: Maul - Shadow Lord",
-      "vote_average": 8.506,
-      "vote_count": 156
+      "vote_average": 8.525,
+      "vote_count": 158
     },
     {
       "adult": false,

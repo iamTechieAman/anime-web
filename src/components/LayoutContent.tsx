@@ -26,9 +26,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
-      <DesktopSidebar />
-      {/* Content area: no left padding on mobile (no sidebar), 72px on md+ */}
-      <div className={`flex flex-col min-h-screen relative pl-0 md:pl-[72px] transition-[padding] duration-300 ease-in-out overflow-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      {/* Content area: edge-to-edge layout matching Onoflix top-navigation design */}
+      <div className={`flex flex-col min-h-screen relative pl-0 transition-[padding] duration-300 ease-in-out overflow-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
         <Suspense fallback={<div className="h-[60px] md:h-[64px] w-full skeleton-shine" />}>
           <Header />

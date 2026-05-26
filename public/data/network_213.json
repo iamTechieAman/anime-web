@@ -22,8 +22,8 @@
       "first_air_date": "2026-05-15",
       "softcore": false,
       "name": "Berlin and the Lady with an Ermine",
-      "vote_average": 8.374,
-      "vote_count": 95
+      "vote_average": 8.407,
+      "vote_count": 97
     },
     {
       "adult": false,
@@ -45,8 +45,30 @@
       "first_air_date": "2016-07-15",
       "softcore": false,
       "name": "Stranger Things",
-      "vote_average": 8.567,
-      "vote_count": 21193
+      "vote_average": 8.566,
+      "vote_count": 21194
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
+      "genre_ids": [
+        10765,
+        9648
+      ],
+      "id": 224941,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Boroughs",
+      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
+      "popularity": 142.8969,
+      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
+      "first_air_date": "2026-05-21",
+      "softcore": false,
+      "name": "The Boroughs",
+      "vote_average": 7.276,
+      "vote_count": 49
     },
     {
       "adult": false,
@@ -69,34 +91,12 @@
       "first_air_date": "2026-05-15",
       "softcore": false,
       "name": "The WONDERfools",
-      "vote_average": 9.2,
-      "vote_count": 96
+      "vote_average": 9.235,
+      "vote_count": 98
     },
     {
       "adult": false,
-      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
-      "genre_ids": [
-        10765,
-        9648
-      ],
-      "id": 224941,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Boroughs",
-      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
-      "popularity": 142.8969,
-      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
-      "first_air_date": "2026-05-21",
-      "softcore": false,
-      "name": "The Boroughs",
-      "vote_average": 7.141,
-      "vote_count": 46
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/wJxZLiPbXrU601c6e9A6kYLejso.jpg",
+      "backdrop_path": "/179sUCj5AcFKdQpvDhkIX15NRgy.jpg",
       "genre_ids": [
         18,
         10759,
@@ -114,7 +114,7 @@
       "first_air_date": "2023-12-29",
       "softcore": false,
       "name": "Berlin",
-      "vote_average": 7.591,
+      "vote_average": 7.6,
       "vote_count": 651
     },
     {
@@ -137,7 +137,7 @@
       "softcore": false,
       "name": "Lucifer",
       "vote_average": 8.434,
-      "vote_count": 15448
+      "vote_count": 15450
     },
     {
       "adult": false,
@@ -159,8 +159,8 @@
       "first_air_date": "2017-11-17",
       "softcore": false,
       "name": "Marvel's The Punisher",
-      "vote_average": 8.1,
-      "vote_count": 3104
+      "vote_average": 8.144,
+      "vote_count": 3105
     },
     {
       "adult": false,
@@ -225,7 +225,7 @@
       "first_air_date": "2022-11-18",
       "softcore": false,
       "name": "Weak Hero",
-      "vote_average": 8.666,
+      "vote_average": 8.7,
       "vote_count": 427
     },
     {
@@ -292,7 +292,7 @@
       "softcore": false,
       "name": "Black Mirror",
       "vote_average": 8.286,
-      "vote_count": 6180
+      "vote_count": 6182
     },
     {
       "adult": false,
@@ -315,7 +315,7 @@
       "softcore": false,
       "name": "Squid Game",
       "vote_average": 7.856,
-      "vote_count": 17408
+      "vote_count": 17409
     },
     {
       "adult": false,
@@ -360,8 +360,8 @@
       "first_air_date": "2018-09-09",
       "softcore": false,
       "name": "You",
-      "vote_average": 8.01,
-      "vote_count": 3922
+      "vote_average": 8.011,
+      "vote_count": 3923
     },
     {
       "adult": false,
@@ -449,10 +449,10 @@
       "first_air_date": "2020-12-25",
       "softcore": false,
       "name": "Bridgerton",
-      "vote_average": 8.063,
+      "vote_average": 8.1,
       "vote_count": 3296
     }
   ],
   "total_pages": 138,
-  "total_results": 2757
+  "total_results": 2758
 }

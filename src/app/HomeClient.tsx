@@ -69,12 +69,65 @@ const TABS = [
     { id: "movies", label: "Movies", icon: Popcorn },
     { id: "tv", label: "TV Shows", icon: Tv },
     { id: "anime", label: "Anime", icon: Sparkles },
+    { id: "toons", label: "PC Toons", icon: Tv },
+    { id: "gaming", label: "Gaming Hub", icon: Play },
     { id: "trending", label: "Trending", icon: TrendingUp },
     { id: "discover", label: "Discover", icon: Zap },
 ];
 
+const CARTOONS_DATA = [
+  { id: "60625", title: "Rick and Morty", poster_path: "/WGRQ8FpjkDTzivQJ43t94bOuY0.jpg", backdrop_path: "/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg", vote_average: 8.7, release_date: "2013-12-02", media_type: "tv", isLive: true, viewers: "85,933" },
+  { id: "15260", title: "Adventure Time", poster_path: "/qk3eQ8jW4opJ48gFWYUXWaMT4l.jpg", backdrop_path: "/3uE9SUywNbj1qSAuYCGgbTTYku5.jpg", vote_average: 8.5, release_date: "2010-04-05", media_type: "tv" },
+  { id: "1434", title: "Family Guy", poster_path: "/3PFsEuAiyLkWsP4GG6dIV37Q6gu.jpg", backdrop_path: "/l7wShoIdIUwaDIbsHno9pO5MZXT.jpg", vote_average: 7.4, release_date: "1999-01-31", media_type: "tv" },
+  { id: "606", title: "Ed, Edd n Eddy", poster_path: "/nfKenwmfmdtoXGhaYiDIftrBchw.jpg", backdrop_path: "/iRbNLYmqlxbqkfCuAmHaFwZ9ocY.jpg", vote_average: 7.9, release_date: "1999-01-04", media_type: "tv" },
+  { id: "47480", title: "The Tom and Jerry Show", poster_path: "/41EWXLXTZO4MLb2BL28mWZuydyq.jpg", backdrop_path: "/utqCOvMmjjMTlXNZz6PHOzRM5QP.jpg", vote_average: 7.3, release_date: "2014-04-09", media_type: "tv" },
+  { id: "12971", title: "Dragon Ball Z", poster_path: "/yfyToia25GnvjY7FPAGaCm3lKRc.jpg", backdrop_path: "/ydf1CeiBLfdxiyNTpskM0802TKl.jpg", vote_average: 8.4, release_date: "1989-04-26", media_type: "tv" },
+  { id: "360920", title: "The Grinch", poster_path: "/smxA8yvZ0LzDPer9BIRd4pyOpx1.jpg", backdrop_path: "/5lWIYxYEqWi8j3ZloxXntw3ImBo.jpg", vote_average: 6.9, release_date: "2018-11-08", media_type: "movie" }
+];
+
+const GAMING_STREAMS_DATA = [
+  { id: "82690", title: "Fortnite Championship - Ninja Live", poster_path: "/cu52l826q8jU7C6Xta2wm6B61mY.jpg", backdrop_path: "/8mP4T02z807Z3XQd1s4n6XlM9b1.jpg", vote_average: 8.2, release_date: "2026", media_type: "movie", isLive: true, viewers: "85,933" },
+  { id: "580489", title: "GTA V Roleplay - xQc Live", poster_path: "/xmbU4V6J1Yst64fgdyTIHTv6eOI.jpg", backdrop_path: "/8Y43POKjjw0L051Gv44Z5w17wLs.jpg", vote_average: 7.8, release_date: "2026", media_type: "movie", isLive: true, viewers: "64,205" },
+  { id: "350312", title: "Minecraft Hardcore - Dream", poster_path: "/pU1jKVmrmz18g4IG9UB3FWt15qb.jpg", backdrop_path: "/q71QZCxIWzaND7761R28su4J3Ur.jpg", vote_average: 8.5, release_date: "2026", media_type: "movie", isLive: true, viewers: "42,150" },
+  { id: "980489", title: "Valorant Radiant Lobby - Shroud", poster_path: "/51tA6WLVndnd4mDxuG2me7ZE0i5.jpg", backdrop_path: "/jZIUCJjScSM24goOJm6cjrxo5tI.jpg", vote_average: 8.0, release_date: "2026", media_type: "movie", isLive: true, viewers: "22,405" },
+  { id: "257344", title: "League of Legends Worlds - Riot Games", poster_path: "/6tIK0Zqf3XN280j6bV5D1j64n3o.jpg", backdrop_path: "/5l67yMvLp3Ww1D1F5o3b28bE54r.jpg", vote_average: 7.5, release_date: "2026", media_type: "movie", isLive: true, viewers: "128,930" }
+];
+
 export default function MoviesPage() {
     const [activeTab, setActiveTab] = useState("movies");
+    const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
+
+    useEffect(() => {
+        const detectDevice = () => {
+            if (typeof window !== "undefined") {
+                const ua = navigator.userAgent;
+                const width = window.innerWidth;
+                const isTVUA = /SmartTV|GoogleTV|AppleTV|Roku|CastTV|Tizen|Web0S|NetCast|Opera TV|Viera|Bravia|PlayStation|Xbox/i.test(ua);
+                if (isTVUA || width >= 2500) {
+                    setDeviceMode("tv");
+                } else if (width < 1024) {
+                    setDeviceMode("mobile");
+                } else {
+                    setDeviceMode("pc");
+                }
+            }
+        };
+        detectDevice();
+        window.addEventListener("resize", detectDevice);
+        return () => window.removeEventListener("resize", detectDevice);
+    }, []);
+
+    // Sync tab from query parameters
+    const paramsInUrl = useSearchParams();
+    const tabParam = paramsInUrl?.get("tab");
+    useEffect(() => {
+        if (tabParam) {
+            setActiveTab(tabParam);
+            // Scroll to content when tab changes
+            const mainContent = document.getElementById("main-feed-start");
+            if (mainContent) mainContent.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [tabParam]);
     const [activeProvider, setActiveProvider] = useState<ProviderSlug>("all");
     const [providerData, setProviderData] = useState<Record<string, any>>({}); // keyed by slug
     const [providerLoading, setProviderLoading] = useState(false);
@@ -297,7 +350,6 @@ export default function MoviesPage() {
     }, [searchQuery]);
 
     // Check for search query in URL
-    const paramsInUrl = useSearchParams();
     useEffect(() => {
         const q = paramsInUrl?.get('q');
         if (q) {
@@ -324,37 +376,39 @@ export default function MoviesPage() {
                 />
 
                 {/* Genres & Categories Sub-Nav */}
-                <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 sticky top-[64px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.3)] py-1 transition-all duration-300">
-                    <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
-                            {TABS.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
-                                        : "bg-[var(--bg-card)] border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
-                                    }`}
-                                >
-                                    <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="hidden lg:flex items-center gap-4 pl-6 border-l border-white/10 ml-6">
-                            <span className="text-[11px] uppercase tracking-[0.2em] font-black text-[var(--text-muted)]">Quick Filters:</span>
-                            {GENRE_ROWS.slice(0, 4).map(g => (
-                                <button 
-                                    key={g.genreId}
-                                    onClick={() => document.getElementById(`genre-${g.genreId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/5 transition-all"
-                                >
-                                    {g.title}
-                                </button>
-                            ))}
+                {deviceMode !== "tv" && (
+                    <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 sticky top-[64px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.3)] py-1 transition-all duration-300">
+                        <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
+                            <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
+                                {TABS.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
+                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
+                                            : "bg-[var(--bg-card)] border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                                        }`}
+                                    >
+                                        <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="hidden lg:flex items-center gap-4 pl-6 border-l border-white/10 ml-6">
+                                <span className="text-[11px] uppercase tracking-[0.2em] font-black text-[var(--text-muted)]">Quick Filters:</span>
+                                {GENRE_ROWS.slice(0, 4).map(g => (
+                                    <button 
+                                        key={g.genreId}
+                                        onClick={() => document.getElementById(`genre-${g.genreId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                                        className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/5 transition-all"
+                                    >
+                                        {g.title}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-4">
                     {searchQuery ? (
@@ -449,7 +503,27 @@ export default function MoviesPage() {
                                     </section>
                                 )}
                                 
-                                {activeTab === "movies" && (
+                                {deviceMode === "tv" ? (
+                                    <div className="space-y-6 md:space-y-8">
+                                        <section className="relative">
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
+                                            <SectionHeader icon={Tv} title="Featured Toons" color="text-[var(--accent)]" isFeatured />
+                                            <MovieRow items={CARTOONS_DATA} title="tv-featured-toons" isLarge />
+                                        </section>
+                                        
+                                        <section className="relative">
+                                            <SectionHeader icon={Flame} title="New Releases" color="text-[var(--accent-warm)]" />
+                                            <MovieRow items={[...CARTOONS_DATA, ...trending.slice(0, 5)]} title="tv-new-releases" />
+                                        </section>
+
+                                        <section className="relative">
+                                            <SectionHeader icon={Play} title="Game-Streaming Highlights" color="text-[var(--accent-secondary)]" isFeatured />
+                                            <MovieRow items={GAMING_STREAMS_DATA} title="tv-gaming-highlights" />
+                                        </section>
+                                    </div>
+                                ) : (
+                                    <>
+                                    {activeTab === "movies" && (
                                     <AnimatePresence mode="wait">
                                     <motion.div
                                         key={`movies-${activeProvider}`}
@@ -657,7 +731,51 @@ export default function MoviesPage() {
                                     </motion.div>
                                     </AnimatePresence>
                                 )}
-                                
+
+                                {activeTab === "toons" && (
+                                    <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`toons-${activeProvider}`}
+                                        initial={{ opacity: 0, y: 18 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -12 }}
+                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        className="space-y-2 md:space-y-3"
+                                    >
+                                        <section>
+                                            <SectionHeader icon={Tv} title="Featured PC Toons" color="text-[var(--accent)]" isFeatured />
+                                            <MovieRow items={CARTOONS_DATA} title="featured-pc-toons" isLarge />
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Sparkles} title="Latest Animated Releases" color="text-[var(--accent-warm)]" />
+                                            <MovieGrid items={CARTOONS_DATA} type="tv" />
+                                        </section>
+                                    </motion.div>
+                                    </AnimatePresence>
+                                )}
+
+                                {activeTab === "gaming" && (
+                                    <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`gaming-${activeProvider}`}
+                                        initial={{ opacity: 0, y: 18 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -12 }}
+                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        className="space-y-2 md:space-y-3"
+                                    >
+                                        <section>
+                                            <SectionHeader icon={Play} title="Live Streaming Highlights" color="text-[var(--accent)]" isFeatured />
+                                            <MovieRow items={GAMING_STREAMS_DATA} title="live-streaming-highlights" isLarge />
+                                        </section>
+                                        <section>
+                                            <SectionHeader icon={Sparkles} title="Popular Gaming Hub Channels" color="text-[var(--accent-secondary)]" />
+                                            <MovieGrid items={GAMING_STREAMS_DATA} type="movie" />
+                                        </section>
+                                    </motion.div>
+                                    </AnimatePresence>
+                                )}
+
                                 {activeTab === "trending" && (
                                     <div className="space-y-2 md:space-y-3">
                                         {((loading && trending.length === 0) || trending.length > 0) && (
@@ -779,6 +897,8 @@ export default function MoviesPage() {
                                             </section>
                                         )}
                                     </div>
+                                )}
+                                    </>
                                 )}
                             </div>
                         </div>

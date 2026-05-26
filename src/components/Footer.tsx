@@ -19,7 +19,7 @@ export default function Footer() {
                                 <img 
                                     src="/logo.webp" 
                                     alt="ToonPlayer" 
-                                    className="w-full h-full object-contain mix-blend-screen group-hover:scale-110 transition-transform duration-300"
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                                 />
                             </div>
                             <span className="text-xl font-black tracking-tighter text-white">ToonPlayer</span>

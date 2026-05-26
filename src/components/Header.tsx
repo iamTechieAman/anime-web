@@ -24,6 +24,29 @@ export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
+  const [isTvSearchOpen, setIsTvSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const detectDevice = () => {
+      if (typeof window !== "undefined") {
+        const ua = navigator.userAgent;
+        const width = window.innerWidth;
+        const isTVUA = /SmartTV|GoogleTV|AppleTV|Roku|CastTV|Tizen|Web0S|NetCast|Opera TV|Viera|Bravia|PlayStation|Xbox/i.test(ua);
+        if (isTVUA || width >= 2500) {
+          setDeviceMode("tv");
+        } else if (width < 1024) { // Mobile and tablet top nav starts < 1024px
+          setDeviceMode("mobile");
+        } else {
+          setDeviceMode("pc");
+        }
+      }
+    };
+    detectDevice();
+    window.addEventListener("resize", detectDevice);
+    return () => window.removeEventListener("resize", detectDevice);
+  }, []);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [isDiscoverMode, setIsDiscoverMode] = useState(false);
@@ -273,7 +296,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
+    <nav className="fixed top-0 left-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
       
       {/* Search Focus Overlay */}
       <AnimatePresence>
@@ -301,7 +324,7 @@ export default function Header() {
             <img 
               src="/logo.webp" 
               alt="ToonPlayer Logo" 
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.45)] group-hover:scale-105 transition-transform duration-300 mix-blend-screen"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.45)] group-hover:scale-105 transition-transform duration-300"
             />
           </div>
           <div className="flex flex-col min-w-0">
@@ -316,246 +339,356 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* ── SEARCH BAR (desktop only) ── */}
-        <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[440px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
-          <div className="flex-1 relative">
-            <form 
-              onSubmit={(e) => handleSearch(e)} 
-              className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-orange-900/15' : 'bg-transparent'}`}
-            >
-              <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
-                <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[var(--accent-secondary)] animate-pulse' : 'text-[var(--text-secondary)] group-focus-within:text-[var(--accent)]'}`} />
-              </button>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setActiveIndex(-1);
-                  if (e.target.value.length >= 2 && !isDiscoverMode) setShowSuggestions(true);
-                }}
-                onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
-                onKeyDown={handleKeyDown}
-                placeholder={isDiscoverMode ? "Describe what you want to watch..." : "Find movies, shows & more..."}
-                className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none focus-visible:outline-none outline-none px-2 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
-                autoComplete="off"
-              />
-              {searchQuery && (
-                <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1.5 hover:bg-white/5 rounded-full transition-colors mr-2">
-                  <X className="w-4 h-4 text-[var(--text-muted)]" />
-                </button>
-              )}
-              
-              {/* AI Discover Toggle */}
-              <button 
-                type="button"
-                onClick={() => setIsDiscoverMode(!isDiscoverMode)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-500/30' : 'bg-white/[0.04] text-[var(--text-muted)] hover:bg-white/10 hover:text-white'}`}
-                title="AI Discovery Search"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden lg:inline">AI</span>
-              </button>
-            </form>
-
-            {/* Suggestions Dropdown */}
-            <AnimatePresence>
-              {showSuggestions && (
-                <motion.div
-                  ref={dropdownRef}
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                  className="absolute top-full left-0 right-0 mt-3 bg-zinc-950/95 border border-white/10 rounded-[28px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-50 backdrop-blur-2xl"
+        {/* ── NAVIGATION LINKS (desktop & TV) ── */}
+        {deviceMode !== "mobile" && (
+          <div className="flex items-center gap-2 lg:gap-4 ml-6 mr-auto text-xs lg:text-sm font-black uppercase tracking-wider text-zinc-400">
+            {deviceMode === "tv" ? (
+              <>
+                <Link href="/?tab=movies" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white">
+                  <Play className="w-4 h-4 fill-current text-[var(--accent)]" /> Home
+                </Link>
+                <button 
+                  onClick={() => { setSearchQuery(""); setIsTvSearchOpen(true); }} 
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
                 >
-                  {searchQuery.length < 2 ? (
-                    <div className="divide-y divide-white/[0.04]">
-                      {recentSearches.length > 0 && (
+                  <Search className="w-4 h-4" /> Search
+                </button>
+                <Link href="/watchlist" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors">
+                  <Bookmark className="w-4 h-4 text-pink-400" /> My List
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
+                  Home
+                </Link>
+                <Link href="/?tab=toons" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
+                  PC Toons
+                </Link>
+                <Link href="/?tab=gaming" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
+                  Gaming Hub
+                </Link>
+                <Link href="/discover" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
+                  Stream Central
+                </Link>
+                <Link href="/watchlist" className="px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors hover:scale-105 active:scale-95 duration-200">
+                  My Library
+                </Link>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── SEARCH BAR (PC only) ── */}
+        {deviceMode === "pc" && (
+          <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[440px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
+            <div className="flex-1 relative">
+              <form 
+                onSubmit={(e) => handleSearch(e)} 
+                className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-orange-900/15' : 'bg-transparent'}`}
+              >
+                <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
+                  <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[var(--accent-secondary)] animate-pulse' : 'text-[var(--text-secondary)] group-focus-within:text-[var(--accent)]'}`} />
+                </button>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setActiveIndex(-1);
+                    if (e.target.value.length >= 2 && !isDiscoverMode) setShowSuggestions(true);
+                  }}
+                  onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={isDiscoverMode ? "Describe what you want to watch..." : "Find movies, shows & more..."}
+                  className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none focus-visible:outline-none outline-none px-2 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
+                  autoComplete="off"
+                />
+                {searchQuery && (
+                  <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1.5 hover:bg-white/5 rounded-full transition-colors mr-2">
+                    <X className="w-4 h-4 text-[var(--text-muted)]" />
+                  </button>
+                )}
+                
+                {/* AI Discover Toggle */}
+                <button 
+                  type="button"
+                  onClick={() => setIsDiscoverMode(!isDiscoverMode)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-500/30' : 'bg-white/[0.04] text-[var(--text-muted)] hover:bg-white/10 hover:text-white'}`}
+                  title="AI Discovery Search"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="hidden lg:inline">AI</span>
+                </button>
+              </form>
+
+              {/* Suggestions Dropdown */}
+              <AnimatePresence>
+                {showSuggestions && (
+                  <motion.div
+                    ref={dropdownRef}
+                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                    className="absolute top-full left-0 right-0 mt-3 bg-zinc-950/95 border border-white/10 rounded-[28px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-50 backdrop-blur-2xl"
+                  >
+                    {searchQuery.length < 2 ? (
+                      <div className="divide-y divide-white/[0.04]">
+                        {recentSearches.length > 0 && (
+                          <div className="p-5">
+                            <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/40 mb-3 flex items-center gap-2">
+                              <Clock className="w-3 h-3" /> Recent Searches
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {recentSearches.map((s, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => { setSearchQuery(s); handleSearch(null, s); }}
+                                  className="px-3.5 py-1.5 bg-white/[0.03] hover:bg-white/10 border border-white/[0.05] rounded-full text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 text-white/70 hover:text-white"
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Trending Section when empty */}
                         <div className="p-5">
-                          <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/40 mb-3 flex items-center gap-2">
-                            <Clock className="w-3 h-3" /> Recent Searches
+                          <p className="text-[10px] uppercase tracking-[0.2em] font-black text-orange-400 mb-4 flex items-center gap-2">
+                            <TrendingUp className="w-3 h-3" /> Trending Hits
                           </p>
-                          <div className="flex flex-wrap gap-2">
-                            {recentSearches.map((s, i) => (
-                              <button
+                          <div className="space-y-1">
+                            {globalCatalog.slice(0, 5).map((item, i) => (
+                              <Link
                                 key={i}
-                                onClick={() => { setSearchQuery(s); handleSearch(null, s); }}
-                                className="px-3.5 py-1.5 bg-white/[0.03] hover:bg-white/10 border border-white/[0.05] rounded-full text-xs font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 text-white/70 hover:text-white"
+                                href={item.href || (item.id ? `/watch/${item.type || 'anime'}/${item.id}` : '#')}
+                                className="flex items-center gap-4 p-2.5 hover:bg-white/5 rounded-2xl transition-all group hover:pl-4"
+                                onClick={() => setShowSuggestions(false)}
                               >
-                                {s}
-                              </button>
+                                <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-orange-500 transition-colors">0{i + 1}</span>
+                                <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-zinc-900 border border-white/5">
+                                  {item.image && <img src={item.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />}
+                                </div>
+                                <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{item.title}</span>
+                                <Sparkles className="w-3.5 h-3.5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
+                              </Link>
                             ))}
                           </div>
                         </div>
-                      )}
-                      
-                      {/* Trending Section when empty */}
-                      <div className="p-5">
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-orange-400 mb-4 flex items-center gap-2">
-                          <TrendingUp className="w-3 h-3" /> Trending Hits
-                        </p>
-                        <div className="space-y-1">
-                          {globalCatalog.slice(0, 5).map((item, i) => (
-                            <Link
-                              key={i}
-                              href={item.href || (item.id ? `/watch/${item.type || 'anime'}/${item.id}` : '#')}
-                              className="flex items-center gap-4 p-2.5 hover:bg-white/5 rounded-2xl transition-all group hover:pl-4"
-                              onClick={() => setShowSuggestions(false)}
-                            >
-                              <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-orange-500 transition-colors">0{i + 1}</span>
-                              <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-zinc-900 border border-white/5">
-                                {item.image && <img src={item.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />}
+                      </div>
+                    ) : suggestions.length > 0 ? (
+                      <div className="p-2 space-y-1">
+                        {suggestions.map((item: any, i: number) => (
+                          <Link
+                            key={`${item.type}-${item.id}`}
+                            href={item.href || `/watch/${item.type}/${item.id}`}
+                            className={`flex items-center gap-4 p-3 rounded-2xl transition-all group ${activeIndex === i ? 'bg-white/10 ring-1 ring-white/10 shadow-lg' : 'hover:bg-white/5'}`}
+                            onMouseEnter={() => setActiveIndex(i)}
+                            onClick={() => { setShowSuggestions(false); saveRecentSearch(item.title); }}
+                          >
+                            <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-zinc-900 border border-white/5 shadow-inner">
+                              {item.image ? (
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Play className="w-5 h-5 text-zinc-700" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="text-sm font-black text-white truncate group-hover:text-orange-400 transition-colors">
+                                  <HighlightText text={item.title} highlight={searchQuery} />
+                                </h4>
+                                <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
+                                  item.type === 'anime' ? 'bg-orange-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                }`}>
+                                  {item.type}
+                                </span>
                               </div>
-                              <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{item.title}</span>
-                              <Sparkles className="w-3.5 h-3.5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
-                            </Link>
+                              <div className="flex items-center gap-2">
+                                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{item.format}</p>
+                                  <span className="w-1 h-1 rounded-full bg-white/10" />
+                                  <p className="text-[10px] font-bold text-white/40">{item.year}</p>
+                              </div>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0 -translate-x-2">
+                              <ChevronDown className="w-5 h-5 text-orange-500 -rotate-90" />
+                            </div>
+                          </Link>
+                        ))}
+                        <button 
+                          onClick={() => handleSearch(null)}
+                          className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-orange-400 hover:text-white hover:bg-orange-500 rounded-2xl transition-all duration-300"
+                        >
+                          All results for "{searchQuery}"
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-12 text-center">
+                        <div className="w-16 h-16 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-4 border border-white/[0.05]">
+                          <Search className="w-6 h-6 text-white/20" />
+                        </div>
+                        <p className="text-sm font-black text-white mb-1 uppercase tracking-widest">No Matches Found</p>
+                        <p className="text-xs text-white/40 font-medium">Try different keywords or browse genres</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Filter Button */}
+            <div ref={filterRef} className="relative shrink-0 border-l border-white/[0.06] pl-1">
+              <button
+                aria-label="Filter Options"
+                onClick={() => { setShowFilters(v => !v); setShowNotifications(false); setShowProfileDropdown(false); }}
+                className={`h-[36px] px-3 rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
+                  showFilters || filterGenre || filterFormat || filterStatus
+                    ? 'bg-orange-500/10 text-orange-400'
+                    : 'bg-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/[0.04]'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden lg:block">Filter</span>
+                {(filterGenre || filterFormat || filterStatus) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {showFilters && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(249,115,22,0.1)] overflow-hidden z-50 backdrop-blur-3xl"
+                  >
+                    <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                      <span className="font-bold text-sm">Fine-tune Search</span>
+                      <button onClick={clearFilters} className="text-xs text-orange-400 hover:text-orange-300 font-medium">Reset</button>
+                    </div>
+                    <div className="p-4 space-y-5">
+                      <div>
+                        <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Genre</label>
+                        <select 
+                          value={filterGenre}
+                          onChange={(e) => setFilterGenre(e.target.value)}
+                          className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none focus:border-orange-500/50"
+                        >
+                          <option value="">All Genres</option>
+                          {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Format</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {FORMATS.map(f => (
+                            <button
+                              key={f}
+                              onClick={() => setFilterFormat(filterFormat === f ? "" : f)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                            >
+                              {f}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Status</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {STATUSES.map(s => (
+                            <button
+                              key={s}
+                              onClick={() => setFilterStatus(filterStatus === s ? "" : s)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                            >
+                              {s}
+                            </button>
                           ))}
                         </div>
                       </div>
                     </div>
-                  ) : suggestions.length > 0 ? (
-                    <div className="p-2 space-y-1">
-                      {suggestions.map((item: any, i: number) => (
-                        <Link
-                          key={`${item.type}-${item.id}`}
-                          href={item.href || `/watch/${item.type}/${item.id}`}
-                          className={`flex items-center gap-4 p-3 rounded-2xl transition-all group ${activeIndex === i ? 'bg-white/10 ring-1 ring-white/10 shadow-lg' : 'hover:bg-white/5'}`}
-                          onMouseEnter={() => setActiveIndex(i)}
-                          onClick={() => { setShowSuggestions(false); saveRecentSearch(item.title); }}
-                        >
-                          <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-zinc-900 border border-white/5 shadow-inner">
-                            {item.image ? (
-                              <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Play className="w-5 h-5 text-zinc-700" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-sm font-black text-white truncate group-hover:text-orange-400 transition-colors">
-                                <HighlightText text={item.title} highlight={searchQuery} />
-                              </h4>
-                              <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
-                                item.type === 'anime' ? 'bg-orange-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
-                              }`}>
-                                {item.type}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{item.format}</p>
-                                <span className="w-1 h-1 rounded-full bg-white/10" />
-                                <p className="text-[10px] font-bold text-white/40">{item.year}</p>
-                            </div>
-                          </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0 -translate-x-2">
-                            <ChevronDown className="w-5 h-5 text-orange-500 -rotate-90" />
-                          </div>
-                        </Link>
-                      ))}
-                      <button 
-                        onClick={() => handleSearch(null)}
-                        className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-orange-400 hover:text-white hover:bg-orange-500 rounded-2xl transition-all duration-300"
-                      >
-                        All results for "{searchQuery}"
+                    <div className="p-3 bg-white/5 border-t border-[var(--border-color)]">
+                      <button onClick={applyFilter} className="w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
+                        Apply Filters
                       </button>
                     </div>
-                  ) : (
-                    <div className="p-12 text-center">
-                      <div className="w-16 h-16 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-4 border border-white/[0.05]">
-                        <Search className="w-6 h-6 text-white/20" />
-                      </div>
-                      <p className="text-sm font-black text-white mb-1 uppercase tracking-widest">No Matches Found</p>
-                      <p className="text-xs text-white/40 font-medium">Try different keywords or browse genres</p>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
+        )}
 
-          {/* Filter Button */}
-          <div ref={filterRef} className="relative shrink-0 border-l border-white/[0.06] pl-1">
-            <button
-              aria-label="Filter Options"
-              onClick={() => { setShowFilters(v => !v); setShowNotifications(false); setShowProfileDropdown(false); }}
-              className={`h-[36px] px-3 rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
-                showFilters || filterGenre || filterFormat || filterStatus
-                  ? 'bg-orange-500/10 text-orange-400'
-                  : 'bg-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/[0.04]'
-              }`}
+        {/* TV Search Overlay */}
+        <AnimatePresence>
+          {deviceMode === "tv" && isTvSearchOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#07070b]/98 z-[100] flex flex-col items-center justify-start pt-24 px-6 sm:px-10"
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span className="hidden lg:block">Filter</span>
-              {(filterGenre || filterFormat || filterStatus) && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-              )}
-            </button>
-
-            <AnimatePresence>
-              {showFilters && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(249,115,22,0.1)] overflow-hidden z-50 backdrop-blur-3xl"
-                >
-                  <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
-                    <span className="font-bold text-sm">Fine-tune Search</span>
-                    <button onClick={clearFilters} className="text-xs text-orange-400 hover:text-orange-300 font-medium">Reset</button>
-                  </div>
-                  <div className="p-4 space-y-5">
-                    <div>
-                      <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Genre</label>
-                      <select 
-                        value={filterGenre}
-                        onChange={(e) => setFilterGenre(e.target.value)}
-                        className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none focus:border-orange-500/50"
-                      >
-                        <option value="">All Genres</option>
-                        {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Format</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {FORMATS.map(f => (
-                          <button
-                            key={f}
-                            onClick={() => setFilterFormat(filterFormat === f ? "" : f)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
-                          >
-                            {f}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)] mb-2 block">Status</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {STATUSES.map(s => (
-                          <button
-                            key={s}
-                            onClick={() => setFilterStatus(filterStatus === s ? "" : s)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white/5 border-t border-[var(--border-color)]">
-                    <button onClick={applyFilter} className="w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
-                      Apply Filters
+              <div className="w-full max-w-3xl flex flex-col gap-6">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <span className="text-xl font-black uppercase tracking-widest text-[var(--accent)]">TV Mode Search</span>
+                  <button 
+                    onClick={() => setIsTvSearchOpen(false)}
+                    className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white cursor-pointer"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="relative flex items-center p-2 bg-white/[0.04] border border-white/10 rounded-2xl focus-within:border-[var(--accent)]/50 transition-all duration-300">
+                  <Search className="w-6 h-6 text-zinc-400 ml-3 shrink-0" />
+                  <input
+                    type="text"
+                    autoFocus
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setActiveIndex(-1);
+                    }}
+                    placeholder="Search cartoons, anime, movies..."
+                    className="w-full bg-transparent border-0 focus:outline-none focus:ring-0 text-lg px-4 text-white placeholder-zinc-500 font-bold"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="p-2 hover:bg-white/5 rounded-full mr-2">
+                      <X className="w-5 h-5 text-zinc-400" />
                     </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+                  )}
+                </div>
+
+                {/* TV Search suggestions */}
+                <div className="max-h-[60vh] overflow-y-auto mt-4 space-y-2 pr-2 hide-scrollbar">
+                  {suggestions.length > 0 ? (
+                    suggestions.map((item: any, i: number) => (
+                      <Link
+                        key={`${item.type}-${item.id}`}
+                        href={item.href || `/watch/${item.type}/${item.id}`}
+                        onClick={() => { setIsTvSearchOpen(false); saveRecentSearch(item.title); }}
+                        className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex === i ? 'bg-white/10 border-[var(--accent)]' : ''}`}
+                      >
+                        <div className="w-12 h-16 relative overflow-hidden rounded-xl bg-zinc-900 shrink-0 border border-white/5">
+                          {item.image && <img src={item.image} alt="" className="w-full h-full object-cover" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-base font-bold text-white block truncate">{item.title}</span>
+                          <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">{item.type} • {item.year} • {item.format}</span>
+                        </div>
+                      </Link>
+                    ))
+                  ) : searchQuery.length >= 2 ? (
+                    <p className="text-zinc-500 text-center py-10 font-bold">No results found for "{searchQuery}"</p>
+                  ) : null}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── RIGHT ACTIONS ── */}
         <div className="ml-auto flex items-center gap-1.5 md:gap-3 shrink-0">
