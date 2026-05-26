@@ -14,6 +14,7 @@ import dynamic from "next/dynamic";
 
 const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[60vh] md:h-[70vh] bg-zinc-900 animate-pulse rounded-2xl w-full" /> });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
+
 const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });
 const ContinueWatchingRow = dynamic(() => import("@/components/ContinueWatchingRow"), { ssr: false });
 const ProviderBar = dynamic(() => import("@/components/ProviderBar"), { ssr: false });
@@ -496,7 +497,7 @@ export default function MoviesPage() {
                                                 {((loading && topRated.length === 0) || topRated.length > 0) && (
                                                     <section>
                                                         <SectionHeader icon={Star} title="Top Rated Movies" color="text-[var(--accent-warm)]" isFeatured />
-                                                        {topRated.length > 0 ? <MovieRow items={topRated} type="movie" title="top-rated-movies" isLarge /> : <RowSkeleton />}
+                                                        {topRated.length > 0 ? <MovieGrid items={topRated} type="movie" /> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {GENRE_ROWS.map((genre) => {
@@ -563,7 +564,7 @@ export default function MoviesPage() {
                                                 {((loading && tvTopRated.length === 0) || tvTopRated.length > 0) && (
                                                     <section>
                                                         <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-[var(--accent-warm)]" isFeatured />
-                                                        {tvTopRated.length > 0 ? <MovieRow items={tvTopRated} type="tv" title="top-rated-tv" isLarge /> : <RowSkeleton />}
+                                                        {tvTopRated.length > 0 ? <MovieGrid items={tvTopRated} type="tv" /> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {NETWORK_ROWS.map((net, idx) => {

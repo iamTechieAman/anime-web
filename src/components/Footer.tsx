@@ -87,37 +87,6 @@ export default function Footer() {
                     </div>
                 </div>
 
-                {/* Support / Link to Us Section */}
-                <div className="mt-8 mx-4 md:mx-6 p-4 bg-white/5 border border-white/10 rounded-xl max-w-3xl lg:max-w-[1800px] xl:mx-auto">
-                    <h3 className="text-white font-bold text-sm uppercase tracking-widest mb-2">Support Us (Link to ToonPlayer)</h3>
-                    <p className="text-[var(--text-muted)] text-xs mb-3">
-                        Love our ad-free platform? Help us grow and climb the search rankings by adding this link to your blog, website, or forum!
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center gap-2">
-                        <input 
-                            type="text" 
-                            readOnly 
-                            value='<a href="https://toonplayer.in" title="Watch Free Anime & Movies">Watch on ToonPlayer</a>' 
-                            className="flex-1 w-full bg-black/50 border border-white/10 rounded px-3 py-2.5 text-[11px] font-mono text-orange-300 outline-none focus:border-orange-500 transition-colors"
-                        />
-                        <button 
-                            onClick={(e) => {
-                                navigator.clipboard.writeText('<a href="https://toonplayer.in" title="Watch Free Anime & Movies">Watch on ToonPlayer</a>');
-                                const btn = e.currentTarget;
-                                const originalText = btn.innerText;
-                                btn.innerText = 'Copied!';
-                                btn.classList.replace('bg-orange-500', 'bg-green-600');
-                                setTimeout(() => {
-                                    btn.innerText = originalText;
-                                    btn.classList.replace('bg-green-600', 'bg-orange-500');
-                                }, 2000);
-                            }}
-                            className="w-full sm:w-auto px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold rounded transition-colors whitespace-nowrap"
-                        >
-                            Copy HTML
-                        </button>
-                    </div>
-                </div>
 
                 <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex flex-col md:flex-row items-center justify-between gap-4 max-w-[1800px] mx-auto px-4 md:px-6 w-full">
                     <p className="text-[var(--text-muted)] text-[10px] font-medium tracking-wider uppercase">

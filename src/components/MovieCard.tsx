@@ -277,3 +277,4 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
         </div>
     );
 });
+
