@@ -32,8 +32,14 @@ const inter = Inter({
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#050505",
+  minimumScale: 1,
+  maximumScale: 5,          // allow pinch-zoom for accessibility
+  viewportFit: "cover",     // fills notch / Dynamic Island areas
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0f" },
+    { media: "(prefers-color-scheme: light)", color: "#0b0b0f" },
+  ],
+  interactiveWidget: "resizes-content",
 };
 
 export const metadata: Metadata = {
@@ -175,28 +181,76 @@ export default async function RootLayout({
         <ClerkProvider
           appearance={{
             variables: {
+              /* Brand */
               colorPrimary: '#f97316',
-              colorBackground: '#0b0b0f',
-              colorInputBackground: '#14141b',
-              colorInputText: '#ffffff',
-              colorText: '#ffffff',
-              colorTextSecondary: '#9ca3af',
+              /* Card / Modal surface — lifted from pitch-black so elements are visible */
+              colorBackground: '#1c1c2a',
+              /* Input field background — slightly lighter than card */
+              colorInputBackground: '#252535',
+              colorInputText: '#f1f5f9',
+              /* All text must be white/near-white so it's readable on dark card */
+              colorText: '#f1f5f9',
+              colorTextSecondary: '#94a3b8',
               colorTextOnPrimaryBackground: '#ffffff',
+              colorNeutral: '#f1f5f9',
               colorDanger: '#ef4444',
+              colorSuccess: '#22c55e',
+              /* Border: subtle but visible */
+              borderRadius: '0.75rem',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontFamilyButtons: 'Inter, system-ui, sans-serif',
+              fontSize: '14px',
+              spacingUnit: '16px',
             },
             elements: {
-              card: 'bg-[#0b0b0f] border border-white/10 rounded-2xl shadow-2xl',
-              headerTitle: 'text-white font-sora font-black text-xl uppercase tracking-tight',
-              headerSubtitle: 'text-zinc-400 font-bold text-xs',
-              socialButtonsBlockButton: 'bg-white/5 border border-white/10 text-white hover:bg-white/10 text-xs font-bold transition-all',
-              socialButtonsBlockButtonText: 'text-white font-bold',
-              formButtonPrimary: 'bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black uppercase text-xs tracking-wider transition-all',
-              footerActionText: 'text-zinc-400 text-xs font-medium',
-              footerActionLink: 'text-orange-400 hover:text-orange-300 font-black text-xs',
-              formFieldLabel: 'text-zinc-300 font-bold text-xs uppercase tracking-wider',
-              formFieldInput: 'bg-[#14141b] border border-white/10 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-xl px-4 py-2.5',
-              identityPreviewText: 'text-white',
-              identityPreviewEditButtonIcon: 'text-orange-500',
+              /* Modal root card — dark but lighter than page BG */
+              card: '!bg-[#1c1c2a] !border !border-white/15 !rounded-2xl !shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_0_1px_rgba(249,115,22,0.08)] backdrop-blur-xl',
+              /* Header */
+              headerTitle: '!text-white !font-black !text-xl !tracking-tight',
+              headerSubtitle: '!text-slate-300 !font-medium !text-sm',
+              /* Social auth buttons — visible ghost style */
+              socialButtonsBlockButton: '!bg-white/8 !border !border-white/15 !text-white hover:!bg-white/15 !text-sm !font-semibold !transition-all !rounded-xl',
+              socialButtonsBlockButtonText: '!text-white !font-semibold',
+              socialButtonsBlockButtonArrow: '!text-slate-300',
+              /* Divider */
+              dividerLine: '!bg-white/10',
+              dividerText: '!text-slate-400',
+              /* Form fields */
+              formFieldLabel: '!text-slate-200 !font-semibold !text-xs !uppercase !tracking-wider',
+              formFieldInput: '!bg-[#252535] !border !border-white/15 !text-white !text-sm placeholder:!text-slate-500 focus:!border-orange-500/70 focus:!ring-1 focus:!ring-orange-500/40 !rounded-xl !px-4 !py-3 !transition-all',
+              formFieldInputShowPasswordButton: '!text-slate-400 hover:!text-white',
+              formFieldHintText: '!text-slate-400 !text-xs',
+              formFieldErrorText: '!text-red-400 !text-xs',
+              formFieldWarningText: '!text-amber-400 !text-xs',
+              /* Primary CTA button */
+              formButtonPrimary: '!bg-gradient-to-r !from-orange-600 !to-amber-500 hover:!from-orange-500 hover:!to-amber-400 !text-white !font-bold !text-sm !tracking-wide !transition-all !rounded-xl !py-3 !shadow-lg !shadow-orange-500/25',
+              /* Secondary / ghost button */
+              formButtonReset: '!text-orange-400 hover:!text-orange-300 !font-semibold !text-sm',
+              /* Footer links */
+              footerActionText: '!text-slate-400 !text-sm',
+              footerActionLink: '!text-orange-400 hover:!text-orange-300 !font-bold !text-sm',
+              /* Identity preview (email badge shown before password step) */
+              identityPreviewText: '!text-white !font-medium',
+              identityPreviewEditButtonIcon: '!text-orange-400',
+              identityPreviewEditButton: '!text-orange-400 hover:!text-orange-300',
+              /* OTP / verification code input */
+              otpCodeFieldInput: '!bg-[#252535] !border-2 !border-white/15 !text-white !text-xl !font-black focus:!border-orange-500 !rounded-xl !transition-all',
+              /* Alert banners */
+              alertText: '!text-white !font-medium',
+              alert: '!bg-orange-500/10 !border !border-orange-500/20 !rounded-xl',
+              /* Avatar */
+              avatarBox: '!ring-2 !ring-orange-500/30',
+              /* Modal backdrop */
+              modalBackdrop: '!backdrop-blur-md !bg-black/70',
+              /* Navbar/internal header in Clerk components */
+              navbar: '!bg-[#1c1c2a] !border-b !border-white/10',
+              navbarButton: '!text-slate-300 hover:!text-white',
+              navbarButtonActive: '!text-white',
+              /* User profile sections */
+              profileSectionTitle: '!text-white !font-bold',
+              profileSectionContent: '!text-slate-300',
+              accordionTriggerButton: '!text-slate-200 hover:!text-white',
+              badge: '!bg-orange-500/15 !text-orange-400 !border !border-orange-500/20',
             }
           }}
           localization={{

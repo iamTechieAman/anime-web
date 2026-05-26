@@ -1,55 +1,105 @@
 "use client";
 
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
-import { Film, Play, Sparkles, Tv, ShieldAlert, Check } from "lucide-react";
+import { Film, Play, Sparkles, Tv, ShieldCheck, Check, Star, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// Static premium posters for the landing background grid (to ensure fast, static, zero-fetch load)
+// Real poster images from TMDB for the animated background grid
 const BACKGROUND_POSTERS = [
-  "https://image.tmdb.org/t/p/w342/qhbcfZ1eZTDbZaTQwQA6EvrLz2n.jpg", // Yona of the Dawn
-  "https://image.tmdb.org/t/p/w342/h117F866S500eX3781s6v44p20m.jpg", // Solo Leveling
-  "https://image.tmdb.org/t/p/w342/f49tQJ49cRPvFSnegAzV76a6qd1.jpg", // Demon Slayer
-  "https://image.tmdb.org/t/p/w342/k9th9ZqH0gC4HwVn6c8P0qWk9tZ.jpg", // Kaiju No. 8
-  "https://image.tmdb.org/t/p/w342/81D5Zq7WlUu929C4n2Wc9n8d11S.jpg", // Frieren
-  "https://image.tmdb.org/t/p/w342/9662nB04nGl25g4fW2o11S7x8bF.jpg", // Jujutsu Kaisen
-  "https://image.tmdb.org/t/p/w342/z45v5X3tUv4R1G7d4G7W2m4f7S8.jpg", // Attack on Titan
-  "https://image.tmdb.org/t/p/w342/7W9e4pXpX2x0G3aR4n6u9k8S0s4.jpg", // Naruto Shippuden
-  "https://image.tmdb.org/t/p/w342/9G1c5W0r1g8fX8C7n5G6k2tD1g1.jpg", // One Piece
-  "https://image.tmdb.org/t/p/w342/pe1af4Nf9Z8gC8W5J6c8S0qWk9t.jpg", // Chainsaw Man
-  "https://image.tmdb.org/t/p/w342/8G24v1u8p5S1N4c9W2o11X8a7X2.jpg", // Bleach
-  "https://image.tmdb.org/t/p/w342/A7s8a7c2D3N4n5K6q7W2a2n1S9a.jpg", // Death Note
-  "https://image.tmdb.org/t/p/w342/9G1c5W0r1g8fX8C7n5G6k2tD1g2.jpg", // My Hero Academia
-  "https://image.tmdb.org/t/p/w342/pe1af4Nf9Z8gC8W5J6c8S0qWk9t.jpg", // Hunter x Hunter
-  "https://image.tmdb.org/t/p/w342/8G24v1u8p5S1N4c9W2o11X8a7X3.jpg", // Vinland Saga
+  "https://image.tmdb.org/t/p/w342/qhbcfZ1eZTDbZaTQwQA6EvrLz2n.jpg",
+  "https://image.tmdb.org/t/p/w342/h117F866S500eX3781s6v44p20m.jpg",
+  "https://image.tmdb.org/t/p/w342/f49tQJ49cRPvFSnegAzV76a6qd1.jpg",
+  "https://image.tmdb.org/t/p/w342/81D5Zq7WlUu929C4n2Wc9n8d11S.jpg",
+  "https://image.tmdb.org/t/p/w342/9662nB04nGl25g4fW2o11S7x8bF.jpg",
+  "https://image.tmdb.org/t/p/w342/k6EOrckWFuz7I4z4wiRwz8go3oH.jpg",
+  "https://image.tmdb.org/t/p/w342/AkJQpZp9WoNdj7pLYSj1L0RcMMN.jpg",
+  "https://image.tmdb.org/t/p/w342/kEl2t3OhXc3Zb9FBh1AuYzRTykH.jpg",
+  "https://image.tmdb.org/t/p/w342/1hRoyzDtpgMU7Dz4JF22RANzQO7.jpg",
+  "https://image.tmdb.org/t/p/w342/yXSzo0vlqZai2OZSRy1wh4BgRKi.jpg",
+  "https://image.tmdb.org/t/p/w342/fOy2Jurz9k6RnJnMULjAFAVTH1b.jpg",
+  "https://image.tmdb.org/t/p/w342/6DrHO1jr3qVrViUO6s6kFiAGM7.jpg",
+  "https://image.tmdb.org/t/p/w342/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+  "https://image.tmdb.org/t/p/w342/Ast9c4fxSu4ZB5GbaCIdv1CMgmf.jpg",
+  "https://image.tmdb.org/t/p/w342/jtnfNzqZwN4E32FGGxx1YZaBWWf.jpg",
+  "https://image.tmdb.org/t/p/w342/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg",
+  "https://image.tmdb.org/t/p/w342/d5NXSklXo0qyIYkgV94XAgMIckC.jpg",
+  "https://image.tmdb.org/t/p/w342/8kNruSfhk5IoE4eZOc4UpvDn6tM.jpg",
+];
+
+const FEATURES = [
+  {
+    icon: Tv,
+    title: "Full HD & 4K",
+    desc: "Crystal-clear 1080p & 4K streams",
+    color: "text-blue-400",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+  },
+  {
+    icon: Film,
+    title: "Massive Catalog",
+    desc: "50,000+ movies, shows & anime",
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+    border: "border-orange-500/20",
+  },
+  {
+    icon: Zap,
+    title: "Zero Ads",
+    desc: "Uninterrupted, buffering-free playback",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Secure Auth",
+    desc: "Enterprise-grade Clerk authentication",
+    color: "text-green-400",
+    bg: "bg-green-500/10",
+    border: "border-green-500/20",
+  },
 ];
 
 export default function NetflixAuthGate() {
   const [mounted, setMounted] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
   }, []);
 
   if (!mounted) return null;
 
   return (
-    <div className="relative min-h-screen w-full bg-[#050505] text-white flex flex-col justify-between overflow-hidden font-inter selection:bg-orange-500/30">
-      
-      {/* 1. Animated Immersive Poster Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/90 to-[#0b0b0f] z-10" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,#050505_95%)] z-10" />
-        
-        {/* Scrolling Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-3 opacity-20 scale-105 rotate-[-6deg] translate-y-[-10%] origin-top-left">
-          {Array.from({ length: 4 }).map((_, rIndex) => (
-            <div 
-              key={rIndex} 
-              className={`flex flex-col gap-3 ${rIndex % 2 === 0 ? 'animate-[marqueeVertical_45s_linear_infinite]' : 'animate-[marqueeVertical_45s_linear_infinite_reverse]'}`}
+    <div className="relative min-h-screen min-h-dvh w-full bg-[#050507] text-white flex flex-col overflow-hidden font-inter">
+
+      {/* ── 1. Animated Poster Background ── */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050507]/60 via-[#050507]/85 to-[#050507] z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050507]/80 via-transparent to-[#050507]/80 z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#050507_85%)] z-10" />
+
+        {/* Scrolling grid of posters */}
+        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3 opacity-25 scale-110 rotate-[-5deg] translate-y-[-8%] origin-top-left">
+          {Array.from({ length: 6 }).map((_, col) => (
+            <div
+              key={col}
+              className="flex flex-col gap-2 sm:gap-3"
+              style={
+                !reducedMotion
+                  ? {
+                      animation: `marqueeVertical ${40 + col * 5}s linear infinite ${col % 2 === 0 ? "" : "reverse"}`,
+                    }
+                  : {}
+              }
             >
-              {[...BACKGROUND_POSTERS, ...BACKGROUND_POSTERS].map((src, pIndex) => (
-                <div key={pIndex} className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-zinc-900 border border-white/5 shadow-md">
-                  <img src={src} alt="Poster" className="w-full h-full object-cover" loading="lazy" />
+              {[...BACKGROUND_POSTERS, ...BACKGROUND_POSTERS].map((src, i) => (
+                <div key={i} className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-zinc-900">
+                  <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
                 </div>
               ))}
             </div>
@@ -57,110 +107,110 @@ export default function NetflixAuthGate() {
         </div>
       </div>
 
-      {/* 2. Top Navigation Bar */}
-      <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 relative flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-full blur-lg opacity-40 animate-pulse" />
-            <img 
-              src="/logo.webp" 
-              alt="ToonPlayer Logo" 
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_8px_rgba(249,115,22,0.5)] mix-blend-screen"
+      {/* ── 2. Header ── */}
+      <header className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex items-center justify-between max-w-screen-2xl mx-auto">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 relative flex items-center justify-center shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-full blur-lg opacity-50 animate-pulse" />
+            <img
+              src="/logo.webp"
+              alt="ToonPlayer Logo"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_10px_rgba(249,115,22,0.6)] mix-blend-screen"
             />
           </div>
-          <span className="text-xl font-black tracking-tighter text-white font-sora drop-shadow-[0_0_12px_rgba(249,115,22,0.4)] uppercase">
-            Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Player</span>
+          <span className="text-lg sm:text-xl lg:text-2xl font-black tracking-tighter text-white font-sora uppercase">
+            Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">Player</span>
           </span>
         </div>
 
+        {/* Sign In button */}
         <SignInButton mode="modal">
-          <button className="px-5 py-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 text-white cursor-pointer">
+          <button className="px-4 sm:px-6 py-2 sm:py-2.5 bg-orange-500 hover:bg-orange-400 active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-orange-500/30 cursor-pointer min-h-[44px]">
             Sign In
           </button>
         </SignInButton>
       </header>
 
-      {/* 3. Hero Content Area */}
-      <main className="relative z-20 w-full max-w-4xl mx-auto px-6 py-12 flex-1 flex flex-col items-center justify-center text-center">
-        
-        {/* Micro-badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-black tracking-wider text-orange-400 uppercase mb-6 animate-bounce">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Now 100% Free & No Ads</span>
+      {/* ── 3. Hero Content ── */}
+      <main className="relative z-20 flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 flex flex-col items-center justify-center text-center">
+
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-orange-500/10 border border-orange-500/25 rounded-full text-xs sm:text-sm font-bold tracking-widest text-orange-400 uppercase mb-6 sm:mb-8">
+          <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+          <span>100% Free · Zero Ads</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-black font-sora tracking-tight text-white mb-6 max-w-3xl leading-[1.1] uppercase">
-          Unlimited Anime, <br/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 drop-shadow-[0_0_30px_rgba(249,115,22,0.2)]">
+        {/* Headline */}
+        <h1 className="font-black font-sora tracking-tight text-white mb-4 sm:mb-6 max-w-3xl leading-[1.05] uppercase text-[clamp(1.8rem,7vw,4rem)]">
+          Unlimited Anime,{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-300">
             Movies & Shows
           </span>
         </h1>
 
-        <p className="text-lg sm:text-xl font-bold text-zinc-300 mb-8 max-w-xl leading-relaxed">
-          Watch secure, premium entertainment anywhere. Ad-free, no payment required. Simply authenticate to enter.
+        {/* Sub-headline */}
+        <p className="text-sm sm:text-base lg:text-lg font-medium text-zinc-300 mb-8 sm:mb-10 max-w-lg sm:max-w-xl leading-relaxed">
+          Premium streaming, zero cost. Watch HD movies, binge your favourite anime, and discover hidden gems — all from one place.
         </p>
 
-        {/* Action CTAs */}
-        <div className="w-full max-w-md mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
+        {/* CTA Buttons */}
+        <div className="w-full max-w-sm sm:max-w-md flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10 sm:mb-14">
           <SignUpButton mode="modal">
-            <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 active:scale-95 text-white rounded-xl font-bold text-base transition-all shadow-xl shadow-orange-500/25 flex items-center justify-center gap-2 group cursor-pointer">
+            <button className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 group cursor-pointer min-h-[52px]">
               Get Started Free
               <Play className="w-4 h-4 fill-white text-white group-hover:translate-x-1 transition-transform" />
             </button>
           </SignUpButton>
 
           <SignInButton mode="modal">
-            <button className="w-full sm:w-auto px-8 py-4 bg-zinc-900/80 hover:bg-zinc-800/90 border border-white/10 active:scale-95 text-white rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 cursor-pointer">
-              Sign In To Account
+            <button className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-white/6 hover:bg-white/12 border border-white/15 active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm min-h-[52px]">
+              Sign In to Account
             </button>
           </SignInButton>
         </div>
 
-        {/* Feature Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-3xl pt-10 border-t border-white/5">
-          <div className="flex flex-col items-center p-4 bg-white/[0.02] border border-white/[0.04] rounded-2xl">
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 mb-2 border border-orange-500/20">
-              <Tv className="w-5 h-5" />
+        {/* Trust badges */}
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 sm:mb-14">
+          {["HD & 4K streams", "Sub & Dub", "Daily updates", "No credit card"].map((trust) => (
+            <div key={trust} className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-zinc-400">
+              <Check className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              {trust}
             </div>
-            <h3 className="text-xs font-black uppercase tracking-wider text-white">Full HD Streams</h3>
-            <p className="text-[10px] text-zinc-400 mt-1 font-medium">1080p & Auto-scaling Player</p>
-          </div>
-          
-          <div className="flex flex-col items-center p-4 bg-white/[0.02] border border-white/[0.04] rounded-2xl">
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 mb-2 border border-orange-500/20">
-              <Film className="w-5 h-5" />
-            </div>
-            <h3 className="text-xs font-black uppercase tracking-wider text-white">Massive Catalog</h3>
-            <p className="text-[10px] text-zinc-400 mt-1 font-medium">Daily Updated Sub & Dub</p>
-          </div>
-
-          <div className="flex flex-col items-center col-span-2 md:col-span-1 p-4 bg-white/[0.02] border border-white/[0.04] rounded-2xl">
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 mb-2 border border-orange-500/20">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <h3 className="text-xs font-black uppercase tracking-wider text-white">Secure Access</h3>
-            <p className="text-[10px] text-zinc-400 mt-1 font-medium">Clerk Auth Verification</p>
-          </div>
+          ))}
         </div>
 
+        {/* Feature Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl pt-8 sm:pt-10 border-t border-white/6">
+          {FEATURES.map(({ icon: Icon, title, desc, color, bg, border }) => (
+            <div
+              key={title}
+              className={`flex flex-col items-center p-3 sm:p-4 lg:p-5 ${bg} border ${border} rounded-2xl transition-all hover:scale-105`}
+            >
+              <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl ${bg} flex items-center justify-center ${color} mb-2 sm:mb-3 border ${border}`}>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <h3 className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-white mb-1">{title}</h3>
+              <p className="text-[10px] sm:text-[11px] text-zinc-400 font-medium text-center leading-relaxed hidden sm:block">{desc}</p>
+            </div>
+          ))}
+        </div>
       </main>
 
-      {/* 4. Footer */}
-      <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
-        <div>
-          &copy; {new Date().getFullYear()} ToonPlayer. All rights reserved.
-        </div>
-        <div className="flex gap-4">
-          <a href="#" className="hover:text-orange-400 transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-orange-400 transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-orange-400 transition-colors">Contact Support</a>
+      {/* ── 4. Footer ── */}
+      <footer className="relative z-20 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-3 text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+        <span>© {new Date().getFullYear()} ToonPlayer. All rights reserved.</span>
+        <div className="flex gap-4 sm:gap-6">
+          <a href="/privacy" className="hover:text-orange-400 transition-colors">Privacy</a>
+          <a href="/terms" className="hover:text-orange-400 transition-colors">Terms</a>
+          <a href="/contact" className="hover:text-orange-400 transition-colors">Contact</a>
         </div>
       </footer>
 
-      {/* Embedded CSS Animations */}
-      <style jsx global>{`
+      {/* Keyframe animation injected inline */}
+      <style>{`
         @keyframes marqueeVertical {
-          0% { transform: translateY(0); }
+          0%   { transform: translateY(0); }
           100% { transform: translateY(-50%); }
         }
       `}</style>
