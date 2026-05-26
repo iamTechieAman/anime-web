@@ -14,17 +14,6 @@
     },
     {
       "adult": false,
-      "id": 2106,
-      "name": "Walt Disney",
-      "original_name": "Walt Disney",
-      "media_type": "person",
-      "popularity": 1.6768,
-      "gender": 2,
-      "known_for_department": "Production",
-      "profile_path": "/fnB3Yt4dPiVODHzfLwntISAvbhw.jpg"
-    },
-    {
-      "adult": false,
       "id": 5531949,
       "name": "Saika Kawakita",
       "original_name": "河北彩伽",
@@ -69,6 +58,17 @@
     },
     {
       "adult": false,
+      "id": 6087840,
+      "name": "波多野结衣",
+      "original_name": "波多野结衣",
+      "media_type": "person",
+      "popularity": 0.4851,
+      "gender": 0,
+      "known_for_department": "Acting",
+      "profile_path": null
+    },
+    {
+      "adult": false,
       "id": 3164807,
       "name": "Yoon Yool",
       "original_name": "윤율",
@@ -91,17 +91,6 @@
     },
     {
       "adult": false,
-      "id": 5748284,
-      "name": "桃乃木香奈",
-      "original_name": "桃乃木香奈",
-      "media_type": "person",
-      "popularity": 0.6724,
-      "gender": 1,
-      "known_for_department": null,
-      "profile_path": "/by5zJpbvpCJnR6Fmga0wcmmaGvV.jpg"
-    },
-    {
-      "adult": false,
       "id": 500,
       "name": "Tom Cruise",
       "original_name": "Tom Cruise",
@@ -110,6 +99,17 @@
       "gender": 2,
       "known_for_department": "Acting",
       "profile_path": "/p17SLq4wabXwIYyjXF1Wf5cNnAm.jpg"
+    },
+    {
+      "adult": false,
+      "id": 5748284,
+      "name": "桃乃木香奈",
+      "original_name": "桃乃木香奈",
+      "media_type": "person",
+      "popularity": 0.6724,
+      "gender": 1,
+      "known_for_department": null,
+      "profile_path": "/by5zJpbvpCJnR6Fmga0wcmmaGvV.jpg"
     },
     {
       "adult": false,
@@ -146,6 +146,28 @@
     },
     {
       "adult": false,
+      "id": 6028826,
+      "name": "佐山爱",
+      "original_name": "佐山爱",
+      "media_type": "person",
+      "popularity": 0.277,
+      "gender": 0,
+      "known_for_department": "Acting",
+      "profile_path": null
+    },
+    {
+      "adult": false,
+      "id": 58021,
+      "name": "Tinto Brass",
+      "original_name": "Tinto Brass",
+      "media_type": "person",
+      "popularity": 6.5601,
+      "gender": 2,
+      "known_for_department": "Directing",
+      "profile_path": "/adQ1j2FQ1FZ67hlZVhsUnALM4G4.jpg"
+    },
+    {
+      "adult": false,
       "id": 86654,
       "name": "Austin Butler",
       "original_name": "Austin Butler",
@@ -157,25 +179,14 @@
     },
     {
       "adult": false,
-      "id": 6087840,
-      "name": "波多野结衣",
-      "original_name": "波多野结衣",
+      "id": 2710789,
+      "name": "Seung Ha",
+      "original_name": "채승하",
       "media_type": "person",
-      "popularity": 0.4851,
-      "gender": 0,
+      "popularity": 2.0568,
+      "gender": 1,
       "known_for_department": "Acting",
-      "profile_path": null
-    },
-    {
-      "adult": false,
-      "id": 1372,
-      "name": "Karl Urban",
-      "original_name": "Karl Urban",
-      "media_type": "person",
-      "popularity": 11.055,
-      "gender": 2,
-      "known_for_department": "Acting",
-      "profile_path": "/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
+      "profile_path": "/nvSJiHakYrDa3CedKSVOEsbLLX8.jpg"
     },
     {
       "adult": false,
@@ -190,25 +201,14 @@
     },
     {
       "adult": false,
-      "id": 6021361,
-      "name": "明里䌷",
-      "original_name": "明里䌷",
+      "id": 1372,
+      "name": "Karl Urban",
+      "original_name": "Karl Urban",
       "media_type": "person",
-      "popularity": 0.5721,
-      "gender": 0,
+      "popularity": 11.055,
+      "gender": 2,
       "known_for_department": "Acting",
-      "profile_path": null
-    },
-    {
-      "adult": false,
-      "id": 2710789,
-      "name": "Seung Ha",
-      "original_name": "채승하",
-      "media_type": "person",
-      "popularity": 2.0568,
-      "gender": 1,
-      "known_for_department": "Acting",
-      "profile_path": "/nvSJiHakYrDa3CedKSVOEsbLLX8.jpg"
+      "profile_path": "/6CkZLwEJxfqqcJHyeXegMAvOlPh.jpg"
     },
     {
       "adult": false,

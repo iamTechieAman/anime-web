@@ -3,6 +3,27 @@
   "results": [
     {
       "adult": false,
+      "backdrop_path": "/wMrV8SLne1jHLeYS0lLrA1Tf86P.jpg",
+      "id": 1304313,
+      "title": "Lee Cronin's The Mummy",
+      "original_title": "Lee Cronin's The Mummy",
+      "overview": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as what should be a joyful reunion turns into a living nightmare.",
+      "poster_path": "/uIb9Tvae5haF0XcQBaPyufmxbb0.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        9648
+      ],
+      "popularity": 802.3373,
+      "release_date": "2026-04-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.04,
+      "vote_count": 1197
+    },
+    {
+      "adult": false,
       "backdrop_path": "/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
       "id": 76479,
       "name": "The Boys",
@@ -19,7 +40,7 @@
       "first_air_date": "2019-07-25",
       "softcore": false,
       "vote_average": 8.46,
-      "vote_count": 12680,
+      "vote_count": 12681,
       "origin_country": [
         "US"
       ]
@@ -44,114 +65,6 @@
       "video": false,
       "vote_average": 7.246,
       "vote_count": 284
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
-      "id": 1339713,
-      "title": "Obsession",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "poster_path": "/bnkdk4auJTBkrzqv1oLKtzCcFrE.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27
-      ],
-      "popularity": 334.7747,
-      "release_date": "2026-04-16",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.9,
-      "vote_count": 272
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/wMrV8SLne1jHLeYS0lLrA1Tf86P.jpg",
-      "id": 1304313,
-      "title": "Lee Cronin's The Mummy",
-      "original_title": "Lee Cronin's The Mummy",
-      "overview": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as what should be a joyful reunion turns into a living nightmare.",
-      "poster_path": "/uIb9Tvae5haF0XcQBaPyufmxbb0.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27,
-        9648
-      ],
-      "popularity": 802.3373,
-      "release_date": "2026-04-15",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.038,
-      "vote_count": 1196
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
-      "id": 687163,
-      "title": "Project Hail Mary",
-      "original_title": "Project Hail Mary",
-      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
-      "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        878,
-        12
-      ],
-      "popularity": 402.5239,
-      "release_date": "2026-03-15",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.627,
-      "vote_count": 4101
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/9Z2uDYXqJrlmePznQQJhL6d92Rq.jpg",
-      "id": 1226863,
-      "title": "The Super Mario Galaxy Movie",
-      "original_title": "The Super Mario Galaxy Movie",
-      "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
-      "poster_path": "/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        10751,
-        35,
-        12,
-        14,
-        16
-      ],
-      "popularity": 387.0855,
-      "release_date": "2026-04-01",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.969,
-      "vote_count": 1880
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
-      "id": 931285,
-      "title": "Mortal Kombat II",
-      "original_title": "Mortal Kombat II",
-      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-      "poster_path": "/io7wVbm9VKaanIcuAymCDy9dmjU.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        14,
-        12
-      ],
-      "popularity": 219.2069,
-      "release_date": "2026-05-06",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.808,
-      "vote_count": 300
     },
     {
       "adult": false,
@@ -224,6 +137,184 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "id": 1339713,
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "poster_path": "/bnkdk4auJTBkrzqv1oLKtzCcFrE.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27
+      ],
+      "popularity": 334.7747,
+      "release_date": "2026-04-16",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.9,
+      "vote_count": 272
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/1YU6Hy3x7fUh7dfOzSfjifTp20g.jpg",
+      "id": 1242332,
+      "title": "Normal",
+      "original_title": "Normal",
+      "overview": "An unassuming substitute sheriff with a troubled past responds to a bank robbery in a small, sleepy town and unknowingly uncovers something far more explosive.",
+      "poster_path": "/rsNdDcCKjCZm9RBMAxL3vMUokKU.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "popularity": 74.8637,
+      "release_date": "2026-04-16",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.451,
+      "vote_count": 102
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
+      "id": 1083381,
+      "title": "Backrooms",
+      "original_title": "Backrooms",
+      "overview": "A strange doorway appears in the basement of a furniture showroom.",
+      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "popularity": 38.0123,
+      "release_date": "2026-05-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 9.2,
+      "vote_count": 4
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/9Z2uDYXqJrlmePznQQJhL6d92Rq.jpg",
+      "id": 1226863,
+      "title": "The Super Mario Galaxy Movie",
+      "original_title": "The Super Mario Galaxy Movie",
+      "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
+      "poster_path": "/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        10751,
+        35,
+        12,
+        14,
+        16
+      ],
+      "popularity": 387.0855,
+      "release_date": "2026-04-01",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.973,
+      "vote_count": 1884
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg",
+      "id": 60625,
+      "name": "Rick and Morty",
+      "original_name": "Rick and Morty",
+      "overview": "Follows a sociopathic genius scientist who drags his inherently timid grandson on adventures across the universe.",
+      "poster_path": "/WGRQ8FpjkDTzivQJ43t94bOuY0.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        16,
+        35,
+        10765,
+        10759
+      ],
+      "popularity": 148.1153,
+      "first_air_date": "2013-12-02",
+      "softcore": false,
+      "vote_average": 8.7,
+      "vote_count": 10873,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
+      "id": 931285,
+      "title": "Mortal Kombat II",
+      "original_title": "Mortal Kombat II",
+      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
+      "poster_path": "/io7wVbm9VKaanIcuAymCDy9dmjU.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        14,
+        12
+      ],
+      "popularity": 219.2069,
+      "release_date": "2026-05-06",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.808,
+      "vote_count": 300
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qO55CD8tgVL1T4WKn6zYFFiD6lL.jpg",
+      "id": 1439930,
+      "title": "The Punisher: One Last Kill",
+      "original_title": "The Punisher: One Last Kill",
+      "overview": "As Frank Castle searches for meaning beyond revenge, an unexpected force pulls him back into the fight.",
+      "poster_path": "/qQclTgLMDvGBuUBFGHRipxkEwWR.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        18,
+        80
+      ],
+      "popularity": 416.9348,
+      "release_date": "2026-05-12",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.435,
+      "vote_count": 1200
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
+      "id": 687163,
+      "title": "Project Hail Mary",
+      "original_title": "Project Hail Mary",
+      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
+      "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        878,
+        12
+      ],
+      "popularity": 402.5239,
+      "release_date": "2026-03-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.628,
+      "vote_count": 4103
+    },
+    {
+      "adult": false,
       "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
       "id": 273240,
       "name": "Off Campus",
@@ -268,71 +359,46 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/1YU6Hy3x7fUh7dfOzSfjifTp20g.jpg",
-      "id": 1242332,
-      "title": "Normal",
-      "original_title": "Normal",
-      "overview": "An unassuming substitute sheriff with a troubled past responds to a bank robbery in a small, sleepy town and unknowingly uncovers something far more explosive.",
-      "poster_path": "/rsNdDcCKjCZm9RBMAxL3vMUokKU.jpg",
+      "backdrop_path": "/y3fQa7pytlysovXzovpXc1OQlTW.jpg",
+      "id": 1314481,
+      "title": "The Devil Wears Prada 2",
+      "original_title": "The Devil Wears Prada 2",
+      "overview": "Andy Sachs returns to Runway as Miranda Priestly navigates a new media landscape and Runway's position within. The duo reconnect with former assistant Emily Charlton, now the head of a luxury brand that possesses funding which could ensure Runway's survival.",
+      "poster_path": "/xTI42pmsP5EDnvsNJPEDubwWBQO.jpg",
       "media_type": "movie",
       "original_language": "en",
       "genre_ids": [
-        28,
-        80,
-        53
-      ],
-      "popularity": 74.8637,
-      "release_date": "2026-04-16",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.451,
-      "vote_count": 102
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4Mt7WHox67uJ1yErwTBFcV8KWgG.jpg",
-      "id": 37854,
-      "name": "One Piece",
-      "original_name": "ワンピース",
-      "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
-      "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
-      "media_type": "tv",
-      "original_language": "ja",
-      "genre_ids": [
-        10759,
         35,
-        16
+        18
       ],
-      "popularity": 63.1922,
-      "first_air_date": "1999-10-20",
+      "popularity": 60.195,
+      "release_date": "2026-04-29",
       "softcore": false,
-      "vote_average": 8.735,
-      "vote_count": 5311,
-      "origin_country": [
-        "JP"
-      ]
+      "video": false,
+      "vote_average": 6.6,
+      "vote_count": 671
     },
     {
       "adult": false,
-      "backdrop_path": "/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
-      "id": 1083381,
-      "title": "Backrooms",
-      "original_title": "Backrooms",
-      "overview": "A strange doorway appears in the basement of a furniture showroom.",
-      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "backdrop_path": "/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
+      "id": 83533,
+      "title": "Avatar: Fire and Ash",
+      "original_title": "Avatar: Fire and Ash",
+      "overview": "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
+      "poster_path": "/aabwWZWx6z1aYP4PX2ADvbDKktd.jpg",
       "media_type": "movie",
       "original_language": "en",
       "genre_ids": [
-        27,
-        9648,
-        878
+        878,
+        12,
+        14
       ],
-      "popularity": 38.0123,
-      "release_date": "2026-05-27",
+      "popularity": 159.6346,
+      "release_date": "2025-12-17",
       "softcore": false,
       "video": false,
-      "vote_average": 9.2,
-      "vote_count": 4
+      "vote_average": 7.5,
+      "vote_count": 3186
     },
     {
       "adult": false,
@@ -352,55 +418,8 @@
       "release_date": "2026-05-21",
       "softcore": false,
       "video": false,
-      "vote_average": 5.752,
-      "vote_count": 113
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg",
-      "id": 60625,
-      "name": "Rick and Morty",
-      "original_name": "Rick and Morty",
-      "overview": "Follows a sociopathic genius scientist who drags his inherently timid grandson on adventures across the universe.",
-      "poster_path": "/WGRQ8FpjkDTzivQJ43t94bOuY0.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        16,
-        35,
-        10765,
-        10759
-      ],
-      "popularity": 148.1153,
-      "first_air_date": "2013-12-02",
-      "softcore": false,
-      "vote_average": 8.7,
-      "vote_count": 10873,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/qO55CD8tgVL1T4WKn6zYFFiD6lL.jpg",
-      "id": 1439930,
-      "title": "The Punisher: One Last Kill",
-      "original_title": "The Punisher: One Last Kill",
-      "overview": "As Frank Castle searches for meaning beyond revenge, an unexpected force pulls him back into the fight.",
-      "poster_path": "/qQclTgLMDvGBuUBFGHRipxkEwWR.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        18,
-        80
-      ],
-      "popularity": 416.9348,
-      "release_date": "2026-05-12",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.434,
-      "vote_count": 1199
+      "vote_average": 5.754,
+      "vote_count": 114
     },
     {
       "adult": false,
@@ -424,27 +443,6 @@
       "origin_country": [
         "US"
       ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/xBT0oNq6rsTFv4SxG5uGRIEOrq6.jpg",
-      "id": 936075,
-      "title": "Michael",
-      "original_title": "Michael",
-      "overview": "The story of Michael Jackson, one of the most influential artists the world has ever known, and his life beyond the music. His journey from the discovery of his extraordinary talent as the lead of the Jackson Five, to the visionary artist whose creative ambition fueled a relentless pursuit to become the biggest entertainer in the world, highlighting both his life off-stage and some of the most iconic performances from his early solo career.",
-      "poster_path": "/3Qud19bBUrrJAzy0Ilm8gRJlJXP.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        10402,
-        18
-      ],
-      "popularity": 130.9118,
-      "release_date": "2026-04-22",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.586,
-      "vote_count": 844
     }
   ],
   "total_pages": 500,

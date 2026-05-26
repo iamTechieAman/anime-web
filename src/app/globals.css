@@ -1646,25 +1646,33 @@ main, .relative.z-10 {
    SHARED MOBILE FIXES — all screens ≤ 768px
    ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Better touch targets — minimum 44px height per Apple HIG */
-  button,
-  a,
-  [role="button"],
-  [role="link"] {
+  /* Better touch targets for primary interactive elements — Apple HIG 44px */
+  /* Applied only to nav-level elements, not every inline button */
+  nav button,
+  nav a,
+  [role="navigation"] button,
+  [role="navigation"] a {
     min-height: 44px;
     min-width: 44px;
   }
 
-  /* Exception: icon-only small buttons inside cards */
-  .card-action-btn {
-    min-height: 32px !important;
-    min-width: 32px !important;
+  /* Mobile nav items need proper sizing */
+  .mobile-nav-item {
+    min-height: 56px;
   }
 
-  /* Padding fix: give content breathing room above fixed header */
-  main {
-    padding-top: 60px !important;
+
+  /* Remove blanket padding-top override — handled by LayoutContent pt-[60px] class */
+  /* Only apply it to bare <main> tags without the class (edge case fallback) */
+  main:not([class]) {
+    padding-top: 60px;
   }
+
+  /* Ensure content doesn't hide under the floating MobileNav (h-16 at bottom-4 = ~88px) */
+  .footer-wrap {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
 
   /* Hero banner height on mobile */
   .hero-carousel,

@@ -272,7 +272,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 md:left-[72px] peer-hover/sidebar:md:left-[220px] right-0 z-50 px-3 md:px-5 lg:px-6 h-[64px] flex items-center bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
+    <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
       
       {/* Search Focus Overlay */}
       <AnimatePresence>
@@ -281,16 +281,16 @@ export default function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 w-[100vw] h-[100vh] bg-black/60 backdrop-blur-md z-[-1] cursor-pointer"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[-1] cursor-pointer"
             onClick={() => setShowSuggestions(false)}
-            style={{ marginLeft: '-50vw', left: '50%' }}
           />
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-[1800px] mx-auto grid grid-cols-2 md:grid-cols-3 items-center gap-4">
-        {/* Logo */}
-        <Link href="/" className="justify-self-start flex items-center gap-2.5 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
+      {/* === FLEX ROW: Logo | Search (desktop) | Actions === */}
+      <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4">
+        {/* ── LOGO ── */}
+        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
           <div className="w-7 h-7 relative flex items-center justify-center">
             <motion.div 
               className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] rounded-full blur-lg opacity-30 group-hover:opacity-55 transition-opacity"
@@ -304,18 +304,19 @@ export default function Header() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg md:text-xl font-black tracking-tighter text-white font-sora block drop-shadow-[0_0_12px_rgba(249,115,22,0.4)] leading-tight uppercase">
+            <span className="text-base md:text-xl font-black tracking-tighter text-white font-sora block leading-tight uppercase">
               Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
             </span>
-            <div className="flex items-center gap-1 -mt-0.5 ml-0.5">
+            {/* Hide tagline on small phones */}
+            <div className="hidden sm:flex items-center gap-1 -mt-0.5 ml-0.5">
               <span className="text-[8px] uppercase tracking-[0.3em] font-black text-zinc-500">Premium</span>
               <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shadow-[0_0_6px_rgba(249,115,22,0.7)]" />
             </div>
           </div>
         </Link>
 
-        {/* Search Bar + Filter */}
-        <div className="justify-self-center w-full max-w-[340px] lg:max-w-[440px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
+        {/* ── SEARCH BAR (desktop only) ── */}
+        <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[440px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
           <div className="flex-1 relative">
             <form 
               onSubmit={(e) => handleSearch(e)} 
@@ -555,22 +556,22 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Right side icons */}
-        <div className="justify-self-end flex items-center gap-2 md:gap-4 shrink-0">
-          <div className="flex items-center gap-1.5 md:gap-3">
-             {/* AdBlock Toggle Button */}
-             {isMounted && (
+        {/* ── RIGHT ACTIONS ── */}
+        <div className="ml-auto flex items-center gap-1.5 md:gap-3 shrink-0">
+          <div className="flex items-center gap-1 md:gap-2">
+            {/* AdBlock Toggle — HIDDEN on mobile to save space */}
+            {isMounted && (
               <button
                 onClick={toggleAdBlock}
-                className={`flex items-center justify-center p-2 rounded-full transition-all border ${
+                className={`hidden sm:flex items-center justify-center p-2 rounded-full transition-all border ${
                   isAdBlockEnabled 
                     ? 'bg-green-500/10 border-green-500/30 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:bg-green-500/20' 
                     : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
                 }`}
-                title={isAdBlockEnabled ? "AdBlock is ON: Blocks Redirections & Ads" : "AdBlock is OFF"}
+                title={isAdBlockEnabled ? "AdBlock ON" : "AdBlock OFF"}
               >
                 <div className="relative">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     {isAdBlockEnabled ? (
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4" />
                     ) : (
@@ -584,28 +585,28 @@ export default function Header() {
               </button>
             )}
 
-            {/* Notifications */}
-            <div ref={notifRef} className="relative">
+            {/* Notifications — HIDDEN on mobile (use MobileNav menu) */}
+            <div ref={notifRef} className="relative hidden sm:block">
               <button 
                 aria-label="Notifications"
                 onClick={() => {
                   if (!showNotifications) {
                     setShowNotifications(true);
-                    markAllAsRead(); // Mark all as read when opening
+                    markAllAsRead();
                   } else {
                     setShowNotifications(false);
                   }
                   setShowFilters(false);
                   setShowProfileDropdown(false);
                 }}
-                className={`p-2 rounded-full transition-all border ${
+                className={`p-2 rounded-full transition-all border min-w-[40px] min-h-[40px] flex items-center justify-center ${
                   showNotifications 
                     ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' 
                     : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/15'
                 }`}
               >
                 <div className="relative">
-                  <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  <Bell className="w-[18px] h-[18px] md:w-5 md:h-5" />
                   {isMounted && unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[var(--bg-overlay)] animate-pulse" />
                   )}
@@ -703,7 +704,8 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center pl-2 border-l border-white/[0.08]">
+          {/* User Button — always visible */}
+          <div className="flex items-center justify-center pl-1.5 md:pl-2 border-l border-white/[0.08]">
             <UserButton>
               <UserButton.MenuItems>
                 <UserButton.Link
