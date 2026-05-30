@@ -2213,10 +2213,12 @@ main, .relative.z-10 {
 .device-tv [tabindex="0"]:focus {
   outline: none !important;
   box-shadow: 0 0 0 4px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.8) !important;
+  border-radius: inherit !important;
   transform: scale(1.06) !important;
   z-index: 40 !important;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s !important;
 }
+
 
 /* Ensure the sidebar expands on focus-within for Smart TV remote control */
 .device-tv aside:focus-within {
