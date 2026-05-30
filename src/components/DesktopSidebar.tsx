@@ -46,6 +46,7 @@ export default function DesktopSidebar() {
                         <Link 
                             key={item.href}
                             href={item.href}
+                            data-focusable="true"
                             className={`relative flex items-center p-2 rounded-xl transition-all duration-300 h-11 group pointer-events-auto border ${
                                 isActive 
                                 ? `bg-gradient-to-r from-[var(--accent)]/20 to-[var(--accent-secondary)]/15 text-white border-[var(--accent)]/35 shadow-[0_0_12px_rgba(249,115,22,0.2)]` 
@@ -82,6 +83,7 @@ export default function DesktopSidebar() {
                         <Link 
                             key={item.href}
                             href={item.href}
+                            data-focusable="true"
                             className={`relative flex items-center p-2 rounded-xl transition-all duration-300 h-11 group pointer-events-auto border ${
                                 isActive 
                                 ? `bg-gradient-to-r from-[var(--accent)]/20 to-[var(--accent-secondary)]/15 text-white border-[var(--accent)]/35 shadow-[0_0_12px_rgba(249,115,22,0.2)]` 

@@ -13,17 +13,17 @@
       "original_language": "en",
       "original_title": "Project Hail Mary",
       "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
-      "popularity": 402.5239,
+      "popularity": 270.6206,
       "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
       "release_date": "2026-03-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.629,
-      "vote_count": 4109
+      "vote_average": 8.638,
+      "vote_count": 4310
     },
     {
       "adult": false,
-      "backdrop_path": "/7OedxK0BvSKJ0ZWCPRYADViTBx6.jpg",
+      "backdrop_path": "/4VrLojD6Gl1HQkcDHAoHQjSDPh9.jpg",
       "genre_ids": [
         28,
         12,
@@ -34,34 +34,13 @@
       "original_language": "en",
       "original_title": "The Mandalorian and Grogu",
       "overview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
-      "popularity": 192.0492,
+      "popularity": 179.8917,
       "poster_path": "/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.751,
-      "vote_count": 231
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
-      "genre_ids": [
-        878,
-        12,
-        14
-      ],
-      "id": 83533,
-      "title": "Avatar: Fire and Ash",
-      "original_language": "en",
-      "original_title": "Avatar: Fire and Ash",
-      "overview": "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
-      "popularity": 159.6346,
-      "poster_path": "/aabwWZWx6z1aYP4PX2ADvbDKktd.jpg",
-      "release_date": "2025-12-17",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.501,
-      "vote_count": 3187
+      "vote_average": 6.8,
+      "vote_count": 305
     },
     {
       "adult": false,
@@ -78,13 +57,75 @@
       "original_language": "en",
       "original_title": "Hoppers",
       "overview": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology, uncovering mysteries within the animal world beyond anything she could have imagined.",
-      "popularity": 134.798,
+      "popularity": 142.3815,
       "poster_path": "/xjtWQ2CL1mpmMNwuU5HeS4Iuwuu.jpg",
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.111,
-      "vote_count": 1231
+      "vote_average": 8.144,
+      "vote_count": 1273
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
+      "genre_ids": [
+        878,
+        12,
+        14
+      ],
+      "id": 83533,
+      "title": "Avatar: Fire and Ash",
+      "original_language": "en",
+      "original_title": "Avatar: Fire and Ash",
+      "overview": "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
+      "popularity": 141.232,
+      "poster_path": "/aabwWZWx6z1aYP4PX2ADvbDKktd.jpg",
+      "release_date": "2025-12-17",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.522,
+      "vote_count": 3238
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "id": 1083381,
+      "title": "Backrooms",
+      "original_language": "en",
+      "original_title": "Backrooms",
+      "overview": "A strange doorway appears in the basement of a furniture showroom.",
+      "popularity": 187.0112,
+      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "release_date": "2026-05-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.7,
+      "vote_count": 78
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/tlm8UkiQsitc8rSuIAscQDCnP8d.jpg",
+      "genre_ids": [
+        28,
+        878
+      ],
+      "id": 603,
+      "title": "The Matrix",
+      "original_language": "en",
+      "original_title": "The Matrix",
+      "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+      "popularity": 196.786,
+      "poster_path": "/aOIuZAjPaRIE6CMzbazvcHuHXDc.jpg",
+      "release_date": "1999-03-31",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.2,
+      "vote_count": 27892
     },
     {
       "adult": false,
@@ -99,17 +140,17 @@
       "original_language": "en",
       "original_title": "Worldbreaker",
       "overview": "Five years ago, a tear in the fabric of reality brought creatures to our world from an alternate dimension bent on our destruction. A father hides his daughter on an island to keep her safe while he prepares her for survival and the battles to come. But when the world is about to break, no place is safe.",
-      "popularity": 117.447,
+      "popularity": 86.5154,
       "poster_path": "/ahj1JU8r0uJv7QII5Uj7tKzbEsC.jpg",
       "release_date": "2025-10-30",
       "softcore": false,
       "video": false,
-      "vote_average": 5.893,
-      "vote_count": 173
+      "vote_average": 6.014,
+      "vote_count": 185
     },
     {
       "adult": false,
-      "backdrop_path": "/2ssWTSVklAEc98frZUQhgtGHx7s.jpg",
+      "backdrop_path": "/5XNQBqnBwPA9yT0jZ0p3s8bbLh0.jpg",
       "genre_ids": [
         12,
         18,
@@ -120,33 +161,13 @@
       "original_language": "en",
       "original_title": "Interstellar",
       "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
-      "popularity": 77.2339,
+      "popularity": 73.08,
       "poster_path": "/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg",
       "release_date": "2014-11-05",
       "softcore": false,
       "video": false,
       "vote_average": 8.475,
-      "vote_count": 39810
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/iZLqwEwUViJdSkGVjePGhxYzbDb.jpg",
-      "genre_ids": [
-        878,
-        53
-      ],
-      "id": 755898,
-      "title": "War of the Worlds",
-      "original_language": "en",
-      "original_title": "War of the Worlds",
-      "overview": "Will Radford is a top analyst for Homeland Security who tracks potential threats through a mass surveillance program, until one day an attack by an unknown entity leads him to question whether the government is hiding something from him... and from the rest of the world.",
-      "popularity": 71.8564,
-      "poster_path": "/yvirUYrva23IudARHn3mMGVxWqM.jpg",
-      "release_date": "2025-07-29",
-      "softcore": false,
-      "video": false,
-      "vote_average": 4.106,
-      "vote_count": 999
+      "vote_count": 39839
     },
     {
       "adult": false,
@@ -161,13 +182,13 @@
       "original_language": "en",
       "original_title": "Greenland 2: Migration",
       "overview": "Having found the safety of the Greenland bunker after the comet Clarke decimated the Earth, the Garrity family must now risk everything to embark on a perilous journey across the wasteland of Europe to find a new home.",
-      "popularity": 69.67,
+      "popularity": 62.8621,
       "poster_path": "/z2tqCJLsw6uEJ8nJV8BsQXGa3dr.jpg",
       "release_date": "2026-01-07",
       "softcore": false,
       "video": false,
-      "vote_average": 6.402,
-      "vote_count": 1107
+      "vote_average": 6.414,
+      "vote_count": 1119
     },
     {
       "adult": false,
@@ -182,118 +203,13 @@
       "original_language": "en",
       "original_title": "Predator: Badlands",
       "overview": "Cast out from his clan, a young Predator finds an unlikely ally in a damaged android and embarks on a treacherous journey in search of the ultimate adversary.",
-      "popularity": 67.2656,
+      "popularity": 62.6152,
       "poster_path": "/pHpq9yNUIo6aDoCXEBzjSolywgz.jpg",
       "release_date": "2025-11-05",
       "softcore": false,
       "video": false,
-      "vote_average": 7.742,
-      "vote_count": 2937
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
-      "genre_ids": [
-        878,
-        28,
-        12
-      ],
-      "id": 24428,
-      "title": "The Avengers",
-      "original_language": "en",
-      "original_title": "The Avengers",
-      "overview": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
-      "popularity": 51.5005,
-      "poster_path": "/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
-      "release_date": "2012-04-25",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.03,
-      "vote_count": 37999
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/wfGDy0KVZsiQpGgYoxObUGgccwk.jpg",
-      "genre_ids": [
-        878,
-        27,
-        12
-      ],
-      "id": 1235192,
-      "title": "Wormtown",
-      "original_language": "en",
-      "original_title": "Wormtown",
-      "overview": "One year into a plague of flesh-eating, mind-altering worms, the nocturnal town of Ashland, Ohio, has embraced the parasites’ rule. Under cult-like Mayor Joshua, zealous Ranchers spread their gospel—by persuasion or by force. A trio of uninfected women cling to survival through scavenging, extreme hygiene, and evasion. But everyone breaks eventually, unleashing betrayal, sacrilege, and body horror.",
-      "popularity": 49.8182,
-      "poster_path": "/lE10ww38b7XA5LIagIsVQj9a8Hn.jpg",
-      "release_date": "2025-09-27",
-      "softcore": false,
-      "video": false,
-      "vote_average": 5.7,
-      "vote_count": 15
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6yeVcxFR0j08vlv2OlL6zbewm4D.jpg",
-      "genre_ids": [
-        28,
-        878,
-        53
-      ],
-      "id": 1265609,
-      "title": "War Machine",
-      "original_language": "en",
-      "original_title": "War Machine",
-      "overview": "On one last grueling mission during Army Ranger training, a combat engineer must lead his unit in a fight against a giant otherworldly killing machine.",
-      "popularity": 51.1198,
-      "poster_path": "/ril8yx5SOmj0KjNlftsdfIp00fr.jpg",
-      "release_date": "2026-02-12",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.333,
-      "vote_count": 1774
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mDfJG3LC3Dqb67AZ52x3Z0jU0uB.jpg",
-      "genre_ids": [
-        12,
-        28,
-        878
-      ],
-      "id": 299536,
-      "title": "Avengers: Infinity War",
-      "original_language": "en",
-      "original_title": "Avengers: Infinity War",
-      "overview": "As the Avengers and their allies have continued to protect the world from threats too large for any one hero to handle, a new danger has emerged from the cosmic shadows: Thanos. A despot of intergalactic infamy, his goal is to collect all six Infinity Stones, artifacts of unimaginable power, and use them to inflict his twisted will on all of reality. Everything the Avengers have fought for has led up to this moment - the fate of Earth and existence itself has never been more uncertain.",
-      "popularity": 49.2997,
-      "poster_path": "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
-      "release_date": "2018-04-25",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.235,
-      "vote_count": 31979
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/v3lNH2gCojWYXVuXcT9FZLBxcSq.jpg",
-      "genre_ids": [
-        28,
-        18,
-        878
-      ],
-      "id": 1235877,
-      "title": "Jana Nayagan",
-      "original_language": "ta",
-      "original_title": "ஜன நாயகன்",
-      "overview": "A clash of ideologies. One stands for the people, the other feeds on control. Their paths collided once before. Years later, a child’s silent fear ignites the past, drawing a former police officer into a battle far bigger than personal revenge.",
-      "popularity": 50.9532,
-      "poster_path": "/jt8pfSIdi47YpFMMWVRr8w5u2S0.jpg",
-      "release_date": "",
-      "softcore": false,
-      "video": false,
-      "vote_average": 0,
-      "vote_count": 0
+      "vote_average": 7.743,
+      "vote_count": 2954
     },
     {
       "adult": false,
@@ -308,96 +224,138 @@
       "original_language": "en",
       "original_title": "Real Steel",
       "overview": "Charlie Kenton is a washed-up fighter who retired from the ring when robots took over the sport. After his robot is trashed, he reluctantly teams up with his estranged son to rebuild and train an unlikely contender.",
-      "popularity": 48.1006,
+      "popularity": 66.5904,
       "poster_path": "/4GIeI5K5YdDUkR3mNQBoScpSFEf.jpg",
       "release_date": "2011-09-28",
       "softcore": false,
       "video": false,
-      "vote_average": 7.086,
-      "vote_count": 9126
+      "vote_average": 7.09,
+      "vote_count": 9145
     },
     {
       "adult": false,
-      "backdrop_path": "/tlm8UkiQsitc8rSuIAscQDCnP8d.jpg",
+      "backdrop_path": "/iZLqwEwUViJdSkGVjePGhxYzbDb.jpg",
       "genre_ids": [
-        28,
-        878
-      ],
-      "id": 603,
-      "title": "The Matrix",
-      "original_language": "en",
-      "original_title": "The Matrix",
-      "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
-      "popularity": 39.9078,
-      "poster_path": "/aOIuZAjPaRIE6CMzbazvcHuHXDc.jpg",
-      "release_date": "1999-03-31",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.246,
-      "vote_count": 27876
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/hHDNOlATHhre4eZ7aYz5cdyJLik.jpg",
-      "genre_ids": [
-        27,
-        53,
-        878
-      ],
-      "id": 1272837,
-      "title": "28 Years Later: The Bone Temple",
-      "original_language": "en",
-      "original_title": "28 Years Later: The Bone Temple",
-      "overview": "Dr. Kelson finds himself in a shocking new relationship - with consequences that could change the world as they know it - and Spike's encounter with Jimmy Crystal becomes a nightmare he can't escape.",
-      "popularity": 37.147,
-      "poster_path": "/kK1BGkG3KAvWB0WMV1DfOx9yTMZ.jpg",
-      "release_date": "2026-01-14",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.117,
-      "vote_count": 1222
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
-      "genre_ids": [
-        28,
         878,
+        53
+      ],
+      "id": 755898,
+      "title": "War of the Worlds",
+      "original_language": "en",
+      "original_title": "War of the Worlds",
+      "overview": "Will Radford is a top analyst for Homeland Security who tracks potential threats through a mass surveillance program, until one day an attack by an unknown entity leads him to question whether the government is hiding something from him... and from the rest of the world.",
+      "popularity": 56.5477,
+      "poster_path": "/yvirUYrva23IudARHn3mMGVxWqM.jpg",
+      "release_date": "2025-07-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 4.103,
+      "vote_count": 1002
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
+      "genre_ids": [
+        878,
+        28,
         12
       ],
-      "id": 27205,
-      "title": "Inception",
+      "id": 24428,
+      "title": "The Avengers",
       "original_language": "en",
-      "original_title": "Inception",
-      "overview": "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\", the implantation of another person's idea into a target's subconscious.",
-      "popularity": 36.2462,
-      "poster_path": "/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg",
-      "release_date": "2010-07-15",
+      "original_title": "The Avengers",
+      "overview": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
+      "popularity": 51.6498,
+      "poster_path": "/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+      "release_date": "2012-04-25",
       "softcore": false,
       "video": false,
-      "vote_average": 8.372,
-      "vote_count": 39247
+      "vote_average": 8.032,
+      "vote_count": 38056
     },
     {
       "adult": false,
-      "backdrop_path": "/zNriRTr0kWwyaXPzdg1EIxf0BWk.jpg",
+      "backdrop_path": "/mDfJG3LC3Dqb67AZ52x3Z0jU0uB.jpg",
       "genre_ids": [
-        878,
         12,
-        28
+        28,
+        878
       ],
-      "id": 1234821,
-      "title": "Jurassic World Rebirth",
+      "id": 299536,
+      "title": "Avengers: Infinity War",
       "original_language": "en",
-      "original_title": "Jurassic World Rebirth",
-      "overview": "Five years after the events of Jurassic World Dominion, covert operations expert Zora Bennett is contracted to lead a skilled team on a top-secret mission to secure genetic material from the world's three most massive dinosaurs. When Zora's operation intersects with a civilian family whose boating expedition was capsized, they all find themselves stranded on an island where they come face-to-face with a sinister, shocking discovery that's been hidden from the world for decades.",
-      "popularity": 34.9964,
-      "poster_path": "/1RICxzeoNCAO5NpcRMIgg1XT6fm.jpg",
-      "release_date": "2025-06-23",
+      "original_title": "Avengers: Infinity War",
+      "overview": "As the Avengers and their allies have continued to protect the world from threats too large for any one hero to handle, a new danger has emerged from the cosmic shadows: Thanos. A despot of intergalactic infamy, his goal is to collect all six Infinity Stones, artifacts of unimaginable power, and use them to inflict his twisted will on all of reality. Everything the Avengers have fought for has led up to this moment - the fate of Earth and existence itself has never been more uncertain.",
+      "popularity": 51.6582,
+      "poster_path": "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+      "release_date": "2018-04-25",
       "softcore": false,
       "video": false,
-      "vote_average": 6.266,
-      "vote_count": 3350
+      "vote_average": 8.236,
+      "vote_count": 32000
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/5p6BsJtnPbglYN15MuiUEppPl0f.jpg",
+      "genre_ids": [
+        9648,
+        878,
+        53
+      ],
+      "id": 1275779,
+      "title": "Disclosure Day",
+      "original_language": "en",
+      "original_title": "Disclosure Day",
+      "overview": "If you found out we weren’t alone, if someone showed you, proved it to you, would that frighten you?",
+      "popularity": 49.573,
+      "poster_path": "/3o5YPjDGDTcTDL5ftDA9NwN9dLd.jpg",
+      "release_date": "2026-06-10",
+      "softcore": false,
+      "video": false,
+      "vote_average": 0,
+      "vote_count": 0
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6yeVcxFR0j08vlv2OlL6zbewm4D.jpg",
+      "genre_ids": [
+        28,
+        878,
+        53
+      ],
+      "id": 1265609,
+      "title": "War Machine",
+      "original_language": "en",
+      "original_title": "War Machine",
+      "overview": "On one last grueling mission during Army Ranger training, a combat engineer must lead his unit in a fight against a giant otherworldly killing machine.",
+      "popularity": 46.5402,
+      "poster_path": "/ril8yx5SOmj0KjNlftsdfIp00fr.jpg",
+      "release_date": "2026-02-12",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.342,
+      "vote_count": 1790
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/v3lNH2gCojWYXVuXcT9FZLBxcSq.jpg",
+      "genre_ids": [
+        28,
+        18,
+        878
+      ],
+      "id": 1235877,
+      "title": "Jana Nayagan",
+      "original_language": "ta",
+      "original_title": "ஜன நாயகன்",
+      "overview": "A clash of ideologies. One stands for the people, the other feeds on control. Their paths collided once before. Years later, a child’s silent fear ignites the past, drawing a former police officer into a battle far bigger than personal revenge.",
+      "popularity": 40.0887,
+      "poster_path": "/jt8pfSIdi47YpFMMWVRr8w5u2S0.jpg",
+      "release_date": "",
+      "softcore": false,
+      "video": false,
+      "vote_average": 0,
+      "vote_count": 0
     },
     {
       "adult": false,
@@ -412,15 +370,57 @@
       "original_language": "en",
       "original_title": "Spider-Man: No Way Home",
       "overview": "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous, forcing him to discover what it truly means to be Spider-Man.",
-      "popularity": 37.8279,
+      "popularity": 41.6303,
       "poster_path": "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
       "release_date": "2021-12-15",
       "softcore": false,
       "video": false,
       "vote_average": 7.934,
-      "vote_count": 21972
+      "vote_count": 21989
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/wfGDy0KVZsiQpGgYoxObUGgccwk.jpg",
+      "genre_ids": [
+        878,
+        27,
+        12
+      ],
+      "id": 1235192,
+      "title": "Wormtown",
+      "original_language": "en",
+      "original_title": "Wormtown",
+      "overview": "One year into a plague of flesh-eating, mind-altering worms, the nocturnal town of Ashland, Ohio, has embraced the parasites’ rule. Under cult-like Mayor Joshua, zealous Ranchers spread their gospel—by persuasion or by force. A trio of uninfected women cling to survival through scavenging, extreme hygiene, and evasion. But everyone breaks eventually, unleashing betrayal, sacrilege, and body horror.",
+      "popularity": 35.9155,
+      "poster_path": "/lE10ww38b7XA5LIagIsVQj9a8Hn.jpg",
+      "release_date": "2025-09-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 5.781,
+      "vote_count": 17
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/ufpeVEM64uZHPpzzeiDNIAdaeOD.jpg",
+      "genre_ids": [
+        28,
+        35,
+        878
+      ],
+      "id": 533535,
+      "title": "Deadpool & Wolverine",
+      "original_language": "en",
+      "original_title": "Deadpool & Wolverine",
+      "overview": "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.",
+      "popularity": 39.123,
+      "poster_path": "/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+      "release_date": "2024-07-24",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.569,
+      "vote_count": 8670
     }
   ],
-  "total_pages": 1311,
-  "total_results": 26208
+  "total_pages": 1313,
+  "total_results": 26256
 }

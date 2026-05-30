@@ -17,9 +17,9 @@ const HEADERS = {
     'Upgrade-Insecure-Requests': '1',
 };
 
-function parseAnimeCards($: cheerio.CheerioAPI, selector: string): AnimeSearchResult[] {
+function parseAnimeCards($: any, selector: string): AnimeSearchResult[] {
     const results: AnimeSearchResult[] = [];
-    $(selector).each((_, el) => {
+    $(selector).each((_: any, el: any) => {
         const $el = $(el);
         // aniwaves.ru uses flw-item structure (same as 9anime/Zoro)
         const $link = $el.find('.film-poster, .poster');

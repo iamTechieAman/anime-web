@@ -2129,3 +2129,96 @@ main, .relative.z-10 {
     animation: none !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────
+   SMART TV CUSTOM OTT LAYOUTS & FOCUS SYSTEM
+   ────────────────────────────────────────────────────────── */
+
+/* TV and PC card snap dimensions */
+.netflix-card-snap {
+  scroll-snap-align: start !important;
+  flex: 0 0 auto !important;
+  width: 130px;
+}
+
+.netflix-card-snap.large {
+  width: 150px;
+}
+
+@media (min-width: 640px) {
+  .netflix-card-snap {
+    width: 150px;
+  }
+  .netflix-card-snap.large {
+    width: 170px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .netflix-card-snap {
+    width: 165px;
+  }
+  .netflix-card-snap.large {
+    width: 190px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .netflix-card-snap {
+    width: 180px;
+  }
+  .netflix-card-snap.large {
+    width: 210px;
+  }
+}
+
+/* TV continue watching card snap dimensions */
+.netflix-row .continue-card-snap {
+  scroll-snap-align: start !important;
+  flex: 0 0 auto !important;
+  width: 220px;
+}
+
+@media (min-width: 640px) {
+  .netflix-row .continue-card-snap {
+    width: 250px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .netflix-row .continue-card-snap {
+    width: 280px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .netflix-row .continue-card-snap {
+    width: 320px;
+  }
+}
+
+/* Universal Smart TV programmatic focus classes */
+.device-tv a:focus,
+.device-tv button:focus,
+.device-tv input:focus,
+.device-tv select:focus,
+.device-tv [data-focusable="true"]:focus,
+.device-tv [tabindex="0"]:focus {
+  outline: 4px solid #f59e0b !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.8) !important;
+  transform: scale(1.06) !important;
+  z-index: 40 !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), outline-color 0.25s, box-shadow 0.25s !important;
+}
+
+/* Ensure the sidebar expands on focus-within for Smart TV remote control */
+.device-tv aside:focus-within {
+  width: 220px !important;
+}
+
+/* Hide mobile-specific floating UI elements on TV */
+.device-tv .tap-scale,
+.device-tv [class*="MobileNav"] {
+  display: none !important;
+}

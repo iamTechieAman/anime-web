@@ -37,9 +37,9 @@ const HEADERS = {
  *   </div>
  * </article>
  */
-function parseCards($: cheerio.CheerioAPI, selector: string): AnimeSearchResult[] {
+function parseCards($: any, selector: string): AnimeSearchResult[] {
     const results: AnimeSearchResult[] = [];
-    $(selector).each((_, el) => {
+    $(selector).each((_: any, el: any) => {
         const $el = $(el);
         const $link = $el.find('a').first();
         const href = $link.attr('href') || '';

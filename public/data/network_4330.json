@@ -3,7 +3,7 @@
   "results": [
     {
       "adult": false,
-      "backdrop_path": "/65Y6PweSvQ1OOFBzStybjipURRP.jpg",
+      "backdrop_path": "/tUtXfyVy54BY7eJnRtI8Xnmr1ZL.jpg",
       "genre_ids": [
         80,
         18,
@@ -16,17 +16,17 @@
       "original_language": "en",
       "original_name": "Criminal Minds",
       "overview": "An elite team of FBI profilers analyze the country's most twisted criminal minds, anticipating their next moves before they strike again. The Behavioral Analysis Unit's most experienced agent is David Rossi, a founding member of the BAU who returns to help the team solve new cases.",
-      "popularity": 172.7875,
-      "poster_path": "/gigxjNnACiXAfrwoMox5WJFgc0I.jpg",
+      "popularity": 213.64,
+      "poster_path": "/hWSb4UnIjlTvnvrP98NbFSO60HA.jpg",
       "first_air_date": "2005-09-22",
       "softcore": false,
       "name": "Criminal Minds",
-      "vote_average": 8.3,
-      "vote_count": 4072
+      "vote_average": 8.301,
+      "vote_count": 4075
     },
     {
       "adult": false,
-      "backdrop_path": "/ewlmL0nxo2lLqBj69upgp2gjHpV.jpg",
+      "backdrop_path": "/wh5agdl3b7fqC7mSjsCkHx4fMAs.jpg",
       "genre_ids": [
         37,
         18
@@ -38,13 +38,13 @@
       "original_language": "en",
       "original_name": "Dutton Ranch",
       "overview": "Rip Wheeler and Beth Dutton gamble everything on a new life in South Texas, but the promise of building a future far from the ghosts of Yellowstone quickly collides with brutal new realities and a rival ranch that will stop at nothing to protect its empire.",
-      "popularity": 156.4726,
+      "popularity": 144.4233,
       "poster_path": "/xsiecCxd8lkcAluw0wWwbW5CwSv.jpg",
       "first_air_date": "2026-05-15",
       "softcore": false,
       "name": "Dutton Ranch",
-      "vote_average": 9.404,
-      "vote_count": 130
+      "vote_average": 9.306,
+      "vote_count": 152
     },
     {
       "adult": false,
@@ -60,13 +60,13 @@
       "original_language": "en",
       "original_name": "Tulsa King",
       "overview": "New York mafia capo Dwight \"The General\" Manfredi is released from prison after 25 years and exiled by his boss to set up shop in Tulsa, Oklahoma. Realizing that his mob family may not have his best interests in mind, Dwight slowly builds a crew.",
-      "popularity": 59.1259,
+      "popularity": 63.5978,
       "poster_path": "/rOYLWCdAifpUtPlTf1WHxyaxeMt.jpg",
       "first_air_date": "2022-11-13",
       "softcore": false,
       "name": "Tulsa King",
-      "vote_average": 8.291,
-      "vote_count": 2619
+      "vote_average": 8.288,
+      "vote_count": 2626
     },
     {
       "adult": false,
@@ -83,34 +83,13 @@
       "original_language": "en",
       "original_name": "SEAL Team",
       "overview": "Military drama following the professional and personal lives of the most elite unit of Navy SEALs as they train, plan and execute the most dangerous, high stakes missions our country can ask of them.",
-      "popularity": 56.2197,
+      "popularity": 59.272,
       "poster_path": "/6iSnec83UEMgLOXAtGYwaVNHLjR.jpg",
       "first_air_date": "2017-09-27",
       "softcore": false,
       "name": "SEAL Team",
-      "vote_average": 8.03,
-      "vote_count": 1626
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mh2UczqEXJJVgqohbyZbHTuxwhL.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 157741,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Landman",
-      "overview": "Set in the proverbial boomtowns of West-Texas and a modern-day tale of fortune-seeking in the world of oil rigs, the series is an upstairs/downstairs story of roughnecks and wildcat billionaires that are fueling a boom so big it’s reshaping our climate, our economy and our geopolitics.",
-      "popularity": 42.1771,
-      "poster_path": "/hYthRgS1nvQkGILn9YmqsF8kSk6.jpg",
-      "first_air_date": "2024-11-17",
-      "softcore": false,
-      "name": "Landman",
-      "vote_average": 8.14,
-      "vote_count": 527
+      "vote_average": 8.031,
+      "vote_count": 1627
     },
     {
       "adult": false,
@@ -126,13 +105,77 @@
       "original_language": "en",
       "original_name": "Mayor of Kingstown",
       "overview": "In a small Michigan town where the business of incarceration is the only thriving industry, the McClusky family are the power brokers between the police, criminals, inmates, prison guards and politicians in a city completely dependent on prisons and the prisoners they contain.",
-      "popularity": 41.8579,
+      "popularity": 46.5026,
       "poster_path": "/6rWIip9MZELAA0SKii5WqsBDCYW.jpg",
       "first_air_date": "2021-11-14",
       "softcore": false,
       "name": "Mayor of Kingstown",
-      "vote_average": 7.9,
-      "vote_count": 612
+      "vote_average": 7.909,
+      "vote_count": 615
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/vIioWssbxRtEkIzgj8r0pCWYkYM.jpg",
+      "genre_ids": [
+        18,
+        37
+      ],
+      "id": 157744,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "1923",
+      "overview": "Follow a new generation of the Dutton family during the early twentieth century when pandemics, historic drought, the end of Prohibition and the Great Depression all plague the mountain west, and the Duttons who call it home.",
+      "popularity": 52.9743,
+      "poster_path": "/zgZRJZvZn5cpsWAB0zMUdad3iZd.jpg",
+      "first_air_date": "2022-12-18",
+      "softcore": false,
+      "name": "1923",
+      "vote_average": 8.233,
+      "vote_count": 759
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mh2UczqEXJJVgqohbyZbHTuxwhL.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 157741,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Landman",
+      "overview": "Set in the proverbial boomtowns of West-Texas and a modern-day tale of fortune-seeking in the world of oil rigs, the series is an upstairs/downstairs story of roughnecks and wildcat billionaires that are fueling a boom so big it’s reshaping our climate, our economy and our geopolitics.",
+      "popularity": 44.6915,
+      "poster_path": "/hYthRgS1nvQkGILn9YmqsF8kSk6.jpg",
+      "first_air_date": "2024-11-17",
+      "softcore": false,
+      "name": "Landman",
+      "vote_average": 8.14,
+      "vote_count": 528
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/nz6vpYyN1pEwBYeoAVIu2316d0z.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 69158,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Good Fight",
+      "overview": "Picking up one year after the events of the final broadcast episode of \"The Good Wife\", an enormous financial scam has destroyed the reputation of a young lawyer, Maia Rindell, while simultaneously wiping out her mentor and godmother Diane Lockhart's savings. Forced out of her law firm, now called \"Lockhart, Deckler, Gussman, Lee, Lyman, Gilbert, Lurie, Kagan, Tannebaum & Associates\", they join Lucca Quinn at one of Chicago's preeminent law firms.",
+      "popularity": 40.7984,
+      "poster_path": "/8qoOHOfbUbrCcHZnDVxGcwOWinV.jpg",
+      "first_air_date": "2017-02-19",
+      "softcore": false,
+      "name": "The Good Fight",
+      "vote_average": 7.54,
+      "vote_count": 336
     },
     {
       "adult": false,
@@ -149,13 +192,13 @@
       "original_language": "en",
       "original_name": "Star Trek: Discovery",
       "overview": "Follow the voyages of Starfleet on their missions to discover new worlds and new life forms, and one Starfleet officer who must learn that to truly understand all things alien, you must first understand yourself.",
-      "popularity": 35.2124,
+      "popularity": 40.9936,
       "poster_path": "/xwpOHgym48Ftz7fbJq5te5xoiwu.jpg",
       "first_air_date": "2017-09-24",
       "softcore": false,
       "name": "Star Trek: Discovery",
-      "vote_average": 6.96,
-      "vote_count": 2008
+      "vote_average": 6.958,
+      "vote_count": 2011
     },
     {
       "adult": false,
@@ -171,34 +214,13 @@
       "original_language": "en",
       "original_name": "Lioness",
       "overview": "Cruz Manuelos, a rough-around-the-edges but passionate young Marine, is recruited to join the CIA's Lioness Engagement Team to help bring down a terrorist organization from within. Joe, the station chief of the Lioness program, is tasked with training, managing and leading her female undercover operatives.",
-      "popularity": 32.6363,
+      "popularity": 33.7744,
       "poster_path": "/ajaXSmdAlYYhnvx1EIsvpfN949y.jpg",
       "first_air_date": "2023-07-23",
       "softcore": false,
       "name": "Lioness",
       "vote_average": 7.975,
-      "vote_count": 1180
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/nz6vpYyN1pEwBYeoAVIu2316d0z.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 69158,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Good Fight",
-      "overview": "Picking up one year after the events of the final broadcast episode of \"The Good Wife\", an enormous financial scam has destroyed the reputation of a young lawyer, Maia Rindell, while simultaneously wiping out her mentor and godmother Diane Lockhart's savings. Forced out of her law firm, now called \"Lockhart, Deckler, Gussman, Lee, Lyman, Gilbert, Lurie, Kagan, Tannebaum & Associates\", they join Lucca Quinn at one of Chicago's preeminent law firms.",
-      "popularity": 35.6864,
-      "poster_path": "/8qoOHOfbUbrCcHZnDVxGcwOWinV.jpg",
-      "first_air_date": "2017-02-19",
-      "softcore": false,
-      "name": "The Good Fight",
-      "vote_average": 7.533,
-      "vote_count": 335
+      "vote_count": 1181
     },
     {
       "adult": false,
@@ -215,35 +237,13 @@
       "original_language": "en",
       "original_name": "MobLand",
       "overview": "Two mob families clash in a war that threatens to topple empires and lives.",
-      "popularity": 29.8934,
+      "popularity": 33.4564,
       "poster_path": "/abeH7n5pcuQcwYcTxG6DTZvXLP1.jpg",
       "first_air_date": "2025-03-30",
       "softcore": false,
       "name": "MobLand",
       "vote_average": 8.3,
       "vote_count": 670
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/zW0v2YT74C6tRafzqqBkfSqLAN0.jpg",
-      "genre_ids": [
-        10765,
-        10759
-      ],
-      "id": 52814,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Halo",
-      "overview": "Depicting an epic 26th-century conflict between humanity and an alien threat known as the Covenant, the series weaves deeply drawn personal stories with action, adventure and a richly imagined vision of the future.",
-      "popularity": 31.2197,
-      "poster_path": "/4UmNhZCEu8Vt3byMvNxNEPyf8EY.jpg",
-      "first_air_date": "2022-03-24",
-      "softcore": false,
-      "name": "Halo",
-      "vote_average": 8.203,
-      "vote_count": 3155
     },
     {
       "adult": false,
@@ -260,32 +260,13 @@
       "original_language": "en",
       "original_name": "Evil",
       "overview": "Skeptical forensic psychologist Kristen Bouchard joins priest-in-training David Acosta and technology expert Ben Shakir as they investigate supposed miracles, demonic possessions, and other extraordinary occurrences to assess for a scientific explanation or if something truly supernatural is at work.",
-      "popularity": 30.3326,
+      "popularity": 32.9939,
       "poster_path": "/auRAAVxlyT6YACql96UdtnpFHy3.jpg",
       "first_air_date": "2019-09-26",
       "softcore": false,
       "name": "Evil",
-      "vote_average": 7.817,
-      "vote_count": 1019
-    },
-    {
-      "adult": false,
-      "backdrop_path": null,
-      "genre_ids": [],
-      "id": 318325,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Tony Awards",
-      "overview": "The Antoinette Perry Award for Excellence in Theatre, more commonly known as a Tony Award, recognizes achievement in live Broadway theatre. The awards are presented by the American Theatre Wing and The Broadway League at an annual ceremony in New York City. The awards are given for Broadway productions and performances, and an award is given for regional theatre.",
-      "popularity": 27.3243,
-      "poster_path": "/zFBRMVDgKRZ6dqTZwkefBbfDC1G.jpg",
-      "first_air_date": "1956-04-01",
-      "softcore": false,
-      "name": "Tony Awards",
-      "vote_average": 0,
-      "vote_count": 0
+      "vote_average": 7.819,
+      "vote_count": 1022
     },
     {
       "adult": false,
@@ -301,35 +282,54 @@
       "original_language": "en",
       "original_name": "Younger",
       "overview": "Liza Miller, a suddenly single stay-at-home mother, tries to get back into the working world, only to find it’s nearly impossible to start at the bottom at 40-year old. When a chance encounter convinces her she looks younger than she is, Liza tries to pass herself off as 26 and lands a job as an assistant at Empirical Press. Now she just has to make sure no one finds out the secret only she and her best friend Maggie share.",
-      "popularity": 28.4019,
+      "popularity": 32.4691,
       "poster_path": "/feWw6i09zaX2apzRqd7QbKEAsx9.jpg",
       "first_air_date": "2015-03-31",
       "softcore": false,
       "name": "Younger",
-      "vote_average": 6.865,
+      "vote_average": 6.9,
       "vote_count": 241
     },
     {
       "adult": false,
-      "backdrop_path": "/vIioWssbxRtEkIzgj8r0pCWYkYM.jpg",
+      "backdrop_path": "/zW0v2YT74C6tRafzqqBkfSqLAN0.jpg",
       "genre_ids": [
-        18,
-        37
+        10765,
+        10759
       ],
-      "id": 157744,
+      "id": 52814,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "1923",
-      "overview": "Follow a new generation of the Dutton family during the early twentieth century when pandemics, historic drought, the end of Prohibition and the Great Depression all plague the mountain west, and the Duttons who call it home.",
-      "popularity": 29.5274,
-      "poster_path": "/zgZRJZvZn5cpsWAB0zMUdad3iZd.jpg",
-      "first_air_date": "2022-12-18",
+      "original_name": "Halo",
+      "overview": "Depicting an epic 26th-century conflict between humanity and an alien threat known as the Covenant, the series weaves deeply drawn personal stories with action, adventure and a richly imagined vision of the future.",
+      "popularity": 30.3148,
+      "poster_path": "/4UmNhZCEu8Vt3byMvNxNEPyf8EY.jpg",
+      "first_air_date": "2022-03-24",
       "softcore": false,
-      "name": "1923",
-      "vote_average": 8.228,
-      "vote_count": 756
+      "name": "Halo",
+      "vote_average": 8.205,
+      "vote_count": 3159
+    },
+    {
+      "adult": false,
+      "backdrop_path": null,
+      "genre_ids": [],
+      "id": 318325,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Tony Awards",
+      "overview": "The Antoinette Perry Award for Excellence in Theatre, more commonly known as a Tony Award, recognizes achievement in live Broadway theatre. The awards are presented by the American Theatre Wing and The Broadway League at an annual ceremony in New York City. The awards are given for Broadway productions and performances, and an award is given for regional theatre.",
+      "popularity": 30.4625,
+      "poster_path": "/zFBRMVDgKRZ6dqTZwkefBbfDC1G.jpg",
+      "first_air_date": "1956-04-01",
+      "softcore": false,
+      "name": "Tony Awards",
+      "vote_average": 0,
+      "vote_count": 0
     },
     {
       "adult": false,
@@ -346,57 +346,13 @@
       "original_language": "en",
       "original_name": "Star Trek: Picard",
       "overview": "Set twenty years after the events of Star Trek Nemesis, we follow the now-retired Admiral Picard into the next chapter of his life.",
-      "popularity": 24.557,
+      "popularity": 26.0543,
       "poster_path": "/nIlAKIrLKxOeoEnc0Urb65yNCp.jpg",
       "first_air_date": "2020-01-23",
       "softcore": false,
       "name": "Star Trek: Picard",
       "vote_average": 7.246,
       "vote_count": 1883
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/fZJs6xgU9dqIg9phIXjZAZOInzy.jpg",
-      "genre_ids": [
-        10765,
-        18
-      ],
-      "id": 103516,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Star Trek: Strange New Worlds",
-      "overview": "Follow Captain Christopher Pike, Science Officer Spock and Number One in the years before Captain Kirk boarded the U.S.S. Enterprise, as they explore new worlds around the galaxy.",
-      "popularity": 21.8532,
-      "poster_path": "/w6KapI2JvrCkOPmQhkwYPJNjqeo.jpg",
-      "first_air_date": "2022-05-05",
-      "softcore": false,
-      "name": "Star Trek: Strange New Worlds",
-      "vote_average": 7.975,
-      "vote_count": 741
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/uQUHCqxHsG9blvtCoL7vluMG9Jp.jpg",
-      "genre_ids": [
-        18,
-        37
-      ],
-      "id": 118357,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "1883",
-      "overview": "Follow the Dutton family as they embark on a journey west through the Great Plains toward the last bastion of untamed America. A stark retelling of Western expansion, and an intense study of one family fleeing poverty to seek a better future in America’s promised land — Montana.",
-      "popularity": 22.1819,
-      "poster_path": "/waLbm384SQDwLTCn6ttPqQS5kfV.jpg",
-      "first_air_date": "2021-12-19",
-      "softcore": false,
-      "name": "1883",
-      "vote_average": 8.261,
-      "vote_count": 931
     },
     {
       "adult": false,
@@ -413,13 +369,57 @@
       "original_language": "en",
       "original_name": "Star Trek: Lower Decks",
       "overview": "The lives of the support crew serving on one of Starfleet's least important ships, the U.S.S. Cerritos, in 2380. Ensigns Mariner, Boimler, Rutherford and Tendi have to keep up with their duties and their social lives, often while the ship is being rocked by a multitude of sci-fi anomalies.",
-      "popularity": 22.775,
+      "popularity": 25.8638,
       "poster_path": "/i7Em3r7KCyNfkOwMkyqN8UMvK8S.jpg",
       "first_air_date": "2020-08-06",
       "softcore": false,
       "name": "Star Trek: Lower Decks",
       "vote_average": 7.636,
-      "vote_count": 435
+      "vote_count": 436
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/fZJs6xgU9dqIg9phIXjZAZOInzy.jpg",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "id": 103516,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Star Trek: Strange New Worlds",
+      "overview": "Follow Captain Christopher Pike, Science Officer Spock and Number One in the years before Captain Kirk boarded the U.S.S. Enterprise, as they explore new worlds around the galaxy.",
+      "popularity": 23.5709,
+      "poster_path": "/w6KapI2JvrCkOPmQhkwYPJNjqeo.jpg",
+      "first_air_date": "2022-05-05",
+      "softcore": false,
+      "name": "Star Trek: Strange New Worlds",
+      "vote_average": 7.975,
+      "vote_count": 742
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/uQUHCqxHsG9blvtCoL7vluMG9Jp.jpg",
+      "genre_ids": [
+        18,
+        37
+      ],
+      "id": 118357,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "1883",
+      "overview": "Follow the Dutton family as they embark on a journey west through the Great Plains toward the last bastion of untamed America. A stark retelling of Western expansion, and an intense study of one family fleeing poverty to seek a better future in America’s promised land — Montana.",
+      "popularity": 19.2838,
+      "poster_path": "/waLbm384SQDwLTCn6ttPqQS5kfV.jpg",
+      "first_air_date": "2021-12-19",
+      "softcore": false,
+      "name": "1883",
+      "vote_average": 8.265,
+      "vote_count": 935
     },
     {
       "adult": false,
@@ -434,7 +434,7 @@
       "original_language": "en",
       "original_name": "RuPaul's Drag Race All Stars",
       "overview": "The most celebrated competitors from RuPaul's Drag Race vie for a second chance to enter Drag Race herstory. This drag queen showdown is filled with plenty of heated competition, lip-syncing for the legacy, and, of course, the All-Stars Snatch Game.",
-      "popularity": 16.4186,
+      "popularity": 20.1729,
       "poster_path": "/ArIu3xEo28LiKtiVWHNZdPFNZrM.jpg",
       "first_air_date": "2012-10-22",
       "softcore": false,

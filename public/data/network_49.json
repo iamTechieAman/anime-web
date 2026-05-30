@@ -14,13 +14,13 @@
       "original_language": "en",
       "original_name": "Euphoria",
       "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
-      "popularity": 323.108,
+      "popularity": 285.4515,
       "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
       "first_air_date": "2019-06-16",
       "softcore": false,
       "name": "Euphoria",
       "vote_average": 8.29,
-      "vote_count": 10697
+      "vote_count": 10723
     },
     {
       "adult": false,
@@ -37,35 +37,13 @@
       "original_language": "en",
       "original_name": "Game of Thrones",
       "overview": "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and icy horrors beyond.",
-      "popularity": 208.6984,
+      "popularity": 221.1624,
       "poster_path": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
       "first_air_date": "2011-04-17",
       "softcore": false,
       "name": "Game of Thrones",
       "vote_average": 8.461,
-      "vote_count": 26870
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rX5hvSRB2k4YoIvRg6Zky52rWk0.jpg",
-      "genre_ids": [
-        10765,
-        37
-      ],
-      "id": 63247,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Westworld",
-      "overview": "A dark odyssey about the dawn of artificial consciousness and the evolution of sin. Set at the intersection of the near future and the reimagined past, it explores a world in which every human appetite, no matter how noble or depraved, can be indulged.",
-      "popularity": 82.2434,
-      "poster_path": "/ALlSU9du9iRiKIIoY1sREGNqQ5.jpg",
-      "first_air_date": "2016-10-02",
-      "softcore": false,
-      "name": "Westworld",
-      "vote_average": 8.021,
-      "vote_count": 6146
+      "vote_count": 26893
     },
     {
       "adult": false,
@@ -81,13 +59,13 @@
       "original_language": "en",
       "original_name": "The Sopranos",
       "overview": "The story of New Jersey-based Italian-American mobster Tony Soprano and the difficulties he faces as he tries to balance the conflicting requirements of his home life and the criminal organization he heads. Those difficulties are often highlighted through his ongoing professional relationship with psychiatrist Jennifer Melfi. The show features Tony's family members and Mafia associates in prominent roles and story arcs, most notably his wife Carmela and his cousin and protégé Christopher Moltisanti.",
-      "popularity": 97.6842,
+      "popularity": 100.2094,
       "poster_path": "/rTc7ZXdroqjkKivFPvCPX0Ru7uw.jpg",
       "first_air_date": "1999-01-10",
       "softcore": false,
       "name": "The Sopranos",
-      "vote_average": 8.666,
-      "vote_count": 3450
+      "vote_average": 8.7,
+      "vote_count": 3455
     },
     {
       "adult": false,
@@ -103,13 +81,35 @@
       "original_language": "en",
       "original_name": "Real Time with Bill Maher",
       "overview": "Each week Bill Maher surrounds himself with a panel of guests which include politicians, actors, comedians, musicians and the like to discuss what's going on in the world.",
-      "popularity": 66.0861,
+      "popularity": 78.5108,
       "poster_path": "/pbpoLLp4kvnYVfnEGiEhagpJuVZ.jpg",
       "first_air_date": "2003-02-21",
       "softcore": false,
       "name": "Real Time with Bill Maher",
-      "vote_average": 6.069,
-      "vote_count": 238
+      "vote_average": 6.048,
+      "vote_count": 239
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rX5hvSRB2k4YoIvRg6Zky52rWk0.jpg",
+      "genre_ids": [
+        10765,
+        37
+      ],
+      "id": 63247,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Westworld",
+      "overview": "A dark odyssey about the dawn of artificial consciousness and the evolution of sin. Set at the intersection of the near future and the reimagined past, it explores a world in which every human appetite, no matter how noble or depraved, can be indulged.",
+      "popularity": 66.6729,
+      "poster_path": "/8MfgyFHf7XEboZJPZXCIDqqiz6e.jpg",
+      "first_air_date": "2016-10-02",
+      "softcore": false,
+      "name": "Westworld",
+      "vote_average": 8,
+      "vote_count": 6151
     },
     {
       "adult": false,
@@ -124,13 +124,13 @@
       "original_language": "en",
       "original_name": "Curb Your Enthusiasm",
       "overview": "The off-kilter, unscripted comic vision of Larry David, who plays himself in a parallel universe in which he can't seem to do anything right, and, by his standards, neither can anyone else.",
-      "popularity": 62.4158,
+      "popularity": 66.9167,
       "poster_path": "/mZqWmSq1M61Jlre3furVDSXvdrN.jpg",
       "first_air_date": "2000-10-15",
       "softcore": false,
       "name": "Curb Your Enthusiasm",
-      "vote_average": 8.036,
-      "vote_count": 918
+      "vote_average": 8.037,
+      "vote_count": 923
     },
     {
       "adult": false,
@@ -147,35 +147,13 @@
       "original_language": "en",
       "original_name": "House of the Dragon",
       "overview": "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights. In the case of the Targaryens, their slow fall begins when King Viserys breaks with a century of tradition by naming his daughter Rhaenyra heir to the Iron Throne. But when Viserys later fathers a son, the court is shocked when Rhaenyra retains her status as his heir, and seeds of division sow friction across the realm.",
-      "popularity": 64.0244,
+      "popularity": 71.0537,
       "poster_path": "/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
       "first_air_date": "2022-08-21",
       "softcore": false,
       "name": "House of the Dragon",
-      "vote_average": 8.293,
-      "vote_count": 5937
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/v8YFr8BbU9qsO8PYIulzTeM6Qk.jpg",
-      "genre_ids": [
-        18,
-        9648
-      ],
-      "id": 46648,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "True Detective",
-      "overview": "An American anthology police detective series utilizing multiple timelines in which investigations seem to unearth personal and professional secrets of those involved, both within or outside the law.",
-      "popularity": 53.1359,
-      "poster_path": "/zYqVTiHK5ZajYcNzAW7qWte5NWS.jpg",
-      "first_air_date": "2014-01-12",
-      "softcore": false,
-      "name": "True Detective",
-      "vote_average": 8.288,
-      "vote_count": 4111
+      "vote_average": 8.3,
+      "vote_count": 5950
     },
     {
       "adult": false,
@@ -191,13 +169,79 @@
       "original_language": "en",
       "original_name": "Sesame Street",
       "overview": "On a special inner city street, the inhabitants—human and muppet—teach preschoolers basic educational and social concepts using comedy, cartoons, games, and songs.",
-      "popularity": 56.0378,
+      "popularity": 67.2188,
       "poster_path": "/14k9BfZ2p4rQBMeJ5crKTfUZVwD.jpg",
       "first_air_date": "1969-11-10",
       "softcore": false,
       "name": "Sesame Street",
       "vote_average": 7.1,
       "vote_count": 281
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/v8YFr8BbU9qsO8PYIulzTeM6Qk.jpg",
+      "genre_ids": [
+        18,
+        9648
+      ],
+      "id": 46648,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "True Detective",
+      "overview": "An American anthology police detective series utilizing multiple timelines in which investigations seem to unearth personal and professional secrets of those involved, both within or outside the law.",
+      "popularity": 54.0873,
+      "poster_path": "/zYqVTiHK5ZajYcNzAW7qWte5NWS.jpg",
+      "first_air_date": "2014-01-12",
+      "softcore": false,
+      "name": "True Detective",
+      "vote_average": 8.289,
+      "vote_count": 4119
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/layPSOJGckJv3PXZDIVluMq69mn.jpg",
+      "genre_ids": [
+        80,
+        18
+      ],
+      "id": 1438,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Wire",
+      "overview": "Told from the points of view of both the Baltimore homicide and narcotics detectives and their targets, the series captures a universe in which the national war on drugs has become a permanent, self-sustaining bureaucracy, and distinctions between good and evil are routinely obliterated.",
+      "popularity": 53.4974,
+      "poster_path": "/4lbclFySvugI51fwsyxBTOm4DqK.jpg",
+      "first_air_date": "2002-06-02",
+      "softcore": false,
+      "name": "The Wire",
+      "vote_average": 8.6,
+      "vote_count": 2674
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jvHw1zF20kYA9gbF2VprXD6uJpq.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 105,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Sex and the City",
+      "overview": "Based on the bestselling book by Candace Bushnell, Sex and the City tells the story of four best friends, all single and in their late thirties, as they pursue their careers and talk about their sex lives, all while trying to survive the New York social scene. ",
+      "popularity": 51.2782,
+      "poster_path": "/jfLp8gTfdi9d8onEFJ60kp1Bl1e.jpg",
+      "first_air_date": "1998-06-06",
+      "softcore": false,
+      "name": "Sex and the City",
+      "vote_average": 7.4,
+      "vote_count": 2152
     },
     {
       "adult": false,
@@ -214,57 +258,13 @@
       "original_language": "en",
       "original_name": "The White Lotus",
       "overview": "Follow the exploits of various guests and employees at an exclusive tropical resort over the span of a week as with each passing day, a darker complexity emerges in these picture-perfect travelers, the hotel’s cheerful employees and the idyllic locale itself.",
-      "popularity": 50.8929,
+      "popularity": 52.327,
       "poster_path": "/gbSaK9v1CbcYH1ISgbM7XObD2dW.jpg",
       "first_air_date": "2021-07-11",
       "softcore": false,
       "name": "The White Lotus",
-      "vote_average": 7.605,
-      "vote_count": 1410
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/layPSOJGckJv3PXZDIVluMq69mn.jpg",
-      "genre_ids": [
-        80,
-        18
-      ],
-      "id": 1438,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Wire",
-      "overview": "Told from the points of view of both the Baltimore homicide and narcotics detectives and their targets, the series captures a universe in which the national war on drugs has become a permanent, self-sustaining bureaucracy, and distinctions between good and evil are routinely obliterated.",
-      "popularity": 48.4479,
-      "poster_path": "/4lbclFySvugI51fwsyxBTOm4DqK.jpg",
-      "first_air_date": "2002-06-02",
-      "softcore": false,
-      "name": "The Wire",
-      "vote_average": 8.625,
-      "vote_count": 2669
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/jvHw1zF20kYA9gbF2VprXD6uJpq.jpg",
-      "genre_ids": [
-        18,
-        35
-      ],
-      "id": 105,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Sex and the City",
-      "overview": "Based on the bestselling book by Candace Bushnell, Sex and the City tells the story of four best friends, all single and in their late thirties, as they pursue their careers and talk about their sex lives, all while trying to survive the New York social scene. ",
-      "popularity": 45.5374,
-      "poster_path": "/jfLp8gTfdi9d8onEFJ60kp1Bl1e.jpg",
-      "first_air_date": "1998-06-06",
-      "softcore": false,
-      "name": "Sex and the City",
-      "vote_average": 7.379,
-      "vote_count": 2151
+      "vote_average": 7.604,
+      "vote_count": 1414
     },
     {
       "adult": false,
@@ -281,13 +281,36 @@
       "original_language": "en",
       "original_name": "True Blood",
       "overview": "Thanks to a Japanese scientist's invention of synthetic blood, vampires have progressed overnight from legendary monsters to fellow citizens. And while humans have been safely removed from the menu, many remain apprehensive about these creatures \"coming out of the coffin.\" Religious leaders, government officials, and vampire fundamentalists around the world have chosen their sides.  But in the small Louisiana town of Bon Temps, the jury is still out.",
-      "popularity": 45.0739,
+      "popularity": 49.3755,
       "poster_path": "/ktEp6fzL4xzCWsSVtrcH8JaQNQy.jpg",
       "first_air_date": "2008-09-07",
       "softcore": false,
       "name": "True Blood",
-      "vote_average": 7.615,
-      "vote_count": 2056
+      "vote_average": 7.614,
+      "vote_count": 2058
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/q31EEBycbOyX7GGJP4GTPI5WJRO.jpg",
+      "genre_ids": [
+        10767,
+        35,
+        10763
+      ],
+      "id": 60694,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Last Week Tonight with John Oliver",
+      "overview": "A half-hour satirical look at the week in news, politics and current events.",
+      "popularity": 47.3592,
+      "poster_path": "/fuuEjEr69uvRtGaQw70JfvdrUwb.jpg",
+      "first_air_date": "2014-04-27",
+      "softcore": false,
+      "name": "Last Week Tonight with John Oliver",
+      "vote_average": 7.81,
+      "vote_count": 800
     },
     {
       "adult": false,
@@ -303,56 +326,13 @@
       "original_language": "en",
       "original_name": "Entourage",
       "overview": "Film star Vince Chase navigates the vapid terrain of Los Angeles with a close circle of friends and his trusty agent.",
-      "popularity": 39.1836,
+      "popularity": 42.4825,
       "poster_path": "/kLKP8zrArBtBboGz3qJOuMGC7rL.jpg",
       "first_air_date": "2004-07-18",
       "softcore": false,
       "name": "Entourage",
       "vote_average": 7.367,
       "vote_count": 645
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6bSYn0NCdVqDuBdwqPvulsNstLA.jpg",
-      "genre_ids": [
-        10759,
-        18
-      ],
-      "id": 3556,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "From the Earth to the Moon",
-      "overview": "The story of the United States' space program, from its beginnings in 1961 to the final moon mission in 1972.",
-      "popularity": 21.4519,
-      "poster_path": "/sSnYvoVT2PYWJbF0aWdUFvLqKhR.jpg",
-      "first_air_date": "1998-04-05",
-      "softcore": false,
-      "name": "From the Earth to the Moon",
-      "vote_average": 8.104,
-      "vote_count": 130
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/acevLdSl5I2MK5RYAm7gwAndt1w.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 100088,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Last of Us",
-      "overview": "Twenty years after modern civilization has been destroyed, Joel, a hardened survivor, is hired to smuggle Ellie, a 14-year-old girl, out of an oppressive quarantine zone. What starts as a small job soon becomes a brutal, heartbreaking journey, as they both must traverse the United States and depend on each other for survival.",
-      "popularity": 38.4146,
-      "poster_path": "/dmo6TYuuJgaYinXBPjrgG9mB5od.jpg",
-      "first_air_date": "2023-01-15",
-      "softcore": false,
-      "name": "The Last of Us",
-      "vote_average": 8.431,
-      "vote_count": 7002
     },
     {
       "adult": false,
@@ -368,13 +348,34 @@
       "original_language": "en",
       "original_name": "Succession",
       "overview": "Follow the lives of the Roy family as they contemplate their future once their aging father begins to step back from the media and entertainment conglomerate they control.",
-      "popularity": 36.5065,
+      "popularity": 40.3038,
       "poster_path": "/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg",
       "first_air_date": "2018-06-03",
       "softcore": false,
       "name": "Succession",
-      "vote_average": 8.295,
-      "vote_count": 1622
+      "vote_average": 8.3,
+      "vote_count": 1625
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/acevLdSl5I2MK5RYAm7gwAndt1w.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 100088,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Last of Us",
+      "overview": "Twenty years after modern civilization has been destroyed, Joel, a hardened survivor, is hired to smuggle Ellie, a 14-year-old girl, out of an oppressive quarantine zone. What starts as a small job soon becomes a brutal, heartbreaking journey, as they both must traverse the United States and depend on each other for survival.",
+      "popularity": 38.6381,
+      "poster_path": "/dmo6TYuuJgaYinXBPjrgG9mB5od.jpg",
+      "first_air_date": "2023-01-15",
+      "softcore": false,
+      "name": "The Last of Us",
+      "vote_average": 8.4,
+      "vote_count": 7006
     },
     {
       "adult": false,
@@ -390,13 +391,13 @@
       "original_language": "en",
       "original_name": "Boardwalk Empire",
       "overview": "Atlantic City at the dawn of Prohibition is a place where the rules don't apply. And the man who runs things -- legally and otherwise -- is the town's treasurer, Enoch \"Nucky\" Thompson, who is equal parts politician and gangster.",
-      "popularity": 35.2548,
+      "popularity": 37.6602,
       "poster_path": "/kL6SqlVPpfAof2nQbh1VxkUuXBQ.jpg",
       "first_air_date": "2010-09-19",
       "softcore": false,
       "name": "Boardwalk Empire",
       "vote_average": 8,
-      "vote_count": 1250
+      "vote_count": 1256
     },
     {
       "adult": false,
@@ -411,37 +412,37 @@
       "original_language": "en",
       "original_name": "Six Feet Under",
       "overview": "When death is your business, what is your life? For the Fisher family, the world outside of their family-owned funeral home continues to be at least as challenging as—and far less predictable than—the one inside.",
-      "popularity": 35.457,
+      "popularity": 35.6874,
       "poster_path": "/sCgzLaVlFy8KxtxRPvt1V5MNTDb.jpg",
       "first_air_date": "2001-06-03",
       "softcore": false,
       "name": "Six Feet Under",
-      "vote_average": 8.097,
-      "vote_count": 1109
+      "vote_average": 8.1,
+      "vote_count": 1111
     },
     {
       "adult": false,
-      "backdrop_path": "/2yDV0xLyqW88dn5qE7YCRnoYmfy.jpg",
+      "backdrop_path": "/2nboc7IWrvJwiT1Dq847IuNcXqF.jpg",
       "genre_ids": [
-        18,
-        10768
+        80,
+        18
       ],
-      "id": 4613,
+      "id": 3322,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Band of Brothers",
-      "overview": "Drawn from interviews with survivors of Easy Company, as well as their journals and letters, Band of Brothers chronicles the experiences of these men from paratrooper training in Georgia through the end of the war. As an elite rifle company parachuting into Normandy early on D-Day morning, participants in the Battle of the Bulge, and witness to the horrors of war, the men of Easy knew extraordinary bravery and extraordinary fear - and became the stuff of legend. Based on Stephen E. Ambrose's acclaimed book of the same name.",
-      "popularity": 36.6529,
-      "poster_path": "/bF0o2cJFVM4JPIOTc4GVMho7fkj.jpg",
-      "first_air_date": "2001-09-09",
+      "original_name": "Oz",
+      "overview": "The daily lives of prisoners in Emerald City, an experimental unit of the Oswald Maximum Security Prison where ingroups - Muslims, Latinos, Italians, Aryans - stick close to their mutual friends and terrorize their mutual enemies.",
+      "popularity": 36.558,
+      "poster_path": "/oTQ9PUnCgf9CimYeWuDGp8iaT07.jpg",
+      "first_air_date": "1997-07-12",
       "softcore": false,
-      "name": "Band of Brothers",
-      "vote_average": 8.6,
-      "vote_count": 4169
+      "name": "Oz",
+      "vote_average": 8.1,
+      "vote_count": 838
     }
   ],
   "total_pages": 19,
-  "total_results": 372
+  "total_results": 373
 }

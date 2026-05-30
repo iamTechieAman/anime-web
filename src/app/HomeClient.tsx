@@ -12,6 +12,8 @@ import useSWR from 'swr';
 import type { ProviderSlug } from "@/components/ProviderBar";
 import dynamic from "next/dynamic";
 
+import { useTVNavigation } from "@/context/TVNavigationContext";
+
 const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[60vh] md:h-[70vh] bg-zinc-900 animate-pulse rounded-2xl w-full" /> });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
@@ -93,27 +95,19 @@ const GAMING_STREAMS_DATA = [
 
 export default function MoviesPage() {
     const [activeTab, setActiveTab] = useState("movies");
-    const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
+    const { deviceMode } = useTVNavigation();
 
-    useEffect(() => {
-        const detectDevice = () => {
-            if (typeof window !== "undefined") {
-                const ua = navigator.userAgent;
-                const width = window.innerWidth;
-                const isTVUA = /SmartTV|GoogleTV|AppleTV|Roku|CastTV|Tizen|Web0S|NetCast|Opera TV|Viera|Bravia|PlayStation|Xbox/i.test(ua);
-                if (isTVUA || width >= 2500) {
-                    setDeviceMode("tv");
-                } else if (width < 1024) {
-                    setDeviceMode("mobile");
-                } else {
-                    setDeviceMode("pc");
-                }
-            }
-        };
-        detectDevice();
-        window.addEventListener("resize", detectDevice);
-        return () => window.removeEventListener("resize", detectDevice);
-    }, []);
+    const isTV = deviceMode === "tv";
+    const tabAnimation: any = isTV ? {} : {
+        initial: { opacity: 0, y: 18 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -12 },
+        transition: { duration: 0.35, ease: "easeOut" }
+    };
+    const errorAnimation: any = isTV ? {} : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 }
+    };
 
     // Sync tab from query parameters
     const paramsInUrl = useSearchParams();
@@ -455,8 +449,7 @@ export default function MoviesPage() {
                                     const hasContent = (pd.trending?.length || 0) + (pd.movies?.length || 0) + (pd.tv?.length || 0) > 0;
                                     if (!hasContent) return (
                                         <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
+                                            {...errorAnimation}
                                             className="flex flex-col items-center justify-center py-4 md:py-6 text-center gap-6"
                                         >
                                             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-4xl border border-white/10">
@@ -525,10 +518,7 @@ export default function MoviesPage() {
                                     <AnimatePresence mode="wait">
                                     <motion.div
                                         key={`movies-${activeProvider}`}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -12 }}
-                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        {...tabAnimation}
                                         className="space-y-2 md:space-y-3"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
@@ -598,10 +588,7 @@ export default function MoviesPage() {
                                     <AnimatePresence mode="wait">
                                     <motion.div
                                         key={`tv-${activeProvider}`}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -12 }}
-                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        {...tabAnimation}
                                         className="space-y-2 md:space-y-3"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
@@ -665,10 +652,7 @@ export default function MoviesPage() {
                                     <AnimatePresence mode="wait">
                                     <motion.div
                                         key={`anime-${activeProvider}`}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -12 }}
-                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        {...tabAnimation}
                                         className="space-y-2 md:space-y-3 mt-4"
                                     >
                                         {/* Provider anime content (Crunchyroll / ToonPlayer Originals) */}
@@ -734,10 +718,7 @@ export default function MoviesPage() {
                                     <AnimatePresence mode="wait">
                                     <motion.div
                                         key={`toons-${activeProvider}`}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -12 }}
-                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        {...tabAnimation}
                                         className="space-y-2 md:space-y-3"
                                     >
                                         <section>
@@ -756,10 +737,7 @@ export default function MoviesPage() {
                                     <AnimatePresence mode="wait">
                                     <motion.div
                                         key={`gaming-${activeProvider}`}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -12 }}
-                                        transition={{ duration: 0.35, ease: "easeOut" }}
+                                        {...tabAnimation}
                                         className="space-y-2 md:space-y-3"
                                     >
                                         <section>

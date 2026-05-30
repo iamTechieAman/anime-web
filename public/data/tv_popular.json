@@ -3,25 +3,24 @@
   "results": [
     {
       "adult": false,
-      "backdrop_path": "/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+      "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
       "genre_ids": [
-        10765,
-        10759
+        18
       ],
-      "id": 76479,
+      "id": 273240,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "The Boys",
-      "overview": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
-      "popularity": 881.7827,
-      "poster_path": "/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
-      "first_air_date": "2019-07-25",
+      "original_name": "Off Campus",
+      "overview": "Hannah Wells tutors hockey captain Garrett Graham to win over her crush. Their deal becomes real connection as they face their pasts. Friends Logan, Dean, Tucker, and Allie navigate college life and love.",
+      "popularity": 712.73,
+      "poster_path": "/cbODFqkcmRgrYH8NkG4Q4Hcg8Z1.jpg",
+      "first_air_date": "2026-05-13",
       "softcore": false,
-      "name": "The Boys",
-      "vote_average": 8.46,
-      "vote_count": 12681
+      "name": "Off Campus",
+      "vote_average": 9.135,
+      "vote_count": 292
     },
     {
       "adult": false,
@@ -38,34 +37,80 @@
       "original_language": "en",
       "original_name": "FROM",
       "overview": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and search for a way out, they must also survive the threats of the surrounding forest – including the terrifying creatures that come out when the sun goes down.",
-      "popularity": 718.6677,
+      "popularity": 654.795,
       "poster_path": "/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
       "first_air_date": "2022-02-20",
       "softcore": false,
       "name": "FROM",
-      "vote_average": 8.406,
-      "vote_count": 3331
+      "vote_average": 8.419,
+      "vote_count": 3372
     },
     {
       "adult": false,
-      "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
+      "backdrop_path": "/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
       "genre_ids": [
-        18
+        10765,
+        10759
       ],
-      "id": 273240,
+      "id": 76479,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Off Campus",
-      "overview": "Hannah Wells tutors hockey captain Garrett Graham to win over her crush. Their deal becomes real connection as they face their pasts. Friends Logan, Dean, Tucker, and Allie navigate college life and love.",
-      "popularity": 626.2158,
-      "poster_path": "/cbODFqkcmRgrYH8NkG4Q4Hcg8Z1.jpg",
-      "first_air_date": "2026-05-13",
+      "original_name": "The Boys",
+      "overview": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
+      "popularity": 648.0994,
+      "poster_path": "/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
+      "first_air_date": "2019-07-25",
       "softcore": false,
-      "name": "Off Campus",
-      "vote_average": 9.1,
-      "vote_count": 259
+      "name": "The Boys",
+      "vote_average": 8.5,
+      "vote_count": 12750
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mkwVoyP9bFSmfVqU8FJyem52hVR.jpg",
+      "genre_ids": [
+        80,
+        9648,
+        18
+      ],
+      "id": 220102,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Spider-Noir",
+      "overview": "Ben Reilly, an aging and down on his luck private investigator in 1930s New York, is forced to grapple with his past life as the city's one and only superhero.",
+      "popularity": 511.7595,
+      "poster_path": "/oD8WSVqz84ZRfelkr7JPeJwR9Iv.jpg",
+      "first_air_date": "2026-05-25",
+      "softcore": false,
+      "name": "Spider-Noir",
+      "vote_average": 8.994,
+      "vote_count": 160
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/pmAzkQJa993nIgPqFtVmOhStHXg.jpg",
+      "genre_ids": [
+        18,
+        10766
+      ],
+      "id": 2354,
+      "origin_country": [
+        "AU"
+      ],
+      "original_language": "en",
+      "original_name": "Home and Away",
+      "overview": "Home and Away is set in the fictional town of Summer Bay, a coastal town in New South Wales, and follows the personal and professional lives of the people living in the area. The show initially focused on the Fletcher family, Pippa and Tom Fletcher and their five foster children Frank Morgan, Carly Morris, Steven Matheson, Lynn Davenport and Sally Keating, who would go on to become one of the show's longest-running characters. The show also originally and currently focuses on the Stewart family. Home and Away had proved popular when it premiered in 1988 and had risen to become a hit in Australia, and after only a few weeks, the show tackled its first major and disturbing storyline, the rape of Carly Morris; it was one of the first shows to feature such storylines during the early timeslot. H&A has tackled many adult-themed and controversial storylines; something rarely found in its restricted timeslot.",
+      "popularity": 875.4213,
+      "poster_path": "/vn0eKMiG69bhQtxb7qLRo8SSqu5.jpg",
+      "first_air_date": "1988-01-18",
+      "softcore": false,
+      "name": "Home and Away",
+      "vote_average": 6.3,
+      "vote_count": 77
     },
     {
       "adult": false,
@@ -82,13 +127,123 @@
       "original_language": "en",
       "original_name": "Law & Order: Special Victims Unit",
       "overview": "In the criminal justice system, sexually-based offenses are considered especially heinous. In New York City, the dedicated detectives who investigate these vicious felonies are members of an elite squad known as the Special Victims Unit. These are their stories.",
-      "popularity": 306.5418,
+      "popularity": 336.8197,
       "poster_path": "/iofokHZoUB4Qhik4PflvJl8TT6a.jpg",
       "first_air_date": "1999-09-20",
       "softcore": false,
       "name": "Law & Order: Special Victims Unit",
-      "vote_average": 7.941,
-      "vote_count": 4211
+      "vote_average": 7.944,
+      "vote_count": 4219
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 85552,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Euphoria",
+      "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
+      "popularity": 285.4515,
+      "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
+      "first_air_date": "2019-06-16",
+      "softcore": false,
+      "name": "Euphoria",
+      "vote_average": 8.3,
+      "vote_count": 10722
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6iNWfGVCEfASDdlNb05TP5nG0ll.jpg",
+      "genre_ids": [
+        80,
+        18,
+        35
+      ],
+      "id": 79744,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Rookie",
+      "overview": "Starting over isn't easy, especially for small-town guy John Nolan who, after a life-altering incident, is pursuing his dream of being an LAPD officer. As the force's oldest rookie, he's met with skepticism from some higher-ups who see him as just a walking midlife crisis.",
+      "popularity": 292.6662,
+      "poster_path": "/70kTz0OmjjZe7zHvIDrq2iKW7PJ.jpg",
+      "first_air_date": "2018-10-16",
+      "softcore": false,
+      "name": "The Rookie",
+      "vote_average": 8.545,
+      "vote_count": 3257
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jP0Rhj9OTPDAwQlHQwOLFDdeE8t.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 1416,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Grey's Anatomy",
+      "overview": "Follows the personal and professional lives of a group of doctors at Seattle's Grey Sloan Memorial Hospital.",
+      "popularity": 302.4184,
+      "poster_path": "/hjJkrLXhWvGHpLeLBDFznpBTY1S.jpg",
+      "first_air_date": "2005-03-27",
+      "softcore": false,
+      "name": "Grey's Anatomy",
+      "vote_average": 8.208,
+      "vote_count": 10907
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/tc7canPSAn2X14hYi6Rl3gZm1o4.jpg",
+      "genre_ids": [
+        80,
+        18
+      ],
+      "id": 549,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Law & Order",
+      "overview": "In cases ripped from the headlines, police investigate serious and often deadly crimes, weighing the evidence and questioning the suspects until someone is taken into custody. The district attorney's office then builds a case to convict the perpetrator by proving the person guilty beyond a reasonable doubt. Working together, these expert teams navigate all sides of the complex criminal justice system to make New York a safer place.",
+      "popularity": 277.9632,
+      "poster_path": "/haJ9eHytVO3H3JooMJG1DiWwDNm.jpg",
+      "first_air_date": "1990-09-13",
+      "softcore": false,
+      "name": "Law & Order",
+      "vote_average": 7.314,
+      "vote_count": 687
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/ro0tlgnsco4SwbdAgmscLkSlMSL.jpg",
+      "genre_ids": [
+        18,
+        9648,
+        10765
+      ],
+      "id": 1622,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Supernatural",
+      "overview": "When they were boys, Sam and Dean Winchester lost their mother to a mysterious and demonic supernatural force. Subsequently, their father raised them to be soldiers. He taught them about the paranormal evil that lives in the dark corners and on the back roads of America ... and he taught them how to kill it. Now, the Winchester brothers crisscross the country in their '67 Chevy Impala, battling every kind of supernatural threat they encounter along the way. ",
+      "popularity": 250.3107,
+      "poster_path": "/8iixmfGx5EIFPdpNvB2JvI3VIqX.jpg",
+      "first_air_date": "2005-09-13",
+      "softcore": false,
+      "name": "Supernatural",
+      "vote_average": 8.307,
+      "vote_count": 8424
     },
     {
       "adult": false,
@@ -106,169 +261,13 @@
       "original_language": "es",
       "original_name": "Berlín y la dama del armiño",
       "overview": "Hungry for a new heist, Berlin summons the gang to Seville and turns an ambitious duke into the victim of his own plan: to steal a da Vinci masterpiece.",
-      "popularity": 273.1627,
+      "popularity": 209.5695,
       "poster_path": "/sTumew0Q01ZHmFneA9cJRi3QUYC.jpg",
       "first_air_date": "2026-05-15",
       "softcore": false,
       "name": "Berlin and the Lady with an Ermine",
-      "vote_average": 8.407,
-      "vote_count": 97
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/gffVOVZ2Y9cmVIZ26Gt9ByMGCYH.jpg",
-      "genre_ids": [
-        16,
-        18,
-        9648
-      ],
-      "id": 220542,
-      "origin_country": [
-        "JP"
-      ],
-      "original_language": "ja",
-      "original_name": "薬屋のひとりごと",
-      "overview": "Maomao lived a peaceful life with her apothecary father. Until one day, she's sold as a lowly servant to the emperor's palace. But she wasn't meant for a compliant life among royalty. So when imperial heirs fall ill, she decides to step in and find a cure! This catches the eye of Jinshi, a handsome palace official who promotes her. Now, she's making a name for herself solving medical mysteries!",
-      "popularity": 210.2216,
-      "poster_path": "/e3ojpANrFnmJCyeBNTinYwyBCIN.jpg",
-      "first_air_date": "2023-10-22",
-      "softcore": false,
-      "name": "The Apothecary Diaries",
-      "vote_average": 8.586,
-      "vote_count": 563
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6iNWfGVCEfASDdlNb05TP5nG0ll.jpg",
-      "genre_ids": [
-        80,
-        18,
-        35
-      ],
-      "id": 79744,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Rookie",
-      "overview": "Starting over isn't easy, especially for small-town guy John Nolan who, after a life-altering incident, is pursuing his dream of being an LAPD officer. As the force's oldest rookie, he's met with skepticism from some higher-ups who see him as just a walking midlife crisis.",
-      "popularity": 265.538,
-      "poster_path": "/70kTz0OmjjZe7zHvIDrq2iKW7PJ.jpg",
-      "first_air_date": "2018-10-16",
-      "softcore": false,
-      "name": "The Rookie",
-      "vote_average": 8.544,
-      "vote_count": 3248
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/tc7canPSAn2X14hYi6Rl3gZm1o4.jpg",
-      "genre_ids": [
-        80,
-        18
-      ],
-      "id": 549,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Law & Order",
-      "overview": "In cases ripped from the headlines, police investigate serious and often deadly crimes, weighing the evidence and questioning the suspects until someone is taken into custody. The district attorney's office then builds a case to convict the perpetrator by proving the person guilty beyond a reasonable doubt. Working together, these expert teams navigate all sides of the complex criminal justice system to make New York a safer place.",
-      "popularity": 253.9411,
-      "poster_path": "/haJ9eHytVO3H3JooMJG1DiWwDNm.jpg",
-      "first_air_date": "1990-09-13",
-      "softcore": false,
-      "name": "Law & Order",
-      "vote_average": 7.3,
-      "vote_count": 685
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/jP0Rhj9OTPDAwQlHQwOLFDdeE8t.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 1416,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Grey's Anatomy",
-      "overview": "Follows the personal and professional lives of a group of doctors at Seattle's Grey Sloan Memorial Hospital.",
-      "popularity": 237.9405,
-      "poster_path": "/hjJkrLXhWvGHpLeLBDFznpBTY1S.jpg",
-      "first_air_date": "2005-03-27",
-      "softcore": false,
-      "name": "Grey's Anatomy",
-      "vote_average": 8.209,
-      "vote_count": 10904
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/ro0tlgnsco4SwbdAgmscLkSlMSL.jpg",
-      "genre_ids": [
-        18,
-        9648,
-        10765
-      ],
-      "id": 1622,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Supernatural",
-      "overview": "When they were boys, Sam and Dean Winchester lost their mother to a mysterious and demonic supernatural force. Subsequently, their father raised them to be soldiers. He taught them about the paranormal evil that lives in the dark corners and on the back roads of America ... and he taught them how to kill it. Now, the Winchester brothers crisscross the country in their '67 Chevy Impala, battling every kind of supernatural threat they encounter along the way. ",
-      "popularity": 223.156,
-      "poster_path": "/8iixmfGx5EIFPdpNvB2JvI3VIqX.jpg",
-      "first_air_date": "2005-09-13",
-      "softcore": false,
-      "name": "Supernatural",
-      "vote_average": 8.307,
-      "vote_count": 8419
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 85552,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Euphoria",
-      "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
-      "popularity": 323.108,
-      "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
-      "first_air_date": "2019-06-16",
-      "softcore": false,
-      "name": "Euphoria",
-      "vote_average": 8.3,
-      "vote_count": 10699
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg",
-      "genre_ids": [
-        10765,
-        18,
-        10759
-      ],
-      "id": 1399,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Game of Thrones",
-      "overview": "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and icy horrors beyond.",
-      "popularity": 208.6984,
-      "poster_path": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
-      "first_air_date": "2011-04-17",
-      "softcore": false,
-      "name": "Game of Thrones",
-      "vote_average": 8.461,
-      "vote_count": 26870
+      "vote_average": 8.482,
+      "vote_count": 113
     },
     {
       "adult": false,
@@ -285,58 +284,59 @@
       "original_language": "en",
       "original_name": "NCIS",
       "overview": "From murder and espionage to terrorism and stolen submarines, a team of special agents investigates any crime that has any connection to Navy and Marine Corps personnel, regardless of rank or position.",
-      "popularity": 201.6668,
+      "popularity": 222.0866,
       "poster_path": "/mBcu8d6x6zB1el3MPNl7cZQEQ31.jpg",
       "first_air_date": "2003-09-23",
       "softcore": false,
       "name": "NCIS",
-      "vote_average": 7.621,
-      "vote_count": 2503
+      "vote_average": 7.62,
+      "vote_count": 2504
     },
     {
       "adult": false,
-      "backdrop_path": "/q3pCsNvJ7CmdJUz2sJEEUY3pOPC.jpg",
+      "backdrop_path": "/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg",
+      "genre_ids": [
+        10765,
+        18,
+        10759
+      ],
+      "id": 1399,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Game of Thrones",
+      "overview": "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and icy horrors beyond.",
+      "popularity": 221.1624,
+      "poster_path": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+      "first_air_date": "2011-04-17",
+      "softcore": false,
+      "name": "Game of Thrones",
+      "vote_average": 8.461,
+      "vote_count": 26893
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/tUtXfyVy54BY7eJnRtI8Xnmr1ZL.jpg",
       "genre_ids": [
         80,
         18,
         9648
       ],
-      "id": 5920,
+      "id": 4057,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "The Mentalist",
-      "overview": "Patrick Jane, a former celebrity psychic medium, uses his razor sharp skills of observation and expertise at \"reading\" people to solve serious crimes with the California Bureau of Investigation.",
-      "popularity": 197.8822,
-      "poster_path": "/acYXu4KaDj1NIkMgObnhe4C4a0T.jpg",
-      "first_air_date": "2008-09-23",
+      "original_name": "Criminal Minds",
+      "overview": "An elite team of FBI profilers analyze the country's most twisted criminal minds, anticipating their next moves before they strike again. The Behavioral Analysis Unit's most experienced agent is David Rossi, a founding member of the BAU who returns to help the team solve new cases.",
+      "popularity": 213.64,
+      "poster_path": "/hWSb4UnIjlTvnvrP98NbFSO60HA.jpg",
+      "first_air_date": "2005-09-22",
       "softcore": false,
-      "name": "The Mentalist",
-      "vote_average": 8.351,
-      "vote_count": 4294
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
-      "genre_ids": [
-        18,
-        80
-      ],
-      "id": 1396,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Breaking Bad",
-      "overview": "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family's financial future at any cost as he enters the dangerous world of drugs and crime.",
-      "popularity": 194.8997,
-      "poster_path": "/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
-      "first_air_date": "2008-01-20",
-      "softcore": false,
-      "name": "Breaking Bad",
-      "vote_average": 8.945,
-      "vote_count": 17793
+      "name": "Criminal Minds",
+      "vote_average": 8.301,
+      "vote_count": 4075
     },
     {
       "adult": false,
@@ -353,79 +353,58 @@
       "original_language": "en",
       "original_name": "The Simpsons",
       "overview": "Set in Springfield, the average American town, the show focuses on the antics and everyday adventures of the Simpson family; Homer, Marge, Bart, Lisa and Maggie, as well as a virtual cast of thousands. Since the beginning, the series has been a pop culture icon, attracting hundreds of celebrities to guest star. The show has also made name for itself in its fearless satirical take on politics, media and American life in general.",
-      "popularity": 186.3505,
+      "popularity": 201.2267,
       "poster_path": "/uWpG7GqfKGQqX4YMAo3nv5OrglV.jpg",
       "first_air_date": "1989-12-17",
       "softcore": false,
       "name": "The Simpsons",
-      "vote_average": 8.017,
-      "vote_count": 10778
+      "vote_average": 8.018,
+      "vote_count": 10783
     },
     {
       "adult": false,
-      "backdrop_path": "/65Y6PweSvQ1OOFBzStybjipURRP.jpg",
+      "backdrop_path": "/q3pCsNvJ7CmdJUz2sJEEUY3pOPC.jpg",
       "genre_ids": [
         80,
         18,
         9648
       ],
-      "id": 4057,
+      "id": 5920,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Criminal Minds",
-      "overview": "An elite team of FBI profilers analyze the country's most twisted criminal minds, anticipating their next moves before they strike again. The Behavioral Analysis Unit's most experienced agent is David Rossi, a founding member of the BAU who returns to help the team solve new cases.",
-      "popularity": 172.7875,
-      "poster_path": "/gigxjNnACiXAfrwoMox5WJFgc0I.jpg",
-      "first_air_date": "2005-09-22",
+      "original_name": "The Mentalist",
+      "overview": "Patrick Jane, a former celebrity psychic medium, uses his razor sharp skills of observation and expertise at \"reading\" people to solve serious crimes with the California Bureau of Investigation.",
+      "popularity": 195.3929,
+      "poster_path": "/acYXu4KaDj1NIkMgObnhe4C4a0T.jpg",
+      "first_air_date": "2008-09-23",
       "softcore": false,
-      "name": "Criminal Minds",
-      "vote_average": 8.3,
-      "vote_count": 4072
+      "name": "The Mentalist",
+      "vote_average": 8.352,
+      "vote_count": 4306
     },
     {
       "adult": false,
-      "backdrop_path": "/wsHj4oHQJoe7DMYaqNFwVoyLiAh.jpg",
+      "backdrop_path": "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
       "genre_ids": [
-        35,
-        10764
+        18,
+        80
       ],
-      "id": 33238,
+      "id": 1396,
       "origin_country": [
-        "KR"
+        "US"
       ],
-      "original_language": "ko",
-      "original_name": "런닝맨",
-      "overview": "These days, as variety shows are gradually disappearing, this is one of Korea’s representative variety shows that has been responsible for Sunday evenings for over 10 years. This program features numerous stars and members going around various places, playing games, and completing missions. In particular, among the many fun elements of variety shows, this one focuses solely on laughter.\n\nOpen your eyes! Big fun is coming in!\n\nOpen your mouth! Big laughter is coming in!\n\nOpen your heart! Useful lessons are coming in!",
-      "popularity": 182.205,
-      "poster_path": "/2Wmmu1MkqxJ48J7aySET9EKEjXz.jpg",
-      "first_air_date": "2010-07-11",
+      "original_language": "en",
+      "original_name": "Breaking Bad",
+      "overview": "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family's financial future at any cost as he enters the dangerous world of drugs and crime.",
+      "popularity": 175.9031,
+      "poster_path": "/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+      "first_air_date": "2008-01-20",
       "softcore": false,
-      "name": "Running Man",
-      "vote_average": 8.2,
-      "vote_count": 209
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/we0PMkWfv10Sm9BsxxOYRmboEv6.jpg",
-      "genre_ids": [
-        10764
-      ],
-      "id": 206122,
-      "origin_country": [
-        "CN"
-      ],
-      "original_language": "zh",
-      "original_name": "怦然心动20岁",
-      "overview": "A reality show where 10  youths in their early 20s that recently graduated university will go on a graduation trip together. They have different personalities and different backgrounds but with time spent with each other, they form friendships and relationships.",
-      "popularity": 149.2532,
-      "poster_path": "/eCtD0KAa5rRNMnvB4KvLYD4ntRk.jpg",
-      "first_air_date": "2021-05-05",
-      "softcore": false,
-      "name": "Twinkle Love",
-      "vote_average": 0,
-      "vote_count": 0
+      "name": "Breaking Bad",
+      "vote_average": 8.946,
+      "vote_count": 17819
     },
     {
       "adult": false,
@@ -441,15 +420,38 @@
       "original_language": "en",
       "original_name": "Family Guy",
       "overview": "Sick, twisted, politically incorrect and Freakin' Sweet animated series featuring the adventures of the dysfunctional Griffin family. Bumbling Peter and long-suffering Lois have three kids. Stewie (a brilliant but sadistic baby bent on killing his mother and taking over the world), Meg (the oldest, and is the most unpopular girl in town) and Chris (the middle kid, he's not very bright but has a passion for movies). The final member of the family is Brian - a talking dog and much more than a pet, he keeps Stewie in check whilst sipping Martinis and sorting through his own life issues.",
-      "popularity": 160.8131,
+      "popularity": 180.727,
       "poster_path": "/3PFsEuAiyLkWsP4GG6dIV37Q6gu.jpg",
       "first_air_date": "1999-01-31",
       "softcore": false,
       "name": "Family Guy",
-      "vote_average": 7.399,
-      "vote_count": 4945
+      "vote_average": 7.4,
+      "vote_count": 4948
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/cvlLBcQWpO9X21jDHhgPJnE2aVq.jpg",
+      "genre_ids": [
+        80,
+        18,
+        9648
+      ],
+      "id": 1431,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "CSI: Crime Scene Investigation",
+      "overview": "A Las Vegas team of forensic investigators are trained to solve criminal cases by scouring the crime scene, collecting irrefutable evidence and finding the missing pieces that solve the mystery.",
+      "popularity": 174.0714,
+      "poster_path": "/i5hmoRjHNWady4AtAGICTUXknKH.jpg",
+      "first_air_date": "2000-10-06",
+      "softcore": false,
+      "name": "CSI: Crime Scene Investigation",
+      "vote_average": 7.637,
+      "vote_count": 1384
     }
   ],
-  "total_pages": 11135,
-  "total_results": 222695
+  "total_pages": 11153,
+  "total_results": 223057
 }
