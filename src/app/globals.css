@@ -81,6 +81,9 @@ img {
   --radius-xl: 16px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
+
+  --header-height: 64px;
+  --container-px: 1.5rem;
 }
 
 .dark {
@@ -1308,7 +1311,6 @@ nav, .fixed, [class*="fixed"] {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 button:focus-visible,
@@ -1412,8 +1414,8 @@ main, .relative.z-10 {
   scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch !important;
   gap: 12px !important;
-  padding: 20px 4px 24px 4px !important;
-  margin: -12px 0 !important;
+  padding: 20px var(--container-px) 24px var(--container-px) !important;
+  margin: -12px calc(-1 * var(--container-px)) !important;
   scrollbar-width: none !important; /* Firefox */
 }
 
@@ -1754,6 +1756,11 @@ main, .relative.z-10 {
    SHARED MOBILE FIXES — all screens ≤ 768px
    ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  :root {
+    --header-height: 60px;
+    --container-px: 1rem;
+  }
+
   /* Better touch targets for primary interactive elements — Apple HIG 44px */
   /* Applied only to nav-level elements, not every inline button */
   nav button,
@@ -1796,11 +1803,7 @@ main, .relative.z-10 {
     contain: layout style paint;
   }
 
-  /* Horizontal scrollable rows — comfortable mobile padding */
-  .netflix-row {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
+  /* Horizontal scrollable rows — using CSS container-px variable */
 
   /* Section headings on mobile */
   .section-title,
@@ -2198,18 +2201,21 @@ main, .relative.z-10 {
 }
 
 /* Universal Smart TV programmatic focus classes */
+.device-tv {
+  --header-height: 80px;
+}
+
 .device-tv a:focus,
 .device-tv button:focus,
 .device-tv input:focus,
 .device-tv select:focus,
 .device-tv [data-focusable="true"]:focus,
 .device-tv [tabindex="0"]:focus {
-  outline: 4px solid #f59e0b !important;
-  outline-offset: 4px !important;
-  box-shadow: 0 0 25px rgba(245, 158, 11, 0.8) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 4px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.8) !important;
   transform: scale(1.06) !important;
   z-index: 40 !important;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), outline-color 0.25s, box-shadow 0.25s !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s !important;
 }
 
 /* Ensure the sidebar expands on focus-within for Smart TV remote control */

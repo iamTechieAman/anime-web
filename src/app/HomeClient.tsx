@@ -71,6 +71,8 @@ const TABS = [
     { id: "movies", label: "Movies", icon: Popcorn },
     { id: "tv", label: "TV Shows", icon: Tv },
     { id: "anime", label: "Anime", icon: Sparkles },
+    { id: "toons", label: "Cartoons", icon: Tv },
+    { id: "gaming", label: "Gaming", icon: Play },
     { id: "trending", label: "Trending", icon: TrendingUp },
     { id: "discover", label: "Discover", icon: Zap },
 ];
@@ -376,39 +378,40 @@ export default function MoviesPage() {
                 />
 
                 {/* Genres & Categories Sub-Nav */}
-                {deviceMode !== "tv" && (
-                    <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 sticky top-[64px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.3)] py-1 transition-all duration-300">
-                        <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
-                            <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
-                                {TABS.map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
-                                            : "bg-[var(--bg-card)] border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
-                                        }`}
-                                    >
-                                        <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="hidden lg:flex items-center gap-4 pl-6 border-l border-white/10 ml-6">
-                                <span className="text-[11px] uppercase tracking-[0.2em] font-black text-[var(--text-muted)]">Quick Filters:</span>
-                                {GENRE_ROWS.slice(0, 4).map(g => (
-                                    <button 
-                                        key={g.genreId}
-                                        onClick={() => document.getElementById(`genre-${g.genreId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                                        className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/5 transition-all"
-                                    >
-                                        {g.title}
-                                    </button>
-                                ))}
-                            </div>
+                <div 
+                    className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 sticky z-40 shadow-[0_10px_30px_rgba(0,0,0,0.3)] py-1 transition-all duration-300"
+                    style={{ top: "var(--header-height)" }}
+                >
+                    <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
+                            {TABS.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
+                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
+                                        : "bg-[var(--bg-card)] border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                                    }`}
+                                >
+                                    <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="hidden lg:flex items-center gap-4 pl-6 border-l border-white/10 ml-6">
+                            <span className="text-[11px] uppercase tracking-[0.2em] font-black text-[var(--text-muted)]">Quick Filters:</span>
+                            {GENRE_ROWS.slice(0, 4).map(g => (
+                                <button 
+                                    key={g.genreId}
+                                    onClick={() => document.getElementById(`genre-${g.genreId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/5 transition-all"
+                                >
+                                    {g.title}
+                                </button>
+                            ))}
                         </div>
                     </div>
-                )}
+                </div>
 
                 <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-4">
                     {searchQuery ? (
@@ -495,33 +498,13 @@ export default function MoviesPage() {
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-[var(--accent)]" isFeatured />
                                         <MovieRow 
-                                            items={[...trending.slice(2, 6), ...popular.slice(2, 6)].sort(() => Math.random() - 0.5)} 
+                                            items={[...trending.slice(2, 6), ...popular.slice(2, 6)]} 
                                             title="smart-recommendations" 
                                             isLarge 
                                         />
                                     </section>
                                 )}
                                 
-                                {deviceMode === "tv" ? (
-                                    <div className="space-y-6 md:space-y-8">
-                                        <section className="relative">
-                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[60px] pointer-events-none" />
-                                            <SectionHeader icon={Tv} title="Featured Toons" color="text-[var(--accent)]" isFeatured />
-                                            <MovieRow items={CARTOONS_DATA} title="tv-featured-toons" isLarge />
-                                        </section>
-                                        
-                                        <section className="relative">
-                                            <SectionHeader icon={Flame} title="New Releases" color="text-[var(--accent-warm)]" />
-                                            <MovieRow items={[...CARTOONS_DATA, ...trending.slice(0, 5)]} title="tv-new-releases" />
-                                        </section>
-
-                                        <section className="relative">
-                                            <SectionHeader icon={Play} title="Game-Streaming Highlights" color="text-[var(--accent-secondary)]" isFeatured />
-                                            <MovieRow items={GAMING_STREAMS_DATA} title="tv-gaming-highlights" />
-                                        </section>
-                                    </div>
-                                ) : (
-                                    <>
                                     {activeTab === "movies" && (
                                     <AnimatePresence mode="wait">
                                     <motion.div
@@ -882,8 +865,7 @@ export default function MoviesPage() {
                                         )}
                                     </div>
                                 )}
-                                    </>
-                                )}
+
                             </div>
                         </div>
                     )}

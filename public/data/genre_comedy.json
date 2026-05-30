@@ -21,8 +21,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.036,
-      "vote_count": 2064
+      "vote_average": 8.045,
+      "vote_count": 2078
     },
     {
       "adult": false,
@@ -61,7 +61,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.424,
-      "vote_count": 13590
+      "vote_count": 13593
     },
     {
       "adult": false,
@@ -83,8 +83,8 @@
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.141,
-      "vote_count": 1268
+      "vote_average": 8.147,
+      "vote_count": 1278
     },
     {
       "adult": false,
@@ -103,8 +103,8 @@
       "release_date": "2026-05-21",
       "softcore": false,
       "video": false,
-      "vote_average": 5.913,
-      "vote_count": 178
+      "vote_average": 5.943,
+      "vote_count": 184
     },
     {
       "adult": false,
@@ -124,8 +124,8 @@
       "release_date": "2026-02-11",
       "softcore": false,
       "video": false,
-      "vote_average": 8.115,
-      "vote_count": 697
+      "vote_average": 8.116,
+      "vote_count": 699
     },
     {
       "adult": false,
@@ -145,8 +145,8 @@
       "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 7.2,
-      "vote_count": 40
+      "vote_average": 7.13,
+      "vote_count": 46
     },
     {
       "adult": false,
@@ -189,8 +189,8 @@
       "release_date": "2025-11-26",
       "softcore": false,
       "video": false,
-      "vote_average": 7.644,
-      "vote_count": 2825
+      "vote_average": 7.645,
+      "vote_count": 2826
     },
     {
       "adult": false,
@@ -210,8 +210,8 @@
       "release_date": "2026-03-19",
       "softcore": false,
       "video": false,
-      "vote_average": 7.683,
-      "vote_count": 896
+      "vote_average": 7.685,
+      "vote_count": 903
     },
     {
       "adult": false,
@@ -230,29 +230,8 @@
       "release_date": "2026-03-12",
       "softcore": false,
       "video": false,
-      "vote_average": 9.088,
-      "vote_count": 182
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/a8uQvrplTkhGJQog6GZ6CqF8An6.jpg",
-      "genre_ids": [
-        35,
-        10751,
-        9648
-      ],
-      "id": 1301421,
-      "title": "The Sheep Detectives",
-      "original_language": "en",
-      "original_title": "The Sheep Detectives",
-      "overview": "George Hardy is a shepherd who reads detective novels to his beloved sheep every night, assuming they can't possibly understand. But when a mysterious incident disrupts life on the farm, the sheep realize they must become the detectives. As they follow the clues and investigate human suspects, they prove that even sheep can be brilliant crime-solvers.",
-      "popularity": 66.7341,
-      "poster_path": "/6QtL9rl3Zb4d8qW6EJ4qO5hSSfU.jpg",
-      "release_date": "2026-04-30",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.6,
-      "vote_count": 117
+      "vote_average": 9.102,
+      "vote_count": 186
     },
     {
       "adult": false,
@@ -272,6 +251,27 @@
       "video": false,
       "vote_average": 5.731,
       "vote_count": 175
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/a8uQvrplTkhGJQog6GZ6CqF8An6.jpg",
+      "genre_ids": [
+        35,
+        10751,
+        9648
+      ],
+      "id": 1301421,
+      "title": "The Sheep Detectives",
+      "original_language": "en",
+      "original_title": "The Sheep Detectives",
+      "overview": "George Hardy is a shepherd who reads detective novels to his beloved sheep every night, assuming they can't possibly understand. But when a mysterious incident disrupts life on the farm, the sheep realize they must become the detectives. As they follow the clues and investigate human suspects, they prove that even sheep can be brilliant crime-solvers.",
+      "popularity": 66.7341,
+      "poster_path": "/6QtL9rl3Zb4d8qW6EJ4qO5hSSfU.jpg",
+      "release_date": "2026-04-30",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.619,
+      "vote_count": 118
     },
     {
       "adult": false,
@@ -393,8 +393,8 @@
       "release_date": "2026-04-29",
       "softcore": false,
       "video": false,
-      "vote_average": 6.6,
-      "vote_count": 700
+      "vote_average": 6.638,
+      "vote_count": 702
     },
     {
       "adult": false,
@@ -419,6 +419,6 @@
       "vote_count": 87
     }
   ],
-  "total_pages": 8517,
-  "total_results": 170338
+  "total_pages": 8518,
+  "total_results": 170346
 }
