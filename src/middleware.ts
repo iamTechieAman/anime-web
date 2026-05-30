@@ -19,8 +19,46 @@ const BLOCKED_UAS = [
     'harvest', 'emailcollector', 'linkextractor',
 ];
 
+// Simple in-memory rate limiting map for edge runtime
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+
+function isRateLimited(ip: string, limit = 40, windowMs = 60000): boolean {
+    const now = Date.now();
+    const current = rateLimitMap.get(ip) || { count: 0, lastReset: now };
+    
+    if (now - current.lastReset > windowMs) {
+        current.count = 1;
+        current.lastReset = now;
+        rateLimitMap.set(ip, current);
+        return false;
+    }
+    
+    current.count++;
+    rateLimitMap.set(ip, current);
+    
+    return current.count > limit;
+}
+
 export default clerkMiddleware(async (auth, request) => {
     const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+    const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for') || 'anonymous';
+
+    // 1. Rate Limiting for API routes
+    if (request.nextUrl.pathname.startsWith('/api')) {
+        const limit = request.nextUrl.pathname.includes('/search') ? 20 : 40; // Strict limit on search
+        if (isRateLimited(ip, limit, 60000)) {
+            return new NextResponse(
+                JSON.stringify({ 
+                    error: 'Rate limit exceeded.', 
+                    message: 'Too many requests. Please try again later.' 
+                }),
+                { 
+                    status: 429, 
+                    headers: { 'content-type': 'application/json' } 
+                }
+            );
+        }
+    }
 
     // Allow requests with empty user agents from internal Next.js prefetching
     if (!userAgent && request.headers.get('x-nextjs-data')) {
@@ -46,7 +84,7 @@ export default clerkMiddleware(async (auth, request) => {
 
     const response = NextResponse.next();
 
-    // Comprehensive Security Headers
+    // Comprehensive Security & CSP Headers
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'SAMEORIGIN');
     response.headers.set('X-XSS-Protection', '1; mode=block');
@@ -54,6 +92,12 @@ export default clerkMiddleware(async (auth, request) => {
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     
+    // Content-Security-Policy (CSP) restricting frame embedding origins
+    response.headers.set(
+        'Content-Security-Policy',
+        "frame-src 'self' https://*.tmdb.org https://*.vidsrc.me https://*.vidsrc.to https://*.vidsrc.xyz https://*.embed.su https://*.vidlink.pro https://*.peachify.top; frame-ancestors 'self' https://toonplayer.in;"
+    );
+
     // Strict Transport Security (HSTS) - enforce HTTPS
     if (process.env.NODE_ENV === 'production') {
         response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');

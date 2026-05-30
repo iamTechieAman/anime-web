@@ -253,10 +253,12 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
 // === MOVIE GRID ===
 export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
+    const { isLowEnd } = useTVNavigation();
     const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
+    const finalItems = isLowEnd ? validItems.slice(0, 8) : validItems;
     return (
         <div className="responsive-grid">
-            {validItems.map((item, idx) => (
+            {finalItems.map((item, idx) => (
                 <div key={`${item.id}-${idx}`} className="w-full">
                     <MovieCard item={item} type={item.media_type || type} isFeatured={idx === 0} />
                 </div>
@@ -269,8 +271,10 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
 export const MovieRow = memo(function MovieRow({ items, type = "movie", title, isLarge = false }: { items: MovieItem[]; type?: string; title?: string; isLarge?: boolean }) {
     const backupId = React.useId();
     const scrollId = `row-${String(title || backupId).replace(/\s/g, "-")}`;
+    const { isLowEnd } = useTVNavigation();
 
     const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
+    const finalItems = isLowEnd ? validItems.slice(0, 10) : validItems;
 
     return (
         <div className="relative w-full mb-4 netflix-row-container">
@@ -278,7 +282,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
                 id={scrollId} 
                 className="netflix-row hide-scrollbar"
             >
-                {validItems.map((item, idx) => (
+                {finalItems.map((item, idx) => (
                     <div key={`${item.id}-${idx}`} className={`netflix-card-snap shrink-0 ${isLarge ? "large" : ""}`}>
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>

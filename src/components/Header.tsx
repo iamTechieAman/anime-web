@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, Bookmark, Clock, TrendingUp, Sparkles, LogIn } from "lucide-react";
+import { Search, X, SlidersHorizontal, Bell, Play, ChevronDown, User, Bookmark, Clock, TrendingUp, Sparkles, LogIn, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import axios from "axios";
+import VoiceSearch from "./VoiceSearch";
+
 import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -57,6 +59,7 @@ export default function Header() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
   const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
 
   const [filterGenre, setFilterGenre] = useState("");
   const [filterFormat, setFilterFormat] = useState("");
@@ -286,6 +289,11 @@ export default function Header() {
     setShowFilters(false);
   };
 
+  const handleVoiceResult = (text: string) => {
+    setSearchQuery(text);
+    router.push(`/search?q=${encodeURIComponent(text.trim())}`);
+  };
+
   const clearFilters = () => {
     setFilterGenre('');
     setFilterFormat('');
@@ -381,6 +389,15 @@ export default function Header() {
                     <X className="w-4 h-4 text-[var(--text-muted)]" />
                   </button>
                 )}
+
+                <button 
+                  type="button" 
+                  aria-label="Voice Search"
+                  onClick={() => setIsVoiceSearchOpen(true)}
+                  className="p-1.5 hover:bg-white/5 rounded-full transition-colors mr-2 cursor-pointer shrink-0"
+                >
+                  <Mic className="w-4 h-4 text-[var(--text-muted)] hover:text-white" />
+                </button>
                 
                 {/* AI Discover Toggle */}
                 <button 
@@ -632,6 +649,14 @@ export default function Header() {
                       <X className="w-5 h-5 text-zinc-400" />
                     </button>
                   )}
+                  <button 
+                    type="button"
+                    data-focusable="true"
+                    onClick={() => setIsVoiceSearchOpen(true)}
+                    className="p-3 bg-white/5 hover:bg-orange-500 rounded-full text-white cursor-pointer mr-2 outline-none focus:outline-none flex items-center justify-center shrink-0"
+                  >
+                    <Mic className="w-5 h-5" />
+                  </button>
                 </div>
 
                 {/* TV Search suggestions */}
@@ -852,6 +877,11 @@ export default function Header() {
         </div>
       </div>
     </nav>
+    <VoiceSearch
+      isOpen={isVoiceSearchOpen}
+      onClose={() => setIsVoiceSearchOpen(false)}
+      onResult={handleVoiceResult}
+    />
     </>
   );
 }

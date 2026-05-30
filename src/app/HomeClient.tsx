@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
@@ -95,19 +95,27 @@ const GAMING_STREAMS_DATA = [
 
 export default function MoviesPage() {
     const [activeTab, setActiveTab] = useState("movies");
-    const { deviceMode } = useTVNavigation();
+    const { deviceMode, isLowEnd } = useTVNavigation();
 
     const isTV = deviceMode === "tv";
-    const tabAnimation: any = isTV ? {} : {
+    const shouldAnimate = !isTV && !isLowEnd;
+    const tabAnimation: any = shouldAnimate ? {
         initial: { opacity: 0, y: 18 },
         animate: { opacity: 1, y: 0 },
         exit: { opacity: 0, y: -12 },
         transition: { duration: 0.35, ease: "easeOut" }
-    };
-    const errorAnimation: any = isTV ? {} : {
+    } : {};
+    const errorAnimation: any = shouldAnimate ? {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 }
-    };
+    } : {};
+
+    // Slice array lengths if running on a low-end device to minimize DOM size
+    const limitData = useCallback((items: any[], maxCount = 10) => {
+        if (!items) return [];
+        return isLowEnd ? items.slice(0, maxCount) : items;
+    }, [isLowEnd]);
+
 
     // Sync tab from query parameters
     const paramsInUrl = useSearchParams();
