@@ -311,21 +311,68 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         };
     }, []);
 
-    // Cast session listener
+    // Cast session listener with proxy wrapper and rich toasts
     useEffect(() => {
-        if (!castAvailable || !rawVideoSource) return;
+        if (!castAvailable) return;
         const castContext = (window as any).cast.framework.CastContext.getInstance();
         
         const handleSessionStateChanged = (event: any) => {
-            if (event.sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
-                const castSession = castContext.getCurrentSession();
-                const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(rawVideoSource, rawVideoSource.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4');
-                const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
+            const sessionState = event.sessionState;
+            
+            if (sessionState === (window as any).cast.framework.SessionState.SESSION_STARTING) {
+                toast.loading("Connecting to casting device...", { id: "cast-toast" });
+            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_START_FAILED) {
+                toast.error("Casting connection failed.", { id: "cast-toast" });
+            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
+                if (!rawVideoSource) {
+                    toast.error("No compatible video source found to cast on this server. Try another server.", { id: "cast-toast" });
+                    return;
+                }
+
+                toast.loading("Casting: Starting video on TV...", { id: "cast-toast" });
                 
-                castSession.loadMedia(request).then(
-                    () => toast.success("Casting started!"),
-                    (e: any) => toast.error("Casting failed.")
-                );
+                try {
+                    const castSession = castContext.getCurrentSession();
+                    // Wrap in proxy to bypass CORS/Referer locks on Chromecast
+                    const proxiedUrl = `${window.location.origin}/api/proxy?url=${encodeURIComponent(rawVideoSource)}&referer=${encodeURIComponent(new URL(rawVideoSource).origin)}`;
+                    
+                    const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(
+                        proxiedUrl, 
+                        rawVideoSource.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4'
+                    );
+                    
+                    // Metadata config for rich Chromecast card display on TV
+                    const metadata = new (window as any).chrome.cast.media.GenericMediaMetadata();
+                    metadata.metadataType = (window as any).chrome.cast.media.MetadataType.GENERIC;
+                    metadata.title = details?.title || details?.name || "ToonPlayer Stream";
+                    metadata.subtitle = type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Movie";
+                    if (details?.poster_path) {
+                        metadata.images = [{ url: `${IMG_BASE}/w500${details.poster_path}` }];
+                    }
+                    mediaInfo.metadata = metadata;
+
+                    const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
+                    
+                    castSession.loadMedia(request).then(
+                        () => {
+                            toast.success(`Playing "${details?.title || details?.name || 'Stream'}" on TV!`, { id: "cast-toast", icon: "📺" });
+                            // Pause local iframe playback if playing
+                            const localIframe = document.querySelector('iframe');
+                            if (localIframe) {
+                                localIframe.contentWindow?.postMessage({ type: 'PAUSE' }, '*');
+                            }
+                        },
+                        (e: any) => {
+                            console.error("[Casting] LoadMedia Failed:", e);
+                            toast.error("Failed to load video on your TV.", { id: "cast-toast" });
+                        }
+                    );
+                } catch (err) {
+                    console.error("[Casting] Session Error:", err);
+                    toast.error("Error setting up cast stream.", { id: "cast-toast" });
+                }
+            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_ENDED) {
+                toast.success("Disconnected from casting device.", { id: "cast-toast" });
             }
         };
 
@@ -340,7 +387,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 handleSessionStateChanged
             );
         };
-    }, [castAvailable, rawVideoSource]);
+    }, [castAvailable, rawVideoSource, details, type, selectedSeason, selectedEpisode]);
 
     const toggleWatchlist = () => {
         if (inWatchlist) {
@@ -819,6 +866,14 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                             <span className="text-sm font-medium hidden sm:inline">Back to Movies</span>
                         </Link>
                         <h1 className="text-sm font-bold truncate text-center flex-1">{fallbackTitle}</h1>
+                        <div className="flex items-center gap-4 shrink-0">
+                            {castAvailable && rawVideoSource && (
+                                <div className="flex items-center justify-center p-1 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors">
+                                    {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
+                                </div>
+                            )}
+                            <div className="w-[50px] hidden sm:block" />
+                        </div>
                     </div>
                 </div>
                 <div className="pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
@@ -826,7 +881,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
                                 <iframe 
-                                    src={embedUrl} 
+                                    src={`/api/proxy/video?url=${encodeURIComponent(embedUrl)}`} 
                                     className="absolute inset-0 w-full h-full border-0" 
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
@@ -872,7 +927,14 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         <span className="text-sm font-medium hidden sm:inline">Back</span>
                     </Link>
                     <h1 className="text-sm font-bold truncate text-center flex-1 text-[var(--text-main)]">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h1>
-                    <div className="w-[100px] hidden sm:block" /> {/* Spacer to center title */}
+                    <div className="flex items-center gap-4 shrink-0">
+                        {castAvailable && rawVideoSource && (
+                            <div className="flex items-center justify-center p-1 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors">
+                                {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
+                            </div>
+                        )}
+                        <div className="w-[50px] hidden sm:block" />
+                    </div>
                 </div>
             </div>
 
@@ -953,7 +1015,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
                             <iframe
                                 key={iframeKey}
-                                src={embedUrl}
+                                src={`/api/proxy/video?url=${encodeURIComponent(embedUrl)}`}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="no-referrer"

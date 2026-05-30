@@ -58,7 +58,8 @@ export default function Player({
     const [playerTime, setPlayerTime] = useState(0);
     const [resumeTime, setResumeTime] = useState(0);
 
-    const { deviceMode } = useTVNavigation();
+    const { deviceMode, performanceTier } = useTVNavigation();
+    const isLowEnd = performanceTier === "low";
 
     // Audio/Quality persistence refs
     const lastAudioTrackName = useRef<string | null>(typeof window !== 'undefined' ? localStorage.getItem('artplayer_audio_track') : null);
@@ -170,8 +171,8 @@ export default function Player({
                                 player.updateSettings({
                                     streaming: {
                                         buffer: {
-                                            stableBufferTime: 12,
-                                            bufferTimeAtTopQuality: 20,
+                                            stableBufferTime: isLowEnd ? 6 : 12,
+                                            bufferTimeAtTopQuality: isLowEnd ? 10 : 20,
                                         },
                                         fastSwitchEnabled: true,
                                     }
@@ -225,19 +226,20 @@ export default function Player({
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
                                 const hls = new Hls({
-                                    maxBufferLength: 20, // Lowered buffer threshold for instant startup
-                                    maxMaxBufferLength: 45,
-                                    maxBufferSize: 45 * 1000 * 1000,
+                                    maxBufferLength: isLowEnd ? 10 : 20, // Lowered buffer threshold for instant startup
+                                    maxMaxBufferLength: isLowEnd ? 20 : 45,
+                                    maxBufferSize: isLowEnd ? 15 * 1000 * 1000 : 45 * 1000 * 1000,
                                     renderTextTracksNatively: false,
                                     initialLiveManifestSize: 1,
-                                    nudgeMaxRetry: 8,
+                                    nudgeMaxRetry: 10,
                                     enableWorker: true,
-                                    lowLatencyMode: true,
-                                    backBufferLength: 60,
-                                    manifestLoadingTimeOut: 8000,
-                                    levelLoadingTimeOut: 8000,
-                                    fragLoadingTimeOut: 12000,
+                                    lowLatencyMode: isLowEnd ? false : true,
+                                    backBufferLength: isLowEnd ? 30 : 60,
+                                    manifestLoadingTimeOut: 10000,
+                                    levelLoadingTimeOut: 10000,
+                                    fragLoadingTimeOut: 15000,
                                     startLevel: -1,
+                                    progressive: true
                                 });
 
                                 hls.loadSource(url);
@@ -341,18 +343,40 @@ export default function Player({
                                     }
                                 });
 
+                                let mediaRecoveryAttempts = 0;
+                                let networkRecoveryAttempts = 0;
+
                                 hls.on(Hls.Events.ERROR, function (event, data) {
                                     if (data.fatal) {
                                         console.error('[ArtPlayer] HLS Fatal Error:', data.type, data.details);
                                         if (onError) onError(data);
                                         switch (data.type) {
                                             case Hls.ErrorTypes.NETWORK_ERROR:
-                                                hls.startLoad();
+                                                if (networkRecoveryAttempts < 5) {
+                                                    networkRecoveryAttempts++;
+                                                    console.warn(`[ArtPlayer] HLS network error, retrying loading in 2s (Attempt ${networkRecoveryAttempts}/5)`);
+                                                    setTimeout(() => {
+                                                        if (!isDestroyed.current && (art as any).hls) {
+                                                            hls.startLoad();
+                                                        }
+                                                    }, 2000);
+                                                } else {
+                                                    art.notice.show = "Network connection failed. Try another server.";
+                                                }
                                                 break;
                                             case Hls.ErrorTypes.MEDIA_ERROR:
-                                                hls.recoverMediaError();
+                                                if (mediaRecoveryAttempts < 3) {
+                                                    mediaRecoveryAttempts++;
+                                                    console.warn(`[ArtPlayer] HLS media error, attempting recovery (Attempt ${mediaRecoveryAttempts}/3)`);
+                                                    hls.recoverMediaError();
+                                                } else {
+                                                    console.warn("[ArtPlayer] HLS media recovery failed. Swapping audio codec.");
+                                                    hls.swapAudioCodec();
+                                                    hls.recoverMediaError();
+                                                }
                                                 break;
                                             default:
+                                                console.error("[ArtPlayer] HLS unrecoverable error. Destroying HLS instance.");
                                                 hls.destroy();
                                                 break;
                                         }

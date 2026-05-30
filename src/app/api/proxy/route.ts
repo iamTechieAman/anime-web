@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUA } from "@/lib/user-agents";
 
-// Domain-to-Referer lookup for anime CDNs
+// Domain-to-Referer lookup for anime CDNs and movie/tv servers
 const CDN_REFERERS: Record<string, string> = {
     'gogocdn.net': 'https://gogoanime.hu',
     'playtaku.net': 'https://gogoanime.hu',
@@ -14,15 +14,39 @@ const CDN_REFERERS: Record<string, string> = {
     'animepahe.ru': 'https://animepahe.ru',
     'kwik.si': 'https://animepahe.ru',
     'files.cache.luluvdo.com': 'https://hianime.to',
+    // Movie/TV video CDNs referer mapping
+    'vidlink.pro': 'https://vidlink.pro',
+    'peachify.top': 'https://peachify.top',
+    'vidfast.pro': 'https://vidfast.pro',
+    '111movies.net': 'https://111movies.net',
+    'vidbinge.com': 'https://vidbinge.com',
+    'vidbinge.to': 'https://vidbinge.to',
+    'embed.su': 'https://embed.su',
+    'vidsrc.me': 'https://vidsrc.me',
+    'vidsrc.to': 'https://vidsrc.to',
+    'vidsrc.net': 'https://vidsrc.net',
+    'vidsrc.pro': 'https://vidsrc.pro',
+    'vidsrc.in': 'https://vidsrc.in',
+    'vidsrc.vip': 'https://vidsrc.vip',
+    'multiembed.mov': 'https://multiembed.mov',
+    'smashy.stream': 'https://smashy.stream',
+    'cinemaos.live': 'https://cinemaos.live',
+    'rivestream.org': 'https://rivestream.org',
+    'autoembed.cc': 'https://autoembed.cc',
+    'abysscdn.com': 'https://abysscdn.com',
+    'cineby.gd': 'https://cineby.gd'
 };
 
 function getReferer(url: string, override?: string | null): string {
     if (override) return override;
     try {
-        const host = new URL(url).hostname;
+        const urlObj = new URL(url);
+        const host = urlObj.hostname;
         for (const [domain, ref] of Object.entries(CDN_REFERERS)) {
             if (host.includes(domain)) return ref;
         }
+        // Fallback dynamically to the resource host's own origin
+        return urlObj.origin;
     } catch (_) {}
     return 'https://allmanga.to';
 }
