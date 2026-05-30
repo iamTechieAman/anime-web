@@ -20,7 +20,7 @@
       "softcore": false,
       "name": "Euphoria",
       "vote_average": 8.29,
-      "vote_count": 10723
+      "vote_count": 10725
     },
     {
       "adult": false,
@@ -43,7 +43,7 @@
       "softcore": false,
       "name": "Game of Thrones",
       "vote_average": 8.461,
-      "vote_count": 26893
+      "vote_count": 26896
     },
     {
       "adult": false,
@@ -64,7 +64,7 @@
       "first_air_date": "1999-01-10",
       "softcore": false,
       "name": "The Sopranos",
-      "vote_average": 8.7,
+      "vote_average": 8.666,
       "vote_count": 3455
     },
     {
@@ -134,7 +134,7 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/2xGcSLyTAzConiHAByWqhfLiatT.jpg",
+      "backdrop_path": "/577eXC8wFQT0eUrJcgznSiFPRmk.jpg",
       "genre_ids": [
         10765,
         18,
@@ -152,8 +152,8 @@
       "first_air_date": "2022-08-21",
       "softcore": false,
       "name": "House of the Dragon",
-      "vote_average": 8.3,
-      "vote_count": 5950
+      "vote_average": 8.296,
+      "vote_count": 5953
     },
     {
       "adult": false,
@@ -336,7 +336,7 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/bcdUYUFk8GdpZJPiSAas9UeocLH.jpg",
+      "backdrop_path": "/d2tAqGQzuP3gYwrVavrnK06xnO4.jpg",
       "genre_ids": [
         18,
         35

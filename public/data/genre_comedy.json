@@ -21,8 +21,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.045,
-      "vote_count": 2078
+      "vote_average": 8.046,
+      "vote_count": 2079
     },
     {
       "adult": false,
@@ -61,7 +61,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.424,
-      "vote_count": 13593
+      "vote_count": 13594
     },
     {
       "adult": false,
@@ -145,8 +145,8 @@
       "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 7.13,
-      "vote_count": 46
+      "vote_average": 7.138,
+      "vote_count": 47
     },
     {
       "adult": false,
@@ -190,7 +190,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.645,
-      "vote_count": 2826
+      "vote_count": 2827
     },
     {
       "adult": false,
@@ -393,8 +393,8 @@
       "release_date": "2026-04-29",
       "softcore": false,
       "video": false,
-      "vote_average": 6.638,
-      "vote_count": 702
+      "vote_average": 6.637,
+      "vote_count": 703
     },
     {
       "adult": false,
@@ -420,5 +420,5 @@
     }
   ],
   "total_pages": 8518,
-  "total_results": 170346
+  "total_results": 170350
 }

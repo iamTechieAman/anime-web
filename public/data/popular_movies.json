@@ -18,8 +18,8 @@
       "release_date": "2026-04-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.07,
-      "vote_count": 1364
+      "vote_average": 8.072,
+      "vote_count": 1367
     },
     {
       "adult": false,
@@ -38,8 +38,8 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.24,
-      "vote_count": 371
+      "vote_average": 7.233,
+      "vote_count": 374
     },
     {
       "adult": false,
@@ -57,8 +57,8 @@
       "release_date": "2026-05-13",
       "softcore": false,
       "video": false,
-      "vote_average": 7.924,
-      "vote_count": 341
+      "vote_average": 7.9,
+      "vote_count": 343
     },
     {
       "adult": false,
@@ -78,8 +78,8 @@
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.393,
-      "vote_count": 1304
+      "vote_average": 8.39,
+      "vote_count": 1308
     },
     {
       "adult": false,
@@ -98,8 +98,8 @@
       "release_date": "2026-03-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.638,
-      "vote_count": 4310
+      "vote_average": 8.6,
+      "vote_count": 4321
     },
     {
       "adult": false,
@@ -121,8 +121,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.042,
-      "vote_count": 2075
+      "vote_average": 8.043,
+      "vote_count": 2080
     },
     {
       "adult": false,
@@ -164,8 +164,8 @@
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.973,
-      "vote_count": 1464
+      "vote_average": 9,
+      "vote_count": 1468
     },
     {
       "adult": false,
@@ -208,6 +208,27 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "id": 1083381,
+      "title": "Backrooms",
+      "original_language": "en",
+      "original_title": "Backrooms",
+      "overview": "A strange doorway appears in the basement of a furniture showroom.",
+      "popularity": 187.0112,
+      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "release_date": "2026-05-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.5,
+      "vote_count": 87
+    },
+    {
+      "adult": false,
       "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
       "genre_ids": [
         28,
@@ -224,8 +245,8 @@
       "release_date": "2026-05-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.761,
-      "vote_count": 328
+      "vote_average": 6.768,
+      "vote_count": 330
     },
     {
       "adult": false,
@@ -246,7 +267,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 6.8,
-      "vote_count": 305
+      "vote_count": 308
     },
     {
       "adult": false,
@@ -306,7 +327,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.033,
-      "vote_count": 6657
+      "vote_count": 6658
     },
     {
       "adult": false,
@@ -326,7 +347,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.424,
-      "vote_count": 13592
+      "vote_count": 13595
     },
     {
       "adult": false,
@@ -348,7 +369,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.399,
-      "vote_count": 695
+      "vote_count": 696
     },
     {
       "adult": false,
@@ -371,7 +392,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.144,
-      "vote_count": 1273
+      "vote_count": 1280
     },
     {
       "adult": false,
@@ -392,28 +413,8 @@
       "video": false,
       "vote_average": 7.039,
       "vote_count": 76
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/oTE4lNs4PSG5iIWjqaTdCIFJ4Bs.jpg",
-      "genre_ids": [
-        28,
-        53
-      ],
-      "id": 1318447,
-      "title": "Apex",
-      "original_language": "en",
-      "original_title": "Apex",
-      "overview": "A grieving woman pushing her limits on a solo adventure in the Australian wild is ensnared in a twisted game with a cunning killer who thinks she's prey.",
-      "popularity": 128.5984,
-      "poster_path": "/eTp7gSPkSF3Aw79mNx1NkBP1PZT.jpg",
-      "release_date": "2026-04-24",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.705,
-      "vote_count": 1281
     }
   ],
-  "total_pages": 57113,
-  "total_results": 1142259
+  "total_pages": 57117,
+  "total_results": 1142336
 }

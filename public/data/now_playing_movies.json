@@ -22,8 +22,8 @@
       "release_date": "2026-04-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.067,
-      "vote_count": 1362
+      "vote_average": 8.073,
+      "vote_count": 1366
     },
     {
       "adult": false,
@@ -42,8 +42,8 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.243,
-      "vote_count": 370
+      "vote_average": 7.233,
+      "vote_count": 374
     },
     {
       "adult": false,
@@ -61,8 +61,8 @@
       "release_date": "2026-05-13",
       "softcore": false,
       "video": false,
-      "vote_average": 7.92,
-      "vote_count": 339
+      "vote_average": 7.9,
+      "vote_count": 343
     },
     {
       "adult": false,
@@ -82,8 +82,8 @@
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.391,
-      "vote_count": 1302
+      "vote_average": 8.39,
+      "vote_count": 1308
     },
     {
       "adult": false,
@@ -105,8 +105,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.04,
-      "vote_count": 2072
+      "vote_average": 8.043,
+      "vote_count": 2080
     },
     {
       "adult": false,
@@ -148,8 +148,8 @@
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.973,
-      "vote_count": 1462
+      "vote_average": 9,
+      "vote_count": 1467
     },
     {
       "adult": false,
@@ -172,6 +172,27 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "id": 1083381,
+      "title": "Backrooms",
+      "original_language": "en",
+      "original_title": "Backrooms",
+      "overview": "A strange doorway appears in the basement of a furniture showroom.",
+      "popularity": 187.0112,
+      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "release_date": "2026-05-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.5,
+      "vote_count": 87
+    },
+    {
+      "adult": false,
       "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
       "genre_ids": [
         28,
@@ -188,8 +209,8 @@
       "release_date": "2026-05-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.8,
-      "vote_count": 327
+      "vote_average": 6.768,
+      "vote_count": 330
     },
     {
       "adult": false,
@@ -209,8 +230,8 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.793,
-      "vote_count": 304
+      "vote_average": 6.8,
+      "vote_count": 308
     },
     {
       "adult": false,
@@ -271,7 +292,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 7.399,
-      "vote_count": 695
+      "vote_count": 696
     },
     {
       "adult": false,
@@ -290,29 +311,8 @@
       "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 6.705,
-      "vote_count": 1281
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
-      "genre_ids": [
-        27,
-        9648,
-        878
-      ],
-      "id": 1083381,
-      "title": "Backrooms",
-      "original_language": "en",
-      "original_title": "Backrooms",
-      "overview": "A strange doorway appears in the basement of a furniture showroom.",
-      "popularity": 187.0112,
-      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
-      "release_date": "2026-05-27",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.8,
-      "vote_count": 75
+      "vote_average": 6.702,
+      "vote_count": 1287
     },
     {
       "adult": false,
@@ -372,8 +372,8 @@
       "release_date": "2026-05-21",
       "softcore": false,
       "video": false,
-      "vote_average": 5.936,
-      "vote_count": 180
+      "vote_average": 5.949,
+      "vote_count": 185
     },
     {
       "adult": false,
@@ -393,8 +393,8 @@
       "release_date": "2026-02-11",
       "softcore": false,
       "video": false,
-      "vote_average": 8.115,
-      "vote_count": 697
+      "vote_average": 8.116,
+      "vote_count": 699
     },
     {
       "adult": false,
@@ -414,10 +414,10 @@
       "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 7.114,
-      "vote_count": 44
+      "vote_average": 7.138,
+      "vote_count": 47
     }
   ],
   "total_pages": 299,
-  "total_results": 5967
+  "total_results": 5974
 }

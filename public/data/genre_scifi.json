@@ -19,7 +19,28 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.638,
-      "vote_count": 4310
+      "vote_count": 4320
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "id": 1083381,
+      "title": "Backrooms",
+      "original_language": "en",
+      "original_title": "Backrooms",
+      "overview": "A strange doorway appears in the basement of a furniture showroom.",
+      "popularity": 187.0112,
+      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
+      "release_date": "2026-05-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.6,
+      "vote_count": 86
     },
     {
       "adult": false,
@@ -40,7 +61,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 6.8,
-      "vote_count": 305
+      "vote_count": 306
     },
     {
       "adult": false,
@@ -62,8 +83,8 @@
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.144,
-      "vote_count": 1273
+      "vote_average": 8.147,
+      "vote_count": 1279
     },
     {
       "adult": false,
@@ -83,29 +104,8 @@
       "release_date": "2025-12-17",
       "softcore": false,
       "video": false,
-      "vote_average": 7.522,
-      "vote_count": 3238
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
-      "genre_ids": [
-        27,
-        9648,
-        878
-      ],
-      "id": 1083381,
-      "title": "Backrooms",
-      "original_language": "en",
-      "original_title": "Backrooms",
-      "overview": "A strange doorway appears in the basement of a furniture showroom.",
-      "popularity": 187.0112,
-      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
-      "release_date": "2026-05-27",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.7,
-      "vote_count": 78
+      "vote_average": 7.524,
+      "vote_count": 3240
     },
     {
       "adult": false,
@@ -124,7 +124,7 @@
       "release_date": "1999-03-31",
       "softcore": false,
       "video": false,
-      "vote_average": 8.2,
+      "vote_average": 8.246,
       "vote_count": 27892
     },
     {
@@ -145,8 +145,8 @@
       "release_date": "2025-10-30",
       "softcore": false,
       "video": false,
-      "vote_average": 6.014,
-      "vote_count": 185
+      "vote_average": 6,
+      "vote_count": 186
     },
     {
       "adult": false,
@@ -167,7 +167,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.475,
-      "vote_count": 39839
+      "vote_count": 39841
     },
     {
       "adult": false,
@@ -187,8 +187,8 @@
       "release_date": "2026-01-07",
       "softcore": false,
       "video": false,
-      "vote_average": 6.414,
-      "vote_count": 1119
+      "vote_average": 6.4,
+      "vote_count": 1120
     },
     {
       "adult": false,
@@ -208,8 +208,8 @@
       "release_date": "2025-11-05",
       "softcore": false,
       "video": false,
-      "vote_average": 7.743,
-      "vote_count": 2954
+      "vote_average": 7.745,
+      "vote_count": 2956
     },
     {
       "adult": false,
@@ -271,7 +271,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.032,
-      "vote_count": 38056
+      "vote_count": 38059
     },
     {
       "adult": false,
@@ -292,7 +292,7 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.236,
-      "vote_count": 32000
+      "vote_count": 32001
     },
     {
       "adult": false,
@@ -333,8 +333,8 @@
       "release_date": "2026-02-12",
       "softcore": false,
       "video": false,
-      "vote_average": 7.342,
-      "vote_count": 1790
+      "vote_average": 7.344,
+      "vote_count": 1791
     },
     {
       "adult": false,
@@ -375,8 +375,29 @@
       "release_date": "2021-12-15",
       "softcore": false,
       "video": false,
-      "vote_average": 7.934,
+      "vote_average": 7.9,
       "vote_count": 21989
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/eQySd26OW7UmCuaeBOL7qy6foMn.jpg",
+      "genre_ids": [
+        28,
+        14,
+        878
+      ],
+      "id": 454639,
+      "title": "Masters of the Universe",
+      "original_language": "en",
+      "original_title": "Masters of the Universe",
+      "overview": "After being separated for 15 years, the Sword of Power leads Prince Adam back to Eternia, where he discovers his home shattered under the fiendish rule of Skeletor. To save his family and his world, Adam must join forces with his closest allies, Teela and Duncan/Man-At-Arms, and embrace his true destiny as He-Man — the most powerful man in the universe.",
+      "popularity": 39.3325,
+      "poster_path": "/y4xNd1eWv1ea5qoPO6JmLvzHZf0.jpg",
+      "release_date": "2026-06-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 9,
+      "vote_count": 4
     },
     {
       "adult": false,
@@ -398,29 +419,8 @@
       "video": false,
       "vote_average": 5.781,
       "vote_count": 17
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/ufpeVEM64uZHPpzzeiDNIAdaeOD.jpg",
-      "genre_ids": [
-        28,
-        35,
-        878
-      ],
-      "id": 533535,
-      "title": "Deadpool & Wolverine",
-      "original_language": "en",
-      "original_title": "Deadpool & Wolverine",
-      "overview": "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.",
-      "popularity": 39.123,
-      "poster_path": "/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
-      "release_date": "2024-07-24",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.569,
-      "vote_count": 8670
     }
   ],
   "total_pages": 1313,
-  "total_results": 26256
+  "total_results": 26254
 }

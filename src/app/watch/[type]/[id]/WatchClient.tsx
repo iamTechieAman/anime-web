@@ -207,6 +207,10 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const rawId = decodeURIComponent(encodedRawId || '');
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
+
+    // Compute validity (but early return happens AFTER hooks — React rules of hooks)
+    const isValidId = type === 'anime' || type === 'cartoon' || (!isNaN(Number(id)) && id !== '' && id !== 'undefined' && id !== 'null');
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const { addToHistory, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
@@ -839,6 +843,29 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         }
     }, [activeServer, selectedSeason, selectedEpisode, mode, details, animeData, tmdbIdForAnime]);
 
+    // Guard: if the ID is not a valid number for movie/tv, show a friendly error
+    if (!isValidId) {
+        return (
+            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex items-center justify-center p-4">
+                <div className="max-w-md w-full text-center">
+                    <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Play className="w-10 h-10 text-orange-400" />
+                    </div>
+                    <h1 className="text-2xl font-black mb-3">Content Not Found</h1>
+                    <p className="text-[var(--text-muted)] mb-6">This content could not be found or has an invalid ID. Please browse our catalog to find something to watch.</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-bold hover:opacity-90 transition-all">
+                            Browse Content
+                        </Link>
+                        <Link href="/search" className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold hover:bg-white/5 transition-all">
+                            Search
+                        </Link>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
     if (loading) {
         return (
             <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
@@ -851,6 +878,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
             </main>
         );
     }
+
 
     if (!details) {
         // Show a minimal player page instead of "Content Not Found"

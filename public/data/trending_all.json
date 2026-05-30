@@ -19,11 +19,31 @@
       "popularity": 511.7595,
       "first_air_date": "2026-05-25",
       "softcore": false,
-      "vote_average": 8.982,
-      "vote_count": 163,
+      "vote_average": 8.94,
+      "vote_count": 167,
       "origin_country": [
         "US"
       ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "id": 1339713,
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27
+      ],
+      "popularity": 399.8813,
+      "release_date": "2026-05-13",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.936,
+      "vote_count": 344
     },
     {
       "adult": false,
@@ -44,52 +64,8 @@
       "release_date": "2026-05-27",
       "softcore": false,
       "video": false,
-      "vote_average": 6.596,
-      "vote_count": 83
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
-      "id": 1339713,
-      "title": "Obsession",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27
-      ],
-      "popularity": 399.8813,
-      "release_date": "2026-05-13",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.9,
-      "vote_count": 342
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6gN8DYnIEln8v7OhRy61c57w0Xy.jpg",
-      "id": 124364,
-      "name": "FROM",
-      "original_name": "FROM",
-      "overview": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and search for a way out, they must also survive the threats of the surrounding forest – including the terrifying creatures that come out when the sun goes down.",
-      "poster_path": "/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        9648,
-        18,
-        10765
-      ],
-      "popularity": 654.795,
-      "first_air_date": "2022-02-20",
-      "softcore": false,
-      "vote_average": 8.419,
-      "vote_count": 3372,
-      "origin_country": [
-        "US"
-      ]
+      "vote_average": 6.528,
+      "vote_count": 90
     },
     {
       "adult": false,
@@ -108,8 +84,96 @@
       "popularity": 648.0994,
       "first_air_date": "2019-07-25",
       "softcore": false,
-      "vote_average": 8.459,
-      "vote_count": 12753,
+      "vote_average": 8.458,
+      "vote_count": 12758,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
+      "id": 687163,
+      "title": "Project Hail Mary",
+      "original_title": "Project Hail Mary",
+      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
+      "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        878,
+        12
+      ],
+      "popularity": 270.6206,
+      "release_date": "2026-03-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.6,
+      "vote_count": 4321
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/dd31qJxOarrHyGZwYsCzOjobQzP.jpg",
+      "id": 1380291,
+      "title": "Tom Clancy's Jack Ryan: Ghost War",
+      "original_title": "Tom Clancy's Jack Ryan: Ghost War",
+      "overview": "Jack Ryan is reluctantly pulled back into espionage when an international covert mission unravels a deadly conspiracy. Racing against time, he joins CIA allies Mike November & James Greer and sharp MI6 officer Emma Marlowe to battle a rogue black-ops unit in a high-stakes, deeply personal fight.",
+      "poster_path": "/8ehYxUh5MWE41AeE9gkHE8DKzvB.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "popularity": 399.0769,
+      "release_date": "2026-05-20",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.226,
+      "vote_count": 376
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
+      "id": 273240,
+      "name": "Off Campus",
+      "original_name": "Off Campus",
+      "overview": "Hannah Wells tutors hockey captain Garrett Graham to win over her crush. Their deal becomes real connection as they face their pasts. Friends Logan, Dean, Tucker, and Allie navigate college life and love.",
+      "poster_path": "/cbODFqkcmRgrYH8NkG4Q4Hcg8Z1.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18
+      ],
+      "popularity": 712.73,
+      "first_air_date": "2026-05-13",
+      "softcore": false,
+      "vote_average": 9.177,
+      "vote_count": 300,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/asROh8ULhbYpB4C7x1Q3iFtcxsB.jpg",
+      "id": 252107,
+      "name": "Star City",
+      "original_name": "Star City",
+      "overview": "Step into a thrilling chapter inspired by For All Mankind. Same alt-history universe. Different perspective: the Soviet Union's. Go behind the Iron Curtain with the cosmonauts, engineers, and intelligence officers who risked it all in the race for the Moon.",
+      "poster_path": "/b8VtW6IEIyEWYdnJHx8bG8RdAak.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18,
+        10765,
+        10768
+      ],
+      "popularity": 63.2936,
+      "first_air_date": "2026-05-28",
+      "softcore": false,
+      "vote_average": 6.1,
+      "vote_count": 10,
       "origin_country": [
         "US"
       ]
@@ -133,8 +197,120 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.8,
-      "vote_count": 305
+      "vote_average": 6.814,
+      "vote_count": 309
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6gN8DYnIEln8v7OhRy61c57w0Xy.jpg",
+      "id": 124364,
+      "name": "FROM",
+      "original_name": "FROM",
+      "overview": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and search for a way out, they must also survive the threats of the surrounding forest – including the terrifying creatures that come out when the sun goes down.",
+      "poster_path": "/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        9648,
+        18,
+        10765
+      ],
+      "popularity": 654.795,
+      "first_air_date": "2022-02-20",
+      "softcore": false,
+      "vote_average": 8.417,
+      "vote_count": 3373,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/xugEpZk9YQ0DIz1aFvH5HGkqpZK.jpg",
+      "id": 1304313,
+      "title": "Lee Cronin's The Mummy",
+      "original_title": "Lee Cronin's The Mummy",
+      "overview": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as what should be a joyful reunion turns into a living nightmare.",
+      "poster_path": "/uIb9Tvae5haF0XcQBaPyufmxbb0.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        9648
+      ],
+      "popularity": 594.6636,
+      "release_date": "2026-04-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.068,
+      "vote_count": 1368
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
+      "id": 85552,
+      "name": "Euphoria",
+      "original_name": "Euphoria",
+      "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
+      "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18
+      ],
+      "popularity": 285.4515,
+      "first_air_date": "2019-06-16",
+      "softcore": false,
+      "vote_average": 8.29,
+      "vote_count": 10725,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gqGQ0zADV5FIcgMWtWX8FcGQjFp.jpg",
+      "id": 1116201,
+      "title": "Iron Lung",
+      "original_title": "Iron Lung",
+      "overview": "The stars are gone. The planets have disappeared. Only individuals aboard space stations or starships were left to give the end a name -- The Quiet Rapture. After decades of decay and crumbling infrastructure, the Consolidation of Iron has made a discovery on a barren moon designated AT-5. An ocean of blood. Hoping to discover desperately needed resources they immediately launch an expedition. A submarine is crafted and a convict is welded inside. Due to the pressure and depth of the ocean the forward viewport has been encased in metal. If successful, they will earn their freedom. If not, another will follow. This will be the 13th expedition.",
+      "poster_path": "/sIwakdbMGS1krtgendTWpxTY9Hw.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        9648,
+        878
+      ],
+      "popularity": 9.5283,
+      "release_date": "2026-01-30",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.337,
+      "vote_count": 144
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
+      "id": 224941,
+      "name": "The Boroughs",
+      "original_name": "The Boroughs",
+      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
+      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        10765,
+        9648
+      ],
+      "popularity": 108.8208,
+      "first_air_date": "2026-05-21",
+      "softcore": false,
+      "vote_average": 7.1,
+      "vote_count": 93,
+      "origin_country": [
+        "US"
+      ]
     },
     {
       "adult": false,
@@ -154,117 +330,8 @@
       "release_date": "2026-05-21",
       "softcore": false,
       "video": false,
-      "vote_average": 5.943,
-      "vote_count": 184
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/dd31qJxOarrHyGZwYsCzOjobQzP.jpg",
-      "id": 1380291,
-      "title": "Tom Clancy's Jack Ryan: Ghost War",
-      "original_title": "Tom Clancy's Jack Ryan: Ghost War",
-      "overview": "Jack Ryan is reluctantly pulled back into espionage when an international covert mission unravels a deadly conspiracy. Racing against time, he joins CIA allies Mike November & James Greer and sharp MI6 officer Emma Marlowe to battle a rogue black-ops unit in a high-stakes, deeply personal fight.",
-      "poster_path": "/8ehYxUh5MWE41AeE9gkHE8DKzvB.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        53
-      ],
-      "popularity": 399.0769,
-      "release_date": "2026-05-20",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.24,
-      "vote_count": 371
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
-      "id": 687163,
-      "title": "Project Hail Mary",
-      "original_title": "Project Hail Mary",
-      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
-      "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        878,
-        12
-      ],
-      "popularity": 270.6206,
-      "release_date": "2026-03-15",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.638,
-      "vote_count": 4316
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
-      "id": 85552,
-      "name": "Euphoria",
-      "original_name": "Euphoria",
-      "overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
-      "poster_path": "/aJrG7OkoTMPWG5c8opz8a93AZPY.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        18
-      ],
-      "popularity": 285.4515,
-      "first_air_date": "2019-06-16",
-      "softcore": false,
-      "vote_average": 8.291,
-      "vote_count": 10724,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
-      "id": 273240,
-      "name": "Off Campus",
-      "original_name": "Off Campus",
-      "overview": "Hannah Wells tutors hockey captain Garrett Graham to win over her crush. Their deal becomes real connection as they face their pasts. Friends Logan, Dean, Tucker, and Allie navigate college life and love.",
-      "poster_path": "/cbODFqkcmRgrYH8NkG4Q4Hcg8Z1.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        18
-      ],
-      "popularity": 712.73,
-      "first_air_date": "2026-05-13",
-      "softcore": false,
-      "vote_average": 9.175,
-      "vote_count": 297,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
-      "id": 224941,
-      "name": "The Boroughs",
-      "original_name": "The Boroughs",
-      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
-      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        10765,
-        9648
-      ],
-      "popularity": 108.8208,
-      "first_air_date": "2026-05-21",
-      "softcore": false,
-      "vote_average": 7.071,
-      "vote_count": 92,
-      "origin_country": [
-        "US"
-      ]
+      "vote_average": 5.949,
+      "vote_count": 186
     },
     {
       "adult": false,
@@ -287,73 +354,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.045,
-      "vote_count": 2078
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/xugEpZk9YQ0DIz1aFvH5HGkqpZK.jpg",
-      "id": 1304313,
-      "title": "Lee Cronin's The Mummy",
-      "original_title": "Lee Cronin's The Mummy",
-      "overview": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as what should be a joyful reunion turns into a living nightmare.",
-      "poster_path": "/uIb9Tvae5haF0XcQBaPyufmxbb0.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27,
-        9648
-      ],
-      "popularity": 594.6636,
-      "release_date": "2026-04-15",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.07,
-      "vote_count": 1366
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
-      "id": 931285,
-      "title": "Mortal Kombat II",
-      "original_title": "Mortal Kombat II",
-      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-      "poster_path": "/lIsMeDbwntNXSUVHmWMMRXEZOVc.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        14,
-        12
-      ],
-      "popularity": 164.3456,
-      "release_date": "2026-05-06",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.761,
-      "vote_count": 328
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/eQySd26OW7UmCuaeBOL7qy6foMn.jpg",
-      "id": 454639,
-      "title": "Masters of the Universe",
-      "original_title": "Masters of the Universe",
-      "overview": "After being separated for 15 years, the Sword of Power leads Prince Adam back to Eternia, where he discovers his home shattered under the fiendish rule of Skeletor. To save his family and his world, Adam must join forces with his closest allies, Teela and Duncan/Man-At-Arms, and embrace his true destiny as He-Man — the most powerful man in the universe.",
-      "poster_path": "/y4xNd1eWv1ea5qoPO6JmLvzHZf0.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        14,
-        878
-      ],
-      "popularity": 39.3325,
-      "release_date": "2026-06-03",
-      "softcore": false,
-      "video": false,
-      "vote_average": 9,
-      "vote_count": 4
+      "vote_average": 8.043,
+      "vote_count": 2080
     },
     {
       "adult": false,
@@ -375,8 +377,54 @@
       "release_date": "2026-03-23",
       "softcore": false,
       "video": false,
-      "vote_average": 6.45,
-      "vote_count": 60
+      "vote_average": 6.4,
+      "vote_count": 65
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
+      "id": 931285,
+      "title": "Mortal Kombat II",
+      "original_title": "Mortal Kombat II",
+      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
+      "poster_path": "/lIsMeDbwntNXSUVHmWMMRXEZOVc.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        14,
+        12
+      ],
+      "popularity": 164.3456,
+      "release_date": "2026-05-06",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.766,
+      "vote_count": 331
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4Mt7WHox67uJ1yErwTBFcV8KWgG.jpg",
+      "id": 37854,
+      "name": "One Piece",
+      "original_name": "ワンピース",
+      "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
+      "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
+      "media_type": "tv",
+      "original_language": "ja",
+      "genre_ids": [
+        10759,
+        35,
+        16
+      ],
+      "popularity": 60.018,
+      "first_air_date": "1999-10-20",
+      "softcore": false,
+      "vote_average": 8.735,
+      "vote_count": 5318,
+      "origin_country": [
+        "JP"
+      ]
     },
     {
       "adult": false,
@@ -397,57 +445,8 @@
       "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 7.178,
-      "vote_count": 45
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg",
-      "id": 60625,
-      "name": "Rick and Morty",
-      "original_name": "Rick and Morty",
-      "overview": "Follows a sociopathic genius scientist who drags his inherently timid grandson on adventures across the universe.",
-      "poster_path": "/owhkU6KRqdXoUQpjV8uyZGPtX58.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        16,
-        35,
-        10765,
-        10759
-      ],
-      "popularity": 174.0032,
-      "first_air_date": "2013-12-02",
-      "softcore": false,
-      "vote_average": 8.676,
-      "vote_count": 10899,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4Mt7WHox67uJ1yErwTBFcV8KWgG.jpg",
-      "id": 37854,
-      "name": "One Piece",
-      "original_name": "ワンピース",
-      "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
-      "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
-      "media_type": "tv",
-      "original_language": "ja",
-      "genre_ids": [
-        10759,
-        35,
-        16
-      ],
-      "popularity": 60.018,
-      "first_air_date": "1999-10-20",
-      "softcore": false,
-      "vote_average": 8.734,
-      "vote_count": 5317,
-      "origin_country": [
-        "JP"
-      ]
+      "vote_average": 7.138,
+      "vote_count": 47
     }
   ],
   "total_pages": 500,

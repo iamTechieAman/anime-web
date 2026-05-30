@@ -45,25 +45,25 @@ const NETWORK_ROWS = [
 
 // Fallback lists to prevent empty gaps and show user's requested titles
 const DEFAULT_TOP_RATED: MovieItem[] = [
-  { id: "dracula-2025", title: "Dracula", poster_path: "/2B9W3D9l1uK1l0XW1eX3r4n6u9k.jpg", vote_average: 7.1, release_date: "2025-10-31", media_type: "movie" },
-  { id: "titanic-1997", title: "Titanic", poster_path: "/9xjZS243BwOK75N1t8Eb6Zc0dgn.jpg", vote_average: 7.9, release_date: "1997-12-19", media_type: "movie" },
-  { id: "your-name-2016", title: "Your Name.", poster_path: "/q71QZCxIWzaND7761R28su4J3Ur.jpg", vote_average: 8.5, release_date: "2016-08-26", media_type: "movie" },
-  { id: "forrest-gump-1994", title: "Forrest Gump", poster_path: "/arOei5A2gH6fS05J76i3eJ9H8S6t.jpg", vote_average: 8.5, release_date: "1994-07-06", media_type: "movie" },
-  { id: "after-we-fell-2021", title: "After We Fell", poster_path: "/dU4w7w0tHTKV5V1w19hcCEiAI3d.jpg", vote_average: 7.0, release_date: "2021-09-01", media_type: "movie" },
-  { id: "my-fault-2023", title: "My Fault", poster_path: "/w46Vw536RL9C4yJm6n7cHQm6485.jpg", vote_average: 7.7, release_date: "2023-06-08", media_type: "movie" },
-  { id: "chainsaw-man-reze-2025", title: "Chainsaw Man - The Movie: Reze Arc", poster_path: "/pe1af4Nf9Z8gC8W5J6c8S0qWk9t.jpg", vote_average: 8.4, release_date: "2025-12-25", media_type: "movie" },
-  { id: "top-gun-1986", title: "Top Gun", poster_path: "/xZ2BIGQ7d5c7f8a7X2G24v1u8p5.jpg", vote_average: 7.1, release_date: "1986-05-16", media_type: "movie" }
+  { id: 76600, title: "Avatar: The Way of Water", poster_path: "/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg", vote_average: 7.6, release_date: "2022-12-14", media_type: "movie" },
+  { id: 597, title: "Titanic", poster_path: "/9xjZS243BwOK75N1t8Eb6Zc0dgn.jpg", vote_average: 7.9, release_date: "1997-12-19", media_type: "movie" },
+  { id: 372058, title: "Your Name.", poster_path: "/q719jXXEzOoYaps6babgKnONONX.jpg", vote_average: 8.5, release_date: "2016-08-26", media_type: "movie" },
+  { id: 13, title: "Forrest Gump", poster_path: "/arOei5A2gH6fS05J76i3eJ9H8S6t.jpg", vote_average: 8.5, release_date: "1994-07-06", media_type: "movie" },
+  { id: 724495, title: "After We Fell", poster_path: "/dU4w7w0tHTKV5V1w19hcCEiAI3d.jpg", vote_average: 6.5, release_date: "2021-09-01", media_type: "movie" },
+  { id: 985939, title: "My Fault", poster_path: "/w46Vw536RL9C4yJm6n7cHQm6485.jpg", vote_average: 7.7, release_date: "2023-06-08", media_type: "movie" },
+  { id: 299536, title: "Avengers: Infinity War", poster_path: "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg", vote_average: 8.3, release_date: "2018-04-25", media_type: "movie" },
+  { id: 120, title: "The Lord of the Rings: The Fellowship of the Ring", poster_path: "/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg", vote_average: 8.4, release_date: "2001-12-18", media_type: "movie" }
 ];
 
 const DEFAULT_NOW_PLAYING: MovieItem[] = [
-  { id: "your-heart-will-be-broken-2026", title: "Your Heart Will Be Broken", poster_path: "/qhbcfZ1eZTDbZaTQwQA6EvrLz2n.jpg", vote_average: 6.8, release_date: "2026-02-14", media_type: "movie" },
-  { id: "my-dearest-assassin-2026", title: "My Dearest Assassin", poster_path: "/f49tQJ49cRPvFSnegAzV76a6qd1.jpg", vote_average: 8.6, release_date: "2026-05-01", media_type: "movie" },
-  { id: "accidental-partners-2026", title: "Accidental Partners", poster_path: "/h117F866S500eX3781s6v44p20m.jpg", vote_average: 9.2, release_date: "2026-03-20", media_type: "movie" },
-  { id: "wuthering-heights-2026", title: "Wuthering Heights", poster_path: "/81D5Zq7WlUu929C4n2Wc9n8d11S.jpg", vote_average: 6.6, release_date: "2026-04-10", media_type: "movie" },
-  { id: "the-drama-2026", title: "The Drama", poster_path: "/9662nB04nGl25g4fW2o11S7x8bF.jpg", vote_average: 6.9, release_date: "2026-06-01", media_type: "movie" },
-  { id: "the-gorge-2025", title: "The Gorge", poster_path: "/7Oo6720cr6Qad272P5Ux4R9U86C.jpg", vote_average: 7.6, release_date: "2025-02-13", media_type: "movie" },
-  { id: "hamnet-2025", title: "Hamnet", poster_path: "/9G1c5W0r1g8fX8C7n5G6k2tD1g1.jpg", vote_average: 7.7, release_date: "2025-11-20", media_type: "movie" },
-  { id: "fifty-shades-freed-2018", title: "Fifty Shades Freed", poster_path: "/jjPJ42602IYvX247tQzs45jU54u.jpg", vote_average: 6.7, release_date: "2018-02-09", media_type: "movie" }
+  { id: 1084736, title: "The Gorge", poster_path: "/7Oo6720cr6Qad272P5Ux4R9U86C.jpg", vote_average: 7.6, release_date: "2025-02-13", media_type: "movie" },
+  { id: 1233069, title: "A Complete Unknown", poster_path: "/aMn88LD7GIAsGmxdoxAUxCGmxQK.jpg", vote_average: 7.4, release_date: "2024-12-25", media_type: "movie" },
+  { id: 533535, title: "Deadpool & Wolverine", poster_path: "/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", vote_average: 7.7, release_date: "2024-07-24", media_type: "movie" },
+  { id: 748783, title: "The Garfield Movie", poster_path: "/p6AbOJvMQhBmffd0PIv0u8ghWeY.jpg", vote_average: 7.0, release_date: "2024-05-01", media_type: "movie" },
+  { id: 957452, title: "The Crow", poster_path: "/58QT4cPJ2u2MPNq3SEBS1ByoGPS.jpg", vote_average: 5.9, release_date: "2024-08-21", media_type: "movie" },
+  { id: 698687, title: "Transformers One", poster_path: "/qbkAqmmEIRSzPMXnwQcHMxzir3k.jpg", vote_average: 7.6, release_date: "2024-09-11", media_type: "movie" },
+  { id: 1064028, title: "Alien: Romulus", poster_path: "/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg", vote_average: 7.2, release_date: "2024-08-13", media_type: "movie" },
+  { id: 519182, title: "Despicable Me 4", poster_path: "/wWba3TaojhK7NdycyUPlLW33TMH.jpg", vote_average: 7.0, release_date: "2024-06-20", media_type: "movie" }
 ];
 
 // Nav tabs
@@ -78,21 +78,22 @@ const TABS = [
 ];
 
 const CARTOONS_DATA = [
-  { id: "60625", title: "Rick and Morty", poster_path: "/WGRQ8FpjkDTzivQJ43t94bOuY0.jpg", backdrop_path: "/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg", vote_average: 8.7, release_date: "2013-12-02", media_type: "tv", isLive: true, viewers: "85,933" },
-  { id: "15260", title: "Adventure Time", poster_path: "/qk3eQ8jW4opJ48gFWYUXWaMT4l.jpg", backdrop_path: "/3uE9SUywNbj1qSAuYCGgbTTYku5.jpg", vote_average: 8.5, release_date: "2010-04-05", media_type: "tv" },
-  { id: "1434", title: "Family Guy", poster_path: "/3PFsEuAiyLkWsP4GG6dIV37Q6gu.jpg", backdrop_path: "/l7wShoIdIUwaDIbsHno9pO5MZXT.jpg", vote_average: 7.4, release_date: "1999-01-31", media_type: "tv" },
-  { id: "606", title: "Ed, Edd n Eddy", poster_path: "/nfKenwmfmdtoXGhaYiDIftrBchw.jpg", backdrop_path: "/iRbNLYmqlxbqkfCuAmHaFwZ9ocY.jpg", vote_average: 7.9, release_date: "1999-01-04", media_type: "tv" },
-  { id: "47480", title: "The Tom and Jerry Show", poster_path: "/41EWXLXTZO4MLb2BL28mWZuydyq.jpg", backdrop_path: "/utqCOvMmjjMTlXNZz6PHOzRM5QP.jpg", vote_average: 7.3, release_date: "2014-04-09", media_type: "tv" },
-  { id: "12971", title: "Dragon Ball Z", poster_path: "/yfyToia25GnvjY7FPAGaCm3lKRc.jpg", backdrop_path: "/ydf1CeiBLfdxiyNTpskM0802TKl.jpg", vote_average: 8.4, release_date: "1989-04-26", media_type: "tv" },
-  { id: "360920", title: "The Grinch", poster_path: "/smxA8yvZ0LzDPer9BIRd4pyOpx1.jpg", backdrop_path: "/5lWIYxYEqWi8j3ZloxXntw3ImBo.jpg", vote_average: 6.9, release_date: "2018-11-08", media_type: "movie" }
+  { id: 60625, title: "Rick and Morty", poster_path: "/WGRQ8FpjkDTzivQJ43t94bOuY0.jpg", backdrop_path: "/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg", vote_average: 8.7, release_date: "2013-12-02", media_type: "tv", isLive: true, viewers: "85,933" },
+  { id: 15260, title: "Adventure Time", poster_path: "/qk3eQ8jW4opJ48gFWYUXWaMT4l.jpg", backdrop_path: "/3uE9SUywNbj1qSAuYCGgbTTYku5.jpg", vote_average: 8.5, release_date: "2010-04-05", media_type: "tv" },
+  { id: 1434, title: "Family Guy", poster_path: "/3PFsEuAiyLkWsP4GG6dIV37Q6gu.jpg", backdrop_path: "/l7wShoIdIUwaDIbsHno9pO5MZXT.jpg", vote_average: 7.4, release_date: "1999-01-31", media_type: "tv" },
+  { id: 606, title: "Ed, Edd n Eddy", poster_path: "/nfKenwmfmdtoXGhaYiDIftrBchw.jpg", backdrop_path: "/iRbNLYmqlxbqkfCuAmHaFwZ9ocY.jpg", vote_average: 7.9, release_date: "1999-01-04", media_type: "tv" },
+  { id: 47480, title: "The Tom and Jerry Show", poster_path: "/41EWXLXTZO4MLb2BL28mWZuydyq.jpg", backdrop_path: "/utqCOvMmjjMTlXNZz6PHOzRM5QP.jpg", vote_average: 7.3, release_date: "2014-04-09", media_type: "tv" },
+  { id: 12971, title: "Dragon Ball Z", poster_path: "/yfyToia25GnvjY7FPAGaCm3lKRc.jpg", backdrop_path: "/ydf1CeiBLfdxiyNTpskM0802TKl.jpg", vote_average: 8.4, release_date: "1989-04-26", media_type: "tv" },
+  { id: 360920, title: "The Grinch", poster_path: "/smxA8yvZ0LzDPer9BIRd4pyOpx1.jpg", backdrop_path: "/5lWIYxYEqWi8j3ZloxXntw3ImBo.jpg", vote_average: 6.9, release_date: "2018-11-08", media_type: "movie" },
+  { id: 4057, title: "Spongebob SquarePants", poster_path: "/rhoXjgVMNe6CExJw8NnAM0qTI1E.jpg", backdrop_path: "/bBUaWTWizaXhE2EBnDVyLBMYPy8.jpg", vote_average: 7.9, release_date: "1999-05-01", media_type: "tv" }
 ];
 
 const GAMING_STREAMS_DATA = [
-  { id: "82690", title: "Fortnite Championship - Ninja Live", poster_path: "/cu52l826q8jU7C6Xta2wm6B61mY.jpg", backdrop_path: "/8mP4T02z807Z3XQd1s4n6XlM9b1.jpg", vote_average: 8.2, release_date: "2026", media_type: "movie", isLive: true, viewers: "85,933" },
-  { id: "580489", title: "GTA V Roleplay - xQc Live", poster_path: "/xmbU4V6J1Yst64fgdyTIHTv6eOI.jpg", backdrop_path: "/8Y43POKjjw0L051Gv44Z5w17wLs.jpg", vote_average: 7.8, release_date: "2026", media_type: "movie", isLive: true, viewers: "64,205" },
-  { id: "350312", title: "Minecraft Hardcore - Dream", poster_path: "/pU1jKVmrmz18g4IG9UB3FWt15qb.jpg", backdrop_path: "/q71QZCxIWzaND7761R28su4J3Ur.jpg", vote_average: 8.5, release_date: "2026", media_type: "movie", isLive: true, viewers: "42,150" },
-  { id: "980489", title: "Valorant Radiant Lobby - Shroud", poster_path: "/51tA6WLVndnd4mDxuG2me7ZE0i5.jpg", backdrop_path: "/jZIUCJjScSM24goOJm6cjrxo5tI.jpg", vote_average: 8.0, release_date: "2026", media_type: "movie", isLive: true, viewers: "22,405" },
-  { id: "257344", title: "League of Legends Worlds - Riot Games", poster_path: "/6tIK0Zqf3XN280j6bV5D1j64n3o.jpg", backdrop_path: "/5l67yMvLp3Ww1D1F5o3b28bE54r.jpg", vote_average: 7.5, release_date: "2026", media_type: "movie", isLive: true, viewers: "128,930" }
+  { id: 82690, title: "Fortnite Championship - Ninja Live", poster_path: "/cu52l826q8jU7C6Xta2wm6B61mY.jpg", backdrop_path: "/8mP4T02z807Z3XQd1s4n6XlM9b1.jpg", vote_average: 8.2, release_date: "2026-01-01", media_type: "movie", isLive: true, viewers: "85,933" },
+  { id: 580489, title: "GTA V Roleplay - xQc Live", poster_path: "/xmbU4V6J1Yst64fgdyTIHTv6eOI.jpg", backdrop_path: "/8Y43POKjjw0L051Gv44Z5w17wLs.jpg", vote_average: 7.8, release_date: "2026-01-01", media_type: "movie", isLive: true, viewers: "64,205" },
+  { id: 350312, title: "Minecraft Hardcore - Dream", poster_path: "/pU1jKVmrmz18g4IG9UB3FWt15qb.jpg", backdrop_path: "/q71QZCxIWzaND7761R28su4J3Ur.jpg", vote_average: 8.5, release_date: "2026-01-01", media_type: "movie", isLive: true, viewers: "42,150" },
+  { id: 980489, title: "Valorant Radiant Lobby - Shroud", poster_path: "/51tA6WLVndnd4mDxuG2me7ZE0i5.jpg", backdrop_path: "/jZIUCJjScSM24goOJm6cjrxo5tI.jpg", vote_average: 8.0, release_date: "2026-01-01", media_type: "movie", isLive: true, viewers: "22,405" },
+  { id: 257344, title: "League of Legends Worlds - Riot Games", poster_path: "/6tIK0Zqf3XN280j6bV5D1j64n3o.jpg", backdrop_path: "/5l67yMvLp3Ww1D1F5o3b28bE54r.jpg", vote_average: 7.5, release_date: "2026-01-01", media_type: "movie", isLive: true, viewers: "128,930" }
 ];
 
 export default function MoviesPage() {

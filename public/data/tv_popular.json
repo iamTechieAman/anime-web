@@ -3,6 +3,28 @@
   "results": [
     {
       "adult": false,
+      "backdrop_path": "/pmAzkQJa993nIgPqFtVmOhStHXg.jpg",
+      "genre_ids": [
+        18,
+        10766
+      ],
+      "id": 2354,
+      "origin_country": [
+        "AU"
+      ],
+      "original_language": "en",
+      "original_name": "Home and Away",
+      "overview": "Home and Away is set in the fictional town of Summer Bay, a coastal town in New South Wales, and follows the personal and professional lives of the people living in the area. The show initially focused on the Fletcher family, Pippa and Tom Fletcher and their five foster children Frank Morgan, Carly Morris, Steven Matheson, Lynn Davenport and Sally Keating, who would go on to become one of the show's longest-running characters. The show also originally and currently focuses on the Stewart family. Home and Away had proved popular when it premiered in 1988 and had risen to become a hit in Australia, and after only a few weeks, the show tackled its first major and disturbing storyline, the rape of Carly Morris; it was one of the first shows to feature such storylines during the early timeslot. H&A has tackled many adult-themed and controversial storylines; something rarely found in its restricted timeslot.",
+      "popularity": 875.4213,
+      "poster_path": "/vn0eKMiG69bhQtxb7qLRo8SSqu5.jpg",
+      "first_air_date": "1988-01-18",
+      "softcore": false,
+      "name": "Home and Away",
+      "vote_average": 6.3,
+      "vote_count": 77
+    },
+    {
+      "adult": false,
       "backdrop_path": "/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
       "genre_ids": [
         18
@@ -19,8 +41,8 @@
       "first_air_date": "2026-05-13",
       "softcore": false,
       "name": "Off Campus",
-      "vote_average": 9.135,
-      "vote_count": 292
+      "vote_average": 9.174,
+      "vote_count": 299
     },
     {
       "adult": false,
@@ -42,8 +64,8 @@
       "first_air_date": "2022-02-20",
       "softcore": false,
       "name": "FROM",
-      "vote_average": 8.419,
-      "vote_count": 3372
+      "vote_average": 8.418,
+      "vote_count": 3373
     },
     {
       "adult": false,
@@ -64,8 +86,8 @@
       "first_air_date": "2019-07-25",
       "softcore": false,
       "name": "The Boys",
-      "vote_average": 8.5,
-      "vote_count": 12750
+      "vote_average": 8.458,
+      "vote_count": 12758
     },
     {
       "adult": false,
@@ -87,30 +109,8 @@
       "first_air_date": "2026-05-25",
       "softcore": false,
       "name": "Spider-Noir",
-      "vote_average": 8.994,
-      "vote_count": 160
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/pmAzkQJa993nIgPqFtVmOhStHXg.jpg",
-      "genre_ids": [
-        18,
-        10766
-      ],
-      "id": 2354,
-      "origin_country": [
-        "AU"
-      ],
-      "original_language": "en",
-      "original_name": "Home and Away",
-      "overview": "Home and Away is set in the fictional town of Summer Bay, a coastal town in New South Wales, and follows the personal and professional lives of the people living in the area. The show initially focused on the Fletcher family, Pippa and Tom Fletcher and their five foster children Frank Morgan, Carly Morris, Steven Matheson, Lynn Davenport and Sally Keating, who would go on to become one of the show's longest-running characters. The show also originally and currently focuses on the Stewart family. Home and Away had proved popular when it premiered in 1988 and had risen to become a hit in Australia, and after only a few weeks, the show tackled its first major and disturbing storyline, the rape of Carly Morris; it was one of the first shows to feature such storylines during the early timeslot. H&A has tackled many adult-themed and controversial storylines; something rarely found in its restricted timeslot.",
-      "popularity": 875.4213,
-      "poster_path": "/vn0eKMiG69bhQtxb7qLRo8SSqu5.jpg",
-      "first_air_date": "1988-01-18",
-      "softcore": false,
-      "name": "Home and Away",
-      "vote_average": 6.3,
-      "vote_count": 77
+      "vote_average": 9,
+      "vote_count": 164
     },
     {
       "adult": false,
@@ -153,8 +153,8 @@
       "first_air_date": "2019-06-16",
       "softcore": false,
       "name": "Euphoria",
-      "vote_average": 8.3,
-      "vote_count": 10722
+      "vote_average": 8.29,
+      "vote_count": 10725
     },
     {
       "adult": false,
@@ -177,7 +177,7 @@
       "softcore": false,
       "name": "The Rookie",
       "vote_average": 8.545,
-      "vote_count": 3257
+      "vote_count": 3258
     },
     {
       "adult": false,
@@ -197,8 +197,8 @@
       "first_air_date": "2005-03-27",
       "softcore": false,
       "name": "Grey's Anatomy",
-      "vote_average": 8.208,
-      "vote_count": 10907
+      "vote_average": 8.209,
+      "vote_count": 10909
     },
     {
       "adult": false,
@@ -243,7 +243,7 @@
       "softcore": false,
       "name": "Supernatural",
       "vote_average": 8.307,
-      "vote_count": 8424
+      "vote_count": 8425
     },
     {
       "adult": false,
@@ -294,6 +294,29 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/tUtXfyVy54BY7eJnRtI8Xnmr1ZL.jpg",
+      "genre_ids": [
+        80,
+        18,
+        9648
+      ],
+      "id": 4057,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Criminal Minds",
+      "overview": "An elite team of FBI profilers analyze the country's most twisted criminal minds, anticipating their next moves before they strike again. The Behavioral Analysis Unit's most experienced agent is David Rossi, a founding member of the BAU who returns to help the team solve new cases.",
+      "popularity": 213.64,
+      "poster_path": "/hWSb4UnIjlTvnvrP98NbFSO60HA.jpg",
+      "first_air_date": "2005-09-22",
+      "softcore": false,
+      "name": "Criminal Minds",
+      "vote_average": 8.3,
+      "vote_count": 4075
+    },
+    {
+      "adult": false,
       "backdrop_path": "/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg",
       "genre_ids": [
         10765,
@@ -313,30 +336,7 @@
       "softcore": false,
       "name": "Game of Thrones",
       "vote_average": 8.461,
-      "vote_count": 26893
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/tUtXfyVy54BY7eJnRtI8Xnmr1ZL.jpg",
-      "genre_ids": [
-        80,
-        18,
-        9648
-      ],
-      "id": 4057,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Criminal Minds",
-      "overview": "An elite team of FBI profilers analyze the country's most twisted criminal minds, anticipating their next moves before they strike again. The Behavioral Analysis Unit's most experienced agent is David Rossi, a founding member of the BAU who returns to help the team solve new cases.",
-      "popularity": 213.64,
-      "poster_path": "/hWSb4UnIjlTvnvrP98NbFSO60HA.jpg",
-      "first_air_date": "2005-09-22",
-      "softcore": false,
-      "name": "Criminal Minds",
-      "vote_average": 8.301,
-      "vote_count": 4075
+      "vote_count": 26896
     },
     {
       "adult": false,
@@ -404,7 +404,7 @@
       "softcore": false,
       "name": "Breaking Bad",
       "vote_average": 8.946,
-      "vote_count": 17819
+      "vote_count": 17821
     },
     {
       "adult": false,
@@ -452,6 +452,6 @@
       "vote_count": 1384
     }
   ],
-  "total_pages": 11153,
-  "total_results": 223057
+  "total_pages": 11154,
+  "total_results": 223076
 }
