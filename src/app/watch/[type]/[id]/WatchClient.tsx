@@ -812,7 +812,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         const embedUrl = SERVERS[0].getUrl((type === "anime" || type === "cartoon") ? "tv" : type, fallbackId, 1, 1);
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
                     <div className="w-full flex items-center justify-between gap-4">
                         <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -821,7 +821,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         <h1 className="text-sm font-bold truncate text-center flex-1">{fallbackTitle}</h1>
                     </div>
                 </div>
-                <div className="pt-14">
+                <div className="pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
                     <div className="relative w-full bg-black">
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
@@ -865,7 +865,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Top Navigation Bar */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
                 <div className="w-full flex items-center justify-between gap-4">
                     <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -876,7 +876,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 </div>
             </div>
 
-            <div className="pt-14 w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-6">
+            <div className="pt-[max(80px,calc(75px+env(safe-area-inset-top)))] w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-6 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
                 <div className="flex flex-col xl:flex-row gap-6 items-start">
                     
                     {/* Left Pane (Main content: Player, Cast, Info, alt etc.) */}
