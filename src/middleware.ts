@@ -95,7 +95,7 @@ export default clerkMiddleware(async (auth, request) => {
     // Content-Security-Policy (CSP) restricting frame embedding origins
     response.headers.set(
         'Content-Security-Policy',
-        "frame-src 'self' https://*.tmdb.org https://*.vidsrc.me https://*.vidsrc.to https://*.vidsrc.xyz https://*.embed.su https://*.vidlink.pro https://*.peachify.top; frame-ancestors 'self' https://toonplayer.in;"
+        "frame-src 'self' https://*.tmdb.org https://tmdb.org https://*.vidsrc.me https://vidsrc.me https://*.vidsrc.to https://vidsrc.to https://*.vidsrc.xyz https://vidsrc.xyz https://*.vidsrc.in https://vidsrc.in https://*.vidsrc.net https://vidsrc.net https://*.vidsrc.pro https://vidsrc.pro https://*.vidsrc.vip https://vidsrc.vip https://*.embed.su https://embed.su https://*.vidlink.pro https://vidlink.pro https://*.peachify.top https://peachify.top https://*.111movies.net https://111movies.net https://*.vidfast.pro https://vidfast.pro https://*.nontongo.win https://nontongo.win https://*.vidstorm.ru https://vidstorm.ru https://*.vidbinge.com https://vidbinge.com https://*.vidbinge.to https://vidbinge.to https://*.multiembed.mov https://multiembed.mov https://*.smashy.stream https://smashy.stream https://*.abysscdn.com https://abysscdn.com https://*.cineby.gd https://cineby.gd https://*.rivestream.org https://rivestream.org https://*.cinemaos.live https://cinemaos.live https://*.autoembed.cc https://autoembed.cc https://*.youtube.com https://youtube.com; frame-ancestors 'self' https://toonplayer.in;"
     );
 
     // Strict Transport Security (HSTS) - enforce HTTPS
