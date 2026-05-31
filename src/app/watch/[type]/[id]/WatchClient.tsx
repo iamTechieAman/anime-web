@@ -221,6 +221,15 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
 
+    // Unified State
+    const [animeData, setAnimeData] = useState<ShowData | null>(null);
+    const [selectedSeason, setSelectedSeason] = useState(1);
+    const [selectedEpisode, setSelectedEpisode] = useState(1);
+    const [episodes, setEpisodes] = useState<any[]>([]);
+    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+    const [mode, setMode] = useState<"sub" | "dub">("sub");
+    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+
     const isAnimeServer = activeServer ? ANIME_SERVERS.some(s => s.id === activeServer.id) : false;
 
 
@@ -427,14 +436,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     // Auto Server Selection State
 
 
-    // Unified State
-    const [animeData, setAnimeData] = useState<ShowData | null>(null);
-    const [selectedSeason, setSelectedSeason] = useState(1);
-    const [selectedEpisode, setSelectedEpisode] = useState(1);
-    const [episodes, setEpisodes] = useState<any[]>([]);
-    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
-    const [mode, setMode] = useState<"sub" | "dub">("sub");
-    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+
 
     // Read season/episode from URL params on mount
     useEffect(() => {

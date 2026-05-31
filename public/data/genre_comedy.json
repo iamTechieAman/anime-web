@@ -16,13 +16,13 @@
       "original_language": "en",
       "original_title": "The Super Mario Galaxy Movie",
       "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
-      "popularity": 291.6036,
+      "popularity": 280.958,
       "poster_path": "/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.046,
-      "vote_count": 2079
+      "vote_average": 8.061,
+      "vote_count": 2112
     },
     {
       "adult": false,
@@ -35,7 +35,7 @@
       "original_language": "hi",
       "original_title": "पति पत्नी और वो दो",
       "overview": "A seemingly perfect marriage in Prayagraj takes an unexpected turn when one decision leads to a chain of misunderstandings, suspicion, and comedic chaos.",
-      "popularity": 198.273,
+      "popularity": 184.3916,
       "poster_path": "/x0RUPvba4JlCCkyyEZGlQFIFVuF.jpg",
       "release_date": "2026-05-15",
       "softcore": false,
@@ -55,13 +55,13 @@
       "original_language": "en",
       "original_title": "The Devil Wears Prada",
       "overview": "A young woman from the Midwest gets more than she bargained for when she moves to New York to become a writer and ends up as the assistant to the tyrannical, larger-than-life editor-in-chief of a major fashion magazine.",
-      "popularity": 152.1336,
+      "popularity": 150.1003,
       "poster_path": "/8912AsVuS7Sj915apArUFbv6F9L.jpg",
       "release_date": "2006-06-29",
       "softcore": false,
       "video": false,
-      "vote_average": 7.424,
-      "vote_count": 13594
+      "vote_average": 7.425,
+      "vote_count": 13607
     },
     {
       "adult": false,
@@ -78,33 +78,13 @@
       "original_language": "en",
       "original_title": "Hoppers",
       "overview": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology, uncovering mysteries within the animal world beyond anything she could have imagined.",
-      "popularity": 142.3815,
+      "popularity": 141.4706,
       "poster_path": "/xjtWQ2CL1mpmMNwuU5HeS4Iuwuu.jpg",
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.147,
-      "vote_count": 1278
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/bOy625BjpCskOWnx3tD09MsKVCb.jpg",
-      "genre_ids": [
-        35,
-        14
-      ],
-      "id": 1368881,
-      "title": "Ladies First",
-      "original_language": "en",
-      "original_title": "Ladies First",
-      "overview": "An arrogant but charismatic ladies' man finds his life of money, power and casual flings upended when he wakes up in a parallel world dominated by women.",
-      "popularity": 104.2757,
-      "poster_path": "/kjR56Yv17pbjTVBTMjqepvcus4f.jpg",
-      "release_date": "2026-05-21",
-      "softcore": false,
-      "video": false,
-      "vote_average": 5.943,
-      "vote_count": 184
+      "vote_average": 8.145,
+      "vote_count": 1288
     },
     {
       "adult": false,
@@ -119,13 +99,13 @@
       "original_language": "en",
       "original_title": "GOAT",
       "overview": "A small goat with big dreams gets a once-in-a-lifetime shot to join the pros and play roarball, a high-intensity, co-ed, full-contact sport dominated by the fastest, fiercest animals in the world.",
-      "popularity": 114.0037,
+      "popularity": 112.4685,
       "poster_path": "/wfuqMlaExcoYiUEvKfVpUTt1v4u.jpg",
       "release_date": "2026-02-11",
       "softcore": false,
       "video": false,
-      "vote_average": 8.116,
-      "vote_count": 699
+      "vote_average": 8.112,
+      "vote_count": 703
     },
     {
       "adult": false,
@@ -140,13 +120,33 @@
       "original_language": "en",
       "original_title": "Over Your Dead Body",
       "overview": "A dysfunctional couple head to a remote cabin to \"reconnect\", but each has secret intentions to kill the other.",
-      "popularity": 111.5297,
+      "popularity": 182.1351,
       "poster_path": "/fqXIk1BY0tJvlqwiTw2HL9gegqE.jpg",
       "release_date": "2026-04-24",
       "softcore": false,
       "video": false,
-      "vote_average": 7.138,
-      "vote_count": 47
+      "vote_average": 7.028,
+      "vote_count": 53
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/bOy625BjpCskOWnx3tD09MsKVCb.jpg",
+      "genre_ids": [
+        35,
+        14
+      ],
+      "id": 1368881,
+      "title": "Ladies First",
+      "original_language": "en",
+      "original_title": "Ladies First",
+      "overview": "An arrogant but charismatic ladies' man finds his life of money, power and casual flings upended when he wakes up in a parallel world dominated by women.",
+      "popularity": 91.6415,
+      "poster_path": "/kjR56Yv17pbjTVBTMjqepvcus4f.jpg",
+      "release_date": "2026-05-21",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.003,
+      "vote_count": 195
     },
     {
       "adult": false,
@@ -160,7 +160,7 @@
       "original_language": "hi",
       "original_title": "भूत बंगला",
       "overview": "A man inherits a palace in rural Mangalpur and plans his sister's wedding there, but strange supernatural events and panicked locals force him to investigate the property's mysterious past.",
-      "popularity": 91.9445,
+      "popularity": 96.4639,
       "poster_path": "/79RBp8afL4u4z3nVGR78z6eIvBB.jpg",
       "release_date": "2026-04-16",
       "softcore": false,
@@ -184,13 +184,33 @@
       "original_language": "en",
       "original_title": "Zootopia 2",
       "overview": "After cracking the biggest case in Zootopia's history, rookie cops Judy Hopps and Nick Wilde find themselves on the twisting trail of a great mystery when Gary De'Snake arrives and turns the animal metropolis upside down. To crack the case, Judy and Nick must go undercover to unexpected new parts of town, where their growing partnership is tested like never before.",
-      "popularity": 83.1874,
+      "popularity": 84.8823,
       "poster_path": "/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
       "release_date": "2025-11-26",
       "softcore": false,
       "video": false,
-      "vote_average": 7.645,
-      "vote_count": 2827
+      "vote_average": 7.643,
+      "vote_count": 2833
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iCML6fBe3X0y06P33bM7dyYXPKZ.jpg",
+      "genre_ids": [
+        35,
+        10749
+      ],
+      "id": 1632181,
+      "title": "Accidental Partners",
+      "original_language": "es",
+      "original_title": "Socias por accidente",
+      "overview": "Two women discover they were both scammed by the same man (who also got them pregnant). They form an alliance to take revenge.",
+      "popularity": 70.2559,
+      "poster_path": "/sr1Yoj6XLPTWYcbDoBy67xivW4I.jpg",
+      "release_date": "2026-03-12",
+      "softcore": false,
+      "video": false,
+      "vote_average": 9.101,
+      "vote_count": 188
     },
     {
       "adult": false,
@@ -205,52 +225,13 @@
       "original_language": "en",
       "original_title": "Ready or Not: Here I Come",
       "overview": "Moments after surviving an all-out attack from the Le Domas family, Grace discovers she’s reached the next level of the nightmarish game — and this time with her estranged sister Faith at her side. Grace has one chance to survive, keep her sister alive, and claim the High Seat of the Council that controls the world. Four rival families are hunting her for the throne, and whoever wins rules it all.",
-      "popularity": 70.7846,
+      "popularity": 68.4055,
       "poster_path": "/13ZcJzSGEqVgDSqsS9U5EkQwPkV.jpg",
       "release_date": "2026-03-19",
       "softcore": false,
       "video": false,
-      "vote_average": 7.685,
-      "vote_count": 903
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/iCML6fBe3X0y06P33bM7dyYXPKZ.jpg",
-      "genre_ids": [
-        35,
-        10749
-      ],
-      "id": 1632181,
-      "title": "Accidental Partners",
-      "original_language": "es",
-      "original_title": "Socias por accidente",
-      "overview": "Two women discover they were both scammed by the same man (who also got them pregnant). They form an alliance to take revenge.",
-      "popularity": 71.2612,
-      "poster_path": "/sr1Yoj6XLPTWYcbDoBy67xivW4I.jpg",
-      "release_date": "2026-03-12",
-      "softcore": false,
-      "video": false,
-      "vote_average": 9.102,
-      "vote_count": 186
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mFDQ8f2lPHorGwtuE0fjnUIbKLF.jpg",
-      "genre_ids": [
-        35
-      ],
-      "id": 62029,
-      "title": "Bingo Bongo",
-      "original_language": "it",
-      "original_title": "Bingo Bongo",
-      "overview": "The ape-man, found somewhere in the jungles of Congo, transferred to Milan and named Bingo Bongo. The only one who believes in the human qualities of him is Laura, a woman anthropologist , so their affection for each other even grows to love.",
-      "popularity": 65.9828,
-      "poster_path": "/5ve4VuCwi7Xas5s50ynEB7uFjM2.jpg",
-      "release_date": "1982-12-23",
-      "softcore": false,
-      "video": false,
-      "vote_average": 5.731,
-      "vote_count": 175
+      "vote_average": 7.684,
+      "vote_count": 911
     },
     {
       "adult": false,
@@ -265,54 +246,32 @@
       "original_language": "en",
       "original_title": "The Sheep Detectives",
       "overview": "George Hardy is a shepherd who reads detective novels to his beloved sheep every night, assuming they can't possibly understand. But when a mysterious incident disrupts life on the farm, the sheep realize they must become the detectives. As they follow the clues and investigate human suspects, they prove that even sheep can be brilliant crime-solvers.",
-      "popularity": 66.7341,
+      "popularity": 67.1627,
       "poster_path": "/6QtL9rl3Zb4d8qW6EJ4qO5hSSfU.jpg",
       "release_date": "2026-04-30",
       "softcore": false,
       "video": false,
-      "vote_average": 7.619,
-      "vote_count": 118
+      "vote_average": 7.633,
+      "vote_count": 120
     },
     {
       "adult": false,
-      "backdrop_path": null,
+      "backdrop_path": "/mFDQ8f2lPHorGwtuE0fjnUIbKLF.jpg",
       "genre_ids": [
-        35,
-        18
-      ],
-      "id": 1699574,
-      "title": "Deool Band 2",
-      "original_language": "en",
-      "original_title": "देऊळ बँड 2",
-      "overview": "The story follows a farmer who decides to question and test his faith, setting off a journey filled with emotional and life-altering moments. At its core, the narrative centers on a woman who tirelessly struggles for her family, facing hardships with resilience, as her path ultimately leads her to confront the very idea of divine power",
-      "popularity": 62.2144,
-      "poster_path": "/89n9cfc5dm0kdkABmDJalzveEwU.jpg",
-      "release_date": "2026-05-21",
-      "softcore": false,
-      "video": false,
-      "vote_average": 0,
-      "vote_count": 0
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6muIb4lmdF2uJmrAY4zyH11wYxW.jpg",
-      "genre_ids": [
-        10749,
-        18,
         35
       ],
-      "id": 1157008,
-      "title": "Dime lo que quieres (de verdad)",
-      "original_language": "es",
-      "original_title": "Dime lo que quieres (de verdad)",
-      "overview": "Diego and Emilia are a conservative couple with 16 years of marriage who have lost the spark, until Tomás and Betina rescue them and introduce them to the forbidden world, changing what they know about intimacy, relationships, and sex.",
-      "popularity": 61.1883,
-      "poster_path": "/2ynUMfrwnEdGmkZmpiiJmTdTi4w.jpg",
-      "release_date": "2023-07-27",
+      "id": 62029,
+      "title": "Bingo Bongo",
+      "original_language": "it",
+      "original_title": "Bingo Bongo",
+      "overview": "The ape-man, found somewhere in the jungles of Congo, transferred to Milan and named Bingo Bongo. The only one who believes in the human qualities of him is Laura, a woman anthropologist , so their affection for each other even grows to love.",
+      "popularity": 66.2575,
+      "poster_path": "/5ve4VuCwi7Xas5s50ynEB7uFjM2.jpg",
+      "release_date": "1982-12-23",
       "softcore": false,
       "video": false,
-      "vote_average": 7.8,
-      "vote_count": 30
+      "vote_average": 5.731,
+      "vote_count": 175
     },
     {
       "adult": false,
@@ -326,75 +285,33 @@
       "original_language": "ar",
       "original_title": "7 كلاب",
       "overview": "Interpol agent Khalid Al-Azzazi joins forces with Ghali Abu Dawood from the 7 Dogs crime syndicate to fight drug trafficking.",
-      "popularity": 63.4065,
+      "popularity": 67.1287,
       "poster_path": "/66n5bB6iYTWsWMz0mh3Qv7qmzIJ.jpg",
       "release_date": "2026-05-27",
       "softcore": false,
       "video": false,
-      "vote_average": 0,
-      "vote_count": 0
+      "vote_average": 1,
+      "vote_count": 1
     },
     {
       "adult": false,
-      "backdrop_path": "/qnTdOizsXBzYu3uIbfhHSfE29TE.jpg",
-      "genre_ids": [
-        28,
-        35,
-        27
-      ],
-      "id": 1292695,
-      "title": "They Will Kill You",
-      "original_language": "en",
-      "original_title": "They Will Kill You",
-      "overview": "A woman answers a help wanted ad to be a housekeeper in a mysterious New York City high-rise, unaware that she is entering a community that has seen a number of disappearances over the years and may be under the grip of a Satanic cult.",
-      "popularity": 50.7565,
-      "poster_path": "/6oI4oQKTWMVUlr8Ivqydp28Ruu6.jpg",
-      "release_date": "2026-03-23",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.961,
-      "vote_count": 619
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/tId87yE7JnQsQsqOpnGXjz9PoEe.jpg",
-      "genre_ids": [
-        18,
-        35,
-        27
-      ],
-      "id": 329505,
-      "title": "Lola's Secret",
-      "original_language": "it",
-      "original_title": "Il peccato di Lola",
-      "overview": "Young man has his dreams come true when the sexy new maid seduces him. But she also has a secret that leads to trouble.",
-      "popularity": 39.3123,
-      "poster_path": "/qaJ4iQngrLbyz9OgaQkJLppDN6m.jpg",
-      "release_date": "1984-05-04",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7,
-      "vote_count": 71
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/y3fQa7pytlysovXzovpXc1OQlTW.jpg",
+      "backdrop_path": null,
       "genre_ids": [
         35,
         18
       ],
-      "id": 1314481,
-      "title": "The Devil Wears Prada 2",
+      "id": 1699574,
+      "title": "Deool Band 2",
       "original_language": "en",
-      "original_title": "The Devil Wears Prada 2",
-      "overview": "Andy Sachs returns to Runway as Miranda Priestly navigates a new media landscape and Runway's position within. The duo reconnect with former assistant Emily Charlton, now the head of a luxury brand that possesses funding which could ensure Runway's survival.",
-      "popularity": 51.202,
-      "poster_path": "/xTI42pmsP5EDnvsNJPEDubwWBQO.jpg",
-      "release_date": "2026-04-29",
+      "original_title": "देऊळ बँड 2",
+      "overview": "The story follows a farmer who decides to question and test his faith, setting off a journey filled with emotional and life-altering moments. At its core, the narrative centers on a woman who tirelessly struggles for her family, facing hardships with resilience, as her path ultimately leads her to confront the very idea of divine power",
+      "popularity": 74.4381,
+      "poster_path": "/89n9cfc5dm0kdkABmDJalzveEwU.jpg",
+      "release_date": "2026-05-21",
       "softcore": false,
       "video": false,
-      "vote_average": 6.637,
-      "vote_count": 703
+      "vote_average": 0,
+      "vote_count": 0
     },
     {
       "adult": false,
@@ -410,15 +327,98 @@
       "original_language": "hi",
       "original_title": "रॉकी और रानी की प्रेम कहानी",
       "overview": "Gym-freak brat Rocky falls in love with Rani, who comes from a well-educated Bengali family. Being from polar opposite worlds, the two decide to switch their families to adjust to each other's cultures and backgrounds and to know if their marriage will survive. Rocky and Rani are trapped in a world where they are united by love but divided by families and the ultimate question is will they fit in?",
-      "popularity": 61.5988,
+      "popularity": 67.0972,
       "poster_path": "/vTQIqlxUkOuyf2UKhlM2OUaFGKz.jpg",
       "release_date": "2023-07-28",
       "softcore": false,
       "video": false,
       "vote_average": 6.201,
       "vote_count": 87
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6muIb4lmdF2uJmrAY4zyH11wYxW.jpg",
+      "genre_ids": [
+        10749,
+        18,
+        35
+      ],
+      "id": 1157008,
+      "title": "Dime lo que quieres (de verdad)",
+      "original_language": "es",
+      "original_title": "Dime lo que quieres (de verdad)",
+      "overview": "Diego and Emilia are a conservative couple with 16 years of marriage who have lost the spark, until Tomás and Betina rescue them and introduce them to the forbidden world, changing what they know about intimacy, relationships, and sex.",
+      "popularity": 64.6031,
+      "poster_path": "/2ynUMfrwnEdGmkZmpiiJmTdTi4w.jpg",
+      "release_date": "2023-07-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.8,
+      "vote_count": 30
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/y3fQa7pytlysovXzovpXc1OQlTW.jpg",
+      "genre_ids": [
+        35,
+        18
+      ],
+      "id": 1314481,
+      "title": "The Devil Wears Prada 2",
+      "original_language": "en",
+      "original_title": "The Devil Wears Prada 2",
+      "overview": "Andy Sachs returns to Runway as Miranda Priestly navigates a new media landscape and Runway's position within. The duo reconnect with former assistant Emily Charlton, now the head of a luxury brand that possesses funding which could ensure Runway's survival.",
+      "popularity": 51.3732,
+      "poster_path": "/xTI42pmsP5EDnvsNJPEDubwWBQO.jpg",
+      "release_date": "2026-04-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.64,
+      "vote_count": 707
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qnTdOizsXBzYu3uIbfhHSfE29TE.jpg",
+      "genre_ids": [
+        28,
+        35,
+        27
+      ],
+      "id": 1292695,
+      "title": "They Will Kill You",
+      "original_language": "en",
+      "original_title": "They Will Kill You",
+      "overview": "A woman answers a help wanted ad to be a housekeeper in a mysterious New York City high-rise, unaware that she is entering a community that has seen a number of disappearances over the years and may be under the grip of a Satanic cult.",
+      "popularity": 48.0932,
+      "poster_path": "/6oI4oQKTWMVUlr8Ivqydp28Ruu6.jpg",
+      "release_date": "2026-03-23",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.973,
+      "vote_count": 624
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/hO2jx1H3XafR7Y8QbFgVH1sHTY9.jpg",
+      "genre_ids": [
+        27,
+        53,
+        35
+      ],
+      "id": 1198994,
+      "title": "Send Help",
+      "original_language": "en",
+      "original_title": "Send Help",
+      "overview": "Two colleagues become stranded on a deserted island, the only survivors of a plane crash. On the island, they must overcome past grievances and work together to survive, but ultimately, it's a battle of wills and wits to make it out alive.",
+      "popularity": 52.5242,
+      "poster_path": "/zbJWVHOtj3ljBzWgL1P8pxP03Up.jpg",
+      "release_date": "2026-01-22",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.037,
+      "vote_count": 1627
     }
   ],
-  "total_pages": 8518,
-  "total_results": 170350
+  "total_pages": 8520,
+  "total_results": 170395
 }

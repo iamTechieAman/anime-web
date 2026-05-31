@@ -20,7 +20,7 @@
       "softcore": false,
       "name": "Euphoria",
       "vote_average": 8.29,
-      "vote_count": 10725
+      "vote_count": 10727
     },
     {
       "adult": false,
@@ -43,7 +43,7 @@
       "softcore": false,
       "name": "Game of Thrones",
       "vote_average": 8.461,
-      "vote_count": 26896
+      "vote_count": 26901
     },
     {
       "adult": false,
@@ -65,7 +65,7 @@
       "softcore": false,
       "name": "The Sopranos",
       "vote_average": 8.666,
-      "vote_count": 3455
+      "vote_count": 3456
     },
     {
       "adult": false,
@@ -91,49 +91,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/rX5hvSRB2k4YoIvRg6Zky52rWk0.jpg",
-      "genre_ids": [
-        10765,
-        37
-      ],
-      "id": 63247,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Westworld",
-      "overview": "A dark odyssey about the dawn of artificial consciousness and the evolution of sin. Set at the intersection of the near future and the reimagined past, it explores a world in which every human appetite, no matter how noble or depraved, can be indulged.",
-      "popularity": 66.6729,
-      "poster_path": "/8MfgyFHf7XEboZJPZXCIDqqiz6e.jpg",
-      "first_air_date": "2016-10-02",
-      "softcore": false,
-      "name": "Westworld",
-      "vote_average": 8,
-      "vote_count": 6151
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/eNSIkGIYqXVFNmT85P4X7BsXkYI.jpg",
-      "genre_ids": [
-        35
-      ],
-      "id": 4546,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Curb Your Enthusiasm",
-      "overview": "The off-kilter, unscripted comic vision of Larry David, who plays himself in a parallel universe in which he can't seem to do anything right, and, by his standards, neither can anyone else.",
-      "popularity": 66.9167,
-      "poster_path": "/mZqWmSq1M61Jlre3furVDSXvdrN.jpg",
-      "first_air_date": "2000-10-15",
-      "softcore": false,
-      "name": "Curb Your Enthusiasm",
-      "vote_average": 8.037,
-      "vote_count": 923
-    },
-    {
-      "adult": false,
       "backdrop_path": "/577eXC8wFQT0eUrJcgznSiFPRmk.jpg",
       "genre_ids": [
         10765,
@@ -152,7 +109,7 @@
       "first_air_date": "2022-08-21",
       "softcore": false,
       "name": "House of the Dragon",
-      "vote_average": 8.296,
+      "vote_average": 8.295,
       "vote_count": 5953
     },
     {
@@ -179,6 +136,49 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/eNSIkGIYqXVFNmT85P4X7BsXkYI.jpg",
+      "genre_ids": [
+        35
+      ],
+      "id": 4546,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Curb Your Enthusiasm",
+      "overview": "The off-kilter, unscripted comic vision of Larry David, who plays himself in a parallel universe in which he can't seem to do anything right, and, by his standards, neither can anyone else.",
+      "popularity": 66.9167,
+      "poster_path": "/mZqWmSq1M61Jlre3furVDSXvdrN.jpg",
+      "first_air_date": "2000-10-15",
+      "softcore": false,
+      "name": "Curb Your Enthusiasm",
+      "vote_average": 8.037,
+      "vote_count": 923
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rX5hvSRB2k4YoIvRg6Zky52rWk0.jpg",
+      "genre_ids": [
+        10765,
+        37
+      ],
+      "id": 63247,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Westworld",
+      "overview": "A dark odyssey about the dawn of artificial consciousness and the evolution of sin. Set at the intersection of the near future and the reimagined past, it explores a world in which every human appetite, no matter how noble or depraved, can be indulged.",
+      "popularity": 66.6729,
+      "poster_path": "/8MfgyFHf7XEboZJPZXCIDqqiz6e.jpg",
+      "first_air_date": "2016-10-02",
+      "softcore": false,
+      "name": "Westworld",
+      "vote_average": 8.021,
+      "vote_count": 6153
+    },
+    {
+      "adult": false,
       "backdrop_path": "/v8YFr8BbU9qsO8PYIulzTeM6Qk.jpg",
       "genre_ids": [
         18,
@@ -197,7 +197,7 @@
       "softcore": false,
       "name": "True Detective",
       "vote_average": 8.289,
-      "vote_count": 4119
+      "vote_count": 4122
     },
     {
       "adult": false,
@@ -218,30 +218,8 @@
       "first_air_date": "2002-06-02",
       "softcore": false,
       "name": "The Wire",
-      "vote_average": 8.6,
-      "vote_count": 2674
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/jvHw1zF20kYA9gbF2VprXD6uJpq.jpg",
-      "genre_ids": [
-        18,
-        35
-      ],
-      "id": 105,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Sex and the City",
-      "overview": "Based on the bestselling book by Candace Bushnell, Sex and the City tells the story of four best friends, all single and in their late thirties, as they pursue their careers and talk about their sex lives, all while trying to survive the New York social scene. ",
-      "popularity": 51.2782,
-      "poster_path": "/jfLp8gTfdi9d8onEFJ60kp1Bl1e.jpg",
-      "first_air_date": "1998-06-06",
-      "softcore": false,
-      "name": "Sex and the City",
-      "vote_average": 7.4,
-      "vote_count": 2152
+      "vote_average": 8.626,
+      "vote_count": 2675
     },
     {
       "adult": false,
@@ -268,6 +246,28 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/jvHw1zF20kYA9gbF2VprXD6uJpq.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 105,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Sex and the City",
+      "overview": "Based on the bestselling book by Candace Bushnell, Sex and the City tells the story of four best friends, all single and in their late thirties, as they pursue their careers and talk about their sex lives, all while trying to survive the New York social scene. ",
+      "popularity": 51.2782,
+      "poster_path": "/jfLp8gTfdi9d8onEFJ60kp1Bl1e.jpg",
+      "first_air_date": "1998-06-06",
+      "softcore": false,
+      "name": "Sex and the City",
+      "vote_average": 7.4,
+      "vote_count": 2152
+    },
+    {
+      "adult": false,
       "backdrop_path": "/nGhC6P0lgcrY57NRB9nweu4nWaK.jpg",
       "genre_ids": [
         10765,
@@ -286,8 +286,8 @@
       "first_air_date": "2008-09-07",
       "softcore": false,
       "name": "True Blood",
-      "vote_average": 7.614,
-      "vote_count": 2058
+      "vote_average": 7.613,
+      "vote_count": 2059
     },
     {
       "adult": false,
@@ -309,8 +309,8 @@
       "first_air_date": "2014-04-27",
       "softcore": false,
       "name": "Last Week Tonight with John Oliver",
-      "vote_average": 7.81,
-      "vote_count": 800
+      "vote_average": 7.813,
+      "vote_count": 801
     },
     {
       "adult": false,
@@ -353,8 +353,8 @@
       "first_air_date": "2018-06-03",
       "softcore": false,
       "name": "Succession",
-      "vote_average": 8.3,
-      "vote_count": 1625
+      "vote_average": 8.296,
+      "vote_count": 1626
     },
     {
       "adult": false,
@@ -374,8 +374,8 @@
       "first_air_date": "2023-01-15",
       "softcore": false,
       "name": "The Last of Us",
-      "vote_average": 8.4,
-      "vote_count": 7006
+      "vote_average": 8.43,
+      "vote_count": 7009
     },
     {
       "adult": false,
@@ -401,27 +401,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/5NOQNDMVXe8t5wIuY6r6b6iUXcc.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 1274,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Six Feet Under",
-      "overview": "When death is your business, what is your life? For the Fisher family, the world outside of their family-owned funeral home continues to be at least as challenging as—and far less predictable than—the one inside.",
-      "popularity": 35.6874,
-      "poster_path": "/sCgzLaVlFy8KxtxRPvt1V5MNTDb.jpg",
-      "first_air_date": "2001-06-03",
-      "softcore": false,
-      "name": "Six Feet Under",
-      "vote_average": 8.1,
-      "vote_count": 1111
-    },
-    {
-      "adult": false,
       "backdrop_path": "/2nboc7IWrvJwiT1Dq847IuNcXqF.jpg",
       "genre_ids": [
         80,
@@ -441,6 +420,27 @@
       "name": "Oz",
       "vote_average": 8.1,
       "vote_count": 838
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/5NOQNDMVXe8t5wIuY6r6b6iUXcc.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 1274,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Six Feet Under",
+      "overview": "When death is your business, what is your life? For the Fisher family, the world outside of their family-owned funeral home continues to be at least as challenging as—and far less predictable than—the one inside.",
+      "popularity": 35.6874,
+      "poster_path": "/sCgzLaVlFy8KxtxRPvt1V5MNTDb.jpg",
+      "first_air_date": "2001-06-03",
+      "softcore": false,
+      "name": "Six Feet Under",
+      "vote_average": 8.1,
+      "vote_count": 1111
     }
   ],
   "total_pages": 19,

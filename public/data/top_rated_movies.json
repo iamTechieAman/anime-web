@@ -15,13 +15,13 @@
       "original_language": "en",
       "original_title": "Swapped",
       "overview": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
-      "popularity": 270.0947,
+      "popularity": 263.9889,
       "poster_path": "/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 9,
-      "vote_count": 1465
+      "vote_average": 8.985,
+      "vote_count": 1477
     },
     {
       "adult": false,
@@ -35,13 +35,13 @@
       "original_language": "en",
       "original_title": "The Shawshank Redemption",
       "overview": "Imprisoned in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison, where he puts his accounting skills to work for an amoral warden. During his long stretch in prison, Dufresne comes to be admired by the other inmates -- including an older prisoner named Red -- for his integrity and unquenchable sense of hope.",
-      "popularity": 73.9032,
+      "popularity": 78.9406,
       "poster_path": "/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
       "release_date": "1994-09-23",
       "softcore": false,
       "video": false,
-      "vote_average": 8.7,
-      "vote_count": 30428
+      "vote_average": 8.721,
+      "vote_count": 30438
     },
     {
       "adult": false,
@@ -55,13 +55,13 @@
       "original_language": "en",
       "original_title": "The Godfather",
       "overview": "Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barely survives an attempt on his life, his youngest son, Michael steps in to take care of the would-be killers, launching a campaign of bloody revenge.",
-      "popularity": 47.795,
+      "popularity": 44.8794,
       "poster_path": "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
       "release_date": "1972-03-14",
       "softcore": false,
       "video": false,
       "vote_average": 8.687,
-      "vote_count": 22962
+      "vote_count": 22967
     },
     {
       "adult": false,
@@ -75,13 +75,13 @@
       "original_language": "en",
       "original_title": "Project Hail Mary",
       "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
-      "popularity": 270.6206,
+      "popularity": 294.0202,
       "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
       "release_date": "2026-03-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.638,
-      "vote_count": 4315
+      "vote_average": 8.642,
+      "vote_count": 4355
     },
     {
       "adult": false,
@@ -95,13 +95,13 @@
       "original_language": "en",
       "original_title": "The Godfather Part II",
       "overview": "In the continuing saga of the Corleone crime family, a young Vito Corleone grows up in Sicily and in 1910s New York. In the 1950s, Michael Corleone attempts to expand the family business into Las Vegas, Hollywood and Cuba.",
-      "popularity": 30.2964,
+      "popularity": 28.5567,
       "poster_path": "/hek3koDUyRQk7FIhPXsa6mT2Zc3.jpg",
       "release_date": "1974-12-20",
       "softcore": false,
       "video": false,
       "vote_average": 8.572,
-      "vote_count": 13917
+      "vote_count": 13922
     },
     {
       "adult": false,
@@ -116,13 +116,13 @@
       "original_language": "en",
       "original_title": "Schindler's List",
       "overview": "The true story of how businessman Oskar Schindler saved over a thousand Jewish lives from the Nazis while they worked as slaves in his factory during World War II.",
-      "popularity": 27.3576,
+      "popularity": 25.4622,
       "poster_path": "/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg",
       "release_date": "1993-12-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.569,
-      "vote_count": 17464
+      "vote_average": 8.568,
+      "vote_count": 17468
     },
     {
       "adult": false,
@@ -135,13 +135,33 @@
       "original_language": "en",
       "original_title": "12 Angry Men",
       "overview": "The defense and the prosecution have rested and the jury is filing into the jury room to decide if a young Spanish-American is guilty or innocent of murdering his father. What begins as an open and shut case soon becomes a mini-drama of each of the jurors' prejudices and preconceptions about the trial, the accused, and each other.",
-      "popularity": 22.3676,
+      "popularity": 23.0069,
       "poster_path": "/zhG3vKWyDRaZYoaww1UVAi29T9h.jpg",
       "release_date": "1957-04-10",
       "softcore": false,
       "video": false,
-      "vote_average": 8.6,
-      "vote_count": 9988
+      "vote_average": 8.561,
+      "vote_count": 9992
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/1yw8C3xPzrliGpQp0qHID7F1zOT.jpg",
+      "genre_ids": [
+        18,
+        9648
+      ],
+      "id": 1330021,
+      "title": "Remarkably Bright Creatures",
+      "original_language": "en",
+      "original_title": "Remarkably Bright Creatures",
+      "overview": "Through unlikely bonds formed during night shifts at a local aquarium, Tova, an elderly widow, learns of a life-changing discovery that may bring her joy and wonder once again.",
+      "popularity": 73.2258,
+      "poster_path": "/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg",
+      "release_date": "2026-05-07",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.532,
+      "vote_count": 486
     },
     {
       "adult": false,
@@ -156,33 +176,13 @@
       "original_language": "ja",
       "original_title": "千と千尋の神隠し",
       "overview": "A young girl, Chihiro, becomes trapped in a strange new world of spirits. When her parents undergo a mysterious transformation, she must call upon the courage she never knew she had to free her family.",
-      "popularity": 37.6928,
+      "popularity": 34.6386,
       "poster_path": "/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
       "release_date": "2001-07-20",
       "softcore": false,
       "video": false,
       "vote_average": 8.534,
-      "vote_count": 18324
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/bVGHSe47W6oCQL1Q88pvRAet51A.jpg",
-      "genre_ids": [
-        18,
-        9648
-      ],
-      "id": 1330021,
-      "title": "Remarkably Bright Creatures",
-      "original_language": "en",
-      "original_title": "Remarkably Bright Creatures",
-      "overview": "Through unlikely bonds formed during night shifts at a local aquarium, Tova, an elderly widow, learns of a life-changing discovery that may bring her joy and wonder once again.",
-      "popularity": 77.8666,
-      "poster_path": "/9HcEqn3D4J6b2Z0jK54id9nA0fr.jpg",
-      "release_date": "2026-05-07",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.541,
-      "vote_count": 474
+      "vote_count": 18329
     },
     {
       "adult": false,
@@ -197,13 +197,13 @@
       "original_language": "en",
       "original_title": "The Dark Knight",
       "overview": "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. The partnership proves to be effective, but they soon find themselves prey to a reign of chaos unleashed by a rising criminal mastermind known to the terrified citizens of Gotham as the Joker.",
-      "popularity": 47.1044,
+      "popularity": 47.3865,
       "poster_path": "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
       "release_date": "2008-07-16",
       "softcore": false,
       "video": false,
       "vote_average": 8.531,
-      "vote_count": 35790
+      "vote_count": 35800
     },
     {
       "adult": false,
@@ -218,13 +218,13 @@
       "original_language": "hi",
       "original_title": "दिलवाले दुल्हनिया ले जायेंगे",
       "overview": "Raj is a rich, carefree, happy-go-lucky second generation NRI. Simran is the daughter of Chaudhary Baldev Singh, who in spite of being an NRI is very strict about adherence to Indian values. Simran has left for India to be married to her childhood fiancé. Raj leaves for India with a mission at his hands, to claim his lady love under the noses of her whole family. Thus begins a saga.",
-      "popularity": 19.2377,
+      "popularity": 18.5232,
       "poster_path": "/tFbfCkS7q6g96wVoAu8kyr93iPm.jpg",
       "release_date": "1995-10-20",
       "softcore": false,
       "video": false,
       "vote_average": 8.513,
-      "vote_count": 4590
+      "vote_count": 4591
     },
     {
       "adult": false,
@@ -239,13 +239,13 @@
       "original_language": "en",
       "original_title": "The Green Mile",
       "overview": "A supernatural tale set on death row in a Southern prison, where gentle giant John Coffey possesses the mysterious power to heal people's ailments. When the cell block's head guard, Paul Edgecomb, recognizes Coffey's miraculous gift, he tries desperately to help stave off the condemned man's execution.",
-      "popularity": 30.4815,
+      "popularity": 28.0739,
       "poster_path": "/8VG8fDNiy50H4FedGwdSVUPoaJe.jpg",
       "release_date": "1999-12-10",
       "softcore": false,
       "video": false,
-      "vote_average": 8.506,
-      "vote_count": 19265
+      "vote_average": 8.507,
+      "vote_count": 19269
     },
     {
       "adult": false,
@@ -260,13 +260,13 @@
       "original_language": "en",
       "original_title": "The Lord of the Rings: The Return of the King",
       "overview": "As armies mass for a final battle that will decide the fate of the world--and powerful, ancient forces of Light and Dark compete to determine the outcome--one member of the Fellowship of the Ring is revealed as the noble heir to the throne of the Kings of Men. Yet, the sole hope for triumph over evil lies with a brave hobbit, Frodo, who, accompanied by his loyal friend Sam and the hideous, wretched Gollum, ventures deep into the very dark heart of Mordor on his seemingly impossible quest to destroy the Ring of Power.​",
-      "popularity": 43.9018,
+      "popularity": 42.3415,
       "poster_path": "/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
       "release_date": "2003-12-17",
       "softcore": false,
       "video": false,
       "vote_average": 8.499,
-      "vote_count": 26555
+      "vote_count": 26562
     },
     {
       "adult": false,
@@ -281,13 +281,13 @@
       "original_language": "ko",
       "original_title": "기생충",
       "overview": "All unemployed, Ki-taek's family takes peculiar interest in the wealthy and glamorous Parks for their livelihood until they get entangled in an unexpected incident.",
-      "popularity": 38.4006,
+      "popularity": 36.9306,
       "poster_path": "/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
       "release_date": "2019-05-30",
       "softcore": false,
       "video": false,
       "vote_average": 8.495,
-      "vote_count": 20641
+      "vote_count": 20645
     },
     {
       "adult": false,
@@ -301,13 +301,13 @@
       "original_language": "en",
       "original_title": "¿Quieres ser mi hijo?",
       "overview": "Lu, a conformist woman in her forties, learns that her 15-year partner has been having extramarital affairs. Starting from scratch, she gets involved in an unexpected relationship with a young womanizer.",
-      "popularity": 12.4557,
+      "popularity": 11.2019,
       "poster_path": "/6PQJsmuvSMZQMmlJfTpjIkrizUh.jpg",
       "release_date": "2023-09-21",
       "softcore": false,
       "video": false,
-      "vote_average": 8.5,
-      "vote_count": 348
+      "vote_average": 8.494,
+      "vote_count": 349
     },
     {
       "adult": false,
@@ -322,13 +322,13 @@
       "original_language": "en",
       "original_title": "Pulp Fiction",
       "overview": "A burger-loving hit man, his philosophical partner, a drug-addled gangster's moll and a washed-up boxer converge in this sprawling, comedic crime caper. Their adventures unfurl in three stories that ingeniously trip back and forth in time.",
-      "popularity": 35.1235,
+      "popularity": 37.1874,
       "poster_path": "/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg",
       "release_date": "1994-09-10",
       "softcore": false,
       "video": false,
       "vote_average": 8.484,
-      "vote_count": 30204
+      "vote_count": 30212
     },
     {
       "adult": false,
@@ -343,13 +343,13 @@
       "original_language": "ja",
       "original_title": "君の名は。",
       "overview": "High schoolers Mitsuha and Taki are complete strangers living separate lives. But one night, they suddenly switch places. Mitsuha wakes up in Taki’s body, and he in hers. This bizarre occurrence continues to happen randomly, and the two must adjust their lives around each other.",
-      "popularity": 29.3308,
+      "popularity": 29.717,
       "poster_path": "/q719jXXEzOoYaps6babgKnONONX.jpg",
       "release_date": "2016-08-26",
       "softcore": false,
       "video": false,
       "vote_average": 8.479,
-      "vote_count": 12568
+      "vote_count": 12571
     },
     {
       "adult": false,
@@ -364,13 +364,13 @@
       "original_language": "en",
       "original_title": "Interstellar",
       "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
-      "popularity": 73.08,
+      "popularity": 74.6225,
       "poster_path": "/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg",
       "release_date": "2014-11-05",
       "softcore": false,
       "video": false,
       "vote_average": 8.475,
-      "vote_count": 39840
+      "vote_count": 39855
     },
     {
       "adult": false,
@@ -383,13 +383,13 @@
       "original_language": "it",
       "original_title": "Il buono, il brutto, il cattivo",
       "overview": "While the Civil War rages on between the Union and the Confederacy, three men – a quiet loner, a ruthless hitman, and a Mexican bandit – comb the American Southwest in search of a strongbox containing $200,000 in stolen gold.",
-      "popularity": 22.5136,
+      "popularity": 23.0421,
       "poster_path": "/bX2xnavhMYjWDoZp1VM6VnU1xwe.jpg",
       "release_date": "1966-12-23",
       "softcore": false,
       "video": false,
       "vote_average": 8.468,
-      "vote_count": 9640
+      "vote_count": 9647
     },
     {
       "adult": false,
@@ -404,15 +404,15 @@
       "original_language": "en",
       "original_title": "Forrest Gump",
       "overview": "A man with a low IQ has accomplished great things in his life and been present during significant historic events—in each case, far exceeding what anyone imagined he could do. But despite all he has achieved, his one true love eludes him.",
-      "popularity": 32.0264,
+      "popularity": 31.39,
       "poster_path": "/Cw4hIUIAmSYfK9QfaUW5igp9La.jpg",
       "release_date": "1994-06-23",
       "softcore": false,
       "video": false,
-      "vote_average": 8.465,
-      "vote_count": 29754
+      "vote_average": 8.5,
+      "vote_count": 29759
     }
   ],
   "total_pages": 545,
-  "total_results": 10889
+  "total_results": 10890
 }

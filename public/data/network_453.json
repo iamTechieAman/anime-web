@@ -16,7 +16,7 @@
       "original_language": "en",
       "original_name": "The Handmaid's Tale",
       "overview": "Set in a dystopian future, a woman is forced to live as a concubine under a fundamentalist theocratic dictatorship.",
-      "popularity": 72.0139,
+      "popularity": 74.198,
       "poster_path": "/eGUT7j3n3rn5yGihlCgwUnD70HV.jpg",
       "first_air_date": "2017-04-26",
       "softcore": false,
@@ -39,34 +39,13 @@
       "original_language": "en",
       "original_name": "King of the Hill",
       "overview": "Set in Texas, this animated series follows the life of propane salesman Hank Hill, who lives with his overly confident substitute Spanish teacher wife Peggy, wannabe comedian son Bobby, and naive niece Luanne. Hank has conservative views about God, family, and country, but his values and ethics are often challenged by the situations he, his family, and his beer-drinking neighbors/buddies find themselves in.",
-      "popularity": 63.597,
+      "popularity": 69.0725,
       "poster_path": "/e2xyMapmYgv4AuSoSDv9Y4pQlD6.jpg",
       "first_air_date": "1997-01-12",
       "softcore": false,
       "name": "King of the Hill",
       "vote_average": 7.395,
       "vote_count": 664
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/uCndE341njionskk1pK9SbHqwZh.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 287527,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Testaments",
-      "overview": "Growing up in Gilead is all they have ever known. As a new generation of young women grapple with the bleak future that awaits them, they will be forced to search for allies, new and old, to help in their fight for freedom.",
-      "popularity": 56.965,
-      "poster_path": "/xVsFopLisBoiKdXXecaNTN4pJ9A.jpg",
-      "first_air_date": "2026-04-08",
-      "softcore": false,
-      "name": "The Testaments",
-      "vote_average": 8.151,
-      "vote_count": 116
     },
     {
       "adult": false,
@@ -83,13 +62,34 @@
       "original_language": "en",
       "original_name": "Futurama",
       "overview": "The adventures of a late-20th-century New York City pizza delivery boy, Philip J. Fry, who, after being unwittingly cryogenically frozen for one thousand years, finds employment at Planet Express, an interplanetary delivery company in the retro-futuristic 31st century.",
-      "popularity": 60.0331,
+      "popularity": 54.2508,
       "poster_path": "/6ZS8SOno6kTmWz4eQ8lX8EBXOMv.jpg",
       "first_air_date": "1999-03-28",
       "softcore": false,
       "name": "Futurama",
-      "vote_average": 8.37,
-      "vote_count": 3734
+      "vote_average": 8.369,
+      "vote_count": 3735
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/uCndE341njionskk1pK9SbHqwZh.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 287527,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Testaments",
+      "overview": "Growing up in Gilead is all they have ever known. As a new generation of young women grapple with the bleak future that awaits them, they will be forced to search for allies, new and old, to help in their fight for freedom.",
+      "popularity": 55.0538,
+      "poster_path": "/xVsFopLisBoiKdXXecaNTN4pJ9A.jpg",
+      "first_air_date": "2026-04-08",
+      "softcore": false,
+      "name": "The Testaments",
+      "vote_average": 8.2,
+      "vote_count": 116
     },
     {
       "adult": false,
@@ -106,13 +106,13 @@
       "original_language": "en",
       "original_name": "Veronica Mars",
       "overview": "In the fictional town of Neptune, California, student Veronica Mars progresses from high school to college while moonlighting as a private investigator under the tutelage of her detective father.",
-      "popularity": 44.9679,
+      "popularity": 44.2986,
       "poster_path": "/vOdJETEueGgUqJR4UvwTdUoJhvO.jpg",
       "first_air_date": "2004-09-22",
       "softcore": false,
       "name": "Veronica Mars",
-      "vote_average": 7.808,
-      "vote_count": 704
+      "vote_average": 7.809,
+      "vote_count": 705
     },
     {
       "adult": false,
@@ -128,7 +128,7 @@
       "original_language": "en",
       "original_name": "WWE NXT",
       "overview": "Wrestlers will portray heroes or villains as they follow a series of events that build tension and culminate in a wrestling match or series of matches.",
-      "popularity": 40.9571,
+      "popularity": 41.258,
       "poster_path": "/9nLBX5Bf7PW4FAaWJLXpFFdeTlV.jpg",
       "first_air_date": "2010-02-23",
       "softcore": false,
@@ -151,7 +151,7 @@
       "original_language": "en",
       "original_name": "The Orville",
       "overview": "Follow the crew of the not-so-functional exploratory ship in the Earth's interstellar fleet, 400 years in the future.",
-      "popularity": 38.3109,
+      "popularity": 38.6083,
       "poster_path": "/78xnHh9H5wYcUeZoB0bt1UgInAW.jpg",
       "first_air_date": "2017-09-10",
       "softcore": false,
@@ -173,7 +173,7 @@
       "original_language": "en",
       "original_name": "Paradise",
       "overview": "The tranquility in a serene, wealthy community inhabited by some of the world's most prominent individuals explodes when a shocking murder occurs and a high stakes investigation unfolds.",
-      "popularity": 38.2672,
+      "popularity": 35.7504,
       "poster_path": "/l8RqfhqEk04W5sSOjQ9zeWU1DyM.jpg",
       "first_air_date": "2025-01-26",
       "softcore": false,
@@ -195,13 +195,13 @@
       "original_language": "en",
       "original_name": "The Bear",
       "overview": "Carmy, a young fine-dining chef, comes home to Chicago to run his family sandwich shop. As he fights to transform the shop and himself, he works alongside a rough-around-the-edges crew that ultimately reveal themselves as his chosen family.",
-      "popularity": 36.9449,
+      "popularity": 32.0635,
       "poster_path": "/4fVddnbhcmzRZE14NJY03GKS6Fn.jpg",
       "first_air_date": "2022-06-23",
       "softcore": false,
       "name": "The Bear",
-      "vote_average": 8.159,
-      "vote_count": 1714
+      "vote_average": 8.158,
+      "vote_count": 1715
     },
     {
       "adult": false,
@@ -218,7 +218,7 @@
       "original_language": "en",
       "original_name": "Only Murders in the Building",
       "overview": "Three strangers share an obsession with true crime and suddenly find themselves wrapped up in one.",
-      "popularity": 31.6308,
+      "popularity": 31.4952,
       "poster_path": "/1yjFVQZuW8aofZ5Cgol8iImsVFp.jpg",
       "first_air_date": "2021-08-31",
       "softcore": false,
@@ -239,13 +239,36 @@
       "original_language": "en",
       "original_name": "The Mindy Project",
       "overview": "Obstetrician/gynecologist Mindy Lahiri tries to balance her personal and professional life, surrounded by quirky co-workers in a small medical practice in New York City.",
-      "popularity": 26.5095,
+      "popularity": 25.2501,
       "poster_path": "/A3txgCPox6hJlOZ0TDTOxch7rVa.jpg",
       "first_air_date": "2012-09-25",
       "softcore": false,
       "name": "The Mindy Project",
       "vote_average": 6.226,
       "vote_count": 184
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/lswRmm6czR4QTnwXRtacMfyxgJ0.jpg",
+      "genre_ids": [
+        10759,
+        18,
+        10764
+      ],
+      "id": 46707,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "WWE Main Event",
+      "overview": "WWE Main Event is a professional wrestling television program produced by WWE that airs on Peacock and streams on Hulu Plus in the United States. The show features WWE wrestlers and complements WWE's primary programs Raw and SmackDown.",
+      "popularity": 26.1779,
+      "poster_path": "/yVZdqmVMI09F7GzFvDJCc36oBkT.jpg",
+      "first_air_date": "2012-10-03",
+      "softcore": false,
+      "name": "WWE Main Event",
+      "vote_average": 7.9,
+      "vote_count": 59
     },
     {
       "adult": false,
@@ -261,7 +284,7 @@
       "original_language": "en",
       "original_name": "Shōgun",
       "overview": "In Japan in the year 1600, at the dawn of a century-defining civil war, Lord Yoshii Toranaga is fighting for his life as his enemies on the Council of Regents unite against him, when a mysterious European ship is found marooned in a nearby fishing village.",
-      "popularity": 25.3397,
+      "popularity": 24.3347,
       "poster_path": "/7O4iVfOMQmdCSxhOg1WnzG1AgYT.jpg",
       "first_air_date": "2024-02-27",
       "softcore": false,
@@ -284,13 +307,35 @@
       "original_language": "en",
       "original_name": "Solar Opposites",
       "overview": "A family of aliens from a much better world must take refuge in middle America after the destruction of their planet. Their mission: protect the Pupa, a living super computer that will one day evolve into its true form, consume them and terraform the Earth.",
-      "popularity": 23.9196,
+      "popularity": 23.2357,
       "poster_path": "/nuBD4dlO7gfg4RhW0sS0pTeiYRc.jpg",
       "first_air_date": "2020-05-08",
       "softcore": false,
       "name": "Solar Opposites",
       "vote_average": 7.782,
       "vote_count": 610
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/kgEFD11dQdi8tCUgdNX1Ul02LlW.jpg",
+      "genre_ids": [
+        16,
+        35
+      ],
+      "id": 107124,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Animaniacs",
+      "overview": "Yakko, Wakko and Dot return for all-new big laughs and the occasional epic takedown of authority figures in serious need of an ego check. Joining the Warners are Starbox & Cindy on their latest play date while Pinky and the Brain's ideas for world domination lead them to all new adventures.",
+      "popularity": 22.0412,
+      "poster_path": "/wmPZzLov9OhiknK4jW4qE6mgvHf.jpg",
+      "first_air_date": "2020-11-20",
+      "softcore": false,
+      "name": "Animaniacs",
+      "vote_average": 8.4,
+      "vote_count": 589
     },
     {
       "adult": false,
@@ -308,58 +353,13 @@
       "original_language": "en",
       "original_name": "Percy Jackson and the Olympians",
       "overview": "Percy Jackson is on a dangerous quest. Outrunning monsters and outwitting gods, he must journey across America to return Zeus's master bolt and stop an all-out war. With the help of his friends Annabeth and Grover, Percy's journey will lead him closer to the answers he seeks: how to fit into a world where he feels out of place, and who he's destined to be.",
-      "popularity": 22.7897,
+      "popularity": 22.5797,
       "poster_path": "/40eFcTzZier3DWLqldsP5VHxeoD.jpg",
       "first_air_date": "2023-12-19",
       "softcore": false,
       "name": "Percy Jackson and the Olympians",
       "vote_average": 7.3,
       "vote_count": 763
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/lswRmm6czR4QTnwXRtacMfyxgJ0.jpg",
-      "genre_ids": [
-        10759,
-        18,
-        10764
-      ],
-      "id": 46707,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "WWE Main Event",
-      "overview": "WWE Main Event is a professional wrestling television program produced by WWE that airs on Peacock and streams on Hulu Plus in the United States. The show features WWE wrestlers and complements WWE's primary programs Raw and SmackDown.",
-      "popularity": 25.4224,
-      "poster_path": "/yVZdqmVMI09F7GzFvDJCc36oBkT.jpg",
-      "first_air_date": "2012-10-03",
-      "softcore": false,
-      "name": "WWE Main Event",
-      "vote_average": 7.9,
-      "vote_count": 59
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/kgEFD11dQdi8tCUgdNX1Ul02LlW.jpg",
-      "genre_ids": [
-        16,
-        35
-      ],
-      "id": 107124,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Animaniacs",
-      "overview": "Yakko, Wakko and Dot return for all-new big laughs and the occasional epic takedown of authority figures in serious need of an ego check. Joining the Warners are Starbox & Cindy on their latest play date while Pinky and the Brain's ideas for world domination lead them to all new adventures.",
-      "popularity": 23.5041,
-      "poster_path": "/wmPZzLov9OhiknK4jW4qE6mgvHf.jpg",
-      "first_air_date": "2020-11-20",
-      "softcore": false,
-      "name": "Animaniacs",
-      "vote_average": 8.4,
-      "vote_count": 589
     },
     {
       "adult": false,
@@ -378,13 +378,57 @@
       "original_language": "ja",
       "original_name": "ゾン100～ゾンビになるまでにしたい100のこと～",
       "overview": "An overworked 24-year-old finally decides to live a little and create a bucket list, when a zombie outbreak hits the country.",
-      "popularity": 20.6224,
+      "popularity": 18.1009,
       "poster_path": "/bTYMgERNC9rVdmxTSzKuex4GWbF.jpg",
       "first_air_date": "2023-07-09",
       "softcore": false,
       "name": "Zom 100: Bucket List of the Dead",
       "vote_average": 7.545,
       "vote_count": 199
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/biIBy2LPOOtGCgUYOls3dUEWU3v.jpg",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "id": 157239,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Alien: Earth",
+      "overview": "When the mysterious deep space research vessel USCSS Maginot crash-lands on Earth, Wendy and a ragtag group of tactical soldiers make a fateful discovery that puts them face-to-face with the planet's greatest threat.",
+      "popularity": 19.049,
+      "poster_path": "/yueXS3q8BtoWekcHOATFHicLl3e.jpg",
+      "first_air_date": "2025-08-12",
+      "softcore": false,
+      "name": "Alien: Earth",
+      "vote_average": 7.313,
+      "vote_count": 1020
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2K84O2cr0jRH7ROeeHJ3zbTR8Uf.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 93812,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Great",
+      "overview": "A genre-bending, anti-historical ride through 18th century Russia following the rise of Catherine the Nothing to Catherine the Great and her explosive relationship with husband Peter, the emperor of Russia.",
+      "popularity": 18.12,
+      "poster_path": "/tpz9UQ3hUwYufNcKWVW00FCjWyc.jpg",
+      "first_air_date": "2020-05-15",
+      "softcore": false,
+      "name": "The Great",
+      "vote_average": 8.077,
+      "vote_count": 1153
     },
     {
       "adult": false,
@@ -401,54 +445,13 @@
       "original_language": "en",
       "original_name": "American Horror Stories",
       "overview": "An anthology series of stand alone episodes delving into horror myths, legends and lore.",
-      "popularity": 18.7077,
+      "popularity": 18.6078,
       "poster_path": "/8b9FGJ9WhpkeGFOHYgKjPT5AXS6.jpg",
       "first_air_date": "2021-07-15",
       "softcore": false,
       "name": "American Horror Stories",
       "vote_average": 7.774,
       "vote_count": 960
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/2K84O2cr0jRH7ROeeHJ3zbTR8Uf.jpg",
-      "genre_ids": [
-        18,
-        35
-      ],
-      "id": 93812,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Great",
-      "overview": "A genre-bending, anti-historical ride through 18th century Russia following the rise of Catherine the Nothing to Catherine the Great and her explosive relationship with husband Peter, the emperor of Russia.",
-      "popularity": 18.9516,
-      "poster_path": "/tpz9UQ3hUwYufNcKWVW00FCjWyc.jpg",
-      "first_air_date": "2020-05-15",
-      "softcore": false,
-      "name": "The Great",
-      "vote_average": 8.077,
-      "vote_count": 1153
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/AvydGD3Y03ad7QLxQ3tAZ3VVkng.jpg",
-      "genre_ids": [],
-      "id": 27023,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Oscars",
-      "overview": "An annual American awards ceremony honoring cinematic achievements in the film industry. The various category winners are awarded a copy of a statuette, officially the Academy Award of Merit, that is better known by its nickname Oscar.",
-      "popularity": 17.927,
-      "poster_path": "/wyMHJMQp8WpmBg9CxefvbQnFhrm.jpg",
-      "first_air_date": "1953-03-19",
-      "softcore": false,
-      "name": "The Oscars",
-      "vote_average": 7,
-      "vote_count": 81
     }
   ],
   "total_pages": 18,

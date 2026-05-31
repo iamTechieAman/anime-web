@@ -22,8 +22,8 @@
       "first_air_date": "2026-05-15",
       "softcore": false,
       "name": "Berlin and the Lady with an Ermine",
-      "vote_average": 8.482,
-      "vote_count": 113
+      "vote_average": 8.392,
+      "vote_count": 116
     },
     {
       "adult": false,
@@ -45,30 +45,8 @@
       "first_air_date": "2016-07-15",
       "softcore": false,
       "name": "Stranger Things",
-      "vote_average": 8.6,
-      "vote_count": 21214
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
-      "genre_ids": [
-        10765,
-        9648
-      ],
-      "id": 224941,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Boroughs",
-      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
-      "popularity": 108.8208,
-      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
-      "first_air_date": "2026-05-21",
-      "softcore": false,
-      "name": "The Boroughs",
-      "vote_average": 7.137,
-      "vote_count": 91
+      "vote_average": 8.566,
+      "vote_count": 21220
     },
     {
       "adult": false,
@@ -91,8 +69,8 @@
       "first_air_date": "2026-05-15",
       "softcore": false,
       "name": "The WONDERfools",
-      "vote_average": 9.2,
-      "vote_count": 114
+      "vote_average": 9.146,
+      "vote_count": 120
     },
     {
       "adult": false,
@@ -117,6 +95,28 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/iftYIh1OjJb99EOTHIrDcx59zWb.jpg",
+      "genre_ids": [
+        10765,
+        9648
+      ],
+      "id": 224941,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Boroughs",
+      "overview": "In a seemingly perfect retirement community, a crew of unlikely heroes must stop an otherworldly threat from stealing the one thing they don't have: time.",
+      "popularity": 108.8208,
+      "poster_path": "/oKxBWbXmnWFO2Wh1QRTtshdfIRa.jpg",
+      "first_air_date": "2026-05-21",
+      "softcore": false,
+      "name": "The Boroughs",
+      "vote_average": 7.088,
+      "vote_count": 97
+    },
+    {
+      "adult": false,
       "backdrop_path": "/mAXOCbZzvmDa6PCh5dcIPOB51Qc.jpg",
       "genre_ids": [
         80,
@@ -135,7 +135,7 @@
       "softcore": false,
       "name": "Lucifer",
       "vote_average": 8.434,
-      "vote_count": 15457
+      "vote_count": 15460
     },
     {
       "adult": false,
@@ -162,7 +162,7 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/cLTAda6fMRirkCY1xfO4pmcHVkk.jpg",
+      "backdrop_path": "/hj2YSkoqHB2FPHeoALfdd4eufue.jpg",
       "genre_ids": [
         10759,
         18
@@ -179,8 +179,54 @@
       "first_air_date": "2022-11-18",
       "softcore": false,
       "name": "Weak Hero",
-      "vote_average": 8.657,
-      "vote_count": 430
+      "vote_average": 8.666,
+      "vote_count": 433
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/dg3OindVAGZBjlT3xYKqIAdukPL.jpg",
+      "genre_ids": [
+        10765,
+        18,
+        9648
+      ],
+      "id": 42009,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "Black Mirror",
+      "overview": "Twisted tales run wild in this mind-bending anthology series that reveals humanity's worst traits, greatest innovations and more.",
+      "popularity": 74.08,
+      "poster_path": "/seN6rRfN0I6n8iDXjlSMk1QjNcq.jpg",
+      "first_air_date": "2011-12-04",
+      "softcore": false,
+      "name": "Black Mirror",
+      "vote_average": 8.287,
+      "vote_count": 6194
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gzOIymABxmetAECXtazEYCpMmfb.jpg",
+      "genre_ids": [
+        9648,
+        80,
+        18
+      ],
+      "id": 78191,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "You",
+      "overview": "A dangerously charming, obsessive man goes to extreme measures to insert himself into the lives of women who fascinate him.",
+      "popularity": 73.8152,
+      "poster_path": "/oANi0vEE92nuijiZQgPZ88FSxqQ.jpg",
+      "first_air_date": "2018-09-09",
+      "softcore": false,
+      "name": "You",
+      "vote_average": 8.011,
+      "vote_count": 3930
     },
     {
       "adult": false,
@@ -202,29 +248,31 @@
       "first_air_date": "2012-10-06",
       "softcore": false,
       "name": "JoJo's Bizarre Adventure",
-      "vote_average": 8.553,
-      "vote_count": 1590
+      "vote_average": 8.556,
+      "vote_count": 1592
     },
     {
       "adult": false,
-      "backdrop_path": "/qxUGZru2ECF6eYeTATj8a3mn4lX.jpg",
+      "backdrop_path": "/zhsEnDNCQX5dlI2wbKzV90pV0B9.jpg",
       "genre_ids": [
-        18
+        18,
+        10759,
+        80
       ],
-      "id": 287429,
+      "id": 127529,
       "origin_country": [
-        "JP"
+        "KR"
       ],
-      "original_language": "ja",
-      "original_name": "三人夫婦",
-      "overview": "When a man's ex suggests a three-person marriage with her boyfriend, the trio face jealousy, social stigma and intimacy issues in their unique setup.",
-      "popularity": 64.9627,
-      "poster_path": "/jtfpphgNCoXCeZBE06ui6ipigv7.jpg",
-      "first_air_date": "2025-04-09",
+      "original_language": "ko",
+      "original_name": "사냥개들",
+      "overview": "Faced with ruthless foes with a violent thirst, two young boxers band together — risking life and limb to bring justice and protect their loved ones.",
+      "popularity": 71.494,
+      "poster_path": "/uSQzD7TXsL96J5ggDrJFdUs8uXU.jpg",
+      "first_air_date": "2023-06-09",
       "softcore": false,
-      "name": "Two Husbands One Wife",
-      "vote_average": 7.4,
-      "vote_count": 5
+      "name": "Bloodhounds",
+      "vote_average": 8.4,
+      "vote_count": 689
     },
     {
       "adult": false,
@@ -251,52 +299,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/zhsEnDNCQX5dlI2wbKzV90pV0B9.jpg",
-      "genre_ids": [
-        18,
-        10759,
-        80
-      ],
-      "id": 127529,
-      "origin_country": [
-        "KR"
-      ],
-      "original_language": "ko",
-      "original_name": "사냥개들",
-      "overview": "Faced with ruthless foes with a violent thirst, two young boxers band together — risking life and limb to bring justice and protect their loved ones.",
-      "popularity": 71.494,
-      "poster_path": "/uSQzD7TXsL96J5ggDrJFdUs8uXU.jpg",
-      "first_air_date": "2023-06-09",
-      "softcore": false,
-      "name": "Bloodhounds",
-      "vote_average": 8.447,
-      "vote_count": 689
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/gzOIymABxmetAECXtazEYCpMmfb.jpg",
-      "genre_ids": [
-        9648,
-        80,
-        18
-      ],
-      "id": 78191,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "You",
-      "overview": "A dangerously charming, obsessive man goes to extreme measures to insert himself into the lives of women who fascinate him.",
-      "popularity": 73.8152,
-      "poster_path": "/oANi0vEE92nuijiZQgPZ88FSxqQ.jpg",
-      "first_air_date": "2018-09-09",
-      "softcore": false,
-      "name": "You",
-      "vote_average": 8.011,
-      "vote_count": 3929
-    },
-    {
-      "adult": false,
       "backdrop_path": "/2meX1nMdScFOoV4370rqHWKmXhY.jpg",
       "genre_ids": [
         10759,
@@ -316,7 +318,7 @@
       "softcore": false,
       "name": "Squid Game",
       "vote_average": 7.856,
-      "vote_count": 17415
+      "vote_count": 17417
     },
     {
       "adult": false,
@@ -343,29 +345,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/dg3OindVAGZBjlT3xYKqIAdukPL.jpg",
-      "genre_ids": [
-        10765,
-        18,
-        9648
-      ],
-      "id": 42009,
-      "origin_country": [
-        "GB"
-      ],
-      "original_language": "en",
-      "original_name": "Black Mirror",
-      "overview": "Twisted tales run wild in this mind-bending anthology series that reveals humanity's worst traits, greatest innovations and more.",
-      "popularity": 74.08,
-      "poster_path": "/seN6rRfN0I6n8iDXjlSMk1QjNcq.jpg",
-      "first_air_date": "2011-12-04",
-      "softcore": false,
-      "name": "Black Mirror",
-      "vote_average": 8.287,
-      "vote_count": 6193
-    },
-    {
-      "adult": false,
       "backdrop_path": "/tNi2aJPdCKfielGYzIi3IKxStz9.jpg",
       "genre_ids": [
         10762,
@@ -388,6 +367,50 @@
     },
     {
       "adult": false,
+      "backdrop_path": "/qxUGZru2ECF6eYeTATj8a3mn4lX.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 287429,
+      "origin_country": [
+        "JP"
+      ],
+      "original_language": "ja",
+      "original_name": "三人夫婦",
+      "overview": "When a man's ex suggests a three-person marriage with her boyfriend, the trio face jealousy, social stigma and intimacy issues in their unique setup.",
+      "popularity": 64.9627,
+      "poster_path": "/jtfpphgNCoXCeZBE06ui6ipigv7.jpg",
+      "first_air_date": "2025-04-09",
+      "softcore": false,
+      "name": "Two Husbands One Wife",
+      "vote_average": 7.4,
+      "vote_count": 5
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/QbtctI8EzlhsyFDMUMyG3fli8B.jpg",
+      "genre_ids": [
+        10759,
+        18,
+        10768
+      ],
+      "id": 63333,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "The Last Kingdom",
+      "overview": "A show of heroic deeds and epic battles with a thematic depth that embraces politics, religion, warfare, courage, love, loyalty and our universal search for identity. Combining real historical figures and events with fictional characters, it is the story of how a people combined their strength under one of the most iconic kings of history in order to reclaim their land for themselves and build a place they call home.",
+      "popularity": 59.2575,
+      "poster_path": "/8eJf0hxgIhE6QSxbtuNCekTddy1.jpg",
+      "first_air_date": "2015-10-10",
+      "softcore": false,
+      "name": "The Last Kingdom",
+      "vote_average": 8.254,
+      "vote_count": 1957
+    },
+    {
+      "adult": false,
       "backdrop_path": "/gFZriCkpJYsApPZEF3jhxL4yLzG.jpg",
       "genre_ids": [
         80,
@@ -406,7 +429,7 @@
       "softcore": false,
       "name": "Money Heist",
       "vote_average": 8.232,
-      "vote_count": 19445
+      "vote_count": 19448
     },
     {
       "adult": false,
@@ -426,31 +449,8 @@
       "first_air_date": "2020-12-25",
       "softcore": false,
       "name": "Bridgerton",
-      "vote_average": 8.062,
-      "vote_count": 3301
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/uU6YW3N11qECNfz18LNGAGg3Uir.jpg",
-      "genre_ids": [
-        80,
-        9648,
-        18
-      ],
-      "id": 76669,
-      "origin_country": [
-        "ES"
-      ],
-      "original_language": "es",
-      "original_name": "Élite",
-      "overview": "When three working class kids enroll in the most exclusive school in Spain, the clash between the wealthy and the poor students leads to tragedy.",
-      "popularity": 55.3751,
-      "poster_path": "/3NTAbAiao4JLzFQw6YxP1YZppM8.jpg",
-      "first_air_date": "2018-10-05",
-      "softcore": false,
-      "name": "Elite",
-      "vote_average": 8.006,
-      "vote_count": 9372
+      "vote_average": 8.063,
+      "vote_count": 3302
     }
   ],
   "total_pages": 139,

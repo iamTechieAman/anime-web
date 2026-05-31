@@ -15,13 +15,13 @@
       "original_language": "en",
       "original_name": "The Mandalorian",
       "overview": "After the fall of the Galactic Empire, lawlessness has spread throughout the galaxy. A lone gunfighter makes his way through the outer reaches, earning his keep as a bounty hunter.",
-      "popularity": 95.2403,
+      "popularity": 95.413,
       "poster_path": "/sWgBv7LV2PRoQgkxwlibdGXKz1S.jpg",
       "first_air_date": "2019-11-12",
       "softcore": false,
       "name": "The Mandalorian",
       "vote_average": 8.408,
-      "vote_count": 10922
+      "vote_count": 10927
     },
     {
       "adult": false,
@@ -38,13 +38,35 @@
       "original_language": "en",
       "original_name": "Star Wars: The Clone Wars",
       "overview": "Yoda, Obi-Wan Kenobi, Anakin Skywalker, Mace Windu and other Jedi Knights lead the Grand Army of the Republic against the droid army of the Separatists.",
-      "popularity": 67.2356,
+      "popularity": 65.579,
       "poster_path": "/e1nWfnnCVqxS2LeTO3dwGyAsG2V.jpg",
       "first_air_date": "2008-10-03",
       "softcore": false,
       "name": "Star Wars: The Clone Wars",
       "vote_average": 8.468,
       "vote_count": 2342
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/zx574JjeDSqd8gpkEi9AeU75adK.jpg",
+      "genre_ids": [
+        10764,
+        10751
+      ],
+      "id": 1508,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Dancing with the Stars",
+      "overview": "The competition sees celebrities perform choreographed dance routines which are judged by a panel of renowned ballroom experts and voted on by viewers. Enjoy sizzling salsas, sambas and spray-tans as they vie for the coveted Mirrorball Trophy.",
+      "popularity": 71.5245,
+      "poster_path": "/5ropLAggzraCNoT6QPltb9lxeP3.jpg",
+      "first_air_date": "2005-06-01",
+      "softcore": false,
+      "name": "Dancing with the Stars",
+      "vote_average": 6.146,
+      "vote_count": 130
     },
     {
       "adult": false,
@@ -61,35 +83,36 @@
       "original_language": "en",
       "original_name": "Daredevil: Born Again",
       "overview": "Matt Murdock, a blind lawyer with heightened abilities, is fighting for justice through his bustling law firm, while former mob boss Wilson Fisk pursues his own political endeavors in New York. When their past identities begin to emerge, both men find themselves on an inevitable collision course.",
-      "popularity": 62.8969,
+      "popularity": 59.7491,
       "poster_path": "/xDUoAsU8lQHOOoRkFiBuarmACDN.jpg",
       "first_air_date": "2025-03-04",
       "softcore": false,
       "name": "Daredevil: Born Again",
-      "vote_average": 8.2,
-      "vote_count": 939
+      "vote_average": 8.173,
+      "vote_count": 942
     },
     {
       "adult": false,
-      "backdrop_path": "/zx574JjeDSqd8gpkEi9AeU75adK.jpg",
+      "backdrop_path": "/AmUhBqsxcenA75T9hV49G6ouO9c.jpg",
       "genre_ids": [
-        10764,
-        10751
+        10765,
+        10759,
+        18
       ],
-      "id": 1508,
+      "id": 83867,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Dancing with the Stars",
-      "overview": "The competition sees celebrities perform choreographed dance routines which are judged by a panel of renowned ballroom experts and voted on by viewers. Enjoy sizzling salsas, sambas and spray-tans as they vie for the coveted Mirrorball Trophy.",
-      "popularity": 66.0915,
-      "poster_path": "/5ropLAggzraCNoT6QPltb9lxeP3.jpg",
-      "first_air_date": "2005-06-01",
+      "original_name": "Andor",
+      "overview": "In an era filled with danger, deception and intrigue, Cassian Andor will discover the difference he can make in the struggle against the tyrannical Galactic Empire. He embarks on a path that is destined to turn him into a rebel hero.",
+      "popularity": 36.9516,
+      "poster_path": "/khZqmwHQicTYoS7Flreb9EddFZC.jpg",
+      "first_air_date": "2022-09-21",
       "softcore": false,
-      "name": "Dancing with the Stars",
-      "vote_average": 6.146,
-      "vote_count": 130
+      "name": "Andor",
+      "vote_average": 8.293,
+      "vote_count": 2022
     },
     {
       "adult": false,
@@ -106,13 +129,35 @@
       "original_language": "en",
       "original_name": "What If...?",
       "overview": "Taking inspiration from the comic books of the same name, each episode of this animated anthology series questions, revisits and twists classic Marvel Cinematic moments.",
-      "popularity": 39.0159,
+      "popularity": 33.6646,
       "poster_path": "/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg",
       "first_air_date": "2021-08-11",
       "softcore": false,
       "name": "What If...?",
       "vote_average": 8.1,
       "vote_count": 4622
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/q3jHCb4dMfYF6ojikKuHd6LscxC.jpg",
+      "genre_ids": [
+        18,
+        10765
+      ],
+      "id": 84958,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Loki",
+      "overview": "After stealing the Tesseract during the events of “Avengers: Endgame,” an alternate version of Loki is brought to the mysterious Time Variance Authority, a bureaucratic organization that exists outside of time and space and monitors the timeline. They give Loki a choice: face being erased from existence due to being a “time variant” or help fix the timeline and stop a greater threat.",
+      "popularity": 33.5124,
+      "poster_path": "/kEl2t3OhXc3Zb9FBh1AuYzRTgZp.jpg",
+      "first_air_date": "2021-06-09",
+      "softcore": false,
+      "name": "Loki",
+      "vote_average": 8.171,
+      "vote_count": 12389
     },
     {
       "adult": false,
@@ -130,58 +175,13 @@
       "original_language": "en",
       "original_name": "Star Wars: Visions",
       "overview": "This anthology of animated shorts from around the world celebrates the mythos of Star Wars through unique cultural lenses.",
-      "popularity": 32.4821,
+      "popularity": 29.4265,
       "poster_path": "/lG9ltUP4FwvsQBcwOJYceDbP48E.jpg",
       "first_air_date": "2021-09-22",
       "softcore": false,
       "name": "Star Wars: Visions",
       "vote_average": 7.086,
       "vote_count": 470
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/AmUhBqsxcenA75T9hV49G6ouO9c.jpg",
-      "genre_ids": [
-        10765,
-        10759,
-        18
-      ],
-      "id": 83867,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Andor",
-      "overview": "In an era filled with danger, deception and intrigue, Cassian Andor will discover the difference he can make in the struggle against the tyrannical Galactic Empire. He embarks on a path that is destined to turn him into a rebel hero.",
-      "popularity": 36.3247,
-      "poster_path": "/khZqmwHQicTYoS7Flreb9EddFZC.jpg",
-      "first_air_date": "2022-09-21",
-      "softcore": false,
-      "name": "Andor",
-      "vote_average": 8.292,
-      "vote_count": 2021
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/q3jHCb4dMfYF6ojikKuHd6LscxC.jpg",
-      "genre_ids": [
-        18,
-        10765
-      ],
-      "id": 84958,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Loki",
-      "overview": "After stealing the Tesseract during the events of “Avengers: Endgame,” an alternate version of Loki is brought to the mysterious Time Variance Authority, a bureaucratic organization that exists outside of time and space and monitors the timeline. They give Loki a choice: face being erased from existence due to being a “time variant” or help fix the timeline and stop a greater threat.",
-      "popularity": 31.9111,
-      "poster_path": "/kEl2t3OhXc3Zb9FBh1AuYzRTgZp.jpg",
-      "first_air_date": "2021-06-09",
-      "softcore": false,
-      "name": "Loki",
-      "vote_average": 8.2,
-      "vote_count": 12388
     },
     {
       "adult": false,
@@ -199,13 +199,34 @@
       "original_language": "ja",
       "original_name": "ドロヘドロ",
       "overview": "Amnesiac Caiman seeks to undo his lizard head curse by killing the sorcerer responsible, with his friend Nikaido's help. In the Hole, that's a threat.",
-      "popularity": 27.9158,
+      "popularity": 27.5966,
       "poster_path": "/zSMmRTopPIRr6913KX8pyiV6zsK.jpg",
       "first_air_date": "2020-01-13",
       "softcore": false,
       "name": "Dorohedoro",
       "vote_average": 8.339,
       "vote_count": 420
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/vPw5Gpg0YEEk1VsE8QlmyTxIJuU.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 208921,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "Rivals",
+      "overview": "It is 1986 and Britain is booming. \"Rivals\" dives headfirst into the cutthroat world of TV where hair-dos are big and ambitions are even bigger. Deals are brokered in boardrooms, as well as bedrooms. Nobody can be sure who will come out on top. With every man and woman out only for themselves, can true love really blossom?",
+      "popularity": 24.7747,
+      "poster_path": "/3p9t1KDo5iXAn1zsSPn8sdtakWs.jpg",
+      "first_air_date": "2024-10-18",
+      "softcore": false,
+      "name": "Rivals",
+      "vote_average": 7.44,
+      "vote_count": 75
     },
     {
       "adult": false,
@@ -222,12 +243,12 @@
       "original_language": "ko",
       "original_name": "골드랜드",
       "overview": "A young woman working as an airport security agent accidentally comes into possession of a smuggling ring’s gold bars. Caught in a chaotic whirlwind of greed and betrayal among various parties vying for the gold, she becomes consumed by the desire to claim it all for herself.",
-      "popularity": 25.1695,
-      "poster_path": "/ixBHQ96ryMa8Q0uIOFdUCjqRyy8.jpg",
+      "popularity": 25.3943,
+      "poster_path": "/qhbwTTeSnIGctR4CEmHc9RQBwtT.jpg",
       "first_air_date": "2026-04-29",
       "softcore": false,
       "name": "Gold Land",
-      "vote_average": 8.043,
+      "vote_average": 8,
       "vote_count": 23
     },
     {
@@ -245,7 +266,7 @@
       "original_language": "ko",
       "original_name": "무빙",
       "overview": "Children who live in hiding with superpowers, along with their parents who live with painful secrets of the past, face enormous dangers together.",
-      "popularity": 24.9372,
+      "popularity": 23.2277,
       "poster_path": "/vf9SNXNAFqzKBGksFwrXhkg9cb7.jpg",
       "first_air_date": "2023-08-09",
       "softcore": false,
@@ -269,34 +290,13 @@
       "original_language": "en",
       "original_name": "Percy Jackson and the Olympians",
       "overview": "Percy Jackson is on a dangerous quest. Outrunning monsters and outwitting gods, he must journey across America to return Zeus's master bolt and stop an all-out war. With the help of his friends Annabeth and Grover, Percy's journey will lead him closer to the answers he seeks: how to fit into a world where he feels out of place, and who he's destined to be.",
-      "popularity": 22.7897,
+      "popularity": 22.5797,
       "poster_path": "/40eFcTzZier3DWLqldsP5VHxeoD.jpg",
       "first_air_date": "2023-12-19",
       "softcore": false,
       "name": "Percy Jackson and the Olympians",
       "vote_average": 7.3,
       "vote_count": 763
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/vPw5Gpg0YEEk1VsE8QlmyTxIJuU.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 208921,
-      "origin_country": [
-        "GB"
-      ],
-      "original_language": "en",
-      "original_name": "Rivals",
-      "overview": "It is 1986 and Britain is booming. \"Rivals\" dives headfirst into the cutthroat world of TV where hair-dos are big and ambitions are even bigger. Deals are brokered in boardrooms, as well as bedrooms. Nobody can be sure who will come out on top. With every man and woman out only for themselves, can true love really blossom?",
-      "popularity": 25.2072,
-      "poster_path": "/3p9t1KDo5iXAn1zsSPn8sdtakWs.jpg",
-      "first_air_date": "2024-10-18",
-      "softcore": false,
-      "name": "Rivals",
-      "vote_average": 7.432,
-      "vote_count": 74
     },
     {
       "adult": false,
@@ -313,13 +313,13 @@
       "original_language": "en",
       "original_name": "Moon Knight",
       "overview": "When Steven Grant, a mild-mannered gift-shop employee, becomes plagued with blackouts and memories of another life, he discovers he has dissociative identity disorder and shares a body with mercenary Marc Spector. As Steven/Marc’s enemies converge upon them, they must navigate their complex identities while thrust into a deadly mystery among the powerful gods of Egypt.",
-      "popularity": 22.0874,
+      "popularity": 20.4013,
       "poster_path": "/YksR65as1ppF2N48TJAh2PLamX.jpg",
       "first_air_date": "2022-03-30",
       "softcore": false,
       "name": "Moon Knight",
-      "vote_average": 7.648,
-      "vote_count": 3487
+      "vote_average": 7.647,
+      "vote_count": 3486
     },
     {
       "adult": false,
@@ -336,12 +336,12 @@
       "original_language": "en",
       "original_name": "X-Men '97",
       "overview": "The X-Men, a band of mutants who use their uncanny gifts to protect a world that hates and fears them, are challenged like never before, forced to face a dangerous and unexpected new future.",
-      "popularity": 21.5221,
+      "popularity": 21.9853,
       "poster_path": "/9Ycz7yYRf9V4jk3YXwcZhFtbNcF.jpg",
       "first_air_date": "2024-03-20",
       "softcore": false,
       "name": "X-Men '97",
-      "vote_average": 8.506,
+      "vote_average": 8.5,
       "vote_count": 669
     },
     {
@@ -359,13 +359,36 @@
       "original_language": "en",
       "original_name": "Hawkeye",
       "overview": "Former Avenger Clint Barton has a seemingly simple mission: get back to his family for Christmas. Possible? Maybe with the help of Kate Bishop, a 22-year-old archer with dreams of becoming a superhero. The two are forced to work together when a presence from Barton’s past threatens to derail far more than the festive spirit.",
-      "popularity": 20.4336,
+      "popularity": 19.9866,
       "poster_path": "/ct5pNE5dDHryHLDnxyZPYcqO1sz.jpg",
       "first_air_date": "2021-11-24",
       "softcore": false,
       "name": "Hawkeye",
       "vote_average": 7.794,
-      "vote_count": 3698
+      "vote_count": 3699
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/lOr9NKxh4vMweufMOUDJjJhCRHW.jpg",
+      "genre_ids": [
+        10765,
+        9648,
+        18
+      ],
+      "id": 85271,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "WandaVision",
+      "overview": "Wanda Maximoff and Vision—two super-powered beings living idealized suburban lives—begin to suspect that everything is not as it seems.",
+      "popularity": 17.8063,
+      "poster_path": "/frobUz2X5Pc8OiVZU8Oo5K3NKMM.jpg",
+      "first_air_date": "2021-01-15",
+      "softcore": false,
+      "name": "WandaVision",
+      "vote_average": 8.191,
+      "vote_count": 12676
     },
     {
       "adult": false,
@@ -382,7 +405,7 @@
       "original_language": "en",
       "original_name": "Star Wars: The Bad Batch",
       "overview": "The 'Bad Batch' of elite and experimental clones make their way through an ever-changing galaxy in the immediate aftermath of the Clone Wars.",
-      "popularity": 18.6086,
+      "popularity": 19.4551,
       "poster_path": "/5mHus672nuinyaE0FtqvD0AddcY.jpg",
       "first_air_date": "2021-05-04",
       "softcore": false,
@@ -404,7 +427,7 @@
       "original_language": "es",
       "original_name": "La nena",
       "overview": "Months after the events of The Purple Network, the hunt is not over yet. Following Lucas's death, Elena Blanco has disappeared. Only Mariajo knows where she is, but she keeps it a secret, even from the rest of the team. The fight against The Network has taken too much of a toll on her, and in a desperate attempt to get her life back on track, she has left the BAC.",
-      "popularity": 18.3946,
+      "popularity": 17.8357,
       "poster_path": "/uyUWXnkrdXEdVlnpkHSWtL6D3oS.jpg",
       "first_air_date": "2026-04-12",
       "softcore": false,
@@ -427,36 +450,13 @@
       "original_language": "en",
       "original_name": "Marvel Studios Legends",
       "overview": "Revisit the epic heroes, villains and moments from across the MCU in preparation for the stories still to come. Each dynamic segment feeds directly into the upcoming series — setting the stage for future events. This series weaves together the many threads that constitute the unparalleled Marvel Cinematic Universe.",
-      "popularity": 18.2266,
+      "popularity": 19.3698,
       "poster_path": "/EpDuYIK81YtCUT3gH2JDpyj8Qk.jpg",
       "first_air_date": "2021-01-08",
       "softcore": false,
       "name": "Marvel Studios Legends",
       "vote_average": 7.356,
       "vote_count": 693
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/lOr9NKxh4vMweufMOUDJjJhCRHW.jpg",
-      "genre_ids": [
-        10765,
-        9648,
-        18
-      ],
-      "id": 85271,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "WandaVision",
-      "overview": "Wanda Maximoff and Vision—two super-powered beings living idealized suburban lives—begin to suspect that everything is not as it seems.",
-      "popularity": 18.9539,
-      "poster_path": "/frobUz2X5Pc8OiVZU8Oo5K3NKMM.jpg",
-      "first_air_date": "2021-01-15",
-      "softcore": false,
-      "name": "WandaVision",
-      "vote_average": 8.19,
-      "vote_count": 12675
     }
   ],
   "total_pages": 23,

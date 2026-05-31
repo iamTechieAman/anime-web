@@ -200,7 +200,7 @@ export default function PlayerHUDOverlay({
       <div className="flex items-center justify-between w-full">
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight drop-shadow">
-            {art.option.title || "Now Playing"}
+            {(art.option as any).title || "Now Playing"}
           </h2>
           <p className="text-xs text-orange-400 font-bold uppercase tracking-widest mt-1">
             Smart TV Native OSD Active

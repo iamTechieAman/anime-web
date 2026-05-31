@@ -18,8 +18,27 @@
       "release_date": "2026-04-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.072,
-      "vote_count": 1367
+      "vote_average": 8.04,
+      "vote_count": 1385
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "genre_ids": [
+        27
+      ],
+      "id": 1339713,
+      "title": "Obsession",
+      "original_language": "en",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "popularity": 399.8813,
+      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
+      "release_date": "2026-05-13",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8,
+      "vote_count": 359
     },
     {
       "adult": false,
@@ -38,27 +57,8 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.233,
-      "vote_count": 374
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
-      "genre_ids": [
-        27
-      ],
-      "id": 1339713,
-      "title": "Obsession",
-      "original_language": "en",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "popularity": 399.8813,
-      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
-      "release_date": "2026-05-13",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.9,
-      "vote_count": 343
+      "vote_average": 7.165,
+      "vote_count": 391
     },
     {
       "adult": false,
@@ -78,28 +78,8 @@
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.39,
-      "vote_count": 1308
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
-      "genre_ids": [
-        878,
-        12
-      ],
-      "id": 687163,
-      "title": "Project Hail Mary",
-      "original_language": "en",
-      "original_title": "Project Hail Mary",
-      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
-      "popularity": 270.6206,
-      "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
-      "release_date": "2026-03-15",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.6,
-      "vote_count": 4321
+      "vote_average": 8.385,
+      "vote_count": 1324
     },
     {
       "adult": false,
@@ -121,8 +101,8 @@
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.043,
-      "vote_count": 2080
+      "vote_average": 8.058,
+      "vote_count": 2109
     },
     {
       "adult": false,
@@ -142,8 +122,28 @@
       "release_date": "2026-03-18",
       "softcore": false,
       "video": false,
-      "vote_average": 7.3,
-      "vote_count": 95
+      "vote_average": 7.263,
+      "vote_count": 97
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
+      "genre_ids": [
+        878,
+        12
+      ],
+      "id": 687163,
+      "title": "Project Hail Mary",
+      "original_language": "en",
+      "original_title": "Project Hail Mary",
+      "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
+      "popularity": 270.6206,
+      "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
+      "release_date": "2026-03-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.6,
+      "vote_count": 4343
     },
     {
       "adult": false,
@@ -164,8 +164,8 @@
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 9,
-      "vote_count": 1468
+      "vote_average": 8.983,
+      "vote_count": 1472
     },
     {
       "adult": false,
@@ -184,7 +184,7 @@
       "release_date": "2026-03-26",
       "softcore": false,
       "video": false,
-      "vote_average": 6.784,
+      "vote_average": 6.8,
       "vote_count": 81
     },
     {
@@ -208,7 +208,47 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/oUozq2XHWifwAVOoS1qHU0qfXqM.jpg",
+      "backdrop_path": "/tlm8UkiQsitc8rSuIAscQDCnP8d.jpg",
+      "genre_ids": [
+        28,
+        878
+      ],
+      "id": 603,
+      "title": "The Matrix",
+      "original_language": "en",
+      "original_title": "The Matrix",
+      "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+      "popularity": 196.786,
+      "poster_path": "/aOIuZAjPaRIE6CMzbazvcHuHXDc.jpg",
+      "release_date": "1999-03-31",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.246,
+      "vote_count": 27901
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/kkRpcauZoBFKnH0Qsy7J5qtwBF5.jpg",
+      "genre_ids": [
+        10749,
+        18
+      ],
+      "id": 1371023,
+      "title": "Chand Mera Dil",
+      "original_language": "hi",
+      "original_title": "चाँद मेरा दिल",
+      "overview": "Aarav and Chandni's passionate college romance is struck by adulthood far too soon, forcing the two young lovers to balance their ambitions with responsibility and realize the evolved meaning of love.",
+      "popularity": 196.1546,
+      "poster_path": "/9LPkXJustudEBgPZEm9tgDx5KtC.jpg",
+      "release_date": "2026-05-22",
+      "softcore": false,
+      "video": false,
+      "vote_average": 1,
+      "vote_count": 1
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
       "genre_ids": [
         27,
         9648,
@@ -224,29 +264,8 @@
       "release_date": "2026-05-27",
       "softcore": false,
       "video": false,
-      "vote_average": 6.5,
-      "vote_count": 87
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
-      "genre_ids": [
-        28,
-        14,
-        12
-      ],
-      "id": 931285,
-      "title": "Mortal Kombat II",
-      "original_language": "en",
-      "original_title": "Mortal Kombat II",
-      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-      "popularity": 164.3456,
-      "poster_path": "/lIsMeDbwntNXSUVHmWMMRXEZOVc.jpg",
-      "release_date": "2026-05-06",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.768,
-      "vote_count": 330
+      "vote_average": 6.7,
+      "vote_count": 116
     },
     {
       "adult": false,
@@ -266,47 +285,50 @@
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 6.8,
-      "vote_count": 308
+      "vote_average": 6.804,
+      "vote_count": 319
     },
     {
       "adult": false,
-      "backdrop_path": "/7f9ZaTwyqQOJtNWUS7xZgWQOzSt.jpg",
+      "backdrop_path": "/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
       "genre_ids": [
+        28,
+        14,
+        12
+      ],
+      "id": 931285,
+      "title": "Mortal Kombat II",
+      "original_language": "en",
+      "original_title": "Mortal Kombat II",
+      "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
+      "popularity": 164.3456,
+      "poster_path": "/lIsMeDbwntNXSUVHmWMMRXEZOVc.jpg",
+      "release_date": "2026-05-06",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.8,
+      "vote_count": 338
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jatqtz0VlQRiugmHktbKQpuf5EV.jpg",
+      "genre_ids": [
+        80,
+        18,
         53
       ],
-      "id": 1431071,
-      "title": "System",
-      "original_language": "hi",
-      "original_title": "सिस्टम",
-      "overview": "When Neha Rajvansh, a privileged public prosecutor, meets Sarika Rawat, a courtroom stenographer from a humble background, their lives are thrown into upheaval where power defines truth, blurring the system and raising a question of what justice truly means to them.",
-      "popularity": 137.9909,
-      "poster_path": "/8qrddM5BRcTuqjc9crJY6e3gyE6.jpg",
-      "release_date": "2026-05-22",
+      "id": 1433117,
+      "title": "Kara",
+      "original_language": "ta",
+      "original_title": "கர",
+      "overview": "A thief tries to go straight, but when predatory banks trap his father in debt, he returns to crime — with a determined cop closing in on his trail.",
+      "popularity": 156.9641,
+      "poster_path": "/uIrFdMWlJFdc1jPBP9bxeaISCDj.jpg",
+      "release_date": "2026-04-30",
       "softcore": false,
       "video": false,
-      "vote_average": 7.5,
-      "vote_count": 2
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/kkRpcauZoBFKnH0Qsy7J5qtwBF5.jpg",
-      "genre_ids": [
-        10749,
-        18
-      ],
-      "id": 1371023,
-      "title": "Chand Mera Dil",
-      "original_language": "hi",
-      "original_title": "चाँद मेरा दिल",
-      "overview": "Aarav and Chandni's passionate college romance is struck by adulthood far too soon, forcing the two young lovers to balance their ambitions with responsibility and realize the evolved meaning of love.",
-      "popularity": 196.1546,
-      "poster_path": "/9LPkXJustudEBgPZEm9tgDx5KtC.jpg",
-      "release_date": "2026-05-22",
-      "softcore": false,
-      "video": false,
-      "vote_average": 0,
-      "vote_count": 0
+      "vote_average": 6.5,
+      "vote_count": 8
     },
     {
       "adult": false,
@@ -326,28 +348,8 @@
       "release_date": "2021-04-07",
       "softcore": false,
       "video": false,
-      "vote_average": 7.033,
-      "vote_count": 6658
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/gkh6Nt8DtY1XT4gQsyFq9XAVJlJ.jpg",
-      "genre_ids": [
-        18,
-        35
-      ],
-      "id": 350,
-      "title": "The Devil Wears Prada",
-      "original_language": "en",
-      "original_title": "The Devil Wears Prada",
-      "overview": "A young woman from the Midwest gets more than she bargained for when she moves to New York to become a writer and ends up as the assistant to the tyrannical, larger-than-life editor-in-chief of a major fashion magazine.",
-      "popularity": 152.1336,
-      "poster_path": "/8912AsVuS7Sj915apArUFbv6F9L.jpg",
-      "release_date": "2006-06-29",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.424,
-      "vote_count": 13595
+      "vote_average": 7.034,
+      "vote_count": 6666
     },
     {
       "adult": false,
@@ -368,8 +370,28 @@
       "release_date": "2025-08-16",
       "softcore": false,
       "video": false,
-      "vote_average": 7.399,
-      "vote_count": 696
+      "vote_average": 7.403,
+      "vote_count": 697
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gkh6Nt8DtY1XT4gQsyFq9XAVJlJ.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 350,
+      "title": "The Devil Wears Prada",
+      "original_language": "en",
+      "original_title": "The Devil Wears Prada",
+      "overview": "A young woman from the Midwest gets more than she bargained for when she moves to New York to become a writer and ends up as the assistant to the tyrannical, larger-than-life editor-in-chief of a major fashion magazine.",
+      "popularity": 152.1336,
+      "poster_path": "/8912AsVuS7Sj915apArUFbv6F9L.jpg",
+      "release_date": "2006-06-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.425,
+      "vote_count": 13606
     },
     {
       "adult": false,
@@ -391,30 +413,10 @@
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.144,
-      "vote_count": 1280
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rHnANzYUmV3WZw3n0yWOLiR3pen.jpg",
-      "genre_ids": [
-        53,
-        80
-      ],
-      "id": 976912,
-      "title": "Graphic Desires",
-      "original_language": "en",
-      "original_title": "Graphic Desires",
-      "overview": "When reclusive Franklin cheats on his partner with a mysterious girl he meets on a dating app, it becomes the start of a deadly obsession.",
-      "popularity": 142.2487,
-      "poster_path": "/3BjLdTWRiHc1ISIZMFvToOmghOM.jpg",
-      "release_date": "2023-08-31",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.039,
-      "vote_count": 76
+      "vote_average": 8.145,
+      "vote_count": 1288
     }
   ],
-  "total_pages": 57117,
-  "total_results": 1142336
+  "total_pages": 57132,
+  "total_results": 1142621
 }

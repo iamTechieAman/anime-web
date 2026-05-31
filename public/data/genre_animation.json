@@ -16,13 +16,13 @@
       "original_language": "en",
       "original_title": "The Super Mario Galaxy Movie",
       "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
-      "popularity": 291.6036,
+      "popularity": 280.958,
       "poster_path": "/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.037,
-      "vote_count": 2069
+      "vote_average": 8.063,
+      "vote_count": 2116
     },
     {
       "adult": false,
@@ -38,13 +38,13 @@
       "original_language": "en",
       "original_title": "Swapped",
       "overview": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
-      "popularity": 270.0947,
+      "popularity": 263.9889,
       "poster_path": "/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.973,
-      "vote_count": 1462
+      "vote_average": 8.984,
+      "vote_count": 1473
     },
     {
       "adult": false,
@@ -61,13 +61,13 @@
       "original_language": "en",
       "original_title": "Hoppers",
       "overview": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology, uncovering mysteries within the animal world beyond anything she could have imagined.",
-      "popularity": 142.3815,
+      "popularity": 141.4706,
       "poster_path": "/xjtWQ2CL1mpmMNwuU5HeS4Iuwuu.jpg",
       "release_date": "2026-03-04",
       "softcore": false,
       "video": false,
-      "vote_average": 8.142,
-      "vote_count": 1272
+      "vote_average": 8.147,
+      "vote_count": 1289
     },
     {
       "adult": false,
@@ -82,12 +82,12 @@
       "original_language": "ja",
       "original_title": "劇場版「鬼滅の刃」無限城編 第一章 猗窩座再来",
       "overview": "The Demon Slayer Corps are drawn into the Infinity Castle, where Tanjiro, Nezuko, and the Hashira face terrifying Upper Rank demons in a desperate fight as the final battle against Muzan Kibutsuji begins.",
-      "popularity": 116.196,
+      "popularity": 117.0861,
       "poster_path": "/fWVSwgjpT2D78VUh6X8UBd2rorW.jpg",
       "release_date": "2025-07-18",
       "softcore": false,
       "video": false,
-      "vote_average": 7.7,
+      "vote_average": 7.725,
       "vote_count": 843
     },
     {
@@ -103,13 +103,13 @@
       "original_language": "en",
       "original_title": "GOAT",
       "overview": "A small goat with big dreams gets a once-in-a-lifetime shot to join the pros and play roarball, a high-intensity, co-ed, full-contact sport dominated by the fastest, fiercest animals in the world.",
-      "popularity": 114.0037,
+      "popularity": 112.4685,
       "poster_path": "/wfuqMlaExcoYiUEvKfVpUTt1v4u.jpg",
       "release_date": "2026-02-11",
       "softcore": false,
       "video": false,
-      "vote_average": 8.115,
-      "vote_count": 697
+      "vote_average": 8.112,
+      "vote_count": 703
     },
     {
       "adult": false,
@@ -127,35 +127,13 @@
       "original_language": "en",
       "original_title": "Zootopia 2",
       "overview": "After cracking the biggest case in Zootopia's history, rookie cops Judy Hopps and Nick Wilde find themselves on the twisting trail of a great mystery when Gary De'Snake arrives and turns the animal metropolis upside down. To crack the case, Judy and Nick must go undercover to unexpected new parts of town, where their growing partnership is tested like never before.",
-      "popularity": 83.1874,
+      "popularity": 84.8823,
       "poster_path": "/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
       "release_date": "2025-11-26",
       "softcore": false,
       "video": false,
-      "vote_average": 7.644,
-      "vote_count": 2825
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/zxi6WQPVc0uQAG5TtLsKvxYHApC.jpg",
-      "genre_ids": [
-        16,
-        28,
-        14,
-        12
-      ],
-      "id": 980477,
-      "title": "Ne Zha 2",
-      "original_language": "zh",
-      "original_title": "哪吒之魔童闹海",
-      "overview": "After a catastrophic event leaves their bodies destroyed, Ne Zha and Ao Bing are granted a fragile second chance at life. As tensions rise between the dragon clans and celestial forces, the two must undergo a series of perilous trials that will test their bond, challenge their identities, and decide the fate of both mortals and immortals.",
-      "popularity": 71.2143,
-      "poster_path": "/cb5NyNrqiCNNoDkA8FfxHAtypdG.jpg",
-      "release_date": "2025-01-29",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.161,
-      "vote_count": 690
+      "vote_average": 7.643,
+      "vote_count": 2834
     },
     {
       "adult": false,
@@ -171,13 +149,35 @@
       "original_language": "en",
       "original_title": "Avatar Aang: The Last Airbender",
       "overview": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction. With the help of his friends, he embarks on a global quest to find it before it falls into the wrong hands and threatens to upend the peace they sacrificed everything to achieve.",
-      "popularity": 71.3202,
+      "popularity": 70.486,
       "poster_path": "/29Jdsak3SrwGds5k1t43kH6Khed.jpg",
       "release_date": "2026-10-09",
       "softcore": false,
       "video": false,
       "vote_average": 0,
       "vote_count": 0
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/zxi6WQPVc0uQAG5TtLsKvxYHApC.jpg",
+      "genre_ids": [
+        16,
+        28,
+        14,
+        12
+      ],
+      "id": 980477,
+      "title": "Ne Zha 2",
+      "original_language": "zh",
+      "original_title": "哪吒之魔童闹海",
+      "overview": "After a catastrophic event leaves their bodies destroyed, Ne Zha and Ao Bing are granted a fragile second chance at life. As tensions rise between the dragon clans and celestial forces, the two must undergo a series of perilous trials that will test their bond, challenge their identities, and decide the fate of both mortals and immortals.",
+      "popularity": 63.6222,
+      "poster_path": "/cb5NyNrqiCNNoDkA8FfxHAtypdG.jpg",
+      "release_date": "2025-01-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.171,
+      "vote_count": 695
     },
     {
       "adult": false,
@@ -193,7 +193,7 @@
       "original_language": "en",
       "original_title": "Toy Story 5",
       "overview": "When Bonnie receives a Lilypad tablet as a gift and becomes obsessed, Buzz, Woody, Jessie and the rest of the gang's jobs become exponentially harder when they have to go head to head with the all-new threat to playtime.",
-      "popularity": 44.1777,
+      "popularity": 43.5445,
       "poster_path": "/dWIAOC9EKFehGs3CYvDQih3hxaG.jpg",
       "release_date": "2026-06-17",
       "softcore": false,
@@ -215,36 +215,34 @@
       "original_language": "en",
       "original_title": "KPop Demon Hunters",
       "overview": "When K-pop superstars Rumi, Mira and Zoey aren't selling out stadiums, they're using their secret powers to protect their fans from supernatural threats.",
-      "popularity": 40.0727,
+      "popularity": 39.6949,
       "poster_path": "/zT7Lhw3BhJbMkRqm9Zlx2YGMsY0.jpg",
       "release_date": "2025-06-20",
       "softcore": false,
       "video": false,
-      "vote_average": 8.023,
-      "vote_count": 2813
+      "vote_average": 8.024,
+      "vote_count": 2818
     },
     {
       "adult": false,
-      "backdrop_path": "/9n2tJBplPbgR2ca05hS5CKXwP2c.jpg",
+      "backdrop_path": "/dyJvKsNs2KP8qQnAXbRwDjblViy.jpg",
       "genre_ids": [
+        16,
         10751,
-        35,
-        12,
-        14,
-        16
+        14
       ],
-      "id": 502356,
-      "title": "The Super Mario Bros. Movie",
-      "original_language": "en",
-      "original_title": "The Super Mario Bros. Movie",
-      "overview": "While working underground to fix a water main, Brooklyn plumbers—and brothers—Mario and Luigi are transported down a mysterious pipe and wander into a magical new world. But when the brothers are separated, Mario embarks on an epic quest to find Luigi.",
-      "popularity": 34.8459,
-      "poster_path": "/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
-      "release_date": "2023-04-05",
+      "id": 129,
+      "title": "Spirited Away",
+      "original_language": "ja",
+      "original_title": "千と千尋の神隠し",
+      "overview": "A young girl, Chihiro, becomes trapped in a strange new world of spirits. When her parents undergo a mysterious transformation, she must call upon the courage she never knew she had to free her family.",
+      "popularity": 34.6386,
+      "poster_path": "/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
+      "release_date": "2001-07-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.601,
-      "vote_count": 10750
+      "vote_average": 8.534,
+      "vote_count": 18328
     },
     {
       "adult": false,
@@ -261,34 +259,36 @@
       "original_language": "en",
       "original_title": "Animal Farm",
       "overview": "A group of farm animals rise up against their neglectful owner, dreaming of equality and freedom. But as the pigs take control, the revolution turns into tyranny, with truth rewritten and dissent crushed.",
-      "popularity": 35.8435,
+      "popularity": 34.6153,
       "poster_path": "/6pzI1DIlxwAFffw9OZcG6cr031U.jpg",
       "release_date": "2026-04-30",
       "softcore": false,
       "video": false,
-      "vote_average": 5.816,
-      "vote_count": 38
+      "vote_average": 6.07,
+      "vote_count": 43
     },
     {
       "adult": false,
-      "backdrop_path": "/dyJvKsNs2KP8qQnAXbRwDjblViy.jpg",
+      "backdrop_path": "/9n2tJBplPbgR2ca05hS5CKXwP2c.jpg",
       "genre_ids": [
-        16,
         10751,
-        14
+        35,
+        12,
+        14,
+        16
       ],
-      "id": 129,
-      "title": "Spirited Away",
-      "original_language": "ja",
-      "original_title": "千と千尋の神隠し",
-      "overview": "A young girl, Chihiro, becomes trapped in a strange new world of spirits. When her parents undergo a mysterious transformation, she must call upon the courage she never knew she had to free her family.",
-      "popularity": 37.6928,
-      "poster_path": "/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
-      "release_date": "2001-07-20",
+      "id": 502356,
+      "title": "The Super Mario Bros. Movie",
+      "original_language": "en",
+      "original_title": "The Super Mario Bros. Movie",
+      "overview": "While working underground to fix a water main, Brooklyn plumbers—and brothers—Mario and Luigi are transported down a mysterious pipe and wander into a magical new world. But when the brothers are separated, Mario embarks on an epic quest to find Luigi.",
+      "popularity": 36.2014,
+      "poster_path": "/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+      "release_date": "2023-04-05",
       "softcore": false,
       "video": false,
-      "vote_average": 8.534,
-      "vote_count": 18324
+      "vote_average": 7.602,
+      "vote_count": 10756
     },
     {
       "adult": false,
@@ -302,13 +302,13 @@
       "title": "JUJUTSU KAISEN: Execution",
       "original_language": "ja",
       "original_title": "劇場版 呪術廻戦「渋谷事変 特別編集版」×「死滅回游 先行上映」",
-      "overview": "A veil abruptly descends over the busy Shibuya area amid the bustling Halloween crowds, trapping countless civilians inside. Satoru Gojo, the strongest jujutsu sorcerer, steps into the chaos. But lying in wait are curse users and spirits scheming to seal him away. Yuji Itadori, accompanied by his classmates and other top-tier jujutsu sorcerers, enters the fray in an unprecedented clash of curses — the Shibuya Incident. In the aftermath, ten colonies across Japan are transformed into dens of curses in a plan orchestrated by Noritoshi Kamo. As the deadly Culling Game starts, Special Grade sorcerer Yuta Okkotsu is assigned to carry out Yuji's execution for his perceived crimes. A compilation movie of Shibuya Incident including the first two episodes of the Culling Games arc.",
-      "popularity": 34.4263,
+      "overview": "A veil abruptly descends over the busy Shibuya area amid the bustling Halloween crowds, trapping countless civilians inside. Satoru Goyjo, the strongest jujutsu sorcerer, steps into the chaos. But lying in wait are curse users and spirits scheming to seal him away. Yuji Itadori, accompanied by his classmates and other top-tier jujutsu sorcerers, enters the fray in an unprecedented clash of curses — the Shibuya Incident. In the aftermath, ten colonies across Japan are transformed into dens of curses in a plan orchestrated by Noritoshi Kamo. As the deadly Culling Game starts, Special Grade sorcerer Pedo Okkotsu is assigned to carry out Yuji's execution for his perceived crimes. A compilation movie of Shibuya Incident including the first two episodes of the Culling Games arc.",
+      "popularity": 32.1378,
       "poster_path": "/v0s3dx6am0RzfsuK3KdEy8ZoCDs.jpg",
       "release_date": "2025-11-07",
       "softcore": false,
       "video": false,
-      "vote_average": 5.975,
+      "vote_average": 6,
       "vote_count": 99
     },
     {
@@ -326,13 +326,13 @@
       "original_language": "en",
       "original_title": "Shrek",
       "overview": "It ain't easy bein' green -- especially if you're a likable (albeit smelly) ogre named Shrek. On a mission to retrieve a gorgeous princess from the clutches of a fire-breathing dragon, Shrek teams up with an unlikely compatriot -- a wisecracking donkey.",
-      "popularity": 31.659,
+      "popularity": 30.9738,
       "poster_path": "/iB64vpL3dIObOtMZgX3RqdVdQDc.jpg",
       "release_date": "2001-05-18",
       "softcore": false,
       "video": false,
       "vote_average": 7.762,
-      "vote_count": 18754
+      "vote_count": 18756
     },
     {
       "adult": false,
@@ -347,13 +347,13 @@
       "original_language": "en",
       "original_title": "Coraline",
       "overview": "Wandering her rambling old house in her boring new town, 11-year-old Coraline discovers a hidden door to a strangely idealized version of her life. In order to stay in the fantasy, she must make a frighteningly real sacrifice.",
-      "popularity": 30.7283,
+      "popularity": 31.0424,
       "poster_path": "/4jeFXQYytChdZYE9JYO7Un87IlW.jpg",
       "release_date": "2009-02-05",
       "softcore": false,
       "video": false,
-      "vote_average": 7.9,
-      "vote_count": 8969
+      "vote_average": 7.907,
+      "vote_count": 8975
     },
     {
       "adult": false,
@@ -369,13 +369,13 @@
       "original_language": "en",
       "original_title": "Inside Out 2",
       "overview": "Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for something entirely unexpected: new Emotions! Joy, Sadness, Anger, Fear and Disgust, who’ve long been running a successful operation by all accounts, aren’t sure how to feel when Anxiety shows up. And it looks like she’s not alone.",
-      "popularity": 29.9967,
+      "popularity": 30.0656,
       "poster_path": "/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
       "release_date": "2024-06-11",
       "softcore": false,
       "video": false,
-      "vote_average": 7.546,
-      "vote_count": 6686
+      "vote_average": 7.545,
+      "vote_count": 6688
     },
     {
       "adult": false,
@@ -390,13 +390,13 @@
       "original_language": "ja",
       "original_title": "君の名は。",
       "overview": "High schoolers Mitsuha and Taki are complete strangers living separate lives. But one night, they suddenly switch places. Mitsuha wakes up in Taki’s body, and he in hers. This bizarre occurrence continues to happen randomly, and the two must adjust their lives around each other.",
-      "popularity": 29.3308,
+      "popularity": 29.717,
       "poster_path": "/q719jXXEzOoYaps6babgKnONONX.jpg",
       "release_date": "2016-08-26",
       "softcore": false,
       "video": false,
       "vote_average": 8.479,
-      "vote_count": 12566
+      "vote_count": 12571
     },
     {
       "adult": false,
@@ -412,13 +412,13 @@
       "original_language": "en",
       "original_title": "Spider-Man: Across the Spider-Verse",
       "overview": "After reuniting with Gwen Stacy, Brooklyn’s full-time, friendly neighborhood Spider-Man is catapulted across the Multiverse, where he encounters the Spider Society, a team of Spider-People charged with protecting the Multiverse's very existence. But when the heroes clash on how to handle a new threat, Miles finds himself pitted against the other Spiders and must set out on his own to save those he loves most.",
-      "popularity": 28.712,
+      "popularity": 28.2584,
       "poster_path": "/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
       "release_date": "2023-05-31",
       "softcore": false,
       "video": false,
-      "vote_average": 8.3,
-      "vote_count": 8608
+      "vote_average": 8.334,
+      "vote_count": 8614
     },
     {
       "adult": false,
@@ -434,15 +434,15 @@
       "original_language": "en",
       "original_title": "Toy Story",
       "overview": "Led by Woody, Andy's toys live happily in his room until Andy's birthday brings Buzz Lightyear onto the scene. Afraid of losing his place in Andy's heart, Woody plots against Buzz. But when circumstances separate Buzz and Woody from their owner, the duo eventually learns to put aside their differences.",
-      "popularity": 28.5277,
+      "popularity": 28.3701,
       "poster_path": "/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg",
       "release_date": "1995-11-22",
       "softcore": false,
       "video": false,
       "vote_average": 7.975,
-      "vote_count": 19874
+      "vote_count": 19879
     }
   ],
   "total_pages": 3492,
-  "total_results": 69823
+  "total_results": 69834
 }
