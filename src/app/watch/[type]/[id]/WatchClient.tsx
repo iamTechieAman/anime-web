@@ -202,7 +202,8 @@ interface ShowData {
     };
 }
 
-export default function WatchClient({ type, id: encodedRawId }: { type: string; id: string }) {
+export default function WatchClient({ type: initialType, id: encodedRawId }: { type: string; id: string }) {
+    const [type, setType] = useState(initialType);
     const { isAdBlockEnabled } = useAdBlock();
     const rawId = decodeURIComponent(encodedRawId || '');
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
@@ -630,7 +631,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         const fetchData = async () => {
             setLoading(true);
             try {
-                if (type === "anime" || type === "cartoon") {
+                if (initialType === "anime" || initialType === "cartoon") {
                     // 1. Fetch Anime/Cartoon Episodes/Metadata
                     const animeRes = await axios.get(`/api/anime/episodes?id=${id}`);
                     const show = animeRes.data.show;
@@ -657,6 +658,9 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                         const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
                         const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`);
                         setDetails(detailsRes.data);
+                        if (detailsRes.data.resolvedType) {
+                            setType(detailsRes.data.resolvedType);
+                        }
                     } else {
                         setSourceError(true);
                         // Minimal details if TMDB match fails
@@ -685,7 +689,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 } else {
                     // Guard against missing or invalid IDs
                     if (!id || id === 'undefined' || id === 'null') {
-                        console.error("[WatchPage] Segments missing or invalid ID:", { id, type });
+                        console.error("[WatchPage] Segments missing or invalid ID:", { id, type: initialType });
                         setSourceError(true);
                         setLoading(false);
                         return;
@@ -694,7 +698,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     let res = null;
                     for (let attempt = 0; attempt < 2; attempt++) {
                         try {
-                            res = await axios.get(`/api/prime/details?id=${id}&type=${type}`);
+                            res = await axios.get(`/api/prime/details?id=${id}&type=${initialType}`);
                             if (res.data) break;
                         } catch (retryErr) {
                             if (attempt === 1) throw retryErr;
@@ -703,7 +707,11 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                     }
                     if (res?.data) {
                         setDetails(res.data);
-                        if (type === "tv" && res.data.seasons?.length > 0) {
+                        if (res.data.resolvedType) {
+                            setType(res.data.resolvedType);
+                        }
+                        const resolvedType = res.data.resolvedType || initialType;
+                        if ((resolvedType === "tv" || resolvedType === "cartoon" || resolvedType === "anime") && res.data.seasons?.length > 0) {
                             setSelectedSeason(res.data.seasons[0].season_number || 1);
                         }
                     } else {
@@ -714,9 +722,12 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 console.error("Failed to fetch page data:", err);
                 // Try robust fallback via TMDB Details which auto-classifies media type
                 try {
-                    const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${type === 'movie' ? 'movie' : 'tv'}`);
+                    const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${initialType === 'movie' ? 'movie' : 'tv'}`);
                     if (fallbackRes.data) {
                         setDetails(fallbackRes.data);
+                        if (fallbackRes.data.resolvedType) {
+                            setType(fallbackRes.data.resolvedType);
+                        }
                         if (fallbackRes.data.seasons?.length > 0) {
                             setSelectedSeason(fallbackRes.data.seasons[0].season_number || 1);
                         }
@@ -729,7 +740,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 // Set minimal fallback details so the player still works
                 setDetails({
                     id: parseInt(id) || 0,
-                    title: type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : type === 'cartoon' ? 'Cartoon' : 'Movie',
+                    title: initialType === 'tv' ? 'TV Show' : initialType === 'anime' ? 'Anime' : initialType === 'cartoon' ? 'Cartoon' : 'Movie',
                     poster_path: null,
                     backdrop_path: null,
                     overview: 'Could not load metadata. The player is still available — try different servers if the content doesn\'t play.',
@@ -747,7 +758,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
             }
         };
         fetchData();
-    }, [id, type]);
+    }, [id, initialType]);
 
     // Fetch episodes when season changes
     useEffect(() => {
