@@ -4,7 +4,6 @@ import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { MobileUIProvider } from "@/context/MobileUIContext";
-import { TVNavigationProvider } from "@/context/TVNavigationContext";
 import ProfileGate from "@/components/ProfileGate"; // Deprecated
 import LayoutContent from "@/components/LayoutContent";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -267,35 +266,33 @@ export default async function RootLayout({
           }}
         >
           <AdBlockProvider>
-            <TVNavigationProvider>
-              <MobileUIProvider>
-                <NotificationProvider>
-                  <WatchProvider>
-                    <GlobalErrorListener />
+            <MobileUIProvider>
+              <NotificationProvider>
+                <WatchProvider>
+                  <GlobalErrorListener />
 
-                    <LayoutContent>
-                      {children}
-                    </LayoutContent>
+                  <LayoutContent>
+                    {children}
+                  </LayoutContent>
 
-                    <Toaster 
-                      position="bottom-center" 
-                      toastOptions={{
-                        style: {
-                          background: '#141414',
-                          color: '#fff',
-                          border: '1px solid rgba(255,255,255,0.08)',
-                          borderRadius: '12px',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                        },
-                      }}
-                    />
-                    <SpeedInsights />
-                    <Analytics />
-                  </WatchProvider>
-                </NotificationProvider>
-              </MobileUIProvider>
-            </TVNavigationProvider>
+                  <Toaster 
+                    position="bottom-center" 
+                    toastOptions={{
+                      style: {
+                        background: '#141414',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '12px',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                      },
+                    }}
+                  />
+                  <SpeedInsights />
+                  <Analytics />
+                </WatchProvider>
+              </NotificationProvider>
+            </MobileUIProvider>
           </AdBlockProvider>
         </ClerkProvider>
       </body>

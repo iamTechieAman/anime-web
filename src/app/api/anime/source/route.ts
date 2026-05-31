@@ -75,7 +75,7 @@ const PRIMARY_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', '
 const FALLBACK_PROVIDERS: ProviderName[] = ['consumet', 'animepahe', 'aniwatch', 'vidsrc'];
 
 // Auto-detect provider from ID prefix
-const PREFIX_MAP: Record<string, string> = {
+const PREFIX_MAP: Record<string, ProviderName> = {
     'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
     'on': 'onoflix', 'of': 'onoflix', 'wa': 'watchanimeworld',
     'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt',
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
     let detectedProvider: ProviderName | null = null;
     if (showId.includes(':')) {
         const prefix = showId.split(':')[0];
-        if (PREFIX_MAP[prefix]) detectedProvider = PREFIX_MAP[prefix] as ProviderName;
+        if (PREFIX_MAP[prefix]) detectedProvider = PREFIX_MAP[prefix];
     }
 
     // Build ordered provider list: explicit > detected > health-sorted primary > fallback

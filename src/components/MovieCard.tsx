@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { Play, Star, Flame } from "lucide-react";
 import React from "react";
-import { useTVNavigation } from "@/context/TVNavigationContext";
 
 // Shared movie item type
 export interface MovieItem {
@@ -42,7 +41,6 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     const [isHovered, setIsHovered] = useState(false);
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const cardRef = useRef<HTMLDivElement>(null);
-    const { deviceMode } = useTVNavigation();
 
     // Intersection Observer for visibility (replaces framer-motion whileInView)
     useEffect(() => {
@@ -69,7 +67,6 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     }, [item.liveViewers]);
 
     const handleMouseEnter = () => {
-        if (deviceMode === "tv") return;
         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         hoverTimeoutRef.current = setTimeout(() => {
             setIsHovered(true);
@@ -98,11 +95,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchStart={handleMouseEnter}
             onTouchEnd={handleMouseLeave}
         >
-        <Link 
-            href={mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`} 
-            data-focusable="true"
-            className="block w-full h-full rounded-xl outline-none focus:outline-none"
-        >
+        <Link href={mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`} className="block w-full h-full">
             <div className="premium-card-container">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (
@@ -273,13 +266,10 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
     const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
 
     return (
-        <div className="relative w-full mb-4 netflix-row-container">
-            <div 
-                id={scrollId} 
-                className="netflix-row hide-scrollbar"
-            >
+        <div className="relative w-full mb-2">
+            <div id={scrollId} className={`ott-card-grid ${isLarge ? "ott-card-grid-large" : ""}`}>
                 {validItems.map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} className={`netflix-card-snap shrink-0 ${isLarge ? "large" : ""}`}>
+                    <div key={`${item.id}-${idx}`} className="w-full min-w-0">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}

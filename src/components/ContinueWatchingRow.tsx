@@ -82,8 +82,8 @@ export default function ContinueWatchingRow() {
                 </span>
             </div>
             
-            <div className="relative group/cw netflix-row-container">
-                <div className="netflix-row hide-scrollbar">
+            <div className="relative group/cw">
+                <div className="continue-grid">
                     {displayHistory.slice(0, 12).map((entry) => {
                         const timeLeft = formatTimeLeft(entry.currentTime, entry.duration);
                         const isRemoving = removingId === entry.id;
@@ -92,8 +92,7 @@ export default function ContinueWatchingRow() {
                             <Link
                                 key={entry.id}
                                 href={getHistoryLink(entry)}
-                                data-focusable="true"
-                                className={`group relative min-w-0 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-orange-500/50 hover:shadow-[0_8px_40px_-8px_rgba(249,115,22,0.4)] hover:-translate-y-2 continue-card-snap shrink-0 ${
+                                className={`group relative min-w-0 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-400 ease-out hover:border-orange-500/50 hover:shadow-[0_8px_40px_-8px_rgba(249,115,22,0.4)] hover:-translate-y-2 ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 }`}
                             >

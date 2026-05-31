@@ -45,7 +45,6 @@ export interface VideoSource {
     isIframe?: boolean;
     server?: string;
     type?: 'sub' | 'dub' | 'raw';
-    headers?: Record<string, string>;
 }
 
 export interface AnimeProvider {

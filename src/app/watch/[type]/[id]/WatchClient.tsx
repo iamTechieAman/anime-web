@@ -207,10 +207,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const rawId = decodeURIComponent(encodedRawId || '');
     // Strip any prefix like 'tmdb:' from the ID so embed servers and API get a clean numeric ID
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
-
-    // Compute validity (but early return happens AFTER hooks — React rules of hooks)
-    const isValidId = type === 'anime' || type === 'cartoon' || (!isNaN(Number(id)) && id !== '' && id !== 'undefined' && id !== 'null');
-
     const router = useRouter();
     const searchParams = useSearchParams();
     const { addToHistory, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
@@ -220,15 +216,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const [showTrailer, setShowTrailer] = useState(false);
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
-
-    // Unified State
-    const [animeData, setAnimeData] = useState<ShowData | null>(null);
-    const [selectedSeason, setSelectedSeason] = useState(1);
-    const [selectedEpisode, setSelectedEpisode] = useState(1);
-    const [episodes, setEpisodes] = useState<any[]>([]);
-    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
-    const [mode, setMode] = useState<"sub" | "dub">("sub");
-    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
 
     const isAnimeServer = activeServer ? ANIME_SERVERS.some(s => s.id === activeServer.id) : false;
 
@@ -324,68 +311,21 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         };
     }, []);
 
-    // Cast session listener with proxy wrapper and rich toasts
+    // Cast session listener
     useEffect(() => {
-        if (!castAvailable) return;
+        if (!castAvailable || !rawVideoSource) return;
         const castContext = (window as any).cast.framework.CastContext.getInstance();
         
         const handleSessionStateChanged = (event: any) => {
-            const sessionState = event.sessionState;
-            
-            if (sessionState === (window as any).cast.framework.SessionState.SESSION_STARTING) {
-                toast.loading("Connecting to casting device...", { id: "cast-toast" });
-            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_START_FAILED) {
-                toast.error("Casting connection failed.", { id: "cast-toast" });
-            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
-                if (!rawVideoSource) {
-                    toast.error("No compatible video source found to cast on this server. Try another server.", { id: "cast-toast" });
-                    return;
-                }
-
-                toast.loading("Casting: Starting video on TV...", { id: "cast-toast" });
+            if (event.sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
+                const castSession = castContext.getCurrentSession();
+                const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(rawVideoSource, rawVideoSource.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4');
+                const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
                 
-                try {
-                    const castSession = castContext.getCurrentSession();
-                    // Wrap in proxy to bypass CORS/Referer locks on Chromecast
-                    const proxiedUrl = `${window.location.origin}/api/proxy?url=${encodeURIComponent(rawVideoSource)}&referer=${encodeURIComponent(new URL(rawVideoSource).origin)}`;
-                    
-                    const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(
-                        proxiedUrl, 
-                        rawVideoSource.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4'
-                    );
-                    
-                    // Metadata config for rich Chromecast card display on TV
-                    const metadata = new (window as any).chrome.cast.media.GenericMediaMetadata();
-                    metadata.metadataType = (window as any).chrome.cast.media.MetadataType.GENERIC;
-                    metadata.title = details?.title || details?.name || "ToonPlayer Stream";
-                    metadata.subtitle = type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Movie";
-                    if (details?.poster_path) {
-                        metadata.images = [{ url: `${IMG_BASE}/w500${details.poster_path}` }];
-                    }
-                    mediaInfo.metadata = metadata;
-
-                    const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
-                    
-                    castSession.loadMedia(request).then(
-                        () => {
-                            toast.success(`Playing "${details?.title || details?.name || 'Stream'}" on TV!`, { id: "cast-toast", icon: "📺" });
-                            // Pause local iframe playback if playing
-                            const localIframe = document.querySelector('iframe');
-                            if (localIframe) {
-                                localIframe.contentWindow?.postMessage({ type: 'PAUSE' }, '*');
-                            }
-                        },
-                        (e: any) => {
-                            console.error("[Casting] LoadMedia Failed:", e);
-                            toast.error("Failed to load video on your TV.", { id: "cast-toast" });
-                        }
-                    );
-                } catch (err) {
-                    console.error("[Casting] Session Error:", err);
-                    toast.error("Error setting up cast stream.", { id: "cast-toast" });
-                }
-            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_ENDED) {
-                toast.success("Disconnected from casting device.", { id: "cast-toast" });
+                castSession.loadMedia(request).then(
+                    () => toast.success("Casting started!"),
+                    (e: any) => toast.error("Casting failed.")
+                );
             }
         };
 
@@ -400,7 +340,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 handleSessionStateChanged
             );
         };
-    }, [castAvailable, rawVideoSource, details, type, selectedSeason, selectedEpisode]);
+    }, [castAvailable, rawVideoSource]);
 
     const toggleWatchlist = () => {
         if (inWatchlist) {
@@ -436,7 +376,14 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     // Auto Server Selection State
 
 
-
+    // Unified State
+    const [animeData, setAnimeData] = useState<ShowData | null>(null);
+    const [selectedSeason, setSelectedSeason] = useState(1);
+    const [selectedEpisode, setSelectedEpisode] = useState(1);
+    const [episodes, setEpisodes] = useState<any[]>([]);
+    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+    const [mode, setMode] = useState<"sub" | "dub">("sub");
+    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
 
     // Read season/episode from URL params on mount
     useEffect(() => {
@@ -845,29 +792,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         }
     }, [activeServer, selectedSeason, selectedEpisode, mode, details, animeData, tmdbIdForAnime]);
 
-    // Guard: if the ID is not a valid number for movie/tv, show a friendly error
-    if (!isValidId) {
-        return (
-            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex items-center justify-center p-4">
-                <div className="max-w-md w-full text-center">
-                    <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Play className="w-10 h-10 text-orange-400" />
-                    </div>
-                    <h1 className="text-2xl font-black mb-3">Content Not Found</h1>
-                    <p className="text-[var(--text-muted)] mb-6">This content could not be found or has an invalid ID. Please browse our catalog to find something to watch.</p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-bold hover:opacity-90 transition-all">
-                            Browse Content
-                        </Link>
-                        <Link href="/search" className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold hover:bg-white/5 transition-all">
-                            Search
-                        </Link>
-                    </div>
-                </div>
-            </main>
-        );
-    }
-
     if (loading) {
         return (
             <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
@@ -881,7 +805,6 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         );
     }
 
-
     if (!details) {
         // Show a minimal player page instead of "Content Not Found"
         const fallbackTitle = type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : type === 'cartoon' ? 'Cartoon' : 'Movie';
@@ -889,29 +812,21 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         const embedUrl = SERVERS[0].getUrl((type === "anime" || type === "cartoon") ? "tv" : type, fallbackId, 1, 1);
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
                     <div className="w-full flex items-center justify-between gap-4">
                         <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             <span className="text-sm font-medium hidden sm:inline">Back to Movies</span>
                         </Link>
                         <h1 className="text-sm font-bold truncate text-center flex-1">{fallbackTitle}</h1>
-                        <div className="flex items-center gap-4 shrink-0">
-                            {castAvailable && rawVideoSource && (
-                                <div className="flex items-center justify-center p-1 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors">
-                                    {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
-                                </div>
-                            )}
-                            <div className="w-[50px] hidden sm:block" />
-                        </div>
                     </div>
                 </div>
-                <div className="pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+                <div className="pt-14">
                     <div className="relative w-full bg-black">
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
                                 <iframe 
-                                    src={`/api/proxy/video?url=${encodeURIComponent(embedUrl)}`} 
+                                    src={embedUrl} 
                                     className="absolute inset-0 w-full h-full border-0" 
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
@@ -950,25 +865,18 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
         <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Top Navigation Bar */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
                 <div className="w-full flex items-center justify-between gap-4">
                     <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-medium hidden sm:inline">Back</span>
                     </Link>
                     <h1 className="text-sm font-bold truncate text-center flex-1 text-[var(--text-main)]">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h1>
-                    <div className="flex items-center gap-4 shrink-0">
-                        {castAvailable && rawVideoSource && (
-                            <div className="flex items-center justify-center p-1 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors">
-                                {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
-                            </div>
-                        )}
-                        <div className="w-[50px] hidden sm:block" />
-                    </div>
+                    <div className="w-[100px] hidden sm:block" /> {/* Spacer to center title */}
                 </div>
             </div>
 
-            <div className="pt-[max(80px,calc(75px+env(safe-area-inset-top)))] w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-6 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div className="pt-14 w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-6">
                 <div className="flex flex-col xl:flex-row gap-6 items-start">
                     
                     {/* Left Pane (Main content: Player, Cast, Info, alt etc.) */}
@@ -1045,7 +953,7 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
 
                             <iframe
                                 key={iframeKey}
-                                src={`/api/proxy/video?url=${encodeURIComponent(embedUrl)}`}
+                                src={embedUrl}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="no-referrer"

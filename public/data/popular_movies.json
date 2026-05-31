@@ -3,7 +3,7 @@
   "results": [
     {
       "adult": false,
-      "backdrop_path": "/xugEpZk9YQ0DIz1aFvH5HGkqpZK.jpg",
+      "backdrop_path": "/wMrV8SLne1jHLeYS0lLrA1Tf86P.jpg",
       "genre_ids": [
         27,
         9648
@@ -13,32 +13,13 @@
       "original_language": "en",
       "original_title": "Lee Cronin's The Mummy",
       "overview": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as what should be a joyful reunion turns into a living nightmare.",
-      "popularity": 594.6636,
+      "popularity": 802.3373,
       "poster_path": "/uIb9Tvae5haF0XcQBaPyufmxbb0.jpg",
       "release_date": "2026-04-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.04,
-      "vote_count": 1385
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
-      "genre_ids": [
-        27
-      ],
-      "id": 1339713,
-      "title": "Obsession",
-      "original_language": "en",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "popularity": 399.8813,
-      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
-      "release_date": "2026-05-13",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8,
-      "vote_count": 359
+      "vote_average": 8.042,
+      "vote_count": 1198
     },
     {
       "adult": false,
@@ -52,13 +33,13 @@
       "original_language": "en",
       "original_title": "Tom Clancy's Jack Ryan: Ghost War",
       "overview": "Jack Ryan is reluctantly pulled back into espionage when an international covert mission unravels a deadly conspiracy. Racing against time, he joins CIA allies Mike November & James Greer and sharp MI6 officer Emma Marlowe to battle a rogue black-ops unit in a high-stakes, deeply personal fight.",
-      "popularity": 399.0769,
+      "popularity": 525.2079,
       "poster_path": "/8ehYxUh5MWE41AeE9gkHE8DKzvB.jpg",
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.165,
-      "vote_count": 391
+      "vote_average": 7.252,
+      "vote_count": 286
     },
     {
       "adult": false,
@@ -73,13 +54,13 @@
       "original_language": "en",
       "original_title": "The Punisher: One Last Kill",
       "overview": "As Frank Castle searches for meaning beyond revenge, an unexpected force pulls him back into the fight.",
-      "popularity": 319.3487,
+      "popularity": 416.9348,
       "poster_path": "/qQclTgLMDvGBuUBFGHRipxkEwWR.jpg",
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.385,
-      "vote_count": 1324
+      "vote_average": 8.433,
+      "vote_count": 1201
     },
     {
       "adult": false,
@@ -96,34 +77,13 @@
       "original_language": "en",
       "original_title": "The Super Mario Galaxy Movie",
       "overview": "Having thwarted Bowser's previous plot to marry Princess Peach, Mario and Luigi now face a fresh threat in Bowser Jr., who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old, the brothers travel across the stars to stop the young heir's crusade.",
-      "popularity": 291.6036,
+      "popularity": 387.0855,
       "poster_path": "/eJGWx219ZcEMVQJhAgMiqo8tYY.jpg",
       "release_date": "2026-04-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.058,
-      "vote_count": 2109
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/gRoZG3Z0zJxgElmTsVHOl2dNYXe.jpg",
-      "genre_ids": [
-        28,
-        80,
-        53
-      ],
-      "id": 1582770,
-      "title": "Dhurandhar: The Revenge",
-      "original_language": "hi",
-      "original_title": "धुरंधर: द रिवेंज",
-      "overview": "As rival gangs, corrupt officials and a ruthless Major Iqbal close in, Hamza's mission for his country spirals into a bloody personal war where the line between patriot and monster disappears in the streets of Lyari.",
-      "popularity": 275.6895,
-      "poster_path": "/ov8vrRLZGoXHpYjSY9Vpv1tHJX7.jpg",
-      "release_date": "2026-03-18",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.263,
-      "vote_count": 97
+      "vote_average": 7.977,
+      "vote_count": 1887
     },
     {
       "adult": false,
@@ -137,13 +97,32 @@
       "original_language": "en",
       "original_title": "Project Hail Mary",
       "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
-      "popularity": 270.6206,
+      "popularity": 402.5239,
       "poster_path": "/yihdXomYb5kTeSivtFndMy5iDmf.jpg",
       "release_date": "2026-03-15",
       "softcore": false,
       "video": false,
-      "vote_average": 8.6,
-      "vote_count": 4343
+      "vote_average": 8.629,
+      "vote_count": 4108
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "genre_ids": [
+        27
+      ],
+      "id": 1339713,
+      "title": "Obsession",
+      "original_language": "en",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "popularity": 334.7747,
+      "poster_path": "/6X4qFYBsG3bpWDG2XIKqr04kFJa.jpg",
+      "release_date": "2026-04-16",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.9,
+      "vote_count": 275
     },
     {
       "adult": false,
@@ -159,13 +138,34 @@
       "original_language": "en",
       "original_title": "Swapped",
       "overview": "A small woodland creature and a majestic bird, two natural sworn enemies of the Valley, magically trade places and set off on an adventure of a lifetime to switch back. Their journey soon uncovers a greater threat—one that could endanger not only their species, but the entire valley they call home.",
-      "popularity": 270.0947,
+      "popularity": 328.7016,
       "poster_path": "/tHhxWxge06goXU6ZQH1hj7vK8Hd.jpg",
       "release_date": "2026-05-01",
       "softcore": false,
       "video": false,
-      "vote_average": 8.983,
-      "vote_count": 1472
+      "vote_average": 8.971,
+      "vote_count": 1385
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gRoZG3Z0zJxgElmTsVHOl2dNYXe.jpg",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "id": 1582770,
+      "title": "Dhurandhar: The Revenge",
+      "original_language": "hi",
+      "original_title": "धुरंधर: द रिवेंज",
+      "overview": "As rival gangs, corrupt officials and a ruthless Major Iqbal close in, Hamza's mission for his country spirals into a bloody personal war where the line between patriot and monster disappears in the streets of Lyari.",
+      "popularity": 299.5133,
+      "poster_path": "/ov8vrRLZGoXHpYjSY9Vpv1tHJX7.jpg",
+      "release_date": "2026-03-18",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.3,
+      "vote_count": 92
     },
     {
       "adult": false,
@@ -179,114 +179,33 @@
       "original_language": "ru",
       "original_title": "Твоё сердце будет разбито",
       "overview": "High school student Polina is saved from bullying at her new school and makes a deal with the main bully Bars: he must pretend to be her boyfriend and protect her, and she must do everything he says. During this game, the couple develops real feelings, but her family and classmates have reasons to separate the lovers.",
-      "popularity": 250.2719,
+      "popularity": 255.5162,
       "poster_path": "/7wIBfBl2gejt6xHxNSK0reVIm7E.jpg",
       "release_date": "2026-03-26",
       "softcore": false,
       "video": false,
       "vote_average": 6.8,
-      "vote_count": 81
+      "vote_count": 79
     },
     {
       "adult": false,
-      "backdrop_path": "/eNAFLrd1XAAD4hgdTPjewpzYU4W.jpg",
+      "backdrop_path": "/gkh6Nt8DtY1XT4gQsyFq9XAVJlJ.jpg",
       "genre_ids": [
+        18,
         35
       ],
-      "id": 1320660,
-      "title": "Pati Patni Aur Woh Do",
-      "original_language": "hi",
-      "original_title": "पति पत्नी और वो दो",
-      "overview": "A seemingly perfect marriage in Prayagraj takes an unexpected turn when one decision leads to a chain of misunderstandings, suspicion, and comedic chaos.",
-      "popularity": 198.273,
-      "poster_path": "/x0RUPvba4JlCCkyyEZGlQFIFVuF.jpg",
-      "release_date": "2026-05-15",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.5,
-      "vote_count": 4
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/tlm8UkiQsitc8rSuIAscQDCnP8d.jpg",
-      "genre_ids": [
-        28,
-        878
-      ],
-      "id": 603,
-      "title": "The Matrix",
+      "id": 350,
+      "title": "The Devil Wears Prada",
       "original_language": "en",
-      "original_title": "The Matrix",
-      "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
-      "popularity": 196.786,
-      "poster_path": "/aOIuZAjPaRIE6CMzbazvcHuHXDc.jpg",
-      "release_date": "1999-03-31",
+      "original_title": "The Devil Wears Prada",
+      "overview": "A young woman from the Midwest gets more than she bargained for when she moves to New York to become a writer and ends up as the assistant to the tyrannical, larger-than-life editor-in-chief of a major fashion magazine.",
+      "popularity": 201.2108,
+      "poster_path": "/8912AsVuS7Sj915apArUFbv6F9L.jpg",
+      "release_date": "2006-06-29",
       "softcore": false,
       "video": false,
-      "vote_average": 8.246,
-      "vote_count": 27901
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/kkRpcauZoBFKnH0Qsy7J5qtwBF5.jpg",
-      "genre_ids": [
-        10749,
-        18
-      ],
-      "id": 1371023,
-      "title": "Chand Mera Dil",
-      "original_language": "hi",
-      "original_title": "चाँद मेरा दिल",
-      "overview": "Aarav and Chandni's passionate college romance is struck by adulthood far too soon, forcing the two young lovers to balance their ambitions with responsibility and realize the evolved meaning of love.",
-      "popularity": 196.1546,
-      "poster_path": "/9LPkXJustudEBgPZEm9tgDx5KtC.jpg",
-      "release_date": "2026-05-22",
-      "softcore": false,
-      "video": false,
-      "vote_average": 1,
-      "vote_count": 1
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
-      "genre_ids": [
-        27,
-        9648,
-        878
-      ],
-      "id": 1083381,
-      "title": "Backrooms",
-      "original_language": "en",
-      "original_title": "Backrooms",
-      "overview": "A strange doorway appears in the basement of a furniture showroom.",
-      "popularity": 187.0112,
-      "poster_path": "/vpkNMkbisv5cTaIfCzUduYzXnjb.jpg",
-      "release_date": "2026-05-27",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.7,
-      "vote_count": 116
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4VrLojD6Gl1HQkcDHAoHQjSDPh9.jpg",
-      "genre_ids": [
-        28,
-        12,
-        878
-      ],
-      "id": 1228710,
-      "title": "The Mandalorian and Grogu",
-      "original_language": "en",
-      "original_title": "The Mandalorian and Grogu",
-      "overview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
-      "popularity": 179.8917,
-      "poster_path": "/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
-      "release_date": "2026-05-20",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.804,
-      "vote_count": 319
+      "vote_average": 7.422,
+      "vote_count": 13553
     },
     {
       "adult": false,
@@ -301,34 +220,13 @@
       "original_language": "en",
       "original_title": "Mortal Kombat II",
       "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-      "popularity": 164.3456,
-      "poster_path": "/lIsMeDbwntNXSUVHmWMMRXEZOVc.jpg",
+      "popularity": 219.2069,
+      "poster_path": "/io7wVbm9VKaanIcuAymCDy9dmjU.jpg",
       "release_date": "2026-05-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.8,
-      "vote_count": 338
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/jatqtz0VlQRiugmHktbKQpuf5EV.jpg",
-      "genre_ids": [
-        80,
-        18,
-        53
-      ],
-      "id": 1433117,
-      "title": "Kara",
-      "original_language": "ta",
-      "original_title": "கர",
-      "overview": "A thief tries to go straight, but when predatory banks trap his father in debt, he returns to crime — with a determined cop closing in on his trail.",
-      "popularity": 156.9641,
-      "poster_path": "/uIrFdMWlJFdc1jPBP9bxeaISCDj.jpg",
-      "release_date": "2026-04-30",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.5,
-      "vote_count": 8
+      "vote_average": 6.802,
+      "vote_count": 301
     },
     {
       "adult": false,
@@ -343,13 +241,114 @@
       "original_language": "en",
       "original_title": "Mortal Kombat",
       "overview": "Washed-up MMA fighter Cole Young, unaware of his heritage, and hunted by Emperor Shang Tsung's best warrior, Sub-Zero, seeks out and trains with Earth's greatest champions as he prepares to stand against the enemies of Outworld in a high stakes battle for the universe.",
-      "popularity": 155.7634,
+      "popularity": 184.3631,
       "poster_path": "/ybrX94xQm8lXYpZAPRmwD9iIbWP.jpg",
       "release_date": "2021-04-07",
       "softcore": false,
       "video": false,
-      "vote_average": 7.034,
-      "vote_count": 6666
+      "vote_average": 7.03,
+      "vote_count": 6628
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/eNAFLrd1XAAD4hgdTPjewpzYU4W.jpg",
+      "genre_ids": [
+        35
+      ],
+      "id": 1320660,
+      "title": "Pati Patni Aur Woh Do",
+      "original_language": "hi",
+      "original_title": "पति पत्नी और वो दो",
+      "overview": "A seemingly perfect marriage in Prayagraj takes an unexpected turn when one decision leads to a chain of misunderstandings, suspicion, and comedic chaos.",
+      "popularity": 214.0864,
+      "poster_path": "/x0RUPvba4JlCCkyyEZGlQFIFVuF.jpg",
+      "release_date": "2026-05-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8,
+      "vote_count": 2
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/7OedxK0BvSKJ0ZWCPRYADViTBx6.jpg",
+      "genre_ids": [
+        28,
+        12,
+        878
+      ],
+      "id": 1228710,
+      "title": "The Mandalorian and Grogu",
+      "original_language": "en",
+      "original_title": "The Mandalorian and Grogu",
+      "overview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
+      "popularity": 192.0492,
+      "poster_path": "/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
+      "release_date": "2026-05-20",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.751,
+      "vote_count": 231
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/oTE4lNs4PSG5iIWjqaTdCIFJ4Bs.jpg",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "id": 1318447,
+      "title": "Apex",
+      "original_language": "en",
+      "original_title": "Apex",
+      "overview": "A grieving woman pushing her limits on a solo adventure in the Australian wild is ensnared in a twisted game with a cunning killer who thinks she's prey.",
+      "popularity": 174.2064,
+      "poster_path": "/eTp7gSPkSF3Aw79mNx1NkBP1PZT.jpg",
+      "release_date": "2026-04-24",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.687,
+      "vote_count": 1229
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/hdLsZ3dCjKt5A6xDpoo3UFgcTSm.jpg",
+      "genre_ids": [
+        27,
+        28
+      ],
+      "id": 1426822,
+      "title": "Mortal Game",
+      "original_language": "en",
+      "original_title": "Mortal Game",
+      "overview": "A group of hunters travel to a mysterious island to track down a legendary forest creature. They soon realize their guide has set them up as bait, forcing them to confront a highly intelligent predator that terrorizes them one by one.",
+      "popularity": 142.1554,
+      "poster_path": "/iCvucorbs3hFqWshDbLe0fHzB71.jpg",
+      "release_date": "2025-02-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 4.917,
+      "vote_count": 12
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iN41Ccw4DctL8npfmYg1j5Tr1eb.jpg",
+      "genre_ids": [
+        878,
+        12,
+        14
+      ],
+      "id": 83533,
+      "title": "Avatar: Fire and Ash",
+      "original_language": "en",
+      "original_title": "Avatar: Fire and Ash",
+      "overview": "In the wake of the devastating war against the RDA and the loss of their eldest son, Jake Sully and Neytiri face a new threat on Pandora: the Ash People, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.",
+      "popularity": 159.6346,
+      "poster_path": "/aabwWZWx6z1aYP4PX2ADvbDKktd.jpg",
+      "release_date": "2025-12-17",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.501,
+      "vote_count": 3187
     },
     {
       "adult": false,
@@ -365,58 +364,54 @@
       "original_language": "zh",
       "original_title": "捕风追影",
       "overview": "Macau Police brings the tracking expert police officer out of retirement to help catch a dangerous group of professional thieves.",
-      "popularity": 154.8103,
+      "popularity": 149.3773,
       "poster_path": "/cHKo3m8N1fwvEy2ZEr0xGmmMODV.jpg",
       "release_date": "2025-08-16",
       "softcore": false,
       "video": false,
-      "vote_average": 7.403,
-      "vote_count": 697
+      "vote_average": 7.373,
+      "vote_count": 683
     },
     {
       "adult": false,
-      "backdrop_path": "/gkh6Nt8DtY1XT4gQsyFq9XAVJlJ.jpg",
+      "backdrop_path": "/7f9ZaTwyqQOJtNWUS7xZgWQOzSt.jpg",
       "genre_ids": [
-        18,
-        35
+        53
       ],
-      "id": 350,
-      "title": "The Devil Wears Prada",
-      "original_language": "en",
-      "original_title": "The Devil Wears Prada",
-      "overview": "A young woman from the Midwest gets more than she bargained for when she moves to New York to become a writer and ends up as the assistant to the tyrannical, larger-than-life editor-in-chief of a major fashion magazine.",
-      "popularity": 152.1336,
-      "poster_path": "/8912AsVuS7Sj915apArUFbv6F9L.jpg",
-      "release_date": "2006-06-29",
+      "id": 1431071,
+      "title": "System",
+      "original_language": "hi",
+      "original_title": "सिस्टम",
+      "overview": "When Neha Rajvansh, a privileged public prosecutor, meets Sarika Rawat, a courtroom stenographer from a humble background, their lives are thrown into upheaval where power defines truth, blurring the system and raising a question of what justice truly means to them.",
+      "popularity": 152.8624,
+      "poster_path": "/wznZGK0WTgbIJWuZVdWG3oPECL.jpg",
+      "release_date": "2026-05-22",
       "softcore": false,
       "video": false,
-      "vote_average": 7.425,
-      "vote_count": 13606
+      "vote_average": 7.5,
+      "vote_count": 2
     },
     {
       "adult": false,
-      "backdrop_path": "/u53UYu5XG2hNgWGvs3xGhAVzypl.jpg",
+      "backdrop_path": "/hlZGaey4lR9hc4rGxZRAmIEsZOc.jpg",
       "genre_ids": [
-        12,
-        16,
-        35,
-        10751,
-        878
+        28,
+        18
       ],
-      "id": 1327819,
-      "title": "Hoppers",
+      "id": 1292415,
+      "title": "Beast",
       "original_language": "en",
-      "original_title": "Hoppers",
-      "overview": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology, uncovering mysteries within the animal world beyond anything she could have imagined.",
-      "popularity": 142.3815,
-      "poster_path": "/xjtWQ2CL1mpmMNwuU5HeS4Iuwuu.jpg",
-      "release_date": "2026-03-04",
+      "original_title": "Beast",
+      "overview": "MMA legend Patton James, now a commercial fisherman, is pulled back into the cage when his brother is in danger. Reuniting with his old coach Sammy, he commits to one final fight in one championship against the brutal champion Xavier Grau.",
+      "popularity": 130.6204,
+      "poster_path": "/7NrvUI3vnW8H3rD7ExKcTL7KRcQ.jpg",
+      "release_date": "2026-04-10",
       "softcore": false,
       "video": false,
-      "vote_average": 8.145,
-      "vote_count": 1288
+      "vote_average": 6.307,
+      "vote_count": 44
     }
   ],
-  "total_pages": 57132,
-  "total_results": 1142621
+  "total_pages": 57038,
+  "total_results": 1140745
 }

@@ -13,13 +13,13 @@
       "original_language": "en",
       "original_title": "Tom Clancy's Jack Ryan: Ghost War",
       "overview": "Jack Ryan is reluctantly pulled back into espionage when an international covert mission unravels a deadly conspiracy. Racing against time, he joins CIA allies Mike November & James Greer and sharp MI6 officer Emma Marlowe to battle a rogue black-ops unit in a high-stakes, deeply personal fight.",
-      "popularity": 376.1243,
+      "popularity": 525.2079,
       "poster_path": "/8ehYxUh5MWE41AeE9gkHE8DKzvB.jpg",
       "release_date": "2026-05-20",
       "softcore": false,
       "video": false,
-      "vote_average": 7.166,
-      "vote_count": 394
+      "vote_average": 7.246,
+      "vote_count": 284
     },
     {
       "adult": false,
@@ -34,13 +34,13 @@
       "original_language": "en",
       "original_title": "The Punisher: One Last Kill",
       "overview": "As Frank Castle searches for meaning beyond revenge, an unexpected force pulls him back into the fight.",
-      "popularity": 311.9086,
+      "popularity": 416.9348,
       "poster_path": "/qQclTgLMDvGBuUBFGHRipxkEwWR.jpg",
       "release_date": "2026-05-12",
       "softcore": false,
       "video": false,
-      "vote_average": 8.387,
-      "vote_count": 1328
+      "vote_average": 8.431,
+      "vote_count": 1197
     },
     {
       "adult": false,
@@ -55,54 +55,13 @@
       "original_language": "hi",
       "original_title": "धुरंधर: द रिवेंज",
       "overview": "As rival gangs, corrupt officials and a ruthless Major Iqbal close in, Hamza's mission for his country spirals into a bloody personal war where the line between patriot and monster disappears in the streets of Lyari.",
-      "popularity": 279.195,
+      "popularity": 299.5133,
       "poster_path": "/ov8vrRLZGoXHpYjSY9Vpv1tHJX7.jpg",
       "release_date": "2026-03-18",
       "softcore": false,
       "video": false,
-      "vote_average": 7.263,
-      "vote_count": 97
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/tlm8UkiQsitc8rSuIAscQDCnP8d.jpg",
-      "genre_ids": [
-        28,
-        878
-      ],
-      "id": 603,
-      "title": "The Matrix",
-      "original_language": "en",
-      "original_title": "The Matrix",
-      "overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
-      "popularity": 197.495,
-      "poster_path": "/aOIuZAjPaRIE6CMzbazvcHuHXDc.jpg",
-      "release_date": "1999-03-31",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.246,
-      "vote_count": 27904
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4VrLojD6Gl1HQkcDHAoHQjSDPh9.jpg",
-      "genre_ids": [
-        28,
-        12,
-        878
-      ],
-      "id": 1228710,
-      "title": "The Mandalorian and Grogu",
-      "original_language": "en",
-      "original_title": "The Mandalorian and Grogu",
-      "overview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
-      "popularity": 168.1829,
-      "poster_path": "/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
-      "release_date": "2026-05-20",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.8,
-      "vote_count": 322
+      "vote_average": 7.332,
+      "vote_count": 92
     },
     {
       "adult": false,
@@ -117,13 +76,13 @@
       "original_language": "en",
       "original_title": "Mortal Kombat II",
       "overview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-      "popularity": 159.6661,
-      "poster_path": "/lIsMeDbwntNXSUVHmWMMRXEZOVc.jpg",
+      "popularity": 219.2069,
+      "poster_path": "/io7wVbm9VKaanIcuAymCDy9dmjU.jpg",
       "release_date": "2026-05-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.783,
-      "vote_count": 339
+      "vote_average": 6.8,
+      "vote_count": 299
     },
     {
       "adult": false,
@@ -138,13 +97,74 @@
       "original_language": "en",
       "original_title": "Mortal Kombat",
       "overview": "Washed-up MMA fighter Cole Young, unaware of his heritage, and hunted by Emperor Shang Tsung's best warrior, Sub-Zero, seeks out and trains with Earth's greatest champions as he prepares to stand against the enemies of Outworld in a high stakes battle for the universe.",
-      "popularity": 154.547,
+      "popularity": 184.3631,
       "poster_path": "/ybrX94xQm8lXYpZAPRmwD9iIbWP.jpg",
       "release_date": "2021-04-07",
       "softcore": false,
       "video": false,
-      "vote_average": 7.034,
-      "vote_count": 6667
+      "vote_average": 7.03,
+      "vote_count": 6628
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/7OedxK0BvSKJ0ZWCPRYADViTBx6.jpg",
+      "genre_ids": [
+        28,
+        12,
+        878
+      ],
+      "id": 1228710,
+      "title": "The Mandalorian and Grogu",
+      "original_language": "en",
+      "original_title": "The Mandalorian and Grogu",
+      "overview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
+      "popularity": 192.0492,
+      "poster_path": "/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
+      "release_date": "2026-05-20",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.8,
+      "vote_count": 229
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/oTE4lNs4PSG5iIWjqaTdCIFJ4Bs.jpg",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "id": 1318447,
+      "title": "Apex",
+      "original_language": "en",
+      "original_title": "Apex",
+      "overview": "A grieving woman pushing her limits on a solo adventure in the Australian wild is ensnared in a twisted game with a cunning killer who thinks she's prey.",
+      "popularity": 174.2064,
+      "poster_path": "/eTp7gSPkSF3Aw79mNx1NkBP1PZT.jpg",
+      "release_date": "2026-04-24",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.681,
+      "vote_count": 1227
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/hdLsZ3dCjKt5A6xDpoo3UFgcTSm.jpg",
+      "genre_ids": [
+        27,
+        28
+      ],
+      "id": 1426822,
+      "title": "Mortal Game",
+      "original_language": "en",
+      "original_title": "Mortal Game",
+      "overview": "A group of hunters travel to a mysterious island to track down a legendary forest creature. They soon realize their guide has set them up as bait, forcing them to confront a highly intelligent predator that terrorizes them one by one.",
+      "popularity": 142.1554,
+      "poster_path": "/iCvucorbs3hFqWshDbLe0fHzB71.jpg",
+      "release_date": "2025-02-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 4.917,
+      "vote_count": 12
     },
     {
       "adult": false,
@@ -160,54 +180,33 @@
       "original_language": "zh",
       "original_title": "捕风追影",
       "overview": "Macau Police brings the tracking expert police officer out of retirement to help catch a dangerous group of professional thieves.",
-      "popularity": 161.7244,
+      "popularity": 149.3773,
       "poster_path": "/cHKo3m8N1fwvEy2ZEr0xGmmMODV.jpg",
       "release_date": "2025-08-16",
       "softcore": false,
       "video": false,
-      "vote_average": 7.407,
-      "vote_count": 698
+      "vote_average": 7.373,
+      "vote_count": 683
     },
     {
       "adult": false,
-      "backdrop_path": "/1eAuwNBy34kkM3xkl202z4f1NiI.jpg",
-      "genre_ids": [
-        18,
-        28,
-        14
-      ],
-      "id": 1367220,
-      "title": "Karuppu",
-      "original_language": "ta",
-      "original_title": "கருப்பு",
-      "overview": "In a world where justice falters, guardian deity Vettai Karuppu takes the guise of a lawyer to battle a corrupt legal system preying on the powerless.",
-      "popularity": 130.9892,
-      "poster_path": "/k71MULHG8q9ThhFL1fcdAcOporW.jpg",
-      "release_date": "2026-05-14",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.3,
-      "vote_count": 9
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/oTE4lNs4PSG5iIWjqaTdCIFJ4Bs.jpg",
+      "backdrop_path": "/hlZGaey4lR9hc4rGxZRAmIEsZOc.jpg",
       "genre_ids": [
         28,
-        53
+        18
       ],
-      "id": 1318447,
-      "title": "Apex",
+      "id": 1292415,
+      "title": "Beast",
       "original_language": "en",
-      "original_title": "Apex",
-      "overview": "A grieving woman pushing her limits on a solo adventure in the Australian wild is ensnared in a twisted game with a cunning killer who thinks she's prey.",
-      "popularity": 124.6492,
-      "poster_path": "/eTp7gSPkSF3Aw79mNx1NkBP1PZT.jpg",
-      "release_date": "2026-04-24",
+      "original_title": "Beast",
+      "overview": "MMA legend Patton James, now a commercial fisherman, is pulled back into the cage when his brother is in danger. Reuniting with his old coach Sammy, he commits to one final fight in one championship against the brutal champion Xavier Grau.",
+      "popularity": 130.6204,
+      "poster_path": "/7NrvUI3vnW8H3rD7ExKcTL7KRcQ.jpg",
+      "release_date": "2026-04-10",
       "softcore": false,
       "video": false,
-      "vote_average": 6.716,
-      "vote_count": 1304
+      "vote_average": 6.307,
+      "vote_count": 44
     },
     {
       "adult": false,
@@ -222,116 +221,13 @@
       "original_language": "ja",
       "original_title": "劇場版「鬼滅の刃」無限城編 第一章 猗窩座再来",
       "overview": "The Demon Slayer Corps are drawn into the Infinity Castle, where Tanjiro, Nezuko, and the Hashira face terrifying Upper Rank demons in a desperate fight as the final battle against Muzan Kibutsuji begins.",
-      "popularity": 117.0861,
+      "popularity": 125.5801,
       "poster_path": "/fWVSwgjpT2D78VUh6X8UBd2rorW.jpg",
       "release_date": "2025-07-18",
       "softcore": false,
       "video": false,
-      "vote_average": 7.727,
-      "vote_count": 844
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/sb76azrAXr9U13uEQxNP5e3fujY.jpg",
-      "genre_ids": [
-        28,
-        35,
-        53
-      ],
-      "id": 1390300,
-      "title": "Over Your Dead Body",
-      "original_language": "en",
-      "original_title": "Over Your Dead Body",
-      "overview": "A dysfunctional couple head to a remote cabin to \"reconnect\", but each has secret intentions to kill the other.",
-      "popularity": 182.1351,
-      "poster_path": "/fqXIk1BY0tJvlqwiTw2HL9gegqE.jpg",
-      "release_date": "2026-04-24",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.009,
-      "vote_count": 54
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/hdLsZ3dCjKt5A6xDpoo3UFgcTSm.jpg",
-      "genre_ids": [
-        27,
-        28
-      ],
-      "id": 1426822,
-      "title": "Mortal Game",
-      "original_language": "en",
-      "original_title": "Mortal Game",
-      "overview": "A group of hunters travel to a mysterious island to track down a legendary forest creature. They soon realize their guide has set them up as bait, forcing them to confront a highly intelligent predator that terrorizes them one by one.",
-      "popularity": 99.1429,
-      "poster_path": "/iCvucorbs3hFqWshDbLe0fHzB71.jpg",
-      "release_date": "2025-02-03",
-      "softcore": false,
-      "video": false,
-      "vote_average": 4.917,
-      "vote_count": 12
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/hlZGaey4lR9hc4rGxZRAmIEsZOc.jpg",
-      "genre_ids": [
-        28,
-        18
-      ],
-      "id": 1292415,
-      "title": "Beast",
-      "original_language": "en",
-      "original_title": "Beast",
-      "overview": "MMA legend Patton James, now a commercial fisherman, is pulled back into the cage when his brother is in danger. Reuniting with his old coach Sammy, he commits to one final fight in one championship against the brutal champion Xavier Grau.",
-      "popularity": 97.009,
-      "poster_path": "/7NrvUI3vnW8H3rD7ExKcTL7KRcQ.jpg",
-      "release_date": "2026-04-10",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.3,
-      "vote_count": 45
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/7TJjD2X9GTEqyLVIJKLS85J2V47.jpg",
-      "genre_ids": [
-        53,
-        28,
-        80
-      ],
-      "id": 28322,
-      "title": "Madness",
-      "original_language": "it",
-      "original_title": "Vacanze per un massacro",
-      "overview": "An escaped convicted murderer invades the cottage of a man, his wife and the wife's sister, whereupon he proceeds to torment this already dysfunctional trio with rape and violence.",
-      "popularity": 98.5661,
-      "poster_path": "/gV0J0Fqw2mYMtQbzb0ruxv9MAeZ.jpg",
-      "release_date": "1980-03-20",
-      "softcore": false,
-      "video": false,
-      "vote_average": 4.969,
-      "vote_count": 32
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4DfxcN4w0FuYZHQ3JAHzpHWia1U.jpg",
-      "genre_ids": [
-        28,
-        80,
-        53
-      ],
-      "id": 1291608,
-      "title": "Dhurandhar",
-      "original_language": "hi",
-      "original_title": "धुरंधर",
-      "overview": "A mysterious traveler slips into the heart of Karachi's underbelly and rises through its ranks with lethal precision, only to tear the notorious ISI-Underworld nexus apart from within.",
-      "popularity": 96.2402,
-      "poster_path": "/8FHOtUpNIk5ZPEay2N2EY5lrxkv.jpg",
-      "release_date": "2025-12-05",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.126,
-      "vote_count": 285
+      "vote_average": 7.72,
+      "vote_count": 840
     },
     {
       "adult": false,
@@ -346,37 +242,97 @@
       "original_language": "en",
       "original_title": "Worldbreaker",
       "overview": "Five years ago, a tear in the fabric of reality brought creatures to our world from an alternate dimension bent on our destruction. A father hides his daughter on an island to keep her safe while he prepares her for survival and the battles to come. But when the world is about to break, no place is safe.",
-      "popularity": 77.9214,
+      "popularity": 117.447,
       "poster_path": "/ahj1JU8r0uJv7QII5Uj7tKzbEsC.jpg",
       "release_date": "2025-10-30",
       "softcore": false,
       "video": false,
-      "vote_average": 6.077,
-      "vote_count": 188
+      "vote_average": 5.893,
+      "vote_count": 173
     },
     {
       "adult": false,
-      "backdrop_path": "/lgotja3xMoJZbynwHfcQcJAEMWH.jpg",
+      "backdrop_path": "/8zLS8p1tRyWFLRFfmgQq0j5WE6z.jpg",
       "genre_ids": [
-        28,
         12,
-        16,
-        35,
-        10751,
-        9648
+        28,
+        14
       ],
-      "id": 1084242,
-      "title": "Zootopia 2",
+      "id": 564,
+      "title": "The Mummy",
       "original_language": "en",
-      "original_title": "Zootopia 2",
-      "overview": "After cracking the biggest case in Zootopia's history, rookie cops Judy Hopps and Nick Wilde find themselves on the twisting trail of a great mystery when Gary De'Snake arrives and turns the animal metropolis upside down. To crack the case, Judy and Nick must go undercover to unexpected new parts of town, where their growing partnership is tested like never before.",
-      "popularity": 84.8823,
-      "poster_path": "/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
-      "release_date": "2025-11-26",
+      "original_title": "The Mummy",
+      "overview": "Dashing legionnaire Rick O'Connell stumbles upon the hidden ruins of Hamunaptra while in the midst of a battle to claim the area in 1920s Egypt. It has been over three thousand years since former High Priest Imhotep suffered a fate worse than death as a punishment for a forbidden love—along with a curse that guarantees eternal doom upon the world if he is ever awoken.",
+      "popularity": 94.4468,
+      "poster_path": "/yhIsVvcUm7QxzLfT6HW2wLf5ajY.jpg",
+      "release_date": "1999-04-16",
       "softcore": false,
       "video": false,
-      "vote_average": 7.644,
-      "vote_count": 2835
+      "vote_average": 6.973,
+      "vote_count": 9993
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/xA6AM5MvEkieZKlv1Tn3sN23I7i.jpg",
+      "genre_ids": [
+        28,
+        18,
+        10749
+      ],
+      "id": 1630423,
+      "title": "My Dearest Assassin",
+      "original_language": "th",
+      "original_title": "เลือดรัก นักฆ่า",
+      "overview": "Hunted for her rare blood type, a caged woman vows to fight alongside the assassin she loves to protect their future when an old enemy resurfaces.",
+      "popularity": 93.4461,
+      "poster_path": "/ul4dQcA68mtSx8J56N5gEcaCCtP.jpg",
+      "release_date": "2026-05-06",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.635,
+      "vote_count": 207
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4DfxcN4w0FuYZHQ3JAHzpHWia1U.jpg",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "id": 1291608,
+      "title": "Dhurandhar",
+      "original_language": "hi",
+      "original_title": "धुरंधर",
+      "overview": "A mysterious traveler slips into the heart of Karachi's underbelly and rises through its ranks with lethal precision, only to tear the notorious ISI-Underworld nexus apart from within.",
+      "popularity": 100.4293,
+      "poster_path": "/8FHOtUpNIk5ZPEay2N2EY5lrxkv.jpg",
+      "release_date": "2025-12-05",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.12,
+      "vote_count": 283
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/1YU6Hy3x7fUh7dfOzSfjifTp20g.jpg",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "id": 1242332,
+      "title": "Normal",
+      "original_language": "en",
+      "original_title": "Normal",
+      "overview": "An unassuming substitute sheriff with a troubled past responds to a bank robbery in a small, sleepy town and unknowingly uncovers something far more explosive.",
+      "popularity": 74.8637,
+      "poster_path": "/rsNdDcCKjCZm9RBMAxL3vMUokKU.jpg",
+      "release_date": "2026-04-16",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.451,
+      "vote_count": 102
     },
     {
       "adult": false,
@@ -392,7 +348,7 @@
       "original_language": "en",
       "original_title": "Avatar Aang: The Last Airbender",
       "overview": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction. With the help of his friends, he embarks on a global quest to find it before it falls into the wrong hands and threatens to upend the peace they sacrificed everything to achieve.",
-      "popularity": 70.486,
+      "popularity": 80.4841,
       "poster_path": "/29Jdsak3SrwGds5k1t43kH6Khed.jpg",
       "release_date": "2026-10-09",
       "softcore": false,
@@ -414,15 +370,57 @@
       "original_language": "zh",
       "original_title": "哪吒之魔童闹海",
       "overview": "After a catastrophic event leaves their bodies destroyed, Ne Zha and Ao Bing are granted a fragile second chance at life. As tensions rise between the dragon clans and celestial forces, the two must undergo a series of perilous trials that will test their bond, challenge their identities, and decide the fate of both mortals and immortals.",
-      "popularity": 63.6222,
+      "popularity": 70.4225,
       "poster_path": "/cb5NyNrqiCNNoDkA8FfxHAtypdG.jpg",
       "release_date": "2025-01-29",
       "softcore": false,
       "video": false,
-      "vote_average": 8.171,
-      "vote_count": 695
+      "vote_average": 8.158,
+      "vote_count": 689
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/1eAuwNBy34kkM3xkl202z4f1NiI.jpg",
+      "genre_ids": [
+        14,
+        28,
+        18
+      ],
+      "id": 1367220,
+      "title": "Karuppu",
+      "original_language": "ta",
+      "original_title": "கருப்பு",
+      "overview": "In a world where justice falters, guardian deity Vettai Karuppu takes the guise of a lawyer to battle a corrupt legal system preying on the powerless. Karuppu blends action, justice, and myth into a gripping supernatural drama.",
+      "popularity": 98.552,
+      "poster_path": "/k71MULHG8q9ThhFL1fcdAcOporW.jpg",
+      "release_date": "2026-05-14",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.4,
+      "vote_count": 8
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/nHxWyy18SvAZ8jJeemtS8k1UNjM.jpg",
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "id": 1290821,
+      "title": "Shelter",
+      "original_language": "en",
+      "original_title": "Shelter",
+      "overview": "A man living in self-imposed exile on a remote island rescues a young girl from a violent storm, setting off a chain of events that forces him out of seclusion to protect her from enemies tied to his past.",
+      "popularity": 81.3315,
+      "poster_path": "/buPFnHZ3xQy6vZEHxbHgL1Pc6CR.jpg",
+      "release_date": "2026-01-28",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.597,
+      "vote_count": 1038
     }
   ],
-  "total_pages": 2432,
-  "total_results": 48631
+  "total_pages": 2429,
+  "total_results": 48566
 }

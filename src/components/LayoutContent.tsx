@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 import ProfileSettings from "@/components/ProfileSettings";
 import { useMobileUI } from "@/context/MobileUIContext";
 import Footer from "@/components/Footer";
-import { useTVNavigation } from "@/context/TVNavigationContext";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
@@ -18,7 +17,27 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isWatchPage = pathname?.startsWith('/watch');
   const isHomePage = pathname === '/';
   
-  const { deviceMode } = useTVNavigation();
+  const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
+
+  useEffect(() => {
+    const detectDevice = () => {
+      if (typeof window !== "undefined") {
+        const ua = navigator.userAgent;
+        const width = window.innerWidth;
+        const isTVUA = /SmartTV|GoogleTV|AppleTV|Roku|CastTV|Tizen|Web0S|NetCast|Opera TV|Viera|Bravia|PlayStation|Xbox/i.test(ua);
+        if (isTVUA || width >= 2500) {
+          setDeviceMode("tv");
+        } else if (width < 1024) {
+          setDeviceMode("mobile");
+        } else {
+          setDeviceMode("pc");
+        }
+      }
+    };
+    detectDevice();
+    window.addEventListener("resize", detectDevice);
+    return () => window.removeEventListener("resize", detectDevice);
+  }, []);
 
   // Cleanup: showProfileSettings should only be triggered by user action
   useEffect(() => {
@@ -27,10 +46,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     }
   }, []);
   
-  const showSidebar = (deviceMode === "pc" || deviceMode === "tv") && !isWatchPage;
+  const showSidebar = deviceMode === "pc" && !isWatchPage;
 
   return (
-    <main className={`min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0 ${deviceMode === "tv" ? "device-tv" : ""}`}>
+    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-[60px] md:h-[64px] w-full skeleton-shine animate-pulse" />}>
@@ -39,7 +58,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
       {/* Content area: adaptive padding based on sidebar visibility */}
       <div className={`flex flex-col min-h-screen relative ${
-        showSidebar ? "pl-0 md:pl-[72px]" : "pl-0"
+        showSidebar ? "pl-0 md:pl-[72px] peer-hover/sidebar:md:pl-[220px]" : "pl-0"
       } transition-[padding] duration-300 ease-in-out overflow-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}

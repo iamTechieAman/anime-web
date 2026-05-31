@@ -80,11 +80,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
 
     return (
         <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-300 hover:scale-[1.06] hover:z-30 w-full h-full`}>
-            <Link 
-                href={getHref()} 
-                data-focusable="true"
-                className="block w-full h-full rounded-xl outline-none focus:outline-none"
-            >
+            <Link href={getHref()} className="block w-full h-full">
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
                     {(imageSrc && !imgError) ? (

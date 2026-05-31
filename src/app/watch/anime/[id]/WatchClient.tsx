@@ -384,69 +384,26 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         };
     }, []);
 
-    // Cast session listener with proxy wrapper and rich toasts
+    // Cast session listener
     useEffect(() => {
         if (!castAvailable) return;
         const castContext = (window as any).cast.framework.CastContext.getInstance();
         
         const handleSessionStateChanged = (event: any) => {
-            const sessionState = event.sessionState;
-            
-            if (sessionState === (window as any).cast.framework.SessionState.SESSION_STARTING) {
-                toast.loading("Connecting to casting device...", { id: "cast-toast" });
-            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_START_FAILED) {
-                toast.error("Casting connection failed.", { id: "cast-toast" });
-            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
+            if (event.sessionState === (window as any).cast.framework.SessionState.SESSION_STARTED) {
                 const sourceToCast = videoType === "iframe" ? rawVideoSource : sourceUrl;
                 if (!sourceToCast) {
-                    toast.error("This stream cannot be casted. Try a different server.", { id: "cast-toast" });
+                    toast.error("This stream cannot be casted. Try a different server.");
                     return;
                 }
-
-                toast.loading("Casting: Starting video on TV...", { id: "cast-toast" });
+                const castSession = castContext.getCurrentSession();
+                const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(sourceToCast, sourceToCast.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4');
+                const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
                 
-                try {
-                    const castSession = castContext.getCurrentSession();
-                    // Wrap in proxy to bypass CORS/Referer locks on Chromecast
-                    const proxiedUrl = `${window.location.origin}/api/proxy?url=${encodeURIComponent(sourceToCast)}&referer=${encodeURIComponent(new URL(sourceToCast).origin)}`;
-                    
-                    const mediaInfo = new (window as any).chrome.cast.media.MediaInfo(
-                        proxiedUrl, 
-                        sourceToCast.includes('.m3u8') ? 'application/x-mpegurl' : 'video/mp4'
-                    );
-                    
-                    // Metadata config for rich Chromecast card display on TV
-                    const metadata = new (window as any).chrome.cast.media.GenericMediaMetadata();
-                    metadata.metadataType = (window as any).chrome.cast.media.MetadataType.GENERIC;
-                    metadata.title = show?.name || "ToonPlayer Stream";
-                    metadata.subtitle = `Episode ${currentEp} (${mode.toUpperCase()})`;
-                    if (show?.thumbnail) {
-                        metadata.images = [{ url: show.thumbnail }];
-                    }
-                    mediaInfo.metadata = metadata;
-
-                    const request = new (window as any).chrome.cast.media.LoadRequest(mediaInfo);
-                    
-                    castSession.loadMedia(request).then(
-                        () => {
-                            toast.success(`Playing "${show?.name || 'Stream'}" on TV!`, { id: "cast-toast", icon: "📺" });
-                            // Pause local player if playing
-                            const localIframe = document.querySelector('iframe');
-                            if (localIframe) {
-                                localIframe.contentWindow?.postMessage({ type: 'PAUSE' }, '*');
-                            }
-                        },
-                        (e: any) => {
-                            console.error("[Casting] LoadMedia Failed:", e);
-                            toast.error("Failed to load video on your TV.", { id: "cast-toast" });
-                        }
-                    );
-                } catch (err) {
-                    console.error("[Casting] Session Error:", err);
-                    toast.error("Error setting up cast stream.", { id: "cast-toast" });
-                }
-            } else if (sessionState === (window as any).cast.framework.SessionState.SESSION_ENDED) {
-                toast.success("Disconnected from casting device.", { id: "cast-toast" });
+                castSession.loadMedia(request).then(
+                    () => toast.success("Casting started!"),
+                    (e: any) => toast.error("Casting failed.")
+                );
             }
         };
 
@@ -461,7 +418,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 handleSessionStateChanged
             );
         };
-    }, [castAvailable, rawVideoSource, sourceUrl, videoType, show, currentEp, mode]);
+    }, [castAvailable, rawVideoSource, sourceUrl, videoType]);
 
     const handleShare = async () => {
         try {

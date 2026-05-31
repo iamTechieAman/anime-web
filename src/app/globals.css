@@ -81,9 +81,6 @@ img {
   --radius-xl: 16px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
-
-  --header-height: 64px;
-  --container-px: 1.5rem;
 }
 
 .dark {
@@ -1311,6 +1308,7 @@ nav, .fixed, [class*="fixed"] {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 button:focus-visible,
@@ -1414,8 +1412,8 @@ main, .relative.z-10 {
   scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch !important;
   gap: 12px !important;
-  padding: 20px var(--container-px) 24px var(--container-px) !important;
-  margin: -12px calc(-1 * var(--container-px)) !important;
+  padding: 20px 4px 24px 4px !important;
+  margin: -12px 0 !important;
   scrollbar-width: none !important; /* Firefox */
 }
 
@@ -1756,11 +1754,6 @@ main, .relative.z-10 {
    SHARED MOBILE FIXES — all screens ≤ 768px
    ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  :root {
-    --header-height: 60px;
-    --container-px: 1rem;
-  }
-
   /* Better touch targets for primary interactive elements — Apple HIG 44px */
   /* Applied only to nav-level elements, not every inline button */
   nav button,
@@ -1803,7 +1796,11 @@ main, .relative.z-10 {
     contain: layout style paint;
   }
 
-  /* Horizontal scrollable rows — using CSS container-px variable */
+  /* Horizontal scrollable rows — comfortable mobile padding */
+  .netflix-row {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
 
   /* Section headings on mobile */
   .section-title,
@@ -2132,168 +2129,3 @@ main, .relative.z-10 {
     animation: none !important;
   }
 }
-
-/* ──────────────────────────────────────────────────────────
-   SMART TV CUSTOM OTT LAYOUTS & FOCUS SYSTEM
-   ────────────────────────────────────────────────────────── */
-
-/* TV and PC card snap dimensions */
-.netflix-card-snap {
-  scroll-snap-align: start !important;
-  flex: 0 0 auto !important;
-  width: 130px;
-}
-
-.netflix-card-snap.large {
-  width: 150px;
-}
-
-@media (min-width: 640px) {
-  .netflix-card-snap {
-    width: 150px;
-  }
-  .netflix-card-snap.large {
-    width: 170px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .netflix-card-snap {
-    width: 165px;
-  }
-  .netflix-card-snap.large {
-    width: 190px;
-  }
-}
-
-@media (min-width: 1440px) {
-  .netflix-card-snap {
-    width: 180px;
-  }
-  .netflix-card-snap.large {
-    width: 210px;
-  }
-}
-
-/* TV continue watching card snap dimensions */
-.netflix-row .continue-card-snap {
-  scroll-snap-align: start !important;
-  flex: 0 0 auto !important;
-  width: 220px;
-}
-
-@media (min-width: 640px) {
-  .netflix-row .continue-card-snap {
-    width: 250px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .netflix-row .continue-card-snap {
-    width: 280px;
-  }
-}
-
-@media (min-width: 1440px) {
-  .netflix-row .continue-card-snap {
-    width: 320px;
-  }
-}
-
-/* Universal Smart TV programmatic focus classes */
-.device-tv {
-  --header-height: 80px;
-}
-
-.device-tv a:focus,
-.device-tv button:focus,
-.device-tv input:focus,
-.device-tv select:focus,
-.device-tv [data-focusable="true"]:focus,
-.device-tv [tabindex="0"]:focus {
-  outline: none !important;
-  box-shadow: 0 0 0 4px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.8) !important;
-  border-radius: inherit !important;
-  transform: scale(1.06) !important;
-  z-index: 40 !important;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s !important;
-}
-
-
-/* Ensure the sidebar expands on focus-within for Smart TV remote control */
-.device-tv aside:focus-within {
-  width: 220px !important;
-}
-
-/* Hide mobile-specific floating UI elements on TV */
-.device-tv .tap-scale,
-.device-tv [class*="MobileNav"] {
-  display: none !important;
-}
-
-/* ══════════════════════════════════════════════════
-   FLUID RESPONSIVE SYSTEM & PERFORMANCE OVERRIDES
-   ══════════════════════════════════════════════════ */
-
-:root {
-  /* Fluid Spacings */
-  --space-fluid-gutter: clamp(1rem, 2.5vw + 0.25rem, 2.5rem);
-  --space-fluid-gap: clamp(0.75rem, 1.5vw + 0.15rem, 1.5rem);
-  --space-fluid-padding: clamp(0.75rem, 2vw + 0.25rem, 2rem);
-  
-  /* Fluid Typography */
-  --font-fluid-hero-title: clamp(2rem, 5vw + 1rem, 4.5rem);
-  --font-fluid-section-title: clamp(1.25rem, 2.5vw + 0.5rem, 2.25rem);
-  --font-fluid-card-title: clamp(0.85rem, 1.2vw + 0.3rem, 1.1rem);
-  --font-fluid-body: clamp(0.875rem, 1vw + 0.4rem, 1.05rem);
-}
-
-/* Container Queries context on snapping row containers */
-.netflix-row-wrap {
-  container-type: inline-size;
-  width: 100%;
-}
-
-@container (max-width: 480px) {
-  .netflix-card-snap {
-    width: 110px !important;
-    min-width: 110px !important;
-  }
-}
-@container (min-width: 481px) and (max-width: 768px) {
-  .netflix-card-snap {
-    width: 140px !important;
-    min-width: 140px !important;
-  }
-}
-@container (min-width: 769px) {
-  .netflix-card-snap {
-    width: 170px !important;
-    min-width: 170px !important;
-  }
-}
-
-/* Low-End performance overrides */
-.performance-low-end,
-.performance-low-end * {
-  animation: none !important;
-  animation-duration: 0.001s !important;
-  transition: none !important;
-  transition-duration: 0.001s !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-  will-change: auto !important;
-}
-
-.performance-low-end .backdrop-blur-md,
-.performance-low-end .backdrop-blur-lg,
-.performance-low-end .backdrop-blur-xl,
-.performance-low-end .backdrop-blur-2xl,
-.performance-low-end .backdrop-blur-3xl {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background-color: rgba(11, 11, 15, 0.98) !important;
-}
-

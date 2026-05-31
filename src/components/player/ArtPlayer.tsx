@@ -5,8 +5,6 @@ import Artplayer from "artplayer";
 import Hls from "hls.js";
 // @ts-ignore
 import artplayerPluginChromecast from 'artplayer-plugin-chromecast';
-import { useTVNavigation } from "@/context/TVNavigationContext";
-import PlayerHUDOverlay from "./PlayerHUDOverlay";
 
 interface PlayerProps {
     option: {
@@ -28,20 +26,6 @@ interface PlayerProps {
     skipIntroDuration?: number; // Duration in seconds to skip to (default: 90)
 }
 
-// Dynamic loader for dash.js to prevent bloat
-const loadDash = (callback: () => void) => {
-    if (typeof window === "undefined") return;
-    if ((window as any).dashjs) {
-        callback();
-        return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.1/dash.all.min.js";
-    script.async = true;
-    script.onload = () => callback();
-    document.body.appendChild(script);
-};
-
 export default function Player({ 
     option, className, style, getInstance, onEnded, onError, onTimeUpdate, 
     initialTime = 0, autoPlay = false, autoNext = false,
@@ -49,7 +33,6 @@ export default function Player({
 }: PlayerProps) {
     const artRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<Artplayer | null>(null);
-    const [artInstance, setArtInstance] = useState<Artplayer | null>(null);
     const [showCountdown, setShowCountdown] = useState(false);
     const [countdown, setCountdown] = useState(5);
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,9 +40,7 @@ export default function Player({
     const [showSkipButton, setShowSkipButton] = useState(false);
     const [playerTime, setPlayerTime] = useState(0);
     const [resumeTime, setResumeTime] = useState(0);
-
-    const { deviceMode, performanceTier } = useTVNavigation();
-    const isLowEnd = performanceTier === "low";
+    const [showResumePrompt, setShowResumePrompt] = useState(false);
 
     // Audio/Quality persistence refs
     const lastAudioTrackName = useRef<string | null>(typeof window !== 'undefined' ? localStorage.getItem('artplayer_audio_track') : null);
@@ -70,6 +51,7 @@ export default function Player({
         if (!showSkipIntro || !playerRef.current) return;
         
         const duration = playerRef.current.duration || 0;
+        // Don't show skip button if the video is too short (e.g. trailers)
         if (duration > 0 && duration < skipIntroDuration + 60) return;
 
         if (playerTime >= 5 && playerTime <= skipIntroDuration) {
@@ -79,9 +61,12 @@ export default function Player({
         }
     }, [playerTime, showSkipIntro, skipIntroDuration]);
 
+    // Resume playback logic has been automated, we no longer need the prompt state
+
     const handleSkipIntro = useCallback(() => {
         if (playerRef.current && !isDestroyed.current) {
             const duration = playerRef.current.duration;
+            // Never skip beyond 10% of the total duration or 5 minutes (whichever is smaller) if it's a short clip
             const targetTime = Math.min(skipIntroDuration, duration * 0.9);
             
             playerRef.current.currentTime = targetTime;
@@ -90,6 +75,12 @@ export default function Player({
         }
     }, [skipIntroDuration]);
 
+    const handleResume = useCallback(() => {
+        if (playerRef.current && !isDestroyed.current && resumeTime > 0) {
+            playerRef.current.currentTime = resumeTime;
+        }
+    }, [resumeTime]);
+
     useEffect(() => {
         isDestroyed.current = false;
         if (!artRef.current) return;
@@ -97,8 +88,6 @@ export default function Player({
         // Initialize ArtPlayer only if it doesn't exist
         if (!playerRef.current) {
             try {
-                const isMpd = option.url.includes('.mpd') || option.type === 'mpd';
-                
                 const art = new Artplayer({
                     container: artRef.current,
                     poster: option.poster || "",
@@ -125,7 +114,7 @@ export default function Player({
                     playsInline: true,
                     autoPlayback: true,
                     airplay: true,
-                    theme: '#f97316', // Matches ToonPlayer secondary orange
+                    theme: '#a855f7',
                     lang: 'en',
                     plugins: [
                         artplayerPluginChromecast({}),
@@ -152,94 +141,26 @@ export default function Player({
                             }
                         }
                     ],
-                    type: option.type || (isMpd ? 'mpd' : option.url.includes('.m3u8') ? 'm3u8' : 'auto'),
+                    type: option.type || (option.url.includes('.m3u8') ? 'm3u8' : 'auto'),
                     customType: {
-                        mpd: function (video: HTMLVideoElement, url: string, art: Artplayer) {
-                            console.log('[ArtPlayer] Loading DASH source:', url);
-                            loadDash(() => {
-                                const dashjs = (window as any).dashjs;
-                                if (!dashjs) {
-                                    console.error("[ArtPlayer] dash.js failed to load.");
-                                    return;
-                                }
-                                
-                                if ((art as any).dash) (art as any).dash.destroy();
-                                const player = dashjs.MediaPlayer().create();
-                                player.initialize(video, url, art.option.autoplay);
-                                
-                                // Auto buffer tweaks for rapid OTT loading
-                                player.updateSettings({
-                                    streaming: {
-                                        buffer: {
-                                            stableBufferTime: isLowEnd ? 6 : 12,
-                                            bufferTimeAtTopQuality: isLowEnd ? 10 : 20,
-                                        },
-                                        fastSwitchEnabled: true,
-                                    }
-                                });
-
-                                (art as any).dash = player;
-
-                                player.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
-                                    try {
-                                        art.setting.remove('quality');
-                                    } catch (e) {}
-
-                                    const bitrates = player.getBitrateInfoListFor("video");
-                                    if (bitrates.length > 1) {
-                                        const qualitySelector = {
-                                            name: 'quality',
-                                            width: 150,
-                                            html: 'Quality',
-                                            tooltip: 'Auto',
-                                            icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6 6 6z"/><circle cx="12" cy="12" r="3"/></svg>',
-                                            selector: [
-                                                { html: 'Auto', default: true, level: -1 },
-                                                ...bitrates.map((b: any, index: number) => ({
-                                                    html: `${b.height}P`,
-                                                    level: index,
-                                                    default: false,
-                                                })).reverse(),
-                                            ],
-                                            onSelect: function (item: any) {
-                                                if (item.level === -1) {
-                                                    player.updateSettings({ streaming: { abr: { autoSwitchBitrate: { video: true } } } });
-                                                } else {
-                                                    player.updateSettings({ streaming: { abr: { autoSwitchBitrate: { video: false } } } });
-                                                    player.setQualityFor("video", item.level);
-                                                }
-                                                art.notice.show = `Switched to ${item.html}`;
-                                                return item.html;
-                                            },
-                                        };
-                                        art.setting.add(qualitySelector);
-                                    }
-                                });
-
-                                art.on('destroy', () => {
-                                    player.destroy();
-                                });
-                            });
-                        },
                         m3u8: function (video: HTMLVideoElement, url: string, art: Artplayer) {
                             console.log('[ArtPlayer] Initializing HLS for URL:', url);
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
                                 const hls = new Hls({
-                                    maxBufferLength: isLowEnd ? 10 : 20, // Lowered buffer threshold for instant startup
-                                    maxMaxBufferLength: isLowEnd ? 20 : 45,
-                                    maxBufferSize: isLowEnd ? 15 * 1000 * 1000 : 45 * 1000 * 1000,
+                                    maxBufferLength: 30,
+                                    maxMaxBufferLength: 60,
+                                    maxBufferSize: 60 * 1000 * 1000,
                                     renderTextTracksNatively: false,
                                     initialLiveManifestSize: 1,
                                     nudgeMaxRetry: 10,
                                     enableWorker: true,
-                                    lowLatencyMode: isLowEnd ? false : true,
-                                    backBufferLength: isLowEnd ? 30 : 60,
+                                    lowLatencyMode: true,
+                                    backBufferLength: 90,
                                     manifestLoadingTimeOut: 10000,
                                     levelLoadingTimeOut: 10000,
                                     fragLoadingTimeOut: 15000,
                                     startLevel: -1,
-                                    progressive: true
                                 });
 
                                 hls.loadSource(url);
@@ -247,6 +168,7 @@ export default function Player({
                                 (art as any).hls = hls;
 
                                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                    // Remove existing settings to prevent duplicates
                                     try {
                                         art.setting.remove('quality');
                                         art.setting.remove('audio');
@@ -343,40 +265,18 @@ export default function Player({
                                     }
                                 });
 
-                                let mediaRecoveryAttempts = 0;
-                                let networkRecoveryAttempts = 0;
-
                                 hls.on(Hls.Events.ERROR, function (event, data) {
                                     if (data.fatal) {
                                         console.error('[ArtPlayer] HLS Fatal Error:', data.type, data.details);
                                         if (onError) onError(data);
                                         switch (data.type) {
                                             case Hls.ErrorTypes.NETWORK_ERROR:
-                                                if (networkRecoveryAttempts < 5) {
-                                                    networkRecoveryAttempts++;
-                                                    console.warn(`[ArtPlayer] HLS network error, retrying loading in 2s (Attempt ${networkRecoveryAttempts}/5)`);
-                                                    setTimeout(() => {
-                                                        if (!isDestroyed.current && (art as any).hls) {
-                                                            hls.startLoad();
-                                                        }
-                                                    }, 2000);
-                                                } else {
-                                                    art.notice.show = "Network connection failed. Try another server.";
-                                                }
+                                                hls.startLoad();
                                                 break;
                                             case Hls.ErrorTypes.MEDIA_ERROR:
-                                                if (mediaRecoveryAttempts < 3) {
-                                                    mediaRecoveryAttempts++;
-                                                    console.warn(`[ArtPlayer] HLS media error, attempting recovery (Attempt ${mediaRecoveryAttempts}/3)`);
-                                                    hls.recoverMediaError();
-                                                } else {
-                                                    console.warn("[ArtPlayer] HLS media recovery failed. Swapping audio codec.");
-                                                    hls.swapAudioCodec();
-                                                    hls.recoverMediaError();
-                                                }
+                                                hls.recoverMediaError();
                                                 break;
                                             default:
-                                                console.error("[ArtPlayer] HLS unrecoverable error. Destroying HLS instance.");
                                                 hls.destroy();
                                                 break;
                                         }
@@ -396,7 +296,6 @@ export default function Player({
                 });
 
                 playerRef.current = art;
-                setArtInstance(art);
 
                 if (getInstance && typeof getInstance === 'function') {
                     getInstance(art);
@@ -417,6 +316,7 @@ export default function Player({
                 });
 
                 art.on('video:ended', () => {
+                    // Logic moved to Parent (WatchClient) to use centralized Netflix-style overlay
                     if (onEnded && !isDestroyed.current) onEnded();
                 });
 
@@ -440,6 +340,11 @@ export default function Player({
             }
         }
 
+        if (playerRef.current) {
+            const art = playerRef.current;
+            // Internal ArtPlayer countdown removed to favor WatchClient overlay
+        }
+
         return () => {
             if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         };
@@ -455,13 +360,24 @@ export default function Player({
             if (playerRef.current) {
                 playerRef.current.destroy(false);
                 playerRef.current = null;
-                setArtInstance(null);
             }
         };
     }, []);
 
+    const cancelAutoNext = () => {
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+        setShowCountdown(false);
+        setCountdown(5);
+    };
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
     return (
-        <div className="relative w-full overflow-visible touch-pan-y video-player-container">
+        <div className="relative w-full overflow-visible touch-pan-y">
             <div
                 ref={artRef}
                 className={`${className} touch-pan-y`}
@@ -483,13 +399,9 @@ export default function Player({
                 </button>
             )}
 
-            {/* Smart TV Overlay Controls */}
-            {artInstance && deviceMode === "tv" && (
-                <PlayerHUDOverlay
-                    art={artInstance}
-                    onNextEpisode={autoNext && onEnded ? onEnded : undefined}
-                />
-            )}
+            {/* Resume Prompt Removed (Auto-resumes now) */}
+
+            {/* Auto-Next Countdown UI is now handled by WatchClient.tsx for consistency */}
         </div>
     );
 }

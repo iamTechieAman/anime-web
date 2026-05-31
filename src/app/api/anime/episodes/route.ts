@@ -19,7 +19,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label = ''): Promise<T>
 const SEARCH_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', 'allanime', 'aniwatch'];
 
 // ID prefix → provider mapping
-const PREFIX_MAP: Record<string, string> = {
+const PREFIX_MAP: Record<string, ProviderName> = {
     'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
     'on': 'onoflix', 'of': 'onoflix', 'wa': 'watchanimeworld',
     'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt',
@@ -111,7 +111,7 @@ export async function GET(request: Request) {
     let provider: ProviderName = providerParam || 'allanime';
     if (id.includes(':')) {
         const prefix = id.split(':')[0];
-        if (PREFIX_MAP[prefix]) provider = PREFIX_MAP[prefix] as ProviderName;
+        if (PREFIX_MAP[prefix]) provider = PREFIX_MAP[prefix];
     }
 
     // Check episode list cache
