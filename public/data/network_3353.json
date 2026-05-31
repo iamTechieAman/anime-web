@@ -3,28 +3,6 @@
   "results": [
     {
       "adult": false,
-      "backdrop_path": "/wqjhAWmqHrIIn4PdchGCuEgPksw.jpg",
-      "genre_ids": [
-        80,
-        18
-      ],
-      "id": 262388,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "M.I.A.",
-      "overview": "Restless in the Florida Keys, Etta Tiger Jonze dreams of a life in Miami's glittering, sub-tropical kingdom. When her family's drug-running business shatters in tragedy, however, Etta embarks on a dangerous journey through Miami's neon-lit underbelly that will define who she is and what she's ultimately capable of.",
-      "popularity": 38.2685,
-      "poster_path": "/uvocuo6mgQTtNa7O6a3MQoTfuh4.jpg",
-      "first_air_date": "2026-05-07",
-      "softcore": false,
-      "name": "M.I.A.",
-      "vote_average": 8.435,
-      "vote_count": 62
-    },
-    {
-      "adult": false,
       "backdrop_path": "/3mDSrhLUX2cAhaPqurNBslPh8rz.jpg",
       "genre_ids": [
         80,
@@ -37,13 +15,13 @@
       "original_language": "en",
       "original_name": "Law & Order: Organized Crime",
       "overview": "The detectives of the Organized Crime Control Bureau work to dismantle New York City's most vicious and violent illegal enterprises.",
-      "popularity": 29.2729,
+      "popularity": 32.0034,
       "poster_path": "/4AvB6Dg8eAbfWv5WOqzCCv2zS90.jpg",
       "first_air_date": "2021-04-01",
       "softcore": false,
       "name": "Law & Order: Organized Crime",
-      "vote_average": 7.9,
-      "vote_count": 294
+      "vote_average": 7.895,
+      "vote_count": 295
     },
     {
       "adult": false,
@@ -60,13 +38,35 @@
       "original_language": "en",
       "original_name": "Curious George",
       "overview": "With the help of his friend “The Man in the Yellow Hat,” a curious little monkey named George sets out on adventures to learn about the world around him.",
-      "popularity": 28.9142,
-      "poster_path": "/AWQF9ZP7X5GqGUoXnyj1NSQjKo.jpg",
+      "popularity": 31.6877,
+      "poster_path": "/1FsihcjjTrzkmD9i8hRPzE6GhZf.jpg",
       "first_air_date": "2006-09-04",
       "softcore": false,
       "name": "Curious George",
-      "vote_average": 7.154,
+      "vote_average": 7.2,
       "vote_count": 130
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/wqjhAWmqHrIIn4PdchGCuEgPksw.jpg",
+      "genre_ids": [
+        80,
+        18
+      ],
+      "id": 262388,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "M.I.A.",
+      "overview": "Restless in the Florida Keys, Etta Tiger Jonze dreams of a life in Miami's glittering, sub-tropical kingdom. When her family's drug-running business shatters in tragedy, however, Etta embarks on a dangerous journey through Miami's neon-lit underbelly that will define who she is and what she's ultimately capable of.",
+      "popularity": 27.7421,
+      "poster_path": "/uvocuo6mgQTtNa7O6a3MQoTfuh4.jpg",
+      "first_air_date": "2026-05-07",
+      "softcore": false,
+      "name": "M.I.A.",
+      "vote_average": 8.46,
+      "vote_count": 63
     },
     {
       "adult": false,
@@ -81,118 +81,13 @@
       "original_language": "en",
       "original_name": "ted",
       "overview": "It's 1993 and Ted the bear's moment of fame has passed, leaving him living with his best friend, 16-year-old John Bennett, who lives in a working-class Boston home with his parents and cousin. Ted may not be the best influence on John, but when it comes right down to it, he's willing to go out on a limb to help his friend and his family.",
-      "popularity": 23.9809,
+      "popularity": 26.6494,
       "poster_path": "/cPn71YFDENH0JkWUezlsLyWmLfN.jpg",
       "first_air_date": "2024-01-11",
       "softcore": false,
       "name": "ted",
-      "vote_average": 7.964,
-      "vote_count": 659
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/xwnXpskFmmuvz8NesJoC7KmTREL.jpg",
-      "genre_ids": [],
-      "id": 37507,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "People's Choice Awards",
-      "overview": "An American awards show recognizing people in entertainment, voted online by the general public and fans.",
-      "popularity": 16.7102,
-      "poster_path": "/ohyiWEGeWUf6JBsgPgtIDKZOJZn.jpg",
-      "first_air_date": "1975-03-04",
-      "softcore": false,
-      "name": "People's Choice Awards",
-      "vote_average": 9.2,
-      "vote_count": 6
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/ccOzCmrglAjRGtqv5ClTaBEsWt8.jpg",
-      "genre_ids": [
-        80,
-        9648
-      ],
-      "id": 120998,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Poker Face",
-      "overview": "Follow Charlie Cale, a woman with an extraordinary ability to tell when someone is lying, as she hits the road and, at every stop, encounters a new cast of characters and crimes she can't help but solve.",
-      "popularity": 19.1624,
-      "poster_path": "/8Xm5dyMQC9whMJKnGdFugUAW73C.jpg",
-      "first_air_date": "2023-01-26",
-      "softcore": false,
-      "name": "Poker Face",
-      "vote_average": 7.469,
-      "vote_count": 495
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/929XdVflzbgQWtKFDOnak3saK0R.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 107365,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Bel-Air",
-      "overview": "The journey of a book smart teen whose life is forever transformed when he moves from the streets of west Philadelphia to live with his relatives in one of LA’s wealthiest suburbs.",
-      "popularity": 15.7391,
-      "poster_path": "/j8tbXWXrL15RucA6H4khq87dEXa.jpg",
-      "first_air_date": "2022-02-13",
-      "softcore": false,
-      "name": "Bel-Air",
-      "vote_average": 7.681,
-      "vote_count": 281
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/5JNsNiL9AOZ2lnGJbul2aM7qN41.jpg",
-      "genre_ids": [
-        18,
-        80
-      ],
-      "id": 91552,
-      "origin_country": [
-        "GB"
-      ],
-      "original_language": "en",
-      "original_name": "Departure",
-      "overview": "Follow the mystery of Flight 716 - a passenger plane that vanishes over the Atlantic Ocean. Following the mysterious crash, recently widowed, brilliant aviation investigator Kendra Malley is called in to investigate by her former boss and mentor Howard Lawson.",
-      "popularity": 16.3192,
-      "poster_path": "/b52lWChoqjtE6ZgMLK2XjA3unDW.jpg",
-      "first_air_date": "2019-07-10",
-      "softcore": false,
-      "name": "Departure",
-      "vote_average": 6.5,
-      "vote_count": 112
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/m0TiLZ79RR19Zz0AZruQSBeH39x.jpg",
-      "genre_ids": [
-        10764
-      ],
-      "id": 90521,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Love Island USA",
-      "overview": "The matchmaking begins as a group of single \"Islanders\" come together in a stunning villa on a beautiful tropical island, ready to embark on a summer of dating, romance, and ultimately, relationships. Every few days the Islanders pair up and those who are not coupled are at risk of being dumped from the island. Islanders are on the lookout for romance, but the road to love doesn't always run smoothly.",
-      "popularity": 16.0874,
-      "poster_path": "/kU2y21cls8WargMaX7KI47URMjD.jpg",
-      "first_air_date": "2019-07-09",
-      "softcore": false,
-      "name": "Love Island USA",
-      "vote_average": 7,
-      "vote_count": 164
+      "vote_average": 7.963,
+      "vote_count": 662
     },
     {
       "adult": false,
@@ -209,13 +104,118 @@
       "original_language": "en",
       "original_name": "WWE Main Event",
       "overview": "WWE Main Event is a professional wrestling television program produced by WWE that airs on Peacock and streams on Hulu Plus in the United States. The show features WWE wrestlers and complements WWE's primary programs Raw and SmackDown.",
-      "popularity": 16.1141,
+      "popularity": 26.1779,
       "poster_path": "/yVZdqmVMI09F7GzFvDJCc36oBkT.jpg",
       "first_air_date": "2012-10-03",
       "softcore": false,
       "name": "WWE Main Event",
       "vote_average": 7.9,
       "vote_count": 59
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/ccOzCmrglAjRGtqv5ClTaBEsWt8.jpg",
+      "genre_ids": [
+        80,
+        9648
+      ],
+      "id": 120998,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Poker Face",
+      "overview": "Follow Charlie Cale, a woman with an extraordinary ability to tell when someone is lying, as she hits the road and, at every stop, encounters a new cast of characters and crimes she can't help but solve.",
+      "popularity": 22.0502,
+      "poster_path": "/8Xm5dyMQC9whMJKnGdFugUAW73C.jpg",
+      "first_air_date": "2023-01-26",
+      "softcore": false,
+      "name": "Poker Face",
+      "vote_average": 7.5,
+      "vote_count": 495
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/929XdVflzbgQWtKFDOnak3saK0R.jpg",
+      "genre_ids": [
+        18
+      ],
+      "id": 107365,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Bel-Air",
+      "overview": "The journey of a book smart teen whose life is forever transformed when he moves from the streets of west Philadelphia to live with his relatives in one of LA’s wealthiest suburbs.",
+      "popularity": 15.9741,
+      "poster_path": "/j8tbXWXrL15RucA6H4khq87dEXa.jpg",
+      "first_air_date": "2022-02-13",
+      "softcore": false,
+      "name": "Bel-Air",
+      "vote_average": 7.681,
+      "vote_count": 281
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/m0TiLZ79RR19Zz0AZruQSBeH39x.jpg",
+      "genre_ids": [
+        10764
+      ],
+      "id": 90521,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Love Island USA",
+      "overview": "The matchmaking begins as a group of single \"Islanders\" come together in a stunning villa on a beautiful tropical island, ready to embark on a summer of dating, romance, and ultimately, relationships. Every few days the Islanders pair up and those who are not coupled are at risk of being dumped from the island. Islanders are on the lookout for romance, but the road to love doesn't always run smoothly.",
+      "popularity": 17.0177,
+      "poster_path": "/kU2y21cls8WargMaX7KI47URMjD.jpg",
+      "first_air_date": "2019-07-09",
+      "softcore": false,
+      "name": "Love Island USA",
+      "vote_average": 6.924,
+      "vote_count": 165
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/xwnXpskFmmuvz8NesJoC7KmTREL.jpg",
+      "genre_ids": [],
+      "id": 37507,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "People's Choice Awards",
+      "overview": "An American awards show recognizing people in entertainment, voted online by the general public and fans.",
+      "popularity": 16.9988,
+      "poster_path": "/ohyiWEGeWUf6JBsgPgtIDKZOJZn.jpg",
+      "first_air_date": "1975-03-04",
+      "softcore": false,
+      "name": "People's Choice Awards",
+      "vote_average": 9.2,
+      "vote_count": 6
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/5JNsNiL9AOZ2lnGJbul2aM7qN41.jpg",
+      "genre_ids": [
+        18,
+        80
+      ],
+      "id": 91552,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "Departure",
+      "overview": "Follow the mystery of Flight 716 - a passenger plane that vanishes over the Atlantic Ocean. Following the mysterious crash, recently widowed, brilliant aviation investigator Kendra Malley is called in to investigate by her former boss and mentor Howard Lawson.",
+      "popularity": 16.7062,
+      "poster_path": "/b52lWChoqjtE6ZgMLK2XjA3unDW.jpg",
+      "first_air_date": "2019-07-10",
+      "softcore": false,
+      "name": "Departure",
+      "vote_average": 6.491,
+      "vote_count": 113
     },
     {
       "adult": false,
@@ -230,7 +230,7 @@
       "original_language": "en",
       "original_name": "Girls5eva",
       "overview": "When a one-hit-wonder girl group from the '90s gets sampled by a young rapper, its members reunite to give their pop star dreams one more shot. They may be grown women balancing spouses, kids, jobs, debt, aging parents and shoulder pain, but can't they also be Girls5Eva?",
-      "popularity": 14.3159,
+      "popularity": 15.0958,
       "poster_path": "/1RplQ2ooky3kONomTNhsptZxqAV.jpg",
       "first_air_date": "2021-05-06",
       "softcore": false,
@@ -252,56 +252,13 @@
       "original_language": "en",
       "original_name": "Dragons: The Nine Realms",
       "overview": "Set 1,300 years after the events of How to Train Your Dragon, dragons are now just a legend to the modern world. When a geological anomaly opens an immense, miles-deep fissure in the Earth’s surface, scientists from all over the world gather at a new research facility to study the mysterious phenomenon. Soon a group of misfit kids, brought to the site by their parents, uncover the truth about dragons and where they’ve been hiding -- a secret they must keep to themselves to protect what they’ve discovered.",
-      "popularity": 12.1565,
+      "popularity": 14.6692,
       "poster_path": "/4iVAFGq8KhFdvsP5dHVvVqs5ALu.jpg",
       "first_air_date": "2021-12-23",
       "softcore": false,
       "name": "Dragons: The Nine Realms",
       "vote_average": 7.7,
       "vote_count": 284
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/akY5bMj3g76EOaliNLdOJI9kBPb.jpg",
-      "genre_ids": [
-        10764
-      ],
-      "id": 215943,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "The Traitors",
-      "overview": "The entertainment industry’s most competitive reality stars and famous faces play the ultimate murder mystery game. Hosted by award-winning actor Alan Cumming at an ancient castle set deep in the Scottish Highlands, contestants work together on a series of exhilarating missions to build a prize fund worth up to $250,000. Hidden amongst the Faithful are the Traitors, whose goal is to eliminate the Faithful and claim the prize for themselves.",
-      "popularity": 11.0368,
-      "poster_path": "/xWK9tLH2UGgzuAI6P3cHeTKopfj.jpg",
-      "first_air_date": "2023-01-12",
-      "softcore": false,
-      "name": "The Traitors",
-      "vote_average": 6.2,
-      "vote_count": 53
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6wLJiFwmuZNvTiE9aqFqx4dDcWh.jpg",
-      "genre_ids": [
-        10759,
-        35
-      ],
-      "id": 133748,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Twisted Metal",
-      "overview": "A motor-mouthed outsider with no memory of his past is offered a chance at a better life, but only if he can successfully deliver a mysterious package across a post-apocalyptic wasteland. With the help of a badass axe-wielding car thief, he’ll face savage marauders driving vehicles of destruction and other dangers of the open road, including a deranged clown who drives an all too familiar ice cream truck.",
-      "popularity": 10.2716,
-      "poster_path": "/zMwMClR9y7RBeVWMEmNn8LwUJHz.jpg",
-      "first_air_date": "2023-07-27",
-      "softcore": false,
-      "name": "Twisted Metal",
-      "vote_average": 7.72,
-      "vote_count": 520
     },
     {
       "adult": false,
@@ -320,13 +277,35 @@
       "original_language": "en",
       "original_name": "Trolls: TrollsTopia",
       "overview": "Now that Poppy knows there are other musical trolls scattered throughout the forest, she bottles up her endless positivity and invites delegates from every troll tribe in the forest to live together in harmony in a grand experiment she calls TrollsTopia!",
-      "popularity": 11.2058,
+      "popularity": 14.9754,
       "poster_path": "/idpD7RzSNelzJqBBMFWZbzMfjUu.jpg",
       "first_air_date": "2020-11-19",
       "softcore": false,
       "name": "Trolls: TrollsTopia",
       "vote_average": 8.5,
       "vote_count": 53
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6wLJiFwmuZNvTiE9aqFqx4dDcWh.jpg",
+      "genre_ids": [
+        10759,
+        35
+      ],
+      "id": 133748,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Twisted Metal",
+      "overview": "A motor-mouthed outsider with no memory of his past is offered a chance at a better life, but only if he can successfully deliver a mysterious package across a post-apocalyptic wasteland. With the help of a badass axe-wielding car thief, he’ll face savage marauders driving vehicles of destruction and other dangers of the open road, including a deranged clown who drives an all too familiar ice cream truck.",
+      "popularity": 12.6756,
+      "poster_path": "/zMwMClR9y7RBeVWMEmNn8LwUJHz.jpg",
+      "first_air_date": "2023-07-27",
+      "softcore": false,
+      "name": "Twisted Metal",
+      "vote_average": 7.728,
+      "vote_count": 523
     },
     {
       "adult": false,
@@ -342,7 +321,7 @@
       "original_language": "en",
       "original_name": "The Mighty Ones",
       "overview": "Follow the hilarious adventures of a group of creatures: a twig, a pebble, a leaf and a strawberry. These best friends, self-named The Mighty Ones, live in an unkempt backyard belonging to a trio of equally unkempt humans whom they mistake for gods.",
-      "popularity": 11.0061,
+      "popularity": 11.9694,
       "poster_path": "/2yqo5H0XvQEw93UjLE27dXHCRhW.jpg",
       "first_air_date": "2020-11-09",
       "softcore": false,
@@ -363,7 +342,7 @@
       "original_language": "en",
       "original_name": "A.P. Bio",
       "overview": "When disgraced Harvard philosophy scholar Jack Griffin loses out on his dream job, he is forced to return to Toledo, Ohio, and work as a high school Advanced Placement biology teacher.",
-      "popularity": 10.4998,
+      "popularity": 11.6855,
       "poster_path": "/8GwiuZazRFNrmvSkagZlEDH7qSS.jpg",
       "first_air_date": "2018-02-01",
       "softcore": false,
@@ -373,25 +352,24 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/93mtIi3zXrZHPKgDukDtbfM89yn.jpg",
+      "backdrop_path": "/akY5bMj3g76EOaliNLdOJI9kBPb.jpg",
       "genre_ids": [
-        16,
-        10762
+        10764
       ],
-      "id": 109330,
+      "id": 215943,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Madagascar: A Little Wild",
-      "overview": "The early years of the Madagascar heroes Alex the Lion, Marty the Zebra, Melman the Giraffe and Gloria the Hippo, as they grow up in a rescue habitat at the Central Park Zoo.",
-      "popularity": 9.0599,
-      "poster_path": "/c9d59YbGDlg15tNOQ18oqRmf09t.jpg",
-      "first_air_date": "2020-09-07",
+      "original_name": "The Traitors",
+      "overview": "The entertainment industry’s most competitive reality stars and famous faces play the ultimate murder mystery game. Hosted by award-winning actor Alan Cumming at an ancient castle set deep in the Scottish Highlands, contestants work together on a series of exhilarating missions to build a prize fund worth up to $250,000. Hidden amongst the Faithful are the Traitors, whose goal is to eliminate the Faithful and claim the prize for themselves.",
+      "popularity": 11.2306,
+      "poster_path": "/xWK9tLH2UGgzuAI6P3cHeTKopfj.jpg",
+      "first_air_date": "2023-01-12",
       "softcore": false,
-      "name": "Madagascar: A Little Wild",
-      "vote_average": 7,
-      "vote_count": 262
+      "name": "The Traitors",
+      "vote_average": 6.2,
+      "vote_count": 53
     },
     {
       "adult": false,
@@ -407,7 +385,7 @@
       "original_language": "en",
       "original_name": "Dragons Rescue Riders: Heroes of the Sky",
       "overview": "Twins Dak and Leyla lead a team of five dragons on adventures to protect the dragons and humans around their adopted home of Huttsgalor. Rescued from a shipwreck at a very early age by a mother dragon who raised them alongside her own son, Winger, the twins' goal is to pay forward their mother's kindness by helping those in need.",
-      "popularity": 9.3934,
+      "popularity": 11.4146,
       "poster_path": "/gxCekqNwgVwyIqMBXRVr1A80qOA.jpg",
       "first_air_date": "2021-11-24",
       "softcore": false,
@@ -417,26 +395,49 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/vX71TGviqLsOtDNJ9q1QR4m14kH.jpg",
+      "backdrop_path": "/krtHrxeeWsIBDNaHWyh5W8tpVyJ.jpg",
       "genre_ids": [
+        10759,
         18
       ],
-      "id": 218589,
+      "id": 68921,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Those About to Die",
-      "overview": "Within the spectacular, complex and corrupt world of gladiatorial sports in Ancient Rome, follow an ensemble of diverse characters across the many layers of Roman society where sports, politics and business intersect and collide.",
-      "popularity": 9.2877,
-      "poster_path": "/gvz0m4MJ8sAj6yMcQdwN07bNjRY.jpg",
-      "first_air_date": "2024-07-18",
+      "original_name": "WWE 205 Live",
+      "overview": "WWE's division of Cruiserweight's battle it out to decide who is the greatest wrestler under 205lbs.",
+      "popularity": 10.7828,
+      "poster_path": "/f6NlvoEJH8KxQI58ecTBkcsbQVF.jpg",
+      "first_air_date": "2016-11-29",
       "softcore": false,
-      "name": "Those About to Die",
-      "vote_average": 7.425,
-      "vote_count": 325
+      "name": "WWE 205 Live",
+      "vote_average": 5.8,
+      "vote_count": 38
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/y8DjXCsyKFL1Ff0zGtpKIQ2MtoL.jpg",
+      "genre_ids": [
+        18,
+        80
+      ],
+      "id": 93749,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Dr. Death",
+      "overview": "An anthology series, with each season following a new medical true crime story.",
+      "popularity": 10.6932,
+      "poster_path": "/pNnmxTSc2ixac4xk8T80wchec0r.jpg",
+      "first_air_date": "2021-07-15",
+      "softcore": false,
+      "name": "Dr. Death",
+      "vote_average": 7.298,
+      "vote_count": 205
     }
   ],
   "total_pages": 11,
-  "total_results": 205
+  "total_results": 204
 }

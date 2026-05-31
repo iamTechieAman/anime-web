@@ -712,10 +712,24 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
                 }
             } catch (err) {
                 console.error("Failed to fetch page data:", err);
+                // Try robust fallback via TMDB Details which auto-classifies media type
+                try {
+                    const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${type === 'movie' ? 'movie' : 'tv'}`);
+                    if (fallbackRes.data) {
+                        setDetails(fallbackRes.data);
+                        if (fallbackRes.data.seasons?.length > 0) {
+                            setSelectedSeason(fallbackRes.data.seasons[0].season_number || 1);
+                        }
+                        return;
+                    }
+                } catch (fallbackErr) {
+                    console.error("TMDB Fallback details failed as well:", fallbackErr);
+                }
+
                 // Set minimal fallback details so the player still works
                 setDetails({
                     id: parseInt(id) || 0,
-                    title: type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : 'Movie',
+                    title: type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : type === 'cartoon' ? 'Cartoon' : 'Movie',
                     poster_path: null,
                     backdrop_path: null,
                     overview: 'Could not load metadata. The player is still available — try different servers if the content doesn\'t play.',
@@ -808,8 +822,13 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     if (!details) {
         // Show a minimal player page instead of "Content Not Found"
         const fallbackTitle = type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : type === 'cartoon' ? 'Cartoon' : 'Movie';
-        const fallbackId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
-        const embedUrl = SERVERS[0].getUrl((type === "anime" || type === "cartoon") ? "tv" : type, fallbackId, 1, 1);
+        const fallbackId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
+        const embedUrl = SERVERS[0].getUrl(
+            (details && (details as any).resolvedType) ? (details as any).resolvedType : ((type === "anime" || type === "cartoon") ? "tv" : type), 
+            fallbackId, 
+            1, 
+            1
+        );
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
@@ -854,12 +873,20 @@ export default function WatchClient({ type, id: encodedRawId }: { type: string; 
     const isUpcoming = details?.release_date && new Date(details?.release_date || "") > new Date();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
-    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || "0") : id;
+    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
     // isAnimeServer is declared at the top of the component
     
+    // Auto-detect and resolve media classification
+    let resolvedMediaType = type;
+    if (details && (details as any).resolvedType) {
+        resolvedMediaType = (details as any).resolvedType;
+    } else if (type === "cartoon" || type === "anime") {
+        resolvedMediaType = "tv"; // Fallback cartoon/anime to tv
+    }
+
     const embedUrl = isAnimeServer 
         ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
-        : activeServer.getUrl((type === "anime" || type === "cartoon") ? "tv" : type, activeId, selectedSeason, selectedEpisode);
+        : activeServer.getUrl(resolvedMediaType, activeId, selectedSeason, selectedEpisode);
 
     return (
         <>

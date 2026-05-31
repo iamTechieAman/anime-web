@@ -9,21 +9,25 @@ export async function GET(request: Request) {
         const id = searchParams.get("id");
         const rawType = searchParams.get("type") || "movie";
 
-        // Strict validation — only TMDB-valid types allowed
-        const type = rawType === "tv" ? "tv" : "movie";
-
         if (!id || id === "undefined" || id === "null" || isNaN(Number(id))) {
             return NextResponse.json({ error: "Missing or invalid id parameter" }, { status: 400 });
         }
 
-        // Fetch details, credits, videos, similar, and recommendations in parallel
-        const [detailsRes, creditsRes, videosRes, similarRes, recommendationsRes] = await Promise.all([
-            fetch(`${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
-        ]);
+        // Strict validation — only TMDB-valid types allowed
+        let type = rawType === "tv" ? "tv" : "movie";
+
+        // Attempt primary fetch
+        let detailsRes = await fetch(`${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } });
+
+        // Auto fallback retry with the other type if 404 is encountered
+        if (!detailsRes.ok && detailsRes.status === 404) {
+            const otherType = type === "tv" ? "movie" : "tv";
+            const retryRes = await fetch(`${TMDB_BASE}/${otherType}/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } });
+            if (retryRes.ok) {
+                type = otherType;
+                detailsRes = retryRes;
+            }
+        }
 
         if (!detailsRes.ok) {
             const status = detailsRes.status;
@@ -34,6 +38,14 @@ export async function GET(request: Request) {
             // Rate limit or upstream error
             throw new Error(`TMDB details error: ${status}`);
         }
+
+        // Fetch other metadata in parallel for the resolved type
+        const [creditsRes, videosRes, similarRes, recommendationsRes] = await Promise.all([
+            fetch(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+            fetch(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+            fetch(`${TMDB_BASE}/${type}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
+            fetch(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
+        ]);
 
         const [details, credits, videos, similar, recommendations] = await Promise.all([
             detailsRes.json(),
@@ -50,6 +62,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json({
             ...details,
+            resolvedType: type,
             cast: credits.cast?.slice(0, 20) || [],
             crew: credits.crew?.slice(0, 10) || [],
             trailer: trailer ? { key: trailer.key, name: trailer.name, site: trailer.site } : null,

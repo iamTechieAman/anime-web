@@ -16,80 +16,36 @@
       "original_language": "en",
       "original_name": "For All Mankind",
       "overview": "Explore an aspirational world where NASA and the space program remained a priority and a focal point of our hopes and dreams as told through the lives of NASA astronauts, engineers, and their families.",
-      "popularity": 59.4598,
+      "popularity": 79.0846,
       "poster_path": "/JP3DItWMbrrLiKR5AYUfpsNf2b.jpg",
       "first_air_date": "2019-11-01",
       "softcore": false,
       "name": "For All Mankind",
       "vote_average": 7.7,
-      "vote_count": 931
+      "vote_count": 937
     },
     {
       "adult": false,
-      "backdrop_path": "/7IY4wELVMvtUc78vPiuL8kQV2iA.jpg",
-      "genre_ids": [
-        10765,
-        18,
-        10759
-      ],
-      "id": 202411,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Monarch: Legacy of Monsters",
-      "overview": "After surviving Godzilla's attack on San Francisco, Cate is shaken yet again by a shocking secret. Amid monstrous threats, she embarks on a globetrotting adventure to learn the truth about her family—and the mysterious organization known as Monarch.",
-      "popularity": 48.53,
-      "poster_path": "/7LBbaEaLSbqdviBYaSS1rRPMnrs.jpg",
-      "first_air_date": "2023-11-16",
-      "softcore": false,
-      "name": "Monarch: Legacy of Monsters",
-      "vote_average": 7.753,
-      "vote_count": 1287
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4XccmjsOmQZw8S2iW1wvlvmb5v1.jpg",
-      "genre_ids": [
-        10765,
-        18
-      ],
-      "id": 125988,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Silo",
-      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
-      "popularity": 47.5442,
-      "poster_path": "/fDMTqUcEh6qJwWZP1SHTfoaqsCy.jpg",
-      "first_air_date": "2023-05-04",
-      "softcore": false,
-      "name": "Silo",
-      "vote_average": 8.137,
-      "vote_count": 2040
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/r1lGjwTRF0RGYFHzvt3SupArmRy.jpg",
+      "backdrop_path": "/asROh8ULhbYpB4C7x1Q3iFtcxsB.jpg",
       "genre_ids": [
         18,
-        35
+        10765,
+        10768
       ],
-      "id": 245318,
+      "id": 252107,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Margo's Got Money Troubles",
-      "overview": "The daughter of a former Hooter's waitress and an ex-pro wrestler, Margo is a recent college dropout and aspiring writer. Faced with a new baby, mounting pile of bills, and dwindling number of ways to pay them, Margo must find a way forward.",
-      "popularity": 45.4778,
-      "poster_path": "/fRR0Ho2c1nFJQiXWg4LNIgRPbg0.jpg",
-      "first_air_date": "2026-04-14",
+      "original_name": "Star City",
+      "overview": "Step into a thrilling chapter inspired by For All Mankind. Same alt-history universe. Different perspective: the Soviet Union's. Go behind the Iron Curtain with the cosmonauts, engineers, and intelligence officers who risked it all in the race for the Moon.",
+      "popularity": 86.4267,
+      "poster_path": "/b8VtW6IEIyEWYdnJHx8bG8RdAak.jpg",
+      "first_air_date": "2026-05-28",
       "softcore": false,
-      "name": "Margo's Got Money Troubles",
-      "vote_average": 8.08,
-      "vote_count": 87
+      "name": "Star City",
+      "vote_average": 6.077,
+      "vote_count": 13
     },
     {
       "adult": false,
@@ -106,57 +62,13 @@
       "original_language": "en",
       "original_name": "Widow's Bay",
       "overview": "The mayor of a New England town resolves to turn it into the next tourist hot spot, despite local warnings that it's cursed.",
-      "popularity": 47.2127,
+      "popularity": 56.8243,
       "poster_path": "/5lcxWLVAEICkFpuAiV1aMy7ZZj3.jpg",
       "first_air_date": "2026-04-28",
       "softcore": false,
       "name": "Widow's Bay",
-      "vote_average": 8.3,
-      "vote_count": 83
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/7NNNXo0qG2SqH4JoG7GPvJ2hzes.jpg",
-      "genre_ids": [
-        10765,
-        18
-      ],
-      "id": 93740,
-      "origin_country": [
-        "US"
-      ],
-      "original_language": "en",
-      "original_name": "Foundation",
-      "overview": "Follow a band of exiles on their monumental journey to save humanity and rebuild civilization amid the fall of the Galactic Empire.",
-      "popularity": 43.9865,
-      "poster_path": "/tg9I5pOY4M9CKj8U0cxVBTsm5eh.jpg",
-      "first_air_date": "2021-09-23",
-      "softcore": false,
-      "name": "Foundation",
-      "vote_average": 7.71,
-      "vote_count": 1699
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/aAVRi7XqkJZE6uUEn2Enbhj8rPx.jpg",
-      "genre_ids": [
-        18,
-        80
-      ],
-      "id": 199318,
-      "origin_country": [
-        "GB"
-      ],
-      "original_language": "en",
-      "original_name": "Bad Sisters",
-      "overview": "The tight-knit Garvey sisters have always looked out for one another. But when the toxic brother-in-law they all wanted dead actually dies, it turns their lives upside down and tests their bond like nothing before.",
-      "popularity": 38.7626,
-      "poster_path": "/z63D1Y8udrrFOhLFCT9YElcTr0w.jpg",
-      "first_air_date": "2022-08-19",
-      "softcore": false,
-      "name": "Bad Sisters",
-      "vote_average": 7.485,
-      "vote_count": 273
+      "vote_average": 8.255,
+      "vote_count": 96
     },
     {
       "adult": false,
@@ -172,34 +84,58 @@
       "original_language": "en",
       "original_name": "Your Friends & Neighbors",
       "overview": "When a financial titan suddenly finds himself divorced and jobless, he starts robbing his wealthy neighbors to stay afloat. Stealing from his own social circle strangely exhilarates him—but he gradually gets tangled in a deadly web.",
-      "popularity": 41.1175,
+      "popularity": 49.9994,
       "poster_path": "/lcp63INKEsVHUly9eayx7gEEOcG.jpg",
       "first_air_date": "2025-04-10",
       "softcore": false,
       "name": "Your Friends & Neighbors",
-      "vote_average": 7.656,
-      "vote_count": 225
+      "vote_average": 7.643,
+      "vote_count": 231
     },
     {
       "adult": false,
-      "backdrop_path": "/9mZlvYlGA4jblCvAvOpinrgn6hr.jpg",
+      "backdrop_path": "/7IY4wELVMvtUc78vPiuL8kQV2iA.jpg",
       "genre_ids": [
-        35
+        10765,
+        18,
+        10759
       ],
-      "id": 285404,
+      "id": 202411,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Maximum Pleasure Guaranteed",
-      "overview": "A newly divorced mom falls down a dangerous rabbit hole of blackmail, murder, and youth soccer.",
-      "popularity": 37.9603,
-      "poster_path": "/f9U0oTlvLlqbww2Gm5j8Lhf1r9W.jpg",
-      "first_air_date": "2026-05-19",
+      "original_name": "Monarch: Legacy of Monsters",
+      "overview": "After surviving Godzilla's attack on San Francisco, Cate is shaken yet again by a shocking secret. Amid monstrous threats, she embarks on a globetrotting adventure to learn the truth about her family—and the mysterious organization known as Monarch.",
+      "popularity": 46.0281,
+      "poster_path": "/7LBbaEaLSbqdviBYaSS1rRPMnrs.jpg",
+      "first_air_date": "2023-11-16",
       "softcore": false,
-      "name": "Maximum Pleasure Guaranteed",
-      "vote_average": 5.4,
-      "vote_count": 13
+      "name": "Monarch: Legacy of Monsters",
+      "vote_average": 7.758,
+      "vote_count": 1291
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/7NNNXo0qG2SqH4JoG7GPvJ2hzes.jpg",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "id": 93740,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Foundation",
+      "overview": "Follow a band of exiles on their monumental journey to save humanity and rebuild civilization amid the fall of the Galactic Empire.",
+      "popularity": 42.7993,
+      "poster_path": "/tg9I5pOY4M9CKj8U0cxVBTsm5eh.jpg",
+      "first_air_date": "2021-09-23",
+      "softcore": false,
+      "name": "Foundation",
+      "vote_average": 7.713,
+      "vote_count": 1701
     },
     {
       "adult": false,
@@ -215,13 +151,57 @@
       "original_language": "en",
       "original_name": "Ted Lasso",
       "overview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
-      "popularity": 34.1798,
+      "popularity": 38.2499,
       "poster_path": "/5fhZdwP1DVJ0FyVH6vrFdHwpXIn.jpg",
       "first_air_date": "2020-08-14",
       "softcore": false,
       "name": "Ted Lasso",
       "vote_average": 8.333,
-      "vote_count": 2344
+      "vote_count": 2352
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4XccmjsOmQZw8S2iW1wvlvmb5v1.jpg",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "id": 125988,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Silo",
+      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
+      "popularity": 38.3922,
+      "poster_path": "/fDMTqUcEh6qJwWZP1SHTfoaqsCy.jpg",
+      "first_air_date": "2023-05-04",
+      "softcore": false,
+      "name": "Silo",
+      "vote_average": 8.141,
+      "vote_count": 2045
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/yZjaZJSW2Fbm4Hi1Y8p8f4FGCJw.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 245318,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Margo's Got Money Troubles",
+      "overview": "The daughter of a former Hooter's waitress and an ex-pro wrestler, Margo is a recent college dropout and aspiring writer. Faced with a new baby, mounting pile of bills, and dwindling number of ways to pay them, Margo must find a way forward.",
+      "popularity": 40.3154,
+      "poster_path": "/fRR0Ho2c1nFJQiXWg4LNIgRPbg0.jpg",
+      "first_air_date": "2026-04-14",
+      "softcore": false,
+      "name": "Margo's Got Money Troubles",
+      "vote_average": 8.094,
+      "vote_count": 96
     },
     {
       "adult": false,
@@ -238,13 +218,13 @@
       "original_language": "en",
       "original_name": "Severance",
       "overview": "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
-      "popularity": 33.1692,
+      "popularity": 35.6026,
       "poster_path": "/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
       "first_air_date": "2022-02-17",
       "softcore": false,
       "name": "Severance",
-      "vote_average": 8.392,
-      "vote_count": 2645
+      "vote_average": 8.394,
+      "vote_count": 2650
     },
     {
       "adult": false,
@@ -261,13 +241,13 @@
       "original_language": "en",
       "original_name": "Slow Horses",
       "overview": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors to defend England from sinister forces.",
-      "popularity": 31.5116,
-      "poster_path": "/dnpatlJrEPiDSn5fzgzvxtiSnMo.jpg",
+      "popularity": 31.0379,
+      "poster_path": "/5RuZZIouptatjV96BdPmKmRsnGg.jpg",
       "first_air_date": "2022-04-01",
       "softcore": false,
       "name": "Slow Horses",
-      "vote_average": 8,
-      "vote_count": 849
+      "vote_average": 8.011,
+      "vote_count": 851
     },
     {
       "adult": false,
@@ -284,34 +264,35 @@
       "original_language": "en",
       "original_name": "See",
       "overview": "A virus has decimated humankind. Those who survived emerged blind. Centuries later when twins are born with the mythic ability to see, their father must protect his tribe against a threatened queen.",
-      "popularity": 28.2507,
+      "popularity": 31.1954,
       "poster_path": "/lKDIhc9FQibDiBQ57n3ELfZCyZg.jpg",
       "first_air_date": "2019-11-01",
       "softcore": false,
       "name": "See",
       "vote_average": 8.081,
-      "vote_count": 2816
+      "vote_count": 2817
     },
     {
       "adult": false,
-      "backdrop_path": "/uMsTtNaUEWOE2q64m8zthBIMgen.jpg",
+      "backdrop_path": "/aAVRi7XqkJZE6uUEn2Enbhj8rPx.jpg",
       "genre_ids": [
-        18
+        18,
+        80
       ],
-      "id": 90282,
+      "id": 199318,
       "origin_country": [
-        "US"
+        "GB"
       ],
       "original_language": "en",
-      "original_name": "The Morning Show",
-      "overview": "A behind-the-scenes look at the lives of the people who help America wake up in the morning, exploring the unique challenges faced by the men and women who carry out this daily televised ritual.",
-      "popularity": 23.8522,
-      "poster_path": "/y9x2R87yt2U616736NJrP0d56dt.jpg",
-      "first_air_date": "2019-11-01",
+      "original_name": "Bad Sisters",
+      "overview": "The tight-knit Garvey sisters have always looked out for one another. But when the toxic brother-in-law they all wanted dead actually dies, it turns their lives upside down and tests their bond like nothing before.",
+      "popularity": 25.1621,
+      "poster_path": "/z63D1Y8udrrFOhLFCT9YElcTr0w.jpg",
+      "first_air_date": "2022-08-19",
       "softcore": false,
-      "name": "The Morning Show",
-      "vote_average": 7.739,
-      "vote_count": 893
+      "name": "Bad Sisters",
+      "vote_average": 7.485,
+      "vote_count": 273
     },
     {
       "adult": false,
@@ -327,13 +308,13 @@
       "original_language": "en",
       "original_name": "Shrinking",
       "overview": "Jimmy is struggling to grieve the loss of his wife while being a dad, friend, and therapist. He decides to try a new approach with everyone in his path: unfiltered, brutal honesty. Will it make things better—or unleash uproarious chaos?",
-      "popularity": 24.455,
+      "popularity": 26.0162,
       "poster_path": "/zEFKMNPBKq6JG7uuDkzTQ9WwErn.jpg",
       "first_air_date": "2023-01-26",
       "softcore": false,
       "name": "Shrinking",
-      "vote_average": 7.849,
-      "vote_count": 619
+      "vote_average": 7.851,
+      "vote_count": 620
     },
     {
       "adult": false,
@@ -349,98 +330,121 @@
       "original_language": "en",
       "original_name": "Invasion",
       "overview": "Earth is visited by an alien species that threatens humanity's existence. Events unfold in real time through the eyes of five ordinary people across the globe as they struggle to make sense of the chaos unraveling around them.",
-      "popularity": 22.4804,
+      "popularity": 24.9021,
       "poster_path": "/1PdNB3rYTcf8VXc8rcmZ0SeYxSq.jpg",
       "first_air_date": "2021-10-21",
       "softcore": false,
       "name": "Invasion",
-      "vote_average": 7.096,
-      "vote_count": 1164
+      "vote_average": 7.1,
+      "vote_count": 1165
     },
     {
       "adult": false,
-      "backdrop_path": "/vNCNUxNHHgP0WsA19hxztUsG3yG.jpg",
+      "backdrop_path": "/uMsTtNaUEWOE2q64m8zthBIMgen.jpg",
       "genre_ids": [
-        18,
-        10765
+        18
       ],
-      "id": 225171,
+      "id": 90282,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Pluribus",
-      "overview": "The most miserable person on Earth must save the world from happiness.",
-      "popularity": 17.6718,
-      "poster_path": "/z7Nga7Q9IGFWs5OEduY2gGFxnX3.jpg",
-      "first_air_date": "2025-11-06",
+      "original_name": "The Morning Show",
+      "overview": "A behind-the-scenes look at the lives of the people who help America wake up in the morning, exploring the unique challenges faced by the men and women who carry out this daily televised ritual.",
+      "popularity": 24.578,
+      "poster_path": "/y9x2R87yt2U616736NJrP0d56dt.jpg",
+      "first_air_date": "2019-11-01",
       "softcore": false,
-      "name": "Pluribus",
-      "vote_average": 7.907,
-      "vote_count": 878
+      "name": "The Morning Show",
+      "vote_average": 7.7,
+      "vote_count": 895
     },
     {
       "adult": false,
-      "backdrop_path": "/cP82Jtvn7DwVt0mWaDFm7QhWHez.jpg",
+      "backdrop_path": "/9mZlvYlGA4jblCvAvOpinrgn6hr.jpg",
       "genre_ids": [
         35
       ],
-      "id": 94951,
+      "id": 285404,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Mythic Quest",
-      "overview": "Meet the team behind the biggest multiplayer video game of all time. But in a workplace focused on building worlds, molding heroes, and creating legends, the most hard-fought battles don’t occur in the game—they happen in the office.",
-      "popularity": 15.0221,
-      "poster_path": "/7QxQlpqEjx3vRpEtuh6Y0R6eY9O.jpg",
-      "first_air_date": "2020-02-07",
+      "original_name": "Maximum Pleasure Guaranteed",
+      "overview": "A newly divorced mom falls down a dangerous rabbit hole of blackmail, murder, and youth soccer.",
+      "popularity": 20.5982,
+      "poster_path": "/f9U0oTlvLlqbww2Gm5j8Lhf1r9W.jpg",
+      "first_air_date": "2026-05-19",
       "softcore": false,
-      "name": "Mythic Quest",
-      "vote_average": 7.244,
-      "vote_count": 438
+      "name": "Maximum Pleasure Guaranteed",
+      "vote_average": 5.2,
+      "vote_count": 15
     },
     {
       "adult": false,
-      "backdrop_path": "/aRZ7k1M3AdjVv8n3Fi6cAkEdpYY.jpg",
+      "backdrop_path": "/cXjRGoYFAFkwPzhOZXFARPuYQ00.jpg",
       "genre_ids": [
-        18
+        18,
+        9648
       ],
-      "id": 198102,
-      "origin_country": [
-        "GB"
-      ],
-      "original_language": "en",
-      "original_name": "Hijack",
-      "overview": "Expert negotiator Sam Nelson is in for the ride of his life—and so is everyone on board with him—after a group of hijackers take control. Sam will try every move in his playbook to take them down...as the stakes grow higher by the second.",
-      "popularity": 17.7826,
-      "poster_path": "/2C51clnxQdiqPDeqQlXcUx70hse.jpg",
-      "first_air_date": "2023-06-28",
-      "softcore": false,
-      "name": "Hijack",
-      "vote_average": 7.543,
-      "vote_count": 788
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/vVKlL4HyrQYAcJuaaUW49FrRqY5.jpg",
-      "genre_ids": [
-        18
-      ],
-      "id": 110382,
+      "id": 80054,
       "origin_country": [
         "US"
       ],
       "original_language": "en",
-      "original_name": "Pachinko",
-      "overview": "This sweeping saga chronicles the hopes and dreams of a Korean immigrant family across four generations as they leave their homeland in an indomitable quest to survive and thrive.",
-      "popularity": 15.5032,
-      "poster_path": "/wUTXdmL6oNjhiStGveOaPeuFOYQ.jpg",
-      "first_air_date": "2022-03-24",
+      "original_name": "Truth Be Told",
+      "overview": "Descend into the world of true-crime podcasts with Poppy Parnell, who risks everything—including her life—to pursue truth and justice.",
+      "popularity": 19.0788,
+      "poster_path": "/3T2TJ61ems7ArVGwb6kiVuKcdUk.jpg",
+      "first_air_date": "2019-12-06",
       "softcore": false,
-      "name": "Pachinko",
-      "vote_average": 7.893,
-      "vote_count": 253
+      "name": "Truth Be Told",
+      "vote_average": 7.1,
+      "vote_count": 215
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/7nsRpSCYcDGLcDmFAISHC8zMQ0D.jpg",
+      "genre_ids": [
+        18,
+        9648
+      ],
+      "id": 88055,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Servant",
+      "overview": "A Philadelphia couple are in mourning after an unspeakable tragedy creates a rift in their marriage and opens the door for a mysterious force to enter their home.",
+      "popularity": 18.6357,
+      "poster_path": "/plsSSobmPSSz4hm8vYMXeIVkJJP.jpg",
+      "first_air_date": "2019-11-28",
+      "softcore": false,
+      "name": "Servant",
+      "vote_average": 7.535,
+      "vote_count": 895
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/pzxIAuKHqQqCFOxh2ALmHUgXkOD.jpg",
+      "genre_ids": [
+        18,
+        80
+      ],
+      "id": 221079,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Last Frontier",
+      "overview": "When a prison transport plane crashes in the remote Alaskan wilderness—freeing dozens of violent inmates—the region's lone marshal must protect the town he's vowed to keep safe.",
+      "popularity": 21.7177,
+      "poster_path": "/4S2gS1mECZ5wDRBVAZE6KWmJHI3.jpg",
+      "first_air_date": "2025-10-09",
+      "softcore": false,
+      "name": "The Last Frontier",
+      "vote_average": 7.221,
+      "vote_count": 199
     }
   ],
   "total_pages": 12,
