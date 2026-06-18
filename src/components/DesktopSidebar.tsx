@@ -28,7 +28,7 @@ export default function DesktopSidebar() {
     return (
         <aside className="peer/sidebar group fixed left-0 top-0 bottom-0 w-[72px] hover:w-[240px] transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] bg-[#08080B]/95 backdrop-blur-md border-r border-white/5 hidden md:flex flex-col py-6 z-[60] overflow-hidden">
             {/* Branded Logo */}
-            <div className="mb-8 shrink-0 flex items-center justify-start h-10 w-full pl-[14px] relative">
+            <div className="mb-8 shrink-0 flex items-center justify-center group-hover:justify-start h-10 w-full px-3 group-hover:px-[18px] transition-all duration-300 relative">
                 <Link href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
                     <div className="w-11 h-11 flex items-center justify-center shrink-0">
                         <Logo />

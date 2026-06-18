@@ -38,6 +38,7 @@ export default function Player({
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isDestroyed = useRef(false);
     const [showSkipButton, setShowSkipButton] = useState(false);
+    const [showSkipCreditsButton, setShowSkipCreditsButton] = useState(false);
     const [playerTime, setPlayerTime] = useState(0);
     const [resumeTime, setResumeTime] = useState(0);
     const [showResumePrompt, setShowResumePrompt] = useState(false);
@@ -46,18 +47,24 @@ export default function Player({
     const lastAudioTrackName = useRef<string | null>(typeof window !== 'undefined' ? localStorage.getItem('artplayer_audio_track') : null);
     const lastQualityHeight = useRef<string | null>(typeof window !== 'undefined' ? localStorage.getItem('artplayer_quality') : null);
 
-    // Skip intro logic — show between 5s and skipIntroDuration
+    // Skip intro & credits checking logic
     useEffect(() => {
-        if (!showSkipIntro || !playerRef.current) return;
+        if (!playerRef.current) return;
         
         const duration = playerRef.current.duration || 0;
-        // Don't show skip button if the video is too short (e.g. trailers)
-        if (duration > 0 && duration < skipIntroDuration + 60) return;
-
-        if (playerTime >= 5 && playerTime <= skipIntroDuration) {
-            setShowSkipButton(true);
+        
+        // Skip intro check (between 5s and skipIntroDuration)
+        if (showSkipIntro && duration > skipIntroDuration + 60) {
+            setShowSkipButton(playerTime >= 5 && playerTime <= skipIntroDuration);
         } else {
             setShowSkipButton(false);
+        }
+
+        // Skip credits check (in the last 3 minutes of the video, duration - 180 to duration - 10)
+        if (duration > 300) {
+            setShowSkipCreditsButton(playerTime >= duration - 180 && playerTime <= duration - 10);
+        } else {
+            setShowSkipCreditsButton(false);
         }
     }, [playerTime, showSkipIntro, skipIntroDuration]);
 
@@ -66,7 +73,7 @@ export default function Player({
     const handleSkipIntro = useCallback(() => {
         if (playerRef.current && !isDestroyed.current) {
             const duration = playerRef.current.duration;
-            // Never skip beyond 10% of the total duration or 5 minutes (whichever is smaller) if it's a short clip
+            // Never skip beyond 90% of the video
             const targetTime = Math.min(skipIntroDuration, duration * 0.9);
             
             playerRef.current.currentTime = targetTime;
@@ -74,6 +81,19 @@ export default function Player({
             playerRef.current.notice.show = `Skipped to ${Math.floor(targetTime)}s`;
         }
     }, [skipIntroDuration]);
+
+    const handleSkipCredits = useCallback(() => {
+        if (playerRef.current && !isDestroyed.current) {
+            const duration = playerRef.current.duration;
+            const targetTime = duration - 5;
+            playerRef.current.currentTime = targetTime;
+            setShowSkipCreditsButton(false);
+            playerRef.current.notice.show = `Skipping Credits`;
+            if (onEnded) {
+                onEnded();
+            }
+        }
+    }, [onEnded]);
 
     const handleResume = useCallback(() => {
         if (playerRef.current && !isDestroyed.current && resumeTime > 0) {
@@ -320,14 +340,7 @@ export default function Player({
                     if (onEnded && !isDestroyed.current) onEnded();
                 });
 
-                art.on('ready', () => {
-                    const handleKeyboard = (e: KeyboardEvent) => {
-                        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-                        if ((e.key === 's' || e.key === 'S') && showSkipButton) handleSkipIntro();
-                    };
-                    document.addEventListener('keydown', handleKeyboard);
-                    art.on('destroy', () => document.removeEventListener('keydown', handleKeyboard));
-                });
+
             } catch (e) {
                 console.error('[ArtPlayer] Initialization Error:', e);
             }
@@ -364,6 +377,21 @@ export default function Player({
         };
     }, []);
 
+    // Bound keyboard events that reactive-update with states
+    useEffect(() => {
+        const handleKeyboard = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if ((e.key === 's' || e.key === 'S') && showSkipButton) {
+                handleSkipIntro();
+            }
+            if ((e.key === 'c' || e.key === 'C') && showSkipCreditsButton) {
+                handleSkipCredits();
+            }
+        };
+        document.addEventListener('keydown', handleKeyboard);
+        return () => document.removeEventListener('keydown', handleKeyboard);
+    }, [showSkipButton, showSkipCreditsButton, handleSkipIntro, handleSkipCredits]);
+
     const cancelAutoNext = () => {
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         setShowCountdown(false);
@@ -396,6 +424,15 @@ export default function Player({
                     className="skip-intro-btn z-[100] touch-auto"
                 >
                     Skip Intro →
+                </button>
+            )}
+
+            {showSkipCreditsButton && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); handleSkipCredits(); }}
+                    className="skip-intro-btn z-[100] touch-auto"
+                >
+                    Skip Credits →
                 </button>
             )}
 

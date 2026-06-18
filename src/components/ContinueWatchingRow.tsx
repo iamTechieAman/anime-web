@@ -90,17 +90,21 @@ export default function ContinueWatchingRow() {
                                 } h-[120px] md:h-[140px] lg:h-[160px] w-[220px] md:w-[250px] lg:w-[280px]`}
                             >
                                 {/* Left Poster */}
-                                <div className="w-[80px] md:w-[90px] lg:w-[100px] shrink-0 relative overflow-hidden bg-black/40 select-none">
+                                <div className="w-[80px] md:w-[90px] lg:w-[100px] shrink-0 relative overflow-hidden bg-black/40 select-none group/poster">
                                     <img 
                                         src={entry.poster || "https://api.dicebear.com/9.x/shapes/svg?seed=fallback"} 
                                         alt={entry.title} 
-                                        className="w-full h-full object-cover transition-transform duration-500"
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover/poster:scale-105"
                                         loading="lazy"
                                     />
+                                    {/* Play Hover Overlay */}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/poster:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                                        <Play className="w-5 h-5 text-white fill-current drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+                                    </div>
                                     {/* Close button */}
                                     <button
                                         onClick={(e) => handleRemove(e, entry.id)}
-                                        className="absolute top-1.5 left-1.5 z-20 p-1 bg-black/60 hover:bg-red-500/90 rounded-full transition-all duration-300 border border-white/10 backdrop-blur-sm cursor-pointer"
+                                        className="absolute top-1.5 left-1.5 z-20 p-1.5 bg-black/60 hover:bg-red-500 rounded-full transition-all duration-200 border border-white/10 backdrop-blur-sm cursor-pointer"
                                         aria-label="Remove from history"
                                     >
                                         <X className="w-3 h-3 text-white" />
