@@ -757,15 +757,11 @@ p, .text-body {
 }
 
 .glow-orange {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.35), 0 0 60px rgba(249, 115, 22, 0.12);
-}
-
-.glow-orange {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.35), 0 0 60px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 8px 30px rgba(249, 115, 22, 0.35);
 }
 
 .glow-blue {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
 }
 
 /* ══════════════════════════════════════════════════

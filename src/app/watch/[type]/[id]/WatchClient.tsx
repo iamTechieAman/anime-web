@@ -229,6 +229,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [showNextOverlay, setShowNextOverlay] = useState(false);
     const [nextCountdown, setNextCountdown] = useState(5);
     const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const manualServerRef = useRef<string | null>(null);
+
+    // Cleanup countdown timer on unmount
+    useEffect(() => {
+        return () => {
+            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        };
+    }, []);
     
     // User Settings Support
     const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
@@ -628,14 +636,50 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         });
     }, [activeServer, serversList, isAnimeServer]);
 
-    // Boot automatic health checker timeout
+    // Dynamic Server Health Pre-Checking & Auto-Selection
+    useEffect(() => {
+        if (!smartSwitchEnabled || !details) return;
+        if (manualServerRef.current === activeServer?.id) return;
+
+        const checkServersHealth = async () => {
+            try {
+                const listToUse = isAnimeServer ? ANIME_SERVERS : serversList;
+                const topServers = listToUse.slice(0, 3);
+                
+                const urlsToCheck = topServers.map(server => {
+                    const resolvedType = (details as any).resolvedType || (type === "cartoon" || type === "anime" ? "tv" : type);
+                    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
+                    return isAnimeServer 
+                        ? (server as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
+                        : (server as any).getUrl(resolvedType, activeId, selectedSeason, selectedEpisode);
+                });
+
+                const response = await axios.post('/api/health', { urls: urlsToCheck });
+                const results = response.data?.results || [];
+
+                const firstAliveIndex = results.findIndex((res: any) => res.alive);
+                if (firstAliveIndex !== -1) {
+                    const aliveServer = topServers[firstAliveIndex];
+                    if (activeServer && aliveServer.id !== activeServer.id) {
+                        console.log(`[ToonPlayer] Auto-selecting healthy server: ${aliveServer.name}`);
+                        setActiveServer(aliveServer);
+                    }
+                }
+            } catch (err) {
+                console.error("[ToonPlayer] Server health check failed:", err);
+            }
+        };
+
+        checkServersHealth();
+    }, [smartSwitchEnabled, type, id, selectedSeason, selectedEpisode, details, serversList, isAnimeServer, animeData, tmdbIdForAnime, activeServer]);
+
+    // Boot automatic health checker timeout (5 seconds client-side fallback)
     useEffect(() => {
         if (!activeServer || sourceError || playerLoaded || !smartSwitchEnabled) return;
 
-        // Fallback after 8.5 seconds if loading fails
         const timer = setTimeout(() => {
             handleAutoFallback();
-        }, 8500);
+        }, 5000);
 
         return () => clearTimeout(timer);
     }, [activeServer, playerLoaded, sourceError, handleAutoFallback, smartSwitchEnabled]);
@@ -645,6 +689,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setFailedServers(new Set());
         setSourceError(false);
         setPlayerLoaded(false);
+        manualServerRef.current = server.id;
         setActiveServer(server);
     }, []);
 
@@ -886,16 +931,17 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         );
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
-                    <div className="w-full flex items-center justify-between gap-4">
-                        <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                            <span className="text-sm font-medium hidden sm:inline">Back to Movies</span>
-                        </Link>
-                        <h1 className="text-sm font-bold truncate text-center flex-1">{fallbackTitle}</h1>
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
+                    <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                        <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                    </Link>
+                    <div className="flex flex-col items-center text-center max-w-[60%] px-4">
+                        <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                            {fallbackTitle}
+                        </h1>
                     </div>
                 </div>
-                <div className="pt-14">
+                <div className="pt-[90px] md:pt-[110px] lg:pt-[140px]">
                     <div className="relative w-full bg-black">
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
@@ -947,18 +993,23 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Top Navigation Bar */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 py-3 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)]">
-                <div className="w-full flex items-center justify-between gap-4">
-                    <Link href="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-sm font-medium hidden sm:inline">Back</span>
-                    </Link>
-                    <h1 className="text-sm font-bold truncate text-center flex-1 text-[var(--text-main)]">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h1>
-                    <div className="w-[100px] hidden sm:block" /> {/* Spacer to center title */}
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
+                <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                    <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                </Link>
+                <div className="flex flex-col items-center text-center max-w-[60%] px-4">
+                    <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                        {type === 'cartoon' ? `Cartoon: ${title}` : title}
+                    </h1>
+                    {(type === 'tv' || type === 'anime' || type === 'cartoon') && (
+                        <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1 font-medium tracking-wide uppercase">
+                            Season {selectedSeason} • Episode {selectedEpisode}
+                        </p>
+                    )}
                 </div>
             </div>
 
-            <div className="pt-14 w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-6">
+            <div className="pt-[90px] md:pt-[110px] lg:pt-[140px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-6">
                 <div className="flex flex-col xl:flex-row gap-6 items-start">
                     
                     {/* Left Pane (Main content: Player, Cast, Info, alt etc.) */}

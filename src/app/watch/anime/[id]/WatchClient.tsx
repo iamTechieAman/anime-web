@@ -179,6 +179,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [showNextOverlay, setShowNextOverlay] = useState(false);
     const [nextCountdown, setNextCountdown] = useState(5);
     const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const manualServerRef = useRef<string | null>(null);
+
+    // Cleanup countdown timer on unmount
+    useEffect(() => {
+        return () => {
+            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        };
+    }, []);
 
     // Server State
     const [servers, setServers] = useState<any[]>([]);
@@ -244,14 +252,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         setFailedServers(new Set());
     }, [currentEp, mode]);
 
-    // Automatic loading timeout recovery (8.5 seconds)
+    // Automatic loading timeout recovery (5 seconds)
     useEffect(() => {
         if (!loadingSource || error || !selectedServer) return;
 
         const timer = setTimeout(() => {
             console.warn(`[ToonPlayer Anime] Provider timed out while loading source. Triggering fallback.`);
             handleAutoFallback();
-        }, 8500);
+        }, 5000);
 
         return () => clearTimeout(timer);
     }, [loadingSource, error, selectedServer, handleAutoFallback]);
@@ -579,11 +587,26 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 setServers(allServers);
 
-                // Auto-selection logic: Pick first available
+                // Auto-selection logic: Pick first available healthy server
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
-                    if (!currentExists) {
-                        setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
+                    if (!currentExists && manualServerRef.current !== selectedServer) {
+                        const topServers = allServers.slice(0, 3);
+                        try {
+                            const urlsToCheck = topServers.map(s => typeof s.getUrl === 'function' ? s.getUrl() : s.url);
+                            const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
+                            const results = checkRes.data?.results || [];
+
+                            const firstAliveIndex = results.findIndex((res: any) => res.alive);
+                            if (firstAliveIndex !== -1) {
+                                setSelectedServer(topServers[firstAliveIndex].serverId);
+                            } else {
+                                setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
+                            }
+                        } catch (checkErr) {
+                            console.error("[ToonPlayer Anime Health] Failed to pre-check health:", checkErr);
+                            setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
+                        }
                     }
                 } else {
                     setSelectedServer(null);
@@ -593,8 +616,25 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 // Always show movie servers + emergency embeds even if native API completely fails
                 const fallbackList = [...movieServersList, ...emergencyEmbeds];
                 setServers(fallbackList);
-                const peachify = fallbackList.find(s => s.serverId === "peachify");
-                setSelectedServer(peachify?.serverId || fallbackList[0]?.serverId || null);
+                
+                // Precheck fallbackList
+                const topFallbacks = fallbackList.slice(0, 3);
+                try {
+                    const urlsToCheck = topFallbacks.map(s => typeof s.getUrl === 'function' ? s.getUrl() : s.url);
+                    const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
+                    const results = checkRes.data?.results || [];
+
+                    const firstAliveIndex = results.findIndex((res: any) => res.alive);
+                    if (firstAliveIndex !== -1) {
+                        setSelectedServer(topFallbacks[firstAliveIndex].serverId);
+                    } else {
+                        const peachify = fallbackList.find(s => s.serverId === "peachify");
+                        setSelectedServer(peachify?.serverId || fallbackList[0]?.serverId || null);
+                    }
+                } catch (e) {
+                    const peachify = fallbackList.find(s => s.serverId === "peachify");
+                    setSelectedServer(peachify?.serverId || fallbackList[0]?.serverId || null);
+                }
             } finally {
                 setLoadingServers(false);
             }
@@ -777,16 +817,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 {/* Navbar */}
-                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] pt-[max(0.75rem,env(safe-area-inset-top))]">
-                    <div className="flex items-center gap-3">
-                        <Link href="/" className="p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
-                            <ChevronLeft className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
-                        </Link>
-                        <h1 className="font-bold text-lg leading-tight line-clamp-1 tracking-tight max-w-[200px] md:max-w-md">{animeTitle}</h1>
+                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
+                    <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                        <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                    </Link>
+                    <div className="flex flex-col items-center text-center max-w-[60%] px-4">
+                        <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                            {animeTitle}
+                        </h1>
                     </div>
                 </nav>
 
-                <div className="pt-[80px] px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
+                <div className="pt-[90px] md:pt-[110px] lg:pt-[140px] px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
                     {/* Fallback Player */}
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe
@@ -862,30 +904,28 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Background Glow - Hidden on mobile for performance */}
             <div className="fixed inset-0 pointer-events-none z-0 hidden md:block">
-                <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-orange-900/10 rounded-full blur-[120px] mix-blend-screen opacity-20"></div>
+                <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-orange-900/10 rounded-full blur-[24px] mix-blend-screen opacity-20"></div>
             </div>
 
             {/* Navbar with Safe Area Support */}
-            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] transition-all pt-[max(0.75rem,env(safe-area-inset-top))] h-auto">
-                <div className="flex items-center gap-3 md:gap-4">
-                    <Link href="/" className="p-1 md:p-2 hover:bg-[var(--border-color)] rounded-full transition-colors group">
-                        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-muted)] group-hover:text-[var(--text-main)]" />
-                    </Link>
-                    <div className="flex flex-col">
-                        <h1 className="font-bold text-lg leading-tight line-clamp-1 tracking-tight max-w-[200px] md:max-w-md text-[var(--text-main)]">
-                            {show.name || "Anime Stream"}
-                        </h1>
-                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                            <span className="text-orange-400 font-bold">EP {currentEp}</span>
-                            <span className="w-1 h-1 bg-[var(--text-muted)]/30 rounded-full"></span>
-                            <span className="uppercase">{mode}</span>
-                        </div>
+            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
+                <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                    <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                </Link>
+                <div className="flex flex-col items-center text-center max-w-[60%] px-4">
+                    <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                        {show.name || "Anime Stream"}
+                    </h1>
+                    <div className="flex items-center gap-2 text-xs md:text-sm text-[var(--text-muted)] mt-1 font-medium tracking-wide uppercase">
+                        <span className="text-orange-400 font-bold">EP {currentEp}</span>
+                        <span className="w-1 h-1 bg-[var(--text-muted)]/30 rounded-full"></span>
+                        <span>{mode}</span>
                     </div>
                 </div>
             </nav>
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className="flex-1 w-full mx-auto pt-[max(80px,calc(75px+env(safe-area-inset-top)))] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
+            <div className="flex-1 w-full mx-auto pt-[90px] md:pt-[110px] lg:pt-[140px] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
                 <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                     {/* Player Column */}
@@ -919,6 +959,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             <button
                                                 onClick={() => {
                                                     setError(null);
+                                                    manualServerRef.current = "peachify";
                                                     setSelectedServer("peachify");
                                                 }}
                                                 className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
@@ -931,6 +972,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             <button
                                                 onClick={() => {
                                                     setError(null);
+                                                    manualServerRef.current = "fmovies";
                                                     setSelectedServer("fmovies");
                                                 }}
                                                 className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-orange-500/40"
@@ -943,7 +985,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 setError(null);
                                                 setSourceUrl(null);
                                                 const firstNative = servers.find(s => !s.isMovieServer);
-                                                setSelectedServer(firstNative?.serverId || servers[0]?.serverId || null);
+                                                const nextServerId = firstNative?.serverId || servers[0]?.serverId || null;
+                                                if (nextServerId) manualServerRef.current = nextServerId;
+                                                setSelectedServer(nextServerId);
                                             }}
                                             className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-orange-500/40 flex items-center gap-1.5"
                                         >
@@ -1232,6 +1276,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     onClick={() => {
                                         const peachify = servers.find(s => s.serverId === "peachify");
                                         if (peachify) {
+                                            manualServerRef.current = "peachify";
                                             setSelectedServer("peachify");
                                             toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
                                         } else {
@@ -1280,6 +1325,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                         <button
                                                             key={`${server.serverId}-${server.type}-${index}`}
                                                             onClick={() => {
+                                                                manualServerRef.current = server.serverId;
                                                                 setSelectedServer(server.serverId);
                                                                 setShowServerDropdown(false);
                                                             }}
