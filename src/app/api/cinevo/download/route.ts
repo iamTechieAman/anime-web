@@ -29,10 +29,10 @@ export async function GET(request: Request) {
                 type: "direct"
             },
             {
-                name: "Embed.su Download",
+                name: "2Embed",
                 url: isMovie
-                    ? `https://embed.su/embed/movie/${id}`
-                    : `https://embed.su/embed/tv/${id}/${season}/${episode}`,
+                    ? `https://www.2embed.cc/embed/${id}`
+                    : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
                 quality: "HD",
                 type: "embed"
             },

@@ -1785,12 +1785,12 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     </a>
                                     <a
                                         href={type === 'tv'
-                                            ? `https://embed.su/embed/tv/${id}/${selectedSeason}/${selectedEpisode}`
-                                            : `https://embed.su/embed/movie/${id}`}
+                                            ? `https://www.2embed.cc/embedtv/${id}&s=${selectedSeason}&e=${selectedEpisode}`
+                                            : `https://www.2embed.cc/embed/${id}`}
                                         target="_blank" rel="noopener noreferrer"
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-orange-500/30 transition-colors"
                                     >
-                                        <Download className="w-3 h-3" /> Embed.su
+                                        <Download className="w-3 h-3" /> 2Embed
                                     </a>
                                 </div>
                             </div>

@@ -46,11 +46,11 @@ export async function GET(request: Request) {
             },
             {
                 id: "embedsu",
-                name: "Embed.su",
+                name: "2Embed",
                 badge: "Multi-Quality",
                 url: isMovie
-                    ? `https://embed.su/embed/movie/${id}`
-                    : `https://embed.su/embed/tv/${id}/${season}/${episode}`,
+                    ? `https://www.2embed.cc/embed/${id}`
+                    : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
             },
             {
                 id: "multiembed",

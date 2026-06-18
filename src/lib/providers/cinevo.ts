@@ -142,12 +142,12 @@ export class CinEvoProvider implements AnimeProvider {
             },
             {
                 url: isMovie
-                    ? `https://embed.su/embed/movie/${tmdbId}`
-                    : `https://embed.su/embed/tv/${tmdbId}/${season}/${episode}`,
-                quality: 'Embed.su',
+                    ? `https://www.2embed.cc/embed/${tmdbId}`
+                    : `https://www.2embed.cc/embedtv/${tmdbId}&s=${season}&e=${episode}`,
+                quality: '2Embed',
                 isM3U8: false,
                 isIframe: true,
-                server: 'embedsu'
+                server: '2embed'
             },
             {
                 url: isMovie

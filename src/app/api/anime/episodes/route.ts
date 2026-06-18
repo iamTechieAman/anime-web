@@ -15,8 +15,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label = ''): Promise<T>
     ]);
 }
 
-// Provider search order — stable providers first
-const SEARCH_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', 'allanime', 'aniwatch'];
+// Provider search order — stable providers first (limit to 2 to avoid 504s)
+const SEARCH_PROVIDERS: ProviderName[] = ['allanime', 'aniwatch'];
 
 // ID prefix → provider mapping
 const PREFIX_MAP: Record<string, ProviderName> = {
@@ -162,7 +162,9 @@ export async function GET(request: Request) {
                 );
 
                 try {
-                    const best = await Promise.any(searchTasks);
+                    // Add 10s overall deadline to prevent Vercel 504
+                    const deadline = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Overall deadline')), 10000));
+                    const best = await Promise.race([Promise.any(searchTasks), deadline]);
                     animeCache.set(cacheKey.episodes(id, best.provider), best, TTL.EPISODE_LIST);
                     return NextResponse.json({ show: best });
                 } catch (aggregateErr) {

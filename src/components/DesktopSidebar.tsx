@@ -21,7 +21,7 @@ export default function DesktopSidebar() {
         { name: "AI Discovery", href: "/discover", icon: Sparkles, tooltip: "AI recommendations" },
         { name: "History", href: "/history", icon: Clock, tooltip: "Watch History" },
         { name: "Trending", href: "/browse?sort_by=popularity.desc", icon: TrendingUp, tooltip: "Trending Now" },
-        { name: "Calendar", href: "/calendar", icon: Calendar, tooltip: "Release Calendar" },
+        { name: "Upcoming", href: "/browse?sort_by=primary_release_date.desc", icon: Calendar, tooltip: "Upcoming Releases" },
         { name: "Favorites", href: "/watchlist", icon: Heart, tooltip: "My Watchlist" },
     ];
 
