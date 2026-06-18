@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { ChevronDown, Check } from "lucide-react";
 
 export type ProviderSlug =
     | "all"
@@ -171,7 +172,8 @@ interface ProviderBarProps {
 }
 
 export default function ProviderBar({ activeProvider, onProviderChange, isLoading = false }: ProviderBarProps) {
-    const [hoveredSlug, setHoveredSlug] = useState<ProviderSlug | null>(null);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const activeProviderInfo = PROVIDERS.find(p => p.slug === activeProvider) || PROVIDERS[0];
 
     return (
         <div
@@ -192,81 +194,100 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
             </AnimatePresence>
 
             <div className="w-full max-w-[1800px] mx-auto px-3 sm:px-6 lg:px-12">
-                <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar py-3 snap-x snap-mandatory">
+
+                {/* ── MOBILE: Glassmorphism Dropdown (< sm) ── */}
+                <div className="flex sm:hidden py-2.5 relative">
+                    <button
+                        id="provider-mobile-toggle"
+                        onClick={() => setMobileOpen(prev => !prev)}
+                        className="flex items-center gap-2.5 w-full px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-sm text-sm font-semibold text-white transition-all active:scale-[0.98]"
+                        aria-haspopup="listbox"
+                        aria-expanded={mobileOpen}
+                    >
+                        <span className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className={`shrink-0 ${activeProviderInfo.color}`}>{activeProviderInfo.logo}</span>
+                            <span className="truncate">{activeProviderInfo.label}</span>
+                        </span>
+                        <ChevronDown
+                            className={`w-4 h-4 text-white/50 shrink-0 transition-transform duration-200 ${mobileOpen ? 'rotate-180' : ''}`}
+                        />
+                    </button>
+
+                    {/* Dropdown Panel */}
+                    <AnimatePresence>
+                        {mobileOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                                transition={{ duration: 0.15, ease: "easeOut" }}
+                                className="absolute top-full left-0 right-0 mt-1 z-[50] bg-[#14141c]/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.7)]"
+                                role="listbox"
+                                aria-label="Select streaming provider"
+                            >
+                                {PROVIDERS.map((provider) => {
+                                    const isActive = activeProvider === provider.slug;
+                                    return (
+                                        <button
+                                            key={provider.slug}
+                                            role="option"
+                                            aria-selected={isActive}
+                                            onClick={() => {
+                                                onProviderChange(provider.slug);
+                                                setMobileOpen(false);
+                                            }}
+                                            className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold transition-colors text-left border-b border-white/[0.04] last:border-b-0 ${
+                                                isActive
+                                                    ? 'bg-white/[0.08] text-white'
+                                                    : 'text-white/60 hover:bg-white/[0.04] hover:text-white'
+                                            }`}
+                                        >
+                                            <span className={`shrink-0 ${isActive ? provider.color : ''}`}>
+                                                {provider.logo}
+                                            </span>
+                                            <span className="flex-1 truncate">{provider.label}</span>
+                                            {isActive && <Check className="w-4 h-4 text-[var(--accent)] shrink-0" />}
+                                        </button>
+                                    );
+                                })}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* ── TABLET / DESKTOP: Wrapped chip row (no horizontal scroll) ── */}
+                <div className="hidden sm:flex flex-wrap items-center gap-1.5 py-2.5">
                     {PROVIDERS.map((provider) => {
                         const isActive = activeProvider === provider.slug;
-                        const isHovered = hoveredSlug === provider.slug;
 
                         return (
-                            <motion.button
+                            <button
                                 key={provider.slug}
                                 id={`provider-btn-${provider.slug}`}
                                 onClick={() => onProviderChange(provider.slug)}
-                                onMouseEnter={() => setHoveredSlug(provider.slug)}
-                                onMouseLeave={() => setHoveredSlug(null)}
-                                whileTap={{ scale: 0.94 }}
-                                className="relative flex-shrink-0 snap-start"
+                                className={`relative flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm whitespace-nowrap transition-all duration-200 border font-semibold active:scale-95 ${
+                                    isActive
+                                        ? `${provider.color} border-white/20 font-bold bg-gradient-to-r ${provider.bgGradient}`
+                                        : 'text-[var(--text-muted)] border-white/[0.06] hover:text-white hover:border-white/15 hover:bg-white/[0.04]'
+                                }`}
+                                style={isActive ? { boxShadow: `0 0 16px ${provider.glowColor}` } : undefined}
                                 aria-label={`Filter by ${provider.label}`}
                                 aria-pressed={isActive}
                             >
-                                {/* Active / hover background glow layer */}
-                                <AnimatePresence>
-                                    {(isActive || isHovered) && (
-                                        <motion.div
-                                            key="glow"
-                                            layoutId={isActive ? "provider-active-bg" : undefined}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            className={`absolute inset-0 rounded-xl bg-gradient-to-r ${provider.bgGradient} opacity-${isActive ? "100" : "40"}`}
-                                            style={{
-                                                boxShadow: isActive
-                                                    ? `0 0 20px ${provider.glowColor}, 0 0 40px ${provider.glowColor}40`
-                                                    : "none",
-                                            }}
-                                        />
-                                    )}
-                                </AnimatePresence>
-
-                                {/* Button content */}
-                                <span
-                                    className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all duration-200 border shrink-0 ${
-                                        isActive
-                                            ? `${provider.color} border-white/20 font-bold`
-                                            : "text-[var(--text-muted)] border-white/[0.06] hover:text-white hover:border-white/15 font-semibold"
-                                    }`}
-                                >
-                                    <span className={`transition-transform duration-300 shrink-0 ${isActive ? "scale-110" : "scale-100"}`}>
-                                        {provider.logo}
-                                    </span>
-
-                                    {/* Active indicator dot */}
-                                    {isActive && (
-                                        <motion.span
-                                            layoutId="active-dot"
-                                            className="w-1.5 h-1.5 rounded-full bg-white/80"
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        />
-                                    )}
+                                <span className={`transition-transform duration-200 shrink-0 ${isActive ? 'scale-110' : 'scale-100'}`}>
+                                    {provider.logo}
                                 </span>
 
+                                {/* Active indicator dot */}
+                                {isActive && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" />
+                                )}
+
                                 {/* Active bottom line */}
-                                <AnimatePresence>
-                                    {isActive && (
-                                        <motion.div
-                                            key="bottom-line"
-                                            layoutId="provider-underline"
-                                            initial={{ scaleX: 0 }}
-                                            animate={{ scaleX: 1 }}
-                                            exit={{ scaleX: 0 }}
-                                            className={`absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-gradient-to-r ${provider.bgGradient}`}
-                                        />
-                                    )}
-                                </AnimatePresence>
-                            </motion.button>
+                                {isActive && (
+                                    <span className={`absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-gradient-to-r ${provider.bgGradient}`} />
+                                )}
+                            </button>
                         );
                     })}
                 </div>

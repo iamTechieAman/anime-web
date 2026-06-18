@@ -7,7 +7,7 @@ export default function Logo({ className = "" }: { className?: string }) {
         <motion.div
             whileHover={{ scale: 1.08, rotate: 8 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className={`relative flex items-center justify-center cursor-pointer select-none shrink-0 h-[32px] md:h-[36px] lg:h-[40px] w-auto aspect-square object-contain ${className}`}
+            className={`relative flex items-center justify-center cursor-pointer select-none shrink-0 h-[30px] md:h-[36px] lg:h-[42px] w-auto aspect-square object-contain transition-transform duration-200 hover:scale-110 active:scale-95 ${className}`}
         >
             {/* Ambient Background Glows */}
             <div className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[#00d2ff] opacity-25 blur-[10px] rounded-full scale-110" />

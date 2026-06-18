@@ -1,9 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useWatch } from "@/context/WatchContext";
 import { Play, Clock, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+
+const PLACEHOLDER = "/tmdb_placeholder.webp";
 
 export default function ContinueWatchingRow() {
     const { history, removeFromHistory } = useWatch();
@@ -91,11 +94,17 @@ export default function ContinueWatchingRow() {
                             >
                                 {/* Left Poster */}
                                 <div className="w-[80px] md:w-[90px] lg:w-[100px] shrink-0 relative overflow-hidden bg-black/40 select-none group/poster">
-                                    <img 
-                                        src={entry.poster || "https://api.dicebear.com/9.x/shapes/svg?seed=fallback"} 
-                                        alt={entry.title} 
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover/poster:scale-105"
-                                        loading="lazy"
+                                    <Image
+                                        src={entry.poster || PLACEHOLDER}
+                                        alt={entry.title || "Continue watching"}
+                                        fill
+                                        sizes="(max-width: 768px) 80px, (max-width: 1024px) 90px, 100px"
+                                        className="object-cover transition-transform duration-500 group-hover/poster:scale-105"
+                                        onError={(e) => {
+                                            const target = e.currentTarget as HTMLImageElement;
+                                            if (target.src !== PLACEHOLDER) target.src = PLACEHOLDER;
+                                        }}
+                                        unoptimized
                                     />
                                     {/* Play Hover Overlay */}
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/poster:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">

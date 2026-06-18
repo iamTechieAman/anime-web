@@ -29,8 +29,8 @@ export default function Footer() {
                         <a href="https://github.com/iamTechieAman/anime-web" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1">
                             <Github className="w-3.5 h-3.5" /> GitHub
                         </a>
-                        <span className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.2 rounded-full text-white/40 cursor-default">
-                            v4.0.0
+                        <span className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-full text-white/40 cursor-default">
+                            v5.0.0
                         </span>
                     </div>
                     <p className="text-[9.5px] text-[var(--text-muted)] tracking-wider">

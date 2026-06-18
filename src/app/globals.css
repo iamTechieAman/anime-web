@@ -8,6 +8,9 @@ html,
 body {
   overflow-x: hidden;
   background: #0b0b0f;
+  /* iPhone notch / Dynamic Island safe area */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 * {
@@ -18,7 +21,8 @@ body {
 
 img {
   user-select: none;
-  pointer-events: none;
+  /* pointer-events: none removed — was blocking interactive overlays on images */
+  -webkit-user-drag: none;
 }
 
 /* ══════════════════════════════════════════════════
