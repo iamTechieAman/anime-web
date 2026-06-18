@@ -123,6 +123,12 @@ export default function Header() {
     setSearchQuery(q);
   }, [searchParams]);
 
+  // Close search dropdown on route change
+  useEffect(() => {
+    setShowSuggestions(false);
+    setShowFilters(false);
+  }, [pathname]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowFilters(false);
@@ -381,7 +387,8 @@ export default function Header() {
                     setActiveIndex(-1);
                     if (e.target.value.length >= 2 && !isDiscoverMode) setShowSuggestions(true);
                   }}
-                  onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
+                  onFocus={() => { if(!isDiscoverMode && searchQuery.length >= 1) setShowSuggestions(true); }}
+                  onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); }}
                   onKeyDown={handleKeyDown}
                   placeholder={isDiscoverMode ? "Describe what you want to watch..." : placeholders[placeholderIndex]}
                   className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none focus-visible:outline-none outline-none px-2 text-sm text-white placeholder-zinc-500 font-bold tracking-tight shadow-none"

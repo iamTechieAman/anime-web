@@ -62,12 +62,12 @@ const MOVIE_SERVERS = [
             type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
     },
     {
-        id: 'vidfast',
-        name: 'Toon Player Auto',
-        badge: 'Fast',
+        id: 'cinevo',
+        name: 'Cinevo',
+        badge: 'HD',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
+            type === 'tv' ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}` : `https://cineby.pro/movie/${id}`,
     },
     {
         id: 'nortan',
@@ -84,6 +84,30 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
+    },
+    {
+        id: 'vidsrcto',
+        name: 'Toon Player Pro',
+        badge: 'Pro',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.to/embed/movie/${id}`,
+    },
+    {
+        id: 'autoembed',
+        name: 'Toon Player Stream',
+        badge: 'Stream',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://autoembed.co/tv/tmdb/${id}-${s || 1}-${e || 1}` : `https://autoembed.co/movie/tmdb/${id}`,
+    },
+    {
+        id: 'vidfast',
+        name: 'Toon Player Auto',
+        badge: 'Fast',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
     },
     {
         id: 'multiembed',

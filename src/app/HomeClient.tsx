@@ -12,7 +12,7 @@ import useSWR from 'swr';
 import type { ProviderSlug } from "@/components/ProviderBar";
 import dynamic from "next/dynamic";
 
-const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[60vh] md:h-[70vh] bg-zinc-900 animate-pulse rounded-2xl w-full" /> });
+const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[55vh] md:h-[70vh] bg-zinc-900 animate-pulse w-full" /> });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
 const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });
@@ -376,7 +376,7 @@ export default function MoviesPage() {
 
                 {/* Genres & Categories Sub-Nav */}
                 {deviceMode !== "tv" && (
-                    <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 sticky top-[64px] z-40 shadow-[0_10px_30px_rgba(0,0,0,0.3)] py-1 transition-all duration-300">
+                    <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 z-30 shadow-[0_4px_16px_rgba(0,0,0,0.25)] py-1 transition-all duration-300">
                         <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
                                 {TABS.map((tab) => (

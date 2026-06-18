@@ -57,6 +57,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'autoembed.co' },
       { protocol: 'https', hostname: 'vidsrc.xyz' },
       { protocol: 'https', hostname: 'player.smashy.stream' },
+      { protocol: 'https', hostname: 'cineby.pro' },
+      { protocol: 'https', hostname: 'vidsrc.to' },
+      { protocol: 'https', hostname: 'vidsrc.pro' },
+      { protocol: 'https', hostname: 'peachify.top' },
     ],
   },
   async headers() {

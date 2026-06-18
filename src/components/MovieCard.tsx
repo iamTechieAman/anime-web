@@ -84,7 +84,12 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
     const year = (releaseDate || "").slice(0, 4);
     const rating = item.vote_average?.toFixed(1);
-    const mediaType = item.media_type || type;
+    // Ensure mediaType is never undefined — detect TV by presence of 'name' or 'first_air_date' fields
+    const rawMediaType = item.media_type || type;
+    const mediaType = (rawMediaType && rawMediaType !== 'undefined')
+        ? rawMediaType
+        : (item.first_air_date || item.name ? 'tv' : 'movie');
+    const watchHref = mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`;
     const matchPercent = Math.round((item.vote_average || 0) * 10);
 
     return (
@@ -96,7 +101,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             onTouchStart={handleMouseEnter}
             onTouchEnd={handleMouseLeave}
         >
-        <Link href={mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`} className="block w-full h-full">
+        <Link href={watchHref} className="block w-full h-full">
             <div className="premium-card-container">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (

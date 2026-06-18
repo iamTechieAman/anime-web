@@ -24,11 +24,11 @@ const SERVERS = [
             type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
     },
     {
-        id: 'vidfast',
-        name: 'Toon Player Auto',
-        badge: 'Fast',
+        id: 'cinevo',
+        name: 'Cinevo',
+        badge: 'HD',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
+            type === 'tv' ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}` : `https://cineby.pro/movie/${id}`,
     },
     {
         id: 'nortan',
@@ -43,6 +43,27 @@ const SERVERS = [
         badge: 'Multi-Audio',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
+    },
+    {
+        id: 'vidsrcto',
+        name: 'Toon Player Pro',
+        badge: 'Pro',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.to/embed/movie/${id}`,
+    },
+    {
+        id: 'autoembed',
+        name: 'Toon Player Stream',
+        badge: 'Stream',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://autoembed.co/tv/tmdb/${id}-${s || 1}-${e || 1}` : `https://autoembed.co/movie/tmdb/${id}`,
+    },
+    {
+        id: 'vidfast',
+        name: 'Toon Player Auto',
+        badge: 'Fast',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
     },
     {
         id: 'multiembed',
@@ -486,26 +507,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 // Use DB servers or fallback to hardcoded
                 const baseServers = fetchedServers.length > 0 ? fetchedServers : (type === 'anime' ? ANIME_SERVERS : SERVERS);
 
-                // Re-sort servers if MultiAudio prioritize is on
-                if (parsed.multiAudio === true || parsed.multiAudio === undefined) {
-                    const sortedServers = [...baseServers].sort((a, b) => {
-                        if (a.id === "peachify") return -1;
-                        if (b.id === "peachify") return 1;
-                        if (a.id === "vidlink") return -1; // Vidlink is best fallback
-                        return 0;
-                    });
-                    setServersList(sortedServers);
-                    
-                    if (isFirstLoadRef.current) {
-                        setActiveServer(sortedServers[0]);
-                        isFirstLoadRef.current = false;
-                    }
-                } else {
-                    setServersList([...baseServers]);
-                    if (isFirstLoadRef.current) {
-                        setActiveServer(baseServers[0]);
-                        isFirstLoadRef.current = false;
-                    }
+                // Keep original order from SERVERS array (do not re-sort; priority is defined in SERVERS const)
+                setServersList([...baseServers]);
+                if (isFirstLoadRef.current) {
+                    setActiveServer(baseServers[0]);
+                    isFirstLoadRef.current = false;
                 }
             } catch (e) {
                 console.error("Failed to initialize servers:", e);
