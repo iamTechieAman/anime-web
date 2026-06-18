@@ -857,18 +857,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 {/* Navbar */}
-                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
-                    <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                        <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
-                    <div className="flex flex-col items-center text-center max-w-[60%] px-4">
-                        <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                    <div className="flex-1 min-w-0">
+                        <h1 className="font-black text-sm md:text-base lg:text-lg leading-tight text-white truncate tracking-tight">
                             {animeTitle}
                         </h1>
+                        <p className="text-[10px] md:text-xs text-zinc-500 font-medium tracking-widest uppercase">Anime · Episode {selectedEpisode}</p>
                     </div>
                 </nav>
 
-                <div className="pt-[90px] md:pt-[110px] lg:pt-[140px] px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
+                <div className="pt-[60px] md:pt-[64px] px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
                     {/* Fallback Player */}
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe

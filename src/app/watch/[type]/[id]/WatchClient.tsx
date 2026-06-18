@@ -995,7 +995,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 </div>
             </div>
 
-            <div className="pt-[90px] md:pt-[110px] lg:pt-[140px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-6">
+            <div className="pt-[60px] md:pt-[64px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4">
                 <div className="flex flex-col xl:flex-row gap-6 items-start">
                     
                     {/* Left Pane (Main content: Player, Cast, Info, alt etc.) */}
@@ -1365,7 +1365,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 <div className="w-full px-4 md:px-6 py-8">
                     <div className="flex flex-col lg:flex-row gap-8 items-start">
                         {/* Poster — visible on all devices */}
-                        <div className="flex-shrink-0 w-[120px] md:w-[220px]">
+                        <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
                             {details.poster_path && (
                                 <div className="relative group">
                                     <img
@@ -1383,7 +1383,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <div className="flex-1 min-w-0">
                             {/* Title Section */}
                             <div className="mb-6">
-                                <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2 font-sora line-clamp-2">{title}</h1>
+                                <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-2 font-sora line-clamp-2">{title}</h2>
                                 <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
                                     <span className="flex items-center gap-1.5 font-bold text-green-400">
                                         <Sparkles className="w-4 h-4" /> {matchPercent}% Match
