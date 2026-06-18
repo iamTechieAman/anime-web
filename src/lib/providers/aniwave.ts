@@ -17,7 +17,7 @@ const HEADERS = {
     'Upgrade-Insecure-Requests': '1',
 };
 
-function parseAnimeCards($: cheerio.CheerioAPI, selector: string): AnimeSearchResult[] {
+function parseAnimeCards($: ReturnType<typeof cheerio.load>, selector: string): AnimeSearchResult[] {
     const results: AnimeSearchResult[] = [];
     $(selector).each((_, el) => {
         const $el = $(el);

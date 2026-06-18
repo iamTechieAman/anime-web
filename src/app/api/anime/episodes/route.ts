@@ -21,8 +21,6 @@ const SEARCH_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', 'a
 // ID prefix → provider mapping
 const PREFIX_MAP: Record<string, ProviderName> = {
     'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
-    'on': 'onoflix', 'of': 'onoflix', 'wa': 'watchanimeworld',
-    'ja': 'justanime', 'ax': 'animex', 'cb': 'cinebolt', 'un': 'cinebolt',
     'wv': 'aniwave', 'awt': 'aniwatchtv',
 };
 

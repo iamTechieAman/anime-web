@@ -11,6 +11,7 @@ import { useNotifications } from "@/context/NotificationContext";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { formatDistanceToNow } from 'date-fns';
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import Logo from "@/components/Logo";
 
 import Fuse from "fuse.js";
 
@@ -71,6 +72,15 @@ export default function Header() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const placeholders = ["Search Movies...", "Search Anime...", "Search TV Shows...", "Search Genres..."];
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPlaceholderIndex(prev => (prev + 1) % placeholders.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);
@@ -299,8 +309,8 @@ export default function Header() {
 
   return (
     <>
-    <nav className={`fixed top-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300 ${
-      showSidebar ? "left-0 md:left-[72px] peer-hover/sidebar:md:left-[220px]" : "left-0"
+    <nav className={`fixed top-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[#050505]/75 backdrop-blur-md border-b border-white/5 transition-all duration-300 ${
+      showSidebar ? "left-0 md:left-[72px] peer-hover/sidebar:md:left-[240px]" : "left-0"
     }`}>
       
       {/* Search Focus Overlay */}
@@ -320,13 +330,7 @@ export default function Header() {
       <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4 min-w-0">
         {/* ── LOGO ── */}
         <Link href="/" className="flex items-center cursor-pointer shrink-0 active:scale-95 transition-transform group" onClick={clearSearch}>
-          <div className="w-8 h-8 relative flex items-center justify-center shrink-0">
-            <img 
-              src="/logo.webp" 
-              alt="ToonPlayer Logo" 
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.25)] group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
+          <Logo />
         </Link>
 
         {/* ── NAVIGATION LINKS (desktop & TV) ── */}
@@ -353,14 +357,14 @@ export default function Header() {
 
         {/* ── SEARCH BAR (PC only) ── */}
         {deviceMode === "pc" && (
-          <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[440px] hidden md:flex items-center gap-1 relative p-1 bg-white/[0.04] border border-white/[0.07] rounded-xl focus-within:border-[var(--accent)]/40 focus-within:shadow-[0_0_14px_rgba(249,115,22,0.15)] transition-all duration-300">
+          <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[460px] hidden md:flex items-center gap-1 relative p-[2px] bg-white/[0.03] border border-white/5 rounded-xl focus-within:bg-[#12131A] focus-within:border-[#FF9D00]/50 focus-within:shadow-[0_0_20px_rgba(255,157,0,0.15)] transition-all duration-300">
             <div className="flex-1 relative">
               <form 
                 onSubmit={(e) => handleSearch(e)} 
-                className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-orange-900/15' : 'bg-transparent'}`}
+                className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-[#FF9D00]/10' : 'bg-transparent'}`}
               >
                 <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
-                  <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[var(--accent-secondary)] animate-pulse' : 'text-[var(--text-secondary)] group-focus-within:text-[var(--accent)]'}`} />
+                  <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[#FF9D00] animate-pulse' : 'text-zinc-400 group-focus-within:text-[#FF9D00]'}`} />
                 </button>
                 <input
                   type="text"
@@ -372,13 +376,13 @@ export default function Header() {
                   }}
                   onFocus={() => { if(!isDiscoverMode) setShowSuggestions(true); }}
                   onKeyDown={handleKeyDown}
-                  placeholder={isDiscoverMode ? "Describe what you want to watch..." : "Find movies, shows & more..."}
-                  className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none focus-visible:outline-none outline-none px-2 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] font-bold tracking-tight shadow-none"
+                  placeholder={isDiscoverMode ? "Describe what you want to watch..." : placeholders[placeholderIndex]}
+                  className="w-full bg-transparent border-0 border-transparent ring-0 ring-transparent focus:ring-0 focus:ring-transparent focus:border-transparent focus:outline-none focus-visible:outline-none outline-none px-2 text-sm text-white placeholder-zinc-500 font-bold tracking-tight shadow-none"
                   autoComplete="off"
                 />
                 {searchQuery && (
                   <button aria-label="Clear search" type="button" onClick={clearSearch} className="p-1.5 hover:bg-white/5 rounded-full transition-colors mr-2">
-                    <X className="w-4 h-4 text-[var(--text-muted)]" />
+                    <X className="w-4 h-4 text-zinc-400" />
                   </button>
                 )}
                 
@@ -386,11 +390,11 @@ export default function Header() {
                 <button 
                   type="button"
                   onClick={() => setIsDiscoverMode(!isDiscoverMode)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-500/30' : 'bg-white/[0.04] text-[var(--text-muted)] hover:bg-white/10 hover:text-white'}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all relative overflow-hidden shrink-0 ${isDiscoverMode ? 'bg-gradient-to-r from-[#FF9D00] to-[#FFB333] text-black shadow-lg shadow-orange-500/25 font-extrabold' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/10'}`}
                   title="AI Discovery Search"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span className="hidden lg:inline">AI</span>
+                  <Sparkles className={`w-3.5 h-3.5 ${isDiscoverMode ? 'text-black animate-pulse' : 'text-[#FF9D00]'}`} />
+                  <span className="hidden lg:inline">AI Mode</span>
                 </button>
               </form>
 
@@ -814,7 +818,7 @@ export default function Header() {
           <div className="profile-action-shell flex items-center justify-center pl-1.5 md:pl-2 border-l border-white/[0.08]">
             {isUserLoaded && !isSignedIn && (
               <SignInButton mode="modal">
-                <button className="h-10 px-3 md:px-4 rounded-full bg-white text-black hover:bg-orange-100 active:scale-95 transition-all font-black text-xs md:text-sm flex items-center gap-2 shadow-[0_10px_24px_rgba(255,255,255,0.12)]">
+                <button className="h-10 px-3 md:px-5 rounded-xl bg-gradient-to-r from-[#FF9D00] to-[#FFB333] text-black hover:opacity-95 active:scale-98 transition-all font-black text-xs md:text-sm flex items-center gap-2 shadow-[0_8px_20px_rgba(255,157,0,0.25)] border-0 cursor-pointer">
                   <LogIn className="w-4 h-4" />
                   <span className="hidden sm:inline">Login</span>
                 </button>

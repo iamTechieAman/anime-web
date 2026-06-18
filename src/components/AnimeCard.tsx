@@ -125,16 +125,25 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
                         </div>
                     </div>
                 </div>
-                {/* Mobile Title Metadata Block */}
-                <div className="block md:hidden mt-1.5 px-1 pb-1">
-                    <h4 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h4>
-                    <div className="flex items-center gap-1.5 mt-0.5 text-[9px] text-[var(--text-muted)] font-medium">
+                {/* Always-visible Title Metadata Block */}
+                <div className="mt-2 px-0.5 pb-1">
+                    <h4 className="text-[11px] md:text-xs font-extrabold text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
+                    <div className="flex items-center gap-1.5 mt-1 text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold">
                         {rating && (
                             <span className="text-[var(--accent-warm)] font-extrabold flex items-center gap-0.5">
                                 ★{rating}
                             </span>
                         )}
-                        {year && <span>{year}</span>}
+                        {year && (
+                            <>
+                                <span className="text-white/25">•</span>
+                                <span>{year}</span>
+                            </>
+                        )}
+                        <span className="text-white/25">•</span>
+                        <span className="text-[var(--accent)] uppercase font-bold text-[8px] tracking-wider">
+                            {show.type || show.media_type || "ANIME"}
+                        </span>
                     </div>
                 </div>
             </Link>

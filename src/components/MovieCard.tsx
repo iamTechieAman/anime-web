@@ -237,6 +237,10 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             <span>{year}</span>
                         </>
                     )}
+                    <span className="text-white/25">•</span>
+                    <span className="text-[var(--accent)] uppercase font-bold text-[8px] tracking-wider">
+                        {mediaType || type || "MOVIE"}
+                    </span>
                 </div>
             </div>
         </Link>

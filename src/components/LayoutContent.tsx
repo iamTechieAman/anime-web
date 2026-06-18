@@ -58,7 +58,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
       {/* Content area: adaptive padding based on sidebar visibility */}
       <div className={`flex flex-col min-h-screen relative ${
-        showSidebar ? "pl-0 md:pl-[72px] peer-hover/sidebar:md:pl-[220px]" : "pl-0"
+        showSidebar ? "pl-0 md:pl-[72px] peer-hover/sidebar:md:pl-[240px]" : "pl-0"
       } transition-[padding] duration-300 ease-in-out overflow-hidden ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}

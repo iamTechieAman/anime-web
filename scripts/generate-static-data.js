@@ -11,7 +11,10 @@ if (!fs.existsSync(DATA_DIR)) {
 
 function fetchJson(url) {
     return new Promise((resolve, reject) => {
-        https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } }, (res) => {
+        const req = https.get(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+            signal: AbortSignal.timeout(10000),
+        }, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
@@ -20,12 +23,17 @@ function fetchJson(url) {
                         reject(new Error(`HTTP Error ${res.statusCode}: ${data}`));
                         return;
                     }
+                    if (!data.trim()) {
+                        reject(new Error('Empty response'));
+                        return;
+                    }
                     resolve(JSON.parse(data));
                 } catch (e) {
                     reject(e);
                 }
             });
-        }).on('error', reject);
+        });
+        req.on('error', reject);
     });
 }
 
@@ -61,7 +69,7 @@ const CATEGORIES = [
 async function generateStaticData() {
     console.log('Generating expanded static data fallbacks for TMDB...');
     
-    for (const cat of CATEGORIES) {
+    await Promise.all(CATEGORIES.map(async (cat) => {
         try {
             console.log(`Fetching ${cat.name}...`);
             const data = await fetchJson(cat.url);
@@ -70,7 +78,7 @@ async function generateStaticData() {
         } catch (error) {
             console.error(`Failed to fetch ${cat.name}:`, error.message);
         }
-    }
+    }));
     
     console.log('Static data fallbacks generation complete.');
 }

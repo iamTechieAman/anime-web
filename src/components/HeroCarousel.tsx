@@ -4,9 +4,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-import { Play, ChevronLeft, ChevronRight, Clock, Calendar, Info } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Clock, Calendar, Info, Heart, Check } from "lucide-react";
 import axios from "axios";
 import { HeroSkeleton } from "@/components/SkeletonLoader";
+import { useWatch } from "@/context/WatchContext";
 
 interface Slide {
     id: number | string;
@@ -29,6 +30,7 @@ export default function HeroCarousel() {
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const { watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
 
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
@@ -84,12 +86,12 @@ export default function HeroCarousel() {
         }
     };
 
-    // Auto-rotate with pause on interaction
+    // Auto-rotate with pause on interaction (8 seconds)
     const startAutoRotate = useCallback(() => {
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = setInterval(() => {
             setCurrent(prev => (prev + 1) % (slides.length || 1));
-        }, 6000);
+        }, 8000);
     }, [slides.length]);
 
     useEffect(() => {
@@ -144,10 +146,25 @@ export default function HeroCarousel() {
     );
 
     const activeSlide = slides[current];
+    const inWatchlist = isInWatchlist(activeSlide.id);
+
+    const toggleWatchlist = () => {
+        if (inWatchlist) {
+            removeFromWatchlist(activeSlide.id);
+        } else {
+            addToWatchlist({
+                id: activeSlide.id,
+                showId: activeSlide.id,
+                type: activeSlide.type === "TV" ? "tv" : "movie",
+                title: activeSlide.title,
+                poster: activeSlide.cover
+            });
+        }
+    };
 
     return (
         <div 
-            className="relative w-full h-[55vh] md:h-[70vh] max-h-[800px] overflow-hidden group bg-[var(--bg-main)]"
+            className="relative w-full h-[70vh] min-h-[550px] max-h-[850px] overflow-hidden group bg-[#050505]"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -167,7 +184,7 @@ export default function HeroCarousel() {
                             fill
                             priority={i < 2}
                             fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-center opacity-70 hidden md:block"
+                            className="object-cover object-center opacity-65 hidden md:block"
                             sizes="100vw"
                         />
                         {/* Mobile Cover Poster */}
@@ -177,86 +194,86 @@ export default function HeroCarousel() {
                             fill
                             priority={i < 2}
                             fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-center opacity-40 block md:hidden"
+                            className="object-cover object-center opacity-35 block md:hidden"
                             sizes="100vw"
                         />
                     </div>
                 </div>
             ))}
 
-            {/* Vignette & Gradient overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/20 to-transparent z-10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent z-10 w-[80%]" />
-            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-32 bg-gradient-to-t from-[var(--bg-main)] to-transparent z-10" />
+            {/* Symmetrical Vignette & Gradient overlays */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5,5,5,0.15)_0%,#050505_95%)] z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/45 to-transparent z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-36 bg-gradient-to-t from-[#050505] to-transparent z-10" />
+            
+            {/* Ambient Backlight Glow behind active slide */}
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[50vw] h-[30vh] rounded-full bg-[#FF9D00]/10 blur-[140px] pointer-events-none z-10" />
 
             {/* Trending Badge */}
-            <div className="absolute top-14 left-4 md:left-20 z-30">
-                <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-[9px] md:text-[10px] font-black px-2.5 py-1 rounded flex items-center gap-1.5 shadow-lg animate-fadeSlideDown">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30">
+                <div className="bg-gradient-to-r from-[#FF9D00] to-[#FF4D4D] text-black text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_4px_15px_rgba(255,157,0,0.3)] animate-fadeSlideDown">
+                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-ping" />
                     TRENDING NOW
                 </div>
             </div>
 
-            {/* Content - Responsive Widescreen Split Layout */}
-            <div className="absolute inset-0 flex items-center md:items-end z-20 pb-10 md:pb-14 pt-16 md:pt-0">
-                <div className="w-full max-w-[1800px] mx-auto px-5 md:px-12 flex flex-col md:flex-row items-center justify-start gap-6 md:gap-10 lg:gap-14">
-                    
-                    {/* Left: Floating show card (Only visible on md+) */}
-                    <div className="hidden md:block w-[160px] lg:w-[200px] aspect-[2/3] relative shrink-0 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_30px_rgba(249,115,22,0.15)] hover:scale-[1.02] transition-transform duration-500 bg-zinc-950">
-                        <Image
-                            src={activeSlide.cover}
-                            alt=""
-                            fill
-                            className="object-cover transition-transform duration-700 hover:scale-105"
-                            sizes="(max-width: 768px) 0px, 200px"
-                        />
+            {/* Content - Responsive Centered Cinematic Layout */}
+            <div className="absolute inset-0 flex items-center justify-center z-20 pb-12 md:pb-16 pt-20">
+                <div className="w-full max-w-3xl mx-auto px-5 flex flex-col items-center justify-center text-center gap-4">
+                    {/* Metadata Badges */}
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        <span className="bg-[#FF9D00] text-black px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
+                            {activeSlide.type}
+                        </span>
+                        <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase border border-white/10">
+                            {activeSlide.quality}
+                        </span>
+                        <span className="text-[10px] font-bold text-zinc-300 flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[#FF9D00]" /> {activeSlide.release}
+                        </span>
+                        {activeSlide.rating !== "?" && (
+                            <span className="text-[10px] font-bold text-[#00D084]">
+                                {activeSlide.rating} Match
+                            </span>
+                        )}
                     </div>
 
-                    {/* Right: Show details & CTA Button (Adaptive layout, centered on mobile, left-aligned on md+) */}
-                    <div className="flex-1 max-w-xl text-center md:text-left flex flex-col items-center md:items-start">
-                        {/* Metadata Badges */}
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 mb-2.5">
-                            <span className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
-                                {activeSlide.type}
-                            </span>
-                            <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase border border-white/10">
-                                {activeSlide.quality}
-                            </span>
-                            <span className="text-[10px] font-bold text-white/60 flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> {activeSlide.release}
-                            </span>
-                            {activeSlide.rating !== "?" && (
-                                <span className="text-[10px] font-bold text-green-400">
-                                    {activeSlide.rating} Match
-                                </span>
+                    {/* Title */}
+                    <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black leading-[1.05] text-white line-clamp-2 font-sora tracking-tighter drop-shadow-[0_4px_25px_rgba(0,0,0,0.95)]">
+                        {activeSlide.title}
+                    </h1>
+
+                    {/* Description */}
+                    <p className="text-zinc-300 text-xs md:text-sm leading-relaxed max-w-xl font-medium drop-shadow-md hidden sm:block">
+                        {activeSlide.description}
+                    </p>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+                        <Link href={activeSlide.link}>
+                            <button className="flex items-center gap-2 px-6 lg:px-8 py-2.5 bg-gradient-to-r from-[#FF9D00] to-[#FFB333] text-black hover:opacity-95 font-black rounded-xl transition-all active:scale-95 shadow-[0_8px_20px_rgba(255,157,0,0.3)] text-xs md:text-sm cursor-pointer min-h-[44px] border-0">
+                                <Play className="w-4 h-4 fill-current" />
+                                WATCH NOW
+                            </button>
+                        </Link>
+                        
+                        {/* Watchlist Toggle Action */}
+                        <button 
+                            onClick={toggleWatchlist}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] text-white font-bold rounded-xl border border-white/5 transition-all text-xs md:text-sm cursor-pointer min-h-[44px] active:scale-95"
+                        >
+                            {inWatchlist ? (
+                                <>
+                                    <Check className="w-4 h-4 text-[#FF9D00]" />
+                                    In Watchlist
+                                </>
+                            ) : (
+                                <>
+                                    <Heart className="w-4 h-4 text-zinc-400 group-hover:text-red-500" />
+                                    + Watchlist
+                                </>
                             )}
-                        </div>
-
-                        {/* Title */}
-                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black leading-[1.05] text-white mb-2 line-clamp-2 font-sora tracking-tighter drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
-                            {activeSlide.title}
-                        </h1>
-
-                        {/* Description */}
-                        <p className="text-white/70 text-xs md:text-sm line-clamp-2 md:line-clamp-3 leading-relaxed max-w-lg mb-4.5 font-medium drop-shadow-md hidden sm:block">
-                            {activeSlide.description}
-                        </p>
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2.5">
-                            <Link href={activeSlide.link}>
-                                <button className="flex items-center gap-2 px-6 lg:px-8 py-2.5 bg-white text-black hover:bg-white/95 font-black rounded-lg transition-all active:scale-95 shadow-[0_10px_24px_rgba(255,255,255,0.15)] text-sm cursor-pointer min-h-[44px]">
-                                    <Play className="w-4 h-4 fill-current" />
-                                    WATCH NOW
-                                </button>
-                            </Link>
-                            <Link href={activeSlide.link}>
-                                <button className="flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white font-bold rounded-lg border border-white/10 transition-all text-sm cursor-pointer min-h-[44px]">
-                                    <Info className="w-4 h-4" />
-                                    More Info
-                                </button>
-                            </Link>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>

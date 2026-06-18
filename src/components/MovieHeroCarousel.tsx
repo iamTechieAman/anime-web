@@ -88,18 +88,14 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
             </AnimatePresence>
 
             {/* Multi-layer gradient overlays for cinematic look */}
-            {/* Base darkening for contrast */}
-            <div className="absolute inset-0 bg-black/20" />
-            {/* Radial spotlight behind the title */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.8)_100%)]" />
-            {/* Left-to-right fade for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-3/4" />
-            {/* Smooth gradient fade into the bottom content rows */}
+            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.85)_100%)]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/45 to-transparent w-full" />
             <div className="absolute bottom-0 left-0 right-0 h-32 md:h-44 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent" />
 
             {/* Content */}
-            <div className="absolute inset-0 flex items-end pb-8 md:pb-12 z-20">
-                <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6">
+            <div className="absolute inset-0 flex items-center justify-center pb-8 md:pb-12 z-20 pt-16">
+                <div className="w-full max-w-3xl mx-auto px-4 md:px-6 flex flex-col items-center justify-center text-center">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={current}
@@ -107,14 +103,14 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.7, ease: "easeOut" }}
-                            className="max-w-3xl flex flex-col gap-5"
+                            className="flex flex-col items-center justify-center text-center gap-4"
                         >
-                            <h1 className="text-4xl md:text-6xl lg:text-[4.5rem] font-black text-white tracking-tighter leading-[1.05] drop-shadow-2xl">
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-[1.05] drop-shadow-[0_4px_25px_rgba(0,0,0,0.95)]">
                                 {title}
                             </h1>
 
                             {/* Meta info */}
-                            <div className="flex items-center gap-4 flex-wrap mt-1">
+                            <div className="flex items-center justify-center gap-4 flex-wrap mt-1">
                                 {matchPercent > 0 && (
                                     <span className={`text-base font-bold ${matchPercent >= 70 ? "text-green-400" : "text-yellow-400"}`}>
                                         {matchPercent}% Match
@@ -128,22 +124,22 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             </div>
 
                             {/* Description */}
-                            <p className="text-[#d1d5db] text-sm md:text-lg leading-relaxed line-clamp-3 md:line-clamp-4 max-w-2xl drop-shadow-md">
+                            <p className="text-[#d1d5db] text-sm md:text-base leading-relaxed line-clamp-3 md:line-clamp-4 max-w-xl drop-shadow-md">
                                 {item.overview}
                             </p>
 
                             {/* Action buttons */}
-                            <div className="flex items-center gap-4 pt-4">
+                            <div className="flex items-center justify-center gap-4 pt-2">
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
-                                    className="flex items-center justify-center gap-2 px-8 py-3.5 md:py-4 bg-white text-black font-extrabold text-base md:text-lg rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.3)]"
+                                    className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-black font-extrabold text-base rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.3)]"
                                 >
                                     <Play className="w-6 h-6 fill-black" />
                                     Play Now
                                 </Link>
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
-                                    className="flex items-center justify-center gap-2 px-6 py-3.5 md:py-4 bg-white/10 backdrop-blur-md text-white font-bold text-base md:text-lg rounded-xl hover:bg-white/20 transition-colors border border-white/20 shadow-xl hover:scale-105 active:scale-95"
+                                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 backdrop-blur-md text-white font-bold text-base rounded-xl hover:bg-white/20 transition-colors border border-white/20 shadow-xl hover:scale-105 active:scale-95"
                                 >
                                     <Info className="w-6 h-6" />
                                     More Info

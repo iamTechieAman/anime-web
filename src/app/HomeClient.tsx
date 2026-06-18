@@ -29,16 +29,16 @@ const GENRE_ROWS = [
     { title: "Science Fiction", icon: Flame, genreId: "878", type: "movie" },
 ];
 
-// Network IDs for streaming platform rows
+// Network IDs for streaming platform rows with brand styling colors
 const NETWORK_ROWS = [
-    { title: "Netflix Originals", networkId: "213", logo: "🔴" },
-    { title: "Prime Video", networkId: "1024", logo: "📦" },
-    { title: "Disney+", networkId: "2739", logo: "🔵" },
-    { title: "Hulu", networkId: "453", logo: "🟢" },
-    { title: "HBO Shows", networkId: "49", logo: "🟣" },
-    { title: "Apple TV+", networkId: "2552", logo: "⚪" },
-    { title: "Paramount+", networkId: "4330", logo: "⛰️" },
-    { title: "Peacock", networkId: "3353", logo: "🦚" },
+    { title: "Netflix Originals", networkId: "213", brandColor: "text-[#E50914]" },
+    { title: "Prime Video", networkId: "1024", brandColor: "text-[#00A8E1]" },
+    { title: "Disney+", networkId: "2739", brandColor: "text-[#0063E5]" },
+    { title: "Hulu", networkId: "453", brandColor: "text-[#1CE783]" },
+    { title: "HBO Shows", networkId: "49", brandColor: "text-[#9933FF]" },
+    { title: "Apple TV+", networkId: "2552", brandColor: "text-white" },
+    { title: "Paramount+", networkId: "4330", brandColor: "text-[#0064FF]" },
+    { title: "Peacock", networkId: "3353", brandColor: "text-[#00579F]" },
 ];
 
 // Fallback lists to prevent empty gaps and show user's requested titles
@@ -644,7 +644,7 @@ export default function MoviesPage() {
                                                     if ((loading && !items) || (items && items.length > 0)) {
                                                         return (
                                                             <section key={net.title} id={`network-${net.networkId}`}>
-                                                                <SectionHeader icon={Tv} title={`${net.logo} ${net.title}`} color="text-[var(--accent-secondary)]" />
+                                                                <SectionHeader icon={Tv} title={net.title} color="text-white" brandColor={net.brandColor} />
                                                                 {items && items.length > 0 ? (
                                                                     <MovieRow items={items} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} />
                                                                 ) : (
@@ -994,18 +994,18 @@ export default function MoviesPage() {
 }
 
 // Section Header Component — memoized to avoid re-renders on tab/provider changes
-const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, isFeatured = false }: { icon: any; title: string; color: string; isFeatured?: boolean }) {
+const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, brandColor, isFeatured = false }: { icon: any; title: string; color: string; brandColor?: string; isFeatured?: boolean }) {
     return (
         <div className="flex items-end gap-2.5 md:gap-3 mb-3 md:mb-4 text-[var(--text-main)] transition-all">
             {isFeatured ? (
-                <div className="w-1.5 h-8 bg-gradient-to-t from-[var(--accent)] to-[var(--accent)] rounded-full shadow-[0_0_15px_rgba(249,115,22,0.45)]" />
+                <div className="w-1.5 h-8 bg-gradient-to-t from-[#FF9D00] to-[#FFD700] rounded-full shadow-[0_0_15px_rgba(255,157,0,0.45)]" />
             ) : (
-                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.35)]" />
+                <div className="w-1 h-5 bg-[#FF9D00] rounded-full shadow-[0_0_10px_rgba(255,157,0,0.35)]" />
             )}
             <div className="flex flex-col">
                 <div className="flex items-center gap-2 md:gap-3">
-                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-[var(--accent)] drop-shadow-md`} />
-                    <h2 className={`${isFeatured ? 'text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base md:text-lg font-black tracking-tight font-sora'}`}>{title}</h2>
+                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-[#FF9D00] drop-shadow-md`} />
+                    <h2 className={`${isFeatured ? 'text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base md:text-lg font-black tracking-tight font-sora'} ${brandColor || 'text-white'}`}>{title}</h2>
                 </div>
                 {isFeatured && (
                     <p className="text-[9px] md:text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mt-0.5 ml-0.5 opacity-75">Featured Collection</p>

@@ -10,12 +10,9 @@ import { AniwatchTVProvider } from './aniwatchtv';
 import { JikanProvider } from './jikan';
 import { AnimePaheProvider } from './animepahe';
 import { GogoanimeProvider } from './gogoanime';
-import type { AnimeProvider } from './types';
+import type { AnimeProvider, ProviderName } from './types';
 
-export type ProviderName =
-    | 'allanime' | 'hianime' | 'anikai' | 'aniwatch'
-    | 'consumet' | 'vidsrc' | 'cinevo' | 'aniwave'
-    | 'aniwatchtv' | 'jikan' | 'animepahe' | 'gogoanime';
+export type { ProviderName } from './types';
 
 const providers = new Map<ProviderName, AnimeProvider>([
     ['allanime', new AllAnimeProvider()],

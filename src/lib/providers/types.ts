@@ -45,7 +45,13 @@ export interface VideoSource {
     isIframe?: boolean;
     server?: string;
     type?: 'sub' | 'dub' | 'raw';
+    headers?: Record<string, string>;
 }
+
+export type ProviderName =
+    | 'allanime' | 'hianime' | 'anikai' | 'aniwatch'
+    | 'consumet' | 'vidsrc' | 'cinevo' | 'aniwave'
+    | 'aniwatchtv' | 'jikan' | 'animepahe' | 'gogoanime';
 
 export interface AnimeProvider {
     name: string;

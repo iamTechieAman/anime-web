@@ -22,48 +22,49 @@ img {
 }
 
 /* ══════════════════════════════════════════════════
-   TOONPLAYER V2.0 — ONOFLIX DARK CINEMA DESIGN SYSTEM
+   TOONPLAYER V4.0 — ONOFLIX DARK CINEMA DESIGN SYSTEM
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* ToonPlayer V2.0 Cinematic Dark UI */
-  --bg-main: #0b0b0f;
-  --bg-card: #171720;
-  --bg-elevated: #171720;
-  --bg-surface: #12121a;
-  --bg-overlay: rgba(11, 11, 15, 0.92);
+  /* ToonPlayer V4.0 Dark Luxury OTT Theme */
+  --bg-main: #050505;
+  --bg-surface: #08080b;
+  --bg-elevated: #0e0f14;
+  --bg-card: #12131a;
+  --bg-overlay: rgba(5, 5, 5, 0.96);
   
   --text-main: #ffffff;
-  --text-secondary: #ffffff;
+  --text-secondary: #f3f4f6;
   --text-muted: #9ca3af;
   
-  --border-color: rgba(255,255,255,0.06);
-  --border-subtle: rgba(255,255,255,0.03);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
   
-  --accent: #f59e0b;
-  --accent-secondary: #f59e0b;
-  --accent-glow: rgba(245, 158, 11, 0.28);
-  --accent-warm: #f59e0b;
+  --accent: #FF9D00;
+  --accent-secondary: #FFB333;
+  --accent-glow: rgba(255, 157, 0, 0.28);
+  --accent-warm: #FF9D00;
 
-  --danger: #ef4444;
-  --success: #22c55e;
+  --secondary: #14F195;
+  --danger: #FF4D4D;
+  --success: #00D084;
   
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
-  --glass-bg: rgba(18, 18, 26, 0.80);
+  --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.06);
 
   /* Gradient system */
-  --gradient-primary: linear-gradient(135deg, #f59e0b, #fb923c);
-  --gradient-hot: linear-gradient(135deg, #ef4444, #f59e0b);
-  --gradient-cool: linear-gradient(135deg, #3b82f6, #f59e0b);
-  --gradient-gold: linear-gradient(135deg, #f59e0b, #fb923c);
+  --gradient-primary: linear-gradient(135deg, #FF9D00, #FFB333);
+  --gradient-hot: linear-gradient(135deg, #FF4D4D, #FF9D00);
+  --gradient-cool: linear-gradient(135deg, #14F195, #00D084);
+  --gradient-gold: linear-gradient(135deg, #FF9D00, #FFD700);
 
   /* Shadows */
-  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
-  --shadow-elevated: 0 10px 36px -8px rgba(0, 0, 0, 0.85);
-  --shadow-glow-orange: 0 0 24px rgba(245, 158, 11, 0.3);
-  --shadow-glow-blue: 0 0 24px rgba(59, 130, 246, 0.3);
+  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.85);
+  --shadow-elevated: 0 12px 40px -6px rgba(0, 0, 0, 0.95);
+  --shadow-glow-orange: 0 0 24px rgba(255, 157, 0, 0.35);
+  --shadow-glow-blue: 0 0 24px rgba(20, 241, 149, 0.35);
 
   /* Spacing scale — 4px grid system */
   --space-xs: 4px;
@@ -84,31 +85,32 @@ img {
 }
 
 .dark {
-  --bg-main: #0b0b0f;
-  --bg-card: #171720;
-  --bg-elevated: #171720;
-  --bg-surface: #12121a;
-  --bg-overlay: rgba(11, 11, 15, 0.92);
+  --bg-main: #050505;
+  --bg-surface: #08080b;
+  --bg-elevated: #0e0f14;
+  --bg-card: #12131a;
+  --bg-overlay: rgba(5, 5, 5, 0.96);
   
   --text-main: #ffffff;
-  --text-secondary: #ffffff;
+  --text-secondary: #f3f4f6;
   --text-muted: #9ca3af;
   
-  --border-color: rgba(255,255,255,0.06);
-  --border-subtle: rgba(255,255,255,0.03);
-  --glass-bg: rgba(18, 18, 26, 0.80);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.06);
   
-  --accent: #f59e0b;
-  --accent-secondary: #f59e0b;
-  --accent-glow: rgba(245, 158, 11, 0.28);
-  --accent-warm: #f59e0b;
+  --accent: #FF9D00;
+  --accent-secondary: #FFB333;
+  --accent-glow: rgba(255, 157, 0, 0.28);
+  --accent-warm: #FF9D00;
   
-  --danger: #ef4444;
-  --success: #22c55e;
+  --secondary: #14F195;
+  --danger: #FF4D4D;
+  --success: #00D084;
 
-  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
-  --shadow-elevated: 0 10px 36px -8px rgba(0, 0, 0, 0.85);
+  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.85);
+  --shadow-elevated: 0 12px 40px -6px rgba(0, 0, 0, 0.95);
 }
 
 /* 🌙 Anime dark surface overrides */
@@ -116,19 +118,19 @@ img {
 .watch-page,
 footer,
 aside {
-  --bg-main: #0b0b0f !important;
-  --bg-card: #171720 !important;
-  --bg-elevated: #171720 !important;
-  --bg-surface: #12121a !important;
-  --bg-overlay: rgba(11, 11, 15, 0.92) !important;
+  --bg-main: #050505 !important;
+  --bg-surface: #08080b !important;
+  --bg-elevated: #0e0f14 !important;
+  --bg-card: #12131a !important;
+  --bg-overlay: rgba(5, 5, 5, 0.96) !important;
   
   --text-main: #ffffff !important;
-  --text-secondary: #ffffff !important;
+  --text-secondary: #f3f4f6 !important;
   --text-muted: #9ca3af !important;
   
-  --border-color: rgba(255,255,255,0.06) !important;
-  --border-subtle: rgba(255,255,255,0.03) !important;
-  --glass-bg: rgba(18, 18, 26, 0.80) !important;
+  --border-color: rgba(255, 255, 255, 0.06) !important;
+  --border-subtle: rgba(255, 255, 255, 0.03) !important;
+  --glass-bg: rgba(255, 255, 255, 0.03) !important;
   --glass-border: rgba(255, 255, 255, 0.06) !important;
 }
 
@@ -137,9 +139,9 @@ aside {
 footer *,
 aside * {
   --text-main: #ffffff;
-  --text-secondary: #ffffff;
+  --text-secondary: #f3f4f6;
   --text-muted: #9ca3af;
-  --border-color: rgba(255,255,255,0.06);
+  --border-color: rgba(255, 255, 255, 0.06);
 }
 
 :root {
@@ -787,14 +789,14 @@ p, .text-body {
 @media (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-    gap: 18px;
+    gap: 24px;
   }
 }
 
 @media (min-width: 1440px) {
   .responsive-grid {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
+    gap: 24px;
   }
 }
 
@@ -1696,7 +1698,7 @@ main, .relative.z-10 {
 
 @media (min-width: 768px) {
   .peer\/sidebar:hover ~ div nav {
-    left: 220px !important;
+    left: 240px !important;
   }
 }
 

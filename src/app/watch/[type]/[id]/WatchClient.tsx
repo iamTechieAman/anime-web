@@ -210,7 +210,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { addToHistory, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+    const { history, addToHistory, getHistoryItem, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]); // Start with first server immediately
     const [loading, setLoading] = useState(true);
@@ -386,15 +386,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [mode, setMode] = useState<"sub" | "dub">("sub");
     const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
 
-    // Read season/episode from URL params on mount
+    // Read query parameters or history on load
     useEffect(() => {
-        const s = searchParams?.get('s');
-        const e = searchParams?.get('e');
-        const ep = searchParams?.get('ep');
-        if (s) setSelectedSeason(parseInt(s) || 1);
-        if (e) setSelectedEpisode(parseInt(e) || 1);
-        if (ep) setSelectedEpisode(parseInt(ep) || 1);
-    }, []);
+        const s = searchParams?.get("season") || searchParams?.get("s");
+        const e = searchParams?.get("episode") || searchParams?.get("e") || searchParams?.get("ep");
+        
+        if (s || e) {
+            if (s) setSelectedSeason(parseInt(s) || 1);
+            if (e) setSelectedEpisode(parseInt(e) || 1);
+        } else if (type === 'tv' && (id || tmdbIdForAnime)) {
+            const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
+            if (finalId) {
+                // Find most recently watched episode of this TV show from history
+                const historyItem = history.find((i: any) => i.showId === finalId);
+                if (historyItem) {
+                    if (historyItem.season) setSelectedSeason(historyItem.season);
+                    if (historyItem.episodeNumber || historyItem.episodeId) {
+                        setSelectedEpisode(Number(historyItem.episodeNumber || historyItem.episodeId) || 1);
+                    }
+                }
+            }
+        }
+    }, [searchParams, id, type, animeData, tmdbIdForAnime, history]);
 
 
 
@@ -412,7 +425,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setSourceError(false);
         setIframeKey(prev => prev + 1);
         
-        // Ensure auto-play / next-episode handling
+        // Ensure auto-play / next-episode / timeupdate handling
         const handleMessage = (e: MessageEvent) => {
             const isEndEvent = e.data && (
                 e.data.type === "videoEnd" || 
@@ -457,6 +470,37 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         return prev - 1;
                     });
                 }, 1000);
+            }
+
+            // Time update parsing for progress saving
+            const isTimeUpdate = e.data && (
+                e.data.type === "timeupdate" || 
+                e.data.event === "timeupdate" ||
+                e.data.name === "timeupdate" ||
+                e.data.event === "time_update"
+            );
+            if (isTimeUpdate) {
+                const currentTime = e.data.currentTime || e.data.data?.currentTime || e.data.data?.time || 0;
+                const duration = e.data.duration || e.data.data?.duration || 0;
+                if (currentTime > 0 && duration > 0) {
+                    try {
+                        const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
+                        addToHistory({
+                            id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
+                            showId: finalId,
+                            type: type as any,
+                            title: details?.title || details?.name || animeData?.name || "Untitled",
+                            poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
+                            episodeId: String(selectedEpisode),
+                            episodeNumber: selectedEpisode,
+                            currentTime: Math.floor(currentTime),
+                            duration: Math.floor(duration),
+                            season: selectedSeason,
+                        } as any);
+                    } catch (err) {
+                        console.warn("Failed to save progress update:", err);
+                    }
+                }
             }
         };
         window.addEventListener("message", handleMessage);
@@ -926,7 +970,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden shadow-2xl shadow-blue-500/10 touch-pan-y"
+                            className="relative w-full aspect-video bg-[#12131A] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/5 shadow-[#FF9D00]/5 touch-pan-y"
                             style={{ touchAction: 'pan-y !important' }}
                         >
                             {/* Loading skeleton */}
@@ -1029,7 +1073,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                         cx="48"
                                                         cy="48"
                                                         r="40"
-                                                        stroke="#f97316"
+                                                        stroke="#FF9D00"
                                                         strokeWidth="8"
                                                         fill="none"
                                                         strokeDasharray="251.2"
@@ -1158,7 +1202,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </button>
                             {showServers && (
                                 <div className="absolute top-full left-0 mt-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg overflow-hidden shadow-2xl z-30 min-w-[160px]">
-                                    {type === "anime" ? [...SERVERS, ...ANIME_SERVERS].map((server) => (
+                                    {type === "anime" ? [...serversList, ...ANIME_SERVERS].map((server) => (
                                         <button
                                             key={server.id}
                                             onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
@@ -1177,7 +1221,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{server.badge}</span>
                                             )}
                                         </button>
-                                    )) : SERVERS.map((server) => (
+                                    )) : serversList.map((server) => (
                                         <button
                                             key={server.id}
                                             onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
@@ -1502,8 +1546,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 }}
                                                 className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
                                                     selectedEpisode === ep.episode_number
-                                                        ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_12px_rgba(249,115,22,0.2)]'
-                                                        : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-blue-500/40'
+                                                        ? 'border-[#FF9D00] bg-[#FF9D00]/10 shadow-[0_0_12px_rgba(255,157,0,0.15)]'
+                                                        : 'border-[var(--border-color)] bg-[#12131A] hover:border-[#FF9D00]/30'
                                                 }`}
                                             >
                                                 {/* Thumbnail */}
@@ -1528,7 +1572,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 {/* Info */}
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-sm font-semibold line-clamp-1 ${
-                                                        selectedEpisode === ep.episode_number ? 'text-blue-400' : 'text-[var(--text-main)]'
+                                                        selectedEpisode === ep.episode_number ? 'text-[#FF9D00]' : 'text-white'
                                                     }`}>
                                                         E{ep.episode_number}. {ep.name}
                                                     </p>
@@ -1730,7 +1774,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                 {/* Right Column: Episode List (TV Shows Only) */}
                 {type === "tv" && details.seasons && details.seasons.length > 0 && (
-                    <div className="hidden xl:block w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:overflow-y-auto pr-2 custom-scrollbar bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
+                    <div className="hidden xl:block w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex xl:flex-col xl:overflow-hidden pr-2 bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -1771,7 +1815,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-2 max-h-[50vh] xl:max-h-[calc(100vh-240px)] overflow-y-auto pr-1 scrollbar-thin">
+                            <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                                 {episodes.map((ep) => (
                                     <button
                                         key={ep.id}
@@ -1781,8 +1825,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         }}
                                         className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${
                                             selectedEpisode === ep.episode_number
-                                                ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_12px_rgba(168,85,247,0.2)]'
-                                                : 'border-[var(--border-color)] bg-[var(--bg-main)] hover:border-orange-500/40'
+                                                ? 'border-[#FF9D00] bg-[#FF9D00]/10 shadow-[0_0_12px_rgba(255,157,0,0.15)]'
+                                                : 'border-[var(--border-color)] bg-[#08080B] hover:border-[#FF9D00]/30'
                                         }`}
                                     >
                                         {/* Compact Image */}
@@ -1807,7 +1851,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         {/* Detail */}
                                         <div className="flex-1 min-w-0">
                                             <p className={`text-xs font-bold line-clamp-1 ${
-                                                selectedEpisode === ep.episode_number ? 'text-orange-400' : 'text-white'
+                                                selectedEpisode === ep.episode_number ? 'text-[#FF9D00]' : 'text-white'
                                             }`}>
                                                 E{ep.episode_number}. {ep.name}
                                             </p>

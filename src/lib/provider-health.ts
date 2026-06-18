@@ -1,4 +1,4 @@
-import { ProviderName } from './providers/types';
+import type { ProviderName } from './providers/types';
 
 interface HealthStats {
     success: number;
