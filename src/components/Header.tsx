@@ -127,7 +127,7 @@ export default function Header() {
   useEffect(() => {
     setShowSuggestions(false);
     setShowFilters(false);
-  }, [pathname]);
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

@@ -948,25 +948,23 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-orange-900/10 rounded-full blur-[24px] mix-blend-screen opacity-20"></div>
             </div>
 
-            {/* Navbar with Safe Area Support */}
-            <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
-                <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                    <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            {/* Top Navigation Bar — Netflix-style compact fixed header */}
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                 </Link>
-                <div className="flex flex-col items-center text-center max-w-[60%] px-4">
-                    <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                <div className="flex-1 min-w-0">
+                    <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
                         {show.name || "Anime Stream"}
                     </h1>
-                    <div className="flex items-center gap-2 text-xs md:text-sm text-[var(--text-muted)] mt-1 font-medium tracking-wide uppercase">
-                        <span className="text-orange-400 font-bold">EP {currentEp}</span>
-                        <span className="w-1 h-1 bg-[var(--text-muted)]/30 rounded-full"></span>
-                        <span>{mode}</span>
-                    </div>
+                    <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
+                        Episode {currentEp} · {mode}
+                    </p>
                 </div>
-            </nav>
+            </div>
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className="flex-1 w-full mx-auto pt-[90px] md:pt-[110px] lg:pt-[140px] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
+            <div className="flex-1 w-full mx-auto pt-[60px] md:pt-[64px] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
                 <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                     {/* Player Column */}

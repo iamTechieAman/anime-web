@@ -193,6 +193,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [serversList, setServersList] = useState<any[]>(SERVERS);
+    const currentMediaTypeServers = typeof type === "string"
+        ? serversList.filter(s => !s.type || s.type === type)
+        : serversList;
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
@@ -510,7 +513,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 // Keep original order from SERVERS array (do not re-sort; priority is defined in SERVERS const)
                 setServersList([...baseServers]);
                 if (isFirstLoadRef.current) {
-                    setActiveServer(baseServers[0]);
+                    const filtered = baseServers.filter((s: any) => !s.type || s.type === type);
+                    setActiveServer(filtered[0] || baseServers[0]);
                     isFirstLoadRef.current = false;
                 }
             } catch (e) {
@@ -530,6 +534,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
     }, [type]);
 
+    // Switch active server if media type changes (e.g., UCR resolves movie -> tv)
+    useEffect(() => {
+        if (!activeServer || !activeServer.type) return;
+        if (activeServer.type !== type) {
+            // Find a server of the new type with the same name or similar serverId prefix
+            const matchingServer = serversList.find(s => 
+                s.type === type && 
+                (s.name === activeServer.name || s.id.replace(/_movie|_tv|_anime/, '') === activeServer.id.replace(/_movie|_tv|_anime/, ''))
+            );
+            if (matchingServer) {
+                console.log(`[ToonPlayer] Switching active server from ${activeServer.id} to ${matchingServer.id} due to media type resolution to ${type}`);
+                setActiveServer(matchingServer);
+            } else {
+                // Fallback to first server of the new type
+                const firstOfNewType = serversList.find(s => s.type === type);
+                if (firstOfNewType) {
+                    setActiveServer(firstOfNewType);
+                }
+            }
+        }
+    }, [type, serversList]);
+
     // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
     const handleAutoFallback = useCallback(() => {
         if (!activeServer) return;
@@ -541,7 +567,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             next.add(activeServer.id);
             
             // Find next server in the list that hasn't failed yet
-            const listToUse = isAnimeServer ? ANIME_SERVERS : serversList;
+            const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
             const nextServer = listToUse.find(s => !next.has(s.id) && s.id !== activeServer.id);
 
             if (nextServer) {
@@ -582,7 +608,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
         const checkServersHealth = async () => {
             try {
-                const listToUse = isAnimeServer ? ANIME_SERVERS : serversList;
+                const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
                 const topServers = listToUse.slice(0, 3);
                 
                 const urlsToCheck = topServers.map(server => {
@@ -1200,7 +1226,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                         {/* Server Buttons — wrapped rows on desktop/tablet (no horizontal scroll) */}
                         <div className="hidden md:flex flex-wrap items-center gap-2 max-h-[84px] md:overflow-hidden lg:max-h-none pr-4">
-                            {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
+                            {(type === "anime" ? [...currentMediaTypeServers, ...ANIME_SERVERS] : currentMediaTypeServers).map((server) => (
                                 <button
                                     key={server.id}
                                     onClick={() => handleManualServerSelect(server)}
@@ -1254,7 +1280,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         exit={{ opacity: 0, y: 8 }}
                                         className="absolute left-0 right-0 mt-2 bg-[#12131A] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 max-h-[220px] overflow-y-auto divide-y divide-white/5"
                                     >
-                                        {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
+                                        {(type === "anime" ? [...currentMediaTypeServers, ...ANIME_SERVERS] : currentMediaTypeServers).map((server) => (
                                             <button
                                                 key={server.id}
                                                 onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
