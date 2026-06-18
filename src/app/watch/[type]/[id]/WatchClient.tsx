@@ -17,109 +17,39 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
-        id: 'toon4k',
-        name: 'Toon4K',
-        badge: 'Premium 4K',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&title=false`,
-    },
-    {
         id: 'toon_ultimate',
         name: 'Toon Player Ultimate',
-        badge: 'Best',
+        badge: 'Ultimate',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://111movies.net/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://111movies.net/movie/${id}?autoplay=1`,
+            type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
     },
     {
         id: 'vidfast',
         name: 'Toon Player Auto',
         badge: 'Fast',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&theme=3b82f6&nextButton=true&autoNext=true` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
+            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
     },
     {
         id: 'nortan',
-        name: 'ToonNortan',
+        name: 'Toon Player Classic',
         badge: 'Classic',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
-    },
-    {
-        id: 'autoembed_pro',
-        name: 'Toon Player Pro',
-        badge: 'CinEvo',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidstorm.ru/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidstorm.ru/embed/movie/${id}`,
-    },
-    {
-        id: 'vidbinge',
-        name: 'Toon Player Titan',
-        badge: '4K/HD',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidbinge.com/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidbinge.com/embed/movie/${id}`,
-    },
-    {
-        id: 'embedsu',
-        name: 'Toon Player Multi',
-        badge: 'Multi-Q',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}` : `https://embed.su/embed/movie/${id}`,
-    },
-    {
-        id: 'multiembed',
-        name: 'Toon Player Xtreme',
-        badge: 'Reliable',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     },
     {
         id: 'peachify',
         name: 'Toon Player VIP',
         badge: 'Multi-Audio',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://peachify.top/?type=movie&id=${id}`,
+            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
     },
     {
-        id: 'vidlink',
-        name: 'VidLink',
-        badge: 'Auto-Next',
+        id: 'multiembed',
+        name: 'Toon Player Backup',
+        badge: 'Backup',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
-    },
-    {
-        id: 'smashy',
-        name: 'SmashyStream',
-        badge: 'CinEvo',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://player.smashy.stream/tv/${id}?s=${s || 1}&e=${e || 1}` : `https://player.smashy.stream/movie/${id}`,
-    },
-    {
-        id: 'abyss',
-        name: 'ToonAbyss',
-        badge: 'AnimeSalt',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://abysscdn.com/?v=tv-${id}-${s || 1}-${e || 1}` : `https://abysscdn.com/?v=movie-${id}`,
-    },
-    {
-        id: 'cineby',
-        name: 'CineBy',
-        badge: 'Fast',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://www.cineby.gd/embed/movie?tmdb=${id}`,
-    },
-    {
-        id: 'rivestream',
-        name: 'RiveStream',
-        badge: 'HD',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://rivestream.org/embed?type=tv&id=${id}&s=${s || 1}&e=${e || 1}` : `https://rivestream.org/embed?type=movie&id=${id}`,
-    },
-    {
-        id: 'cinemaos',
-        name: 'CinemaOS',
-        badge: 'Vip',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `https://cinemaos.live/embed/${type}/${id}${type === 'tv' ? `/${s || 1}/${e || 1}` : ''}?autoplay=1`,
+            type === 'tv' ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
     }
 ];
 
@@ -246,6 +176,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState("Initializing Stream");
+    const [healthScores, setHealthScores] = useState<Record<string, number>>({});
     
     // Watchlist
     const inWatchlist = isInWatchlist(id);
@@ -607,6 +539,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             const nextServer = listToUse.find(s => !next.has(s.id) && s.id !== activeServer.id);
 
             if (nextServer) {
+                setLoadingStatus(`Switching to backup server: ${nextServer.name}...`);
                 toast.error(`Server ${activeServer.name} is unresponsive. Rotating to ${nextServer.name}...`, {
                     icon: "🔄",
                     style: {
@@ -684,11 +617,58 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         return () => clearTimeout(timer);
     }, [activeServer, playerLoaded, sourceError, handleAutoFallback, smartSwitchEnabled]);
 
+    // Helper to match server names to live API health scores
+    const getHealthScoreForServer = (serverName: string, scoresMap: Record<string, number>): number => {
+        const name = serverName.toLowerCase();
+        if (name.includes("ultimate")) return scoresMap["vidsrc to"] ?? scoresMap["vidsrc.to"] ?? 100;
+        if (name.includes("auto")) return scoresMap["vidsrc me"] ?? scoresMap["vidsrc.me"] ?? 100;
+        if (name.includes("classic")) return 85; 
+        if (name.includes("vip")) return 95; 
+        if (name.includes("backup")) return scoresMap["superembed"] ?? 100;
+        return 100;
+    };
+
+    // Live Sync with server health engine
+    useEffect(() => {
+        const fetchHealthStats = async () => {
+            try {
+                const res = await fetch('/api/provider/health');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.providers) {
+                    const scoresMap: Record<string, number> = {};
+                    data.providers.forEach((p: any) => {
+                        scoresMap[p.name.toLowerCase()] = p.score;
+                    });
+                    setHealthScores(scoresMap);
+
+                    // Filter out servers with score < 70%
+                    const filtered = SERVERS.filter(server => {
+                        const score = getHealthScoreForServer(server.name, scoresMap);
+                        return score >= 70;
+                    });
+
+                    if (filtered.length > 0) {
+                        setServersList(filtered);
+                        const activeStillExists = filtered.some(s => s.id === activeServer?.id);
+                        if (!activeStillExists && !manualServerRef.current) {
+                            setActiveServer(filtered[0]);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("[Health Sync] Failed to load provider health stats:", err);
+            }
+        };
+        fetchHealthStats();
+    }, [activeServer]);
+
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
         setFailedServers(new Set());
         setSourceError(false);
         setPlayerLoaded(false);
+        setLoadingStatus(`Connecting to ${server.name}...`);
         manualServerRef.current = server.id;
         setActiveServer(server);
     }, []);
@@ -1031,7 +1011,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         <div className="w-16 h-16 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
                                         <Play className="absolute inset-0 m-auto w-6 h-6 text-blue-400" />
                                     </div>
-                                    <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">Initializing Stream</p>
+                                    <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">{loadingStatus}</p>
                                     <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
                                     {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
                                 </div>
@@ -1206,10 +1186,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <Server className="w-3.5 h-3.5" /> Server:
                         </span>
 
-
-
-                        {/* Server Buttons — scrollable row on desktop */}
-                        <div className="hidden md:flex items-center gap-2 overflow-x-auto max-w-[calc(100vw-280px)] pb-2 pr-4 custom-scrollbar">
+                        {/* Server Buttons — wrapped rows on desktop/tablet (no horizontal scroll) */}
+                        <div className="hidden md:flex flex-wrap items-center gap-2 max-h-[84px] md:overflow-hidden lg:max-h-none pr-4">
                             {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
                                 <button
                                     key={server.id}
@@ -1243,57 +1221,49 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         </div>
 
                         {/* Mobile dropdown */}
-                        <div className="relative md:hidden">
+                        <div className="relative md:hidden w-full max-w-[280px] z-50">
                             <button
                                 onClick={() => setShowServers(!showServers)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-sm font-medium hover:border-blue-500/50 transition-colors"
+                                className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-[#12131A]/95 backdrop-blur-md border border-white/10 rounded-xl text-xs font-black text-white hover:border-[#FF9D00]/50 transition-all shadow-lg"
+                                aria-label="Select streaming server"
                             >
-                                {activeServer.name}
-                                <ChevronDown className={`w-4 h-4 transition-transform ${showServers ? "rotate-180" : ""}`} />
-                            </button>
-                            {showServers && (
-                                <div className="absolute top-full left-0 mt-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg overflow-hidden shadow-2xl z-30 min-w-[160px]">
-                                    {type === "anime" ? [...serversList, ...ANIME_SERVERS].map((server) => (
-                                        <button
-                                            key={server.id}
-                                            onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
-                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-orange-400 bg-orange-500/10" : "text-[var(--text-main)]"
-                                                }`}
-                                        >
-                                            <div className="flex items-center">
-                                                {activeServer.id === server.id ? (
-                                                    <Play className="w-4 h-4 mr-2 fill-current" />
-                                                ) : (
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mx-1.5 mr-2.5" />
-                                                )}
-                                                {server.name}
-                                            </div>
-                                            {server.badge && (
-                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{server.badge}</span>
-                                            )}
-                                        </button>
-                                    )) : serversList.map((server) => (
-                                        <button
-                                            key={server.id}
-                                            onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
-                                            className={`w-full px-4 py-3 text-sm text-left hover:bg-white/5 transition-colors flex items-center justify-between ${activeServer.id === server.id ? "text-orange-400 bg-orange-500/10" : "text-[var(--text-main)]"
-                                                }`}
-                                        >
-                                            <div className="flex items-center">
-                                                {activeServer.id === server.id ? (
-                                                    <Play className="w-4 h-4 mr-2 fill-current" />
-                                                ) : (
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mx-1.5 mr-2.5" />
-                                                )}
-                                                {server.name}
-                                            </div>
-                                            {server.badge && (
-                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{server.badge}</span>
-                                            )}
-                                        </button>
-                                    ))}
+                                <div className="flex items-center gap-2">
+                                    <Server className="w-3.5 h-3.5 text-[#FF9D00]" />
+                                    <span className="truncate">{activeServer.name}</span>
                                 </div>
-                            )}
+                                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-300 ${showServers ? "rotate-180 text-white" : ""}`} />
+                            </button>
+                            
+                            <AnimatePresence>
+                                {showServers && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 8 }}
+                                        className="absolute left-0 right-0 mt-2 bg-[#12131A] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 max-h-[220px] overflow-y-auto divide-y divide-white/5"
+                                    >
+                                        {(type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList).map((server) => (
+                                            <button
+                                                key={server.id}
+                                                onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
+                                                className={`w-full px-4 py-3 text-xs text-left hover:bg-white/5 transition-colors flex items-center justify-between ${
+                                                    activeServer.id === server.id ? "text-[#FF9D00] bg-orange-500/5 font-black" : "text-zinc-300 font-medium"
+                                                }`}
+                                            >
+                                                <span className="truncate flex items-center gap-2">
+                                                    {activeServer.id === server.id && <Play className="w-3 h-3 fill-current text-[#FF9D00]" />}
+                                                    {server.name}
+                                                </span>
+                                                {server.badge && (
+                                                    <span className="text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 uppercase">
+                                                        {server.badge}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         <div className="flex items-center gap-2 ml-auto">

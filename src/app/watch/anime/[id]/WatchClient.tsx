@@ -54,77 +54,45 @@ const EpisodeButton = React.memo(function EpisodeButton({
 
 const MOVIE_SERVERS = [
     {
-        id: "peachify",
-        name: "ToonPlayer VIP",
-        badge: "Multi-Audio",
+        id: 'toon_ultimate',
+        name: 'Toon Player Ultimate',
+        badge: 'Ultimate',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=true` : `https://peachify.top/?type=movie&id=${id}&autoplay=true`,
+            type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
     },
     {
-        id: "vidbinge",
-        name: "VidBinge",
-        badge: "4K/HD",
+        id: 'vidfast',
+        name: 'Toon Player Auto',
+        badge: 'Fast',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidbinge.to/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidbinge.to/embed/movie/${id}?autoplay=true`,
+            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
     },
     {
-        id: "vidsrc_pro",
-        name: "VidSrc Pro",
-        badge: "VIP",
+        id: 'nortan',
+        name: 'Toon Player Classic',
+        badge: 'Classic',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.pro/embed/movie/${id}?autoplay=true`,
+            type === 'tv' ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
     },
     {
-        id: "vidlink",
-        name: "VidLink",
-        badge: "Recommended",
+        id: 'peachify',
+        name: 'Toon Player VIP',
+        badge: 'Multi-Audio',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
+            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
     },
     {
-        id: "vidsrc_net",
-        name: "VidSrc",
-        badge: "Stable",
+        id: 'multiembed',
+        name: 'Toon Player Backup',
+        badge: 'Backup',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.net/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.net/embed/movie/${id}?autoplay=true`,
-    },
-    {
-        id: "vidsrc_me",
-        name: "VidSrc US",
-        badge: "Fast",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=true` : `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=true`,
-    },
-    {
-        id: "superembed",
-        name: "SuperEmbed",
-        badge: "Reliable",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}&autoplay=true` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&autoplay=true`,
-    },
-    {
-        id: "autoembed",
-        name: "AutoEmbed",
-        badge: null,
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://player.autoembed.cc/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://player.autoembed.cc/embed/movie/${id}?autoplay=true`,
-    },
-    {
-        id: "vidsrc_in",
-        name: "VidSrc IN",
-        badge: "Backup",
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === "tv" ? `https://vidsrc.in/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://vidsrc.in/embed/movie/${id}?autoplay=true`,
-    },
+            type === 'tv' ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
+    }
 ];
 
 interface ShowData {
@@ -205,6 +173,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [loadingShow, setLoadingShow] = useState(true);
     const [showServerDropdown, setShowServerDropdown] = useState(false);
     const serverRef = useRef<HTMLDivElement>(null);
+    const [loadingStatus, setLoadingStatus] = useState("Connecting to server...");
+    const [healthScores, setHealthScores] = useState<Record<string, number>>({});
 
     const processingRef = useRef<string | null>(null);
 
@@ -229,6 +199,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             const nextServer = servers.find(s => !next.has(s.serverId) && s.serverId !== selectedServer);
 
             if (nextServer) {
+                setLoadingStatus(`Switching to backup server: ${nextServer.serverName}...`);
                 toast.error(`Server failed. Auto-switching to ${nextServer.serverName}...`, {
                     icon: "🔄",
                     style: {
@@ -246,6 +217,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             return next;
         });
     }, [selectedServer, servers]);
+
+    // Helper to match server names to live API health scores
+    const getHealthScoreForServer = (serverName: string, scoresMap: Record<string, number>): number => {
+        const name = serverName.toLowerCase();
+        if (name.includes("ultimate")) return scoresMap["vidsrc to"] ?? scoresMap["vidsrc.to"] ?? 100;
+        if (name.includes("auto")) return scoresMap["vidsrc me"] ?? scoresMap["vidsrc.me"] ?? 100;
+        if (name.includes("classic")) return 85; 
+        if (name.includes("vip")) return 95; 
+        if (name.includes("backup")) return scoresMap["superembed"] ?? 100;
+        return 100;
+    };
 
     // Reset failed servers when episode or mode changes
     useEffect(() => {
@@ -265,6 +247,27 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }, [loadingSource, error, selectedServer, handleAutoFallback]);
 
     // Load Settings & Bookmark
+    // Load live health stats on mount
+    useEffect(() => {
+        const fetchHealthStats = async () => {
+            try {
+                const res = await fetch('/api/provider/health');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.providers) {
+                    const scoresMap: Record<string, number> = {};
+                    data.providers.forEach((p: any) => {
+                        scoresMap[p.name.toLowerCase()] = p.score;
+                    });
+                    setHealthScores(scoresMap);
+                }
+            } catch (err) {
+                console.warn("[Health Sync] Failed to load provider health stats:", err);
+            }
+        };
+        fetchHealthStats();
+    }, []);
+
     useEffect(() => {
         // null means first visit → default to true. Only disable if explicitly set to 'false'.
         const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') !== 'false';
@@ -585,13 +588,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 // ALWAYS include movie servers — they are the guaranteed fallback
                 const allServers = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
 
-                setServers(allServers);
+                // Filter out servers with score < 70%
+                const filteredServers = allServers.filter((server: any) => {
+                    const score = getHealthScoreForServer(server.serverName || server.name || '', healthScores);
+                    return score >= 70;
+                });
+                const finalServersList = filteredServers.length > 0 ? filteredServers : allServers;
+                setServers(finalServersList);
 
                 // Auto-selection logic: Pick first available healthy server
-                if (allServers.length > 0) {
-                    const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
+                if (finalServersList.length > 0) {
+                    const currentExists = finalServersList.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists && manualServerRef.current !== selectedServer) {
-                        const topServers = allServers.slice(0, 3);
+                        const topServers = finalServersList.slice(0, 3);
                         try {
                             const urlsToCheck = topServers.map(s => typeof s.getUrl === 'function' ? s.getUrl() : s.url);
                             const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
@@ -601,11 +610,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             if (firstAliveIndex !== -1) {
                                 setSelectedServer(topServers[firstAliveIndex].serverId);
                             } else {
-                                setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
+                                setSelectedServer(nativeServers[0]?.serverId || finalServersList[0].serverId);
                             }
                         } catch (checkErr) {
                             console.error("[ToonPlayer Anime Health] Failed to pre-check health:", checkErr);
-                            setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
+                            setSelectedServer(nativeServers[0]?.serverId || finalServersList[0].serverId);
                         }
                     }
                 } else {
@@ -615,7 +624,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
                 // Always show movie servers + emergency embeds even if native API completely fails
                 const fallbackList = [...movieServersList, ...emergencyEmbeds];
-                setServers(fallbackList);
+                
+                // Filter out servers with score < 70%
+                const filteredFallbacks = fallbackList.filter((server: any) => {
+                    const score = getHealthScoreForServer(server.serverName || server.name || '', healthScores);
+                    return score >= 70;
+                });
+                const finalFallbackList = filteredFallbacks.length > 0 ? filteredFallbacks : fallbackList;
+                setServers(finalFallbackList);
                 
                 // Precheck fallbackList
                 const topFallbacks = fallbackList.slice(0, 3);
@@ -942,7 +958,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             Initializing Stream
                                         </h3>
                                         <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
-                                            Bypassing protections...
+                                            {loadingStatus}
                                         </p>
                                     </div>
                                 </div>
