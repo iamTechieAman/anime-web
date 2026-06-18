@@ -241,7 +241,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const timer = setTimeout(() => {
             console.warn(`[ToonPlayer Anime] Provider timed out while loading source. Triggering fallback.`);
             handleAutoFallback();
-        }, 5000);
+        }, 8000);
 
         return () => clearTimeout(timer);
     }, [loadingSource, error, selectedServer, handleAutoFallback]);

@@ -164,7 +164,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[70vh] min-h-[550px] max-h-[850px] overflow-hidden group bg-[#050505]"
+            className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[850px] overflow-hidden group bg-[#050505]"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}

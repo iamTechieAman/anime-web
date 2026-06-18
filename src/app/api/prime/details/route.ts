@@ -2,6 +2,83 @@ import { NextResponse } from "next/server";
 
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
+const TVMAZE_BASE = "https://api.tvmaze.com";
+
+/**
+ * Universal Content Resolver (UCR)
+ * Priority: TMDB (primary) → TVMaze (cross-validation)
+ * Rules:
+ *   - If TMDB returns seasons > 0 or number_of_episodes > 1 → type=tv
+ *   - If only runtime is available → type=movie
+ *   - Query TV and Movie in parallel when type is ambiguous
+ *   - Cross-validate with TVMaze for episodic content detection
+ *   - Never trust the raw `type` param blindly
+ */
+async function resolveContentType(
+    id: string,
+    hintType: string
+): Promise<{ type: string; detailsData: any }> {
+    // Step 1: Fetch both TV and Movie TMDB details in parallel
+    const [tvRes, movieRes] = await Promise.all([
+        fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+        fetch(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+    ]);
+
+    const tvData = tvRes.ok ? await tvRes.json() : null;
+    const movieData = movieRes.ok ? await movieRes.json() : null;
+
+    // Step 2: Apply episodic validation rules
+    if (tvData && !tvData.status_message) {
+        // TMDB TV data exists
+        const hasSeasons = (tvData.number_of_seasons || 0) > 0;
+        const hasEpisodes = (tvData.number_of_episodes || 0) > 1;
+        const hasEpisodeRuntime = Array.isArray(tvData.episode_run_time) && tvData.episode_run_time.length > 0;
+
+        if (hasSeasons || hasEpisodes || hasEpisodeRuntime) {
+            return { type: "tv", detailsData: tvData };
+        }
+    }
+
+    // Step 3: Movie fallback
+    if (movieData && !movieData.status_message) {
+        // Verify it's truly a movie (has runtime but no seasons)
+        if (movieData.runtime && !movieData.number_of_seasons) {
+            return { type: "movie", detailsData: movieData };
+        }
+    }
+
+    // Step 4: Honor the hint if both endpoints returned valid data
+    if (hintType === "tv" && tvData && !tvData.status_message) {
+        return { type: "tv", detailsData: tvData };
+    }
+    if (movieData && !movieData.status_message) {
+        return { type: "movie", detailsData: movieData };
+    }
+    if (tvData && !tvData.status_message) {
+        return { type: "tv", detailsData: tvData };
+    }
+
+    throw new Error("Content not found on TMDB for either tv or movie type.");
+}
+
+/**
+ * TVMaze cross-validation: confirms if content is episodic via title search.
+ * Returns true if TVMaze finds a series match, false otherwise.
+ */
+async function tvmazeCrossValidate(title: string): Promise<boolean> {
+    try {
+        const encoded = encodeURIComponent(title);
+        const res = await fetch(`${TVMAZE_BASE}/singlesearch/shows?q=${encoded}`, {
+            next: { revalidate: 7200 },
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        // If TVMaze found a show, it's episodic TV
+        return !!(data && data.id);
+    } catch {
+        return false;
+    }
+}
 
 export async function GET(request: Request) {
     try {
@@ -13,33 +90,28 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Missing or invalid id parameter" }, { status: 400 });
         }
 
-        // Strict validation — only TMDB-valid types allowed
-        let type = rawType === "tv" ? "tv" : "movie";
+        const hintType = rawType === "tv" ? "tv" : "movie";
 
-        // Attempt primary fetch
-        let detailsRes = await fetch(`${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } });
+        // Resolve content type using Universal Content Resolver
+        let { type, detailsData: details } = await resolveContentType(id, hintType);
 
-        // Auto fallback retry with the other type if 404 is encountered
-        if (!detailsRes.ok && detailsRes.status === 404) {
-            const otherType = type === "tv" ? "movie" : "tv";
-            const retryRes = await fetch(`${TMDB_BASE}/${otherType}/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } });
-            if (retryRes.ok) {
-                type = otherType;
-                detailsRes = retryRes;
+        // TVMaze cross-validation for movies that might actually be series
+        if (type === "movie" && details?.title) {
+            const isEpisodic = await tvmazeCrossValidate(details.title);
+            if (isEpisodic) {
+                // Re-fetch as TV if TVMaze confirms it's a series
+                const tvRes = await fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } });
+                if (tvRes.ok) {
+                    const tvData = await tvRes.json();
+                    if (!tvData.status_message) {
+                        type = "tv";
+                        details = tvData;
+                    }
+                }
             }
         }
 
-        if (!detailsRes.ok) {
-            const status = detailsRes.status;
-            // If TMDB says 404, it's a bad id/type combo — return 404, not 500
-            if (status === 404) {
-                return NextResponse.json({ error: "Content not found on TMDB" }, { status: 404 });
-            }
-            // Rate limit or upstream error
-            throw new Error(`TMDB details error: ${status}`);
-        }
-
-        // Fetch other metadata in parallel for the resolved type
+        // Fetch supplementary metadata in parallel for the resolved type
         const [creditsRes, videosRes, similarRes, recommendationsRes] = await Promise.all([
             fetch(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
             fetch(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
@@ -47,8 +119,7 @@ export async function GET(request: Request) {
             fetch(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
         ]);
 
-        const [details, credits, videos, similar, recommendations] = await Promise.all([
-            detailsRes.json(),
+        const [credits, videos, similar, recommendations] = await Promise.all([
             creditsRes.ok ? creditsRes.json() : { cast: [], crew: [] },
             videosRes.ok ? videosRes.json() : { results: [] },
             similarRes.ok ? similarRes.json() : { results: [] },

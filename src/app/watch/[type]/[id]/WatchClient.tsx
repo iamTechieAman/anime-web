@@ -612,7 +612,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
         const timer = setTimeout(() => {
             handleAutoFallback();
-        }, 5000);
+        }, 8000);
 
         return () => clearTimeout(timer);
     }, [activeServer, playerLoaded, sourceError, handleAutoFallback, smartSwitchEnabled]);

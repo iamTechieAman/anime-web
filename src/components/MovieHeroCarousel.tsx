@@ -38,7 +38,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
 
     if (!heroItems.length) {
         return (
-            <div className="relative w-full h-[60vh] md:h-[68vh] max-h-[720px] pb-12 md:pb-16 bg-[var(--bg-main)]">
+            <div className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[850px] pb-12 md:pb-16 bg-[var(--bg-main)]">
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
                 <div className="absolute bottom-10 md:bottom-16 left-0 right-0 max-w-[1800px] mx-auto px-4 md:px-6 w-full space-y-4">
                     <div className="h-10 md:h-14 w-[60%] bg-[var(--bg-card)] rounded-xl animate-pulse" />
@@ -64,7 +64,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
     const type = item.media_type || "movie";
 
     return (
-        <div className="relative w-full h-[60vh] md:h-[68vh] max-h-[720px] pb-12 md:pb-16 overflow-hidden bg-[var(--bg-main)]">
+        <div className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[850px] pb-12 md:pb-16 overflow-hidden bg-[var(--bg-main)]">
             {/* Background images with crossfade */}
             <AnimatePresence mode="wait">
                 <motion.div
