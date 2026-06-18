@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Play, Star, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 export interface Show {
     _id?: string;
@@ -84,14 +85,19 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
                     {(imageSrc && !imgError) ? (
-                        <img
-                            src={imageSrc}
-                            alt={title}
-                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                            loading="lazy"
-                            decoding="async"
-                            onError={() => setImgError(true)}
-                        />
+                        <div className="relative w-full h-full overflow-hidden">
+                            <Image
+                                src={imageSrc}
+                                alt={title}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                placeholder="blur"
+                                blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
+                                loading="lazy"
+                                onError={() => setImgError(true)}
+                            />
+                        </div>
                     ) : (
                         <ImagePlaceholder title={title} />
                     )}

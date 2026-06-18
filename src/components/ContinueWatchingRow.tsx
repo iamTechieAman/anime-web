@@ -59,7 +59,7 @@ export default function ContinueWatchingRow() {
         }, [current, total]);
 
         return (
-            <div className="h-[4px] bg-white/10 rounded-full overflow-hidden w-full relative">
+            <div className="h-[3px] bg-white/10 rounded-full overflow-hidden w-full relative">
                 <div 
                     className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-out rounded-full" 
                     style={{ width }}
@@ -87,10 +87,10 @@ export default function ContinueWatchingRow() {
                                 key={entry.id}
                                 className={`snap-start shrink-0 flex items-stretch rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-350 hover:border-[var(--accent)]/30 hover:shadow-2xl hover:scale-[1.02] relative ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-                                } h-[120px] md:h-[150px] lg:h-[180px] w-[220px] md:w-[270px] lg:w-[310px]`}
+                                } h-[120px] md:h-[140px] lg:h-[160px] w-[220px] md:w-[250px] lg:w-[280px]`}
                             >
                                 {/* Left Poster */}
-                                <div className="w-[80px] md:w-[95px] lg:w-[110px] shrink-0 relative overflow-hidden bg-black/40 select-none">
+                                <div className="w-[80px] md:w-[90px] lg:w-[100px] shrink-0 relative overflow-hidden bg-black/40 select-none">
                                     <img 
                                         src={entry.poster || "https://api.dicebear.com/9.x/shapes/svg?seed=fallback"} 
                                         alt={entry.title} 

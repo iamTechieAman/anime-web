@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { Play, Star, Flame } from "lucide-react";
 import React from "react";
+import Image from "next/image";
 
 // Shared movie item type
 export interface MovieItem {
@@ -99,16 +100,19 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             <div className="premium-card-container">
                 {/* Poster Image */}
                 {((item.poster_path || item.image) && !imgError) ? (
-                    <img
-                        src={item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image}
-                        srcSet={item.poster_path ? `${IMG_BASE}/w185${item.poster_path} 185w, ${IMG_BASE}/w342${item.poster_path} 342w` : undefined}
-                        sizes="(max-width: 640px) 50vw, 20vw"
-                        alt={`${title} (${year}) - Stream HD on ToonPlayer`}
-                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                        onError={() => setImgError(true)}
-                        loading="lazy"
-                        decoding="async"
-                    />
+                    <div className="relative w-full h-full overflow-hidden">
+                        <Image
+                            src={item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image!}
+                            alt={`${title} (${year}) - Stream HD on ToonPlayer`}
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            placeholder="blur"
+                            blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
+                            onError={() => setImgError(true)}
+                            loading="lazy"
+                        />
+                    </div>
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
                         <span className="text-zinc-600 text-3xl font-bold">{title.charAt(0)}</span>
