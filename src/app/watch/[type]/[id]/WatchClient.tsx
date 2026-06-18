@@ -978,21 +978,27 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     return (
         <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
-            {/* Top Navigation Bar */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
-                <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                    <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            {/* Top Navigation Bar — Netflix-style compact fixed header */}
+            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                 </Link>
-                <div className="flex flex-col items-center text-center max-w-[60%] px-4">
-                    <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
+                <div className="flex-1 min-w-0">
+                    <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
                         {type === 'cartoon' ? `Cartoon: ${title}` : title}
                     </h1>
                     {(type === 'tv' || type === 'anime' || type === 'cartoon') && (
-                        <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1 font-medium tracking-wide uppercase">
-                            Season {selectedSeason} • Episode {selectedEpisode}
+                        <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
+                            Season {selectedSeason} · Episode {selectedEpisode}
                         </p>
                     )}
                 </div>
+                {details?.vote_average > 0 && (
+                    <div className="shrink-0 hidden sm:flex items-center gap-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-md">
+                        <span className="text-yellow-400 text-[11px]">★</span>
+                        <span className="text-[11px] font-bold text-zinc-300">{details.vote_average.toFixed(1)}</span>
+                    </div>
+                )}
             </div>
 
             <div className="pt-[60px] md:pt-[64px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4">
