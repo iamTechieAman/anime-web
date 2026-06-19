@@ -37,7 +37,7 @@ export default function Header() {
         const isTVUA = /SmartTV|GoogleTV|AppleTV|Roku|CastTV|Tizen|Web0S|NetCast|Opera TV|Viera|Bravia|PlayStation|Xbox/i.test(ua);
         if (isTVUA || width >= 2500) {
           setDeviceMode("tv");
-        } else if (width < 1024) { // Mobile and tablet top nav starts < 1024px
+        } else if (width < 768) { // Align with standard md breakpoint
           setDeviceMode("mobile");
         } else {
           setDeviceMode("pc");
@@ -342,7 +342,7 @@ export default function Header() {
         >
           <Logo />
           <span className="text-sm font-black tracking-tight text-white uppercase whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-            Toon<span className="text-[#FF9D00]">Player</span>
+            Toon<span className="text-[var(--accent)]">Player</span>
           </span>
         </Link>
 
@@ -370,14 +370,14 @@ export default function Header() {
 
         {/* ── SEARCH BAR (PC only) ── */}
         {deviceMode === "pc" && (
-          <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[460px] hidden md:flex items-center gap-1 relative p-[2px] bg-white/[0.03] border border-white/5 rounded-xl focus-within:bg-[#12131A] focus-within:border-[#FF9D00]/50 focus-within:shadow-[0_0_20px_rgba(255,157,0,0.15)] transition-all duration-300">
+          <div className="flex-1 justify-self-center w-full max-w-[340px] lg:max-w-[460px] hidden md:flex items-center gap-1 relative p-[2px] bg-white/[0.03] border border-white/5 rounded-xl focus-within:bg-[#12131A] focus-within:border-[var(--accent)]/50 focus-within:shadow-[0_0_20px_var(--accent-glow)] transition-all duration-300">
             <div className="flex-1 relative">
               <form 
                 onSubmit={(e) => handleSearch(e)} 
-                className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-[#FF9D00]/10' : 'bg-transparent'}`}
+                className={`relative flex items-center px-2.5 py-1.5 group transition-all duration-300 rounded-xl ${isDiscoverMode ? 'bg-[var(--accent)]/10' : 'bg-transparent'}`}
               >
                 <button type="submit" aria-label="Search" className="shrink-0 p-1 -ml-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer z-10">
-                  <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[#FF9D00] animate-pulse' : 'text-zinc-400 group-focus-within:text-[#FF9D00]'}`} />
+                  <Search className={`w-[18px] h-[18px] transition-colors ${isDiscoverMode ? 'text-[var(--accent)] animate-pulse' : 'text-zinc-400 group-focus-within:text-[var(--accent)]'}`} />
                 </button>
                 <input
                   type="text"
@@ -404,10 +404,10 @@ export default function Header() {
                 <button 
                   type="button"
                   onClick={() => setIsDiscoverMode(!isDiscoverMode)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all relative overflow-hidden shrink-0 ${isDiscoverMode ? 'bg-gradient-to-r from-[#FF9D00] to-[#FFB333] text-black shadow-lg shadow-orange-500/25 font-extrabold' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all relative overflow-hidden shrink-0 ${isDiscoverMode ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg shadow-[var(--accent)]/25 font-extrabold' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/10'}`}
                   title="AI Discovery Search"
                 >
-                  <Sparkles className={`w-3.5 h-3.5 ${isDiscoverMode ? 'text-black animate-pulse' : 'text-[#FF9D00]'}`} />
+                  <Sparkles className={`w-3.5 h-3.5 ${isDiscoverMode ? 'text-white animate-pulse' : 'text-[var(--accent)]'}`} />
                   <span className="hidden lg:inline">AI Mode</span>
                 </button>
               </form>
@@ -445,7 +445,7 @@ export default function Header() {
                         
                         {/* Trending Section when empty */}
                         <div className="p-5">
-                          <p className="text-[10px] uppercase tracking-[0.2em] font-black text-orange-400 mb-4 flex items-center gap-2">
+                          <p className="text-[10px] uppercase tracking-[0.2em] font-black text-[var(--accent)] mb-4 flex items-center gap-2">
                             <TrendingUp className="w-3 h-3" /> Trending Hits
                           </p>
                           <div className="space-y-1">
@@ -456,12 +456,12 @@ export default function Header() {
                                 className="flex items-center gap-4 p-2.5 hover:bg-white/5 rounded-2xl transition-all group hover:pl-4"
                                 onClick={() => setShowSuggestions(false)}
                               >
-                                <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-orange-500 transition-colors">0{i + 1}</span>
+                                <span className="text-xs font-black text-white/20 w-4 italic group-hover:text-[var(--accent)] transition-colors">0{i + 1}</span>
                                 <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-zinc-900 border border-white/5">
                                   {item.image && <img src={item.image} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />}
                                 </div>
                                 <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors truncate">{item.title}</span>
-                                <Sparkles className="w-3.5 h-3.5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
+                                <Sparkles className="w-3.5 h-3.5 text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
                               </Link>
                             ))}
                           </div>
@@ -488,11 +488,11 @@ export default function Header() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <h4 className="text-sm font-black text-white truncate group-hover:text-orange-400 transition-colors">
+                                <h4 className="text-sm font-black text-white truncate group-hover:text-[var(--accent)] transition-colors">
                                   <HighlightText text={item.title} highlight={searchQuery} />
                                 </h4>
                                 <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
-                                  item.type === 'anime' ? 'bg-orange-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                  item.type === 'anime' ? 'bg-[var(--accent)] text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.3)]'
                                 }`}>
                                   {item.type}
                                 </span>
@@ -504,13 +504,13 @@ export default function Header() {
                               </div>
                             </div>
                             <div className="opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0 -translate-x-2">
-                              <ChevronDown className="w-5 h-5 text-orange-500 -rotate-90" />
+                              <ChevronDown className="w-5 h-5 text-[var(--accent)] -rotate-90" />
                             </div>
                           </Link>
                         ))}
                         <button 
                           onClick={() => handleSearch(null)}
-                          className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-orange-400 hover:text-white hover:bg-orange-500 rounded-2xl transition-all duration-300"
+                          className="w-full mt-2 p-4 text-center text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)] hover:text-white hover:bg-[var(--accent)] rounded-2xl transition-all duration-300"
                         >
                           All results for "{searchQuery}"
                         </button>
@@ -536,7 +536,7 @@ export default function Header() {
                 onClick={() => { setShowFilters(v => !v); setShowNotifications(false); setShowProfileDropdown(false); }}
                 className={`h-[36px] px-3 rounded-xl flex items-center gap-2 text-sm font-bold transition-all ${
                   showFilters || filterGenre || filterFormat || filterStatus
-                    ? 'bg-orange-500/10 text-orange-400'
+                    ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
                     : 'bg-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
@@ -553,11 +553,11 @@ export default function Header() {
                     initial={{ opacity: 0, y: 8, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(249,115,22,0.1)] overflow-hidden z-50 backdrop-blur-3xl"
+                    className="absolute top-full right-0 mt-3 w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_var(--accent-glow)] overflow-hidden z-50 backdrop-blur-3xl"
                   >
                     <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                       <span className="font-bold text-sm">Fine-tune Search</span>
-                      <button onClick={clearFilters} className="text-xs text-orange-400 hover:text-orange-300 font-medium">Reset</button>
+                      <button onClick={clearFilters} className="text-xs text-[var(--accent)] hover:text-[var(--accent-secondary)] font-medium">Reset</button>
                     </div>
                     <div className="p-4 space-y-5">
                       <div>
@@ -565,7 +565,7 @@ export default function Header() {
                         <select 
                           value={filterGenre}
                           onChange={(e) => setFilterGenre(e.target.value)}
-                          className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none focus:border-orange-500/50"
+                          className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]/50"
                         >
                           <option value="">All Genres</option>
                           {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
@@ -578,7 +578,7 @@ export default function Header() {
                             <button
                               key={f}
                               onClick={() => setFilterFormat(filterFormat === f ? "" : f)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterFormat === f ? 'bg-[var(--accent)] border-[var(--accent-secondary)] text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
                             >
                               {f}
                             </button>
@@ -592,7 +592,7 @@ export default function Header() {
                             <button
                               key={s}
                               onClick={() => setFilterStatus(filterStatus === s ? "" : s)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-orange-500 border-orange-400 text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStatus === s ? 'bg-[var(--accent)] border-[var(--accent-secondary)] text-white' : 'bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20'}`}
                             >
                               {s}
                             </button>
@@ -601,7 +601,7 @@ export default function Header() {
                       </div>
                     </div>
                     <div className="p-3 bg-white/5 border-t border-[var(--border-color)]">
-                      <button onClick={applyFilter} className="w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20">
+                      <button onClick={applyFilter} className="w-full py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:from-[var(--accent-secondary)] hover:to-[var(--accent)] text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-[var(--accent)]/20">
                         Apply Filters
                       </button>
                     </div>
@@ -725,7 +725,7 @@ export default function Header() {
                 }}
                 className={`p-2 rounded-full transition-all border min-w-[40px] min-h-[40px] flex items-center justify-center ${
                   showNotifications 
-                    ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' 
+                    ? 'bg-[var(--accent)]/10 border-[var(--accent)]/30 text-[var(--accent)]' 
                     : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-white/15'
                 }`}
               >
@@ -743,16 +743,16 @@ export default function Header() {
                      initial={{ opacity: 0, y: 12, scale: 0.95 }}
                      animate={{ opacity: 1, y: 0, scale: 1 }}
                      exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                     className="absolute top-full right-[-48px] sm:right-0 mt-3 w-[88vw] max-w-[340px] sm:w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_rgba(249,115,22,0.1)] z-50 overflow-hidden backdrop-blur-3xl"
+                     className="absolute top-full right-[-48px] sm:right-0 mt-3 w-[88vw] max-w-[340px] sm:w-80 bg-[#0B0713]/90 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_15px_var(--accent-glow)] z-50 overflow-hidden backdrop-blur-3xl"
                    >
                       <div className="p-4 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                          <div className="flex items-center gap-2">
                            <span className="font-bold text-sm">Notifications</span>
-                           {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-black">{unreadCount}</span>}
+                           {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-[var(--accent)]/20 text-[var(--accent)] text-[10px] font-black">{unreadCount}</span>}
                          </div>
                          <button
                            onClick={() => markAllAsRead()}
-                           className="text-[10px] uppercase tracking-widest text-orange-400 font-black hover:text-orange-300 transition-colors"
+                           className="text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:text-[var(--accent-secondary)] transition-colors"
                          >
                            Mark all read
                          </button>
@@ -762,9 +762,9 @@ export default function Header() {
                            <div className="divide-y divide-[var(--border-color)]">
                              {notifications.map((notif: any) => {
                                const CATEGORY_META: Record<string, { label: string; color: string }> = {
-                                 episodes: { label: 'New Episode', color: 'text-orange-400 bg-orange-500/10' },
+                                 episodes: { label: 'New Episode', color: 'text-[var(--accent)] bg-[var(--accent)]/10' },
                                  trending: { label: 'Trending', color: 'text-red-400 bg-red-500/10' },
-                                 recommendations: { label: 'AI Pick', color: 'text-amber-400 bg-amber-500/10' },
+                                 recommendations: { label: 'AI Pick', color: 'text-cyan-400 bg-cyan-500/10' },
                                  watchlist: { label: 'Watchlist', color: 'text-blue-400 bg-blue-500/10' },
                                  community: { label: 'Community', color: 'text-green-400 bg-green-500/10' },
                                  system: { label: 'System', color: 'text-zinc-400 bg-zinc-500/10' },
@@ -773,13 +773,13 @@ export default function Header() {
                                return (
                                  <div
                                    key={notif.id}
-                                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-orange-500/5' : ''}`}
+                                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer relative ${!notif.read ? 'bg-[var(--accent)]/5' : ''}`}
                                    onClick={() => {
                                      markAsRead(notif.id);
                                      if (notif.link) router.push(notif.link);
                                    }}
                                  >
-                                   {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-r" />}
+                                   {!notif.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent)] rounded-r" />}
                                    <div className="flex justify-between items-start mb-1 gap-2">
                                      <div className="flex-1 min-w-0">
                                        <div className="flex items-center gap-1.5 mb-0.5">
@@ -809,7 +809,7 @@ export default function Header() {
                       <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
                         <button
                           onClick={() => { setShowNotifications(false); setShowProfileSettings(true); }}
-                          className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-orange-400 font-black hover:bg-orange-500/5 transition-all"
+                          className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all"
                         >
                           ⚙ Manage Alerts
                         </button>
@@ -832,7 +832,7 @@ export default function Header() {
           <div className="profile-action-shell flex items-center justify-center pl-1.5 md:pl-2 border-l border-white/[0.08]">
             {isUserLoaded && !isSignedIn && (
               <SignInButton mode="modal">
-                <button className="h-10 px-3 md:px-5 rounded-xl bg-gradient-to-r from-[#FF9D00] to-[#FFB333] text-black hover:opacity-95 active:scale-98 transition-all font-black text-xs md:text-sm flex items-center gap-2 shadow-[0_8px_20px_rgba(255,157,0,0.25)] border-0 cursor-pointer">
+                <button className="h-10 px-3 md:px-5 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-95 active:scale-98 transition-all font-black text-xs md:text-sm flex items-center gap-2 shadow-[0_8px_20px_var(--accent-glow)] border-0 cursor-pointer">
                   <LogIn className="w-4 h-4" />
                   <span className="hidden sm:inline">Login</span>
                 </button>
@@ -842,8 +842,8 @@ export default function Header() {
               <UserButton
                 appearance={{
                   elements: {
-                    userButtonAvatarBox: "w-9 h-9 md:w-10 md:h-10 ring-2 ring-orange-500/55 shadow-[0_0_18px_rgba(249,115,22,0.34)]",
-                    userButtonTrigger: "rounded-full focus:shadow-[0_0_0_3px_rgba(249,115,22,0.28)]"
+                    userButtonAvatarBox: "w-9 h-9 md:w-10 md:h-10 ring-2 ring-[var(--accent)]/55 shadow-[0_0_18px_var(--accent-glow)]",
+                    userButtonTrigger: "rounded-full focus:shadow-[0_0_0_3px_var(--accent-glow)]"
                   }
                 }}
               >
@@ -855,7 +855,7 @@ export default function Header() {
                   />
                   <UserButton.Link
                     label="Watch History"
-                    labelIcon={<Clock className="w-3.5 h-3.5 text-orange-400" />}
+                    labelIcon={<Clock className="w-3.5 h-3.5 text-[var(--accent)]" />}
                     href="/history"
                   />
                   <UserButton.Link

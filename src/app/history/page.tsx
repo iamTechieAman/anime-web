@@ -177,7 +177,7 @@ export default function HistoryPage() {
                             background: progressNum > 80
                               ? 'linear-gradient(to bottom, #00D084, #14F195)'
                               : progressNum > 0
-                              ? 'linear-gradient(to bottom, #FF9D00, #FFB333)'
+                              ? 'linear-gradient(to bottom, var(--accent), var(--accent-secondary))'
                               : 'rgba(255,255,255,0.04)'
                           }}
                         />
@@ -195,7 +195,7 @@ export default function HistoryPage() {
                               className="h-full transition-all duration-700"
                               style={{
                                 width: progressPct,
-                                background: progressNum > 80 ? 'linear-gradient(to right, #00D084, #14F195)' : 'linear-gradient(to right, #FF9D00, #FFB333)'
+                                background: progressNum > 80 ? 'linear-gradient(to right, #00D084, #14F195)' : 'linear-gradient(to right, var(--accent), var(--accent-secondary))'
                               }}
                             />
                           </div>
@@ -244,7 +244,7 @@ export default function HistoryPage() {
                                   className="h-full rounded-full transition-all duration-700"
                                   style={{
                                     width: progressPct,
-                                    background: progressNum > 80 ? 'linear-gradient(to right, #00D084, #14F195)' : 'linear-gradient(to right, #FF9D00, #FFB333)'
+                                    background: progressNum > 80 ? 'linear-gradient(to right, #00D084, #14F195)' : 'linear-gradient(to right, var(--accent), var(--accent-secondary))'
                                   }}
                                 />
                               </div>

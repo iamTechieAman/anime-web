@@ -39,17 +39,17 @@ const FEATURES = [
     icon: Film,
     title: "Massive Catalog",
     desc: "50,000+ movies, shows & anime",
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
+    color: "text-[var(--accent)]",
+    bg: "bg-[var(--accent)]/10",
+    border: "border-[var(--accent)]/20",
   },
   {
     icon: Zap,
     title: "Zero Ads",
     desc: "Uninterrupted, buffering-free playback",
-    color: "text-amber-400",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
+    color: "text-[var(--secondary)]",
+    bg: "bg-[var(--secondary)]/10",
+    border: "border-[var(--secondary)]/20",
   },
   {
     icon: ShieldCheck,
@@ -115,17 +115,17 @@ export default function NetflixAuthGate() {
             <img
               src="/logo.webp"
               alt="ToonPlayer Logo"
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_rgba(249,115,22,0.25)]"
+              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_var(--accent-glow)]"
             />
           </div>
           <span className="text-lg sm:text-xl lg:text-2xl font-black tracking-tighter text-white font-sora uppercase">
-            Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">Player</span>
+            Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
           </span>
         </div>
 
         {/* Sign In button */}
         <SignInButton mode="modal">
-          <button className="px-4 sm:px-6 py-2 sm:py-2.5 bg-orange-500 hover:bg-orange-400 active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-orange-500/30 cursor-pointer min-h-[44px]">
+          <button className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-secondary)] active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-[var(--accent)]/30 cursor-pointer min-h-[44px]">
             Sign In
           </button>
         </SignInButton>
@@ -135,7 +135,7 @@ export default function NetflixAuthGate() {
       <main className="relative z-20 flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 flex flex-col items-center justify-center text-center">
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-orange-500/10 border border-orange-500/25 rounded-full text-xs sm:text-sm font-bold tracking-widest text-orange-400 uppercase mb-6 sm:mb-8">
+        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-[var(--accent)]/10 border border-[var(--accent)]/25 rounded-full text-xs sm:text-sm font-bold tracking-widest text-[var(--accent)] uppercase mb-6 sm:mb-8">
           <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
           <span>100% Free · Zero Ads</span>
         </div>
@@ -143,7 +143,7 @@ export default function NetflixAuthGate() {
         {/* Headline */}
         <h1 className="font-black font-sora tracking-tight text-white mb-4 sm:mb-6 max-w-3xl leading-[1.05] uppercase text-[clamp(1.8rem,7vw,4rem)]">
           Unlimited Anime,{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-300">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] via-[var(--accent-secondary)] to-[var(--secondary)]">
             Movies & Shows
           </span>
         </h1>
@@ -156,7 +156,7 @@ export default function NetflixAuthGate() {
         {/* CTA Buttons */}
         <div className="w-full max-w-sm sm:max-w-md flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10 sm:mb-14">
           <SignUpButton mode="modal">
-            <button className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 group cursor-pointer min-h-[52px]">
+            <button className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:from-[var(--accent-secondary)] hover:to-[var(--accent)] active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl shadow-[var(--accent)]/30 flex items-center justify-center gap-2 group cursor-pointer min-h-[52px]">
               Get Started Free
               <Play className="w-4 h-4 fill-white text-white group-hover:translate-x-1 transition-transform" />
             </button>
@@ -173,7 +173,7 @@ export default function NetflixAuthGate() {
         <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 sm:mb-14">
           {["HD & 4K streams", "Sub & Dub", "Daily updates", "No credit card"].map((trust) => (
             <div key={trust} className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-zinc-400">
-              <Check className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              <Check className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
               {trust}
             </div>
           ))}
@@ -200,9 +200,9 @@ export default function NetflixAuthGate() {
       <footer className="relative z-20 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-3 text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
         <span>© {new Date().getFullYear()} ToonPlayer. All rights reserved.</span>
         <div className="flex gap-4 sm:gap-6">
-          <a href="/privacy" className="hover:text-orange-400 transition-colors">Privacy</a>
-          <a href="/terms" className="hover:text-orange-400 transition-colors">Terms</a>
-          <a href="/contact" className="hover:text-orange-400 transition-colors">Contact</a>
+          <a href="/privacy" className="hover:text-[var(--accent)] transition-colors">Privacy</a>
+          <a href="/terms" className="hover:text-[var(--accent)] transition-colors">Terms</a>
+          <a href="/contact" className="hover:text-[var(--accent)] transition-colors">Contact</a>
         </div>
       </footer>
 

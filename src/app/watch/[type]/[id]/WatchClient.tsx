@@ -618,8 +618,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     icon: "🔄",
                     style: {
                         background: "rgba(20, 20, 20, 0.95)",
-                        color: "#fff",
-                        border: "1px solid rgba(249, 115, 22, 0.3)",
+                        border: "1px solid rgba(124, 58, 237, 0.3)",
                         fontSize: "12px",
                         fontWeight: "bold"
                     }
@@ -1081,7 +1080,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="relative w-full aspect-video bg-[#12131A] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/5 shadow-[#FF9D00]/5 touch-pan-y"
+                            className="relative w-full aspect-video bg-[#12131A] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/5 shadow-[var(--accent)]/5 touch-pan-y"
                             style={{ touchAction: 'pan-y !important' }}
                         >
                             {/* Loading skeleton */}
@@ -1093,25 +1092,24 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     </div>
                                     <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">{loadingStatus}</p>
                                     <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
-                                    {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
+                                    {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
                                 </div>
                             )}
                             {/* Upcoming Content Lock */}
                             {isUpcoming && playerLoaded && (
                                 <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 p-8 text-center backdrop-blur-md">
-                                    <Calendar className="w-16 h-16 text-orange-500 mb-6" />
-                                    <h2 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter">Content Upcoming</h2>
-                                    <p className="text-[var(--text-muted)] text-base max-w-md mb-8">
-                                        This content has not been released yet (Expected: {details.release_date}).
-                                        Trailers or promo clips may play if available, but the full movie will appear here after the release date.
-                                    </p>
-                                    <div className="flex gap-4">
-                                        <Link 
-                                            href="/" 
-                                            className="px-6 py-2.5 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-500 transition-all uppercase tracking-widest text-[10px]"
-                                        >
-                                            Explore Others
-                                        </Link>
+                                    <div className="flex flex-col items-center max-w-md text-center p-8 bg-zinc-950/40 border border-white/5 rounded-2xl backdrop-blur-md">
+                                        <Calendar className="w-16 h-16 text-[var(--accent)] mb-6" />
+                                        <h2 className="text-xl font-black text-white uppercase tracking-wider mb-2 font-sora">Upcoming Episode</h2>
+                                        <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-6 font-medium">This episode is scheduled to air soon. We'll update the streams as soon as it becomes available.</p>
+                                        <div className="flex gap-3">
+                                            <button 
+                                                onClick={() => router.back()}
+                                                className="px-6 py-2.5 bg-[var(--accent)] text-white rounded-lg font-bold hover:opacity-90 transition-all uppercase tracking-widest text-[10px]"
+                                            >
+                                                Explore Others
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -1128,7 +1126,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     <div className="flex gap-3">
                                         <button 
                                             onClick={() => setIframeKey(prev => prev + 1)}
-                                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-500 hover:to-orange-500 text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-[var(--accent)] hover:from-blue-500 hover:to-[var(--accent)] text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                                         >
                                             <Zap className="w-4 h-4" /> Try Refreshing
                                         </button>
@@ -1184,7 +1182,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                         cx="48"
                                                         cy="48"
                                                         r="40"
-                                                        stroke="#FF9D00"
+                                                        stroke="var(--accent)"
                                                         strokeWidth="8"
                                                         fill="none"
                                                         strokeDasharray="251.2"
@@ -1252,7 +1250,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 </div>
 
                 {/* Server disclaimer */}
-                <div className="w-full bg-orange-500/10 border-b border-orange-500/20 px-4 md:px-6 py-2.5 backdrop-blur-md">
+                <div className="w-full bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 px-4 md:px-6 py-2.5 backdrop-blur-md">
                     <p className="w-full text-xs font-semibold text-blue-300 flex items-center gap-2">
                         <Sparkles className="w-4 h-4 shrink-0 text-yellow-400" />
                         <span>You are watching <span className="font-black text-white px-1">{title}</span>. If the current server doesn't work, please try other servers below.</span>
@@ -1273,10 +1271,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     key={server.id}
                                     onClick={() => handleManualServerSelect(server)}
                                     className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id
-                                        ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30 font-bold"
+                                        ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold"
                                         : failedServers.has(server.id)
                                             ? "bg-red-500/10 text-red-400 border border-red-500/20 line-through opacity-70"
-                                            : "bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white"
+                                            : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
                                         } ${server.id === "peachify" ? "border-amber-500/50 hover:border-amber-500" : ""}`}
                                 >
                                     <div className="flex flex-col items-start gap-0.5">
@@ -1290,7 +1288,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         </div>
                                         {server.badge && (
                                             <span className={`text-[9px] px-1.5 py-[1px] rounded uppercase font-black tracking-widest ${server.id === "peachify" ? "text-amber-400 bg-amber-400/10"
-                                                : "text-orange-400 bg-orange-400/10"
+                                                : "text-[var(--accent)] bg-[var(--accent)]/10"
                                                 }`}>
                                                 {server.badge}
                                             </span>
@@ -1304,43 +1302,45 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <div className="relative md:hidden w-full max-w-[280px] z-50">
                             <button
                                 onClick={() => setShowServers(!showServers)}
-                                className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-[#12131A]/95 backdrop-blur-md border border-white/10 rounded-xl text-xs font-black text-white hover:border-[#FF9D00]/50 transition-all shadow-lg"
+                                className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-[#12131A]/95 backdrop-blur-md border border-white/10 rounded-xl text-xs font-black text-white hover:border-[var(--accent)]/50 transition-all shadow-lg"
                                 aria-label="Select streaming server"
                             >
                                 <div className="flex items-center gap-2">
-                                    <Server className="w-3.5 h-3.5 text-[#FF9D00]" />
-                                    <span className="truncate">{activeServer.name}</span>
+                                    <Server className="w-3.5 h-3.5 text-[var(--accent)]" />
+                                    <span>{activeServer.name}</span>
                                 </div>
-                                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-300 ${showServers ? "rotate-180 text-white" : ""}`} />
+                                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${showServers ? "rotate-180 text-white" : ""}`} />
                             </button>
                             
                             <AnimatePresence>
                                 {showServers && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 8 }}
+                                        initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 8 }}
-                                        className="absolute left-0 right-0 mt-2 bg-[#12131A] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 max-h-[220px] overflow-y-auto divide-y divide-white/5"
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="absolute top-full left-0 right-0 mt-2 bg-zinc-950 border border-white/10 rounded-xl overflow-hidden z-20 shadow-2xl"
                                     >
-                                        {(type === "anime" ? [...currentMediaTypeServers, ...ANIME_SERVERS] : currentMediaTypeServers).map((server) => (
-                                            <button
-                                                key={server.id}
-                                                onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
-                                                className={`w-full px-4 py-3 text-xs text-left hover:bg-white/5 transition-colors flex items-center justify-between ${
-                                                    activeServer.id === server.id ? "text-[#FF9D00] bg-orange-500/5 font-black" : "text-zinc-300 font-medium"
-                                                }`}
-                                            >
-                                                <span className="truncate flex items-center gap-2">
-                                                    {activeServer.id === server.id && <Play className="w-3 h-3 fill-current text-[#FF9D00]" />}
-                                                    {server.name}
-                                                </span>
-                                                {server.badge && (
-                                                    <span className="text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 uppercase">
-                                                        {server.badge}
+                                        <div className="p-1.5 space-y-1">
+                                            {(type === "anime" ? [...currentMediaTypeServers, ...ANIME_SERVERS] : currentMediaTypeServers).map((server) => (
+                                                <button
+                                                    key={server.id}
+                                                    onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
+                                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all ${
+                                                        activeServer.id === server.id ? "text-[var(--accent)] bg-[var(--accent)]/5 font-black" : "text-zinc-300 font-medium"
+                                                    }`}
+                                                >
+                                                    <span className="truncate flex items-center gap-2">
+                                                        {activeServer.id === server.id && <Play className="w-3 h-3 fill-current text-[var(--accent)]" />}
+                                                        {server.name}
                                                     </span>
-                                                )}
-                                            </button>
-                                        ))}
+                                                    {server.badge && (
+                                                        <span className="text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-zinc-400 uppercase">
+                                                            {server.badge}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -1361,7 +1361,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             }
                                         }
                                     }}
-                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-500 hover:to-blue-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_rgba(249,115,22,0.4)]"
+                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-[var(--accent)] to-blue-600 hover:from-[var(--accent)] hover:to-blue-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_var(--accent-glow)]"
                                 >
                                     Next Episode <Play className="w-3.5 h-3.5 fill-current" />
                                 </button>
@@ -1500,8 +1500,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     onClick={() => setSelectedEpisode(parseInt(epNum))}
                                                     className={`py-2 rounded-lg text-xs font-bold transition-all border ${
                                                         selectedEpisode === parseInt(epNum)
-                                                            ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20"
-                                                            : "bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-white/20 hover:text-white"
+                                                            ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold"
+                                                            : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
                                                     }`}
                                                 >
                                                     {epNum}
@@ -1526,7 +1526,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     <div className="flex flex-wrap gap-3">
                                         <button 
                                             onClick={toggleWatchlist} 
-                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 ${inWatchlist ? "bg-orange-500 text-white shadow-orange-500/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}
+                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}
                                         >
                                             <Heart className={`w-4 h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}
                                         </button>
@@ -1597,7 +1597,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <section className="mt-10 xl:hidden">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#f97316]" />
+                                    <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                                     <h2 className="text-xl font-bold">Episodes</h2>
                                     {episodes.length > 0 && (
                                         <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">
@@ -1647,8 +1647,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 }}
                                                 className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
                                                     selectedEpisode === ep.episode_number
-                                                        ? 'border-[#FF9D00] bg-[#FF9D00]/10 shadow-[0_0_12px_rgba(255,157,0,0.15)]'
-                                                        : 'border-[var(--border-color)] bg-[#12131A] hover:border-[#FF9D00]/30'
+                                                        ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]'
+                                                        : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'
                                                 }`}
                                             >
                                                 {/* Thumbnail */}
@@ -1673,7 +1673,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 {/* Info */}
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-sm font-semibold line-clamp-1 ${
-                                                        selectedEpisode === ep.episode_number ? 'text-[#FF9D00]' : 'text-white'
+                                                        selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'
                                                     }`}>
                                                         E{ep.episode_number}. {ep.name}
                                                     </p>
@@ -1717,7 +1717,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                                                     {/* Play Icon Overlay */}
                                                     <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${selectedEpisode === ep.episode_number ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                                                        <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                                                        <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                                                             <Play className="w-4 h-4 text-white fill-current ml-0.5" />
                                                         </div>
                                                     </div>
@@ -1862,7 +1862,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             ? `https://www.2embed.cc/embedtv/${id}&s=${selectedSeason}&e=${selectedEpisode}`
                                             : `https://www.2embed.cc/embed/${id}`}
                                         target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-orange-500/30 transition-colors"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent)] rounded-lg text-[11px] font-bold shrink-0 hover:bg-[var(--accent)]/30 transition-colors"
                                     >
                                         <Download className="w-3 h-3" /> 2Embed
                                     </a>
@@ -1879,7 +1879,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#a855f7]" />
+                                    <div className="w-1.5 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                                     <h2 className="text-base font-bold text-white">Episodes</h2>
                                 </div>
                                 <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-main)] px-2 py-0.5 rounded-md font-bold">
@@ -1895,7 +1895,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         setSelectedSeason(Number(e.target.value));
                                         setSelectedEpisode(1);
                                     }}
-                                    className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-orange-500 transition-colors cursor-pointer text-xs"
+                                    className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-[var(--accent)] transition-colors cursor-pointer text-xs"
                                 >
                                     {details.seasons
                                         .filter(s => s.season_number > 0)
@@ -1913,7 +1913,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         {/* Episode List Scroll Area */}
                         {loadingEpisodes ? (
                             <div className="flex justify-center items-center py-12">
-                                <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                                <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
                             </div>
                         ) : (
                             <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
@@ -1926,8 +1926,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         }}
                                         className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${
                                             selectedEpisode === ep.episode_number
-                                                ? 'border-[#FF9D00] bg-[#FF9D00]/10 shadow-[0_0_12px_rgba(255,157,0,0.15)]'
-                                                : 'border-[var(--border-color)] bg-[#08080B] hover:border-[#FF9D00]/30'
+                                                ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]'
+                                                : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'
                                         }`}
                                     >
                                         {/* Compact Image */}
@@ -1952,7 +1952,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         {/* Detail */}
                                         <div className="flex-1 min-w-0">
                                             <p className={`text-xs font-bold line-clamp-1 ${
-                                                selectedEpisode === ep.episode_number ? 'text-[#FF9D00]' : 'text-white'
+                                                selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'
                                             }`}>
                                                 E{ep.episode_number}. {ep.name}
                                             </p>
@@ -1971,7 +1971,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             {details.recommendations && details.recommendations.length > 0 && (
                 <section className="mt-10 px-0 sm:px-4 md:px-6 lg:px-8">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#f97316]" />
+                        <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                         <h2 className="text-lg font-bold">You May Also Like</h2>
                     </div>
                     <MovieRow items={details.recommendations} type={type} />
@@ -1982,7 +1982,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             {details.similar && details.similar.length > 0 && (
                 <section className="mt-6 mb-12 px-0 sm:px-4 md:px-6 lg:px-8">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-1 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_#a855f7]" />
+                        <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                         <h2 className="text-lg font-bold">Similar</h2>
                     </div>
                     <MovieRow items={details.similar} type={type} />
@@ -2000,7 +2000,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-orange-500/90 hover:bg-orange-600 text-white rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)] backdrop-blur-sm transition-colors"
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"
                     >
                         <ChevronUp className="w-5 h-5" />
                     </motion.button>

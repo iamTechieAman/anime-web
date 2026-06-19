@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Manrope, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -14,18 +13,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
 import { ClerkProvider } from "@clerk/nextjs";
 
-
-const manrope = Manrope({
-  variable: "--font-sora",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const viewport = {
   width: "device-width",
@@ -172,7 +159,7 @@ export default async function RootLayout({
         <meta name="google-site-verification" content="google555e8d2c84c218f0" />
       </head>
       <body
-        className={`${manrope.variable} ${inter.variable} font-inter antialiased bg-[#09090B] text-white overflow-x-hidden transition-colors duration-300 selection:bg-violet-500/25`}
+        className="font-inter antialiased bg-[#09090B] text-white overflow-x-hidden transition-colors duration-300 selection:bg-violet-500/25"
         suppressHydrationWarning
       >
         <ClerkProvider

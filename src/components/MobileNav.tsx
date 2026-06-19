@@ -110,10 +110,10 @@ export default function MobileNav() {
                             }`}
                         >
                             <div className="relative">
-                                <Icon className={`${item.active ? "w-5 h-5 text-[var(--accent)] drop-shadow-[0_0_8px_rgba(249,115,22,0.65)]" : "w-[18px] h-[18px]"} transition-all duration-200`} />
+                                <Icon className={`${item.active ? "w-5 h-5 text-[var(--accent)] drop-shadow-[0_0_8px_var(--accent-glow)]" : "w-[18px] h-[18px]"} transition-all duration-200`} />
                                 {/* Notification badge */}
                                 {'badge' in item && item.badge && (
-                                    <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] flex items-center justify-center bg-gradient-to-tr from-orange-500 to-amber-500 text-white text-[8px] font-black rounded-full px-0.5 shadow-[0_0_8px_rgba(249,115,22,0.6)]">
+                                    <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] flex items-center justify-center bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[8px] font-black rounded-full px-0.5 shadow-[0_0_8px_var(--accent-glow)]">
                                         {item.badge > 9 ? '9+' : item.badge}
                                     </span>
                                 )}
@@ -121,7 +121,7 @@ export default function MobileNav() {
                             <span className={`text-[10px] font-bold tracking-tight ${item.active ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
                             {/* Active dot indicator */}
                             {item.active && (
-                                <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] shadow-[0_0_8px_rgba(249,115,22,0.7)] animate-pulse" />
+                                <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] shadow-[0_0_8px_var(--accent-glow)] animate-pulse" />
                             )}
                         </button>
                     );

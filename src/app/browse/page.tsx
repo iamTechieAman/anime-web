@@ -15,7 +15,7 @@ export default function BrowsePage() {
         <Suspense fallback={
             <div className="min-h-screen pt-24 flex items-center justify-center bg-[var(--bg-main)]">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-[#FF9D00]/30 border-t-[#FF9D00] rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" />
                     <p className="text-sm text-[var(--text-muted)] animate-pulse font-bold tracking-widest uppercase">Loading Catalog...</p>
                 </div>
             </div>

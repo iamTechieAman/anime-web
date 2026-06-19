@@ -34,7 +34,7 @@ export default function DesktopSidebar() {
                         <Logo />
                     </div>
                     <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-                        Toon<span className="text-[#FF9D00]">Player</span>
+                        Toon<span className="text-[var(--accent)]">Player</span>
                     </span>
                 </Link>
             </div>
@@ -59,7 +59,7 @@ export default function DesktopSidebar() {
                             {isActive && (
                                 <motion.div 
                                     layoutId="activeGlow"
-                                    className="absolute left-0 w-[3px] h-6 bg-[#FF9D00] rounded-r-full shadow-[0_0_15px_#FF9D00]"
+                                    className="absolute left-0 w-[3px] h-6 bg-[var(--accent)] rounded-r-full shadow-[0_0_15px_var(--accent-glow)]"
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 />
                             )}
@@ -69,7 +69,7 @@ export default function DesktopSidebar() {
                                 <Icon 
                                     className={`w-[18px] h-[18px] transition-all duration-300 ${
                                         isActive 
-                                            ? "text-[#FF9D00] drop-shadow-[0_0_8px_rgba(255,157,0,0.6)] scale-110" 
+                                            ? "text-[var(--accent)] drop-shadow-[0_0_8px_var(--accent-glow)] scale-110" 
                                             : "group-hover/item:scale-115 group-hover/item:text-white"
                                     }`}
                                     strokeWidth={2.2}

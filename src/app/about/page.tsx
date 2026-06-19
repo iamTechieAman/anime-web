@@ -14,7 +14,7 @@ const stats = [
     { label: "Performance", value: 100, color: "text-[#00D084]" },
     { label: "Accessibility", value: 100, color: "text-[#00D084]" },
     { label: "Best Practices", value: 100, color: "text-[#00D084]" },
-    { label: "SEO", value: 100, color: "text-[#FF9D00]" },
+    { label: "SEO", value: 100, color: "text-[var(--accent)]" },
 ];
 
 export default function AboutPage() {

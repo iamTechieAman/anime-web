@@ -28,10 +28,10 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-main)]">
-      <div className="w-full max-w-md bg-[var(--bg-card)]/30 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_20px_50px_-20px_rgba(249,115,22,0.15)]">
+      <div className="w-full max-w-md bg-[var(--bg-card)]/30 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_20px_50px_-20px_var(--accent-glow)]">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-4 border border-orange-500/30">
-            <Sparkles className="w-8 h-8 text-orange-400" />
+          <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/20 flex items-center justify-center mb-4 border border-[var(--accent)]/30">
+            <Sparkles className="w-8 h-8 text-[var(--accent)]" />
           </div>
           <h1 className="text-2xl font-black font-sora text-white">Join ToonPlayer</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">Start your cinematic journey</p>
@@ -45,7 +45,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-orange-500 outline-none transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-[var(--accent)] outline-none transition-all"
                 placeholder="Ex. John Doe"
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -59,7 +59,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-orange-500 outline-none transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-[var(--accent)] outline-none transition-all"
                 placeholder="john@example.com"
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -73,7 +73,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-orange-500 outline-none transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-[var(--accent)] outline-none transition-all"
                 placeholder="••••••••"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
@@ -82,7 +82,7 @@ export default function RegisterPage() {
 
           <button
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-400 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg shadow-orange-500/20 text-white"
+            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-secondary)] py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent)]/20 text-white"
           >
             {loading ? "Creating Account..." : "Create Account"}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -92,7 +92,7 @@ export default function RegisterPage() {
         <div className="mt-8 pt-6 border-t border-white/5 text-center">
           <p className="text-sm text-[var(--text-muted)]">
             Already have an account?{" "}
-            <Link href="/login" className="text-orange-400 font-bold hover:underline">Sign In</Link>
+            <Link href="/login" className="text-[var(--accent)] font-bold hover:underline">Sign In</Link>
           </p>
         </div>
       </div>

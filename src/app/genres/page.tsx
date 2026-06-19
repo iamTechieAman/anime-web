@@ -55,7 +55,7 @@ export default function GenresPage() {
                             >
                                 <Link 
                                     href={`/search?genre=${genre.name}`}
-                                    className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-500 ${genre.border} hover:shadow-[0_8px_32px_rgba(255,157,0,0.12)]`}
+                                    className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-500 ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
                                 >
                                     {/* Ambient Glow */}
                                     <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />

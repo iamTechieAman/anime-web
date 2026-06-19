@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Manrope:wght@200..800&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --font-sora: "Manrope", sans-serif;
+  --font-inter: "Inter", sans-serif;
+}
+
+
 /* ══════════════════════════════════════════════════
    ONOFLIX GLOBAL RESETS & OVERFLOW FIXES
    ══════════════════════════════════════════════════ */

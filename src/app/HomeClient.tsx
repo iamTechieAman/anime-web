@@ -975,13 +975,13 @@ const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, br
     return (
         <div className="flex items-end gap-2.5 md:gap-3 mb-3 md:mb-4 text-[var(--text-main)] transition-all">
             {isFeatured ? (
-                <div className="w-1.5 h-8 bg-gradient-to-t from-[#FF9D00] to-[#FFD700] rounded-full shadow-[0_0_15px_rgba(255,157,0,0.45)]" />
+                <div className="w-1.5 h-8 bg-gradient-to-t from-[var(--accent)] to-[var(--accent-secondary)] rounded-full shadow-[0_0_15px_var(--accent-glow)]" />
             ) : (
-                <div className="w-1 h-5 bg-[#FF9D00] rounded-full shadow-[0_0_10px_rgba(255,157,0,0.35)]" />
+                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
             )}
             <div className="flex flex-col">
                 <div className="flex items-center gap-2 md:gap-3">
-                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-[#FF9D00] drop-shadow-md`} />
+                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-[var(--accent)] drop-shadow-md`} />
                     <h2 className={`${isFeatured ? 'text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base md:text-lg font-black tracking-tight font-sora'} ${brandColor || 'text-white'}`}>{title}</h2>
                 </div>
                 {isFeatured && (

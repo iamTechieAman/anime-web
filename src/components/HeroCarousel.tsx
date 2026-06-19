@@ -207,12 +207,12 @@ export default function HeroCarousel() {
             <div className="absolute bottom-0 left-0 right-0 h-24 md:h-36 bg-gradient-to-t from-[#050505] to-transparent z-10" />
             
             {/* Ambient Backlight Glow behind active slide */}
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[50vw] h-[30vh] rounded-full bg-[#FF9D00]/10 blur-[140px] pointer-events-none z-10" />
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[50vw] h-[30vh] rounded-full bg-[var(--accent)]/10 blur-[140px] pointer-events-none z-10" />
 
             {/* Trending Badge */}
             <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30">
-                <div className="bg-gradient-to-r from-[#FF9D00] to-[#FF4D4D] text-black text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_4px_15px_rgba(255,157,0,0.3)] animate-fadeSlideDown">
-                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-ping" />
+                <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_4px_15px_var(--accent-glow)] animate-fadeSlideDown">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
                     TRENDING NOW
                 </div>
             </div>
@@ -222,14 +222,14 @@ export default function HeroCarousel() {
                 <div className="w-full max-w-3xl mx-auto px-5 flex flex-col items-center justify-center text-center gap-4">
                     {/* Metadata Badges */}
                     <div className="flex flex-wrap items-center justify-center gap-2">
-                        <span className="bg-[#FF9D00] text-black px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
+                        <span className="bg-[var(--accent)] text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
                             {activeSlide.type}
                         </span>
                         <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase border border-white/10">
                             {activeSlide.quality}
                         </span>
                         <span className="text-[10px] font-bold text-zinc-300 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-[#FF9D00]" /> {activeSlide.release}
+                            <Clock className="w-3 h-3 text-[var(--accent)]" /> {activeSlide.release}
                         </span>
                         {activeSlide.rating !== "?" && (
                             <span className="text-[10px] font-bold text-[#00D084]">
@@ -251,7 +251,7 @@ export default function HeroCarousel() {
                     {/* Action Buttons */}
                     <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
                         <Link href={activeSlide.link}>
-                            <button className="flex items-center gap-2 px-6 lg:px-8 py-2.5 bg-gradient-to-r from-[#FF9D00] to-[#FFB333] text-black hover:opacity-95 font-black rounded-xl transition-all active:scale-95 shadow-[0_8px_20px_rgba(255,157,0,0.3)] text-xs md:text-sm cursor-pointer min-h-[44px] border-0">
+                            <button className="flex items-center gap-2 px-6 lg:px-8 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-95 font-black rounded-xl transition-all active:scale-95 shadow-[0_8px_20px_var(--accent-glow)] text-xs md:text-sm cursor-pointer min-h-[44px] border-0">
                                 <Play className="w-4 h-4 fill-current" />
                                 WATCH NOW
                             </button>
@@ -264,7 +264,7 @@ export default function HeroCarousel() {
                         >
                             {inWatchlist ? (
                                 <>
-                                    <Check className="w-4 h-4 text-[#FF9D00]" />
+                                    <Check className="w-4 h-4 text-[var(--accent)]" />
                                     In Watchlist
                                 </>
                             ) : (
