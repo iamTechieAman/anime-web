@@ -3,13 +3,26 @@ import { getUA } from "@/lib/user-agents";
 
 // Domain-to-Referer lookup for anime CDNs
 const CDN_REFERERS: Record<string, string> = {
+    'megacloud.tv': 'https://hianime.to',
+    'mega.nz': 'https://hianime.to',
+    'rapid-cloud.co': 'https://zoro.to',
+    'rabbitstream.net': 'https://zoro.to',
+    'allanime.day': 'https://allmanga.to',
     'gogocdn.net': 'https://gogoanime.hu',
     'playtaku.net': 'https://gogoanime.hu',
     'vidstreaming.io': 'https://gogoanime.hu',
-    'megacloud.tv': 'https://hianime.to',
-    'rapid-cloud.co': 'https://hianime.to',
-    'rabbitstream.net': 'https://zoro.to',
-    'allanime.day': 'https://allmanga.to',
+    'anime-taku.net': 'https://hianime.to',
+    'vidlink.pro': 'https://vidlink.pro',
+    'vidsrc.to': 'https://vidsrc.to',
+    'vidsrc.pro': 'https://vidsrc.pro',
+    'vidsrc.me': 'https://vidsrc.me',
+    'embed.su': 'https://embed.su',
+    'autoembed.co': 'https://autoembed.co',
+    'cineby.pro': 'https://cineby.pro',
+    'nontongo.win': 'https://nontongo.win',
+    'peachify.top': 'https://peachify.top',
+    'vidfast.pro': 'https://vidfast.pro',
+    'multiembed.mov': 'https://multiembed.mov',
     'youtube-anime.com': 'https://allmanga.to',
     'animepahe.ru': 'https://animepahe.ru',
     'kwik.si': 'https://animepahe.ru',
@@ -48,6 +61,9 @@ export async function GET(request: NextRequest) {
                 headers.set("User-Agent", attempt === 0 ? getUA() : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                 headers.set("Referer", referer);
                 headers.set("Origin", referer);
+                headers.set("Accept", "*/*");
+                headers.set("Accept-Language", "en-US,en;q=0.9");
+                headers.set("Accept-Encoding", "identity");
 
                 const range = request.headers.get("range");
                 if (range) {
@@ -180,7 +196,6 @@ export async function GET(request: NextRequest) {
 
         const copyHeaders = [
             "Content-Type",
-            "Content-Length",
             "Content-Range",
             "Accept-Ranges",
             "Last-Modified",
@@ -208,4 +223,15 @@ export async function GET(request: NextRequest) {
         console.error("[Proxy] Error:", error);
         return new NextResponse("Proxy Error: " + error.message, { status: 500 });
     }
+}
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Range, Authorization, Accept, Accept-Language",
+        },
+    });
 }
