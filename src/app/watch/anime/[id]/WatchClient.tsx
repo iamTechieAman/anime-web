@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
 import SimilarAnime from "@/components/SimilarAnime";
+import CommentsSection from "@/components/CommentsSection";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useWatch } from "@/context/WatchContext";
@@ -1044,7 +1045,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         {show.name || "Anime Stream"}
                     </h1>
                     <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
-                        Episode {currentEp} · {mode}
+                        {episodes.length > 1 ? `Episode ${currentEp} · ${mode}` : `Movie · ${mode}`}
                     </p>
                 </div>
             </div>
@@ -1533,55 +1534,58 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </button>
                             </div>
                             <p className="text-sm text-[var(--text-muted)]">
-                                Watching Episode {currentEp} in {mode.toUpperCase()}
+                                {episodes.length > 1 ? `Watching Episode ${currentEp} in ${mode.toUpperCase()}` : `Watching Movie in ${mode.toUpperCase()}`}
                             </p>
                         </div>
                     </div>
 
                     {/* Sidebar - Fixed Height Vertical Episode List */}
-                    <div className="w-full xl:w-[350px] flex-shrink-0">
-                        <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px]">
-                            {/* Sticky Header with Search */}
-                            <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
-                                </div>
-                                <div className="relative">
-                                    <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                                    <input 
-                                        type="number"
-                                        placeholder="Search episode..."
-                                        value={epFilter}
-                                        className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-[var(--accent)]/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
-                                        onChange={(e) => setEpFilter(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
-                                {(() => {
-                                    const filteredEpisodes = epFilter
-                                        ? episodes.filter(ep => String(ep).includes(epFilter))
-                                        : episodes;
-                                    return filteredEpisodes.map((ep) => (
-                                        <EpisodeButton
-                                            key={ep}
-                                            ep={ep}
-                                            currentEp={currentEp}
-                                            onClick={() => setCurrentEp(ep)}
+                    {episodes.length > 1 && (
+                        <div className="w-full xl:w-[350px] flex-shrink-0">
+                            <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px]">
+                                {/* Sticky Header with Search */}
+                                <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
+                                    </div>
+                                    <div className="relative">
+                                        <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                                        <input 
+                                            type="number"
+                                            placeholder="Search episode..."
+                                            value={epFilter}
+                                            className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-[var(--accent)]/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
+                                            onChange={(e) => setEpFilter(e.target.value)}
                                         />
-                                    ));
-                                })()
-                                }
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
+                                    {(() => {
+                                        const filteredEpisodes = epFilter
+                                            ? episodes.filter(ep => String(ep).includes(epFilter))
+                                            : episodes;
+                                        return filteredEpisodes.map((ep) => (
+                                            <EpisodeButton
+                                                key={ep}
+                                                ep={ep}
+                                                currentEp={currentEp}
+                                                onClick={() => setCurrentEp(ep)}
+                                            />
+                                        ));
+                                    })()
+                                    }
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                 </div> {/* End flex-row */}
 
                 {/* Smart Recommendations - Full Width Below Player+Sidebar */}
-                <div className="mt-6 w-full">
+                <div className="mt-6 w-full space-y-6">
                     <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
+                    <CommentsSection contentId={id} category="anime" />
                 </div>
 
             </div>

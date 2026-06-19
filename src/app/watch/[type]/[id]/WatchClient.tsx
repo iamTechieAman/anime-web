@@ -12,6 +12,7 @@ import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { useWatch } from "@/context/WatchContext";
+import CommentsSection from "@/components/CommentsSection";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -1984,7 +1985,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
             {/* Similar - Full Width Below Player+Sidebar */}
             {details.similar && details.similar.length > 0 && (
-                <section className="mt-6 mb-12 px-0 sm:px-4 md:px-6 lg:px-8">
+                <section className="mt-6 mb-6 px-0 sm:px-4 md:px-6 lg:px-8">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                         <h2 className="text-lg font-bold">Similar</h2>
@@ -1992,6 +1993,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <MovieRow items={details.similar} type={type} />
                 </section>
             )}
+
+            {/* Comments & Discussion */}
+            <section className="mt-6 mb-12 px-0 sm:px-4 md:px-6 lg:px-8">
+                <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
+            </section>
 
         </div> {/* End pt-14 wrapper */}
 
