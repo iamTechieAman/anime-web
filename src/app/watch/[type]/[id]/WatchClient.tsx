@@ -169,7 +169,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
 
-    const isAnimeServer = activeServer ? ANIME_SERVERS.some(s => s.id === activeServer.id) : false;
+    const isAnimeServer = type === 'anime' || (activeServer ? (activeServer.type === 'anime' || ANIME_SERVERS.some(s => s.id === activeServer.id)) : false);
 
 
     // Cast & Auto-Next state
@@ -194,7 +194,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [serversList, setServersList] = useState<any[]>(SERVERS);
     const currentMediaTypeServers = typeof type === "string"
-        ? serversList.filter(s => !s.type || s.type === type)
+        ? serversList.filter(s => {
+            if (!s.type) return true;
+            const targetType = (type === "cartoon") ? "tv" : type;
+            return s.type === targetType;
+        })
         : serversList;
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
@@ -495,9 +499,22 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             id: srv.serverId,
                             name: srv.name,
                             badge: srv.badge,
-                            getUrl: (_type: string, _id: string, s?: number, e?: number) => {
+                            type: srv.type,
+                            getUrl: (param1: string, param2: string, s?: number, e?: number) => {
+                                if (srv.type === 'anime' || type === 'anime') {
+                                    return srv.urlTemplate
+                                        .replace('{id}', param1)
+                                        .replace('{e}', String(param2 || 1));
+                                }
+                                const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
+                                if (isAnimeCall) {
+                                    return srv.urlTemplate
+                                        .replace('{id}', param1)
+                                        .replace('{s}', '1')
+                                        .replace('{e}', String(param2 || 1));
+                                }
                                 return srv.urlTemplate
-                                    .replace('{id}', _id)
+                                    .replace('{id}', param2)
                                     .replace('{s}', String(s || 1))
                                     .replace('{e}', String(e || 1));
                             }
@@ -530,7 +547,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 // Keep original order from SERVERS array (do not re-sort; priority is defined in SERVERS const)
                 setServersList([...baseServers]);
                 if (isFirstLoadRef.current) {
-                    const filtered = baseServers.filter((s: any) => !s.type || s.type === type);
+                    const targetType = (type === "cartoon") ? "tv" : type;
+                    const filtered = baseServers.filter((s: any) => !s.type || s.type === targetType);
                     setActiveServer(filtered[0] || baseServers[0]);
                     isFirstLoadRef.current = false;
                 }

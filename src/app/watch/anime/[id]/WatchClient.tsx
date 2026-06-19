@@ -199,6 +199,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const serverRef = useRef<HTMLDivElement>(null);
     const [loadingStatus, setLoadingStatus] = useState("Connecting to server...");
     const [healthScores, setHealthScores] = useState<Record<string, number>>({});
+    const [dynamicMovieServers, setDynamicMovieServers] = useState<any[]>(MOVIE_SERVERS);
 
     const processingRef = useRef<string | null>(null);
 
@@ -290,6 +291,68 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
         };
         fetchHealthStats();
+    }, []);
+
+    // Fetch dynamic movie/tv fallback servers from MongoDB on mount
+    useEffect(() => {
+        const loadDynamicFallbackServers = async () => {
+            try {
+                let fetchedServers = [];
+                try {
+                    const res = await axios.get('/api/servers?type=movie');
+                    if (res.data && res.data.servers && res.data.servers.length > 0) {
+                        fetchedServers = res.data.servers.map((srv: any) => ({
+                            id: srv.serverId,
+                            name: srv.name,
+                            badge: srv.badge,
+                            type: srv.type,
+                            isMovieServer: true,
+                            getUrl: (param1: string, param2: string, s?: number, e?: number) => {
+                                if (srv.type === 'anime') {
+                                    return srv.urlTemplate
+                                        .replace('{id}', param1)
+                                        .replace('{e}', String(param2 || 1));
+                                }
+                                const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
+                                if (isAnimeCall) {
+                                    return srv.urlTemplate
+                                        .replace('{id}', param1)
+                                        .replace('{s}', '1')
+                                        .replace('{e}', String(param2 || 1));
+                                }
+                                return srv.urlTemplate
+                                    .replace('{id}', param2)
+                                    .replace('{s}', String(s || 1))
+                                    .replace('{e}', String(e || 1));
+                            }
+                        }));
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch dynamic fallback servers in anime, using hardcoded', err);
+                }
+
+                if (fetchedServers.length > 0) {
+                    let baseServers = [...fetchedServers];
+                    MOVIE_SERVERS.forEach((hc: any) => {
+                        const exists = fetchedServers.some((fs: any) => 
+                            fs.id === hc.id || 
+                            fs.id.startsWith(hc.id) ||
+                            fs.name.toLowerCase().includes(hc.name.toLowerCase()) ||
+                            hc.name.toLowerCase().includes(fs.name.toLowerCase())
+                        );
+                        if (!exists) {
+                            baseServers.push(hc);
+                        }
+                    });
+                    setDynamicMovieServers(baseServers);
+                } else {
+                    setDynamicMovieServers([...MOVIE_SERVERS]);
+                }
+            } catch (e) {
+                console.error("Failed to initialize dynamic movie servers in anime WatchClient:", e);
+            }
+        };
+        loadDynamicFallbackServers();
     }, []);
 
     useEffect(() => {
@@ -549,7 +612,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
 
         // ALWAYS include movie servers — they are the guaranteed fallback
-        const movieServersList = MOVIE_SERVERS.map(ms => ({
+        const movieServersList = dynamicMovieServers.map(ms => ({
             serverId: ms.id,
             serverName: ms.name,
             type: mode,
@@ -626,7 +689,15 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     if (!currentExists && manualServerRef.current !== selectedServer) {
                         const topServers = finalServersList.slice(0, 3);
                         try {
-                            const urlsToCheck = topServers.map(s => typeof s.getUrl === 'function' ? s.getUrl() : s.url);
+                             const urlsToCheck = topServers.map(s => {
+                                 if (typeof s.getUrl === 'function') {
+                                     if (s.isMovieServer && !s.isEmergency) {
+                                         return s.getUrl("tv", tmdbId || "100", 1, parseInt(String(currentEp) || "1"));
+                                     }
+                                     return s.getUrl();
+                                 }
+                                 return s.url;
+                             });
                             const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
                             const results = checkRes.data?.results || [];
 
@@ -660,7 +731,15 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 // Precheck fallbackList
                 const topFallbacks = fallbackList.slice(0, 3);
                 try {
-                    const urlsToCheck = topFallbacks.map(s => typeof s.getUrl === 'function' ? s.getUrl() : s.url);
+                     const urlsToCheck = topFallbacks.map(s => {
+                         if (typeof s.getUrl === 'function') {
+                             if (s.isMovieServer && !s.isEmergency) {
+                                 return s.getUrl("tv", tmdbId || "100", 1, parseInt(String(currentEp) || "1"));
+                             }
+                             return s.getUrl();
+                         }
+                         return s.url;
+                     });
                     const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
                     const results = checkRes.data?.results || [];
 
