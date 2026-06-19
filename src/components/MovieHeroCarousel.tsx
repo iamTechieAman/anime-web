@@ -81,6 +81,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             alt={title}
                             className="w-full h-full object-cover transition-transform duration-[10000ms] ease-linear hover:scale-110"
                             loading={current === 0 ? "eager" : "lazy"}
+                            fetchPriority={current === 0 ? "high" : "auto"}
                             decoding="async"
                         />
                     )}

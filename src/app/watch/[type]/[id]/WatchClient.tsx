@@ -1309,9 +1309,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     )}
                 </div>
             )}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[60px] md:pt-[64px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4"}`}>
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-16 w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4 mt-[env(safe-area-inset-top)] mb-[env(safe-area-inset-bottom)]"}`}>
                 {isFocusMode && (
-                    <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
+                    <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl mt-[env(safe-area-inset-top)] ml-[env(safe-area-inset-left)]">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
                     </button>
                 )}
