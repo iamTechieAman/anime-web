@@ -3,7 +3,80 @@ import json
 import sys
 import argparse
 import re
-from scrapling import StealthyFetcher # type: ignore
+import os
+from bs4 import BeautifulSoup
+
+# Wrapper classes to make ScrapingBee responses behave exactly like Scrapling responses
+class BSWrapper:
+    def __init__(self, el):
+        self.el = el
+        self.tag = el.name
+        self.attrib = el.attrs if el.attrs else {}
+        
+    @property
+    def text(self):
+        return self.el.get_text()
+        
+    def css(self, selector):
+        return [BSWrapper(item) for item in self.el.select(selector)]
+        
+    def string(self):
+        return self.el.string or self.el.get_text() or ""
+
+class ScrapingBeeResponse:
+    def __init__(self, content):
+        self.content = content
+        self.text = content.decode('utf-8', errors='ignore') if isinstance(content, bytes) else str(content)
+        self.soup = BeautifulSoup(self.text, 'lxml')
+        
+    def css(self, selector):
+        return [BSWrapper(item) for item in self.soup.select(selector)]
+        
+    @property
+    def status_code(self):
+        return 200
+
+# Intercepts Scrapling's StealthyFetcher and routes requests through ScrapingBee if API key is present
+class StealthyFetcher:
+    def __init__(self, *args, **kwargs):
+        self.real_fetcher = None
+        
+    def fetch(self, url, *args, **kwargs):
+        scrapingbee_key = os.environ.get("SCRAPINGBEE_API_KEY")
+        if scrapingbee_key:
+            print(f"[Scraper API] Routing through ScrapingBee: {url}")
+            try:
+                from scrapingbee import ScrapingBeeClient
+                client = ScrapingBeeClient(api_key=scrapingbee_key)
+                
+                engine = kwargs.get('engine', 'chrome')
+                wait_until = kwargs.get('wait_until', 'domcontentloaded')
+                
+                # Configure ScrapingBee request parameters
+                params = {
+                    'premium_proxy': True,      # Use premium residential proxies to bypass tough anti-bots
+                    'country_code': 'us',       # Route through US coordinates by default
+                    'device': 'desktop',        # Spoof desktop viewport
+                }
+                
+                # Render JS dynamically for Chrome engine or specific wait-until conditions
+                if engine == 'chrome' or wait_until == 'networkidle' or 'wait_until' in kwargs:
+                    params['render_js'] = True
+                    params['wait'] = "2000"     # Wait 2 seconds for JS execution
+                    
+                resp = client.get(url, params=params)
+                if resp.ok:
+                    return ScrapingBeeResponse(resp.content)
+                else:
+                    print(f"[Scraper API] ScrapingBee request failed with status {resp.status_code}, falling back to local Scrapling...")
+            except Exception as e:
+                print(f"[Scraper API] ScrapingBee exception: {e}, falling back to local Scrapling...")
+                
+        # Fall back to local Scrapling fetcher
+        if not self.real_fetcher:
+            from scrapling import StealthyFetcher as RealFetcher # type: ignore
+            self.real_fetcher = RealFetcher()
+        return self.real_fetcher.fetch(url, *args, **kwargs)
 
 # Helper to ensure we only get clean embed/video URLs, not full site pages
 def clean_source_url(url, provider_domain):

@@ -6,3 +6,4 @@ beautifulsoup4
 playwright
 lxml
 httpx
+scrapingbee

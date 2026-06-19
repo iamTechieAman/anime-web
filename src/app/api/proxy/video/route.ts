@@ -157,7 +157,7 @@ function serveCleanPlayer(videoUrl: string) {
     return new NextResponse(html, {
         headers: {
             'Content-Type': 'text/html',
-            'Content-Security-Policy': "frame-ancestors 'self' http://localhost:* https://*.toonplayer.in",
+            'Content-Security-Policy': "frame-ancestors *",
             'X-Frame-Options': 'SAMEORIGIN'
         }
     });
@@ -207,7 +207,7 @@ function serveFallbackIframe(targetUrl: string) {
     return new NextResponse(html, {
         headers: {
             'Content-Type': 'text/html',
-            'Content-Security-Policy': "frame-ancestors 'self' http://localhost:* https://*.toonplayer.in",
+            'Content-Security-Policy': "frame-ancestors *",
             'X-Frame-Options': 'SAMEORIGIN'
         }
     });

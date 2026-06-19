@@ -19,10 +19,12 @@ const CDN_REFERERS: Record<string, string> = {
 function getReferer(url: string, override?: string | null): string {
     if (override) return override;
     try {
-        const host = new URL(url).hostname;
+        const parsed = new URL(url);
+        const host = parsed.hostname;
         for (const [domain, ref] of Object.entries(CDN_REFERERS)) {
             if (host.includes(domain)) return ref;
         }
+        return parsed.origin;
     } catch (_) {}
     return 'https://allmanga.to';
 }
