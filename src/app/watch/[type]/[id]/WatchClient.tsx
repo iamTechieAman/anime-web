@@ -409,7 +409,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 e.data.type === "player_ended"
             );
 
-            if (isEndEvent && (type === 'tv' || type === 'anime')) {
+            if (isEndEvent && (type === 'tv' || type === 'anime') && resolvedMediaType !== 'movie') {
                 // Trigger Netflix-style countdown overlay instead of direct jump
                 if (showNextOverlay) return; // Already counting down
                 
@@ -1054,7 +1054,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
                         {type === 'cartoon' ? `Cartoon: ${title}` : title}
                     </h1>
-                    {(type === 'tv' || type === 'anime' || type === 'cartoon') && (
+                    {(type === 'tv' || type === 'anime' || type === 'cartoon') && resolvedMediaType !== 'movie' && (
                         <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
                             Season {selectedSeason} · Episode {selectedEpisode}
                         </p>
@@ -1476,7 +1476,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                             {/* Player Metadata & Controls */}
                             <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-8">
-                                {type === "anime" && episodes.length > 0 && (
+                                {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
                                     <div className="mb-6">
                                         <div className="flex items-center justify-between mb-4">
                                             <h3 className="font-bold text-lg flex items-center gap-2">
@@ -1607,26 +1607,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
 
                                 {/* Season Selector */}
-                                <div className="relative">
-                                    <select
-                                        value={selectedSeason}
-                                        onChange={(e) => {
-                                            setSelectedSeason(Number(e.target.value));
-                                            setSelectedEpisode(1);
-                                        }}
-                                        className="appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm"
-                                    >
-                                        {details.seasons
-                                            .filter(s => s.season_number > 0)
-                                            .sort((a, b) => a.season_number - b.season_number)
-                                            .map((season) => (
-                                                <option key={season.id} value={season.season_number}>
-                                                    Season {season.season_number} ({season.episode_count} eps)
-                                                </option>
-                                            ))}
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                                </div>
+                                {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
+                                    <div className="relative">
+                                        <select
+                                            value={selectedSeason}
+                                            onChange={(e) => {
+                                                setSelectedSeason(Number(e.target.value));
+                                                setSelectedEpisode(1);
+                                            }}
+                                            className="appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm"
+                                        >
+                                            {details.seasons
+                                                .filter(s => s.season_number > 0)
+                                                .sort((a, b) => a.season_number - b.season_number)
+                                                .map((season) => (
+                                                    <option key={season.id} value={season.season_number}>
+                                                        Season {season.season_number} ({season.episode_count} eps)
+                                                    </option>
+                                                ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Episodes */}
@@ -1888,26 +1890,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </div>
 
                             {/* Season Selector */}
-                            <div className="relative">
-                                <select
-                                    value={selectedSeason}
-                                    onChange={(e) => {
-                                        setSelectedSeason(Number(e.target.value));
-                                        setSelectedEpisode(1);
-                                    }}
-                                    className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-[var(--accent)] transition-colors cursor-pointer text-xs"
-                                >
-                                    {details.seasons
-                                        .filter(s => s.season_number > 0)
-                                        .sort((a, b) => a.season_number - b.season_number)
-                                        .map((season) => (
-                                            <option key={season.id} value={season.season_number}>
-                                                Season {season.season_number} ({season.episode_count} eps)
-                                            </option>
-                                        ))}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                            </div>
+                            {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
+                                <div className="relative">
+                                    <select
+                                        value={selectedSeason}
+                                        onChange={(e) => {
+                                            setSelectedSeason(Number(e.target.value));
+                                            setSelectedEpisode(1);
+                                        }}
+                                        className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-[var(--accent)] transition-colors cursor-pointer text-xs"
+                                    >
+                                        {details.seasons
+                                            .filter(s => s.season_number > 0)
+                                            .sort((a, b) => a.season_number - b.season_number)
+                                            .map((season) => (
+                                                <option key={season.id} value={season.season_number}>
+                                                    Season {season.season_number} ({season.episode_count} eps)
+                                                </option>
+                                            ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                                </div>
+                            )}
                         </div>
 
                         {/* Episode List Scroll Area */}

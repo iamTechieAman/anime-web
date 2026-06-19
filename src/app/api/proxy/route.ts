@@ -37,24 +37,35 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const referer = getReferer(targetUrl, refererOverride);
-        const headers = new Headers();
-        headers.set("User-Agent", getUA());
-        headers.set("Referer", referer);
-        headers.set("Origin", referer);
+        let response = null;
+        let lastError = null;
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                const referer = getReferer(targetUrl, refererOverride);
+                const headers = new Headers();
+                headers.set("User-Agent", attempt === 0 ? getUA() : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                headers.set("Referer", referer);
+                headers.set("Origin", referer);
 
-        const range = request.headers.get("range");
-        if (range) {
-            headers.set("Range", range);
+                const range = request.headers.get("range");
+                if (range) {
+                    headers.set("Range", range);
+                }
+
+                response = await fetch(targetUrl, {
+                    headers: headers,
+                    method: "GET",
+                });
+                if (response.ok) break;
+            } catch (err: any) {
+                lastError = err;
+                if (attempt === 1) throw err;
+                await new Promise(r => setTimeout(r, 500));
+            }
         }
 
-        const response = await fetch(targetUrl, {
-            headers: headers,
-            method: "GET",
-        });
-
-        if (!response.ok) {
-            return new NextResponse(`Proxy Error: ${response.statusText}`, { status: response.status });
+        if (!response || !response.ok) {
+            return new NextResponse(`Proxy Error: ${response?.statusText || lastError?.message || "Failed"}`, { status: response?.status || 502 });
         }
 
         const contentType = response.headers.get("Content-Type") || "";
