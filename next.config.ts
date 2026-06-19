@@ -68,35 +68,49 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'no-referrer-when-downgrade' },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), fullscreen=(self "https://vidlink.pro" "https://vidsrc.to" "https://vidsrc.pro" "https://vidsrc.me" "https://autoembed.co" "https://cineby.pro" "https://vidfast.pro" "https://peachify.top" "https://multiembed.mov" "https://embed.su" "https://megacloud.tv" "https://rapid-cloud.co")',
           },
         ],
       },
       {
+        // Watch page: relax restrictions so all embed iframes can load and go fullscreen
         source: '/watch/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://toonplayer.in;",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:",
+              "style-src 'self' 'unsafe-inline' https:",
+              "img-src 'self' data: blob: https:",
+              "media-src 'self' blob: https:",
+              "connect-src 'self' https: wss:",
+              "frame-src *",
+              "worker-src 'self' blob:",
+              "font-src 'self' data: https:",
+              "object-src 'none'",
+            ].join('; '),
           },
+          {
+            key: 'Permissions-Policy',
+            value: 'fullscreen=*, autoplay=*, encrypted-media=*, picture-in-picture=*',
+          },
+        ],
+      },
+      {
+        // Proxy embed route: return permissive headers so browser loads iframes freely
+        source: '/api/proxy/embed',
+        headers: [
+          { key: 'X-Frame-Options', value: 'ALLOWALL' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: '*' },
         ],
       },
     ];

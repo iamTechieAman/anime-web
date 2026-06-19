@@ -1333,7 +1333,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <>
         <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>

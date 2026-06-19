@@ -913,7 +913,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 {/* Navbar */}
-                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
+                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -925,7 +925,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     </div>
                 </nav>
 
-                <div className="pt-[60px] md:pt-[64px] px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
+                <div className="pt-14 md:pt-16 px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
                     {/* Fallback Player */}
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe
@@ -1265,7 +1265,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -1281,7 +1281,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             )}
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[60px] md:pt-[64px] w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-14 md:pt-16 w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
                 {isFocusMode && (
                     <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
