@@ -1490,13 +1490,13 @@ body, html {
    ULTIMATE SCROLL ENFORCER
    ══════════════════════════════════════════════════ */
 
-/* Force horizontal scroll to be absolutely forbidden on mobile/desktop root */
+/* Force horizontal scroll to be absolutely forbidden while explicitly enabling vertical scrolling */
 html, body {
   overflow-x: hidden !important;
+  overflow-y: auto !important;
   position: relative !important;
   width: 100% !important;
-  height: auto !important;
-  min-height: 100% !important;
+  min-height: 100vh !important;
 }
 
 /* Fix for possible scroll-blocking elements in the center */

@@ -36,8 +36,7 @@ const getProxiedEmbedUrl = (rawUrl: string | null) => {
                            parsed.hostname.includes('vidstreaming') ||
                            parsed.hostname.includes('allanime') ||
                            parsed.hostname.includes('anime-taku') ||
-                           parsed.hostname.includes('filemoon') ||
-                           parsed.hostname.includes('embed.su');
+                           parsed.hostname.includes('filemoon');
         if (needsProxy) {
             return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
         }
@@ -83,38 +82,6 @@ const EpisodeButton = React.memo(function EpisodeButton({
 
 const MOVIE_SERVERS = [
     {
-        id: 'toon4k',
-        name: 'Toon4K',
-        badge: 'Premium 4K',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false`,
-    },
-    {
-        id: 'toon_ultimate',
-        name: 'Toon Player Ultimate',
-        badge: 'Ultimate',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
-    },
-    {
-        id: 'cinevo',
-        name: 'Cinevo',
-        badge: 'HD',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}` : `https://cineby.pro/movie/${id}`,
-    },
-    {
-        id: 'nortan',
-        name: 'Toon Player Classic',
-        badge: 'Classic',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
-    },
-    {
         id: 'peachify',
         name: 'Toon Player VIP',
         badge: 'Multi-Audio',
@@ -123,37 +90,117 @@ const MOVIE_SERVERS = [
             type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
     },
     {
-        id: 'vidsrcto',
-        name: 'Toon Player Pro',
-        badge: 'Pro',
+        id: 'vidlink',
+        name: 'VidLink',
+        badge: 'Auto-Next',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false`,
+    },
+    {
+        id: 'toon4k',
+        name: 'Toon4K',
+        badge: 'Premium 4K',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
+    },
+    {
+        id: 'toon_ultimate',
+        name: 'Toon Player Ultimate',
+        badge: 'Best',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.to/embed/movie/${id}`,
     },
     {
         id: 'autoembed',
-        name: 'Toon Player Stream',
-        badge: 'Stream',
+        name: 'Toon Player Auto',
+        badge: 'Fast',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://autoembed.co/tv/tmdb/${id}-${s || 1}-${e || 1}` : `https://autoembed.co/movie/tmdb/${id}`,
     },
     {
+        id: 'nontongo',
+        name: 'ToonNortan',
+        badge: 'Classic',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
+    },
+    {
+        id: 'vidsrcto',
+        name: 'Toon Player Pro',
+        badge: 'CinEvo',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.to/embed/movie/${id}`,
+    },
+    {
+        id: 'toon_titan',
+        name: 'Toon Player Titan',
+        badge: '4K/HD',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}` : `https://embed.su/embed/movie/${id}`,
+    },
+    {
+        id: 'multiembed',
+        name: 'Toon Player Multi',
+        badge: 'Multi-Q',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    },
+    {
         id: 'vidfast',
-        name: 'Toon Player Auto',
-        badge: 'Fast',
+        name: 'Toon Player Xtreme',
+        badge: 'Reliable',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
     },
     {
-        id: 'multiembed',
-        name: 'Toon Player Backup',
-        badge: 'Backup',
+        id: 'smashystream',
+        name: 'SmashyStream',
+        badge: 'CinEvo',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
-    }
+            type === 'tv' ? `https://embed.smashystream.com/playere.php?tmdb=${id}&s=${s || 1}&e=${e || 1}` : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+    },
+    {
+        id: 'toon_abyss',
+        name: 'ToonAbyss',
+        badge: 'AnimeSalt',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.cc/v2/embed/movie/${id}`,
+    },
+    {
+        id: 'cineby',
+        name: 'CineBy',
+        badge: 'Fast',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}?autoplay=true` : `https://cineby.pro/movie/${id}?autoplay=true`,
+    },
+    {
+        id: 'rivestream',
+        name: 'RiveStream',
+        badge: 'HD',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://api.rivestream.xyz/embed/tv/?tmdb=${id}&season=${s || 1}&episode=${e || 1}` : `https://api.rivestream.xyz/embed/movie/?tmdb=${id}`,
+    },
+    {
+        id: 'cinemaos',
+        name: 'CinemaOS',
+        badge: 'HD',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://cinemaos.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://cinemaos.to/embed/movie/${id}`,
+    },
 ];
 
 interface ShowData {

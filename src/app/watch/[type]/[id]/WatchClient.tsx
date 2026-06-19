@@ -18,62 +18,8 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
-        id: 'toon4k',
-        name: 'Toon4K',
-        badge: 'Premium 4K',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
-                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
-    },
-    {
-        id: 'vidsrcto',
-        name: 'Toon Player Pro',
-        badge: 'Pro',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vidsrc.to/embed/movie/${id}`,
-    },
-    {
-        id: 'toon_ultimate',
-        name: 'Toon Ultimate',
-        badge: 'Ultimate',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1`
-                : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
-    },
-    {
-        id: 'autoembed',
-        name: 'Toon Stream',
-        badge: 'Stream',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://autoembed.co/tv/tmdb/${id}/${s || 1}/${e || 1}`
-                : `https://autoembed.co/movie/tmdb/${id}`,
-    },
-    {
-        id: 'cinevo',
-        name: 'Cinevo HD',
-        badge: 'HD',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}?autoplay=true`
-                : `https://cineby.pro/movie/${id}?autoplay=true`,
-    },
-    {
-        id: 'vidfast',
-        name: 'Toon Fast',
-        badge: 'Fast',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=7C3AED`
-                : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=7C3AED`,
-    },
-    {
         id: 'peachify',
-        name: 'Toon VIP',
+        name: 'Toon Player VIP',
         badge: 'Multi-Audio',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -81,22 +27,130 @@ const SERVERS = [
                 : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
     },
     {
+        id: 'vidlink',
+        name: 'VidLink',
+        badge: 'Auto-Next',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
+                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
+    },
+    {
+        id: 'toon4k',
+        name: 'Toon4K',
+        badge: 'Premium 4K',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1`
+                : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
+    },
+    {
+        id: 'toon_ultimate',
+        name: 'Toon Player Ultimate',
+        badge: 'Best',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://vidsrc.to/embed/movie/${id}`,
+    },
+    {
+        id: 'autoembed',
+        name: 'Toon Player Auto',
+        badge: 'Fast',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://autoembed.co/tv/tmdb/${id}/${s || 1}/${e || 1}`
+                : `https://autoembed.co/movie/tmdb/${id}`,
+    },
+    {
+        id: 'nontongo',
+        name: 'ToonNortan',
+        badge: 'Classic',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://www.nontongo.win/embed/movie/${id}`,
+    },
+    {
+        id: 'vidsrcto',
+        name: 'Toon Player Pro',
+        badge: 'CinEvo',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://vidsrc.to/embed/movie/${id}`,
+    },
+    {
+        id: 'toon_titan',
+        name: 'Toon Player Titan',
+        badge: '4K/HD',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://embed.su/embed/movie/${id}`,
+    },
+    {
         id: 'multiembed',
-        name: 'Toon Backup',
-        badge: 'Backup',
+        name: 'Toon Player Multi',
+        badge: 'Multi-Q',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}`
                 : `https://multiembed.mov/?video_id=${id}&tmdb=1`,
     },
     {
-        id: 'vidsrcme',
-        name: 'Toon Mirror',
-        badge: 'Mirror',
+        id: 'vidfast',
+        name: 'Toon Player Xtreme',
+        badge: 'Reliable',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
-                ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}`
-                : `https://vidsrc.me/embed/movie?tmdb=${id}`,
+                ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=7C3AED`
+                : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=7C3AED`,
+    },
+    {
+        id: 'smashystream',
+        name: 'SmashyStream',
+        badge: 'CinEvo',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://embed.smashystream.com/playere.php?tmdb=${id}&s=${s || 1}&e=${e || 1}`
+                : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+    },
+    {
+        id: 'toon_abyss',
+        name: 'ToonAbyss',
+        badge: 'AnimeSalt',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://vidsrc.cc/v2/embed/movie/${id}`,
+    },
+    {
+        id: 'cineby',
+        name: 'CineBy',
+        badge: 'Fast',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}?autoplay=true`
+                : `https://cineby.pro/movie/${id}?autoplay=true`,
+    },
+    {
+        id: 'rivestream',
+        name: 'RiveStream',
+        badge: 'HD',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://api.rivestream.xyz/embed/tv/?tmdb=${id}&season=${s || 1}&episode=${e || 1}`
+                : `https://api.rivestream.xyz/embed/movie/?tmdb=${id}`,
+    },
+    {
+        id: 'cinemaos',
+        name: 'CinemaOS',
+        badge: 'HD',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://cinemaos.to/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://cinemaos.to/embed/movie/${id}`,
     },
 ];
 
@@ -157,8 +211,7 @@ const getProxiedEmbedUrl = (rawUrl: string) => {
             host.includes('vidstreaming') ||
             host.includes('allanime') ||
             host.includes('anime-taku') ||
-            host.includes('filemoon') ||
-            host.includes('embed.su');
+            host.includes('filemoon');
 
         if (needsProxy) {
             return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;

@@ -49,7 +49,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const showSidebar = deviceMode === "pc" && !isWatchPage;
 
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
@@ -90,6 +90,6 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
           onClose={() => setShowProfileSettings(false)} 
         />
       )}
-    </main>
+    </div>
   );
 }
