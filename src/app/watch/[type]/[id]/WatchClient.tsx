@@ -507,8 +507,25 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     console.error('Failed to fetch servers, using fallback', err);
                 }
 
-                // Use DB servers or fallback to hardcoded
-                const baseServers = fetchedServers.length > 0 ? fetchedServers : (type === 'anime' ? ANIME_SERVERS : SERVERS);
+                // Combine DB servers and hardcoded fallbacks to ensure no servers are ever missing
+                let baseServers = [];
+                const hardcodedList = type === 'anime' ? ANIME_SERVERS : SERVERS;
+                if (fetchedServers.length > 0) {
+                    baseServers = [...fetchedServers];
+                    hardcodedList.forEach((hc: any) => {
+                        const exists = fetchedServers.some((fs: any) => 
+                            fs.id === hc.id || 
+                            fs.id.startsWith(hc.id) ||
+                            fs.name.toLowerCase().includes(hc.name.toLowerCase()) ||
+                            hc.name.toLowerCase().includes(fs.name.toLowerCase())
+                        );
+                        if (!exists) {
+                            baseServers.push(hc);
+                        }
+                    });
+                } else {
+                    baseServers = [...hardcodedList];
+                }
 
                 // Keep original order from SERVERS array (do not re-sort; priority is defined in SERVERS const)
                 setServersList([...baseServers]);
