@@ -103,6 +103,31 @@ const ANIME_SERVERS = [
     }
 ];
 
+const getProxiedEmbedUrl = (rawUrl: string) => {
+    if (!rawUrl) return "";
+    if (rawUrl.startsWith('/') || rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1')) {
+        return rawUrl;
+    }
+    try {
+        const parsed = new URL(rawUrl);
+        const needsProxy = parsed.hostname.includes('multiembed') || 
+                           parsed.hostname.includes('embed.su') || 
+                           parsed.hostname.includes('vidsrc') || 
+                           parsed.hostname.includes('vidlink') || 
+                           parsed.hostname.includes('cineby') || 
+                           parsed.hostname.includes('autoembed') || 
+                           parsed.hostname.includes('peachify') || 
+                           parsed.hostname.includes('nontongo') || 
+                           parsed.hostname.includes('vidfast') || 
+                           parsed.hostname.includes('filemoon');
+        if (needsProxy) {
+            return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
+        }
+    } catch (_) {}
+    return rawUrl;
+};
+
+
 interface MovieDetails {
     id: number;
     title?: string;
@@ -643,99 +668,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         });
     }, [activeServer, serversList, isAnimeServer]);
 
-    // Dynamic Server Health Pre-Checking & Auto-Selection
-    useEffect(() => {
-        if (!smartSwitchEnabled || !details) return;
-        if (manualServerRef.current === activeServer?.id) return;
-
-        const checkServersHealth = async () => {
-            try {
-                const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
-                const topServers = listToUse.slice(0, 3);
-                
-                const urlsToCheck = topServers.map(server => {
-                    const resolvedType = (details as any).resolvedType || (type === "cartoon" || type === "anime" ? "tv" : type);
-                    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
-                    return isAnimeServer 
-                        ? (server as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
-                        : (server as any).getUrl(resolvedType, activeId, selectedSeason, selectedEpisode);
-                });
-
-                const response = await axios.post('/api/health', { urls: urlsToCheck });
-                const results = response.data?.results || [];
-
-                const firstAliveIndex = results.findIndex((res: any) => res.alive);
-                if (firstAliveIndex !== -1) {
-                    const aliveServer = topServers[firstAliveIndex];
-                    if (activeServer && aliveServer.id !== activeServer.id) {
-                        console.log(`[ToonPlayer] Auto-selecting healthy server: ${aliveServer.name}`);
-                        setActiveServer(aliveServer);
-                    }
-                }
-            } catch (err) {
-                console.error("[ToonPlayer] Server health check failed:", err);
-            }
-        };
-
-        checkServersHealth();
-    }, [smartSwitchEnabled, type, id, selectedSeason, selectedEpisode, details, serversList, isAnimeServer, animeData, tmdbIdForAnime, activeServer]);
-
-    // Boot automatic health checker timeout (5 seconds client-side fallback)
-    useEffect(() => {
-        if (!activeServer || sourceError || playerLoaded || !smartSwitchEnabled) return;
-
-        const timer = setTimeout(() => {
-            handleAutoFallback();
-        }, 8000);
-
-        return () => clearTimeout(timer);
-    }, [activeServer, playerLoaded, sourceError, handleAutoFallback, smartSwitchEnabled]);
-
-    // Helper to match server names to live API health scores
-    const getHealthScoreForServer = (serverName: string, scoresMap: Record<string, number>): number => {
-        const name = serverName.toLowerCase();
-        if (name.includes("ultimate")) return scoresMap["vidsrc to"] ?? scoresMap["vidsrc.to"] ?? 100;
-        if (name.includes("auto")) return scoresMap["vidsrc me"] ?? scoresMap["vidsrc.me"] ?? 100;
-        if (name.includes("classic")) return 85; 
-        if (name.includes("vip")) return 95; 
-        if (name.includes("backup")) return scoresMap["superembed"] ?? 100;
-        return 100;
-    };
-
-    // Live Sync with server health engine
-    useEffect(() => {
-        const fetchHealthStats = async () => {
-            try {
-                const res = await fetch('/api/provider/health');
-                if (!res.ok) return;
-                const data = await res.json();
-                if (data && data.providers) {
-                    const scoresMap: Record<string, number> = {};
-                    data.providers.forEach((p: any) => {
-                        scoresMap[p.name.toLowerCase()] = p.score;
-                    });
-                    setHealthScores(scoresMap);
-
-                    // Filter out servers with score < 70%
-                    const filtered = SERVERS.filter(server => {
-                        const score = getHealthScoreForServer(server.name, scoresMap);
-                        return score >= 70;
-                    });
-
-                    if (filtered.length > 0) {
-                        setServersList(filtered);
-                        const activeStillExists = filtered.some(s => s.id === activeServer?.id);
-                        if (!activeStillExists && !manualServerRef.current) {
-                            setActiveServer(filtered[0]);
-                        }
-                    }
-                }
-            } catch (err) {
-                console.warn("[Health Sync] Failed to load provider health stats:", err);
-            }
-        };
-        fetchHealthStats();
-    }, [activeServer]);
+    // Automatic background health checks and timeout rotations have been removed for improved stability and UX.
 
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
@@ -1000,7 +933,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
                                 <iframe 
-                                    src={embedUrl} 
+                                    src={getProxiedEmbedUrl(embedUrl)} 
                                     className="absolute inset-0 w-full h-full border-0" 
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
@@ -1145,7 +1078,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                             <iframe
                                 key={iframeKey}
-                                src={embedUrl}
+                                src={getProxiedEmbedUrl(embedUrl)}
                                 className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                 referrerPolicy="no-referrer"
@@ -1273,9 +1206,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     onClick={() => handleManualServerSelect(server)}
                                     className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id
                                         ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold"
-                                        : failedServers.has(server.id)
-                                            ? "bg-red-500/10 text-red-400 border border-red-500/20 line-through opacity-70"
-                                            : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
+                                        : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
                                         } ${server.id === "peachify" ? "border-amber-500/50 hover:border-amber-500" : ""}`}
                                 >
                                     <div className="flex flex-col items-start gap-0.5">
@@ -1829,9 +1760,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Download Iframe */}
                             <div className="flex-1 relative" onClick={(e) => e.stopPropagation()}>
                                 <iframe
-                                    src={type === 'tv'
+                                    src={getProxiedEmbedUrl(type === 'tv'
                                         ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
-                                        : `https://dl.vidsrc.vip/movie/${id}`}
+                                        : `https://dl.vidsrc.vip/movie/${id}`)}
                                     className="w-full h-full border-0"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                     referrerPolicy="no-referrer"
@@ -1878,7 +1809,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                 {/* Right Column: Episode List (TV Shows Only) */}
                 {type === "tv" && details.seasons && details.seasons.length > 0 && (
-                    <div className="hidden xl:block w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex xl:flex-col xl:overflow-hidden pr-2 bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
+                    <div className="hidden xl:flex w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex-col xl:overflow-hidden pr-2 bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">

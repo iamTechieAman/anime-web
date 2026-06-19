@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as cheerio from 'cheerio';
+
 
 /**
  * /api/proxy/embed
@@ -104,26 +106,82 @@ export async function GET(request: NextRequest) {
         let html = await response.text();
         const embedBaseUrl = new URL(decodedUrl);
 
-        // Rewrite absolute URLs from the same origin
-        html = html.replace(
-            new RegExp(`(src|href|action)=["'](https?://${embedBaseUrl.hostname}[^"']+)["']`, 'g'),
-            (_match, attr, url) => `${attr}="${origin}/api/proxy?url=${encodeURIComponent(url)}&referer=${encodeURIComponent(referer)}"`
-        );
+        try {
+            const $ = cheerio.load(html);
 
-        // Rewrite relative paths (starting with /)
-        html = html.replace(
-            /(src|href)=["'](\/[^"']+)["']/g,
-            (_match, attr, path) => {
-                const absolute = `${embedBaseUrl.origin}${path}`;
-                return `${attr}="${origin}/api/proxy?url=${encodeURIComponent(absolute)}&referer=${encodeURIComponent(referer)}"`;
+            const resolveUrl = (val: string) => {
+                if (!val) return val;
+                // Skip special protocols or already proxied
+                if (val.startsWith('data:') || val.startsWith('blob:') || val.startsWith('javascript:') || val.includes(origin) || val.includes('localhost') || val.includes('127.0.0.1')) {
+                    return val;
+                }
+                try {
+                    // Resolve relative URLs using the decoded target URL as base
+                    const resolved = new URL(val, decodedUrl).toString();
+                    return `${origin}/api/proxy?url=${encodeURIComponent(resolved)}&referer=${encodeURIComponent(referer)}`;
+                } catch (_) {
+                    return val;
+                }
+            };
+
+            $('script').each((_, el) => {
+                const src = $(el).attr('src');
+                if (src) $(el).attr('src', resolveUrl(src));
+            });
+            $('link[rel="stylesheet"]').each((_, el) => {
+                const href = $(el).attr('href');
+                if (href) $(el).attr('href', resolveUrl(href));
+            });
+            $('img').each((_, el) => {
+                const src = $(el).attr('src');
+                if (src) $(el).attr('src', resolveUrl(src));
+            });
+            $('iframe').each((_, el) => {
+                const src = $(el).attr('src');
+                if (src) $(el).attr('src', resolveUrl(src));
+            });
+            $('video, audio, source').each((_, el) => {
+                const src = $(el).attr('src');
+                if (src) $(el).attr('src', resolveUrl(src));
+            });
+            $('a').each((_, el) => {
+                const href = $(el).attr('href');
+                if (href && (href.includes('.m3u8') || href.includes('.mp4') || href.includes('embed') || href.includes('player'))) {
+                    $(el).attr('href', resolveUrl(href));
+                }
+            });
+
+            // Ensure base tag points to target domain for any relative AJAX fetches
+            if ($('head').length > 0) {
+                if ($('base').length === 0) {
+                    $('head').prepend(`<base href="${embedBaseUrl.origin}/" />`);
+                }
             }
-        );
 
-        // Inject base tag to handle any remaining relative URLs
-        html = html.replace(
-            '<head>',
-            `<head><base href="${embedBaseUrl.origin}/" />`
-        );
+            html = $.html();
+        } catch (cheerioErr) {
+            console.error('[EmbedProxy] Cheerio parsing failed, falling back to regex:', cheerioErr);
+            // Rewrite absolute URLs from the same origin
+            html = html.replace(
+                new RegExp(`(src|href|action)=["'](https?://${embedBaseUrl.hostname}[^"']+)["']`, 'g'),
+                (_match, attr, url) => `${attr}="${origin}/api/proxy?url=${encodeURIComponent(url)}&referer=${encodeURIComponent(referer)}"`
+            );
+
+            // Rewrite relative paths (starting with /)
+            html = html.replace(
+                /(src|href)=["'](\/[^"']+)["']/g,
+                (_match, attr, path) => {
+                    const absolute = `${embedBaseUrl.origin}${path}`;
+                    return `${attr}="${origin}/api/proxy?url=${encodeURIComponent(absolute)}&referer=${encodeURIComponent(referer)}"`;
+                }
+            );
+
+            // Inject base tag to handle any remaining relative URLs
+            html = html.replace(
+                '<head>',
+                `<head><base href="${embedBaseUrl.origin}/" />`
+            );
+        }
 
         const responseHeaders = new Headers();
         responseHeaders.set('Content-Type', 'text/html; charset=utf-8');

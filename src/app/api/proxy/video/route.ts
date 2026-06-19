@@ -165,6 +165,12 @@ function serveCleanPlayer(videoUrl: string) {
 
 // Serves the original URL but completely locked down using strict iframe sandbox
 function serveFallbackIframe(targetUrl: string) {
+    let referer = "";
+    try {
+        referer = new URL(targetUrl).origin;
+    } catch (_) {}
+    const proxiedUrl = `/api/proxy/embed?url=${encodeURIComponent(targetUrl)}&referer=${encodeURIComponent(referer)}`;
+
     const html = `
     <!DOCTYPE html>
     <html lang="en">
@@ -183,9 +189,9 @@ function serveFallbackIframe(targetUrl: string) {
         <div id="cover">
             <div id="click-to-play">Click to Play Ad-Free</div>
         </div>
-        <!-- Removed strict sandbox to fix provider playback issues -->
+        <!-- Wrap in embed proxy to bypass sameorigin / X-Frame-Options blocks -->
         <iframe 
-            src="${targetUrl.replace(/"/g, '&quot;')}" 
+            src="${proxiedUrl.replace(/"/g, '&quot;')}" 
             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
             referrerpolicy="no-referrer"
         ></iframe>

@@ -19,6 +19,31 @@ import { useWatch } from "@/context/WatchContext";
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
 
+const getProxiedEmbedUrl = (rawUrl: string | null) => {
+    if (!rawUrl) return "";
+    if (rawUrl.startsWith('/') || rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1')) {
+        return rawUrl;
+    }
+    try {
+        const parsed = new URL(rawUrl);
+        const needsProxy = parsed.hostname.includes('multiembed') || 
+                           parsed.hostname.includes('embed.su') || 
+                           parsed.hostname.includes('vidsrc') || 
+                           parsed.hostname.includes('vidlink') || 
+                           parsed.hostname.includes('cineby') || 
+                           parsed.hostname.includes('autoembed') || 
+                           parsed.hostname.includes('peachify') || 
+                           parsed.hostname.includes('nontongo') || 
+                           parsed.hostname.includes('vidfast') || 
+                           parsed.hostname.includes('filemoon');
+        if (needsProxy) {
+            return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
+        }
+    } catch (_) {}
+    return rawUrl;
+};
+
+
 /** Memoized episode button to prevent full list re-render on every currentEp change */
 const EpisodeButton = React.memo(function EpisodeButton({
     ep, currentEp, onClick
@@ -267,39 +292,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         setFailedServers(new Set());
     }, [currentEp, mode]);
 
-    // Automatic loading timeout recovery (5 seconds)
-    useEffect(() => {
-        if (!loadingSource || error || !selectedServer) return;
-
-        const timer = setTimeout(() => {
-            console.warn(`[ToonPlayer Anime] Provider timed out while loading source. Triggering fallback.`);
-            handleAutoFallback();
-        }, 8000);
-
-        return () => clearTimeout(timer);
-    }, [loadingSource, error, selectedServer, handleAutoFallback]);
-
-    // Load Settings & Bookmark
-    // Load live health stats on mount
-    useEffect(() => {
-        const fetchHealthStats = async () => {
-            try {
-                const res = await fetch('/api/provider/health');
-                if (!res.ok) return;
-                const data = await res.json();
-                if (data && data.providers) {
-                    const scoresMap: Record<string, number> = {};
-                    data.providers.forEach((p: any) => {
-                        scoresMap[p.name.toLowerCase()] = p.score;
-                    });
-                    setHealthScores(scoresMap);
-                }
-            } catch (err) {
-                console.warn("[Health Sync] Failed to load provider health stats:", err);
-            }
-        };
-        fetchHealthStats();
-    }, []);
+    // Background loading timeouts and provider health checks have been removed to prevent unexpected switches.
 
     // Fetch dynamic movie/tv fallback servers from MongoDB on mount
     useEffect(() => {
@@ -682,85 +675,23 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 
                 // ALWAYS include movie servers — they are the guaranteed fallback
                 const allServers = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
+                setServers(allServers);
 
-                // Filter out servers with score < 70%
-                const filteredServers = allServers.filter((server: any) => {
-                    const score = getHealthScoreForServer(server.serverName || server.name || '', healthScores);
-                    return score >= 70;
-                });
-                const finalServersList = filteredServers.length > 0 ? filteredServers : allServers;
-                setServers(finalServersList);
-
-                // Auto-selection logic: Pick first available healthy server
-                if (finalServersList.length > 0) {
-                    const currentExists = finalServersList.find((s: any) => s.serverId === selectedServer);
+                // Pick first available server immediately
+                if (allServers.length > 0) {
+                    const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists && manualServerRef.current !== selectedServer) {
-                        const topServers = finalServersList.slice(0, 3);
-                        try {
-                             const urlsToCheck = topServers.map(s => {
-                                 if (typeof s.getUrl === 'function') {
-                                     if (s.isMovieServer && !s.isEmergency) {
-                                         return s.getUrl("tv", tmdbId || "100", 1, parseInt(String(currentEp) || "1"));
-                                     }
-                                     return s.getUrl();
-                                 }
-                                 return s.url;
-                             });
-                            const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
-                            const results = checkRes.data?.results || [];
-
-                            const firstAliveIndex = results.findIndex((res: any) => res.alive);
-                            if (firstAliveIndex !== -1) {
-                                setSelectedServer(topServers[firstAliveIndex].serverId);
-                            } else {
-                                setSelectedServer(nativeServers[0]?.serverId || finalServersList[0].serverId);
-                            }
-                        } catch (checkErr) {
-                            console.error("[ToonPlayer Anime Health] Failed to pre-check health:", checkErr);
-                            setSelectedServer(nativeServers[0]?.serverId || finalServersList[0].serverId);
-                        }
+                        setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
                     }
                 } else {
                     setSelectedServer(null);
                 }
             } catch (err) {
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
-                // Always show movie servers + emergency embeds even if native API completely fails
                 const fallbackList = [...movieServersList, ...emergencyEmbeds];
-                
-                // Filter out servers with score < 70%
-                const filteredFallbacks = fallbackList.filter((server: any) => {
-                    const score = getHealthScoreForServer(server.serverName || server.name || '', healthScores);
-                    return score >= 70;
-                });
-                const finalFallbackList = filteredFallbacks.length > 0 ? filteredFallbacks : fallbackList;
-                setServers(finalFallbackList);
-                
-                // Precheck fallbackList
-                const topFallbacks = fallbackList.slice(0, 3);
-                try {
-                     const urlsToCheck = topFallbacks.map(s => {
-                         if (typeof s.getUrl === 'function') {
-                             if (s.isMovieServer && !s.isEmergency) {
-                                 return s.getUrl("tv", tmdbId || "100", 1, parseInt(String(currentEp) || "1"));
-                             }
-                             return s.getUrl();
-                         }
-                         return s.url;
-                     });
-                    const checkRes = await axios.post('/api/health', { urls: urlsToCheck });
-                    const results = checkRes.data?.results || [];
-
-                    const firstAliveIndex = results.findIndex((res: any) => res.alive);
-                    if (firstAliveIndex !== -1) {
-                        setSelectedServer(topFallbacks[firstAliveIndex].serverId);
-                    } else {
-                        const peachify = fallbackList.find(s => s.serverId === "peachify");
-                        setSelectedServer(peachify?.serverId || fallbackList[0]?.serverId || null);
-                    }
-                } catch (e) {
-                    const peachify = fallbackList.find(s => s.serverId === "peachify");
-                    setSelectedServer(peachify?.serverId || fallbackList[0]?.serverId || null);
+                setServers(fallbackList);
+                if (fallbackList.length > 0 && !selectedServer) {
+                    setSelectedServer(fallbackList[0].serverId);
                 }
             } finally {
                 setLoadingServers(false);
@@ -863,7 +794,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         setVideoType(isM3U8 ? "m3u8" : "mp4");
                     } else {
                         // Fallback to iframe if it's a raw embed page
-                        const proxiedUrl = `/api/proxy/video?url=${encodeURIComponent(absoluteUrl)}`;
+                        let referer = "";
+                        try { referer = new URL(absoluteUrl).origin; } catch(_) {}
+                        const proxiedUrl = `/api/proxy/embed?url=${encodeURIComponent(absoluteUrl)}&referer=${encodeURIComponent(referer)}`;
                         setSourceUrl(proxiedUrl);
                         setVideoType("iframe");
                     }
@@ -960,7 +893,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     {/* Fallback Player */}
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
                         <iframe
-                            src={`/api/proxy/video?url=${encodeURIComponent(fallbackEmbedUrl)}`}
+                            src={getProxiedEmbedUrl(fallbackEmbedUrl)}
                             className="absolute inset-0 w-full h-full border-0"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
@@ -1013,7 +946,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     return (
         <>
-        <main className={`bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-300 ${dimLights ? 'brightness-[.2]' : ''}`}>
+        {/* Dim Lights Background Overlay */}
+        {dimLights && (
+            <div 
+                onClick={() => setDimLights(false)}
+                className="fixed inset-0 bg-black/90 z-[45] transition-opacity duration-300 cursor-pointer"
+            />
+        )}
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-300">
             {/* No JavaScript Fallback */}
             <noscript>
                 <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">
@@ -1056,7 +996,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                     {/* Player Column */}
                     <div className="flex-1 w-full min-w-0 touch-pan-y">
-                        <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative z-20 shadow-2xl touch-pan-y" style={{ touchAction: 'pan-y !important' }}>
+                        <div className={`w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
                             {loadingSource ? (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                                     <div className="relative">
@@ -1133,7 +1073,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         <>
                                             <iframe
                                                 ref={iframeRef}
-                                                src={sourceUrl}
+                                                src={getProxiedEmbedUrl(sourceUrl)}
                                                 className="w-full h-full border-0 bg-black"
                                                 allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                                                 onLoad={() => setLoadingSource(false)}
