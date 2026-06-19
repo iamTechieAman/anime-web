@@ -933,6 +933,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             className="absolute inset-0 w-full h-full border-0"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
+                            onLoad={(e) => {
+                                try {
+                                    const iframe = e.target as HTMLIFrameElement;
+                                    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                                    if (doc) {
+                                        const text = doc.body?.innerText || '';
+                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway') || text.includes('Server Not Responding')) {
+                                            console.warn('[ToonPlayer] Proxy error detected inside fallback iframe. Triggering autoscan...');
+                                        }
+                                    }
+                                } catch (err) {}
+                            }}
                         />
                     </div>
 
@@ -1058,8 +1070,24 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     src={getProxiedEmbedUrl(sourceUrl)}
                                     className="w-full h-full border-0 bg-black"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
-                                    onLoad={() => setLoadingSource(false)}
-                                    onError={() => setError("Iframe failed to load.")}
+                                    onLoad={(e) => {
+                                        setLoadingSource(false);
+                                        try {
+                                            const iframe = e.target as HTMLIFrameElement;
+                                            const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                                            if (doc) {
+                                                const text = doc.body?.innerText || '';
+                                                if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway') || text.includes('Server Not Responding')) {
+                                                    console.warn('[ToonPlayer] Proxy error detected inside anime iframe. Triggering autoscan fallback...');
+                                                    handleAutoFallback();
+                                                }
+                                            }
+                                        } catch (err) {}
+                                    }}
+                                    onError={() => {
+                                        setError("Iframe failed to load.");
+                                        handleAutoFallback();
+                                    }}
                                 ></iframe>
                                 
                                 {/* Global Audio Unlocker Overlay */}

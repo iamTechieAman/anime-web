@@ -1152,7 +1152,22 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             onError={() => {
                                 handleAutoFallback();
                             }}
-                            onLoad={() => setPlayerLoaded(true)}
+                            onLoad={(e) => {
+                                setPlayerLoaded(true);
+                                try {
+                                    const iframe = e.target as HTMLIFrameElement;
+                                    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                                    if (doc) {
+                                        const text = doc.body?.innerText || '';
+                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway')) {
+                                            console.warn('[ToonPlayer] Proxy error detected inside iframe. Triggering autoscan fallback...');
+                                            handleAutoFallback();
+                                        }
+                                    }
+                                } catch (err) {
+                                    // Cross-origin errors are expected and mean a third-party player loaded successfully
+                                }
+                            }}
                         />
                         <AnimatePresence>
                             {showNextOverlay && (
