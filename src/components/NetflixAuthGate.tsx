@@ -113,8 +113,8 @@ export default function NetflixAuthGate() {
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 sm:w-9 sm:h-9 relative flex items-center justify-center shrink-0">
             <img
-              src="/logo.webp"
-              alt="ToonPlayer Logo"
+              src="/icon.png"
+              alt="ToonPlayer Icon"
               className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_var(--accent-glow)]"
             />
           </div>

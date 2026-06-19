@@ -153,7 +153,7 @@ export default async function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#050505" />
-        <link rel="apple-touch-icon" href="/logo.webp" />
+        <link rel="apple-touch-icon" href="/icon.png" />
         
         {/* Google Search Console Verification */}
         <meta name="google-site-verification" content="google555e8d2c84c218f0" />

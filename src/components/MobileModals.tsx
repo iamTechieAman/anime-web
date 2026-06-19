@@ -255,7 +255,7 @@ export default function MobileModals() {
                                     <div className="p-4 bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent-secondary)]/10 rounded-xl border border-[var(--accent)]/20">
                                         <div className="flex items-center gap-3 mb-3">
                                             <div className="w-10 h-10 flex items-center justify-center p-1 bg-white/5 rounded-lg shrink-0">
-                                                <img src="/logo.webp" alt="Logo" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div class="text-white font-black text-xs">TP</div>'; }} />
+                                                <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div class="text-white font-black text-xs">TP</div>'; }} />
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-[var(--text-main)]">ToonPlayer</h4>

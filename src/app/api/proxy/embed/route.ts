@@ -151,8 +151,100 @@ export async function GET(request: NextRequest) {
                 }
             });
 
-            // Ensure base tag points to target domain for any relative AJAX fetches
+            const interceptScript = `
+                (function() {
+                    const originalFetch = window.fetch;
+                    const originalOpen = XMLHttpRequest.prototype.open;
+                    const originalPushState = window.history.pushState;
+                    const originalReplaceState = window.history.replaceState;
+                    
+                    const embedUrl = ${JSON.stringify(decodedUrl)};
+                    const embedBase = new URL(embedUrl);
+                    const proxyOrigin = window.location.origin;
+
+                    function getProxiedUrl(inputUrl) {
+                        if (!inputUrl) return inputUrl;
+                        const urlStr = typeof inputUrl === 'string' ? inputUrl : inputUrl.toString();
+                        
+                        if (urlStr.startsWith('data:') || urlStr.startsWith('blob:') || urlStr.startsWith('javascript:')) {
+                            return inputUrl;
+                        }
+                        if (urlStr.includes('/api/proxy') || urlStr.includes(proxyOrigin)) {
+                            return inputUrl;
+                        }
+                        
+                        try {
+                            const resolved = new URL(urlStr, embedUrl).toString();
+                            if (!resolved.startsWith('http')) return inputUrl;
+                            return proxyOrigin + '/api/proxy?url=' + encodeURIComponent(resolved) + '&referer=' + encodeURIComponent(embedBase.origin);
+                        } catch (e) {
+                            return inputUrl;
+                        }
+                    }
+
+                    window.fetch = function(input, init) {
+                        if (typeof input === 'string' || input instanceof URL) {
+                            return originalFetch(getProxiedUrl(input), init);
+                        } else if (input && typeof input.url === 'string') {
+                            try {
+                                const newUrl = getProxiedUrl(input.url);
+                                const newRequest = new Request(newUrl, input);
+                                return originalFetch(newRequest, init);
+                            } catch (e) {
+                                return originalFetch(input, init);
+                            }
+                        }
+                        return originalFetch(input, init);
+                    };
+
+                    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+                        if (typeof url === 'string') {
+                            url = getProxiedUrl(url);
+                        }
+                        return originalOpen.call(this, method, url, async, user, password);
+                    };
+
+                    function safeHistoryUrl(url) {
+                        if (!url) return url;
+                        try {
+                            const parsedUrl = new URL(url, window.location.href);
+                            if (parsedUrl.origin !== window.location.origin) {
+                                return parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+                            }
+                            return url;
+                        } catch (e) {
+                            return url;
+                        }
+                    }
+
+                    window.history.pushState = function(state, unused, url) {
+                        try {
+                            return originalPushState.apply(this, [state, unused, safeHistoryUrl(url)]);
+                        } catch (e) {
+                            console.warn('history.pushState error caught:', e);
+                        }
+                    };
+
+                    window.history.replaceState = function(state, unused, url) {
+                        try {
+                            return originalReplaceState.apply(this, [state, unused, safeHistoryUrl(url)]);
+                        } catch (e) {
+                            console.warn('history.replaceState error caught:', e);
+                        }
+                    };
+
+                    try {
+                        Object.defineProperty(document, 'domain', {
+                            get() { return window.location.hostname; },
+                            set(val) { console.log('document.domain set to', val, 'ignored'); return val; }
+                        });
+                    } catch(e) {}
+                })();
+            `;
+
+            // Ensure intercept script and base tag are added to head
             if ($('head').length > 0) {
+                $('head').prepend(`<script>${interceptScript}</script>`);
                 if ($('base').length === 0) {
                     $('head').prepend(`<base href="${embedBaseUrl.origin}/" />`);
                 }
@@ -161,6 +253,97 @@ export async function GET(request: NextRequest) {
             html = $.html();
         } catch (cheerioErr) {
             console.error('[EmbedProxy] Cheerio parsing failed, falling back to regex:', cheerioErr);
+            const interceptScript = `
+                (function() {
+                    const originalFetch = window.fetch;
+                    const originalOpen = XMLHttpRequest.prototype.open;
+                    const originalPushState = window.history.pushState;
+                    const originalReplaceState = window.history.replaceState;
+                    
+                    const embedUrl = ${JSON.stringify(decodedUrl)};
+                    const embedBase = new URL(embedUrl);
+                    const proxyOrigin = window.location.origin;
+
+                    function getProxiedUrl(inputUrl) {
+                        if (!inputUrl) return inputUrl;
+                        const urlStr = typeof inputUrl === 'string' ? inputUrl : inputUrl.toString();
+                        
+                        if (urlStr.startsWith('data:') || urlStr.startsWith('blob:') || urlStr.startsWith('javascript:')) {
+                            return inputUrl;
+                        }
+                        if (urlStr.includes('/api/proxy') || urlStr.includes(proxyOrigin)) {
+                            return inputUrl;
+                        }
+                        
+                        try {
+                            const resolved = new URL(urlStr, embedUrl).toString();
+                            if (!resolved.startsWith('http')) return inputUrl;
+                            return proxyOrigin + '/api/proxy?url=' + encodeURIComponent(resolved) + '&referer=' + encodeURIComponent(embedBase.origin);
+                        } catch (e) {
+                            return inputUrl;
+                        }
+                    }
+
+                    window.fetch = function(input, init) {
+                        if (typeof input === 'string' || input instanceof URL) {
+                            return originalFetch(getProxiedUrl(input), init);
+                        } else if (input && typeof input.url === 'string') {
+                            try {
+                                const newUrl = getProxiedUrl(input.url);
+                                const newRequest = new Request(newUrl, input);
+                                return originalFetch(newRequest, init);
+                            } catch (e) {
+                                return originalFetch(input, init);
+                            }
+                        }
+                        return originalFetch(input, init);
+                    };
+
+                    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+                        if (typeof url === 'string') {
+                            url = getProxiedUrl(url);
+                        }
+                        return originalOpen.call(this, method, url, async, user, password);
+                    };
+
+                    function safeHistoryUrl(url) {
+                        if (!url) return url;
+                        try {
+                            const parsedUrl = new URL(url, window.location.href);
+                            if (parsedUrl.origin !== window.location.origin) {
+                                return parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+                            }
+                            return url;
+                        } catch (e) {
+                            return url;
+                        }
+                    }
+
+                    window.history.pushState = function(state, unused, url) {
+                        try {
+                            return originalPushState.apply(this, [state, unused, safeHistoryUrl(url)]);
+                        } catch (e) {
+                            console.warn('history.pushState error caught:', e);
+                        }
+                    };
+
+                    window.history.replaceState = function(state, unused, url) {
+                        try {
+                            return originalReplaceState.apply(this, [state, unused, safeHistoryUrl(url)]);
+                        } catch (e) {
+                            console.warn('history.replaceState error caught:', e);
+                        }
+                    };
+
+                    try {
+                        Object.defineProperty(document, 'domain', {
+                            get() { return window.location.hostname; },
+                            set(val) { console.log('document.domain set to', val, 'ignored'); return val; }
+                        });
+                    } catch(e) {}
+                })();
+            `;
+
             // Rewrite absolute URLs from the same origin
             html = html.replace(
                 new RegExp(`(src|href|action)=["'](https?://${embedBaseUrl.hostname}[^"']+)["']`, 'g'),
@@ -176,10 +359,10 @@ export async function GET(request: NextRequest) {
                 }
             );
 
-            // Inject base tag to handle any remaining relative URLs
+            // Inject base tag and intercept script
             html = html.replace(
                 '<head>',
-                `<head><base href="${embedBaseUrl.origin}/" />`
+                `<head><script>${interceptScript}</script><base href="${embedBaseUrl.origin}/" />`
             );
         }
 

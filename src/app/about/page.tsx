@@ -30,7 +30,7 @@ export default function AboutPage() {
                         transition={{ duration: 0.5 }}
                         className="w-24 h-24 mx-auto flex items-center justify-center mb-6"
                     >
-                        <img src="/logo.webp" alt="ToonPlayer Logo" className="w-full h-full object-contain filter drop-shadow-[0_0_20px_var(--accent-glow)]" />
+                        <img src="/icon.png" alt="ToonPlayer Icon" className="w-full h-full object-contain filter drop-shadow-[0_0_20px_var(--accent-glow)]" />
                     </motion.div>
                     
                     <motion.h1 

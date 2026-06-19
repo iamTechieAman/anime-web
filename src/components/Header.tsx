@@ -334,16 +334,16 @@ export default function Header() {
 
       {/* === FLEX ROW: Logo | Search (desktop) | Actions === */}
       <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4 min-w-0">
-        {/* ── LOGO ── */}
         <Link 
           href="/" 
-          className={`flex items-center gap-2.5 cursor-pointer shrink-0 active:scale-95 transition-transform group ${showSidebar ? "md:hidden" : ""}`} 
+          className={`flex items-center cursor-pointer shrink-0 active:scale-95 transition-transform ${showSidebar ? "md:hidden" : ""}`} 
           onClick={clearSearch}
         >
-          <Logo />
-          <span className="text-sm font-black tracking-tight text-white uppercase whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-            Toon<span className="text-[var(--accent)]">Player</span>
-          </span>
+          <img 
+            src="/logo.webp" 
+            alt="ToonPlayer Logo" 
+            className="h-[28px] md:h-[34px] lg:h-[40px] w-auto object-contain filter drop-shadow-[0_0_12px_rgba(249,115,22,0.15)]" 
+          />
         </Link>
 
         {/* ── NAVIGATION LINKS (desktop & TV) ── */}

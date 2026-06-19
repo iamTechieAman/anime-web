@@ -72,6 +72,44 @@ export async function GET(request: NextRequest) {
 
         const contentType = response.headers.get("Content-Type") || "";
 
+        // Handle CSS rewriting to bypass CORS on sub-resources (fonts, images)
+        if (contentType.includes("text/css") || targetUrl.includes(".css")) {
+            let cssText = await response.text();
+            const cssBaseUrl = new URL(targetUrl);
+
+            // Rewrite url(...) references so they go through this proxy
+            cssText = cssText.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi, (match, quote, urlVal) => {
+                const trimmedUrl = urlVal.trim();
+                // Skip data URIs, blob, etc.
+                if (trimmedUrl.startsWith('data:') || trimmedUrl.startsWith('blob:') || trimmedUrl.startsWith('javascript:')) {
+                    return match;
+                }
+                
+                // Do not rewrite already proxied URLs
+                if (trimmedUrl.includes('/api/proxy')) {
+                    return match;
+                }
+
+                try {
+                    // Resolve relative URLs using the CSS file's URL as base
+                    const resolved = new URL(trimmedUrl, targetUrl).toString();
+                    return `url(${quote}${request.nextUrl.origin}/api/proxy?url=${encodeURIComponent(resolved)}&referer=${encodeURIComponent(cssBaseUrl.origin)}${quote})`;
+                } catch (_) {
+                    return match;
+                }
+            });
+
+            const responseHeaders = new Headers();
+            responseHeaders.set("Content-Type", "text/css; charset=utf-8");
+            responseHeaders.set("Access-Control-Allow-Origin", "*");
+            responseHeaders.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=60");
+
+            return new NextResponse(cssText, {
+                status: response.status,
+                headers: responseHeaders,
+            });
+        }
+
         // Handle m3u8 rewriting for HLS streams
         // If the content is an m3u8 playlist, we must rewrite the segment URLs inside it
         // so that they ALSO go through this proxy.
