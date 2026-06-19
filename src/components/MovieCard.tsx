@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
-import { Play, Star, Flame } from "lucide-react";
+import { Play, Star, Flame, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import React from "react";
 import Image from "next/image";
 
@@ -16,7 +16,6 @@ export interface MovieItem {
     image?: string;
     vote_average?: number;
     release_date?: string;
-
     first_air_date?: string;
     media_type?: string;
     overview?: string;
@@ -34,27 +33,26 @@ export interface MovieItem {
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
-// === MOVIE CARD (Pure CSS animations, no framer-motion on scroll) ===
+// === MOVIE CARD — Onoflix-inspired ContentCard design ===
 export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatured = false }: { item: MovieItem; type?: string; isFeatured?: boolean }) {
     const [imgError, setImgError] = useState(false);
     const [liveViewers, setLiveViewers] = useState(item.liveViewers);
     const [isVisible, setIsVisible] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
-    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const cardRef = useRef<HTMLDivElement>(null);
 
-    // Intersection Observer for visibility (replaces framer-motion whileInView)
+    // Intersection Observer for lazy reveal
     useEffect(() => {
         const el = cardRef.current;
         if (!el) return;
         const observer = new IntersectionObserver(
             ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
-            { rootMargin: "-50px", threshold: 0.1 }
+            { rootMargin: "0px", threshold: 0.05 }
         );
         observer.observe(el);
         return () => observer.disconnect();
     }, []);
 
+    // Fluctuating live viewer count
     useEffect(() => {
         if (!item.liveViewers) return;
         const interval = setInterval(() => {
@@ -67,192 +65,122 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
         return () => clearInterval(interval);
     }, [item.liveViewers]);
 
-    const handleMouseEnter = () => {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-        hoverTimeoutRef.current = setTimeout(() => {
-            setIsHovered(true);
-        }, 600); // 600ms delay before triggering "trailer"
-    };
-
-    const handleMouseLeave = () => {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-        setIsHovered(false);
-    };
-
     const title = item.title || item.name || "Untitled";
     const releaseDate = item.release_date || item.first_air_date;
     const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
     const year = (releaseDate || "").slice(0, 4);
-    const rating = item.vote_average?.toFixed(1);
-    // Ensure mediaType is never undefined — detect TV by presence of 'name' or 'first_air_date' fields
+    const rating = item.vote_average && item.vote_average > 0 ? item.vote_average.toFixed(1) : null;
     const rawMediaType = item.media_type || type;
     const mediaType = (rawMediaType && rawMediaType !== 'undefined')
         ? rawMediaType
         : (item.first_air_date || item.name ? 'tv' : 'movie');
     const watchHref = mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`;
-    const matchPercent = Math.round((item.vote_average || 0) * 10);
+
+    const posterSrc = item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image;
 
     return (
         <div
             ref={cardRef}
-            className={`card-reveal ${isVisible ? 'card-visible' : ''} ${isFeatured ? 'grid-featured' : ''} group relative transition-all duration-300 hover:scale-[1.06] hover:z-30 w-full h-full`}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={handleMouseEnter}
-            onTouchEnd={handleMouseLeave}
+            className={`group relative w-full transition-all duration-300 ease-out will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'} ${isFeatured ? 'col-span-1' : ''}`}
         >
-        <Link href={watchHref} className="block w-full h-full">
-            <div className="premium-card-container">
-                {/* Poster Image */}
-                {((item.poster_path || item.image) && !imgError) ? (
-                    <div className="relative w-full h-full overflow-hidden">
+            <Link href={watchHref} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] rounded-xl" draggable={false}>
+                {/* === Poster Container === */}
+                <div className="relative w-full overflow-hidden rounded-xl bg-zinc-900 shadow-md group-hover:shadow-2xl group-hover:shadow-black/60 transition-shadow duration-300" style={{ aspectRatio: '2/3' }}>
+                    
+                    {/* Shimmer skeleton while image loads */}
+                    <div className="absolute inset-0 shimmer-card" />
+
+                    {/* Poster Image */}
+                    {(posterSrc && !imgError) ? (
                         <Image
-                            src={item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image!}
-                            alt={`${title} (${year}) - Stream HD on ToonPlayer`}
+                            src={posterSrc}
+                            alt={`${title} (${year})`}
                             fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 20vw, 14vw"
+                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.08] relative z-[1]"
                             placeholder="blur"
                             blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                             onError={() => setImgError(true)}
                             loading="lazy"
                         />
-                    </div>
-                ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
-                        <span className="text-zinc-600 text-3xl font-bold">{title.charAt(0)}</span>
-                    </div>
-                )}
-
-                {/* Simulated Trailer Overlay (Backdrop Image) */}
-                {isHovered && item.backdrop_path && (
-                    <div className="absolute inset-0 z-10 animate-fadeSlideDown bg-black">
-                        <img
-                            src={`${IMG_BASE}/w500${item.backdrop_path}`}
-                            alt={`${title} Trailer`}
-                            className="w-full h-full object-cover opacity-80"
-                        />
-                        {/* Trailer Progress Bar Simulation */}
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                            <div className="h-full bg-[var(--accent)] w-1/3 animate-[pulse_2s_ease-in-out_infinite]" />
+                    ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950 flex flex-col items-center justify-center gap-2 z-[1]">
+                            <span className="text-3xl font-black text-zinc-700">{title.charAt(0)}</span>
+                            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest px-3 text-center line-clamp-2">{title}</span>
                         </div>
-                        <div className="absolute top-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white tracking-widest border border-white/10">
-                            Trailer Playing
+                    )}
+
+                    {/* Bottom gradient overlay — always visible */}
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-[2] pointer-events-none" />
+
+                    {/* Play button overlay on hover */}
+                    <div className="absolute inset-0 z-[3] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="w-11 h-11 rounded-full bg-white/95 shadow-2xl flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-200">
+                            <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                         </div>
                     </div>
-                )}
 
-                {/* Most Viewed badge */}
-                {item.isMostViewed && (
-                    <div className="absolute top-0 left-0 flex items-center gap-1 bg-[var(--accent)]/90 rounded-br-lg px-1.5 py-0.5 sm:px-2 sm:py-1 z-20 shadow-lg">
-                        <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white fill-white" />
-                        <span className="text-[7px] sm:text-[9px] font-bold text-white uppercase tracking-wider">
-                            Most Viewed
-                        </span>
-                    </div>
-                )}
-
-                {/* Live Stream Badge */}
-                {item.isLive && (
-                    <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-600/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-red-500/20 animate-pulse">
-                        <span className="w-1 h-1 bg-white rounded-full" />
-                        <span className="text-[7.5px] sm:text-[8px] font-black text-white uppercase tracking-widest">
-                            LIVE
-                        </span>
-                    </div>
-                )}
-
-                {/* Viewer count for live streams */}
-                {item.isLive && item.viewers && (
-                    <div className="absolute bottom-2 left-2 bg-black/75 px-1.5 py-0.5 rounded text-[8px] font-black text-white tracking-widest border border-white/5 z-20 uppercase">
-                        {item.viewers} VIEWERS
-                    </div>
-                )}
-
-                {/* Rating badge (only when not live) */}
-                {!item.isLive && (
-                    <div className={`absolute left-2 flex items-center gap-1 bg-black/70 rounded-md px-2 py-0.5 z-10 ${item.isMostViewed ? 'top-8' : 'top-2'}`}>
-                        <Star className="w-3 h-3 text-[var(--accent-warm)] fill-[var(--accent-warm)]" />
-                        <span className="text-[11px] font-bold text-white">{rating}</span>
-                    </div>
-                )}
-
-                {/* Upcoming or HD badge */}
-                {isUpcoming ? (
-                    <div className="absolute top-2 right-2 bg-[var(--accent)]/90 rounded px-1.5 py-0.5 z-20 shadow-lg border border-[var(--accent)]/30">
-                        <span className="text-[9px] font-black text-white uppercase tracking-wider">
-                            Upcoming
-                        </span>
-                    </div>
-                ) : (
-                    <div className="absolute top-2 right-2 hidden sm:block bg-[var(--accent)]/80 rounded px-1.5 py-0.5 z-10">
-                        <span className="text-[9px] font-bold text-white tracking-wider">HD</span>
-                    </div>
-                )}
-
-                {/* Premium Slide-Up Netflix-Style Overlay */}
-                <div className="premium-card-overlay">
-                    <div className="premium-card-overlay-content space-y-2">
-                        {/* Play CTA Indicator */}
-                        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg mb-1">
-                            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
-                        </div>
-                        
-                        <h4 className="text-xs font-black text-white line-clamp-2 leading-tight tracking-tight">{title}</h4>
-                        
-                        <div className="flex items-center gap-2 text-[9px] text-white/90 font-bold">
-                            {matchPercent > 0 && (
-                                <span className={`font-black ${matchPercent >= 70 ? "text-green-400" : matchPercent >= 50 ? "text-yellow-400" : "text-red-400"}`}>
-                                    {matchPercent}% Match
+                    {/* Top badges */}
+                    <div className="absolute top-0 left-0 right-0 z-[4] flex items-start justify-between p-2">
+                        <div className="flex flex-col gap-1">
+                            {item.isLive && (
+                                <span className="inline-flex items-center gap-1 bg-red-600 text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
+                                    <span className="w-1 h-1 bg-white rounded-full animate-pulse" />LIVE
                                 </span>
                             )}
-                            {year && <span>• {year}</span>}
+                            {item.isMostViewed && (
+                                <span className="inline-flex items-center gap-1 bg-[var(--accent)] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
+                                    <Flame className="w-2.5 h-2.5 fill-white" />HOT
+                                </span>
+                            )}
                         </div>
+                        <div className="flex flex-col items-end gap-1">
+                            {isUpcoming ? (
+                                <span className="bg-yellow-500/90 text-black text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded">Soon</span>
+                            ) : (
+                                <span className="bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded border border-white/10">HD</span>
+                            )}
+                        </div>
+                    </div>
 
-                        {/* Sub/Dub indicators */}
-                        {(item.availableEpisodes?.sub || item.availableEpisodes?.dub) && (
-                            <div className="flex gap-1 items-center shrink-0 border border-white/20 rounded-sm bg-black/40 overflow-hidden text-[8px] w-fit">
-                                {(item.availableEpisodes?.sub ?? 0) > 0 && (
-                                    <span className="px-1 py-0.5 font-medium border-r border-white/20 flex items-center gap-1 text-[#4ade80]">
-                                        SUB {item.availableEpisodes.sub}
-                                    </span>
-                                )}
-                                {(item.availableEpisodes?.dub ?? 0) > 0 && (
-                                    <span className="px-1 py-0.5 font-medium text-[#c084fc] flex items-center gap-1">
-                                        DUB {item.availableEpisodes.dub}
-                                    </span>
-                                )}
+                    {/* Bottom metadata overlay — visible on hover */}
+                    <div className="absolute inset-x-0 bottom-0 z-[5] p-2.5 translate-y-1 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        {/* Rating */}
+                        {rating && (
+                            <div className="flex items-center gap-1 mb-1">
+                                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                                <span className="text-xs font-bold text-white">{rating}</span>
                             </div>
+                        )}
+                        <h4 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h4>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            {year && <span className="text-[9px] text-white/70 font-medium">{year}</span>}
+                            {(item.availableEpisodes?.sub || item.availableEpisodes?.dub) && (
+                                <div className="flex gap-0.5 items-center text-[8px] font-bold">
+                                    {(item.availableEpisodes?.sub ?? 0) > 0 && <span className="text-green-400">SUB</span>}
+                                    {(item.availableEpisodes?.dub ?? 0) > 0 && <span className="text-purple-400 ml-0.5">DUB</span>}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Below-card metadata — always visible, onoflix style */}
+                <div className="mt-2 px-0.5">
+                    <h4 className="text-[12px] md:text-[13px] font-semibold text-zinc-100 line-clamp-1 leading-snug group-hover:text-white transition-colors">{title}</h4>
+                    <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-zinc-500 font-medium">
+                        {item.isLive ? (
+                            <span className="text-red-500 font-bold flex items-center gap-1">● LIVE {liveViewers ? `· ${liveViewers.toLocaleString()}` : ''}</span>
+                        ) : (
+                            <>
+                                {rating && <span className="text-yellow-500 font-bold">★ {rating}</span>}
+                                {rating && year && <span className="text-zinc-700">·</span>}
+                                {year && <span>{year}</span>}
+                            </>
                         )}
                     </div>
                 </div>
-            </div>
-            {/* Always-visible compact metadata keeps dense OTT rows scannable. */}
-            <div className="mt-2 px-0.5 pb-1">
-                <h4 className="text-[11px] md:text-xs font-extrabold text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
-                <div className="flex items-center gap-1.5 mt-1 text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold">
-                    {item.isLive ? (
-                        <span className="text-red-500 font-extrabold flex items-center gap-1 animate-pulse">
-                            ● LIVE
-                        </span>
-                    ) : rating ? (
-                        <span className="text-[var(--accent-warm)] font-extrabold flex items-center gap-0.5">
-                            ★{rating}
-                        </span>
-                    ) : null}
-                    {year && (
-                        <>
-                            <span className="text-white/25">•</span>
-                            <span>{year}</span>
-                        </>
-                    )}
-                    <span className="text-white/25">•</span>
-                    <span className="text-[var(--accent)] uppercase font-bold text-[8px] tracking-wider">
-                        {mediaType || type || "MOVIE"}
-                    </span>
-                </div>
-            </div>
-        </Link>
+            </Link>
         </div>
     );
 });
@@ -271,22 +199,76 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
     );
 });
 
-// === MOVIE ROW (Horizontal Scroll) ===
+// === MOVIE ROW — Onoflix carousel with prev/next arrows ===
 export const MovieRow = memo(function MovieRow({ items, type = "movie", title, isLarge = false }: { items: MovieItem[]; type?: string; title?: string; isLarge?: boolean }) {
-    const backupId = React.useId();
-    const scrollId = `row-${String(title || backupId).replace(/\s/g, "-")}`;
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    const checkScroll = useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 8);
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
+    }, []);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        checkScroll();
+        el.addEventListener('scroll', checkScroll, { passive: true });
+        const ro = new ResizeObserver(checkScroll);
+        ro.observe(el);
+        return () => { el.removeEventListener('scroll', checkScroll); ro.disconnect(); };
+    }, [checkScroll, items]);
+
+    const scroll = (dir: 'left' | 'right') => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const cardWidth = el.querySelector('[data-card]')?.clientWidth || 160;
+        const visibleCards = Math.floor(el.clientWidth / cardWidth);
+        const amount = cardWidth * Math.max(2, visibleCards - 1);
+        el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
+    };
 
     const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
 
     return (
-        <div className="relative w-full mb-2">
-            <div id={scrollId} className={`ott-card-grid ${isLarge ? "ott-card-grid-large" : ""}`}>
+        <div className="relative group/row w-full">
+            {/* Prev arrow */}
+            <button
+                onClick={() => scroll('left')}
+                aria-label="Scroll left"
+                className={`absolute left-0 top-0 bottom-[52px] z-20 w-10 flex items-center justify-center bg-gradient-to-r from-[#09090B]/90 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 ${canScrollLeft ? '' : 'pointer-events-none !opacity-0'}`}
+            >
+                <div className="w-8 h-8 rounded-full bg-zinc-800/80 border border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-700 transition-colors">
+                    <ChevronLeft className="w-4 h-4 text-white" />
+                </div>
+            </button>
+
+            {/* Scrollable row */}
+            <div
+                ref={scrollRef}
+                className={`ott-card-grid ${isLarge ? "ott-card-grid-large" : ""} scrollbar-hide`}
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
                 {validItems.map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} className="w-full min-w-0">
+                    <div key={`${item.id}-${idx}`} data-card className="w-full min-w-0 shrink-0">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}
             </div>
+
+            {/* Next arrow */}
+            <button
+                onClick={() => scroll('right')}
+                aria-label="Scroll right"
+                className={`absolute right-0 top-0 bottom-[52px] z-20 w-10 flex items-center justify-center bg-gradient-to-l from-[#09090B]/90 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 ${canScrollRight ? '' : 'pointer-events-none !opacity-0'}`}
+            >
+                <div className="w-8 h-8 rounded-full bg-zinc-800/80 border border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-700 transition-colors">
+                    <ChevronRight className="w-4 h-4 text-white" />
+                </div>
+            </button>
         </div>
     );
 });

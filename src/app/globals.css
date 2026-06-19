@@ -522,8 +522,16 @@ p, .text-body {
 }
 
 @keyframes shimmer {
+  0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+/* Onoflix-style card shimmer skeleton */
+@keyframes shimmer-card-anim {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 
 @keyframes shimmerPulse {
   0%, 100% { opacity: 0.4; }
@@ -1454,72 +1462,51 @@ main, .relative.z-10 {
   display: none !important; /* Chrome, Safari, Opera */
 }
 
-/* Edge-to-edge OTT rows: auto-fit cards fill every pixel of the content width. */
+/* Edge-to-edge OTT horizontal scroll carousel (onoflix-style) */
 .ott-card-grid {
-  --ott-card-min: 126px;
-  --ott-card-gap: clamp(8px, 1vw, 16px);
+  --ott-card-w: 126px;
+  --ott-card-gap: clamp(8px, 1vw, 14px);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(var(--ott-card-min), 100%), 1fr));
+  /* Horizontal scroll: fixed column widths, auto-fill as many as fit then scroll */
+  grid-auto-flow: column;
+  grid-auto-columns: var(--ott-card-w);
+  grid-template-rows: 1fr;
   gap: var(--ott-card-gap);
   width: 100%;
-  padding: clamp(8px, 1vw, 14px) 0 clamp(18px, 1.8vw, 28px);
-  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: clamp(6px, 1vw, 10px) 2px clamp(18px, 1.8vw, 28px);
+  /* Prevent vertical clipping of hover scale effects */
+  padding-left: 2px;
 }
+.ott-card-grid::-webkit-scrollbar { display: none; }
+.ott-card-grid > * { scroll-snap-align: start; }
+
 
 .ott-card-grid-large {
-  --ott-card-min: 132px;
-}
-
-.continue-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-  gap: clamp(12px, 1.2vw, 18px);
-  width: 100%;
-  padding-bottom: 18px;
-}
-
-@media (min-width: 1024px) {
-  .continue-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
+  --ott-card-w: 148px;
 }
 
 @media (min-width: 640px) {
-  .ott-card-grid {
-    --ott-card-min: 140px;
-  }
-  .ott-card-grid-large {
-    --ott-card-min: 150px;
-  }
+  .ott-card-grid { --ott-card-w: 148px; }
+  .ott-card-grid-large { --ott-card-w: 165px; }
 }
-
 @media (min-width: 1024px) {
-  .ott-card-grid {
-    --ott-card-min: 155px;
-  }
-  .ott-card-grid-large {
-    --ott-card-min: 168px;
-  }
+  .ott-card-grid { --ott-card-w: 168px; }
+  .ott-card-grid-large { --ott-card-w: 185px; }
 }
-
 @media (min-width: 1440px) {
-  .ott-card-grid {
-    --ott-card-min: 172px;
-  }
-  .ott-card-grid-large {
-    --ott-card-min: 188px;
-  }
+  .ott-card-grid { --ott-card-w: 185px; }
+  .ott-card-grid-large { --ott-card-w: 205px; }
+}
+@media (min-width: 1920px) {
+  .ott-card-grid { --ott-card-w: 210px; --ott-card-gap: 18px; }
+  .ott-card-grid-large { --ott-card-w: 230px; }
 }
 
-@media (min-width: 1920px) {
-  .ott-card-grid {
-    --ott-card-min: 190px;
-    --ott-card-gap: 18px;
-  }
-  .ott-card-grid-large {
-    --ott-card-min: 210px;
-  }
-}
 
 /* Netflix Snap-Align Cards */
 .netflix-card-snap {

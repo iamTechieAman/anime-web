@@ -6,7 +6,7 @@ import Script from "next/script";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -26,22 +26,25 @@ const getProxiedEmbedUrl = (rawUrl: string | null) => {
     }
     try {
         const parsed = new URL(rawUrl);
-        const needsProxy = parsed.hostname.includes('multiembed') || 
-                           parsed.hostname.includes('embed.su') || 
-                           parsed.hostname.includes('vidsrc') || 
-                           parsed.hostname.includes('vidlink') || 
-                           parsed.hostname.includes('cineby') || 
-                           parsed.hostname.includes('autoembed') || 
-                           parsed.hostname.includes('peachify') || 
-                           parsed.hostname.includes('nontongo') || 
-                           parsed.hostname.includes('vidfast') || 
-                           parsed.hostname.includes('filemoon');
+        // ONLY proxy sites that need server-side HTML rewriting for CORS.
+        // Direct embed providers 403 when fetched server-side — load them as plain iframes.
+        const needsProxy = parsed.hostname.includes('megacloud') ||
+                           parsed.hostname.includes('rapid-cloud') ||
+                           parsed.hostname.includes('rabbitstream') ||
+                           parsed.hostname.includes('gogocdn') ||
+                           parsed.hostname.includes('playtaku') ||
+                           parsed.hostname.includes('vidstreaming') ||
+                           parsed.hostname.includes('allanime') ||
+                           parsed.hostname.includes('anime-taku') ||
+                           parsed.hostname.includes('filemoon') ||
+                           parsed.hostname.includes('embed.su');
         if (needsProxy) {
             return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
         }
     } catch (_) {}
     return rawUrl;
 };
+
 
 
 /** Memoized episode button to prevent full list re-render on every currentEp change */
@@ -241,6 +244,39 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [showSafeGuide, setShowSafeGuide] = useState(false);
 
     const [tmdbId, setTmdbId] = useState<string | null>(null);
+    const [dimLights, setDimLights] = useState(false);
+    const [isFocusMode, setIsFocusMode] = useState(false);
+    const [isTheatreMode, setIsTheatreMode] = useState(false);
+    const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
+    const [iframeKey, setIframeKey] = useState(0);
+
+    const hasNextEpisode = () => {
+        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        return currentIdx !== -1 && currentIdx + 1 < availableEps.length;
+    };
+
+    const hasPrevEpisode = () => {
+        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        return currentIdx > 0;
+    };
+
+    const handleNextEpisode = () => {
+        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        if (currentIdx !== -1 && currentIdx + 1 < availableEps.length) {
+            const nextEp = availableEps[currentIdx + 1];
+            setCurrentEp(String(nextEp));
+            toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
+        }
+    };
+
+    const handlePrevEpisode = () => {
+        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        if (currentIdx > 0) {
+            const prevEp = availableEps[currentIdx - 1];
+            setCurrentEp(String(prevEp));
+            toast.success(`Now playing Episode ${prevEp}`, { icon: '▶️' });
+        }
+    };
 
     const { addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     
@@ -939,6 +975,229 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             </main>
         );
     }
+    const renderPlayer = () => {
+        return (
+            <div className={`w-full ${isFocusMode ? "h-screen" : "aspect-video"} bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+                {loadingSource ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-[var(--accent)]/20 blur-2xl rounded-full scale-150 animate-pulse"></div>
+                            <Loader2 className="w-16 h-16 animate-spin text-[var(--accent)] relative z-10" />
+                        </div>
+                        <div className="text-center relative z-10 px-4">
+                            <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_var(--accent-glow)]">
+                                Initializing Stream
+                            </h3>
+                            <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
+                                {loadingStatus}
+                            </p>
+                        </div>
+                    </div>
+                ) : error ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-[var(--bg-card)]/80 backdrop-blur-lg">
+                        <AlertCircle className="w-8 h-8 md:w-10 md:h-10 text-red-600/80" />
+                        <div className="max-w-md">
+                            <p className="font-bold text-[var(--text-main)] text-base md:text-lg">Stream Unavailable</p>
+                            <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1">Native sources failed. Try a movie server below.</p>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2 w-full max-w-sm">
+                            {/* Quick switch to ToonPlayer VIP */}
+                            {servers.find(s => s.serverId === "peachify") && (
+                                <button
+                                    onClick={() => {
+                                        setError(null);
+                                        manualServerRef.current = "peachify";
+                                        setSelectedServer("peachify");
+                                    }}
+                                    className="px-4 py-2 bg-[var(--accent)] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
+                                >
+                                    <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
+                                </button>
+                            )}
+                            {/* Quick switch to FMovies */}
+                            {servers.find(s => s.serverId === "fmovies") && (
+                                <button
+                                    onClick={() => {
+                                        setError(null);
+                                        manualServerRef.current = "fmovies";
+                                        setSelectedServer("fmovies");
+                                    }}
+                                    className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-[var(--accent)]/40"
+                                >
+                                    FMovies
+                                </button>
+                            )}
+                            <button
+                                onClick={() => {
+                                    setError(null);
+                                    setSourceUrl(null);
+                                    const firstNative = servers.find(s => !s.isMovieServer);
+                                    const nextServerId = firstNative?.serverId || servers[0]?.serverId || null;
+                                    if (nextServerId) manualServerRef.current = nextServerId;
+                                    setSelectedServer(nextServerId);
+                                }}
+                                className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-[var(--accent)]/40 flex items-center gap-1.5"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" /> Retry All
+                            </button>
+                            
+                            {castAvailable && (
+                                <div className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-blue-500/50">
+                                    {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : sourceUrl ? (
+                    <div className="relative w-full h-full">
+                        {videoType === "iframe" ? (
+                            <>
+                                <iframe
+                                    key={iframeKey}
+                                    ref={iframeRef}
+                                    src={getProxiedEmbedUrl(sourceUrl)}
+                                    className="w-full h-full border-0 bg-black"
+                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
+                                    onLoad={() => setLoadingSource(false)}
+                                    onError={() => setError("Iframe failed to load.")}
+                                ></iframe>
+                                
+                                {/* Global Audio Unlocker Overlay */}
+                                <AnimatePresence>
+                                    {!audioUnlocked && !loadingSource && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            onClick={() => {
+                                                setAudioUnlocked(true);
+                                                if (iframeRef.current) {
+                                                    iframeRef.current.contentWindow?.postMessage({ type: 'PLAY_WITH_SOUND' }, '*');
+                                                }
+                                            }}
+                                            className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
+                                        >
+                                            <div className="bg-[var(--accent)]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform">
+                                                <Play className="w-5 h-5 fill-current" />
+                                                Tap anywhere to enable audio
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </>
+                        ) : (
+                            <ArtPlayer
+                                key={`${id}-${currentEp}`}
+                                option={{
+                                    url: sourceUrl,
+                                    type: videoType,
+                                }}
+                                initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
+                                onTimeUpdate={(currentTime, duration) => {
+                                    addToHistory({
+                                        id: `${fullId}-${currentEp}`,
+                                        showId: fullId,
+                                        type: 'anime',
+                                        title: show?.name || 'Unknown',
+                                        poster: show?.thumbnail || ((show as any)?.image) || '',
+                                        episodeId: currentEp,
+                                        episodeNumber: Number(currentEp) || 1,
+                                        currentTime,
+                                        duration
+                                    });
+                                }}
+                                onEnded={handleVideoEnded}
+                                onError={() => setError("Player failed to load video.")}
+                                autoPlay={autoPlay}
+                                autoNext={autoNext}
+                                className="w-full h-full"
+                            />
+                        )}
+
+                        {/* Netflix-style Auto Next Overlay (Shared) */}
+                        <AnimatePresence>
+                            {showNextOverlay && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
+                                >
+                                    <motion.div
+                                        initial={{ scale: 0.9, y: 20 }}
+                                        animate={{ scale: 1, y: 0 }}
+                                        className="max-w-sm w-full"
+                                    >
+                                        <div className="relative w-20 h-20 mx-auto mb-6">
+                                            <svg className="w-full h-full transform -rotate-90">
+                                                <circle
+                                                    cx="40"
+                                                    cy="40"
+                                                    r="36"
+                                                    stroke="rgba(255,255,255,0.1)"
+                                                    strokeWidth="6"
+                                                    fill="none"
+                                                />
+                                                <motion.circle
+                                                    cx="40"
+                                                    cy="40"
+                                                    r="36"
+                                                    stroke="var(--accent)"
+                                                    strokeWidth="6"
+                                                    fill="none"
+                                                    strokeDasharray="226.08"
+                                                    animate={{ strokeDashoffset: 226.08 - (226.08 * (5 - nextCountdown)) / 5 }}
+                                                    transition={{ duration: 1, ease: "linear" }}
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-2xl font-black text-white">{nextCountdown}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <h3 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">Up Next</h3>
+                                        <p className="text-[var(--text-muted)] text-xs font-bold mb-6">
+                                            Episode {availableEps[availableEps.indexOf(currentEp) + 1] || 'Next'}
+                                        </p>
+                                        
+                                        <div className="flex items-center gap-2 justify-center">
+                                            <button 
+                                                onClick={() => {
+                                                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                                    setShowNextOverlay(false);
+                                                }}
+                                                className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs transition-all"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                                    setShowNextOverlay(false);
+                                                    const currentIndex = availableEps.map(String).indexOf(String(currentEp));
+                                                    if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
+                                                        const nextEp = availableEps[currentIndex + 1];
+                                                        setCurrentEp(String(nextEp));
+                                                    }
+                                                }}
+                                                className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg font-black text-xs transition-all flex items-center gap-1.5"
+                                            >
+                                                Play Now <Play className="w-3.5 h-3.5 fill-current" />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                ) : (
+                    <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
+                        <p>Initializing...</p>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     if (!show) return null;
 
@@ -976,557 +1235,380 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             </div>
 
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
-                <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                </Link>
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
-                        {show.name || "Anime Stream"}
-                    </h1>
-                    <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
-                        {episodes.length > 1 ? `Episode ${currentEp} · ${mode}` : `Movie · ${mode}`}
-                    </p>
+            {!isFocusMode && (
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
+                            {show.name || "Anime Stream"}
+                        </h1>
+                        <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
+                            {episodes.length > 1 ? `Episode ${currentEp} · ${mode}` : `Movie · ${mode}`}
+                        </p>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className="flex-1 w-full mx-auto pt-[60px] md:pt-[64px] pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10">
-                <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[60px] md:pt-[64px] w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
+                {isFocusMode && (
+                    <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
+                        <X className="w-3.5 h-3.5" /> Exit Focus Mode
+                    </button>
+                )}
 
-                    {/* Player Column */}
-                    <div className="flex-1 w-full min-w-0 touch-pan-y">
-                        <div className={`w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
-                            {loadingSource ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
-                                    <div className="relative">
-                                        <div className="absolute inset-0 bg-[var(--accent)]/20 blur-2xl rounded-full scale-150 animate-pulse"></div>
-                                        <Loader2 className="w-16 h-16 animate-spin text-[var(--accent)] relative z-10" />
-                                    </div>
-                                    <div className="text-center relative z-10 px-4">
-                                        <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_var(--accent-glow)]">
-                                            Initializing Stream
-                                        </h3>
-                                        <p className="text-[10px] text-white/50 uppercase tracking-[0.3em] font-medium animate-pulse">
-                                            {loadingStatus}
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : error ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-[var(--bg-card)]/80 backdrop-blur-lg">
-                                    <AlertCircle className="w-8 h-8 md:w-10 md:h-10 text-red-600/80" />
-                                    <div className="max-w-md">
-                                        <p className="font-bold text-[var(--text-main)] text-base md:text-lg">Stream Unavailable</p>
-                                        <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1">Native sources failed. Try a movie server below.</p>
-                                    </div>
-                                    <div className="flex flex-wrap justify-center gap-2 w-full max-w-sm">
-                                        {/* Quick switch to ToonPlayer VIP */}
-                                        {servers.find(s => s.serverId === "peachify") && (
-                                            <button
-                                                onClick={() => {
-                                                    setError(null);
-                                                    manualServerRef.current = "peachify";
-                                                    setSelectedServer("peachify");
-                                                }}
-                                                className="px-4 py-2 bg-[var(--accent)] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
-                                            >
-                                                <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
-                                            </button>
-                                        )}
-                                        {/* Quick switch to FMovies */}
-                                        {servers.find(s => s.serverId === "fmovies") && (
-                                            <button
-                                                onClick={() => {
-                                                    setError(null);
-                                                    manualServerRef.current = "fmovies";
-                                                    setSelectedServer("fmovies");
-                                                }}
-                                                className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-[var(--accent)]/40"
-                                            >
-                                                FMovies
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() => {
-                                                setError(null);
-                                                setSourceUrl(null);
-                                                const firstNative = servers.find(s => !s.isMovieServer);
-                                                const nextServerId = firstNative?.serverId || servers[0]?.serverId || null;
-                                                if (nextServerId) manualServerRef.current = nextServerId;
-                                                setSelectedServer(nextServerId);
-                                            }}
-                                            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-[var(--accent)]/40 flex items-center gap-1.5"
-                                        >
-                                            <RefreshCw className="w-3.5 h-3.5" /> Retry All
-                                        </button>
-                                        
-                                        {castAvailable && (
-                                            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-blue-500/50">
-                                                {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ) : sourceUrl ? (
-                                <div className="relative w-full h-full">
-                                    {videoType === "iframe" ? (
-                                        <>
-                                            <iframe
-                                                ref={iframeRef}
-                                                src={getProxiedEmbedUrl(sourceUrl)}
-                                                className="w-full h-full border-0 bg-black"
-                                                allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
-                                                onLoad={() => setLoadingSource(false)}
-                                                onError={() => setError("Iframe failed to load.")}
-                                            ></iframe>
-                                            
-                                            {/* Global Audio Unlocker Overlay */}
-                                            <AnimatePresence>
-                                                {!audioUnlocked && !loadingSource && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        exit={{ opacity: 0 }}
-                                                        onClick={() => {
-                                                            setAudioUnlocked(true);
-                                                            if (iframeRef.current) {
-                                                                iframeRef.current.contentWindow?.postMessage({ type: 'PLAY_WITH_SOUND' }, '*');
-                                                            }
-                                                        }}
-                                                        className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
-                                                    >
-                                                        <div className="bg-[var(--accent)]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform">
-                                                            <Play className="w-5 h-5 fill-current" />
-                                                            Tap anywhere to enable audio
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </>
-                                    ) : (
-                                        <ArtPlayer
-                                            key={`${id}-${currentEp}`}
-                                            option={{
-                                                url: sourceUrl,
-                                                type: videoType,
-                                            }}
-                                            initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
-                                            onTimeUpdate={(currentTime, duration) => {
-                                                addToHistory({
-                                                    id: `${fullId}-${currentEp}`,
-                                                    showId: fullId,
-                                                    type: 'anime',
-                                                    title: show?.name || 'Unknown',
-                                                    poster: show?.thumbnail || ((show as any)?.image) || '',
-                                                    episodeId: currentEp,
-                                                    episodeNumber: Number(currentEp) || 1,
-                                                    currentTime,
-                                                    duration
-                                                });
-                                            }}
-                                            onEnded={handleVideoEnded}
-                                            onError={() => setError("Player failed to load video.")}
-                                            autoPlay={autoPlay}
-                                            autoNext={autoNext}
-                                            className="w-full h-full"
-                                        />
-                                    )}
+                {(isTheatreMode || isFocusMode) && (
+                    <div className={`w-full ${isFocusMode ? "h-screen bg-black rounded-none border-0 overflow-hidden animate-fade-in" : "mb-6"}`}>{renderPlayer()}</div>
+                )}
 
-                                    {/* Netflix-style Auto Next Overlay (Shared) */}
-                                    <AnimatePresence>
-                                        {showNextOverlay && (
-                                            <motion.div 
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                className="absolute inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
-                                            >
-                                                <motion.div
-                                                    initial={{ scale: 0.9, y: 20 }}
-                                                    animate={{ scale: 1, y: 0 }}
-                                                    className="max-w-sm w-full"
-                                                >
-                                                    <div className="relative w-20 h-20 mx-auto mb-6">
-                                                        <svg className="w-full h-full transform -rotate-90">
-                                                            <circle
-                                                                cx="40"
-                                                                cy="40"
-                                                                r="36"
-                                                                stroke="rgba(255,255,255,0.1)"
-                                                                strokeWidth="6"
-                                                                fill="none"
-                                                            />
-                                                            <motion.circle
-                                                                cx="40"
-                                                                cy="40"
-                                                                r="36"
-                                                                stroke="var(--accent)"
-                                                                strokeWidth="6"
-                                                                fill="none"
-                                                                strokeDasharray="226.08"
-                                                                animate={{ strokeDashoffset: 226.08 - (226.08 * (5 - nextCountdown)) / 5 }}
-                                                                transition={{ duration: 1, ease: "linear" }}
-                                                            />
-                                                        </svg>
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <span className="text-2xl font-black text-white">{nextCountdown}</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <h3 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">Up Next</h3>
-                                                    <p className="text-[var(--text-muted)] text-xs font-bold mb-6">
-                                                        Episode {availableEps[availableEps.indexOf(currentEp) + 1] || 'Next'}
-                                                    </p>
-                                                    
-                                                    <div className="flex items-center gap-2 justify-center">
-                                                        <button 
-                                                            onClick={() => {
-                                                                if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                                                setShowNextOverlay(false);
-                                                            }}
-                                                            className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs transition-all"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => {
-                                                                if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                                                setShowNextOverlay(false);
-                                        const currentIndex = availableEps.map(String).indexOf(String(currentEp));
-                                        if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
-                                            const nextEp = availableEps[currentIndex + 1];
-                                            setCurrentEp(String(nextEp));
-                                                                }
-                                                            }}
-                                                            className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg font-black text-xs transition-all flex items-center gap-1.5"
-                                                        >
-                                                            Play Now <Play className="w-3.5 h-3.5 fill-current" />
-                                                        </button>
-                                                    </div>
-                                                </motion.div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                            ) : (
-                                <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
-                                    <p>Initializing...</p>
-                                </div>
-                            )}
-                        </div>
+                {!isFocusMode && (
+                    <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
-                        {/* Safe Stream & Stats */}
-                        <div className="flex flex-wrap items-center gap-3 pt-4">
-                            {/* Next Episode Button */}
-                            {availableEps && currentEp && availableEps.map(String).indexOf(String(currentEp)) < availableEps.length - 1 && (
-                                <button
-                                    onClick={() => {
-                                        const currentIndex = availableEps.map(String).indexOf(String(currentEp));
-                                        if (currentIndex !== -1 && currentIndex < availableEps.length - 1) {
-                                            const nextEp = availableEps[currentIndex + 1];
-                                            setCurrentEp(String(nextEp));
-                                            toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
-                                        }
-                                    }}
-                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:from-[var(--accent-secondary)] hover:to-[var(--accent)] text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_var(--accent-glow)] mr-auto"
-                                >
-                                    Next Episode <Play className="w-3.5 h-3.5 fill-current" />
-                                </button>
-                            )}
+                        {/* Player Column */}
+                        <div className="flex-1 w-full min-w-0 touch-pan-y">
+                            {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
 
-                            <button 
-                                onClick={() => setDimLights(!dimLights)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-white text-xs font-black uppercase tracking-wider transition-all"
-                                title="Toggle Cinema Light Effect"
-                            >
-                                <Zap className="w-3.5 h-3.5" />
-                                <span>{dimLights ? 'Brighten' : 'Dim Lights'}</span>
-                            </button>
-
-                            <button 
-                                onClick={() => setShowSafeGuide(true)}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider hover:bg-emerald-500/20 transition-colors"
-                            >
-                                <Shield className="w-3 h-3" />
-                                SafeStream Protected
-                            </button>
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-[10px] font-black uppercase tracking-wider">
-                                <Zap className="w-3 h-3" />
-                                Edge Optimized
-                            </div>
-                        </div>
-
-                        {/* Ad-Blocker Guide Modal */}
-                        <AnimatePresence>
-                            {showSafeGuide && (
-                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowSafeGuide(false)}>
-                                    <motion.div 
-                                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                        className="max-w-md w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 space-y-4 shadow-2xl"
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        <div className="flex items-center gap-3 text-emerald-400 mb-2">
-                                            <Shield className="w-6 h-6" />
-                                            <h3 className="text-xl font-bold text-white">SafeStream Guide</h3>
-                                        </div>
-                                        <p className="text-[var(--text-muted)] text-sm leading-relaxed">
-                                            We've enabled <span className="text-white font-bold">Player Guard</span> to block 99% of redirects and popups. To reach <span className="text-emerald-400 font-bold">100% Ad-Free</span> experience, we highly recommend using AdGuard DNS.
-                                        </p>
-                                        <div className="bg-black/40 rounded-xl p-4 border border-white/5 space-y-3">
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span className="text-[var(--text-muted)]">DNS Server:</span>
-                                                <code className="text-[var(--accent)] font-bold selection:bg-[var(--accent)]/20">dns.adguard.com</code>
-                                            </div>
-                                            <p className="text-[9px] text-[var(--text-muted)] italic">
-                                                * This will block ads across all streaming sites and providers automatically.
-                                            </p>
-                                        </div>
-                                        <button 
-                                            onClick={() => setShowSafeGuide(false)}
-                                            className="w-full py-3 bg-white text-black rounded-xl font-black text-sm hover:bg-white/90 transition-colors uppercase tracking-widest"
-                                        >
-                                            Got it
-                                        </button>
-                                    </motion.div>
-                                </div>
-                            )}
-                        </AnimatePresence>
-
-                        {/* Troubleshooting & Help */}
-                        <div className="mt-4 p-4 bg-slate-900/40 backdrop-blur-sm rounded-xl border border-slate-800/60 shadow-inner">
-                            <div className="flex items-center gap-2 mb-3 text-amber-500/90 font-medium">
-                                <AlertTriangle className="w-4 h-4" />
-                                <span className="text-sm">Playback Troubleshooting</span>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-400">
-                                <div className="space-y-2">
-                                    <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
-                                        <span>If video is not found or refused to connect, switch to <b>VidSrc Pro</b> or <b>VidSrc PM</b>.</span>
-                                    </p>
-                                    <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
-                                        <span>Disable <b>Ad-Blockers</b> if you see a blank player or "Connection Refused".</span>
-                                    </p>
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
-                                        <span>Try switching from <b>SUB to DUB</b> (or vice versa) if one source fails.</span>
-                                    </p>
-                                    <p className="flex items-start gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
-                                        <span>If using <b>WatchAnimeWorld</b>, some old links may return 404—switch server.</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Server & Meta Controls - JustAnime Style */}
-                        <div className="mt-4 bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-                                {/* Type Selection (SUB/DUB) */}
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Source:</span>
-                                    <div className="flex bg-[var(--bg-main)] p-1 rounded-md border border-[var(--border-color)]">
-                                        <button
-                                            onClick={() => setMode("sub")}
-                                            className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
-                                        >
-                                            SUB
-                                        </button>
-                                        <button
-                                            onClick={() => setMode("dub")}
-                                            className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
-                                        >
-                                            DUB
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Multi-Audio Quick Select */}
-                                <button
-                                    onClick={() => {
-                                        const peachify = servers.find(s => s.serverId === "peachify");
-                                        if (peachify) {
-                                            manualServerRef.current = "peachify";
-                                            setSelectedServer("peachify");
-                                            toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
-                                        } else {
-                                            toast.error("Multi-Audio server not available for this title");
-                                        }
-                                    }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                        selectedServer === "peachify" 
-                                        ? "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
-                                        : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
-                                    }`}
-                                >
-                                    <Sparkles className={`w-4 h-4 ${selectedServer === "peachify" ? "animate-pulse" : ""}`} />
-                                    <span className="text-xs font-black uppercase tracking-wider">Multi-Audio</span>
-                                </button>
-
-                                {/* Server Selection Dropdown */}
-                                <div className="flex items-center gap-3 relative" ref={serverRef}>
-                                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Server:</span>
+                            {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
+                            <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md mb-4">
+                                <div className="flex items-center gap-2">
                                     <button
-                                        onClick={() => setShowServerDropdown(!showServerDropdown)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] hover:bg-white/5 border border-[var(--border-color)] rounded-lg text-sm font-bold text-white transition-all min-w-[180px] justify-between group"
+                                        onClick={handlePrevEpisode}
+                                        disabled={!hasPrevEpisode()}
+                                        className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
+                                        title="Previous Episode"
+                                    ><ChevronLeft className="w-4 h-4" /></button>
+                                    <span className="text-xs font-semibold text-zinc-400 min-w-[70px] text-center">
+                                        EP {currentEp}
+                                    </span>
+                                    <button
+                                        onClick={handleNextEpisode}
+                                        disabled={!hasNextEpisode()}
+                                        className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
+                                        title="Next Episode"
+                                    ><ChevronRight className="w-4 h-4" /></button>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setIframeKey(prev => prev + 1)}
+                                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all"
+                                        title="Reload Player"
+                                    ><RefreshCw className="w-4 h-4" /></button>
+                                    <button
+                                        onClick={() => {
+                                            setIsTheatreMode(!isTheatreMode);
+                                            if (isFocusMode) setIsFocusMode(false);
+                                        }}
+                                        className={`p-2 border rounded-xl transition-all ${
+                                            isTheatreMode 
+                                                ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
+                                                : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                        }`}
+                                        title="Theatre Mode"
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <Server className="w-4 h-4 text-[var(--accent)]" />
-                                            <span>{servers.find(s => s.serverId === selectedServer)?.serverName || "Select Server"}</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <rect x="2" y="4" width="20" height="16" rx="2" />
+                                            <line x1="2" y1="16" x2="22" y2="16" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsFocusMode(!isFocusMode);
+                                            if (isTheatreMode) setIsTheatreMode(false);
+                                        }}
+                                        className={`p-2 border rounded-xl transition-all ${
+                                            isFocusMode 
+                                                ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
+                                                : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                        }`}
+                                        title="Cinematic Focus Mode"
+                                    ><Shield className="w-4 h-4" /></button>
+                                    <button 
+                                        onClick={() => setDimLights(!dimLights)}
+                                        className={`p-2 border rounded-xl transition-all ${
+                                            dimLights 
+                                                ? "bg-amber-500/20 border-amber-500 text-amber-500 font-bold" 
+                                                : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                        }`}
+                                        title="Toggle Cinema Light Effect"
+                                    >
+                                        <Zap className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Safe Stream & Stats */}
+                            <div className="flex flex-wrap items-center gap-3 mb-4">
+                                <button 
+                                    onClick={() => setShowSafeGuide(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider hover:bg-emerald-500/20 transition-colors"
+                                >
+                                    <Shield className="w-3 h-3" />
+                                    SafeStream Protected
+                                </button>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-[10px] font-black uppercase tracking-wider">
+                                    <Zap className="w-3 h-3" />
+                                    Edge Optimized
+                                </div>
+                            </div>
+
+                            {/* Troubleshooting & Help */}
+                            <div className="mt-4 p-4 bg-slate-900/40 backdrop-blur-sm rounded-xl border border-slate-800/60 shadow-inner">
+                                <div className="flex items-center gap-2 mb-3 text-amber-500/90 font-medium">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    <span className="text-sm">Playback Troubleshooting</span>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-400">
+                                    <div className="space-y-2">
+                                        <p className="flex items-start gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span>If video is not found or refused to connect, switch to alternative servers.</span>
+                                        </p>
+                                        <p className="flex items-start gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span>Disable <b>Ad-Blockers</b> if you see a blank player or "Connection Refused".</span>
+                                        </p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="flex items-start gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span>Try switching from <b>SUB to DUB</b> (or vice versa) if one source fails.</span>
+                                        </p>
+                                        <p className="flex items-start gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span>If links return 404, try dynamic fallback movie servers.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Server & Meta Controls - JustAnime Style */}
+                            <div className="mt-4 bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                                    {/* Type Selection (SUB/DUB) */}
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Source:</span>
+                                        <div className="flex bg-[var(--bg-main)] p-1 rounded-md border border-[var(--border-color)]">
+                                            <button
+                                                onClick={() => setMode("sub")}
+                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                            >
+                                                SUB
+                                            </button>
+                                            <button
+                                                onClick={() => setMode("dub")}
+                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                            >
+                                                DUB
+                                            </button>
                                         </div>
-                                        <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] group-hover:text-white transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
+                                    </div>
+
+                                    {/* Multi-Audio Quick Select */}
+                                    <button
+                                        onClick={() => {
+                                            const peachify = servers.find(s => s.serverId === "peachify");
+                                            if (peachify) {
+                                                manualServerRef.current = "peachify";
+                                                setSelectedServer("peachify");
+                                                toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
+                                            } else {
+                                                toast.error("Multi-Audio server not available for this title");
+                                            }
+                                        }}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                                            selectedServer === "peachify" 
+                                            ? "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
+                                            : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
+                                        }`}
+                                    >
+                                        <Sparkles className={`w-4 h-4 ${selectedServer === "peachify" ? "animate-pulse" : ""}`} />
+                                        <span className="text-xs font-black uppercase tracking-wider">Multi-Audio</span>
                                     </button>
 
-                                    <AnimatePresence>
-                                        {showServerDropdown && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-md"
-                                            >
-                                                <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs font-black uppercase text-white tracking-widest">Select Source</span>
+                                    {/* Server Selection Dropdown */}
+                                    <div className="flex items-center gap-3 relative" ref={serverRef}>
+                                        <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Server:</span>
+                                        <button
+                                            onClick={() => setShowServerDropdown(!showServerDropdown)}
+                                            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] hover:bg-white/5 border border-[var(--border-color)] rounded-lg text-sm font-bold text-white transition-all min-w-[180px] justify-between group"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Server className="w-4 h-4 text-[var(--accent)]" />
+                                                <span>{servers.find(s => s.serverId === selectedServer)?.serverName || "Select Server"}</span>
+                                            </div>
+                                            <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] group-hover:text-white transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        <AnimatePresence>
+                                            {showServerDropdown && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-md"
+                                                >
+                                                    <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-xs font-black uppercase text-white tracking-widest">Select Source</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="max-h-64 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
-                                                    {servers.map((server, index) => (
-                                                        <button
-                                                            key={`${server.serverId}-${server.type}-${index}`}
-                                                            onClick={() => {
-                                                                manualServerRef.current = server.serverId;
-                                                                setSelectedServer(server.serverId);
-                                                                setShowServerDropdown(false);
-                                                            }}
-                                                            className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
-                                                                selectedServer === server.serverId
-                                                                    ? "bg-[var(--accent)]/10 text-white border border-[var(--accent)]/30 shadow-lg"
-                                                                    : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
-                                                            }`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                                                    server.isMovieServer ? 'bg-[var(--accent)]/10 text-[var(--accent)]' : 'bg-[var(--accent)]/10 text-[var(--accent)]'
-                                                                }`}>
-                                                                    <Play className={`w-3.5 h-3.5 ${selectedServer === server.serverId ? 'fill-current' : ''}`} />
+                                                    <div className="max-h-64 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
+                                                        {servers.map((server, index) => (
+                                                            <button
+                                                                key={`${server.serverId}-${server.type}-${index}`}
+                                                                onClick={() => {
+                                                                    manualServerRef.current = server.serverId;
+                                                                    setSelectedServer(server.serverId);
+                                                                    setShowServerDropdown(false);
+                                                                }}
+                                                                className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
+                                                                    selectedServer === server.serverId
+                                                                        ? "bg-[var(--accent)]/10 text-white border border-[var(--accent)]/30 shadow-lg"
+                                                                        : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent)]/10 text-[var(--accent)]">
+                                                                        <Play className={`w-3.5 h-3.5 ${selectedServer === server.serverId ? 'fill-current' : ''}`} />
+                                                                    </div>
+                                                                    <div className="text-left">
+                                                                        <p className="text-xs font-bold leading-none mb-1">{server.serverName}</p>
+                                                                        <p className="text-[9px] uppercase tracking-tighter opacity-60">
+                                                                            {server.badge || (server.isMovieServer ? "Movie Server" : "Native HLS")}
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="text-left">
-                                                                    <p className="text-xs font-bold leading-none mb-1">{server.serverName}</p>
-                                                                    <p className="text-[9px] uppercase tracking-tighter opacity-60">
-                                                                        {server.badge || (server.isMovieServer ? "Movie Server" : "Native HLS")}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            {selectedServer === server.serverId && (
-                                                                <Check className="w-4 h-4 text-[var(--accent)]" />
-                                                            )}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </motion.div>
+                                                                {selectedServer === server.serverId && (
+                                                                    <Check className="w-4 h-4 text-[var(--accent)]" />
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
+                                    <div className="flex items-center gap-2 text-[var(--accent)]">
+                                        <Sparkles className="w-4 h-4" />
+                                        Premium Auto-Features Active
+                                    </div>
+                                    <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-md transition-colors text-white border border-white/5 disabled:opacity-50">
+                                       <Share2 className="w-4 h-4" /> Share
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Metadata */}
+                            <div className="mt-6 flex flex-col gap-2 relative">
+                                <div className="flex items-start justify-between gap-4">
+                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex-1 font-sora">{show.name}</h1>
+                                    
+                                    <button
+                                        onClick={toggleBookmark}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shrink-0 ${
+                                            isBookmarked 
+                                                ? "bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/40 hover:bg-[var(--accent)]/20" 
+                                                : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
+                                        }`}
+                                    >
+                                        {isBookmarked ? (
+                                            <>
+                                                <BookmarkCheck className="w-5 h-5 fill-current" />
+                                                <span className="hidden sm:inline font-bold text-sm">In Watchlist</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <BookmarkPlus className="w-5 h-5" />
+                                                <span className="hidden sm:inline font-bold text-sm">Add to Watchlist</span>
+                                            </>
                                         )}
-                                    </AnimatePresence>
+                                    </button>
                                 </div>
-                            </div>
-
-                            {/* Auto Toggles Removed — Now Permanent */}
-                            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
-                                <div className="flex items-center gap-2 text-[var(--accent)]">
-                                    <Sparkles className="w-4 h-4" />
-                                    Premium Auto-Features Active
-                                </div>
-                                <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-md transition-colors text-white border border-white/5 disabled:opacity-50">
-                                   <Share2 className="w-4 h-4" /> Share
-                                </button>
+                                <p className="text-sm text-[var(--text-muted)]">
+                                    {episodes.length > 1 ? `Watching Episode ${currentEp} in ${mode.toUpperCase()}` : `Watching Movie in ${mode.toUpperCase()}`}
+                                </p>
                             </div>
                         </div>
 
-                        {/* Metadata */}
-                        <div className="mt-6 flex flex-col gap-2 relative">
-                            <div className="flex items-start justify-between gap-4">
-                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex-1 font-sora">{show.name}</h1>
-                                
-                                <button
-                                    onClick={toggleBookmark}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shrink-0 ${
-                                        isBookmarked 
-                                            ? "bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/40 hover:bg-[var(--accent)]/20" 
-                                            : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
-                                    }`}
-                                >
-                                    {isBookmarked ? (
-                                        <>
-                                            <BookmarkCheck className="w-5 h-5 fill-current" />
-                                            <span className="hidden sm:inline font-bold text-sm">In Watchlist</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <BookmarkPlus className="w-5 h-5" />
-                                            <span className="hidden sm:inline font-bold text-sm">Add to Watchlist</span>
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            <p className="text-sm text-[var(--text-muted)]">
-                                {episodes.length > 1 ? `Watching Episode ${currentEp} in ${mode.toUpperCase()}` : `Watching Movie in ${mode.toUpperCase()}`}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Sidebar - Fixed Height Vertical Episode List */}
-                    {episodes.length > 1 && (
-                        <div className="w-full xl:w-[350px] flex-shrink-0">
-                            <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px]">
-                                {/* Sticky Header with Search */}
-                                <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
-                                    </div>
-                                    <div className="relative">
-                                        <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                                        <input 
-                                            type="number"
-                                            placeholder="Search episode..."
-                                            value={epFilter}
-                                            className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-[var(--accent)]/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
-                                            onChange={(e) => setEpFilter(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
-                                    {(() => {
-                                        const filteredEpisodes = epFilter
-                                            ? episodes.filter(ep => String(ep).includes(epFilter))
-                                            : episodes;
-                                        return filteredEpisodes.map((ep) => (
-                                            <EpisodeButton
-                                                key={ep}
-                                                ep={ep}
-                                                currentEp={currentEp}
-                                                onClick={() => setCurrentEp(ep)}
+                        {/* Sidebar - Fixed Height Vertical Episode List */}
+                        {episodes.length > 1 && (
+                            <div className="w-full xl:w-[350px] flex-shrink-0">
+                                <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px]">
+                                    {/* Sticky Header with Search */}
+                                    <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                                                    <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="List View"><List className="w-3.5 h-3.5" /></button>
+                                                    <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="Grid View"><LayoutGrid className="w-3.5 h-3.5" /></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="relative">
+                                            <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                                            <input 
+                                                type="number"
+                                                placeholder="Search episode..."
+                                                value={epFilter}
+                                                className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-[var(--accent)]/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
+                                                onChange={(e) => setEpFilter(e.target.value)}
                                             />
-                                        ));
-                                    })()
-                                    }
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
+                                        {(() => {
+                                            const filteredEpisodes = epFilter
+                                                ? episodes.filter(ep => String(ep).includes(epFilter))
+                                                : episodes;
+                                            
+                                            if (episodeLayoutMode === "grid") {
+                                                return (
+                                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-1.5 p-1">
+                                                        {filteredEpisodes.map((ep) => (
+                                                            <button 
+                                                                key={ep} 
+                                                                onClick={() => setCurrentEp(String(ep))} 
+                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(ep) ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                            >
+                                                                {ep}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            }
+
+                                            return filteredEpisodes.map((ep) => (
+                                                <EpisodeButton
+                                                    key={ep}
+                                                    ep={ep}
+                                                    currentEp={currentEp}
+                                                    onClick={() => setCurrentEp(String(ep))}
+                                                />
+                                            ));
+                                        })()
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                </div> {/* End flex-row */}
+                    </div>
+                )}
 
                 {/* Smart Recommendations - Full Width Below Player+Sidebar */}
-                <div className="mt-6 w-full space-y-6">
-                    <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
-                    <CommentsSection contentId={id} category="anime" />
-                </div>
+                {!isFocusMode && (
+                    <div className="mt-6 w-full space-y-6">
+                        <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
+                        <CommentsSection contentId={id} category="anime" />
+                    </div>
+                )}
 
             </div>
         </main>

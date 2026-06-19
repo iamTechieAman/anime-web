@@ -7,7 +7,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, LayoutGrid, List, Search } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -110,22 +110,27 @@ const getProxiedEmbedUrl = (rawUrl: string) => {
     }
     try {
         const parsed = new URL(rawUrl);
-        const needsProxy = parsed.hostname.includes('multiembed') || 
-                           parsed.hostname.includes('embed.su') || 
-                           parsed.hostname.includes('vidsrc') || 
-                           parsed.hostname.includes('vidlink') || 
-                           parsed.hostname.includes('cineby') || 
-                           parsed.hostname.includes('autoembed') || 
-                           parsed.hostname.includes('peachify') || 
-                           parsed.hostname.includes('nontongo') || 
-                           parsed.hostname.includes('vidfast') || 
-                           parsed.hostname.includes('filemoon');
+        // ONLY proxy sites that need server-side HTML rewriting for CORS.
+        // Direct embed providers (vidlink, vidsrc, cineby, etc.) work fine as plain iframes
+        // and return 403 when fetched server-side — never proxy them.
+        const needsProxy = parsed.hostname.includes('megacloud') || 
+                           parsed.hostname.includes('rapid-cloud') ||
+                           parsed.hostname.includes('rabbitstream') ||
+                           parsed.hostname.includes('gogocdn') ||
+                           parsed.hostname.includes('playtaku') ||
+                           parsed.hostname.includes('vidstreaming') ||
+                           parsed.hostname.includes('allanime') ||
+                           parsed.hostname.includes('anime-taku') ||
+                           parsed.hostname.includes('filemoon') ||
+                           parsed.hostname.includes('embed.su');
         if (needsProxy) {
             return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
         }
     } catch (_) {}
+    // Return URL as-is — browser loads it directly in the iframe (no server-side fetch)
     return rawUrl;
 };
+
 
 
 interface MovieDetails {
@@ -386,6 +391,97 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [loadingEpisodes, setLoadingEpisodes] = useState(false);
     const [mode, setMode] = useState<"sub" | "dub">("sub");
     const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+    const [isFocusMode, setIsFocusMode] = useState(false);
+    const [isTheatreMode, setIsTheatreMode] = useState(false);
+    const [episodeSearch, setEpisodeSearch] = useState("");
+    const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
+
+    const hasNextEpisode = () => {
+        if (type === 'movie') return false;
+        if (type === 'anime') {
+            const currentIdx = episodes.indexOf(String(selectedEpisode));
+            return currentIdx !== -1 && currentIdx + 1 < episodes.length;
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) return true;
+        const currentSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason);
+        const nextSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason + 1);
+        if (currentSeasonData && selectedEpisode >= currentSeasonData.episode_count && nextSeasonData) return true;
+        return false;
+    };
+
+    const hasPrevEpisode = () => {
+        if (type === 'movie') return false;
+        if (type === 'anime') {
+            const currentIdx = episodes.indexOf(String(selectedEpisode));
+            return currentIdx > 0;
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx > 0) return true;
+        if (selectedSeason > 1) {
+            const prevSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason - 1);
+            if (prevSeasonData) return true;
+        }
+        return false;
+    };
+
+    const handleNextEpisode = () => {
+        if (type === 'anime') {
+            const currentIdx = episodes.indexOf(String(selectedEpisode));
+            if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
+                const nextEp = episodes[currentIdx + 1];
+                setSelectedEpisode(parseInt(nextEp) || (selectedEpisode + 1));
+            }
+            return;
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        let nextEp = selectedEpisode + 1;
+        let nextSeason = selectedSeason;
+        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
+            nextEp = episodes[currentIdx + 1].episode_number;
+        } else {
+            const currentSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason);
+            if (currentSeasonData && selectedEpisode >= currentSeasonData.episode_count) {
+                nextSeason += 1;
+                nextEp = 1;
+            }
+        }
+        setSelectedEpisode(nextEp);
+        setSelectedSeason(nextSeason);
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set("s", nextSeason.toString());
+        newUrl.searchParams.set("e", nextEp.toString());
+        router.push(newUrl.pathname + newUrl.search);
+    };
+
+    const handlePrevEpisode = () => {
+        if (type === 'anime') {
+            const currentIdx = episodes.indexOf(String(selectedEpisode));
+            if (currentIdx > 0) {
+                const prevEp = episodes[currentIdx - 1];
+                setSelectedEpisode(parseInt(prevEp) || (selectedEpisode - 1));
+            }
+            return;
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        let prevEp = selectedEpisode - 1;
+        let prevSeason = selectedSeason;
+        if (currentIdx > 0) {
+            prevEp = episodes[currentIdx - 1].episode_number;
+        } else if (selectedSeason > 1) {
+            const prevSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason - 1);
+            if (prevSeasonData) {
+                prevSeason -= 1;
+                prevEp = prevSeasonData.episode_count || 1;
+            }
+        }
+        setSelectedEpisode(prevEp);
+        setSelectedSeason(prevSeason);
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set("s", prevSeason.toString());
+        newUrl.searchParams.set("e", prevEp.toString());
+        router.push(newUrl.pathname + newUrl.search);
+    };
 
     // Read query parameters or history on load
     useEffect(() => {
@@ -969,1009 +1065,564 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     if (details && (details as any).resolvedType) {
         resolvedMediaType = (details as any).resolvedType;
     } else if (type === "cartoon" || type === "anime") {
-        resolvedMediaType = "tv"; // Fallback cartoon/anime to tv
+        resolvedMediaType = "tv";
     }
-
     const embedUrl = isAnimeServer 
         ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
         : activeServer.getUrl(resolvedMediaType, activeId, selectedSeason, selectedEpisode);
-
-    return (
-        <>
-        <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
-            {/* Top Navigation Bar — Netflix-style compact fixed header */}
-            <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
-                <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                </Link>
-                <div className="flex-1 min-w-0">
-                    <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
-                        {type === 'cartoon' ? `Cartoon: ${title}` : title}
-                    </h1>
-                    {(type === 'tv' || type === 'anime' || type === 'cartoon') && resolvedMediaType !== 'movie' && (
-                        <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
-                            Season {selectedSeason} · Episode {selectedEpisode}
-                        </p>
-                    )}
+    const renderPlayer = () => {
+        return (
+            <div className="relative w-full bg-black touch-pan-y">
+                <div className="w-full touch-pan-y">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className={`relative w-full ${isFocusMode ? "h-screen" : "aspect-video"} bg-[#12131A] ${isFocusMode ? "rounded-none border-0" : "rounded-2xl border border-white/5"} overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] shadow-[var(--accent)]/5 touch-pan-y`}
+                        style={{ touchAction: 'pan-y !important' }}
+                    >
+                        {!playerLoaded && (
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--bg-card)]">
+                                <div className="relative">
+                                    <div className="w-16 h-16 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+                                    <Play className="absolute inset-0 m-auto w-6 h-6 text-blue-400" />
+                                </div>
+                                <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">{loadingStatus}</p>
+                                <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
+                                {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
+                            </div>
+                        )}
+                        {isUpcoming && playerLoaded && (
+                            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 p-8 text-center backdrop-blur-md">
+                                <div className="flex flex-col items-center max-w-md text-center p-8 bg-zinc-950/40 border border-white/5 rounded-2xl backdrop-blur-md">
+                                    <Calendar className="w-16 h-16 text-[var(--accent)] mb-6" />
+                                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-2 font-sora">Upcoming Episode</h2>
+                                    <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-6 font-medium">This episode is scheduled to air soon. We'll update the streams as soon as it becomes available.</p>
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={() => router.back()}
+                                            className="px-6 py-2.5 bg-[var(--accent)] text-white rounded-lg font-bold hover:opacity-90 transition-all uppercase tracking-widest text-[10px]"
+                                        >
+                                            Explore Others
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {sourceError && !isAnimeServer && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center">
+                                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                                    <X className="w-8 h-8 text-red-500" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">Server Not Responding</h3>
+                                <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md">
+                                    This content might not be available on {activeServer.name}.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => setIframeKey(prev => prev + 1)}
+                                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-[var(--accent)] hover:from-blue-500 hover:to-[var(--accent)] text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                                    >
+                                        <Zap className="w-4 h-4" /> Try Refreshing
+                                    </button>
+                                    {type === 'anime' && (
+                                        <button 
+                                            onClick={() => setActiveServer(ANIME_SERVERS[0])}
+                                            className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                                        >
+                                            <Server className="w-4 h-4" /> Anime Server
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        <iframe
+                            key={iframeKey}
+                            src={getProxiedEmbedUrl(embedUrl)}
+                            className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-pointer-lock"
+                            onError={() => {
+                                handleAutoFallback();
+                            }}
+                            onLoad={() => setPlayerLoaded(true)}
+                        />
+                        <AnimatePresence>
+                            {showNextOverlay && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
+                                >
+                                    <motion.div
+                                        initial={{ scale: 0.9, y: 20 }}
+                                        animate={{ scale: 1, y: 0 }}
+                                        className="max-w-sm w-full"
+                                    >
+                                        <div className="relative w-24 h-24 mx-auto mb-6">
+                                            <svg className="w-full h-full transform -rotate-90">
+                                                <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
+                                                <motion.circle
+                                                    cx="48" cy="48" r="40" stroke="var(--accent)" strokeWidth="8" fill="none"
+                                                    strokeDasharray="251.2"
+                                                    animate={{ strokeDashoffset: 251.2 - (251.2 * (5 - nextCountdown)) / 5 }}
+                                                    transition={{ duration: 1, ease: "linear" }}
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-3xl font-black text-white">{nextCountdown}</span>
+                                            </div>
+                                        </div>
+                                        <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Up Next</h3>
+                                        <p className="text-[var(--text-muted)] text-sm font-bold mb-8">Episode {selectedEpisode + 1}</p>
+                                        <div className="flex items-center gap-3 justify-center">
+                                            <button 
+                                                onClick={() => {
+                                                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                                    setShowNextOverlay(false);
+                                                }}
+                                                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all"
+                                            >Cancel</button>
+                                            <button 
+                                                onClick={() => {
+                                                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                                    setNextCountdown(0);
+                                                    setShowNextOverlay(false);
+                                                    const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+                                                    let nextEp = selectedEpisode + 1;
+                                                    if (currentIndex !== -1 && currentIndex + 1 < episodes.length) {
+                                                        nextEp = episodes[currentIndex + 1].episode_number;
+                                                        setSelectedEpisode(nextEp);
+                                                    }
+                                                    let nextSeason = selectedSeason;
+                                                    const seasons = details?.seasons;
+                                                    const currentSeasonData = seasons?.find(s => s.season_number === selectedSeason);
+                                                    if (currentSeasonData && nextEp > currentSeasonData.episode_count) {
+                                                        nextSeason += 1;
+                                                        nextEp = 1;
+                                                    }
+                                                    const newUrl = new URL(window.location.href);
+                                                    newUrl.searchParams.set("s", nextSeason.toString());
+                                                    newUrl.searchParams.set("e", nextEp.toString());
+                                                    router.push(newUrl.pathname + newUrl.search);
+                                                }}
+                                                className="px-8 py-3 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-2 shadow-2xl shadow-white/10"
+                                            >Play Now <Play className="w-4 h-4 fill-current" /></button>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
                 </div>
-                {details?.vote_average > 0 && (
-                    <div className="shrink-0 hidden sm:flex items-center gap-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-md">
-                        <span className="text-yellow-400 text-[11px]">★</span>
-                        <span className="text-[11px] font-bold text-zinc-300">{details.vote_average.toFixed(1)}</span>
+                {!isFocusMode && (
+                    <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handlePrevEpisode}
+                                disabled={!hasPrevEpisode()}
+                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
+                                title="Previous Episode"
+                            ><ChevronLeft className="w-4 h-4" /></button>
+                            <span className="text-xs font-semibold text-zinc-400 min-w-[70px] text-center">
+                                {type === 'movie' ? 'Movie' : `EP ${selectedEpisode}`}
+                            </span>
+                            <button
+                                onClick={handleNextEpisode}
+                                disabled={!hasNextEpisode()}
+                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
+                                title="Next Episode"
+                            ><ChevronRight className="w-4 h-4" /></button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIframeKey(prev => prev + 1)}
+                                className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all"
+                                title="Reload Player"
+                            ><RefreshCw className="w-4 h-4" /></button>
+                            <button
+                                onClick={() => {
+                                    setIsTheatreMode(!isTheatreMode);
+                                    if (isFocusMode) setIsFocusMode(false);
+                                }}
+                                className={`p-2 border rounded-xl transition-all ${
+                                    isTheatreMode 
+                                        ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
+                                        : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                }`}
+                                title="Theatre Mode"
+                            ><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" /><line x1="2" y1="16" x2="22" y2="16" /></svg></button>
+                            <button
+                                onClick={() => {
+                                    setIsFocusMode(!isFocusMode);
+                                    if (isTheatreMode) setIsTheatreMode(false);
+                                }}
+                                className={`p-2 border rounded-xl transition-all ${
+                                    isFocusMode 
+                                        ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
+                                        : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                }`}
+                                title="Cinematic Focus Mode"
+                            ><Shield className="w-4 h-4" /></button>
+                        </div>
                     </div>
                 )}
             </div>
-
-            <div className="pt-[60px] md:pt-[64px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4">
-                <div className="flex flex-col xl:flex-row gap-6 items-start">
-                    
-                    {/* Left Pane (Main content: Player, Cast, Info, alt etc.) */}
-                    <div className="flex-1 w-full min-w-0">
-                {/* Video Player with Anti-Redirect Protection */}
-                <div className="relative w-full bg-black touch-pan-y">
-                    <div className="w-full touch-pan-y">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="relative w-full aspect-video bg-[#12131A] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/5 shadow-[var(--accent)]/5 touch-pan-y"
-                            style={{ touchAction: 'pan-y !important' }}
-                        >
-                            {/* Loading skeleton */}
-                            {!playerLoaded && (
-                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--bg-card)]">
-                                    <div className="relative">
-                                        <div className="w-16 h-16 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
-                                        <Play className="absolute inset-0 m-auto w-6 h-6 text-blue-400" />
-                                    </div>
-                                    <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">{loadingStatus}</p>
-                                    <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
-                                    {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
-                                </div>
-                            )}
-                            {/* Upcoming Content Lock */}
-                            {isUpcoming && playerLoaded && (
-                                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 p-8 text-center backdrop-blur-md">
-                                    <div className="flex flex-col items-center max-w-md text-center p-8 bg-zinc-950/40 border border-white/5 rounded-2xl backdrop-blur-md">
-                                        <Calendar className="w-16 h-16 text-[var(--accent)] mb-6" />
-                                        <h2 className="text-xl font-black text-white uppercase tracking-wider mb-2 font-sora">Upcoming Episode</h2>
-                                        <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-6 font-medium">This episode is scheduled to air soon. We'll update the streams as soon as it becomes available.</p>
-                                        <div className="flex gap-3">
-                                            <button 
-                                                onClick={() => router.back()}
-                                                className="px-6 py-2.5 bg-[var(--accent)] text-white rounded-lg font-bold hover:opacity-90 transition-all uppercase tracking-widest text-[10px]"
-                                            >
-                                                Explore Others
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            {/* Source Error Fallback */}
-                            {sourceError && !isAnimeServer && (
-                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center">
-                                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-                                        <X className="w-8 h-8 text-red-500" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2">Server Not Responding</h3>
-                                    <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md">
-                                        This content might not be available on {activeServer.name}.
-                                    </p>
-                                    <div className="flex gap-3">
-                                        <button 
-                                            onClick={() => setIframeKey(prev => prev + 1)}
-                                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-[var(--accent)] hover:from-blue-500 hover:to-[var(--accent)] text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                                        >
-                                            <Zap className="w-4 h-4" /> Try Refreshing
-                                        </button>
-                                        {type === 'anime' && (
-                                            <button 
-                                                onClick={() => setActiveServer(ANIME_SERVERS[0])}
-                                                className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold transition-all flex items-center gap-2"
-                                            >
-                                        <Server className="w-4 h-4" /> Anime Server
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            <iframe
-                                key={iframeKey}
-                                src={getProxiedEmbedUrl(embedUrl)}
-                                className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
-                                allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer"
-                                referrerPolicy="strict-origin-when-cross-origin"
-                                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-pointer-lock"
-                                onError={() => {
-                                    handleAutoFallback();
-                                }}
-                                onLoad={() => setPlayerLoaded(true)}
-                            />
-
-                            {/* Netflix-style Auto Next Overlay */}
-                            <AnimatePresence>
-                                {showNextOverlay && (
-                                    <motion.div 
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className="absolute inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
-                                    >
-                                        <motion.div
-                                            initial={{ scale: 0.9, y: 20 }}
-                                            animate={{ scale: 1, y: 0 }}
-                                            className="max-w-sm w-full"
-                                        >
-                                            <div className="relative w-24 h-24 mx-auto mb-6">
-                                                <svg className="w-full h-full transform -rotate-90">
-                                                    <circle
-                                                        cx="48"
-                                                        cy="48"
-                                                        r="40"
-                                                        stroke="rgba(255,255,255,0.1)"
-                                                        strokeWidth="8"
-                                                        fill="none"
-                                                    />
-                                                    <motion.circle
-                                                        cx="48"
-                                                        cy="48"
-                                                        r="40"
-                                                        stroke="var(--accent)"
-                                                        strokeWidth="8"
-                                                        fill="none"
-                                                        strokeDasharray="251.2"
-                                                        animate={{ strokeDashoffset: 251.2 - (251.2 * (5 - nextCountdown)) / 5 }}
-                                                        transition={{ duration: 1, ease: "linear" }}
-                                                    />
-                                                </svg>
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <span className="text-3xl font-black text-white">{nextCountdown}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Up Next</h3>
-                                            <p className="text-[var(--text-muted)] text-sm font-bold mb-8">
-                                                Episode {selectedEpisode + 1}
-                                            </p>
-                                            
-                                            <div className="flex items-center gap-3 justify-center">
-                                                <button 
-                                                    onClick={() => {
-                                                        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                                        setShowNextOverlay(false);
-                                                    }}
-                                                    className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button 
-                                                    onClick={() => {
-                                                        // Direct jump
-                                                        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                                        setNextCountdown(0);
-                                                        // This will be caught by the next tick or I can manually trigger redirect here
-                                                        setShowNextOverlay(false);
-                                                        
-                                                        const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-                                                        let nextEp = selectedEpisode + 1;
-                                                        if (currentIndex !== -1 && currentIndex + 1 < episodes.length) {
-                                                            nextEp = episodes[currentIndex + 1].episode_number;
-                                                            setSelectedEpisode(nextEp);
-                                                        }
-                                                        let nextSeason = selectedSeason;
-                                                        const seasons = details?.seasons;
-                                                        const currentSeasonData = seasons?.find(s => s.season_number === selectedSeason);
-                                                        if (currentSeasonData && nextEp > currentSeasonData.episode_count) {
-                                                            nextSeason += 1;
-                                                            nextEp = 1;
-                                                        }
-                                                        const newUrl = new URL(window.location.href);
-                                                        newUrl.searchParams.set("s", nextSeason.toString());
-                                                        newUrl.searchParams.set("e", nextEp.toString());
-                                                        router.push(newUrl.pathname + newUrl.search);
-                                                    }}
-                                                    className="px-8 py-3 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-2 shadow-2xl shadow-white/10"
-                                                >
-                                                    Play Now <Play className="w-4 h-4 fill-current" />
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.div>
+        );
+    };
+    const getFilteredEpisodes = () => {
+        if (!episodeSearch.trim()) return episodes;
+        const search = episodeSearch.toLowerCase();
+        return episodes.filter((ep: any) => {
+            if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
+            return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
+        });
+    };
+    const activeFilteredEpisodes = getFilteredEpisodes();
+    return (
+        <>
+        <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
+            {!isFocusMode && (
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-[60px] md:h-[64px] bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h1>
+                        {(type === 'tv' || type === 'anime' || type === 'cartoon') && resolvedMediaType !== 'movie' && (
+                            <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">Season {selectedSeason} · Episode {selectedEpisode}</p>
+                        )}
                     </div>
-                </div>
-
-                {/* Server disclaimer */}
-                <div className="w-full bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 px-4 md:px-6 py-2.5 backdrop-blur-md">
-                    <p className="w-full text-xs font-semibold text-blue-300 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 shrink-0 text-yellow-400" />
-                        <span>You are watching <span className="font-black text-white px-1">{title}</span>. If the current server doesn't work, please try other servers below.</span>
-                    </p>
-                </div>
-
-                {/* Server Selector Bar */}
-                <div className="w-full px-4 md:px-6 py-3 border-b border-[var(--border-color)]">
-                    <div className="flex items-center gap-3 flex-wrap">
-                        <span className="text-xs text-[var(--text-muted)] font-medium flex items-center gap-1.5">
-                            <Server className="w-3.5 h-3.5" /> Server:
-                        </span>
-
-                        {/* Server Buttons — wrapped rows on desktop/tablet, no height cap */}
-                        <div className="hidden md:flex flex-wrap items-center gap-2 pr-4">
-                            {(() => {
-                                // Always show all applicable servers, deduped by id
-                                const base = type === "anime"
-                                    ? [...serversList, ...ANIME_SERVERS]
-                                    : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
-                                const seen = new Set<string>();
-                                return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-                            })().map((server: any) => (
-                                <button
-                                    key={server.id}
-                                    onClick={() => handleManualServerSelect(server)}
-                                    className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id
-                                        ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold"
-                                        : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/20"
-                                        } ${failedServers.has(server.id) ? 'opacity-40 cursor-not-allowed' : ''} ${server.id === "peachify" ? "border-amber-500/50 hover:border-amber-500" : ""}`}
-                                    title={failedServers.has(server.id) ? `${server.name} — failed` : server.name}
-                                    disabled={failedServers.has(server.id) && activeServer.id !== server.id}
-                                >
-                                    <div className="flex flex-col items-start gap-0.5">
-                                        <div className="flex items-center gap-1.5">
-                                            {/* Status dot */}
-                                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeServer.id === server.id ? 'bg-green-400 animate-pulse' : failedServers.has(server.id) ? 'bg-red-500' : 'bg-zinc-600'}`} />
-                                            {activeServer.id === server.id ? (
-                                                <Play className="w-3 h-3 fill-current" />
-                                            ) : (
-                                                <Server className="w-3 h-3" />
-                                            )}
-                                            {server.name}
-                                        </div>
-                                        {server.badge && (
-                                            <span className={`text-[9px] px-1.5 py-[1px] rounded uppercase font-black tracking-widest ${server.id === "peachify" ? "text-amber-400 bg-amber-400/10"
-                                                : "text-[var(--accent)] bg-[var(--accent)]/10"
-                                                }`}>
-                                                {server.badge}
-                                            </span>
-                                        )}
-                                    </div>
-                                </button>
-                            ))}
+                    {details?.vote_average > 0 && (
+                        <div className="shrink-0 hidden sm:flex items-center gap-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-md">
+                            <span className="text-yellow-400 text-[11px]">★</span>
+                            <span className="text-[11px] font-bold text-zinc-300">{details.vote_average.toFixed(1)}</span>
                         </div>
-
-                        {/* Mobile dropdown */}
-                        <div className="relative md:hidden w-full max-w-[300px] z-[110]">
-                            <button
-                                onClick={() => setShowServers(!showServers)}
-                                className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-[#12131A]/95 backdrop-blur-md border border-white/10 rounded-xl text-xs font-black text-white hover:border-[var(--accent)]/50 transition-all shadow-lg"
-                                aria-label="Select streaming server"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
-                                    <Server className="w-3.5 h-3.5 text-[var(--accent)]" />
-                                    <span>{activeServer.name}</span>
-                                </div>
-                                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${showServers ? "rotate-180 text-white" : ""}`} />
-                            </button>
-                            
-                            <AnimatePresence>
-                                {showServers && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                                        transition={{ duration: 0.15 }}
-                                        className="absolute top-full left-0 right-0 mt-2 bg-zinc-950 border border-white/10 rounded-xl overflow-hidden z-[120] shadow-2xl max-h-[60vh] overflow-y-auto"
-                                    >
-                                        <div className="p-1.5 space-y-0.5">
-                                            {(() => {
-                                                const base = type === "anime"
-                                                    ? [...serversList, ...ANIME_SERVERS]
-                                                    : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
-                                                const seen = new Set<string>();
-                                                return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-                                            })().map((server: any) => (
-                                                <button
-                                                    key={server.id}
-                                                    onClick={() => { handleManualServerSelect(server); setShowServers(false); }}
-                                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all ${
-                                                        activeServer.id === server.id ? "text-[var(--accent)] bg-[var(--accent)]/10 font-black" : "text-zinc-300 font-medium hover:bg-white/5"
-                                                    } ${failedServers.has(server.id) ? 'opacity-40' : ''}`}
-                                                >
-                                                    <span className="truncate flex items-center gap-2">
-                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeServer.id === server.id ? 'bg-green-400 animate-pulse' : failedServers.has(server.id) ? 'bg-red-500' : 'bg-zinc-600'}`} />
-                                                        {activeServer.id === server.id && <Play className="w-3 h-3 fill-current text-[var(--accent)]" />}
-                                                        {server.name}
-                                                    </span>
-                                                    {server.badge && (
-                                                        <span className={`text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded uppercase shrink-0 ${
-                                                            server.id === 'peachify' ? 'bg-amber-400/10 text-amber-400' : 'bg-white/5 text-zinc-400'
-                                                        }`}>
-                                                            {server.badge}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-
-                        <div className="flex items-center gap-2 ml-auto">
-                            {/* Next Episode Button */}
-                            {type === 'tv' && episodes && episodes.length > 0 && (
-                                <button
-                                    onClick={() => {
-                                        const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-                                        if (currentIndex !== -1 && currentIndex < episodes.length - 1) {
-                                            router.push(`/watch/${type}/${id}?season=${selectedSeason}&ep=${episodes[currentIndex + 1].episode_number}`);
-                                        } else if (details?.seasons && details.seasons.length > 0) {
-                                            const currentSeasonIndex = details?.seasons?.findIndex((s: any) => s.season_number === selectedSeason);
-                                            if (currentSeasonIndex !== undefined && currentSeasonIndex !== -1 && currentSeasonIndex < (details?.seasons?.length || 0) - 1) {
-                                                router.push(`/watch/${type}/${id}?season=${details.seasons![currentSeasonIndex + 1].season_number}&ep=1`);
-                                            }
-                                        }
-                                    }}
-                                    className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-[var(--accent)] to-blue-600 hover:from-[var(--accent)] hover:to-blue-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all drop-shadow-[0_0_10px_var(--accent-glow)]"
-                                >
-                                    Next Episode <Play className="w-3.5 h-3.5 fill-current" />
-                                </button>
-                            )}
-
-                            {/* Trailer button */}
-                            {details.trailer && (
-                                <button
-                                    onClick={() => setShowTrailer(!showTrailer)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium hover:bg-red-500/20 transition-all"
-                                >
-                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                    Trailer
-                                </button>
-                            )}
-
-                            {/* Multi-Audio Quick Select */}
-                            <button
-                                onClick={() => {
-                                    const peachify = SERVERS.find(s => s.id === "peachify");
-                                    if (peachify) {
-                                        setActiveServer(peachify);
-                                        toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
-                                    } else {
-                                        toast.error("Multi-Audio not available for this title");
-                                    }
-                                }}
-                                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg border transition-all ${
-                                    activeServer.id === "peachify" 
-                                    ? "bg-amber-600/20 border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]" 
-                                    : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
-                                }`}
-                            >
-                                <Sparkles className={`w-3.5 h-3.5 ${activeServer.id === "peachify" ? "animate-pulse" : ""}`} />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Multi-Audio</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Trailer Modal */}
-                <AnimatePresence>
-                    {showTrailer && details.trailer && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
-                            onClick={() => setShowTrailer(false)}
-                        >
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                className="w-full max-w-4xl aspect-video rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${details.trailer.key}?autoplay=1`}
-                                    className="w-full h-full border-0"
-                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
-                                />
-                            </motion.div>
-                            <button
-                                onClick={() => setShowTrailer(false)}
-                                className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </motion.div>
                     )}
-                </AnimatePresence>
-
-                {/* Movie Details — CineVibe glassmorphism style */}
-                <div className="w-full px-4 md:px-6 py-8">
-                    <div className="flex flex-col lg:flex-row gap-8 items-start">
-                        {/* Poster — visible on all devices */}
-                        <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
-                            {details.poster_path && (
-                                <div className="relative group">
-                                    <img
-                                        src={`${IMG_BASE}/w500${details.poster_path}`}
-                                        alt={title}
-                                        loading="lazy"
-                                        className="w-full rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]"
-                                    />
-                                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Info Panel */}
-                        <div className="flex-1 min-w-0">
-                            {/* Title Section */}
-                            <div className="mb-6">
-                                <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-2 font-sora line-clamp-2">{title}</h2>
-                                <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
-                                    <span className="flex items-center gap-1.5 font-bold text-green-400">
-                                        <Sparkles className="w-4 h-4" /> {matchPercent}% Match
-                                    </span>
-                                    <span>{year}</span>
-                                    {details?.runtime ? (
-                                        <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span>
-                                    ) : (
-                                        <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>
-                                    )}
-                                    <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[10px] font-bold tracking-widest uppercase">
-                                        {details?.status || "Released"}
-                                    </span>
+                </div>
+            )}
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[60px] md:pt-[64px] w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4"}`}>
+                {isFocusMode && (
+                    <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
+                        <X className="w-3.5 h-3.5" /> Exit Focus Mode
+                    </button>
+                )}
+                {(isTheatreMode || isFocusMode) && (
+                    <div className={`w-full ${isFocusMode ? "h-screen bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
+                )}
+                {!isFocusMode && (
+                    <div className="flex flex-col xl:flex-row gap-6 items-start">
+                        <div className="flex-1 w-full min-w-0">
+                            {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
+                            <div className="w-full bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 px-4 md:px-6 py-2.5 backdrop-blur-md rounded-xl mb-4">
+                                <p className="w-full text-xs font-semibold text-blue-300 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 shrink-0 text-yellow-400" />
+                                    <span>You are watching <span className="font-black text-white px-1">{title}</span>. If the current server doesn't work, please try other servers below.</span>
+                                </p>
+                            </div>
+                            <div className="w-full px-4 md:px-6 py-3 border-b border-[var(--border-color)] mb-6 bg-[var(--bg-card)]/40 rounded-xl border border-[var(--border-color)]">
+                                <div className="flex items-center gap-3 flex-wrap">
+                                    <span className="text-xs text-[var(--text-muted)] font-medium flex items-center gap-1.5"><Server className="w-3.5 h-3.5" /> Server:</span>
+                                    <div className="hidden md:flex flex-wrap items-center gap-2 pr-4">
+                                        {(() => {
+                                            const base = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
+                                            const seen = new Set<string>();
+                                            return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+                                        })().map((server: any) => (
+                                            <button key={server.id} onClick={() => handleManualServerSelect(server)} className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/20"} ${failedServers.has(server.id) ? 'opacity-40 cursor-not-allowed' : ''} ${server.id === "peachify" ? "border-amber-500/50 hover:border-amber-500" : ""}`} title={failedServers.has(server.id) ? `${server.name} — failed` : server.name} disabled={failedServers.has(server.id) && activeServer.id !== server.id}>
+                                                <div className="flex flex-col items-start gap-0.5">
+                                                    <div className="flex items-center gap-1.5"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeServer.id === server.id ? 'bg-green-400 animate-pulse' : failedServers.has(server.id) ? 'bg-red-500' : 'bg-zinc-600'}`} />{activeServer.id === server.id ? <Play className="w-3 h-3 fill-current" /> : <Server className="w-3 h-3" />}{server.name}</div>
+                                                    {server.badge && <span className={`text-[9px] px-1.5 py-[1px] rounded uppercase font-black tracking-widest ${server.id === "peachify" ? "text-amber-400 bg-amber-400/10" : "text-[var(--accent)] bg-[var(--accent)]/10"}`}>{server.badge}</span>}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="relative md:hidden w-full max-w-[300px] z-[110]">
+                                        <button onClick={() => setShowServers(!showServers)} className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-[#12131A]/95 backdrop-blur-md border border-white/10 rounded-xl text-xs font-black text-white hover:border-[var(--accent)]/50 transition-all shadow-lg" aria-label="Select streaming server">
+                                            <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" /><Server className="w-3.5 h-3.5 text-[var(--accent)]" /><span>{activeServer.name}</span></div>
+                                            <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${showServers ? "rotate-180 text-white" : ""}`} />
+                                        </button>
+                                        <AnimatePresence>
+                                            {showServers && (
+                                                <motion.div initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.97 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-2 bg-zinc-950 border border-white/10 rounded-xl overflow-hidden z-[120] shadow-2xl max-h-[60vh] overflow-y-auto">
+                                                    <div className="p-1.5 space-y-0.5">
+                                                        {(() => {
+                                                            const base = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
+                                                            const seen = new Set<string>();
+                                                            return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+                                                        })().map((server: any) => (
+                                                            <button key={server.id} onClick={() => { handleManualServerSelect(server); setShowServers(false); }} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all ${activeServer.id === server.id ? "text-[var(--accent)] bg-[var(--accent)]/10 font-black" : "text-zinc-300 font-medium hover:bg-white/5"} ${failedServers.has(server.id) ? 'opacity-40' : ''}`}>
+                                                                <span className="truncate flex items-center gap-2"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeServer.id === server.id ? 'bg-green-400 animate-pulse' : failedServers.has(server.id) ? 'bg-red-500' : 'bg-zinc-600'}`} />{activeServer.id === server.id && <Play className="w-3 h-3 fill-current text-[var(--accent)]" />}{server.name}</span>
+                                                                {server.badge && <span className={`text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded uppercase shrink-0 ${server.id === 'peachify' ? 'bg-amber-400/10 text-amber-400' : 'bg-white/5 text-zinc-400'}`}>{server.badge}</span>}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Player Metadata & Controls */}
-                            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-8">
-                                {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
+                            <div className="flex flex-col lg:flex-row gap-8 items-start">
+                                <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
+                                    {details.poster_path && (
+                                        <div className="relative group">
+                                            <img src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} loading="lazy" className="w-full rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
+                                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
                                     <div className="mb-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="font-bold text-lg flex items-center gap-2">
-                                                <Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes
-                                            </h3>
-                                            <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
-                                                <button 
-                                                    onClick={() => setMode("sub")}
-                                                    className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}
-                                                >SUB</button>
-                                                <button 
-                                                    onClick={() => setMode("dub")}
-                                                    className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}
-                                                >DUB</button>
+                                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-2 font-sora line-clamp-2">{title}</h2>
+                                        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
+                                            <span className="flex items-center gap-1.5 font-bold text-green-400"><Sparkles className="w-4 h-4" /> {matchPercent}% Match</span>
+                                            <span>{year}</span>
+                                            {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
+                                            <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-8">
+                                        {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
+                                            <div className="mb-6">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <h3 className="font-bold text-lg flex items-center gap-2"><Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes</h3>
+                                                    <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
+                                                        <button onClick={() => setMode("sub")} className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>SUB</button>
+                                                        <button onClick={() => setMode("dub")} className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>DUB</button>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
+                                                    {episodes.map((epNum: string) => (
+                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="bg-blue-600/10 p-3 rounded-xl border border-blue-500/20"><Play className="w-6 h-6 text-blue-500 fill-current" /></div>
+                                                <div>
+                                                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Now Playing</p>
+                                                    <p className="font-bold text-sm">{type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-3">
+                                                <button onClick={toggleWatchlist} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-4 h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
+                                                <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"><Download className="w-4 h-4" /> Download</button>
+                                                <button onClick={handleShare} className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-sm hover:bg-[var(--border-color)] transition-all active:scale-95"><Share2 className="w-4 h-4" /> Share</button>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
-                                            {episodes.map((epNum: string) => (
-                                                <button
-                                                    key={epNum}
-                                                    onClick={() => setSelectedEpisode(parseInt(epNum))}
-                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border ${
-                                                        selectedEpisode === parseInt(epNum)
-                                                            ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold"
-                                                            : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
-                                                    }`}
-                                                >
-                                                    {epNum}
-                                                </button>
-                                            ))}
-                                        </div>
                                     </div>
-                                )}
-
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-blue-600/10 p-3 rounded-xl border border-blue-500/20">
-                                            <Play className="w-6 h-6 text-blue-500 fill-current" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Now Playing</p>
-                                            <p className="font-bold text-sm">
-                                                {type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}
-                                            </p>
-                                        </div>
+                                    <div className="flex flex-wrap gap-2 mb-5">
+                                        {details.genres?.map((genre) => (
+                                            <span key={genre.id} className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full text-xs font-medium text-[var(--text-main)] hover:bg-[var(--border-color)] transition-colors">{genre.name}</span>
+                                        ))}
                                     </div>
-                                    <div className="flex flex-wrap gap-3">
-                                        <button 
-                                            onClick={toggleWatchlist} 
-                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}
-                                        >
-                                            <Heart className={`w-4 h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}
-                                        </button>
-                                        <button
-                                            onClick={() => setShowDownloadModal(true)}
-                                            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
-                                        >
-                                            <Download className="w-4 h-4" /> Download
-                                        </button>
-                                        <button 
-                                            onClick={handleShare} 
-                                            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-sm hover:bg-[var(--border-color)] transition-all active:scale-95"
-                                        >
-                                            <Share2 className="w-4 h-4" /> Share
-                                        </button>
+                                    <p className="text-[var(--text-muted)] text-sm md:text-base leading-relaxed mb-6 max-w-2xl">{details.overview}</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                        {director && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5">{director.name}</p></div>}
+                                        {details.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
+                                        {details.status && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Status</span><p className="text-white font-medium mt-0.5">{details.status}</p></div>}
+                                        {details.vote_count && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Genres */}
-                            <div className="flex flex-wrap gap-2 mb-5">
-                                {details.genres?.map((genre) => (
-                                    <span key={genre.id} className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full text-xs font-medium text-[var(--text-main)] hover:bg-[var(--border-color)] transition-colors">
-                                        {genre.name}
-                                    </span>
-                                ))}
-                            </div>
-
-                            {/* Overview */}
-                            <p className="text-[var(--text-muted)] text-sm md:text-base leading-relaxed mb-6 max-w-2xl">
-                                {details.overview}
-                            </p>
-
-                            {/* Additional Info Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                {director && (
-                                    <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]">
-                                        <span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Director</span>
-                                        <p className="text-white font-medium mt-0.5">{director.name}</p>
+                            {type === 'tv' && details.seasons && details.seasons.length > 0 && (
+                                <section className="mt-10 xl:hidden">
+                                    <div className="flex flex-col gap-4 mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                                                <h2 className="text-xl font-bold">Episodes</h2>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                                                    <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><List className="w-3.5 h-3.5" /></button>
+                                                    <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><LayoutGrid className="w-3.5 h-3.5" /></button>
+                                                </div>
+                                                {episodes.length > 0 && <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row gap-3">
+                                            {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
+                                                <div className="relative flex-1 sm:max-w-[200px]">
+                                                    <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm">
+                                                        {details.seasons.filter(s => s.season_number > 0).sort((a, b) => a.season_number - b.season_number).map((season) => <option key={season.id} value={season.season_number}>Season {season.season_number} ({season.episode_count} eps)</option>)}
+                                                    </select>
+                                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                                                </div>
+                                            )}
+                                            <div className="relative flex-1">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                                                <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-[var(--accent)] transition-colors placeholder:text-zinc-500" />
+                                                {episodeSearch && <button onClick={() => setEpisodeSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
-                                {details.spoken_languages && details.spoken_languages.length > 0 && (
-                                    <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]">
-                                        <span className="text-[var(--text-muted)] text-xs uppercase tracking-wider flex items-center gap-1">
-                                            <Globe className="w-3 h-3" /> Language
-                                        </span>
-                                        <p className="text-white font-medium mt-0.5">{details?.spoken_languages?.[0]?.english_name || "English"}</p>
-                                    </div>
-                                )}
-                                {details.status && (
-                                    <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]">
-                                        <span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Status</span>
-                                        <p className="text-white font-medium mt-0.5">{details.status}</p>
-                                    </div>
-                                )}
-                                {details.vote_count && (
-                                    <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]">
-                                        <span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Votes</span>
-                                        <p className="text-white font-medium mt-0.5">{details?.vote_count?.toLocaleString() || "0"}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* TV Show Seasons & Episodes (Bottom list for mobile/tablet screens) */}
-                    {type === 'tv' && details.seasons && details.seasons.length > 0 && (
-                        <section className="mt-10 xl:hidden">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                                    <h2 className="text-xl font-bold">Episodes</h2>
-                                    {episodes.length > 0 && (
-                                        <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">
-                                            {episodes.length} EP{episodes.length !== 1 ? 's' : ''}
-                                        </span>
+                                    {loadingEpisodes ? (
+                                        <div className="flex justify-center items-center py-12"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+                                    ) : (
+                                        <>
+                                            {episodeLayoutMode === "grid" ? (
+                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
+                                                    {activeFilteredEpisodes.map((ep) => (
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-2">
+                                                    {activeFilteredEpisodes.map((ep) => (
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
+                                                            <div className="w-24 h-14 rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative">
+                                                                {ep.still_path ? <img src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
+                                                                {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={`text-sm font-semibold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
+                                                                <div className="flex items-center gap-2 mt-0.5">{ep.air_date && <span className="text-[10px] text-[var(--text-muted)]">{ep.air_date}</span>}{ep.runtime > 0 && <span className="text-[10px] text-[var(--text-muted)]">{ep.runtime}m</span>}</div>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
-                                </div>
-
-                                {/* Season Selector */}
-                                {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
-                                    <div className="relative">
-                                        <select
-                                            value={selectedSeason}
-                                            onChange={(e) => {
-                                                setSelectedSeason(Number(e.target.value));
-                                                setSelectedEpisode(1);
-                                            }}
-                                            className="appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm"
-                                        >
-                                            {details.seasons
-                                                .filter(s => s.season_number > 0)
-                                                .sort((a, b) => a.season_number - b.season_number)
-                                                .map((season) => (
-                                                    <option key={season.id} value={season.season_number}>
-                                                        Season {season.season_number} ({season.episode_count} eps)
-                                                    </option>
-                                                ))}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Episodes */}
-                            {loadingEpisodes ? (
-                                <div className="flex justify-center items-center py-12">
-                                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                                </div>
-                            ) : (
-                                <>
-                                    {/* Mobile: Compact List View */}
-                                    <div className="flex flex-col gap-2 sm:hidden">
-                                        {episodes.map((ep) => (
-                                            <button
-                                                key={ep.id}
-                                                onClick={() => {
-                                                    setSelectedEpisode(ep.episode_number);
-                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                }}
-                                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
-                                                    selectedEpisode === ep.episode_number
-                                                        ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]'
-                                                        : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'
-                                                }`}
-                                            >
-                                                {/* Thumbnail */}
-                                                <div className="w-24 h-14 rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative">
-                                                    {ep.still_path ? (
-                                                        <img
-                                                            src={`${IMG_BASE}/w185${ep.still_path}`}
-                                                            alt={ep.name}
-                                                            loading="lazy"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>
-                                                    )}
-                                                    {selectedEpisode === ep.episode_number && (
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                                            <Play className="w-5 h-5 text-white fill-current" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Info */}
-                                                <div className="flex-1 min-w-0">
-                                                    <p className={`text-sm font-semibold line-clamp-1 ${
-                                                        selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'
-                                                    }`}>
-                                                        E{ep.episode_number}. {ep.name}
-                                                    </p>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        {ep.air_date && <span className="text-[10px] text-[var(--text-muted)]">{ep.air_date}</span>}
-                                                        {ep.runtime > 0 && <span className="text-[10px] text-[var(--text-muted)]">{ep.runtime}m</span>}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Desktop/Tablet: Card Grid View */}
-                                    <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                        {episodes.map((ep) => (
-                                            <button
-                                                key={ep.id}
-                                                onClick={() => {
-                                                    setSelectedEpisode(ep.episode_number);
-                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                }}
-                                                className={`text-left group relative overflow-hidden rounded-xl border transition-all duration-300 ${selectedEpisode === ep.episode_number
-                                                    ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                                                    : 'border-[var(--border-color)] hover:border-blue-500/50 hover:shadow-lg'
-                                                    }`}
-                                            >
-                                                <div className="aspect-video bg-[var(--bg-card)] relative overflow-hidden">
-                                                    {ep.still_path ? (
-                                                        <img
-                                                            src={`${IMG_BASE}/w300${ep.still_path}`}
-                                                            alt={ep.name}
-                                                            loading="lazy"
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] bg-black/20">
-                                                            No Image
-                                                        </div>
-                                                    )}
-                                                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-
-                                                    {/* Play Icon Overlay */}
-                                                    <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${selectedEpisode === ep.episode_number ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                                                        <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                                                            <Play className="w-4 h-4 text-white fill-current ml-0.5" />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold text-white shadow">
-                                                        E{ep.episode_number}
-                                                    </div>
-                                                    {ep.runtime > 0 && (
-                                                        <div className="absolute bottom-2 left-2 bg-black/80 px-1.5 py-0.5 rounded text-[10px] text-[var(--text-muted)]">
-                                                            {ep.runtime}m
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="p-3 bg-[var(--bg-main)]">
-                                                    <h3 className={`font-semibold text-sm line-clamp-1 mb-1 ${selectedEpisode === ep.episode_number ? 'text-blue-400' : 'text-[var(--text-main)] group-hover:text-blue-400'} transition-colors`}>
-                                                        {ep.episode_number}. {ep.name}
-                                                    </h3>
-                                                    <p className="text-xs text-[var(--text-muted)] line-clamp-2">
-                                                        {ep.overview || "No description available."}
-                                                    </p>
-                                                    {ep.air_date && (
-                                                        <p className="text-[10px] text-[var(--text-muted)] mt-1.5 flex items-center gap-1">
-                                                            <Calendar className="w-3 h-3" /> {ep.air_date}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </>
+                                </section>
                             )}
-                        </section>
-                    )}
-
-                    {/* Cast */}
-                    {details.cast && details.cast.length > 0 && (
-                        <section className="mt-10">
-                            <div className="flex items-center gap-3 mb-5">
-                                <Users className="w-5 h-5 text-blue-400" />
-                                <h2 className="text-lg font-bold">Top Cast</h2>
-                            </div>
-                            <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
-                                {details.cast.slice(0, 15).map((person) => (
-                                    <div key={person.id} className="flex-shrink-0 w-[100px] text-center group">
-                                        <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-blue-500/50 transition-all">
-                                            {person.profile_path ? (
-                                                <img
-                                                    src={`${IMG_BASE}/w185${person.profile_path}`}
-                                                    alt={person.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg font-bold bg-gradient-to-br from-zinc-800 to-zinc-900">
-                                                    {person.name.charAt(0)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <p className="text-xs font-medium text-[var(--text-main)] line-clamp-1">{person.name}</p>
-                                        <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{person.character}</p>
+                            {details.cast && details.cast.length > 0 && (
+                                <section className="mt-10">
+                                    <div className="flex items-center gap-3 mb-5"><Users className="w-5 h-5 text-blue-400" /><h2 className="text-lg font-bold">Top Cast</h2></div>
+                                    <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
+                                        {details.cast.slice(0, 15).map((person) => (
+                                            <div key={person.id} className="flex-shrink-0 w-[100px] text-center group">
+                                                <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-blue-500/50 transition-all">{person.profile_path ? <img src={`${IMG_BASE}/w185${person.profile_path}`} alt={person.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg font-bold bg-gradient-to-br from-zinc-800 to-zinc-900">{person.name.charAt(0)}</div>}</div>
+                                                <p className="text-xs font-medium text-[var(--text-main)] line-clamp-1">{person.name}</p>
+                                                <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{person.character}</p>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-                </div> {/* End Left column */}
-
-                {/* Download Modal */}
-                <AnimatePresence>
-                    {showDownloadModal && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col"
-                            onClick={() => setShowDownloadModal(false)}
-                        >
-                            {/* Header */}
-                            <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                                        <Download className="w-5 h-5 text-emerald-400" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-sm text-white">Download — {title}</h3>
-                                        <p className="text-[11px] text-zinc-500">{type === 'tv' ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : 'Full Movie'}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <a
-                                        href={type === 'tv'
-                                            ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
-                                            : `https://dl.vidsrc.vip/movie/${id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"
-                                    >
-                                        <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
-                                    </a>
-                                    <button onClick={() => setShowDownloadModal(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                                        <X className="w-5 h-5 text-zinc-400" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Download Iframe */}
-                            <div className="flex-1 relative" onClick={(e) => e.stopPropagation()}>
-                                <iframe
-                                    src={getProxiedEmbedUrl(type === 'tv'
-                                        ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
-                                        : `https://dl.vidsrc.vip/movie/${id}`)}
-                                    className="w-full h-full border-0"
-                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
-                                    referrerPolicy="no-referrer"
-                                />
-                            </div>
-
-                            {/* Alternative Sources Bar */}
-                            <div className="shrink-0 p-3 border-t border-white/10 bg-black/80 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-                                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Alt:</span>
-                                    <a
-                                        href={type === 'tv'
-                                            ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}`
-                                            : `https://dl.vidsrc.vip/movie/${id}`}
-                                        target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-emerald-600/30 transition-colors"
-                                    >
-                                        <Download className="w-3 h-3" /> VidSrc DL
-                                    </a>
-                                    <a
-                                        href={type === 'tv'
-                                            ? `https://vidfast.pro/tv/${id}/${selectedSeason}/${selectedEpisode}?autoPlay=true`
-                                            : `https://vidfast.pro/movie/${id}?autoPlay=true`}
-                                        target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-blue-600/30 transition-colors"
-                                    >
-                                        <Download className="w-3 h-3" /> VidFast Pro
-                                    </a>
-                                    <a
-                                        href={type === 'tv'
-                                            ? `https://www.2embed.cc/embedtv/${id}&s=${selectedSeason}&e=${selectedEpisode}`
-                                            : `https://www.2embed.cc/embed/${id}`}
-                                        target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent)] rounded-lg text-[11px] font-bold shrink-0 hover:bg-[var(--accent)]/30 transition-colors"
-                                    >
-                                        <Download className="w-3 h-3" /> 2Embed
-                                    </a>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-                </div> {/* End Left column */}
-
-                {/* Right Column: Episode List (TV Shows Only) */}
-                {type === "tv" && details.seasons && details.seasons.length > 0 && (
-                    <div className="hidden xl:flex w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex-col xl:overflow-hidden pr-2 bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                                    <h2 className="text-base font-bold text-white">Episodes</h2>
-                                </div>
-                                <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-main)] px-2 py-0.5 rounded-md font-bold">
-                                    {episodes.length} EP{episodes.length !== 1 ? 's' : ''}
-                                </span>
-                            </div>
-
-                            {/* Season Selector */}
-                            {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
-                                <div className="relative">
-                                    <select
-                                        value={selectedSeason}
-                                        onChange={(e) => {
-                                            setSelectedSeason(Number(e.target.value));
-                                            setSelectedEpisode(1);
-                                        }}
-                                        className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-[var(--accent)] transition-colors cursor-pointer text-xs"
-                                    >
-                                        {details.seasons
-                                            .filter(s => s.season_number > 0)
-                                            .sort((a, b) => a.season_number - b.season_number)
-                                            .map((season) => (
-                                                <option key={season.id} value={season.season_number}>
-                                                    Season {season.season_number} ({season.episode_count} eps)
-                                                </option>
-                                            ))}
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                                </div>
+                                </section>
                             )}
                         </div>
-
-                        {/* Episode List Scroll Area */}
-                        {loadingEpisodes ? (
-                            <div className="flex justify-center items-center py-12">
-                                <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                                {episodes.map((ep) => (
-                                    <button
-                                        key={ep.id}
-                                        onClick={() => {
-                                            setSelectedEpisode(ep.episode_number);
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }}
-                                        className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${
-                                            selectedEpisode === ep.episode_number
-                                                ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]'
-                                                : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'
-                                        }`}
-                                    >
-                                        {/* Compact Image */}
-                                        <div className="w-20 h-12 rounded-lg overflow-hidden bg-[var(--bg-card)] flex-shrink-0 relative">
-                                            {ep.still_path ? (
-                                                <img
-                                                    src={`${IMG_BASE}/w185${ep.still_path}`}
-                                                    alt={ep.name}
-                                                    loading="lazy"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>
-                                            )}
-                                            {selectedEpisode === ep.episode_number && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                                    <Play className="w-4 h-4 text-white fill-current" />
-                                                </div>
-                                            )}
+                        {type === "tv" && details.seasons && details.seasons.length > 0 && (
+                            <div className="hidden xl:flex w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex-col xl:overflow-hidden pr-2 bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-base font-bold text-white">Episodes</h2>
                                         </div>
-
-                                        {/* Detail */}
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-xs font-bold line-clamp-1 ${
-                                                selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'
-                                            }`}>
-                                                E{ep.episode_number}. {ep.name}
-                                            </p>
-                                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">{ep.runtime > 0 ? `${ep.runtime}m` : 'TV Show'}</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                                                <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="List View"><List className="w-3.5 h-3.5" /></button>
+                                                <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="Grid View"><LayoutGrid className="w-3.5 h-3.5" /></button>
+                                            </div>
+                                            <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-main)] px-2 py-0.5 rounded-md font-bold">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>
                                         </div>
-                                    </button>
-                                ))}
+                                    </div>
+                                    {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
+                                        <div className="relative">
+                                            <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-[var(--accent)] transition-colors cursor-pointer text-xs">
+                                                {details.seasons.filter(s => s.season_number > 0).sort((a, b) => a.season_number - b.season_number).map((season) => <option key={season.id} value={season.season_number}>Season {season.season_number} ({season.episode_count} eps)</option>)}
+                                            </select>
+                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                                        </div>
+                                    )}
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                                        <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-[var(--accent)] transition-colors placeholder:text-zinc-500" />
+                                        {episodeSearch && <button onClick={() => setEpisodeSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
+                                    </div>
+                                </div>
+                                {loadingEpisodes ? (
+                                    <div className="flex justify-center items-center py-12"><div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" /></div>
+                                ) : (
+                                    <>
+                                        {episodeLayoutMode === "grid" ? (
+                                            <div className="grid grid-cols-5 gap-1.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                                                {activeFilteredEpisodes.map((ep) => (
+                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`py-2.5 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                                                {activeFilteredEpisodes.map((ep) => (
+                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'}`}>
+                                                        <div className="w-20 h-12 rounded-lg overflow-hidden bg-[var(--bg-card)] flex-shrink-0 relative">
+                                                            {ep.still_path ? <img src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>}
+                                                            {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-4 h-4 text-white fill-current" /></div>}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className={`text-xs font-bold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
+                                                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">{ep.runtime > 0 ? `${ep.runtime}m` : 'TV Show'}</span>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
                 )}
-
-            </div> {/* End xl:flex-row */}
-
-            {/* Recommendations - Full Width Below Player+Sidebar */}
-            {details.recommendations && details.recommendations.length > 0 && (
+            </div>
+            {!isFocusMode && details.recommendations && details.recommendations.length > 0 && (
                 <section className="mt-10 px-0 sm:px-4 md:px-6 lg:px-8">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                        <h2 className="text-lg font-bold">You May Also Like</h2>
-                    </div>
+                    <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                     <MovieRow items={details.recommendations} type={type} />
                 </section>
             )}
-
-            {/* Similar - Full Width Below Player+Sidebar */}
-            {details.similar && details.similar.length > 0 && (
+            {!isFocusMode && details.similar && details.similar.length > 0 && (
                 <section className="mt-6 mb-6 px-0 sm:px-4 md:px-6 lg:px-8">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                        <h2 className="text-lg font-bold">Similar</h2>
-                    </div>
+                    <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                     <MovieRow items={details.similar} type={type} />
                 </section>
             )}
-
-            {/* Comments & Discussion */}
-            <section className="mt-6 mb-12 px-0 sm:px-4 md:px-6 lg:px-8">
-                <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
-            </section>
-
-        </div> {/* End pt-14 wrapper */}
-
-
-            {/* Scroll to Top */}
+            {!isFocusMode && (
+                <section className="mt-6 mb-12 px-0 sm:px-4 md:px-6 lg:px-8">
+                    <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
+                </section>
+            )}
             <AnimatePresence>
-                {showScrollTop && (
-                    <motion.button
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"
-                    >
-                        <ChevronUp className="w-5 h-5" />
-                    </motion.button>
+                {showScrollTop && !isFocusMode && (
+                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
                 )}
             </AnimatePresence>
         </main>
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
+        <AnimatePresence>
+            {showDownloadModal && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col" onClick={() => setShowDownloadModal(false)}>
+                    <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-emerald-500/20 rounded-lg flex items-center justify-center"><Download className="w-5 h-5 text-emerald-400" /></div>
+                            <div>
+                                <h3 className="font-bold text-sm text-white">Download — {title}</h3>
+                                <p className="text-[11px] text-zinc-500">{type === 'tv' ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : 'Full Movie'}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a href={type === 'tv' ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}` : `https://dl.vidsrc.vip/movie/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"><ExternalLink className="w-3.5 h-3.5" /> Open in New Tab</a>
+                            <button onClick={() => setShowDownloadModal(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><X className="w-5 h-5 text-zinc-400" /></button>
+                        </div>
+                    </div>
+                    <div className="flex-1 relative" onClick={(e) => e.stopPropagation()}>
+                        <iframe src={getProxiedEmbedUrl(type === 'tv' ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}` : `https://dl.vidsrc.vip/movie/${id}`)} className="w-full h-full border-0" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="shrink-0 p-3 border-t border-white/10 bg-black/80 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Alt:</span>
+                            <a href={type === 'tv' ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}` : `https://dl.vidsrc.vip/movie/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-emerald-600/30 transition-colors"><Download className="w-3 h-3" /> VidSrc DL</a>
+                            <a href={type === 'tv' ? `https://vidfast.pro/tv/${id}/${selectedSeason}/${selectedEpisode}?autoPlay=true` : `https://vidfast.pro/movie/${id}?autoPlay=true`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-blue-600/30 transition-colors"><Download className="w-3 h-3" /> VidFast Pro</a>
+                            <a href={type === 'tv' ? `https://www.2embed.cc/embedtv/${id}&s=${selectedSeason}&e=${selectedEpisode}` : `https://www.2embed.cc/embed/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent)] rounded-lg text-[11px] font-bold shrink-0 hover:bg-[var(--accent)]/30 transition-colors"><Download className="w-3 h-3" /> 2Embed</a>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
         </>
     );
 }
