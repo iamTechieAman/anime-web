@@ -22,64 +22,82 @@ const SERVERS = [
         name: 'Toon4K',
         badge: 'Premium 4K',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false`,
-    },
-    {
-        id: 'toon_ultimate',
-        name: 'Toon Player Ultimate',
-        badge: 'Ultimate',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1` : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
-    },
-    {
-        id: 'cinevo',
-        name: 'Cinevo',
-        badge: 'HD',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}` : `https://cineby.pro/movie/${id}`,
-    },
-    {
-        id: 'nortan',
-        name: 'Toon Player Classic',
-        badge: 'Classic',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://www.nontongo.win/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.nontongo.win/embed/movie/${id}`,
-    },
-    {
-        id: 'peachify',
-        name: 'Toon Player VIP',
-        badge: 'Multi-Audio',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
+            type === 'tv'
+                ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
+                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
     },
     {
         id: 'vidsrcto',
         name: 'Toon Player Pro',
         badge: 'Pro',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}` : `https://vidsrc.to/embed/movie/${id}`,
+            type === 'tv'
+                ? `https://vidsrc.to/embed/tv/${id}/${s || 1}/${e || 1}`
+                : `https://vidsrc.to/embed/movie/${id}`,
+    },
+    {
+        id: 'toon_ultimate',
+        name: 'Toon Player Ultimate',
+        badge: 'Ultimate',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidsrc.pro/embed/tv/${id}/${s || 1}/${e || 1}?autoplay=1`
+                : `https://vidsrc.pro/embed/movie/${id}?autoplay=1`,
     },
     {
         id: 'autoembed',
         name: 'Toon Player Stream',
         badge: 'Stream',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://autoembed.co/tv/tmdb/${id}-${s || 1}-${e || 1}` : `https://autoembed.co/movie/tmdb/${id}`,
+            type === 'tv'
+                ? `https://autoembed.co/tv/tmdb/${id}/${s || 1}/${e || 1}`
+                : `https://autoembed.co/movie/tmdb/${id}`,
+    },
+    {
+        id: 'cinevo',
+        name: 'Cinevo',
+        badge: 'HD',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}`
+                : `https://cineby.pro/movie/${id}`,
     },
     {
         id: 'vidfast',
-        name: 'Toon Player Auto',
+        name: 'Toon Player Fast',
         badge: 'Fast',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=3b82f6` : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=3b82f6`,
+            type === 'tv'
+                ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&theme=7C3AED`
+                : `https://vidfast.pro/movie/${id}?autoPlay=true&theme=7C3AED`,
+    },
+    {
+        id: 'peachify',
+        name: 'Toon Player VIP',
+        badge: 'Multi-Audio',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1`
+                : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
     },
     {
         id: 'multiembed',
         name: 'Toon Player Backup',
         badge: 'Backup',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}` : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
-    }
+            type === 'tv'
+                ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}`
+                : `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    },
+    {
+        id: 'vidsrcme',
+        name: 'Toon Player Mirror',
+        badge: 'Mirror',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}`
+                : `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    },
 ];
 
 const ANIME_SERVERS = [
@@ -87,7 +105,7 @@ const ANIME_SERVERS = [
         id: "toon4k_anime",
         name: "Toon4K Anime",
         badge: "Premium 4K",
-        getUrl: (id: string, ep: number) => `https://vidlink.pro/embed/anime/${id}/${ep}?primaryColor=3b82f6`
+        getUrl: (id: string, ep: number) => `https://vidlink.pro/tv/${id}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true`
     },
     {
         id: "vidsrc_anime",
@@ -100,8 +118,16 @@ const ANIME_SERVERS = [
         name: "VidSrc Me",
         badge: "Backup",
         getUrl: (id: string, ep: number) => `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+    },
+    {
+        id: "vidsrc_pro_anime",
+        name: "VidSrc Pro",
+        badge: "HD",
+        getUrl: (id: string, ep: number) => `https://vidsrc.pro/embed/anime/${id}/1/${ep}`
     }
 ];
+
+
 
 const getProxiedEmbedUrl = (rawUrl: string) => {
     if (!rawUrl) return "";
@@ -110,31 +136,31 @@ const getProxiedEmbedUrl = (rawUrl: string) => {
     }
     try {
         const parsed = new URL(rawUrl);
-        // ONLY proxy sites that need server-side HTML rewriting for CORS.
-        // Direct embed providers (vidlink, vidsrc, cineby, etc.) work fine as plain iframes
-        // and return 403 when fetched server-side — never proxy them.
-        const needsProxy = parsed.hostname.includes('megacloud') || 
-                           parsed.hostname.includes('rapid-cloud') ||
-                           parsed.hostname.includes('rabbitstream') ||
-                           parsed.hostname.includes('gogocdn') ||
-                           parsed.hostname.includes('playtaku') ||
-                           parsed.hostname.includes('vidstreaming') ||
-                           parsed.hostname.includes('allanime') ||
-                           parsed.hostname.includes('anime-taku') ||
-                           parsed.hostname.includes('filemoon') ||
-                           parsed.hostname.includes('embed.su') ||
-                           parsed.hostname.includes('peachify') ||
-                           parsed.hostname.includes('nontongo') ||
-                           parsed.hostname.includes('vidfast') ||
-                           parsed.hostname.includes('multiembed') ||
-                           parsed.hostname.includes('autoembed') ||
-                           parsed.hostname.includes('cineby') ||
-                           parsed.hostname.includes('vidsrc');
+        const host = parsed.hostname;
+
+        // ONLY proxy true anime CDN servers that require server-side HTML rewriting to resolve
+        // CORS blocks on their sub-resources. These cannot be loaded as plain iframes.
+        //
+        // DO NOT proxy commercial embed providers (vidsrc, peachify, nontongo, autoembed, cineby,
+        // vidfast, multiembed, vidlink) — they use Cloudflare bot protection that blocks
+        // server-side fetches with 403/500, and they load perfectly as direct browser iframes.
+        const needsProxy =
+            host.includes('megacloud') ||
+            host.includes('rapid-cloud') ||
+            host.includes('rabbitstream') ||
+            host.includes('gogocdn') ||
+            host.includes('playtaku') ||
+            host.includes('vidstreaming') ||
+            host.includes('allanime') ||
+            host.includes('anime-taku') ||
+            host.includes('filemoon') ||
+            host.includes('embed.su');
+
         if (needsProxy) {
             return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
         }
     } catch (_) {}
-    // Return URL as-is — browser loads it directly in the iframe (no server-side fetch)
+    // All other embeds load directly in the iframe — browser handles them natively
     return rawUrl;
 };
 
@@ -1147,8 +1173,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             key={iframeKey}
                             src={getProxiedEmbedUrl(embedUrl)}
                             className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer"
-                            referrerPolicy="strict-origin-when-cross-origin"
+                            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share"
+                            allowFullScreen
+                            title={`${title} - Video Player`}
                             onError={() => {
                                 handleAutoFallback();
                             }}

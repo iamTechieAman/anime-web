@@ -226,25 +226,46 @@ export async function GET(request: NextRequest) {
     const referer = getRefererForUrl(decodedUrl, refererOverride || undefined);
 
     try {
-        const response = await fetch(decodedUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0',
-                'Referer': referer,
-                'Origin': referer,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Sec-Fetch-Dest': 'iframe',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'cross-site',
-                'DNT': '1',
-            },
-            redirect: 'follow',
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
 
-        if (!response.ok) {
-            return new NextResponse(`Embed fetch failed: ${response.status} ${response.statusText}`, {
-                status: response.status,
+        let response: Response;
+        try {
+            response = await fetch(decodedUrl, {
+                signal: controller.signal,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+                    'Referer': referer,
+                    'Origin': new URL(referer).origin,
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Sec-CH-UA': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+                    'Sec-CH-UA-Mobile': '?0',
+                    'Sec-CH-UA-Platform': '"Windows"',
+                    'Sec-Fetch-Dest': 'iframe',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'cross-site',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Cache-Control': 'no-cache',
+                },
+                redirect: 'follow',
+            });
+        } finally {
+            clearTimeout(timeout);
+        }
+
+        if (!response!.ok) {
+            // Return a detectable error HTML page instead of propagating the status code.
+            // This allows the client-side auto-scan engine to detect the failure and rotate.
+            const errHtml = `<!DOCTYPE html><html><body style="background:#0a0a0a;color:#ef4444;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:12px;"><div style="font-size:48px">⚠️</div><div style="font-size:18px;font-weight:bold;">Embed fetch failed</div><div style="font-size:12px;color:#888">${response!.status} — ${decodedUrl.slice(0,80)}</div></body></html>`;
+            return new NextResponse(errHtml, {
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/html; charset=utf-8',
+                    'Access-Control-Allow-Origin': '*',
+                    'X-Embed-Error': `${response!.status}`,
+                },
             });
         }
 
@@ -397,7 +418,17 @@ export async function GET(request: NextRequest) {
 
     } catch (err: any) {
         console.error('[EmbedProxy] Error:', err.message);
-        return new NextResponse(`Embed proxy error: ${err.message}`, { status: 500 });
+        const isTimeout = err.name === 'AbortError' || err.message?.includes('abort');
+        const errMsg = isTimeout ? 'Request timed out' : err.message;
+        const errHtml = `<!DOCTYPE html><html><body style="background:#0a0a0a;color:#ef4444;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:12px;"><div style="font-size:48px">⚠️</div><div style="font-size:18px;font-weight:bold;">Embed proxy error</div><div style="font-size:12px;color:#888">${errMsg}</div></body></html>`;
+        return new NextResponse(errHtml, {
+            status: 200,
+            headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Access-Control-Allow-Origin': '*',
+                'X-Embed-Error': 'proxy-error',
+            },
+        });
     }
 }
 

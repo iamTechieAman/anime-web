@@ -1069,7 +1069,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     ref={iframeRef}
                                     src={getProxiedEmbedUrl(sourceUrl)}
                                     className="w-full h-full border-0 bg-black"
-                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
+                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
+                                    allowFullScreen
                                     onLoad={(e) => {
                                         setLoadingSource(false);
                                         try {
