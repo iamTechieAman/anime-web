@@ -255,8 +255,8 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
                     </AnimatePresence>
                 </div>
 
-                {/* ── TABLET / DESKTOP: Wrapped chip row (no horizontal scroll) ── */}
-                <div className="hidden sm:flex flex-wrap items-center gap-1.5 py-2.5">
+                {/* ── TABLET / DESKTOP: Horizontal scrollable chip row ── */}
+                <div className="hidden sm:flex items-center gap-2 py-3 overflow-x-auto flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth">
                     {PROVIDERS.map((provider) => {
                         const isActive = activeProvider === provider.slug;
 

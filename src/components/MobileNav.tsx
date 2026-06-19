@@ -87,11 +87,11 @@ export default function MobileNav() {
     return (
         <div
             className={`
-                fixed bottom-4 left-4 right-4 z-[100] 
-                bg-[var(--bg-overlay)] backdrop-blur-2xl border border-[var(--border-color)] rounded-2xl
+                fixed bottom-0 left-0 right-0 z-[100] 
+                bg-[var(--bg-overlay)] backdrop-blur-2xl border-t border-[var(--border-color)]
                 pb-[env(safe-area-inset-bottom)] transition-all duration-300 md:hidden
                 ${isScrolledDown ? "translate-y-24 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}
-                shadow-[0_8px_32px_rgba(0,0,0,0.6)]
+                shadow-[0_-8px_32px_rgba(0,0,0,0.4)]
             `}
         >
             <div className="flex justify-around items-center h-16 px-1">

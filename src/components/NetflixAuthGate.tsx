@@ -3,6 +3,7 @@
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Film, Play, Sparkles, Tv, ShieldCheck, Check, Star, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
+import Logo from "@/components/Logo";
 
 // Real poster images from TMDB for the animated background grid
 const BACKGROUND_POSTERS = [
@@ -63,7 +64,7 @@ const FEATURES = [
 
 export default function NetflixAuthGate() {
   const [mounted, setMounted] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(true); // Default to true for SSR safety
 
   useEffect(() => {
     setMounted(true);
@@ -71,7 +72,6 @@ export default function NetflixAuthGate() {
     setReducedMotion(mq.matches);
   }, []);
 
-  if (!mounted) return null;
 
   return (
     <div className="relative min-h-screen min-h-dvh w-full bg-[#050507] text-white flex flex-col overflow-hidden font-inter">
@@ -111,12 +111,9 @@ export default function NetflixAuthGate() {
       <header className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex items-center justify-between max-w-screen-2xl mx-auto pt-[env(safe-area-inset-top)]">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <img
-            src="/icon.png"
-            alt=""
-            aria-hidden="true"
-            className="w-8 h-8 sm:w-10 sm:h-10 object-contain filter drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
-          />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
+            <Logo />
+          </div>
           <span className="flex flex-col leading-none">
             <span className="text-base sm:text-xl font-black tracking-tight text-white" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Toon</span>
             <span className="text-base sm:text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Player</span>

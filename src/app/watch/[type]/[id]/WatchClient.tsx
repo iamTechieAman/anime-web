@@ -1381,58 +1381,58 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="mb-6">
-                                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-2 font-sora line-clamp-2">{title}</h2>
-                                        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-muted)]">
-                                            <span className="flex items-center gap-1.5 font-bold text-green-400"><Sparkles className="w-4 h-4" /> {matchPercent}% Match</span>
+                                    <div className="mb-4 sm:mb-6">
+                                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-2 sm:mb-3 font-sora leading-tight">{title}</h2>
+                                        <div className="flex flex-wrap items-center gap-y-2 gap-x-3 sm:gap-x-4 text-xs sm:text-sm font-medium text-[var(--text-muted)]">
+                                            <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
                                             <span>{year}</span>
                                             {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
-                                            <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                            <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
                                         </div>
                                     </div>
-                                    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-8">
+                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+                                        {details.genres?.map((genre) => (
+                                            <span key={genre.id} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-full text-[10px] sm:text-xs font-bold tracking-wide text-zinc-300 hover:text-white hover:bg-white/10 transition-all">{genre.name}</span>
+                                        ))}
+                                    </div>
+                                    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-6 sm:mb-8">
                                         {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
                                             <div className="mb-6">
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <h3 className="font-bold text-lg flex items-center gap-2"><Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes</h3>
+                                                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2"><Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes</h3>
                                                     <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
-                                                        <button onClick={() => setMode("sub")} className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>SUB</button>
-                                                        <button onClick={() => setMode("dub")} className={`px-4 py-1 rounded-md text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>DUB</button>
+                                                        <button onClick={() => setMode("sub")} className={`px-3 sm:px-4 py-1 rounded-md text-[10px] sm:text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>SUB</button>
+                                                        <button onClick={() => setMode("dub")} className={`px-3 sm:px-4 py-1 rounded-md text-[10px] sm:text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>DUB</button>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
                                                     {episodes.map((epNum: string) => (
-                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
+                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
                                                     ))}
                                                 </div>
                                             </div>
                                         )}
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="bg-blue-600/10 p-3 rounded-xl border border-blue-500/20"><Play className="w-6 h-6 text-blue-500 fill-current" /></div>
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+                                            <div className="flex items-center gap-3 sm:gap-4">
+                                                <div className="bg-blue-600/10 p-2.5 sm:p-3 rounded-xl border border-blue-500/20"><Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 fill-current" /></div>
                                                 <div>
-                                                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Now Playing</p>
-                                                    <p className="font-bold text-sm">{type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}</p>
+                                                    <p className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Now Playing</p>
+                                                    <p className="font-bold text-xs sm:text-sm">{type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex flex-wrap gap-3">
-                                                <button onClick={toggleWatchlist} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-4 h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
-                                                <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"><Download className="w-4 h-4" /> Download</button>
-                                                <button onClick={handleShare} className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-sm hover:bg-[var(--border-color)] transition-all active:scale-95"><Share2 className="w-4 h-4" /> Share</button>
+                                            <div className="flex flex-wrap gap-2 sm:gap-3">
+                                                <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
+                                                <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
+                                                <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-[var(--border-color)] transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-wrap gap-2 mb-5">
-                                        {details.genres?.map((genre) => (
-                                            <span key={genre.id} className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full text-xs font-medium text-[var(--text-main)] hover:bg-[var(--border-color)] transition-colors">{genre.name}</span>
-                                        ))}
-                                    </div>
-                                    <p className="text-[var(--text-muted)] text-sm md:text-base leading-relaxed mb-6 max-w-2xl">{details.overview}</p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                        {director && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5">{director.name}</p></div>}
-                                        {details.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
-                                        {details.status && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Status</span><p className="text-white font-medium mt-0.5">{details.status}</p></div>}
-                                        {details.vote_count && <div className="bg-white/[0.03] rounded-xl p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
+                                    <p className="text-[var(--text-muted)] text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-3xl">{details.overview}</p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
+                                        {director && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5 truncate">{director.name}</p></div>}
+                                        {details.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5 truncate">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
+                                        {details.status && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Status</span><p className="text-white font-medium mt-0.5 truncate">{details.status}</p></div>}
+                                        {details.vote_count && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5 truncate">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
                                     </div>
                                 </div>
                             </div>

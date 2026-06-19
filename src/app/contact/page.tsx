@@ -70,9 +70,6 @@ export default function ContactPage() {
                         <a href="https://github.com/iamTechieAman" className="p-3 bg-white/5 rounded-xl text-[var(--text-muted)] hover:text-white transition-colors border border-white/5 hover:border-white/10">
                             <Github className="w-6 h-6" />
                         </a>
-                        <a href="#" className="p-3 bg-white/5 rounded-xl text-[var(--text-muted)] hover:text-white transition-colors border border-white/5 hover:border-white/10">
-                            <Twitter className="w-6 h-6" />
-                        </a>
                     </div>
                 </div>
 

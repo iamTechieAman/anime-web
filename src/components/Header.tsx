@@ -852,6 +852,9 @@ export default function Header() {
 
           {/* User account — readable signed-out and signed-in states */}
           <div className="profile-action-shell flex items-center justify-center pl-1.5 md:pl-2 border-l border-white/[0.08]">
+            {!isUserLoaded && (
+                <div className="w-[84px] md:w-[100px] h-10 rounded-xl bg-white/5 animate-pulse" />
+            )}
             {isUserLoaded && !isSignedIn && (
               <SignInButton mode="modal">
                 <button className="h-10 px-3 md:px-5 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-95 active:scale-98 transition-all font-black text-xs md:text-sm flex items-center gap-2 shadow-[0_8px_20px_var(--accent-glow)] border-0 cursor-pointer">

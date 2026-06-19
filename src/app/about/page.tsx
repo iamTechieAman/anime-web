@@ -61,12 +61,6 @@ export default function AboutPage() {
                         <a href="https://github.com/iamTechieAman" target="_blank" rel="noopener noreferrer" className="p-3.5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] hover:border-[var(--accent)]/55 hover:shadow-[0_0_20px_var(--accent-glow)] transition-all">
                             <Github className="w-6 h-6 text-white" />
                         </a>
-                        <a href="#" className="p-3.5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] hover:border-blue-500/50 transition-all">
-                            <Twitter className="w-6 h-6 text-white" />
-                        </a>
-                        <a href="mailto:contact@toonplayer.in" className="p-3.5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] hover:border-rose-500/50 transition-all">
-                            <Mail className="w-6 h-6 text-white" />
-                        </a>
                     </motion.div>
                 </section>
 
