@@ -37,7 +37,7 @@ const SERVERS = [
     },
     {
         id: 'toon_ultimate',
-        name: 'Toon Player Ultimate',
+        name: 'Toon Ultimate',
         badge: 'Ultimate',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -46,7 +46,7 @@ const SERVERS = [
     },
     {
         id: 'autoembed',
-        name: 'Toon Player Stream',
+        name: 'Toon Stream',
         badge: 'Stream',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -55,16 +55,16 @@ const SERVERS = [
     },
     {
         id: 'cinevo',
-        name: 'Cinevo',
+        name: 'Cinevo HD',
         badge: 'HD',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
-                ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}`
-                : `https://cineby.pro/movie/${id}`,
+                ? `https://cineby.pro/tv/${id}/${s || 1}/${e || 1}?autoplay=true`
+                : `https://cineby.pro/movie/${id}?autoplay=true`,
     },
     {
         id: 'vidfast',
-        name: 'Toon Player Fast',
+        name: 'Toon Fast',
         badge: 'Fast',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -73,7 +73,7 @@ const SERVERS = [
     },
     {
         id: 'peachify',
-        name: 'Toon Player VIP',
+        name: 'Toon VIP',
         badge: 'Multi-Audio',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -82,7 +82,7 @@ const SERVERS = [
     },
     {
         id: 'multiembed',
-        name: 'Toon Player Backup',
+        name: 'Toon Backup',
         badge: 'Backup',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -91,7 +91,7 @@ const SERVERS = [
     },
     {
         id: 'vidsrcme',
-        name: 'Toon Player Mirror',
+        name: 'Toon Mirror',
         badge: 'Mirror',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
@@ -103,28 +103,32 @@ const SERVERS = [
 const ANIME_SERVERS = [
     {
         id: "toon4k_anime",
-        name: "Toon4K Anime",
-        badge: "Premium 4K",
-        getUrl: (id: string, ep: number) => `https://vidlink.pro/tv/${id}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true`
+        name: "Toon4K",
+        badge: "4K",
+        getUrl: (id: string, ep: number) =>
+            `https://vidlink.pro/tv/${id}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true`
     },
     {
         id: "vidsrc_anime",
-        name: "VidSrc Anime",
-        badge: "Anime",
-        getUrl: (id: string, ep: number) => `https://vidsrc.to/embed/anime/${id}/${ep}`
-    },
-    {
-        id: "vidsrc_me_anime",
-        name: "VidSrc Me",
-        badge: "Backup",
-        getUrl: (id: string, ep: number) => `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+        name: "VidSrc",
+        badge: "Sub",
+        getUrl: (id: string, ep: number) =>
+            `https://vidsrc.to/embed/anime/${id}/${ep}`
     },
     {
         id: "vidsrc_pro_anime",
         name: "VidSrc Pro",
         badge: "HD",
-        getUrl: (id: string, ep: number) => `https://vidsrc.pro/embed/anime/${id}/1/${ep}`
-    }
+        getUrl: (id: string, ep: number) =>
+            `https://vidsrc.pro/embed/anime/${id}/1/${ep}?autoplay=1`
+    },
+    {
+        id: "vidsrc_me_anime",
+        name: "VidSrc Alt",
+        badge: "Dub",
+        getUrl: (id: string, ep: number) =>
+            `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+    },
 ];
 
 
@@ -1105,215 +1109,178 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         : activeServer.getUrl(resolvedMediaType, activeId, selectedSeason, selectedEpisode);
     const renderPlayer = () => {
         return (
-            <div className="relative w-full bg-black touch-pan-y">
-                <div className="w-full touch-pan-y">
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                        className={`relative w-full ${isFocusMode ? "h-screen" : "aspect-video"} bg-black ${isFocusMode ? "rounded-none" : "rounded-2xl"} overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] shadow-[var(--accent)]/5 touch-pan-y`}
-                        style={{ touchAction: 'pan-y !important' }}
-                    >
-                        {!playerLoaded && (
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--bg-card)]">
-                                <div className="relative">
-                                    <div className="w-16 h-16 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
-                                    <Play className="absolute inset-0 m-auto w-6 h-6 text-blue-400" />
-                                </div>
-                                <p className="mt-4 text-[var(--text-muted)] text-sm animate-pulse tracking-widest uppercase font-bold">{loadingStatus}</p>
-                                <p className="mt-1 text-zinc-600 text-xs font-medium uppercase tracking-tighter">Server: {activeServer.name}</p>
-                                {isUpcoming && <p className="mt-4 px-4 py-1.5 bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</p>}
+            <div className="relative w-full">
+                {/* ── VIDEO CONTAINER ── */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className={`relative w-full ${
+                        isFocusMode ? "h-screen rounded-none" : "aspect-video rounded-xl sm:rounded-2xl"
+                    } bg-[#0a0a0a] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
+                >
+                    {/* Loading State */}
+                    {!playerLoaded && (
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0a0a0a] gap-4">
+                            <div className="relative flex items-center justify-center">
+                                <div className="absolute w-20 h-20 rounded-full border border-[var(--accent)]/20 animate-ping" />
+                                <div className="w-14 h-14 rounded-full border-[3px] border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
+                                <Play className="absolute w-5 h-5 text-[var(--accent)]" />
                             </div>
-                        )}
-                        {isUpcoming && playerLoaded && (
-                            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 p-8 text-center backdrop-blur-md">
-                                <div className="flex flex-col items-center max-w-md text-center p-8 bg-zinc-950/40 border border-white/5 rounded-2xl backdrop-blur-md">
-                                    <Calendar className="w-16 h-16 text-[var(--accent)] mb-6" />
-                                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-2 font-sora">Upcoming Episode</h2>
-                                    <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-6 font-medium">This episode is scheduled to air soon. We'll update the streams as soon as it becomes available.</p>
-                                    <div className="flex gap-3">
-                                        <button 
-                                            onClick={() => router.back()}
-                                            className="px-6 py-2.5 bg-[var(--accent)] text-white rounded-lg font-bold hover:opacity-90 transition-all uppercase tracking-widest text-[10px]"
-                                        >
-                                            Explore Others
+                            <div className="text-center">
+                                <p className="text-white text-xs font-black uppercase tracking-[0.2em] animate-pulse">{loadingStatus}</p>
+                                <p className="text-zinc-600 text-[10px] font-medium mt-1 uppercase tracking-wider">{activeServer.name}</p>
+                            </div>
+                            {isUpcoming && (
+                                <span className="px-4 py-1.5 bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Upcoming Release Overlay */}
+                    {isUpcoming && playerLoaded && (
+                        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+                            <div className="text-center max-w-sm">
+                                <div className="w-16 h-16 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent)]/20">
+                                    <Calendar className="w-8 h-8 text-[var(--accent)]" />
+                                </div>
+                                <h2 className="text-lg font-black text-white uppercase tracking-wide mb-2">Upcoming</h2>
+                                <p className="text-xs text-zinc-400 leading-relaxed mb-6">This episode hasn't aired yet. Check back soon.</p>
+                                <button onClick={() => router.back()} className="px-6 py-2.5 bg-[var(--accent)] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all">Go Back</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Source Error Overlay */}
+                    {sourceError && !isAnimeServer && (
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 text-center">
+                            <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+                                <X className="w-6 h-6 text-red-400" />
+                            </div>
+                            <h3 className="text-base font-bold mb-1 text-white">Server Unavailable</h3>
+                            <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">Try a different server below</p>
+                            <div className="flex gap-2 flex-wrap justify-center">
+                                <button onClick={() => { setSourceError(false); setIframeKey(prev => prev + 1); }}
+                                    className="px-4 py-2 bg-[var(--accent)] text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
+                                    <RefreshCw className="w-3.5 h-3.5" /> Retry
+                                </button>
+                                <button onClick={handleAutoFallback}
+                                    className="px-4 py-2 bg-white/10 border border-white/10 text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
+                                    <Zap className="w-3.5 h-3.5" /> Next Server
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* IFRAME */}
+                    <iframe
+                        key={iframeKey}
+                        src={getProxiedEmbedUrl(embedUrl)}
+                        className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-500 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
+                        allowFullScreen
+                        title={`${title} - ToonPlayer`}
+                        onError={handleAutoFallback}
+                        onLoad={(e) => {
+                            setPlayerLoaded(true);
+                            try {
+                                const iframe = e.target as HTMLIFrameElement;
+                                const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                                if (doc) {
+                                    const text = doc.body?.innerText || '';
+                                    if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('⚠️')) {
+                                        handleAutoFallback();
+                                    }
+                                }
+                            } catch (_) {}
+                        }}
+                    />
+
+                    {/* Auto-Next Overlay */}
+                    <AnimatePresence>
+                        {showNextOverlay && (
+                            <motion.div
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="absolute inset-0 z-[60] bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6"
+                            >
+                                <motion.div initial={{ scale: 0.9, y: 16 }} animate={{ scale: 1, y: 0 }} className="max-w-[280px] w-full">
+                                    <div className="relative w-20 h-20 mx-auto mb-5">
+                                        <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
+                                            <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" />
+                                            <motion.circle cx="40" cy="40" r="34" stroke="var(--accent)" strokeWidth="6" fill="none"
+                                                strokeDasharray="213.6"
+                                                animate={{ strokeDashoffset: 213.6 - (213.6 * (5 - nextCountdown)) / 5 }}
+                                                transition={{ duration: 1, ease: "linear" }}
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-2xl font-black text-white">{nextCountdown}</span>
+                                        </div>
+                                    </div>
+                                    <h3 className="text-lg font-black text-white mb-1 uppercase tracking-tight">Up Next</h3>
+                                    <p className="text-zinc-400 text-xs font-medium mb-6">Episode {selectedEpisode + 1}</p>
+                                    <div className="flex items-center gap-2 justify-center">
+                                        <button onClick={() => { if (nextIntervalRef.current) clearInterval(nextIntervalRef.current); setShowNextOverlay(false); }}
+                                            className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all">Cancel</button>
+                                        <button onClick={() => {
+                                            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                                            setNextCountdown(0); setShowNextOverlay(false);
+                                            const ci = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+                                            let ne = selectedEpisode + 1, ns = selectedSeason;
+                                            if (ci !== -1 && ci + 1 < episodes.length) { ne = episodes[ci + 1].episode_number; setSelectedEpisode(ne); }
+                                            const csData = details?.seasons?.find(s => s.season_number === selectedSeason);
+                                            if (csData && ne > csData.episode_count) { ns += 1; ne = 1; }
+                                            const u = new URL(window.location.href);
+                                            u.searchParams.set("s", ns.toString()); u.searchParams.set("e", ne.toString());
+                                            router.push(u.pathname + u.search);
+                                        }} className="px-6 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-1.5">
+                                            <Play className="w-4 h-4 fill-current" /> Play Now
                                         </button>
                                     </div>
-                                </div>
-                            </div>
-                        )}
-                        {sourceError && !isAnimeServer && (
-                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center">
-                                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-                                    <X className="w-8 h-8 text-red-500" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Server Not Responding</h3>
-                                <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md">
-                                    This content might not be available on {activeServer.name}.
-                                </p>
-                                <div className="flex gap-3">
-                                    <button 
-                                        onClick={() => setIframeKey(prev => prev + 1)}
-                                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-[var(--accent)] hover:from-blue-500 hover:to-[var(--accent)] text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
-                                    >
-                                        <Zap className="w-4 h-4" /> Try Refreshing
-                                    </button>
-                                    {type === 'anime' && (
-                                        <button 
-                                            onClick={() => setActiveServer(ANIME_SERVERS[0])}
-                                            className="px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold transition-all flex items-center gap-2"
-                                        >
-                                            <Server className="w-4 h-4" /> Anime Server
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                        <iframe
-                            key={iframeKey}
-                            src={getProxiedEmbedUrl(embedUrl)}
-                            className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share"
-                            allowFullScreen
-                            title={`${title} - Video Player`}
-                            onError={() => {
-                                handleAutoFallback();
-                            }}
-                            onLoad={(e) => {
-                                setPlayerLoaded(true);
-                                try {
-                                    const iframe = e.target as HTMLIFrameElement;
-                                    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-                                    if (doc) {
-                                        const text = doc.body?.innerText || '';
-                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway')) {
-                                            console.warn('[ToonPlayer] Proxy error detected inside iframe. Triggering autoscan fallback...');
-                                            handleAutoFallback();
-                                        }
-                                    }
-                                } catch (err) {
-                                    // Cross-origin errors are expected and mean a third-party player loaded successfully
-                                }
-                            }}
-                        />
-                        <AnimatePresence>
-                            {showNextOverlay && (
-                                <motion.div 
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="absolute inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
-                                >
-                                    <motion.div
-                                        initial={{ scale: 0.9, y: 20 }}
-                                        animate={{ scale: 1, y: 0 }}
-                                        className="max-w-sm w-full"
-                                    >
-                                        <div className="relative w-24 h-24 mx-auto mb-6">
-                                            <svg className="w-full h-full transform -rotate-90">
-                                                <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
-                                                <motion.circle
-                                                    cx="48" cy="48" r="40" stroke="var(--accent)" strokeWidth="8" fill="none"
-                                                    strokeDasharray="251.2"
-                                                    animate={{ strokeDashoffset: 251.2 - (251.2 * (5 - nextCountdown)) / 5 }}
-                                                    transition={{ duration: 1, ease: "linear" }}
-                                                />
-                                            </svg>
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-3xl font-black text-white">{nextCountdown}</span>
-                                            </div>
-                                        </div>
-                                        <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Up Next</h3>
-                                        <p className="text-[var(--text-muted)] text-sm font-bold mb-8">Episode {selectedEpisode + 1}</p>
-                                        <div className="flex items-center gap-3 justify-center">
-                                            <button 
-                                                onClick={() => {
-                                                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                                    setShowNextOverlay(false);
-                                                }}
-                                                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all"
-                                            >Cancel</button>
-                                            <button 
-                                                onClick={() => {
-                                                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                                    setNextCountdown(0);
-                                                    setShowNextOverlay(false);
-                                                    const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-                                                    let nextEp = selectedEpisode + 1;
-                                                    if (currentIndex !== -1 && currentIndex + 1 < episodes.length) {
-                                                        nextEp = episodes[currentIndex + 1].episode_number;
-                                                        setSelectedEpisode(nextEp);
-                                                    }
-                                                    let nextSeason = selectedSeason;
-                                                    const seasons = details?.seasons;
-                                                    const currentSeasonData = seasons?.find(s => s.season_number === selectedSeason);
-                                                    if (currentSeasonData && nextEp > currentSeasonData.episode_count) {
-                                                        nextSeason += 1;
-                                                        nextEp = 1;
-                                                    }
-                                                    const newUrl = new URL(window.location.href);
-                                                    newUrl.searchParams.set("s", nextSeason.toString());
-                                                    newUrl.searchParams.set("e", nextEp.toString());
-                                                    router.push(newUrl.pathname + newUrl.search);
-                                                }}
-                                                className="px-8 py-3 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-2 shadow-2xl shadow-white/10"
-                                            >Play Now <Play className="w-4 h-4 fill-current" /></button>
-                                        </div>
-                                    </motion.div>
                                 </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
-                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+
+                {/* ── CONTROL BAR ── */}
                 {!isFocusMode && (
-                    <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md">
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={handlePrevEpisode}
-                                disabled={!hasPrevEpisode()}
-                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
-                                title="Previous Episode"
-                            ><ChevronLeft className="w-4 h-4" /></button>
-                            <span className="text-xs font-semibold text-zinc-400 min-w-[70px] text-center">
-                                {type === 'movie' ? 'Movie' : `EP ${selectedEpisode}`}
+                    <div className="flex items-center justify-between mt-2.5 px-1 gap-3 select-none">
+                        {/* Episode Nav */}
+                        <div className="flex items-center gap-1.5">
+                            <button onClick={handlePrevEpisode} disabled={!hasPrevEpisode()}
+                                className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all"
+                                title="Previous Episode">
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-xs font-bold text-zinc-400 px-2 min-w-[56px] text-center">
+                                {type === 'movie' ? 'Movie' : `S${selectedSeason}E${selectedEpisode}`}
                             </span>
-                            <button
-                                onClick={handleNextEpisode}
-                                disabled={!hasNextEpisode()}
-                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
-                                title="Next Episode"
-                            ><ChevronRight className="w-4 h-4" /></button>
+                            <button onClick={handleNextEpisode} disabled={!hasNextEpisode()}
+                                className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all"
+                                title="Next Episode">
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setIframeKey(prev => prev + 1)}
-                                className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all"
-                                title="Reload Player"
-                            ><RefreshCw className="w-4 h-4" /></button>
-                            <button
-                                onClick={() => {
-                                    setIsTheatreMode(!isTheatreMode);
-                                    if (isFocusMode) setIsFocusMode(false);
-                                }}
-                                className={`p-2 border rounded-xl transition-all ${
-                                    isTheatreMode 
-                                        ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
-                                        : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                                }`}
-                                title="Theatre Mode"
-                            ><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" /><line x1="2" y1="16" x2="22" y2="16" /></svg></button>
-                            <button
-                                onClick={() => {
-                                    setIsFocusMode(!isFocusMode);
-                                    if (isTheatreMode) setIsTheatreMode(false);
-                                }}
-                                className={`p-2 border rounded-xl transition-all ${
-                                    isFocusMode 
-                                        ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
-                                        : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                                }`}
-                                title="Cinematic Focus Mode"
-                            ><Shield className="w-4 h-4" /></button>
+                        {/* View Controls */}
+                        <div className="flex items-center gap-1.5">
+                            <button onClick={() => setIframeKey(prev => prev + 1)}
+                                className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] rounded-lg text-zinc-400 hover:text-white transition-all"
+                                title="Reload">
+                                <RefreshCw className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => { setIsTheatreMode(!isTheatreMode); if (isFocusMode) setIsFocusMode(false); }}
+                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
+                                    isTheatreMode ? 'bg-[var(--accent)]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                }`} title="Theatre Mode">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
+                            </button>
+                            <button onClick={() => { setIsFocusMode(!isFocusMode); if (isTheatreMode) setIsTheatreMode(false); }}
+                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
+                                    isFocusMode ? 'bg-[var(--accent)]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                }`} title="Focus Mode">
+                                <Shield className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                     </div>
                 )}
@@ -1364,52 +1331,59 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <div className="flex flex-col xl:flex-row gap-6 items-start">
                         <div className="flex-1 w-full min-w-0">
                             {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
-                            <div className="w-full bg-[var(--accent)]/10 border-b border-[var(--accent)]/20 px-4 md:px-6 py-2.5 backdrop-blur-md rounded-xl mb-4">
-                                <p className="w-full text-xs font-semibold text-blue-300 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 shrink-0 text-yellow-400" />
-                                    <span>You are watching <span className="font-black text-white px-1">{title}</span>. If the current server doesn't work, please try other servers below.</span>
-                                </p>
-                            </div>
-                            <div className="w-full px-4 md:px-6 py-3 border-b border-[var(--border-color)] mb-6 bg-[var(--bg-card)]/40 rounded-xl border border-[var(--border-color)]">
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <span className="text-xs text-[var(--text-muted)] font-medium flex items-center gap-1.5"><Server className="w-3.5 h-3.5" /> Server:</span>
-                                    <div className="hidden md:flex flex-wrap items-center gap-2 pr-4">
+                            {/* ── SERVER SELECTION BAR ── */}
+                            <div className="mb-4 rounded-xl bg-[var(--bg-card)]/50 border border-white/[0.06] overflow-hidden">
+                                {/* Now Playing Banner */}
+                                <div className="px-4 py-2.5 bg-[var(--accent)]/8 border-b border-white/[0.04] flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
+                                    <p className="text-xs font-semibold text-zinc-400 truncate">
+                                        Watching <span className="text-white font-bold">{title}</span>
+                                        {resolvedMediaType !== 'movie' && (
+                                            <span className="text-zinc-500"> · S{selectedSeason}E{selectedEpisode}</span>
+                                        )}
+                                    </p>
+                                    <span className="ml-auto text-[10px] font-black text-[var(--accent)] uppercase tracking-widest shrink-0 flex items-center gap-1">
+                                        <Server className="w-3 h-3" /> {activeServer.name}
+                                    </span>
+                                </div>
+                                {/* Scrollable Server Pills — same on all screen sizes */}
+                                <div className="px-3 py-2.5 overflow-x-auto scrollbar-none">
+                                    <div className="flex items-center gap-2 min-w-max">
                                         {(() => {
-                                            const base = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
+                                            const base = type === "anime"
+                                                ? [...ANIME_SERVERS, ...serversList.filter((s: any) => !s.type || s.type === 'tv')]
+                                                : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
                                             const seen = new Set<string>();
                                             return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-                                        })().map((server: any) => (
-                                            <button key={server.id} onClick={() => handleManualServerSelect(server)} className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${activeServer.id === server.id ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30 font-bold" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/20"} ${failedServers.has(server.id) ? 'opacity-40 cursor-not-allowed' : ''} ${server.id === "peachify" ? "border-amber-500/50 hover:border-amber-500" : ""}`} title={failedServers.has(server.id) ? `${server.name} — failed` : server.name} disabled={failedServers.has(server.id) && activeServer.id !== server.id}>
-                                                <div className="flex flex-col items-start gap-0.5">
-                                                    <div className="flex items-center gap-1.5"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeServer.id === server.id ? 'bg-green-400 animate-pulse' : failedServers.has(server.id) ? 'bg-red-500' : 'bg-zinc-600'}`} />{activeServer.id === server.id ? <Play className="w-3 h-3 fill-current" /> : <Server className="w-3 h-3" />}{server.name}</div>
-                                                    {server.badge && <span className={`text-[9px] px-1.5 py-[1px] rounded uppercase font-black tracking-widest ${server.id === "peachify" ? "text-amber-400 bg-amber-400/10" : "text-[var(--accent)] bg-[var(--accent)]/10"}`}>{server.badge}</span>}
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="relative md:hidden w-full max-w-[300px] z-[110]">
-                                        <button onClick={() => setShowServers(!showServers)} className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-[#12131A]/95 backdrop-blur-md border border-white/10 rounded-xl text-xs font-black text-white hover:border-[var(--accent)]/50 transition-all shadow-lg" aria-label="Select streaming server">
-                                            <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" /><Server className="w-3.5 h-3.5 text-[var(--accent)]" /><span>{activeServer.name}</span></div>
-                                            <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${showServers ? "rotate-180 text-white" : ""}`} />
-                                        </button>
-                                        <AnimatePresence>
-                                            {showServers && (
-                                                <motion.div initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.97 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-2 bg-zinc-950 border border-white/10 rounded-xl overflow-hidden z-[120] shadow-2xl max-h-[60vh] overflow-y-auto">
-                                                    <div className="p-1.5 space-y-0.5">
-                                                        {(() => {
-                                                            const base = type === "anime" ? [...serversList, ...ANIME_SERVERS] : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
-                                                            const seen = new Set<string>();
-                                                            return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-                                                        })().map((server: any) => (
-                                                            <button key={server.id} onClick={() => { handleManualServerSelect(server); setShowServers(false); }} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all ${activeServer.id === server.id ? "text-[var(--accent)] bg-[var(--accent)]/10 font-black" : "text-zinc-300 font-medium hover:bg-white/5"} ${failedServers.has(server.id) ? 'opacity-40' : ''}`}>
-                                                                <span className="truncate flex items-center gap-2"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeServer.id === server.id ? 'bg-green-400 animate-pulse' : failedServers.has(server.id) ? 'bg-red-500' : 'bg-zinc-600'}`} />{activeServer.id === server.id && <Play className="w-3 h-3 fill-current text-[var(--accent)]" />}{server.name}</span>
-                                                                {server.badge && <span className={`text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded uppercase shrink-0 ${server.id === 'peachify' ? 'bg-amber-400/10 text-amber-400' : 'bg-white/5 text-zinc-400'}`}>{server.badge}</span>}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                        })().map((server: any) => {
+                                            const isActive = activeServer.id === server.id;
+                                            const isFailed = failedServers.has(server.id);
+                                            return (
+                                                <button
+                                                    key={server.id}
+                                                    onClick={() => handleManualServerSelect(server)}
+                                                    disabled={isFailed && !isActive}
+                                                    title={isFailed ? `${server.name} — unavailable` : server.name}
+                                                    className={`flex-none flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 border ${
+                                                        isActive
+                                                            ? 'bg-[var(--accent)] border-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]'
+                                                            : isFailed
+                                                                ? 'bg-transparent border-white/[0.05] text-zinc-600 opacity-40 cursor-not-allowed'
+                                                                : 'bg-white/[0.04] border-white/[0.07] text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.15]'
+                                                    }`}
+                                                >
+                                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                        isActive ? 'bg-white animate-pulse' : isFailed ? 'bg-red-500' : 'bg-zinc-600'
+                                                    }`} />
+                                                    {server.name}
+                                                    {server.badge && (
+                                                        <span className={`text-[8px] font-black tracking-widest px-1 py-px rounded uppercase ${
+                                                            isActive ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-zinc-500'
+                                                        }`}>{server.badge}</span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>

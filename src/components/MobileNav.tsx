@@ -89,10 +89,11 @@ export default function MobileNav() {
             className={`
                 fixed bottom-0 left-0 right-0 z-[100] 
                 bg-[var(--bg-overlay)] backdrop-blur-2xl border-t border-[var(--border-color)]
-                pb-[env(safe-area-inset-bottom)] transition-all duration-300 md:hidden
+                transition-all duration-300 md:hidden
                 ${isScrolledDown ? "translate-y-24 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}
                 shadow-[0_-8px_32px_rgba(0,0,0,0.4)]
             `}
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
             <div className="flex justify-around items-center h-16 px-1">
                 {navItems.map((item) => {
