@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sora, Inter } from "next/font/google";
+import { Manrope, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -15,7 +15,7 @@ import { AdBlockProvider } from "@/context/AdBlockContext";
 import { ClerkProvider } from "@clerk/nextjs";
 
 
-const sora = Sora({
+const manrope = Manrope({
   variable: "--font-sora",
   subsets: ["latin"],
   display: "swap",
@@ -172,7 +172,7 @@ export default async function RootLayout({
         <meta name="google-site-verification" content="google555e8d2c84c218f0" />
       </head>
       <body
-        className={`${sora.variable} ${inter.variable} font-inter antialiased bg-[#0b0b0f] text-white overflow-x-hidden transition-colors duration-300 selection:bg-orange-500/25`}
+        className={`${manrope.variable} ${inter.variable} font-inter antialiased bg-[#09090B] text-white overflow-x-hidden transition-colors duration-300 selection:bg-violet-500/25`}
         suppressHydrationWarning
       >
         <ClerkProvider
@@ -190,23 +190,24 @@ export default async function RootLayout({
               colorTextSecondary: '#94a3b8',
               colorTextOnPrimaryBackground: '#ffffff',
               colorNeutral: '#f1f5f9',
+              colorPrimary: '#7C3AED',
+              colorBackground: '#111113',
+              colorText: '#ffffff',
+              colorTextSecondary: '#a1a1aa',
               colorDanger: '#ef4444',
-              colorSuccess: '#22c55e',
-              /* Border: subtle but visible */
-              borderRadius: '0.75rem',
-              fontFamily: 'Inter, system-ui, sans-serif',
-              fontFamilyButtons: 'Inter, system-ui, sans-serif',
-              fontSize: '14px',
+              colorSuccess: '#10b981',
+              fontFamily: 'Inter, sans-serif',
+              borderRadius: '16px',
               spacingUnit: '16px',
             },
             elements: {
               /* Modal root card — dark but lighter than page BG */
-              card: '!bg-[#1c1c2a] !border !border-white/15 !rounded-2xl !shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_0_1px_rgba(249,115,22,0.08)] backdrop-blur-xl',
+              card: '!bg-[#111113] !border !border-white/10 !rounded-2xl !shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_0_1px_rgba(124,58,237,0.08)] backdrop-blur-xl',
               /* Header */
               headerTitle: '!text-white !font-black !text-xl !tracking-tight',
               headerSubtitle: '!text-slate-300 !font-medium !text-sm',
               /* Social auth buttons — visible ghost style */
-              socialButtonsBlockButton: '!bg-white/8 !border !border-white/15 !text-white hover:!bg-white/15 !text-sm !font-semibold !transition-all !rounded-xl',
+              socialButtonsBlockButton: '!bg-white/8 !border !border-white/10 !text-white hover:!bg-white/15 !text-sm !font-semibold !transition-all !rounded-xl',
               socialButtonsBlockButtonText: '!text-white !font-semibold',
               socialButtonsBlockButtonArrow: '!text-slate-300',
               /* Divider */
@@ -214,40 +215,40 @@ export default async function RootLayout({
               dividerText: '!text-slate-400',
               /* Form fields */
               formFieldLabel: '!text-slate-200 !font-semibold !text-xs !uppercase !tracking-wider',
-              formFieldInput: '!bg-[#252535] !border !border-white/15 !text-white !text-sm placeholder:!text-slate-500 focus:!border-orange-500/70 focus:!ring-1 focus:!ring-orange-500/40 !rounded-xl !px-4 !py-3 !transition-all',
+              formFieldInput: '!bg-[#18181B] !border !border-white/10 !text-white !text-sm placeholder:!text-slate-500 focus:!border-violet-500/70 focus:!ring-1 focus:!ring-violet-500/40 !rounded-xl !px-4 !py-3 !transition-all',
               formFieldInputShowPasswordButton: '!text-slate-400 hover:!text-white',
               formFieldHintText: '!text-slate-400 !text-xs',
               formFieldErrorText: '!text-red-400 !text-xs',
-              formFieldWarningText: '!text-amber-400 !text-xs',
+              formFieldWarningText: '!text-cyan-400 !text-xs',
               /* Primary CTA button */
-              formButtonPrimary: '!bg-gradient-to-r !from-orange-600 !to-amber-500 hover:!from-orange-500 hover:!to-amber-400 !text-white !font-bold !text-sm !tracking-wide !transition-all !rounded-xl !py-3 !shadow-lg !shadow-orange-500/25',
+              formButtonPrimary: '!bg-gradient-to-r !from-violet-600 !to-cyan-500 hover:!from-violet-500 hover:!to-cyan-400 !text-white !font-bold !text-sm !tracking-wide !transition-all !rounded-xl !py-3 !shadow-lg !shadow-violet-500/25',
               /* Secondary / ghost button */
-              formButtonReset: '!text-orange-400 hover:!text-orange-300 !font-semibold !text-sm',
+              formButtonReset: '!text-violet-400 hover:!text-violet-300 !font-semibold !text-sm',
               /* Footer links */
               footerActionText: '!text-slate-400 !text-sm',
-              footerActionLink: '!text-orange-400 hover:!text-orange-300 !font-bold !text-sm',
+              footerActionLink: '!text-violet-400 hover:!text-violet-300 !font-bold !text-sm',
               /* Identity preview (email badge shown before password step) */
               identityPreviewText: '!text-white !font-medium',
-              identityPreviewEditButtonIcon: '!text-orange-400',
-              identityPreviewEditButton: '!text-orange-400 hover:!text-orange-300',
+              identityPreviewEditButtonIcon: '!text-violet-400',
+              identityPreviewEditButton: '!text-violet-400 hover:!text-violet-300',
               /* OTP / verification code input */
-              otpCodeFieldInput: '!bg-[#252535] !border-2 !border-white/15 !text-white !text-xl !font-black focus:!border-orange-500 !rounded-xl !transition-all',
+              otpCodeFieldInput: '!bg-[#18181B] !border-2 !border-white/10 !text-white !text-xl !font-black focus:!border-violet-500 !rounded-xl !transition-all',
               /* Alert banners */
               alertText: '!text-white !font-medium',
-              alert: '!bg-orange-500/10 !border !border-orange-500/20 !rounded-xl',
+              alert: '!bg-violet-500/10 !border !border-violet-500/20 !rounded-xl',
               /* Avatar */
-              avatarBox: '!ring-2 !ring-orange-500/30',
+              avatarBox: '!ring-2 !ring-violet-500/30',
               /* Modal backdrop */
               modalBackdrop: '!backdrop-blur-md !bg-black/70',
               /* Navbar/internal header in Clerk components */
-              navbar: '!bg-[#1c1c2a] !border-b !border-white/10',
+              navbar: '!bg-[#111113] !border-b !border-white/10',
               navbarButton: '!text-slate-300 hover:!text-white',
               navbarButtonActive: '!text-white',
               /* User profile sections */
               profileSectionTitle: '!text-white !font-bold',
               profileSectionContent: '!text-slate-300',
               accordionTriggerButton: '!text-slate-200 hover:!text-white',
-              badge: '!bg-orange-500/15 !text-orange-400 !border !border-orange-500/20',
+              badge: '!bg-violet-500/15 !text-violet-400 !border !border-violet-500/20',
             }
           }}
           localization={{
