@@ -122,7 +122,14 @@ const getProxiedEmbedUrl = (rawUrl: string) => {
                            parsed.hostname.includes('allanime') ||
                            parsed.hostname.includes('anime-taku') ||
                            parsed.hostname.includes('filemoon') ||
-                           parsed.hostname.includes('embed.su');
+                           parsed.hostname.includes('embed.su') ||
+                           parsed.hostname.includes('peachify') ||
+                           parsed.hostname.includes('nontongo') ||
+                           parsed.hostname.includes('vidfast') ||
+                           parsed.hostname.includes('multiembed') ||
+                           parsed.hostname.includes('autoembed') ||
+                           parsed.hostname.includes('cineby') ||
+                           parsed.hostname.includes('vidsrc');
         if (needsProxy) {
             return `/api/proxy/embed?url=${encodeURIComponent(rawUrl)}&referer=${encodeURIComponent(parsed.origin)}`;
         }
@@ -1078,7 +1085,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
-                        className={`relative w-full ${isFocusMode ? "h-screen" : "aspect-video"} bg-[#12131A] ${isFocusMode ? "rounded-none border-0" : "rounded-2xl border border-white/5"} overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] shadow-[var(--accent)]/5 touch-pan-y`}
+                        className={`relative w-full ${isFocusMode ? "h-screen" : "aspect-video"} bg-black ${isFocusMode ? "rounded-none" : "rounded-2xl"} overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] shadow-[var(--accent)]/5 touch-pan-y`}
                         style={{ touchAction: 'pan-y !important' }}
                     >
                         {!playerLoaded && (
@@ -1507,7 +1514,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             )}
                         </div>
                         {type === "tv" && details.seasons && details.seasons.length > 0 && (
-                            <div className="hidden xl:flex w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex-col xl:overflow-hidden pr-2 bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] p-4 space-y-4">
+                            <div className="hidden xl:flex w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex-col xl:overflow-hidden bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] py-4 pl-4 pr-1 space-y-4">
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
