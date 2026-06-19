@@ -623,7 +623,12 @@ p, .text-body {
 
 @layer utilities {
   .netflix-row {
-    @apply flex overflow-x-auto gap-3 pb-6 pt-2 px-4 md:px-12 scrollbar-hide snap-x snap-mandatory scroll-smooth;
+    @apply flex overflow-x-auto gap-3 pb-6 pt-2 px-4 md:px-12 snap-x snap-mandatory scroll-smooth;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .netflix-row::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
   
   .netflix-card-snap {
