@@ -334,16 +334,28 @@ export default function Header() {
 
       {/* === FLEX ROW: Logo | Search (desktop) | Actions === */}
       <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 md:gap-4 min-w-0">
-        <Link 
-          href="/" 
-          className={`flex items-center cursor-pointer shrink-0 active:scale-95 transition-transform ${showSidebar ? "md:hidden" : ""}`} 
+        <Link
+          href="/"
+          className={`flex items-center gap-2 cursor-pointer shrink-0 active:scale-95 transition-transform select-none ${showSidebar ? "md:hidden" : ""}`}
           onClick={clearSearch}
+          aria-label="ToonPlayer Home"
         >
-          <img 
-            src="/logo.webp" 
-            alt="ToonPlayer Logo" 
-            className="h-[28px] md:h-[34px] lg:h-[40px] w-auto object-contain filter drop-shadow-[0_0_12px_rgba(249,115,22,0.15)]" 
+          {/* Fiery play icon */}
+          <img
+            src="/icon.png"
+            alt=""
+            aria-hidden="true"
+            className="h-[28px] md:h-[34px] lg:h-[38px] w-auto object-contain filter drop-shadow-[0_0_10px_rgba(249,115,22,0.45)]"
           />
+          {/* Brand text — matches mockup typography */}
+          <span className="flex flex-col leading-none">
+            <span className="text-[13px] md:text-[15px] lg:text-[17px] font-black tracking-tight text-white" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>
+              Toon
+            </span>
+            <span className="text-[13px] md:text-[15px] lg:text-[17px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>
+              Player
+            </span>
+          </span>
         </Link>
 
         {/* ── NAVIGATION LINKS (desktop & TV) ── */}

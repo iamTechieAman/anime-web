@@ -111,15 +111,15 @@ export default function NetflixAuthGate() {
       <header className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex items-center justify-between max-w-screen-2xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 relative flex items-center justify-center shrink-0">
-            <img
-              src="/icon.png"
-              alt="ToonPlayer Icon"
-              className="w-full h-full relative z-10 object-contain drop-shadow-[0_0_6px_var(--accent-glow)]"
-            />
-          </div>
-          <span className="text-lg sm:text-xl lg:text-2xl font-black tracking-tighter text-white font-sora uppercase">
-            Toon<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Player</span>
+          <img
+            src="/icon.png"
+            alt=""
+            aria-hidden="true"
+            className="w-8 h-8 sm:w-10 sm:h-10 object-contain filter drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"
+          />
+          <span className="flex flex-col leading-none">
+            <span className="text-base sm:text-xl font-black tracking-tight text-white" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Toon</span>
+            <span className="text-base sm:text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Player</span>
           </span>
         </div>
 
