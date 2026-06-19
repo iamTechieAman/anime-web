@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-import { Play, ChevronLeft, ChevronRight, Clock, Calendar, Info, Heart, Check } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Clock, Calendar, Info, Heart, Check, Plus } from "lucide-react";
 import axios from "axios";
 import { HeroSkeleton } from "@/components/SkeletonLoader";
 import { useWatch } from "@/context/WatchContext";
@@ -146,15 +146,16 @@ export default function HeroCarousel() {
     );
 
     const activeSlide = slides[current];
-    const inWatchlist = isInWatchlist(activeSlide.id);
+    const slideId = String(activeSlide.id);
+    const inWatchlist = isInWatchlist(slideId);
 
     const toggleWatchlist = () => {
         if (inWatchlist) {
-            removeFromWatchlist(activeSlide.id);
+            removeFromWatchlist(slideId);
         } else {
             addToWatchlist({
-                id: activeSlide.id,
-                showId: activeSlide.id,
+                id: slideId,
+                showId: slideId,
                 type: activeSlide.type === "TV" ? "tv" : "movie",
                 title: activeSlide.title,
                 poster: activeSlide.cover
@@ -164,7 +165,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[850px] overflow-hidden group bg-[#050505]"
+            className="relative w-full h-[65vh] md:h-[80vh] min-h-[480px] md:min-h-[600px] max-h-[900px] overflow-hidden group bg-[var(--bg-main)]"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -184,7 +185,7 @@ export default function HeroCarousel() {
                             fill
                             priority={i < 2}
                             fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-center opacity-65 hidden md:block"
+                            className="object-cover object-top opacity-70 hidden md:block"
                             sizes="100vw"
                         />
                         {/* Mobile Cover Poster */}
@@ -194,83 +195,76 @@ export default function HeroCarousel() {
                             fill
                             priority={i < 2}
                             fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-center opacity-35 block md:hidden"
+                            className="object-cover object-top opacity-50 block md:hidden"
                             sizes="100vw"
                         />
                     </div>
                 </div>
             ))}
 
-            {/* Symmetrical Vignette & Gradient overlays */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5,5,5,0.15)_0%,#050505_95%)] z-10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/45 to-transparent z-10" />
-            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-36 bg-gradient-to-t from-[#050505] to-transparent z-10" />
+            {/* Symmetrical Vignette & Netflix-style Left Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-[70%] z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-[var(--bg-main)]/20 z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[var(--bg-main)] to-transparent z-10" />
             
-            {/* Ambient Backlight Glow behind active slide */}
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[50vw] h-[30vh] rounded-full bg-[var(--accent)]/10 blur-[140px] pointer-events-none z-10" />
-
-            {/* Trending Badge */}
-            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30">
-                <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_4px_15px_var(--accent-glow)] animate-fadeSlideDown">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                    TRENDING NOW
-                </div>
-            </div>
-
-            {/* Content - Responsive Centered Cinematic Layout */}
-            <div className="absolute inset-0 flex items-center justify-center z-20 pb-12 md:pb-16 pt-20">
-                <div className="w-full max-w-3xl mx-auto px-5 flex flex-col items-center justify-center text-center gap-4">
-                    {/* Metadata Badges */}
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                        <span className="bg-[var(--accent)] text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
-                            {activeSlide.type}
-                        </span>
-                        <span className="bg-white/10 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase border border-white/10">
-                            {activeSlide.quality}
-                        </span>
-                        <span className="text-[10px] font-bold text-zinc-300 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-[var(--accent)]" /> {activeSlide.release}
-                        </span>
-                        {activeSlide.rating !== "?" && (
-                            <span className="text-[10px] font-bold text-[#00D084]">
-                                {activeSlide.rating} Match
-                            </span>
-                        )}
+            {/* Content - Left-Aligned Cinematic Layout */}
+            <div className="absolute inset-0 flex flex-col justify-end pb-16 md:pb-28 px-4 md:px-12 z-20 max-w-[1600px] mx-auto w-full md:w-[65%]">
+                <div className="flex flex-col items-start text-left gap-3 md:gap-4 w-full">
+                    
+                    {/* Trending Badge */}
+                    <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-sm flex items-center gap-1.5 shadow-lg w-max mb-2">
+                        TRENDING NOW
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black leading-[1.05] text-white line-clamp-2 font-sora tracking-tighter drop-shadow-[0_4px_25px_rgba(0,0,0,0.95)]">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-white line-clamp-2 font-sora drop-shadow-[0_4px_15px_rgba(0,0,0,0.8)]">
                         {activeSlide.title}
                     </h1>
 
+                    {/* Metadata Badges */}
+                    <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-white/90">
+                        {activeSlide.rating !== "?" && (
+                            <span className="text-green-500 font-bold drop-shadow-md">
+                                {activeSlide.rating} Match
+                            </span>
+                        )}
+                        <span className="text-white/70">{activeSlide.release}</span>
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] uppercase border border-white/20">
+                            {activeSlide.type}
+                        </span>
+                        <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] uppercase border border-white/20">
+                            {activeSlide.quality}
+                        </span>
+                    </div>
+
                     {/* Description */}
-                    <p className="text-zinc-300 text-xs md:text-sm leading-relaxed max-w-xl font-medium drop-shadow-md hidden sm:block">
+                    <p className="text-zinc-300 text-sm md:text-base lg:text-lg leading-relaxed max-w-2xl font-medium drop-shadow-md line-clamp-3 md:line-clamp-4 mt-2">
                         {activeSlide.description}
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
-                        <Link href={activeSlide.link}>
-                            <button className="flex items-center gap-2 px-6 lg:px-8 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-95 font-black rounded-xl transition-all active:scale-95 shadow-[0_8px_20px_var(--accent-glow)] text-xs md:text-sm cursor-pointer min-h-[44px] border-0">
-                                <Play className="w-4 h-4 fill-current" />
-                                WATCH NOW
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full sm:w-auto mt-4">
+                        <Link href={activeSlide.link} className="flex-1 sm:flex-none">
+                            <button className="w-full flex items-center justify-center gap-2 px-8 py-3 md:py-3.5 bg-white text-black hover:bg-gray-200 font-bold rounded-lg transition-colors shadow-lg active:scale-95">
+                                <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
+                                <span className="text-base md:text-lg">Play</span>
                             </button>
                         </Link>
                         
                         {/* Watchlist Toggle Action */}
                         <button 
                             onClick={toggleWatchlist}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] text-white font-bold rounded-xl border border-white/5 transition-all text-xs md:text-sm cursor-pointer min-h-[44px] active:scale-95"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 md:py-3.5 bg-gray-500/30 hover:bg-gray-500/50 backdrop-blur-md text-white font-bold rounded-lg border border-white/10 transition-colors shadow-lg active:scale-95"
                         >
                             {inWatchlist ? (
                                 <>
-                                    <Check className="w-4 h-4 text-[var(--accent)]" />
-                                    In Watchlist
+                                    <Check className="w-5 h-5 md:w-6 md:h-6" />
+                                    <span className="text-base md:text-lg">Added</span>
                                 </>
                             ) : (
                                 <>
-                                    <Heart className="w-4 h-4 text-zinc-400 group-hover:text-red-500" />
-                                    + Watchlist
+                                    <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                                    <span className="text-base md:text-lg">My List</span>
                                 </>
                             )}
                         </button>
@@ -281,21 +275,6 @@ export default function HeroCarousel() {
             {/* Navigation Controls */}
             <div className="absolute bottom-6 right-4 md:right-8 flex items-center gap-3 z-30">
                 {/* Dot indicators */}
-                <div className="hero-dots hidden md:flex">
-                    {slides.slice(0, 8).map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => goToSlide(i)}
-                            className={`hero-dot relative overflow-hidden transition-all duration-300 ${i === current ? '!w-12 !bg-white/20' : ''}`}
-                            aria-label={`Go to slide ${i + 1}`}
-                        >
-                            {i === current && (
-                                <div className="absolute top-0 left-0 bottom-0 bg-white animate-[progressBar_6s_linear]" />
-                            )}
-                        </button>
-                    ))}
-                </div>
-
                 {/* Arrow buttons */}
                 <button
                     onClick={prevSlide}

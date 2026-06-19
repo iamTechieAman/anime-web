@@ -594,6 +594,65 @@ p, .text-body {
   animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-main: #09090b; /* Very dark near-black */
+    --bg-card: #141416;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #fcfcfc;
+    --text-muted: #9ca3af;
+    --accent: #e50914; /* Netflix/OnoFlix red */
+    --accent-glow: rgba(229, 9, 20, 0.4);
+    --accent-secondary: #ff3b3b;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .netflix-row {
+    @apply flex overflow-x-auto gap-3 pb-6 pt-2 px-4 md:px-12 scrollbar-hide snap-x snap-mandatory scroll-smooth;
+  }
+  
+  .netflix-card-snap {
+    @apply snap-start shrink-0 snap-always;
+  }
+
+  .glass-header {
+    @apply bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px];
+  }
+
+  .glass-panel {
+    @apply bg-[#141416]/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Android Webview tight margins */
+  .android-optimize {
+    @apply touch-manipulation overscroll-y-none pb-[calc(env(safe-area-inset-bottom)+20px)];
+  }
+}
+
 /* ══════════════════════════════════════════════════
    CARD SYSTEM — PREMIUM HOVER EFFECTS
    ══════════════════════════════════════════════════ */

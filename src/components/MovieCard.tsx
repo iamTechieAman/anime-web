@@ -249,11 +249,10 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
             {/* Scrollable row */}
             <div
                 ref={scrollRef}
-                className={`ott-card-grid ${isLarge ? "ott-card-grid-large" : ""} scrollbar-hide`}
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                className="netflix-row"
             >
                 {validItems.map((item, idx) => (
-                    <div key={`${item.id}-${idx}`} data-card className="w-full min-w-0 shrink-0">
+                    <div key={`${item.id}-${idx}`} data-card className="netflix-card-snap w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px]">
                         <MovieCard item={item} type={item.media_type || type} />
                     </div>
                 ))}

@@ -308,6 +308,16 @@ export default function Header() {
     setFilterStatus('');
   };
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const isWatchPage = pathname?.startsWith('/watch');
   const showSidebar = deviceMode === "pc" && !isWatchPage;
 
@@ -315,9 +325,9 @@ export default function Header() {
 
   return (
     <>
-    <nav className={`fixed top-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 bg-[#050505]/75 backdrop-blur-md border-b border-white/5 transition-all duration-300 ${
+    <nav className={`fixed top-0 right-0 z-50 h-[60px] md:h-[64px] flex items-center px-3 md:px-5 lg:px-6 transition-all duration-500 ease-in-out ${
       showSidebar ? "left-0 md:left-[72px] peer-hover/sidebar:md:left-[240px]" : "left-0"
-    }`}>
+    } ${isScrolled ? "bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-white/10 shadow-lg" : "bg-gradient-to-b from-black/80 to-transparent border-b border-transparent"}`}>
       
       {/* Search Focus Overlay */}
       <AnimatePresence>

@@ -141,17 +141,39 @@ export async function GET(request: Request) {
                             const p = getProvider(pName);
                             const searchRes = await withTimeout(p.search(title), 5000, `search ${pName}`);
                             if (!searchRes?.length) throw new Error('No results');
-                            const match = findBestMatch(searchRes, title);
-                            if (!match) throw new Error('No match');
-                            const info = await withTimeout(p.getInfo(match.id), 5000, `info ${pName}:${match.id}`);
-                            const mapped = mapInfoToShow(info, media);
+                            
+                            // To prevent mismatching series with similar names (e.g. Doraemon 1979 vs 2005),
+                            // we fetch info for the top 3 results and match their AniList ID exactly.
+                            const topResults = searchRes.slice(0, 3);
+                            
+                            const infoPromises = topResults.map(r => 
+                                withTimeout(p.getInfo(r.id), 5000, `info ${pName}:${r.id}`).catch(() => null)
+                            );
+                            
+                            const infos = await Promise.all(infoPromises);
+                            
+                            // Find strict ID match first, fallback to best title match if provider missing IDs
+                            let matchInfo = infos.find(info => 
+                                info && (String(info.anilistId) === id || String((info as any).aniListId) === id || String(info.malId) === String(media.idMal))
+                            );
+                            
+                            if (!matchInfo) {
+                                const titleMatch = findBestMatch(searchRes, title);
+                                if (!titleMatch) throw new Error('No match');
+                                matchInfo = infos[topResults.findIndex(r => r.id === titleMatch.id)] 
+                                            || await withTimeout(p.getInfo(titleMatch.id), 5000, `info fallback ${pName}`);
+                            }
+
+                            if (!matchInfo) throw new Error('Info fetch failed');
+
+                            const mapped = mapInfoToShow(matchInfo, media);
                             if (!mapped || (mapped.availableEpisodesDetail.sub.length === 0 && mapped.availableEpisodesDetail.dub.length === 0)) {
                                 throw new Error('No episodes found');
                             }
                             providerHealth.reportSuccess(pName);
                             return { ...mapped, provider: pName };
                         } catch (err: any) {
-                            if (err.message.includes('Timeout')) {
+                            if (err?.message?.includes('Timeout')) {
                                 providerHealth.reportError(pName, true);
                             } else {
                                 providerHealth.reportError(pName, false);

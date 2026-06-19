@@ -7,7 +7,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, LayoutGrid, List, Search } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -491,8 +491,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (s || e) {
             if (s) setSelectedSeason(parseInt(s) || 1);
             if (e) setSelectedEpisode(parseInt(e) || 1);
-        } else if (type === 'tv' && (id || tmdbIdForAnime)) {
-            const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
+        } else if (type === 'tv' && id) {
+            const finalId = id;
             if (finalId) {
                 // Find most recently watched episode of this TV show from history
                 const historyItem = history.find((i: any) => i.showId === finalId);
@@ -1142,7 +1142,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-700 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer"
                             referrerPolicy="strict-origin-when-cross-origin"
-                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-pointer-lock"
                             onError={() => {
                                 handleAutoFallback();
                             }}
