@@ -17,6 +17,13 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
+        id: 'toon4k',
+        name: 'Toon4K',
+        badge: 'Premium 4K',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false`,
+    },
+    {
         id: 'toon_ultimate',
         name: 'Toon Player Ultimate',
         badge: 'Ultimate',

@@ -3,6 +3,15 @@ import connectToDatabase from '@/lib/db';
 import { ServerModel } from '@/models/Server';
 
 const INITIAL_SERVERS = [
+    // 0. Toon4K
+    {
+        serverId: 'toon4k_movie', name: 'Toon4K', badge: 'Premium 4K', type: 'movie',
+        urlTemplate: 'https://vidlink.pro/movie/{id}?primaryColor=7C3AED&title=false', qualityScore: 101
+    },
+    {
+        serverId: 'toon4k_tv', name: 'Toon4K', badge: 'Premium 4K', type: 'tv',
+        urlTemplate: 'https://vidlink.pro/tv/{id}/{s}/{e}?primaryColor=7C3AED&title=false', qualityScore: 101
+    },
     // 1. Toon Player Ultimate
     {
         serverId: 'toon_ultimate_movie', name: 'Toon Player Ultimate', badge: 'Ultimate', type: 'movie',
