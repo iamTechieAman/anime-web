@@ -195,9 +195,6 @@ export default function MoviesPage() {
     useEffect(() => {
         if (tabParam) {
             setActiveTab(tabParam);
-            // Scroll to content when tab changes
-            const mainContent = document.getElementById("main-feed-start");
-            if (mainContent) mainContent.scrollIntoView({ behavior: "smooth" });
         }
     }, [tabParam]);
     const [activeProvider, setActiveProvider] = useState<ProviderSlug>("all");

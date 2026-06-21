@@ -35,7 +35,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
     { label: "Watch History", icon: Clock, href: "/history", color: "text-[var(--accent)]" },
     { label: "Profile Settings", icon: Settings, action: () => setShowProfileSettings(true), color: "text-blue-400" },
-    { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/")), color: "text-red-400" },
+    { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" },
   ];
 
   const updateMenuPosition = useCallback(() => {
@@ -117,7 +117,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
         e.preventDefault();
         const item = menuItems[focusedIndex];
         if (item.href) {
-          router.push(item.href);
+          router.push(item.href, { scroll: false });
         } else if (item.action) {
           item.action();
         }

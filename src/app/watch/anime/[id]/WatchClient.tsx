@@ -53,12 +53,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
     const isActive = String(currentEp) === String(ep);
     const ref = React.useRef<HTMLButtonElement>(null);
 
-    // Auto-scroll into view when this episode becomes active
-    React.useEffect(() => {
-        if (isActive && ref.current) {
-            ref.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }
-    }, [isActive]);
+    // Auto-scroll disabled to prevent page jumping
 
     return (
         <button

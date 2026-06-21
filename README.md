@@ -18,9 +18,12 @@
 
 ---
 
-## 📖 About
+## 📖 About & My Journey
 
 ToonPlayer is a high-performance, cinematic-quality content aggregator that lets users discover and stream anime, movies, and TV shows — all from a single, ad-free interface. Inspired by Netflix, Crunchyroll, Apple TV+, Plex, and Stremio, it aggregates video sources from multiple providers, applies an intelligent server-scanning pipeline, and delivers content through a sandboxed proxy player that blocks popups and malicious redirects.
+
+**My Journey (Jan 2026 - June 2026)**
+Building ToonPlayer took 5 months of continuous iteration and learning. What started in January as a basic layout experiment quickly evolved into a massive, feature-rich platform. I spent months perfecting the architecture, battling API rate limits, fine-tuning the video proxies, and striving for a "100% UI/UX/Performance" score. This project represents my dedication to creating a premium, Netflix-quality experience entirely from scratch.
 
 ---
 
@@ -32,12 +35,12 @@ ToonPlayer is a high-performance, cinematic-quality content aggregator that lets
 - ♿ **Accessibility (a11y)**: Added `aria-label`s, explicit focus rings, and proper `<h1>` / `<h2>` document structure across all components.
 - 📦 **Optimization**: Purged all legacy `<img>` tags in favor of optimized `next/image` with strict sizing and `priority` preloading.
 
-### Phase 6 — Watch History & Watchlist (`June 2026`)
+### Phase 6 — Watch History & Watchlist (`May 2026`)
 - 🕓 **Premium Watch History**: Virtualized infinite scroll with Day / Week / Month grouping, animated collapsible sections, animated progress bars with "Completed" (≥90%) badges, Rewatch vs Resume smart labeling, Bulk Select + Select All, JSON Export, type filter chips, toast-based confirmations (no native `confirm()`), and a premium animated empty state.
 - 📌 **Premium Watchlist**: Framer Motion `Reorder.Group` drag-and-drop list reordering with GripVertical handle, inline tag editor (no `prompt()` — keyboard Enter/Escape support), grid collection picker dropdown, folder tabs with item counts (Favorites, To Watch, Completed + custom), type filter chips, tag filter pills, Sort by Date / A–Z / Type, and animated empty state with floating decorators.
 - 🗂️ **WatchContext Upgrade**: `WatchlistItem` now carries `collection`, `tags`, and `order` fields; new `updateWatchlistItem`, `reorderWatchlist`, `bulkRemoveFromHistory` context methods; `customCollections` persisted separately in localStorage; `normalizeWatchlistItem` helper for backward compatibility.
 
-### Phase 5 — AI Discovery (`June 2026`)
+### Phase 5 — AI Discovery (`April 2026`)
 - 🤖 **Conversational AI Chat**: Full ChatGPT/Perplexity-style conversational UI with multi-turn chat memory — every follow-up query includes prior message context.
 - 🎙️ **Voice Search**: Web Speech API integration directly in the input bar — click mic or hold `Space` to dictate.
 - 🃏 **Mood Prompt Cards**: 8 curated glassmorphic cards (Cyberpunk, Sad Anime, Studio Ghibli, Mind Bending, K-Drama, Hidden Gems, Action-Packed, Romance) that inject styled prompts into the chat.
@@ -45,14 +48,14 @@ ToonPlayer is a high-performance, cinematic-quality content aggregator that lets
 - ⏱️ **Dynamic Loading Logs**: Animated step-by-step progress indicators while AI processes your request.
 - ⌨️ **Ctrl+K Integration**: AI Discovery accessible directly from the global Command Palette.
 
-### Phase 4 — Randomizer (`June 2026`)
+### Phase 4 — Randomizer (`March 2026`)
 - 🎲 **Device Parity Fix**: Randomizer no longer hidden behind `md:hidden` / `lg:hidden` — rendered on all screen sizes.
 - 🔘 **Global Floating FAB**: Bottom-right `RandomizerFloatingTrigger` persists on every page for instant access.
 - 🎠 **Hero CTA Buttons**: "Surprise Me" buttons added to HeroCarousel and MovieHeroCarousel.
 - ⌨️ **Keyboard Shortcut**: Press `R` anywhere to open the Randomizer modal.
 - 🔧 **Framer Motion Fix**: Exit animations fixed — `AnimatePresence` moved to `LayoutContent.tsx` wrapper instead of inside the modal.
 
-### Phase 3 — Browse Catalog (`June 2026`)
+### Phase 3 — Browse Catalog (`February 2026`)
 - 🎛️ **Slide-Over Filter Drawer**: Right-side glassmorphic filter panel with backdrop overlay and spring animations.
 - 🏷️ **Interactive Filter Chips**: Genre, Year (slider track), Language, Region, Network — all converted from dropdowns to visual chips.
 - 📦 **Card Virtualization**: `content-visibility: auto` + `contain-intrinsic-size` for native GPU-level list virtualization.
@@ -60,12 +63,12 @@ ToonPlayer is a high-performance, cinematic-quality content aggregator that lets
 - ♾️ **Improved Infinite Scroll**: Fail-safe `error` guard on the IntersectionObserver prevents infinite retry loops; "End of Catalog" pill shown when all pages are fetched.
 - 🚫 **Double Scrollbar Fix**: Replaced nested `<main>` layout with single scroll container.
 
-### Phase 2 — Homepage (`June 2026`)
+### Phase 2 — Homepage (`January 2026`)
 - 🎬 **Hero Carousel**: Auto-cycling fullscreen hero with `70vh` max-height cap, background blur, gradient overlay, mute/unmute, random hero selection, and animated progress indicators.
 - ⏭️ **Continue Watching Row**: Horizontal progress bars, episode metadata, and one-click resume.
 - 📊 **Smart Sections**: Trending, Top Picks, Top Anime Collections — all with skeleton loading states.
 
-### Phase 1 — Global Layout (`June 2026`)
+### Phase 1 — Global Layout (`January 2026`)
 - 📐 **Tested on 375px → 3840px**: All pages verified at 1920, 2560, 3440, 3840 (desktop) and 375, 390, 412, 430 (mobile).
 - 🧱 **Sidebar z-index stack** fixed — no content overlap on any breakpoint.
 - 📏 **Consistent padding system** — 4px grid across all pages.

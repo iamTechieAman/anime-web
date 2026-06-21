@@ -49,31 +49,31 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
                 type = "movie";
                 targetId = POPULAR_MOVIES[Math.floor(Math.random() * POPULAR_MOVIES.length)];
                 toast.success("Chosen a blockbuster Movie for you!", { icon: "🎬" });
-                router.push(`/watch/${type}/${targetId}`);
+                router.push(`/watch/${type}/${targetId}`, { scroll: false });
             } else if (mode === "anime") {
                 type = "anime";
                 targetId = POPULAR_ANIME[Math.floor(Math.random() * POPULAR_ANIME.length)];
                 toast.success("Fate selected a popular Anime for you!", { icon: "🎏" });
-                router.push(`/watch/anime/${targetId}`);
+                router.push(`/watch/anime/${targetId}`, { scroll: false });
             } else if (mode === "genre") {
                 const pickedGenre = GENRES[Math.floor(Math.random() * GENRES.length)];
                 toast.success(`Picked Genre: ${pickedGenre}!`);
-                router.push(`/search?genre=${pickedGenre}`);
+                router.push(`/search?genre=${pickedGenre}`, { scroll: false });
             } else if (mode === "year") {
                 const pickedYear = Math.floor(Math.random() * (2026 - 2000 + 1)) + 2000;
                 toast.success(`Picked Year: ${pickedYear}!`);
-                router.push(`/search?status=Completed&query=${pickedYear}`);
+                router.push(`/search?status=Completed&query=${pickedYear}`, { scroll: false });
             } else if (mode === "studio") {
                 const pickedStudio = STUDIOS[Math.floor(Math.random() * STUDIOS.length)];
                 toast.success(`Picked Production House: ${pickedStudio}!`);
-                router.push(`/search?query=${encodeURIComponent(pickedStudio)}`);
+                router.push(`/search?query=${encodeURIComponent(pickedStudio)}`, { scroll: false });
             } else if (mode === "top") {
                 const pick = TOP_RATED[Math.floor(Math.random() * TOP_RATED.length)];
                 toast.success("Streaming an acclaimed Top-Rated classic!", { icon: "⭐" });
                 if (pick.type === "anime") {
-                    router.push(`/watch/anime/${pick.id}`);
+                    router.push(`/watch/anime/${pick.id}`, { scroll: false });
                 } else {
-                    router.push(`/watch/${pick.type}/${pick.id}`);
+                    router.push(`/watch/${pick.type}/${pick.id}`, { scroll: false });
                 }
             } else {
                 // Surprise Me - completely random
@@ -81,15 +81,15 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
                 if (chance < 0.33) {
                     type = "movie";
                     targetId = POPULAR_MOVIES[Math.floor(Math.random() * POPULAR_MOVIES.length)];
-                    router.push(`/watch/${type}/${targetId}`);
+                    router.push(`/watch/${type}/${targetId}`, { scroll: false });
                 } else if (chance < 0.66) {
                     type = "anime";
                     targetId = POPULAR_ANIME[Math.floor(Math.random() * POPULAR_ANIME.length)];
-                    router.push(`/watch/anime/${targetId}`);
+                    router.push(`/watch/anime/${targetId}`, { scroll: false });
                 } else {
                     type = "tv";
                     targetId = POPULAR_SHOWS[Math.floor(Math.random() * POPULAR_SHOWS.length)];
-                    router.push(`/watch/${type}/${targetId}`);
+                    router.push(`/watch/${type}/${targetId}`, { scroll: false });
                 }
                 toast.success("Destiny has chosen! Enjoy the stream...", { icon: "✨" });
             }

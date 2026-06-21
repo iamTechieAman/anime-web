@@ -151,9 +151,9 @@ export default function MobileModals() {
         saveSearch(q);
         setSearchOpen(false);
         if (isDiscoverMode) {
-            router.push(`/discover?prompt=${encodeURIComponent(q.trim())}`);
+            router.push(`/discover?prompt=${encodeURIComponent(q.trim())}`, { scroll: false });
         } else {
-            router.push(`/search?query=${encodeURIComponent(q.trim())}`);
+            router.push(`/search?query=${encodeURIComponent(q.trim())}`, { scroll: false });
         }
     };
 
@@ -204,7 +204,7 @@ export default function MobileModals() {
                                             return (
                                                 <button
                                                     key={link.name}
-                                                    onClick={() => { setMenuOpen(false); router.push(link.href); }}
+                                                    onClick={() => { setMenuOpen(false); router.push(link.href, { scroll: false }); }}
                                                     className="flex items-center gap-2.5 p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)] hover:border-white/20 transition-colors active:scale-95 text-left"
                                                 >
                                                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${link.color} flex items-center justify-center shadow-lg shrink-0`}>
@@ -307,7 +307,6 @@ export default function MobileModals() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={isDiscoverMode ? "Describe what you want..." : searchPlaceholder}
-                                        autoFocus
                                         className={`w-full text-[var(--text-main)] border rounded-xl pl-10 pr-[88px] py-3 ring-0 focus:ring-0 outline-none focus:outline-none transition-all text-sm shadow-none ${isDiscoverMode ? 'bg-[var(--accent)]/10 border-[var(--accent)]/50 focus:border-[var(--accent)]' : 'bg-[var(--bg-card)] border-[var(--border-color)] focus:border-[var(--accent)]/60'}`}
                                     />
                                     <button 
@@ -363,7 +362,7 @@ export default function MobileModals() {
                                             {["Action", "Romance", "Comedy", "Fantasy", "Thriller", "Sci-Fi", "Horror", "Drama", "Mystery", "Adventure"].map((genre) => (
                                                 <button 
                                                     key={genre}
-                                                    onClick={() => { setSearchOpen(false); router.push(`/search?genre=${genre}`); }}
+                                                    onClick={() => { setSearchOpen(false); router.push(`/search?genre=${genre}`, { scroll: false }); }}
                                                     className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)]/50 transition-colors active:scale-95 shrink-0"
                                                 >
                                                     {genre}

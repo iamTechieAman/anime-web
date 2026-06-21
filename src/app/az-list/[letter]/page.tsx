@@ -166,7 +166,6 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                     disabled={page === 1}
                                     onClick={() => {
                                         setPage(p => Math.max(1, p - 1));
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                     className="px-6 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl disabled:opacity-30 hover:bg-[var(--border-color)] transition-colors font-medium"
                                 >
@@ -179,7 +178,6 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                     disabled={shows.length === 0}
                                     onClick={() => {
                                         setPage(p => p + 1);
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                     className="px-6 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
                                 >

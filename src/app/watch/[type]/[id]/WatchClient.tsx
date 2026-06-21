@@ -655,7 +655,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set("s", nextSeason.toString());
         newUrl.searchParams.set("e", nextEp.toString());
-        router.push(newUrl.pathname + newUrl.search);
+        router.push(newUrl.pathname + newUrl.search, { scroll: false });
     };
 
     const handlePrevEpisode = () => {
@@ -684,7 +684,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set("s", prevSeason.toString());
         newUrl.searchParams.set("e", prevEp.toString());
-        router.push(newUrl.pathname + newUrl.search);
+        router.push(newUrl.pathname + newUrl.search, { scroll: false });
     };
 
     // Read query parameters or history on load
@@ -770,7 +770,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             const newUrl = new URL(window.location.href);
                             newUrl.searchParams.set("s", nextSeason.toString());
                             newUrl.searchParams.set("e", nextEp.toString());
-                            router.push(newUrl.pathname + newUrl.search);
+                            router.push(newUrl.pathname + newUrl.search, { scroll: false });
                             
                             return 0;
                         }
@@ -1405,7 +1405,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             if (csData && ne > csData.episode_count) { ns += 1; ne = 1; }
                                             const u = new URL(window.location.href);
                                             u.searchParams.set("s", ns.toString()); u.searchParams.set("e", ne.toString());
-                                            router.push(u.pathname + u.search);
+                                            router.push(u.pathname + u.search, { scroll: false });
                                         }} className="px-6 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-1.5">
                                             <Play className="w-4 h-4 fill-current" /> Play Now
                                         </button>
@@ -1627,7 +1627,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     </div>
                                     <p className="text-[var(--text-muted)] text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-3xl">{details.overview}</p>
                                     {details.belongs_to_collection && (
-                                        <div className="bg-gradient-to-r from-[var(--bg-card)] to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name)}`)}>
+                                        <div className="bg-gradient-to-r from-[var(--bg-card)] to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name)}`, { scroll: false })}>
                                             {details.belongs_to_collection.poster_path && (
                                                 <div className="w-12 h-16 shrink-0 rounded overflow-hidden">
                                                     <Image src={`${IMG_BASE}/w92${details.belongs_to_collection.poster_path}`} alt="" fill sizes="92px" className="object-cover" />
@@ -1688,13 +1688,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             {episodeLayoutMode === "grid" ? (
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
                                                     ))}
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-2">
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
                                                             <div className="w-24 h-14 rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative">
                                                                 {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
                                                                 {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
@@ -1927,13 +1927,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         {episodeLayoutMode === "grid" ? (
                                             <div className="grid grid-cols-5 gap-1.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                                                 {activeFilteredEpisodes.map((ep) => (
-                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`py-2.5 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-2.5 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
                                                 ))}
                                             </div>
                                         ) : (
                                             <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                                                 {activeFilteredEpisodes.map((ep) => (
-                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'}`}>
+                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'}`}>
                                                         <div className="w-20 h-12 rounded-lg overflow-hidden bg-[var(--bg-card)] flex-shrink-0 relative">
                                                             {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>}
                                                             {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-4 h-4 text-white fill-current" /></div>}

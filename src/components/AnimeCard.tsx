@@ -40,7 +40,7 @@ function resolveImage(show: Show): string | null {
     return null;
 }
 
-export default memo(function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
+const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
     const [isVisible, setIsVisible] = useState(false);
     const [imgError, setImgError] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
@@ -256,3 +256,5 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
         </div>
     );
 }
+
+export default AnimeCard;

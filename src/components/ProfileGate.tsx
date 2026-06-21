@@ -152,7 +152,6 @@ export default function ProfileGate() {
                     placeholder="Enter your name"
                     maxLength={15}
                     className="w-full bg-[var(--bg-card)] border-2 border-[var(--border-color)] focus:border-orange-500 rounded-2xl px-6 py-4 text-xl text-center font-bold outline-none transition-all placeholder:font-normal placeholder:opacity-50"
-                    autoFocus
                   />
                 </div>
 

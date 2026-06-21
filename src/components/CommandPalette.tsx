@@ -68,22 +68,22 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         });
         list.push({
             name: "Browse Movies",
-            action: () => { router.push("/browse?type=movie"); onClose(); }
+            action: () => { router.push("/browse?type=movie", { scroll: false }); onClose(); }
         });
         list.push({
             name: "Browse TV Shows",
-            action: () => { router.push("/browse?type=tv"); onClose(); }
+            action: () => { router.push("/browse?type=tv", { scroll: false }); onClose(); }
         });
         list.push({
             name: "AI Discovery (Smart Recommendations)",
-            action: () => { router.push("/discover"); onClose(); }
+            action: () => { router.push("/discover", { scroll: false }); onClose(); }
         });
 
         // Pinned
         pinnedSearches.forEach(term => {
             list.push({
                 name: `Search Pinned: ${term}`,
-                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }
+                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }
             });
         });
 
@@ -91,7 +91,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         recentSearches.forEach(term => {
             list.push({
                 name: `Search Recent: ${term}`,
-                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }
+                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }
             });
         });
 
@@ -99,7 +99,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         results.forEach(item => {
             list.push({
                 name: item.title,
-                action: () => { router.push(item.href); saveSearch(item.title); onClose(); }
+                action: () => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }
             });
         });
 
@@ -266,7 +266,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         return (
                                             <div
                                                 key={item.id + item.type}
-                                                onClick={() => { router.push(item.href); saveSearch(item.title); onClose(); }}
+                                                onClick={() => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }}
                                                 onMouseEnter={() => setActiveIndex(actualIdx)}
                                                 className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-left transition-all ${
                                                     isSelected ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent-glow)]" : "text-zinc-300 hover:bg-white/5"
@@ -310,7 +310,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 return (
                                                     <div
                                                         key={term}
-                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }}
+                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
                                                         className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer border transition-all ${
                                                             isSelected ? "bg-[var(--accent)] border-transparent text-white" : "bg-white/5 border-white/5 hover:border-white/10 text-zinc-300"
@@ -339,7 +339,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 return (
                                                     <div
                                                         key={term}
-                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }}
+                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
                                                         className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-left transition-all ${
                                                             isSelected ? "bg-white/10 text-white" : "text-zinc-300 hover:bg-white/5"
@@ -377,7 +377,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                     <span className="text-xs font-bold">Surprise Me (Random Picker)</span>
                                 </button>
                                 <button
-                                    onClick={() => { router.push("/browse?type=movie"); onClose(); }}
+                                    onClick={() => { router.push("/browse?type=movie", { scroll: false }); onClose(); }}
                                     onMouseEnter={() => setActiveIndex(1)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                                         activeIndex === 1 ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
@@ -387,7 +387,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                     <span className="text-xs font-bold">Browse Movies</span>
                                 </button>
                                 <button
-                                    onClick={() => { router.push("/browse?type=tv"); onClose(); }}
+                                    onClick={() => { router.push("/browse?type=tv", { scroll: false }); onClose(); }}
                                     onMouseEnter={() => setActiveIndex(2)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                                         activeIndex === 2 ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
@@ -409,7 +409,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                     {GENRES.map(genre => (
                                         <button
                                             key={genre}
-                                            onClick={() => { router.push(`/search?genre=${encodeURIComponent(genre)}`); onClose(); }}
+                                            onClick={() => { router.push(`/search?genre=${encodeURIComponent(genre)}`, { scroll: false }); onClose(); }}
                                             className="px-2.5 py-1 bg-white/5 hover:bg-[var(--accent)] hover:text-white border border-white/5 hover:border-transparent rounded-lg text-[11px] font-bold text-zinc-400 transition-all cursor-pointer"
                                         >
                                             {genre}
@@ -429,7 +429,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                     {COLLECTIONS.map(collection => (
                                         <button
                                             key={collection}
-                                            onClick={() => { router.push(`/search?query=${encodeURIComponent(collection)}`); onClose(); }}
+                                            onClick={() => { router.push(`/search?query=${encodeURIComponent(collection)}`, { scroll: false }); onClose(); }}
                                             className="flex items-center gap-2 p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-xs font-bold text-zinc-300 transition-all text-left"
                                         >
                                             <Compass className="w-3.5 h-3.5 text-orange-400" />

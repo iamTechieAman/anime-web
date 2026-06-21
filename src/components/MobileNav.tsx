@@ -44,14 +44,14 @@ export default function MobileNav() {
             icon: Film,
             color: "text-blue-500",
             active: pathname === '/' || pathname?.startsWith('//'),
-            onClick: () => { closeAll(); router.push('/'); },
+            onClick: () => { closeAll(); router.push('/', { scroll: false }); },
         },
         {
             label: "Anime",
             icon: Zap,
             color: "text-amber-400",
             active: pathname === '/az-list/all' || pathname?.startsWith('/az-list/'),
-            onClick: () => { closeAll(); router.push('/az-list/all'); },
+            onClick: () => { closeAll(); router.push('/az-list/all', { scroll: false }); },
         },
         {
             label: "Random",
@@ -70,7 +70,7 @@ export default function MobileNav() {
             icon: Clock,
             color: "text-orange-500",
             active: pathname === '/history',
-            onClick: () => { closeAll(); router.push('/history'); },
+            onClick: () => { closeAll(); router.push('/history', { scroll: false }); },
         },
         {
             label: "Search",

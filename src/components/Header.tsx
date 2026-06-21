@@ -146,7 +146,7 @@ export default function Header() {
     if (e) e.preventDefault();
     const q = override || searchQuery;
     if (q.trim()) saveRecent(q);
-    if (isDiscoverMode && q.trim()) { setShowSuggestions(false); setShowFilters(false); router.push(`/discover?prompt=${encodeURIComponent(q.trim())}`); return; }
+    if (isDiscoverMode && q.trim()) { setShowSuggestions(false); setShowFilters(false); router.push(`/discover?prompt=${encodeURIComponent(q.trim())}`, { scroll: false }); return; }
     const p = new URLSearchParams();
     if (q.trim()) p.set("query",q);
     if (filterGenre) p.set("genre",filterGenre);
@@ -154,13 +154,13 @@ export default function Header() {
     if (filterStatus) p.set("status",filterStatus.toLowerCase());
     if (!q.trim() && !filterGenre && !filterFormat && !filterStatus) return;
     setShowSuggestions(false); setShowFilters(false);
-    router.push(`/search?${p.toString()}`);
+    router.push(`/search?${p.toString()}`, { scroll: false });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key==="ArrowDown") { e.preventDefault(); setActiveIndex(p => p<suggestions.length-1?p+1:p); }
     else if (e.key==="ArrowUp") { e.preventDefault(); setActiveIndex(p => p>-1?p-1:p); }
-    else if (e.key==="Enter" && activeIndex>=0) { e.preventDefault(); router.push(suggestions[activeIndex].href); setShowSuggestions(false); }
+    else if (e.key==="Enter" && activeIndex>=0) { e.preventDefault(); router.push(suggestions[activeIndex].href, { scroll: false }); setShowSuggestions(false); }
     else if (e.key==="Escape") setShowSuggestions(false);
   };
 
@@ -177,7 +177,7 @@ export default function Header() {
     if (filterGenre) p.set("genre",filterGenre);
     if (filterFormat) p.set("format",filterFormat.toLowerCase());
     if (filterStatus) p.set("status",filterStatus.toLowerCase());
-    if (p.toString()) router.push(`/search?${p.toString()}`);
+    if (p.toString()) router.push(`/search?${p.toString()}`, { scroll: false });
     setShowFilters(false);
   };
 
@@ -253,7 +253,7 @@ export default function Header() {
                 </div>
                 <div className="relative flex items-center p-2 bg-white/[0.04] border border-white/10 rounded-2xl focus-within:border-[var(--accent)]/50 transition-all">
                   <Search className="w-6 h-6 text-zinc-400 ml-3 shrink-0"/>
-                  <input type="text" autoFocus value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
+                  <input type="text" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
                   {searchQuery&&<button onClick={()=>setSearchQuery("")} className="p-2"><X className="w-5 h-5 text-zinc-400"/></button>}
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 hide-scrollbar">
@@ -325,7 +325,7 @@ export default function Header() {
                           const meta:Record<string,{label:string,color:string}>={episodes:{label:'New Episode',color:'text-[var(--accent)] bg-[var(--accent)]/10'},trending:{label:'Trending',color:'text-red-400 bg-red-500/10'},recommendations:{label:'AI Pick',color:'text-cyan-400 bg-cyan-500/10'},watchlist:{label:'Watchlist',color:'text-blue-400 bg-blue-500/10'},community:{label:'Community',color:'text-green-400 bg-green-500/10'},system:{label:'System',color:'text-zinc-400 bg-zinc-500/10'}};
                           const m=meta[n.category]||meta['system'];
                           return (
-                            <div key={n.id} className={`p-3.5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read?'bg-[var(--accent)]/5':''}`} onClick={()=>{markAsRead(n.id);if(n.link)router.push(n.link);}}>
+                            <div key={n.id} className={`p-3.5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read?'bg-[var(--accent)]/5':''}`} onClick={()=>{markAsRead(n.id);if(n.link)router.push(n.link, { scroll: false });}}>
                               {!n.read&&<div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--accent)] rounded-r"/>}
                               <div className="flex justify-between items-start mb-1 gap-2">
                                 <div className="flex-1 min-w-0">

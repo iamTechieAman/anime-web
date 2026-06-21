@@ -159,14 +159,13 @@ function TagInput({ tags, onAdd, onRemove }: TagInputProps) {
             onKeyDown={handleKeyDown}
             onBlur={() => { if (!value.trim()) setIsEditing(false); else handleSubmit(); }}
             placeholder="tag name…"
-            autoFocus
             maxLength={24}
             className="w-20 bg-white/5 border border-[var(--accent)]/30 rounded-lg px-2 py-0.5 text-[10px] text-white outline-none focus:border-[var(--accent)]/60 font-bold"
           />
         </form>
       ) : (
         <button
-          onClick={() => { setIsEditing(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+          onClick={() => { setIsEditing(true); }}
           className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-zinc-500 hover:text-zinc-300 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
           aria-label="Add tag"
         >
@@ -608,7 +607,6 @@ export default function WatchlistPage() {
                     value={newFolderName}
                     onChange={e => setNewFolderName(e.target.value)}
                     placeholder="Folder name..."
-                    autoFocus
                     maxLength={40}
                     className="flex-1 bg-transparent text-xs text-white outline-none placeholder-zinc-600 font-bold"
                   />
