@@ -457,6 +457,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // Watchlist
     const inWatchlist = isInWatchlist(id);
 
+    // Unified playback state must be initialized before callbacks that close over it.
+    const [animeData, setAnimeData] = useState<ShowData | null>(null);
+    const [selectedSeason, setSelectedSeason] = useState(1);
+    const [selectedEpisode, setSelectedEpisode] = useState(1);
+    const [episodes, setEpisodes] = useState<any[]>([]);
+    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+    const [mode, setMode] = useState<"sub" | "dub">("sub");
+    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+    const [isFocusMode, setIsFocusMode] = useState(false);
+    const [isTheatreMode, setIsTheatreMode] = useState(false);
+    const [episodeSearch, setEpisodeSearch] = useState("");
+    const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
+
+    const activeFilteredEpisodes = useMemo(() => {
+        if (!episodeSearch.trim()) return episodes;
+        const search = episodeSearch.toLowerCase();
+        return episodes.filter((ep: any) => {
+            if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
+            return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
+        });
+    }, [episodes, episodeSearch]);
+
 
     // TV Auto-Next logic
     const handleVideoEnded = useCallback(() => {
@@ -592,28 +614,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // Auto Server Selection State
 
 
-    // Unified State
-    const [animeData, setAnimeData] = useState<ShowData | null>(null);
-    const [selectedSeason, setSelectedSeason] = useState(1);
-    const [selectedEpisode, setSelectedEpisode] = useState(1);
-    const [episodes, setEpisodes] = useState<any[]>([]);
-    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
-    const [mode, setMode] = useState<"sub" | "dub">("sub");
-    const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
-    const [isFocusMode, setIsFocusMode] = useState(false);
-    const [isTheatreMode, setIsTheatreMode] = useState(false);
-    const [episodeSearch, setEpisodeSearch] = useState("");
-
-    const activeFilteredEpisodes = useMemo(() => {
-        if (!episodeSearch.trim()) return episodes;
-        const search = episodeSearch.toLowerCase();
-        return episodes.filter((ep: any) => {
-            if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
-            return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
-        });
-    }, [episodes, episodeSearch]);
-    const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
-
     const hasNextEpisode = () => {
         if (type === 'movie') return false;
         if (type === 'anime') {
@@ -721,8 +721,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 }
             }
         }
-    // Remove `history` from deps to prevent infinite loop — use ref guard above
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Keep history out of the dependencies; the ref guard restores it only once.
     }, [searchParams, id, type]);
 
 
