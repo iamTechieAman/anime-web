@@ -51,7 +51,7 @@ export default function ContinueWatchingRow() {
         }, 200);
     };
 
-    // Progress Bar Sub-component to handle animation on mount
+    // Progress Bar Sub-component to handle animation on mount at the bottom of the card
     const AnimatedProgressBar = ({ current, total }: { current: number, total: number }) => {
         const [width, setWidth] = useState('0%');
         useEffect(() => {
@@ -62,9 +62,9 @@ export default function ContinueWatchingRow() {
         }, [current, total]);
 
         return (
-            <div className="h-[3px] bg-white/10 rounded-full overflow-hidden w-full relative">
+            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 rounded-b-2xl overflow-hidden pointer-events-none">
                 <div 
-                    className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-out rounded-full" 
+                    className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-out" 
                     style={{ width }}
                 />
             </div>
@@ -88,7 +88,7 @@ export default function ContinueWatchingRow() {
                         return (
                             <div
                                 key={entry.id}
-                                className={`snap-start shrink-0 flex items-stretch rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden transition-all duration-350 hover:border-[var(--accent)]/30 hover:shadow-2xl hover:scale-[1.02] relative ${
+                                className={`snap-start shrink-0 flex items-stretch rounded-2xl bg-[var(--bg-card)]/40 backdrop-blur-md border border-white/5 overflow-hidden transition-all duration-350 hover:border-[var(--accent)]/30 hover:shadow-2xl hover:scale-[1.02] relative ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 } h-[120px] md:h-[140px] lg:h-[160px] w-[220px] md:w-[250px] lg:w-[280px]`}
                             >
@@ -121,7 +121,7 @@ export default function ContinueWatchingRow() {
                                 </div>
 
                                 {/* Right Content */}
-                                <div className="flex-1 min-w-0 flex flex-col justify-between p-3 md:p-3.5 lg:p-4 select-none">
+                                <div className="flex-1 min-w-0 flex flex-col justify-between p-3 md:p-3.5 lg:p-4 select-none pb-5">
                                     <div className="space-y-1">
                                         <Link href={getHistoryLink(entry)} className="block group/link">
                                             <h3 className="font-black text-xs sm:text-sm text-white line-clamp-1 font-sora tracking-tight group-hover/link:text-[var(--accent)] transition-colors">
@@ -134,24 +134,13 @@ export default function ContinueWatchingRow() {
                                                     {entry.type === 'tv' ? `S1 · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
                                                 </span>
                                             )}
-                                            {timeLeft && (
+                                            {entry.duration > 0 && (
                                                 <span className="text-[9px] text-[var(--text-muted)] font-medium">
-                                                    {timeLeft}
+                                                    {timeLeft ? `${timeLeft} · ` : ""}{formatProgress(entry.currentTime, entry.duration)}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-
-                                    {/* Progress Bar & Percentage */}
-                                    {entry.duration > 0 && (
-                                        <div className="space-y-1">
-                                            <div className="flex items-center justify-between text-[8px] font-bold text-[var(--text-muted)]">
-                                                <span>PROGRESS</span>
-                                                <span>{formatProgress(entry.currentTime, entry.duration)}</span>
-                                            </div>
-                                            <AnimatedProgressBar current={entry.currentTime} total={entry.duration} />
-                                        </div>
-                                    )}
 
                                     {/* Small Pill Resume */}
                                     <Link 
@@ -162,6 +151,11 @@ export default function ContinueWatchingRow() {
                                         <span>Resume</span>
                                     </Link>
                                 </div>
+
+                                {/* Animated progress bar at bottom */}
+                                {entry.duration > 0 && (
+                                    <AnimatedProgressBar current={entry.currentTime} total={entry.duration} />
+                                )}
                             </div>
                         );
                     })}

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-import { Play, ChevronLeft, ChevronRight, Check, Plus, Volume2, VolumeX } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Check, Plus, Volume2, VolumeX, Shuffle } from "lucide-react";
 import axios from "axios";
 import { HeroSkeleton } from "@/components/SkeletonLoader";
 import { useWatch } from "@/context/WatchContext";
@@ -45,6 +45,14 @@ export default function HeroCarousel() {
         dedupingInterval: 60000,
     });
 
+    // Recover user mute preference on mount
+    useEffect(() => {
+        const storedMute = localStorage.getItem('toonplayer_hero_muted');
+        if (storedMute !== null) {
+            setIsMuted(storedMute === 'true');
+        }
+    }, []);
+
     useEffect(() => {
         if (trendingData?.results) {
             processSlides(trendingData.results);
@@ -83,7 +91,10 @@ export default function HeroCarousel() {
             }
 
             const validSlides = formattedSlides.filter(s => s && s.image && s.image !== '');
-            setSlides(validSlides.length > 0 ? validSlides.slice(0, 12) : []);
+            const slicedSlides = validSlides.length > 0 ? validSlides.slice(0, 12) : [];
+            // Shuffle to keep the homepage fresh (random hero)
+            const shuffledSlides = [...slicedSlides].sort(() => Math.random() - 0.5);
+            setSlides(shuffledSlides);
         } catch (err) {
             console.error("Error processing slides:", err);
         } finally {
@@ -101,9 +112,14 @@ export default function HeroCarousel() {
 
     useEffect(() => {
         if (slides.length === 0) return;
-        startAutoRotate();
+        if (activeTrailerKey) {
+            // Pause auto-rotation when trailer is playing
+            if (timerRef.current) clearInterval(timerRef.current);
+        } else {
+            startAutoRotate();
+        }
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }, [slides.length, startAutoRotate]);
+    }, [slides.length, activeTrailerKey, startAutoRotate]);
 
     // Handle trailer preview on slide change
     useEffect(() => {
@@ -161,9 +177,11 @@ export default function HeroCarousel() {
     };
 
     const toggleMute = () => {
-        setIsMuted(prev => !prev);
+        const nextMute = !isMuted;
+        setIsMuted(nextMute);
+        localStorage.setItem('toonplayer_hero_muted', String(nextMute));
         if (iframeRef.current) {
-            const command = isMuted ? '{"event":"command","func":"unMute","args":[]}' : '{"event":"command","func":"mute","args":[]}';
+            const command = nextMute ? '{"event":"command","func":"mute","args":[]}' : '{"event":"command","func":"unMute","args":[]}';
             iframeRef.current.contentWindow?.postMessage(command, '*');
         }
     };
@@ -200,7 +218,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[60vh] md:h-[70vh] min-h-[450px] md:min-h-[550px] max-h-[70vh] overflow-hidden group bg-[var(--bg-main)]"
+            className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] max-h-[70vh] overflow-hidden group bg-[var(--bg-main)]"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -251,9 +269,9 @@ export default function HeroCarousel() {
             })}
 
             {/* Cinematic Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-[70%] z-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-[var(--bg-main)]/20 z-10 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[var(--bg-main)] to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-full md:w-[60%] bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/90 via-[var(--bg-main)]/50 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-black/35 z-10 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-28 md:h-44 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/70 to-transparent z-10 pointer-events-none" />
             
             {/* Left Content Area */}
             <div className="absolute inset-0 flex flex-col justify-end pb-12 md:pb-20 px-4 md:px-12 z-20 max-w-[1600px] mx-auto w-full md:w-[65%] pointer-events-none">
@@ -299,7 +317,7 @@ export default function HeroCarousel() {
                     {/* Action Buttons */}
                     <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full sm:w-auto mt-3">
                         <Link href={activeSlide.link} className="flex-1 sm:flex-none">
-                            <button className="w-full flex items-center justify-center gap-2 px-8 py-2.5 md:py-3 bg-white text-black hover:bg-zinc-200 font-bold rounded-lg transition-colors shadow-lg active:scale-95">
+                            <button className="w-full flex items-center justify-center gap-2 px-8 py-2 md:py-2.5 bg-white text-black hover:bg-zinc-200 font-bold rounded-md transition-colors shadow-lg active:scale-95">
                                 <Play className="w-4 h-4 md:w-5 h-5 fill-current" />
                                 <span className="text-sm md:text-base">Play</span>
                             </button>
@@ -307,10 +325,22 @@ export default function HeroCarousel() {
                         
                         <button 
                             onClick={toggleWatchlist}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 md:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-lg border border-white/10 transition-colors shadow-lg active:scale-95"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2 md:py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-md border border-white/10 transition-colors shadow-lg active:scale-95"
                         >
                             {inWatchlist ? <Check className="w-4 h-4 md:w-5 h-5" /> : <Plus className="w-4 h-4 md:w-5 h-5" />}
                             <span className="text-sm md:text-base">{inWatchlist ? "Added" : "My List"}</span>
+                        </button>
+
+                        <button 
+                            onClick={() => {
+                                if (typeof window !== "undefined") {
+                                    window.dispatchEvent(new Event("openRandomizer"));
+                                }
+                            }}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2 md:py-2.5 bg-pink-600/80 hover:bg-pink-600 border border-pink-500/20 text-white font-bold rounded-md transition-colors shadow-lg active:scale-95"
+                        >
+                            <Shuffle className="w-4 h-4 md:w-5 h-5" />
+                            <span className="text-sm md:text-base">Surprise Me</span>
                         </button>
 
                         {/* Mute Button Toggle */}

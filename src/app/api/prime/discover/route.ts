@@ -12,8 +12,23 @@ export async function GET(req: Request) {
     const genreId = searchParams.get("genre_id");
     const year = searchParams.get("year");
     const voteAvgGte = searchParams.get("vote_average_gte");
-    const watchProviderId = searchParams.get("watch_provider_id");
+    let watchProviderId = searchParams.get("watch_provider_id");
     const watchRegion = searchParams.get("watch_region") || "US";
+    const withOriginalLanguage = searchParams.get("with_original_language");
+
+    // Map TV Network IDs to watch provider IDs for movies
+    if (!watchProviderId && networkId && mediaType === "movie") {
+        const networkToProvider: Record<string, string> = {
+            "213": "8",    // Netflix
+            "2739": "337", // Disney+
+            "1024": "9",   // Amazon Prime
+            "2552": "350", // Apple TV+
+            "49": "384",   // HBO Max
+            "453": "15",   // Hulu
+            "4330": "531"  // Paramount+
+        };
+        watchProviderId = networkToProvider[networkId] || null;
+    }
 
     try {
         const params = new URLSearchParams({
@@ -25,12 +40,18 @@ export async function GET(req: Request) {
             include_adult: "false",
         });
 
+        if (withOriginalLanguage) {
+            params.set("with_original_language", withOriginalLanguage);
+        }
         if (networkId && mediaType === "tv") {
             params.set("with_networks", networkId);
         }
         if (watchProviderId) {
             params.set("with_watch_providers", watchProviderId);
             params.set("watch_region", watchRegion);
+        }
+        if (watchRegion) {
+            params.set("region", watchRegion);
         }
         if (genreId) {
             params.set("with_genres", genreId);

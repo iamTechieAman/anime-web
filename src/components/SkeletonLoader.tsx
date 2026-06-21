@@ -47,20 +47,18 @@ export const RowSkeleton = memo(function RowSkeleton({ count = 6 }: { count?: nu
         <div className="space-y-4">
             {/* Section header skeleton */}
             <div className="flex items-center gap-3">
-                <div className="w-1 h-6 skeleton-shine rounded-full" />
+                <div className="w-1 h-5 bg-[var(--accent)] rounded-full" />
                 <div className="w-5 h-5 skeleton-shine rounded" />
                 <div className="w-40 h-5 skeleton-shine rounded" />
             </div>
             {/* Cards row */}
             <div className="flex gap-3 overflow-hidden">
                 {Array.from({ length: count }).map((_, i) => (
-                    <div key={i} className="flex-shrink-0 w-[28vw] sm:w-[155px] md:w-[170px] lg:w-[180px]">
-                        <div className="rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)]">
-                            <div className="aspect-[2/3] skeleton-shine" />
-                            <div className="p-3 space-y-2">
-                                <div className="h-3 skeleton-shine rounded w-full" />
-                                <div className="h-2 skeleton-shine rounded w-2/3" />
-                            </div>
+                    <div key={i} className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px]">
+                        <div className="relative w-full aspect-[2/3] rounded-xl bg-white/5 overflow-hidden skeleton-shine mb-2" />
+                        <div className="space-y-2 px-0.5">
+                            <div className="h-3.5 skeleton-shine rounded w-4/5" />
+                            <div className="h-2.5 skeleton-shine rounded w-1/2" />
                         </div>
                     </div>
                 ))}
@@ -74,11 +72,11 @@ export const GridSkeleton = memo(function GridSkeleton({ count = 12 }: { count?:
     return (
         <div className="responsive-grid">
             {Array.from({ length: count }).map((_, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)]">
-                    <div className="aspect-[2/3] skeleton-shine" />
-                    <div className="p-3 space-y-2">
-                        <div className="h-3 skeleton-shine rounded w-full" />
-                        <div className="h-2 skeleton-shine rounded w-2/3" />
+                <div key={i} className="w-full">
+                    <div className="relative w-full aspect-[2/3] rounded-xl bg-white/5 overflow-hidden skeleton-shine mb-2" />
+                    <div className="space-y-2 px-0.5">
+                        <div className="h-3.5 skeleton-shine rounded w-4/5" />
+                        <div className="h-2.5 skeleton-shine rounded w-1/2" />
                     </div>
                 </div>
             ))}

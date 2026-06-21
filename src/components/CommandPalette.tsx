@@ -73,6 +73,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             name: "Browse TV Shows",
             action: () => { router.push("/browse?type=tv"); onClose(); }
         });
+        list.push({
+            name: "AI Discovery (Smart Recommendations)",
+            action: () => { router.push("/discover"); onClose(); }
+        });
 
         // Pinned
         pinnedSearches.forEach(term => {

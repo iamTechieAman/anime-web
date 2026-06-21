@@ -936,6 +936,30 @@ p, .text-body {
   }
 }
 
+/* Card Native Virtualization Helper */
+.card-virtualized {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 250px;
+}
+
+@media (min-width: 640px) {
+  .card-virtualized {
+    contain-intrinsic-size: auto 280px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-virtualized {
+    contain-intrinsic-size: auto 320px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .card-virtualized {
+    contain-intrinsic-size: auto 350px;
+  }
+}
+
 /* Sticky Sidebar Utility */
 .sticky-sidebar {
   position: -webkit-sticky;

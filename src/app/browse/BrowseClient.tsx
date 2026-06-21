@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-    Compass, Film, Tv, Sparkles, Filter, X, SlidersHorizontal, 
+    Compass, Film, Tv, X, SlidersHorizontal, 
     ArrowUpDown, Globe, Calendar, RefreshCw, Loader2 
 } from "lucide-react";
 import { MovieCard, type MovieItem } from "@/components/MovieCard";
@@ -72,17 +72,15 @@ export default function BrowseClient() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    // Sync state with URL params
-    const [mediaType, setMediaType] = useState<"movie" | "tv">(
-        (searchParams.get("type") as "movie" | "tv") || "movie"
-    );
-    const [selectedGenre, setSelectedGenre] = useState(searchParams.get("genre_id") || "");
-    const [selectedNetwork, setSelectedNetwork] = useState(searchParams.get("network_id") || "");
-    const [selectedYear, setSelectedYear] = useState(searchParams.get("year") || "");
-    const [selectedLanguage, setSelectedLanguage] = useState(searchParams.get("language") || "");
-    const [selectedCountry, setSelectedCountry] = useState(searchParams.get("country") || "US");
-    const [selectedSort, setSelectedSort] = useState(searchParams.get("sort_by") || "popularity.desc");
-    const [selectedLetter, setSelectedLetter] = useState(searchParams.get("letter") || "");
+    // Read filters directly from searchParams (single source of truth)
+    const mediaType = (searchParams.get("type") as "movie" | "tv") || "movie";
+    const selectedGenre = searchParams.get("genre_id") || "";
+    const selectedNetwork = searchParams.get("network_id") || "";
+    const selectedYear = searchParams.get("year") || "";
+    const selectedLanguage = searchParams.get("language") || "";
+    const selectedCountry = searchParams.get("country") || "US";
+    const selectedSort = searchParams.get("sort_by") || "popularity.desc";
+    const selectedLetter = searchParams.get("letter") || "";
 
     const [items, setItems] = useState<MovieItem[]>([]);
     const [page, setPage] = useState(1);
@@ -90,17 +88,46 @@ export default function BrowseClient() {
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [showFilters, setShowFilters] = useState(true);
+    const [showFilters, setShowFilters] = useState(false);
 
     const observerTarget = useRef<HTMLDivElement>(null);
 
-    // Save filters to localStorage whenever they change
+    // Lock body scrolling when filter drawer is open
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const filters = { mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter };
-            localStorage.setItem("toonplayer_browse_filters", JSON.stringify(filters));
+        if (showFilters) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
         }
-    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [showFilters]);
+
+    // Sync helper to push parameter updates to router URL (triggers fetchCatalog automatically via searchParams changes)
+    const setFilterParam = useCallback((key: string, value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("page"); // Reset pagination
+        if (value) {
+            params.set(key, value);
+        } else {
+            params.delete(key);
+        }
+        
+        // Reset network filter if swapping media type
+        if (key === "type") {
+            params.delete("network_id");
+        }
+        
+        router.replace(`/browse?${params.toString()}`, { scroll: false });
+    }, [searchParams, router]);
+
+    const handleReset = () => {
+        const params = new URLSearchParams();
+        params.set("type", mediaType); // Keep current media type
+        params.set("country", "US");
+        router.replace(`/browse?${params.toString()}`, { scroll: false });
+    };
 
     // Load filters on mount if URL parameters are not set
     useEffect(() => {
@@ -109,18 +136,28 @@ export default function BrowseClient() {
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (parsed.mediaType) setMediaType(parsed.mediaType);
-                    if (parsed.selectedGenre) setSelectedGenre(parsed.selectedGenre);
-                    if (parsed.selectedNetwork) setSelectedNetwork(parsed.selectedNetwork);
-                    if (parsed.selectedYear) setSelectedYear(parsed.selectedYear);
-                    if (parsed.selectedLanguage) setSelectedLanguage(parsed.selectedLanguage);
-                    if (parsed.selectedCountry) setSelectedCountry(parsed.selectedCountry);
-                    if (parsed.selectedSort) setSelectedSort(parsed.selectedSort);
-                    if (parsed.selectedLetter) setSelectedLetter(parsed.selectedLetter);
+                    const params = new URLSearchParams();
+                    if (parsed.mediaType) params.set("type", parsed.mediaType);
+                    if (parsed.selectedGenre) params.set("genre_id", parsed.selectedGenre);
+                    if (parsed.selectedNetwork) params.set("network_id", parsed.selectedNetwork);
+                    if (parsed.selectedYear) params.set("year", parsed.selectedYear);
+                    if (parsed.selectedLanguage) params.set("language", parsed.selectedLanguage);
+                    if (parsed.selectedCountry) params.set("country", parsed.selectedCountry);
+                    if (parsed.selectedSort) params.set("sort_by", parsed.selectedSort);
+                    if (parsed.selectedLetter) params.set("letter", parsed.selectedLetter);
+                    router.replace(`/browse?${params.toString()}`, { scroll: false });
                 } catch(e) {}
             }
         }
-    }, []);
+    }, [searchParams, router]);
+
+    // Save filters to localStorage whenever searchParams change
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const filters = { mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter };
+            localStorage.setItem("toonplayer_browse_filters", JSON.stringify(filters));
+        }
+    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
 
     // Fetch catalog helper
     const fetchCatalog = useCallback(async (pageNum: number, isAppend: boolean) => {
@@ -129,33 +166,55 @@ export default function BrowseClient() {
         setError(null);
 
         try {
-            const params = new URLSearchParams({
-                media_type: mediaType,
-                sort_by: selectedSort,
-                page: String(pageNum),
-                watch_region: selectedCountry
-            });
+            let combinedResults: MovieItem[] = [];
+            let currentPageNum = pageNum;
+            let currentTotalPages = 1;
+            let attempts = 0;
+            const maxAttempts = 5; // Guard against infinite looping
 
-            if (selectedGenre) params.set("genre_id", selectedGenre);
-            if (selectedNetwork && mediaType === "tv") params.set("network_id", selectedNetwork);
-            if (selectedYear) params.set("year", selectedYear);
-
-            const res = await axios.get(`/api/prime/discover?${params.toString()}`);
-            let fetchedResults = res.data.results || [];
-
-            // Apply client-side alphabet filter if selected
-            if (selectedLetter) {
-                const letter = selectedLetter.toLowerCase();
-                fetchedResults = fetchedResults.filter((item: MovieItem) => {
-                    const title = (item.title || item.name || "").toLowerCase();
-                    return title.startsWith(letter);
+            while (attempts < maxAttempts) {
+                const params = new URLSearchParams({
+                    media_type: mediaType,
+                    sort_by: selectedSort,
+                    page: String(currentPageNum),
+                    watch_region: selectedCountry
                 });
+
+                if (selectedGenre) params.set("genre_id", selectedGenre);
+                if (selectedNetwork) params.set("network_id", selectedNetwork);
+                if (selectedYear) params.set("year", selectedYear);
+                if (selectedLanguage) params.set("with_original_language", selectedLanguage);
+
+                const res = await axios.get(`/api/prime/discover?${params.toString()}`);
+                let fetchedResults = res.data.results || [];
+                currentTotalPages = res.data.total_pages || 1;
+
+                // Client-side alphabet filter
+                if (selectedLetter) {
+                    const letter = selectedLetter.toLowerCase();
+                    fetchedResults = fetchedResults.filter((item: MovieItem) => {
+                        const title = (item.title || item.name || "").toLowerCase();
+                        return title.startsWith(letter);
+                    });
+                }
+
+                combinedResults = [...combinedResults, ...fetchedResults];
+
+                // If not filtering by letter, or got enough items, or hit total pages, stop
+                if (!selectedLetter || combinedResults.length >= 8 || currentPageNum >= currentTotalPages) {
+                    break;
+                }
+
+                currentPageNum++;
+                attempts++;
             }
+
+            setPage(currentPageNum);
+            setTotalPages(currentTotalPages);
 
             if (isAppend) {
                 setItems(prev => {
-                    const combined = [...prev, ...fetchedResults];
-                    // Deduplicate by ID
+                    const combined = [...prev, ...combinedResults];
                     const seen = new Set();
                     return combined.filter(item => {
                         if (seen.has(item.id)) return false;
@@ -164,10 +223,8 @@ export default function BrowseClient() {
                     });
                 });
             } else {
-                setItems(fetchedResults);
+                setItems(combinedResults);
             }
-            
-            setTotalPages(res.data.total_pages || 1);
         } catch (err: any) {
             console.error("Browse loading failed:", err);
             setError("Failed to load catalog content. Please try again.");
@@ -177,7 +234,7 @@ export default function BrowseClient() {
         }
     }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
 
-    // Fetch initial on change
+    // Fetch initial results on change
     useEffect(() => {
         setPage(1);
         fetchCatalog(1, false);
@@ -185,13 +242,12 @@ export default function BrowseClient() {
 
     // Handle Infinite Scroll
     useEffect(() => {
-        if (loading || loadingMore || page >= totalPages) return;
+        if (loading || loadingMore || page >= totalPages || error) return;
 
         const observer = new IntersectionObserver(
             entries => {
                 if (entries[0].isIntersecting) {
                     const nextPage = page + 1;
-                    setPage(nextPage);
                     fetchCatalog(nextPage, true);
                 }
             },
@@ -204,25 +260,14 @@ export default function BrowseClient() {
         return () => {
             if (target) observer.unobserve(target);
         };
-    }, [page, totalPages, loading, loadingMore, fetchCatalog]);
-
-    const handleReset = () => {
-        setSelectedGenre("");
-        setSelectedNetwork("");
-        setSelectedYear("");
-        setSelectedLanguage("");
-        setSelectedCountry("US");
-        setSelectedSort("popularity.desc");
-        setSelectedLetter("");
-        setPage(1);
-    };
+    }, [page, totalPages, loading, loadingMore, error, fetchCatalog]);
 
     return (
-        <main className="min-h-screen pt-24 pb-20 px-4 md:px-8 bg-[#050505]">
-            <div className="max-w-[1800px] mx-auto space-y-8">
+        <div className="flex-1 w-full bg-[#050505] pt-6 pb-12 px-4 md:px-8 flex flex-col">
+            <div className="max-w-[1800px] mx-auto w-full flex-1 flex flex-col space-y-8">
                 
-                {/* Header & Sticky Filter Panel */}
-                <div className="sticky top-14 md:top-16 z-30 bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5 space-y-6">
+                {/* Sticky Header Bar */}
+                <div className="sticky top-14 md:top-16 z-30 bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <h1 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3">
@@ -237,8 +282,8 @@ export default function BrowseClient() {
                         <div className="flex items-center gap-3">
                             <div className="bg-[#12131A] border border-white/5 p-1 rounded-xl flex gap-1">
                                 <button
-                                    onClick={() => { setMediaType("movie"); setSelectedNetwork(""); }}
-                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                                    onClick={() => setFilterParam("type", "movie")}
+                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "movie" 
                                             ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
@@ -248,8 +293,8 @@ export default function BrowseClient() {
                                     Movies
                                 </button>
                                 <button
-                                    onClick={() => setMediaType("tv")}
-                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                                    onClick={() => setFilterParam("type", "tv")}
+                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "tv" 
                                             ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
@@ -262,10 +307,10 @@ export default function BrowseClient() {
 
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 h-11 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${
+                                className={`flex items-center gap-2 h-11 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer ${
                                     showFilters 
                                         ? "bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
-                                        : "bg-[#12131A] border-white/5 text-zinc-400 hover:text-white"
+                                        : "bg-[#12131A] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                 }`}
                             >
                                 <SlidersHorizontal className="w-4 h-4" />
@@ -273,123 +318,148 @@ export default function BrowseClient() {
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    <AnimatePresence>
-                        {showFilters && (
+                {/* Sliding Glassmorphic Filter Drawer Overlay */}
+                <AnimatePresence>
+                    {showFilters && (
+                        <>
+                            {/* Backdrop overlay */}
                             <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowFilters(false)}
+                                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                            />
+
+                            {/* Drawer Panel */}
+                            <motion.div
+                                initial={{ x: "100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "100%" }}
+                                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                                className="fixed right-0 top-0 h-full w-full sm:w-[440px] z-50 bg-[#0B0B0F]/95 backdrop-blur-2xl border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col"
                             >
-                                <div className="bg-[#12131A]/60 border border-white/5 rounded-2xl p-6 space-y-6 backdrop-blur-md">
+                                {/* Header */}
+                                <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/20">
+                                    <div className="flex items-center gap-2">
+                                        <SlidersHorizontal className="w-5 h-5 text-[var(--accent)]" />
+                                        <span className="text-base font-extrabold text-white tracking-wide">Catalog Filters</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={handleReset}
+                                            className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white border border-white/5 hover:border-white/10 bg-white/5 rounded-lg transition-all cursor-pointer"
+                                        >
+                                            Reset All
+                                        </button>
+                                        <button
+                                            onClick={() => setShowFilters(false)}
+                                            className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-all cursor-pointer"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Scrollable filter segments */}
+                                <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                     
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-1.5 mb-2">
-                                                <ArrowUpDown className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sort By</span>
-                                            </div>
-                                            <select
-                                                value={selectedSort}
-                                                onChange={(e) => setSelectedSort(e.target.value)}
-                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                            >
-                                                {SORT_OPTIONS.map(opt => (
-                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-1.5 mb-2">
-                                                <Calendar className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Year</span>
-                                            </div>
-                                            <select
-                                                value={selectedYear}
-                                                onChange={(e) => setSelectedYear(e.target.value)}
-                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                            >
-                                                <option value="">All Years</option>
-                                                {Array.from({ length: 37 }, (_, i) => String(2026 - i)).map(yr => (
-                                                    <option key={yr} value={yr}>{yr}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-1.5 mb-2">
-                                                <Globe className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Language</span>
-                                            </div>
-                                            <select
-                                                value={selectedLanguage}
-                                                onChange={(e) => setSelectedLanguage(e.target.value)}
-                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                            >
-                                                <option value="">All Languages</option>
-                                                {LANGUAGES.map(lang => (
-                                                    <option key={lang.code} value={lang.code}>{lang.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-1.5 mb-2">
-                                                <Globe className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Region</span>
-                                            </div>
-                                            <select
-                                                value={selectedCountry}
-                                                onChange={(e) => setSelectedCountry(e.target.value)}
-                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                            >
-                                                {COUNTRIES.map(c => (
-                                                    <option key={c.code} value={c.code}>{c.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="flex items-end">
+                                    {/* Content type */}
+                                    <div className="space-y-2.5">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Content Type</span>
+                                        <div className="grid grid-cols-2 gap-2 bg-[#08080B] p-1 rounded-xl border border-white/5">
                                             <button
-                                                onClick={handleReset}
-                                                className="w-full h-10 border border-white/5 bg-[#08080B] hover:bg-white/5 text-zinc-300 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                                onClick={() => setFilterParam("type", "movie")}
+                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                                                    mediaType === "movie"
+                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-md"
+                                                        : "text-zinc-400 hover:text-white"
+                                                }`}
                                             >
-                                                <RefreshCw className="w-3.5 h-3.5" />
-                                                Reset
+                                                <Film className="w-3.5 h-3.5" />
+                                                Movies
+                                            </button>
+                                            <button
+                                                onClick={() => setFilterParam("type", "tv")}
+                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                                                    mediaType === "tv"
+                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-md"
+                                                        : "text-zinc-400 hover:text-white"
+                                                }`}
+                                            >
+                                                <Tv className="w-3.5 h-3.5" />
+                                                TV Shows
                                             </button>
                                         </div>
                                     </div>
 
-                                    {mediaType === "tv" && (
-                                        <div className="space-y-3 pt-2">
-                                            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Select Network Channel</h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {NETWORKS.map(net => (
-                                                    <button
-                                                        key={net.id}
-                                                        onClick={() => setSelectedNetwork(selectedNetwork === net.id ? "" : net.id)}
-                                                        className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                                                            selectedNetwork === net.id
-                                                                ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_15px_var(--accent-glow)]"
-                                                                : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
-                                                        }`}
-                                                    >
-                                                        <span>{net.logo}</span>
-                                                        {net.name}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                    {/* Sorting selection */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
+                                            <ArrowUpDown className="w-3 h-3 text-[var(--accent)]" /> Sort By
+                                        </span>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {SORT_OPTIONS.map(opt => (
+                                                <button
+                                                    key={opt.value}
+                                                    onClick={() => setFilterParam("sort_by", opt.value)}
+                                                    className={`px-3 py-2 border rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                                                        selectedSort === opt.value
+                                                            ? "bg-[var(--accent)]/15 text-[var(--accent)] border-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)]"
+                                                            : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                    }`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
                                         </div>
-                                    )}
+                                    </div>
 
-                                    <div className="space-y-3 pt-2">
-                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Filter by Genre</h3>
+                                    {/* Year scroll selection */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
+                                            <Calendar className="w-3 h-3 text-[var(--accent)]" /> Release Year
+                                        </span>
+                                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                            <button
+                                                onClick={() => setFilterParam("year", "")}
+                                                className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                                                    selectedYear === ""
+                                                        ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                }`}
+                                            >
+                                                All Years
+                                            </button>
+                                            {Array.from({ length: 27 }, (_, i) => String(2026 - i)).map(yr => (
+                                                <button
+                                                    key={yr}
+                                                    onClick={() => setFilterParam("year", selectedYear === yr ? "" : yr)}
+                                                    className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                                                        selectedYear === yr
+                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                    }`}
+                                                >
+                                                    {yr}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Genre selector */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Filter by Genre</span>
                                         <div className="flex flex-wrap gap-2">
                                             {GENRES.map(g => (
                                                 <button
                                                     key={g.id}
-                                                    onClick={() => setSelectedGenre(selectedGenre === g.id ? "" : g.id)}
-                                                    className={`px-3.5 py-2 border rounded-full text-[11px] font-extrabold transition-all cursor-pointer ${
+                                                    onClick={() => setFilterParam("genre_id", selectedGenre === g.id ? "" : g.id)}
+                                                    className={`px-3.5 py-2 border rounded-full text-xs font-bold transition-all cursor-pointer ${
                                                         selectedGenre === g.id
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_15px_var(--accent-glow)]"
+                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -399,17 +469,95 @@ export default function BrowseClient() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3 pt-2">
-                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Titles Starting With</h3>
-                                        <div className="flex flex-wrap gap-1">
+                                    {/* Language selector */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
+                                            <Globe className="w-3 h-3 text-[var(--accent)]" /> Original Language
+                                        </span>
+                                        <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => setFilterParam("language", "")}
+                                                className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                                    selectedLanguage === ""
+                                                        ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                }`}
+                                            >
+                                                All Languages
+                                            </button>
+                                            {LANGUAGES.map(lang => (
+                                                <button
+                                                    key={lang.code}
+                                                    onClick={() => setFilterParam("language", selectedLanguage === lang.code ? "" : lang.code)}
+                                                    className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                                        selectedLanguage === lang.code
+                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                    }`}
+                                                >
+                                                    {lang.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Region selector */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
+                                            <Globe className="w-3 h-3 text-[var(--accent)]" /> Watch Region
+                                        </span>
+                                        <div className="flex flex-wrap gap-2">
+                                            {COUNTRIES.map(c => (
+                                                <button
+                                                    key={c.code}
+                                                    onClick={() => setFilterParam("country", selectedCountry === c.code ? "" : c.code)}
+                                                    className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                                        selectedCountry === c.code
+                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                    }`}
+                                                >
+                                                    {c.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Network Channel / Platform selector */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                            {mediaType === "tv" ? "Network Channel" : "Streaming Platform"}
+                                        </span>
+                                        <div className="flex flex-wrap gap-2">
+                                            {NETWORKS.map(net => (
+                                                <button
+                                                    key={net.id}
+                                                    onClick={() => setFilterParam("network_id", selectedNetwork === net.id ? "" : net.id)}
+                                                    className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                                                        selectedNetwork === net.id
+                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                    }`}
+                                                >
+                                                    <span>{net.logo}</span>
+                                                    {net.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Alphabet selector */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Titles Starting With</span>
+                                        <div className="grid grid-cols-6 gap-1.5">
                                             {ALPHABET.map(letter => (
                                                 <button
                                                     key={letter}
-                                                    onClick={() => setSelectedLetter(selectedLetter === letter ? "" : letter)}
-                                                    className={`w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
+                                                    onClick={() => setFilterParam("letter", selectedLetter === letter ? "" : letter)}
+                                                    className={`h-9 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
                                                         selectedLetter === letter
                                                             ? "bg-[var(--accent)] text-white shadow-[0_0_10px_var(--accent-glow)]"
-                                                            : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5"
+                                                            : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5 border border-white/5"
                                                     }`}
                                                 >
                                                     {letter}
@@ -420,16 +568,18 @@ export default function BrowseClient() {
 
                                 </div>
                             </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                        </>
+                    )}
+                </AnimatePresence>
 
+                {/* Sub-header status bar */}
                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
                     <p className="text-sm text-zinc-400 font-semibold">
                         Found <span className="text-white font-extrabold">{items.length}</span> titles matching filters
                     </p>
                 </div>
 
+                {/* Main Results Display */}
                 {loading ? (
                     <GridSkeleton count={16} />
                 ) : error ? (
@@ -441,26 +591,26 @@ export default function BrowseClient() {
                         <p className="text-zinc-500 text-sm mb-6">{error}</p>
                         <button
                             onClick={() => fetchCatalog(1, false)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all"
+                            className="px-6 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all cursor-pointer"
                         >
                             Retry Loading
                         </button>
                     </div>
                 ) : items.length === 0 ? (
-                    <div className="py-24 flex flex-col items-center justify-center text-center opacity-60">
-                        <Compass className="w-16 h-16 text-zinc-500 mb-4" />
+                    <div className="py-24 flex flex-col items-center justify-center text-center opacity-60 flex-1">
+                        <Compass className="w-16 h-16 text-zinc-500 mb-4 animate-bounce" />
                         <h3 className="text-lg font-bold text-white">No content matching filters</h3>
                         <p className="text-zinc-500 text-sm mt-1">Try resetting genres, networks, or alphabetical parameters.</p>
                         <button
                             onClick={handleReset}
-                            className="mt-6 px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-black uppercase tracking-wider text-white border border-white/10 transition-all"
+                            className="mt-6 px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-black uppercase tracking-wider text-white border border-white/10 transition-all cursor-pointer"
                         >
                             Clear Filters
                         </button>
                     </div>
                 ) : (
-                    <div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
+                    <div className="flex-1 flex flex-col justify-between">
+                        <div className="responsive-grid">
                             {items.map((item, idx) => (
                                 <motion.div
                                     key={`${item.id}-${idx}`}
@@ -473,19 +623,23 @@ export default function BrowseClient() {
                             ))}
                         </div>
 
-                        {/* Infinite scroll target trigger */}
-                        <div ref={observerTarget} className="h-10 w-full flex items-center justify-center mt-12">
-                            {loadingMore && (
-                                <div className="flex items-center gap-2 text-zinc-500 text-xs font-bold uppercase tracking-widest">
+                        {/* Infinite scroll target trigger / status pill */}
+                        <div ref={observerTarget} className="w-full flex flex-col items-center justify-center mt-12 mb-8 min-h-[50px]">
+                            {loadingMore ? (
+                                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest bg-zinc-900/50 border border-white/5 px-5 py-2.5 rounded-full shadow-lg backdrop-blur-md">
                                     <Loader2 className="w-4 h-4 animate-spin text-[var(--accent)]" />
                                     Loading More Hits...
                                 </div>
-                            )}
+                            ) : page >= totalPages && items.length > 0 ? (
+                                <div className="text-zinc-500 text-[10px] font-black uppercase tracking-widest bg-[#12131A] border border-white/5 px-6 py-2.5 rounded-full shadow-md">
+                                    End of Catalog
+                                </div>
+                            ) : null}
                         </div>
                     </div>
                 )}
 
             </div>
-        </main>
+        </div>
     );
 }

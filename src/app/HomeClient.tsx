@@ -92,6 +92,76 @@ const GAMING_STREAMS_DATA = [
   { id: "257344", title: "League of Legends Worlds - Riot Games", poster_path: "/6tIK0Zqf3XN280j6bV5D1j64n3o.jpg", backdrop_path: "/5l67yMvLp3Ww1D1F5o3b28bE54r.jpg", vote_average: 7.5, release_date: "2026", media_type: "movie", isLive: true, viewers: "128,930" }
 ];
 
+const TOP_COLLECTIONS = [
+    {
+        id: "shonen-legends",
+        title: "Shonen Legends",
+        description: "High-octane action, epic battles, and legendary journeys.",
+        image: "https://image.tmdb.org/t/p/w780/ydf1CeiBLfdxiyNTpskM0802TKl.jpg",
+        link: "/browse?genre=Action&type=anime"
+    },
+    {
+        id: "ghibli-favorites",
+        title: "Studio Ghibli Favorites",
+        description: "Step into worlds of wonder, magic, and heartwarming tales.",
+        image: "https://image.tmdb.org/t/p/w780/utqCOvMmjjMTlXNZz6PHOzRM5QP.jpg",
+        link: "/browse?genre=Fantasy&type=anime"
+    },
+    {
+        id: "mind-bending-toons",
+        title: "Mind-Bending Cartoons",
+        description: "Hilarious, surreal, and cosmic adventures for the curious.",
+        image: "https://image.tmdb.org/t/p/w780/zJZfxi8X3XPHAhxXseRugtnNVtt.jpg",
+        link: "/browse?genre=Sci-Fi&type=tv"
+    },
+    {
+        id: "cinematic-masterpieces",
+        title: "Blockbuster Movies",
+        description: "Must-watch blockbusters and cinematic spectacles.",
+        image: "https://image.tmdb.org/t/p/w780/8mP4T02z807Z3XQd1s4n6XlM9b1.jpg",
+        link: "/browse?type=movie"
+    }
+];
+
+const TopCollectionsRow = () => {
+    return (
+        <section className="mb-8 md:mb-12 w-full overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+                <h2 className="text-base md:text-lg font-black font-sora tracking-tight text-white">Curated Collections</h2>
+            </div>
+            <div className="w-full">
+                <div className="flex items-center gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2">
+                    {TOP_COLLECTIONS.map((col) => (
+                        <Link 
+                            href={col.link} 
+                            key={col.id}
+                            className="snap-start shrink-0 relative w-[240px] sm:w-[280px] md:w-[320px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 bg-zinc-900 shadow-lg group hover:border-[var(--accent)]/30 hover:shadow-2xl transition-all duration-350 hover:scale-[1.02]"
+                        >
+                            <img 
+                                src={col.image} 
+                                alt={col.title} 
+                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700 ease-out" 
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+                            <div className="absolute inset-0 flex flex-col justify-end p-4 z-20 select-none">
+                                <span className="text-[8px] font-black tracking-widest text-[var(--accent)] uppercase mb-1">COLLECTION</span>
+                                <h3 className="text-sm md:text-base font-black text-white font-sora tracking-tight leading-tight mb-1 group-hover:text-[var(--accent)] transition-colors">
+                                    {col.title}
+                                </h3>
+                                <p className="text-[10px] text-zinc-400 font-medium line-clamp-2 leading-relaxed">
+                                    {col.description}
+                                </p>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 export default function MoviesPage() {
     const [activeTab, setActiveTab] = useState("movies");
     const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
@@ -146,6 +216,7 @@ export default function MoviesPage() {
     const [trendingPeople, setTrendingPeople] = useState<any[]>([]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [profile, setProfile] = useState<{name: string, avatar: string} | null>(null);
+    const [recommendedItems, setRecommendedItems] = useState<MovieItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Premium Extra Categories
@@ -209,6 +280,15 @@ export default function MoviesPage() {
     useEffect(() => { if (Array.isArray(moviePopular?.results)) setPopular(moviePopular.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [moviePopular]);
     useEffect(() => { if (Array.isArray(movieUpcoming?.results)) setNowPlaying(movieUpcoming.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [movieUpcoming]);
     useEffect(() => { if (Array.isArray(moviePeople?.results)) setTrendingPeople(moviePeople.results.filter((i: any) => i && i.profile_path).slice(0, 6)); }, [moviePeople]);
+
+    // Pre-compute smart recommendations once when trending/popular loads to prevent CLS/re-shuffling
+    useEffect(() => {
+        if (trending.length > 0 && popular.length > 0) {
+            const combined = [...trending.slice(2, 6), ...popular.slice(2, 6)];
+            const shuffled = combined.sort(() => Math.random() - 0.5);
+            setRecommendedItems(shuffled);
+        }
+    }, [trending, popular]);
 
     // Fetch main data sequentially (remaining axios calls)
     useEffect(() => {
@@ -490,18 +570,23 @@ export default function MoviesPage() {
                                 )}
 
                                 {/* Smart Recommendations (only when no provider active) */}
-                                {activeProvider === "all" && activeTab !== "anime" && trending.length > 0 && popular.length > 0 && (
-                                    <section className="mb-4 relative">
+                                {activeProvider === "all" && activeTab !== "anime" && recommendedItems.length > 0 && (
+                                    <section className="mb-8 md:mb-12 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[16px] pointer-events-none" />
                                         <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-[var(--accent)]" isFeatured />
                                         <LazySection>
                                             <MovieRow 
-                                                items={[...trending.slice(2, 6), ...popular.slice(2, 6)].sort(() => Math.random() - 0.5)} 
+                                                items={recommendedItems} 
                                                 title="smart-recommendations" 
                                                 isLarge 
                                             />
                                         </LazySection>
                                     </section>
+                                )}
+
+                                {/* Top Collections */}
+                                {activeProvider === "all" && activeTab !== "anime" && (
+                                    <TopCollectionsRow />
                                 )}
                                 
                                 {deviceMode === "tv" ? (
@@ -527,7 +612,7 @@ export default function MoviesPage() {
                                     {activeTab === "movies" && (
                                     <div
                                         key={`movies-${activeProvider}`}
-                                        className="space-y-2 md:space-y-3"
+                                        className="space-y-8 md:space-y-12"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -594,7 +679,7 @@ export default function MoviesPage() {
                                 {activeTab === "tv" && (
                                     <div
                                         key={`tv-${activeProvider}`}
-                                        className="space-y-2 md:space-y-3"
+                                        className="space-y-8 md:space-y-12"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
@@ -655,7 +740,7 @@ export default function MoviesPage() {
                                 {activeTab === "anime" && (
                                     <div
                                         key={`anime-${activeProvider}`}
-                                        className="space-y-2 md:space-y-3 mt-4"
+                                        className="space-y-8 md:space-y-12 mt-4"
                                     >
                                         {/* Provider anime content (Crunchyroll / ToonPlayer Originals) */}
                                         {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
@@ -722,7 +807,7 @@ export default function MoviesPage() {
                                 {activeTab === "toons" && (
                                     <div
                                         key={`toons-${activeProvider}`}
-                                        className="space-y-2 md:space-y-3"
+                                        className="space-y-8 md:space-y-12"
                                     >
                                         <section>
                                             <SectionHeader icon={Tv} title="Featured PC Toons" color="text-[var(--accent)]" isFeatured />
@@ -738,7 +823,7 @@ export default function MoviesPage() {
                                 {activeTab === "gaming" && (
                                     <div
                                         key={`gaming-${activeProvider}`}
-                                        className="space-y-2 md:space-y-3"
+                                        className="space-y-8 md:space-y-12"
                                     >
                                         <section>
                                             <SectionHeader icon={Play} title="Live Streaming Highlights" color="text-[var(--accent)]" isFeatured />
@@ -752,7 +837,7 @@ export default function MoviesPage() {
                                 )}
 
                                 {activeTab === "trending" && (
-                                    <div className="space-y-2 md:space-y-3">
+                                    <div className="space-y-8 md:space-y-12">
                                         {((loading && trending.length === 0) || trending.length > 0) && (
                                             <section>
                                                 <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
@@ -997,7 +1082,13 @@ const RowSkeleton = memo(function RowSkeleton() {
     return (
         <div className="netflix-row px-0">
             {[...Array(8)].map((_, i) => (
-                <div key={i} className="netflix-card-snap w-[130px] sm:w-[150px] md:w-[170px] lg:w-[180px] aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
+                <div key={i} className="netflix-card-snap w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px] shrink-0">
+                    <div className="relative w-full aspect-[2/3] rounded-xl bg-white/5 overflow-hidden skeleton-shine mb-2 animate-pulse" />
+                    <div className="space-y-2 px-0.5 animate-pulse">
+                        <div className="h-3.5 bg-white/5 rounded w-4/5" />
+                        <div className="h-2.5 bg-white/5 rounded w-1/2" />
+                    </div>
+                </div>
             ))}
         </div>
     );

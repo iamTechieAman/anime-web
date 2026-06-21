@@ -57,8 +57,13 @@ export default function MobileNav() {
             label: "Random",
             icon: Shuffle,
             color: "text-pink-500",
-            active: pathname === '/randomize',
-            onClick: () => { closeAll(); router.push('/randomize'); },
+            active: false,
+            onClick: () => {
+                closeAll();
+                if (typeof window !== "undefined") {
+                    window.dispatchEvent(new Event("openRandomizer"));
+                }
+            },
         },
         {
             label: "History",

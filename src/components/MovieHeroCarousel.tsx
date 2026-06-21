@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Play, Info, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Info, Star, ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 
 interface HeroItem {
     id: number;
@@ -130,7 +130,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             </p>
 
                             {/* Action buttons */}
-                            <div className="flex items-center justify-center gap-4 pt-2">
+                            <div className="flex items-center justify-center gap-4 pt-2 flex-wrap">
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
                                     className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-black font-extrabold text-base rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.3)]"
@@ -145,6 +145,17 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                                     <Info className="w-6 h-6" />
                                     More Info
                                 </Link>
+                                <button
+                                    onClick={() => {
+                                        if (typeof window !== "undefined") {
+                                            window.dispatchEvent(new Event("openRandomizer"));
+                                        }
+                                    }}
+                                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-pink-600/80 hover:bg-pink-600 border border-pink-500/20 text-white font-bold text-base rounded-xl transition-all shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
+                                >
+                                    <Shuffle className="w-5 h-5" />
+                                    Surprise Me
+                                </button>
                             </div>
                         </motion.div>
                     </AnimatePresence>

@@ -12,6 +12,8 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import Footer from "@/components/Footer";
 import RandomizerModal from "@/components/RandomizerModal";
 import CommandPalette from "@/components/CommandPalette";
+import { AnimatePresence } from "framer-motion";
+import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
@@ -113,10 +115,14 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <Footer />
       </div>
       <MobileModals />
-      <RandomizerModal 
-        isOpen={isRandomizerOpen} 
-        onClose={() => setIsRandomizerOpen(false)} 
-      />
+      <RandomizerFloatingTrigger />
+      <AnimatePresence>
+        {isRandomizerOpen && (
+          <RandomizerModal 
+            onClose={() => setIsRandomizerOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
       <CommandPalette 
         isOpen={isCommandPaletteOpen} 
         onClose={() => setIsCommandPaletteOpen(false)} 

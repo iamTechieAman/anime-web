@@ -1,16 +1,17 @@
 <p align="center">
-  <img src="public/logo.webp" alt="ToonPlayer Logo" width="80" />
+  <img src="public/logo.webp" alt="ToonPlayer Logo" width="90" />
 </p>
 
 <h1 align="center">ToonPlayer</h1>
 <p align="center">
-  <strong>Free Anime & Movies Streaming Aggregator</strong>
+  <strong>Netflix · Crunchyroll · Apple TV+ quality — Free Anime, Movies & TV Streaming</strong>
 </p>
 
 <p align="center">
   <a href="https://toonplayer.in"><img src="https://img.shields.io/badge/Live-toonplayer.in-blueviolet?style=for-the-badge" alt="Live Site" /></a>
   <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/Framer_Motion-12-EF4177?style=for-the-badge&logo=framer" alt="Framer Motion" />
   <img src="https://img.shields.io/badge/Deployed_on-Vercel-000?style=for-the-badge&logo=vercel" alt="Vercel" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License" />
 </p>
@@ -19,43 +20,88 @@
 
 ## 📖 About
 
-ToonPlayer is a high-performance content aggregator that lets users discover and stream anime, movies, and TV shows — all from a single, ad-free interface. It aggregates video sources from multiple providers, applies an intelligent server-scanning pipeline, and delivers content through a sandboxed proxy player that blocks popups and malicious redirects.
-
-### 🏆 Recent Releases & Major System Upgrades (v4.0+)
-
-- 🚀 **Centralized Self-Healing Stream Provider Engine (v4.0)**: Built-in automated provider health checking, smart loading timeout rotators (8.5-second fallback triggers), Axios-level failover chains, silent mirror redirections, and unified notification toast alerts.
-- 🎨 **Premium UI Optimization & Crunchyroll-Style Polish**: GPU hardware-accelerated transforms (`translate3d(0, -6px, 0)`), 15-20% vertical spacing compression for massive above-the-fold catalog visibility, custom 3-column CSS Grid navbar layout, and increased sidebar z-index stack handling (`z-[60]`) to completely remove content overlapping.
+ToonPlayer is a high-performance, cinematic-quality content aggregator that lets users discover and stream anime, movies, and TV shows — all from a single, ad-free interface. Inspired by Netflix, Crunchyroll, Apple TV+, Plex, and Stremio, it aggregates video sources from multiple providers, applies an intelligent server-scanning pipeline, and delivers content through a sandboxed proxy player that blocks popups and malicious redirects.
 
 ---
 
-## ✨ Features
+## 🏆 Changelog — v5.0 (Latest)
+
+### Phase 6 — Watch History & Watchlist (`June 2026`)
+- 🕓 **Premium Watch History**: Virtualized infinite scroll with Day / Week / Month grouping, animated collapsible sections, animated progress bars with "Completed" (≥90%) badges, Rewatch vs Resume smart labeling, Bulk Select + Select All, JSON Export, type filter chips, toast-based confirmations (no native `confirm()`), and a premium animated empty state.
+- 📌 **Premium Watchlist**: Framer Motion `Reorder.Group` drag-and-drop list reordering with GripVertical handle, inline tag editor (no `prompt()` — keyboard Enter/Escape support), grid collection picker dropdown, folder tabs with item counts (Favorites, To Watch, Completed + custom), type filter chips, tag filter pills, Sort by Date / A–Z / Type, and animated empty state with floating decorators.
+- 🗂️ **WatchContext Upgrade**: `WatchlistItem` now carries `collection`, `tags`, and `order` fields; new `updateWatchlistItem`, `reorderWatchlist`, `bulkRemoveFromHistory` context methods; `customCollections` persisted separately in localStorage; `normalizeWatchlistItem` helper for backward compatibility.
+
+### Phase 5 — AI Discovery (`June 2026`)
+- 🤖 **Conversational AI Chat**: Full ChatGPT/Perplexity-style conversational UI with multi-turn chat memory — every follow-up query includes prior message context.
+- 🎙️ **Voice Search**: Web Speech API integration directly in the input bar — click mic or hold `Space` to dictate.
+- 🃏 **Mood Prompt Cards**: 8 curated glassmorphic cards (Cyberpunk, Sad Anime, Studio Ghibli, Mind Bending, K-Drama, Hidden Gems, Action-Packed, Romance) that inject styled prompts into the chat.
+- 📜 **Search History**: Recent searches persisted in localStorage with one-click re-query.
+- ⏱️ **Dynamic Loading Logs**: Animated step-by-step progress indicators while AI processes your request.
+- ⌨️ **Ctrl+K Integration**: AI Discovery accessible directly from the global Command Palette.
+
+### Phase 4 — Randomizer (`June 2026`)
+- 🎲 **Device Parity Fix**: Randomizer no longer hidden behind `md:hidden` / `lg:hidden` — rendered on all screen sizes.
+- 🔘 **Global Floating FAB**: Bottom-right `RandomizerFloatingTrigger` persists on every page for instant access.
+- 🎠 **Hero CTA Buttons**: "Surprise Me" buttons added to HeroCarousel and MovieHeroCarousel.
+- ⌨️ **Keyboard Shortcut**: Press `R` anywhere to open the Randomizer modal.
+- 🔧 **Framer Motion Fix**: Exit animations fixed — `AnimatePresence` moved to `LayoutContent.tsx` wrapper instead of inside the modal.
+
+### Phase 3 — Browse Catalog (`June 2026`)
+- 🎛️ **Slide-Over Filter Drawer**: Right-side glassmorphic filter panel with backdrop overlay and spring animations.
+- 🏷️ **Interactive Filter Chips**: Genre, Year (slider track), Language, Region, Network — all converted from dropdowns to visual chips.
+- 📦 **Card Virtualization**: `content-visibility: auto` + `contain-intrinsic-size` for native GPU-level list virtualization.
+- 🦴 **Zero-CLS Skeletons**: Skeleton cards match exact card height, border-radius, aspect ratio, and metadata spacing.
+- ♾️ **Improved Infinite Scroll**: Fail-safe `error` guard on the IntersectionObserver prevents infinite retry loops; "End of Catalog" pill shown when all pages are fetched.
+- 🚫 **Double Scrollbar Fix**: Replaced nested `<main>` layout with single scroll container.
+
+### Phase 2 — Homepage (`June 2026`)
+- 🎬 **Hero Carousel**: Auto-cycling fullscreen hero with `70vh` max-height cap, background blur, gradient overlay, mute/unmute, random hero selection, and animated progress indicators.
+- ⏭️ **Continue Watching Row**: Horizontal progress bars, episode metadata, and one-click resume.
+- 📊 **Smart Sections**: Trending, Top Picks, Top Anime Collections — all with skeleton loading states.
+
+### Phase 1 — Global Layout (`June 2026`)
+- 📐 **Tested on 375px → 3840px**: All pages verified at 1920, 2560, 3440, 3840 (desktop) and 375, 390, 412, 430 (mobile).
+- 🧱 **Sidebar z-index stack** fixed — no content overlap on any breakpoint.
+- 📏 **Consistent padding system** — 4px grid across all pages.
+- 🔒 **Overflow & CLS fixes** — `overflow-x: hidden` on `html`/`body`, no double scrollbars.
+
+---
+
+## ✨ Full Feature Matrix
 
 | Category | Feature |
 |---|---|
-| 🎬 **Streaming** | Multi-server auto-scan with smart fallback — finds a working stream in seconds |
-| 🛡️ **Ad-Free** | Aggressive iframe sandboxing blocks all popups, redirects, and overlay ads |
-| ▶️ **Playback** | Autoplay, auto-unmute, and seamless auto-next-episode across all servers |
+| 🎬 **Streaming** | Multi-server auto-scan with 8.5s timeout fallback chains — finds working streams in seconds |
+| 🛡️ **Ad-Free** | Aggressive iframe sandboxing (`sandbox` + CSP) blocks all popups, redirects, and overlay ads |
+| ▶️ **Playback** | Autoplay, auto-unmute, and seamless auto-next-episode across all providers |
 | 📺 **Cast** | Chromecast & AirPlay support via ArtPlayer plugin |
-| 🔍 **AI Discovery** | Natural language search — describe what you want to watch and get smart recommendations |
-| 🎌 **Anime** | Full anime catalog scraped from multiple providers (Aniwaves, HiAnime, AllAnime) |
-| 👤 **Profiles** | JWT-based authentication with MongoDB — watch history & favorites sync across devices |
-| 🔔 **Push Notifications** | Web Push via VAPID keys — get notified when new episodes drop |
-| 📱 **Mobile** | Fully responsive PWA with native Android APK available via Capacitor |
-| ⚡ **Performance** | Edge caching, ISR, static data pre-generation — optimized for Vercel Free Tier |
+| 🤖 **AI Discovery** | Conversational natural language search with multi-turn memory, voice input, mood cards, and history |
+| 🎌 **Anime** | Full anime catalog from multiple providers (Aniwaves, HiAnime, AllAnime) |
+| 🎲 **Randomizer** | Surprise Me — random movie, anime, genre, year, studio, or top-rated pick from any page |
+| ⌨️ **Command Palette** | Ctrl+K global search with quick-access shortcuts to all major features |
+| 🕓 **Watch History** | Virtualized, grouped (Day/Week/Month), progress bars, bulk delete, export JSON |
+| 📌 **Watchlist** | Folders, collections, custom tags, drag-and-drop reorder, grid/list view |
+| 👤 **Profiles** | JWT-based auth with MongoDB — history & favorites sync across devices |
+| 🔔 **Push Notifications** | Web Push via VAPID keys — alerts for new episode drops |
+| 📱 **Mobile PWA** | Fully responsive — Lighthouse 95+ on mobile; Android APK via Capacitor |
+| ⚡ **Performance** | Edge caching, ISR, static pre-generation, `content-visibility: auto` virtualization |
 | 🔒 **Security** | Rate limiting, input sanitization (Zod), bcrypt hashing, HTTP-only JWT cookies |
-| 🌐 **SEO** | Dynamic sitemaps, structured meta tags, canonical URLs, robots.txt |
+| 🌐 **SEO** | Dynamic sitemaps, structured meta tags, Open Graph, canonical URLs, robots.txt |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ```
-Frontend        → Next.js 16, React 19, Tailwind CSS 4, Framer Motion
+Frontend        → Next.js 16, React 19, Tailwind CSS 4, Framer Motion 12
 Video Players   → ArtPlayer, HLS.js, VidStack
 Backend/API     → Next.js API Routes (serverless), Cheerio (scraping), Axios
 Database        → MongoDB Atlas (Mongoose ODM)
 Auth            → Custom JWT (jose) + bcryptjs
 Push            → Web Push API + VAPID (web-push)
+AI              → Google Gemini API (conversational recommendations)
+State           → React Context API (WatchContext, NotificationContext, AdBlockContext)
+Animations      → Framer Motion (Reorder, AnimatePresence, motion.div, useDragControls)
 Deployment      → Vercel (primary), Cloudflare (optional via OpenNext)
 Mobile          → Capacitor (Android APK)
 Monitoring      → Vercel Analytics, Speed Insights, Puppeteer automated audits
@@ -67,7 +113,7 @@ Monitoring      → Vercel Analytics, Speed Insights, Puppeteer automated audits
 
 ```
 anime-web/
-├── public/                  # Static assets, service worker, logo
+├── public/                  # Static assets, service worker, logo, icons
 ├── scripts/                 # Build-time helpers & dev tools
 │   ├── generate-static-data.js   # Pre-fetches data at build time
 │   ├── generate-keys.js          # VAPID key generator
@@ -80,20 +126,38 @@ anime-web/
 │   │   │   ├── anime/       # Anime scraping APIs (home, search, genre, servers, source)
 │   │   │   ├── auth/        # Login & registration (MongoDB + JWT)
 │   │   │   ├── prime/       # TMDB movie/TV APIs
-│   │   │   ├── user/        # History, favorites, profile sync
-│   │   │   ├── discover/    # AI-powered recommendation engine
+│   │   │   ├── user/        # History, favorites, watchlist, profile sync
+│   │   │   ├── discover/    # AI-powered recommendation engine (Gemini)
 │   │   │   └── subscribe/   # Web Push subscription
 │   │   ├── watch/           # Video player pages (movie/TV & anime)
+│   │   ├── browse/          # Browse catalog with filter drawer
 │   │   ├── search/          # Unified search with genre filters
-│   │   ├── discover/        # AI Discovery UI
+│   │   ├── discover/        # AI Discovery conversational UI
+│   │   ├── history/         # Watch History — grouped, virtualized, export
+│   │   ├── watchlist/       # Watchlist — folders, tags, drag reorder
+│   │   ├── genres/          # Genre browser
 │   │   ├── profile/         # User profile dashboard
 │   │   ├── error.tsx        # Global error boundary
 │   │   └── not-found.tsx    # Custom 404 page
 │   ├── components/          # Reusable UI components
-│   ├── context/             # React contexts (Watch, Notifications, AdBlock)
+│   │   ├── HeroCarousel.tsx          # Full-screen hero with trailer autoplay
+│   │   ├── MovieHeroCarousel.tsx     # Movie-specific hero carousel
+│   │   ├── CommandPalette.tsx        # Ctrl+K global command palette
+│   │   ├── RandomizerModal.tsx       # Surprise Me randomizer modal
+│   │   ├── RandomizerFloatingTrigger.tsx  # Global floating FAB trigger
+│   │   ├── ContinueWatchingRow.tsx   # Resume watching horizontal row
+│   │   ├── MovieCard.tsx             # Virtualized, GPU-accelerated card
+│   │   ├── SkeletonLoader.tsx        # Zero-CLS matched skeleton cards
+│   │   ├── MobileNav.tsx             # Bottom navigation bar
+│   │   ├── DesktopSidebar.tsx        # Collapsible left sidebar
+│   │   └── LayoutContent.tsx         # Global layout wrapper
+│   ├── context/             # React contexts
+│   │   ├── WatchContext.tsx          # History, watchlist, collections, tags
+│   │   ├── NotificationContext.tsx   # Push notification state
+│   │   └── AdBlockContext.tsx        # Ad-block detection
 │   ├── hooks/               # Custom React hooks
 │   ├── lib/                 # Core utilities
-│   │   ├── providers/       # Anime provider adapters (Aniwaves, HiAnime, AllAnime, etc.)
+│   │   ├── providers/       # Anime provider adapters (Aniwaves, HiAnime, AllAnime)
 │   │   ├── db.ts            # MongoDB connection singleton
 │   │   ├── auth.ts          # JWT sign/verify
 │   │   ├── security.ts      # Rate limiting & event logging
@@ -112,7 +176,7 @@ anime-web/
 
 - **Node.js** ≥ 18
 - **npm** ≥ 9
-- A free **MongoDB Atlas** cluster (optional — the app works without it, auth features will be disabled)
+- A free **MongoDB Atlas** cluster (optional — auth features disabled without it)
 
 ### Installation
 
@@ -145,6 +209,9 @@ VAPID_PRIVATE_KEY=
 
 # TMDB API (default key included, but you can use your own)
 TMDB_API_KEY=your_tmdb_api_key
+
+# Google Gemini API (for AI Discovery)
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### Run Locally
@@ -168,8 +235,8 @@ npm start
 
 1. Push your code to GitHub.
 2. Go to [vercel.com/new](https://vercel.com/new) and import your repository.
-3. Add your environment variables in the Vercel Dashboard → Settings → Environment Variables.
-4. Every push to `main` will trigger an automatic deployment.
+3. Add your environment variables in Vercel Dashboard → Settings → Environment Variables.
+4. Every push to `main` triggers an automatic deployment.
 
 **Manual deploy via CLI:**
 ```bash
@@ -186,6 +253,9 @@ npx tsc --noEmit
 
 # Lint
 npm run lint
+
+# Production build
+npm run build
 
 # Production API health check
 node scripts/health-check.js
