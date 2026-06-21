@@ -155,7 +155,7 @@ export default memo(function AnimeCard({ show, isBanner = false }: { show: Show;
             </Link>
         </div>
     );
-}
+});
 
 export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number }) {
     const [imgError, setImgError] = useState(false);
@@ -237,7 +237,7 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
             </Link>
         </div>
     );
-}
+});
 
 export function AnimeGrid({ shows }: { shows: Show[] }) {
     if (!shows || shows.length === 0) {

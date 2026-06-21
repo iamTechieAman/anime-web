@@ -14,6 +14,9 @@ import { useAdBlock } from "@/context/AdBlockContext";
 import { useWatch } from "@/context/WatchContext";
 import Image from "next/image";
 import CommentsSection from "@/components/CommentsSection";
+import dynamic from "next/dynamic";
+
+const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -712,10 +715,18 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // Scroll-to-top visibility
     useEffect(() => {
-    // Refresh iframe
-    const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
-    const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
-    
+        const toggleVisibility = () => {
+            if (window.scrollY > 300) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+        window.addEventListener("scroll", toggleVisibility);
+        return () => window.removeEventListener("scroll", toggleVisibility);
+    }, []);
+
+
     useEffect(() => {
         setPlayerLoaded(false);
         setSourceError(false);
