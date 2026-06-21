@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
     Home, Compass, LayoutGrid, Sparkles, Clock, 
-    TrendingUp, Calendar, Heart, Settings, Github, HelpCircle 
+    TrendingUp, Calendar, Heart, Settings, Github, HelpCircle, Shuffle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
@@ -23,6 +23,14 @@ export default function DesktopSidebar() {
         { name: "Trending", href: "/browse?sort_by=popularity.desc", icon: TrendingUp, tooltip: "Trending Now" },
         { name: "Upcoming", href: "/browse?sort_by=primary_release_date.desc", icon: Calendar, tooltip: "Upcoming Releases" },
         { name: "Favorites", href: "/watchlist", icon: Heart, tooltip: "My Watchlist" },
+        { 
+            name: "Surprise Me", 
+            icon: Shuffle, 
+            tooltip: "Feeling Lucky?", 
+            onClick: () => {
+                if (typeof window !== "undefined") window.dispatchEvent(new Event("openRandomizer"));
+            }
+        },
     ];
 
     return (
@@ -42,19 +50,16 @@ export default function DesktopSidebar() {
             {/* Navigation Sections */}
             <div className="flex-1 flex flex-col gap-1.5 px-3">
                 {sections.map((item) => {
-                    const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
+                    const isActive = item.href ? (pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))) : false;
                     const Icon = item.icon;
+                    const cssClass = `relative flex items-center h-11 px-3 rounded-xl transition-all duration-200 group/item w-full text-left cursor-pointer ${
+                        isActive 
+                            ? "bg-white/[0.04] text-white" 
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
+                    }`;
 
-                    return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={`relative flex items-center h-11 px-3 rounded-xl transition-all duration-200 group/item ${
-                                isActive 
-                                    ? "bg-white/[0.04] text-white" 
-                                    : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
-                            }`}
-                        >
+                    const content = (
+                        <>
                             {/* Active glow indicator */}
                             {isActive && (
                                 <motion.div 
@@ -85,7 +90,17 @@ export default function DesktopSidebar() {
                             <div className="absolute left-[80px] px-3 py-1.5 bg-[#12131A] border border-white/10 rounded-lg text-white text-[10px] font-black tracking-wider uppercase whitespace-nowrap opacity-0 pointer-events-none transition-all duration-200 translate-x-1 group-hover/item:hover:opacity-0 group-hover/item:translate-x-2 group-hover:group-hover/item:opacity-0 group-hover:group-hover/item:translate-x-1 lg:group-hover/item:opacity-100 z-50 shadow-2xl">
                                 {item.tooltip}
                             </div>
+                        </>
+                    );
+
+                    return item.href ? (
+                        <Link key={item.name} href={item.href} className={cssClass}>
+                            {content}
                         </Link>
+                    ) : (
+                        <button key={item.name} onClick={item.onClick} className={cssClass}>
+                            {content}
+                        </button>
                     );
                 })}
             </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, ThumbsUp, ThumbsDown, Send, EyeOff, AlertCircle } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Send, EyeOff, AlertCircle, Image as ImageIcon, Smile, HelpCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Comment {
     id: string;
@@ -15,22 +16,32 @@ interface Comment {
     userDisliked?: boolean;
     isSpoiler?: boolean;
     showSpoiler?: boolean;
+    gifUrl?: string;
 }
 
 const DEFAULT_MOCK_COMMENTS: Record<string, string[]> = {
     anime: [
-        "This episode was absolutely stunning! The animation during the fight scenes is cinema-grade. 🔥",
+        "This episode was absolutely stunning! The animation during the **fight scenes** is cinema-grade. 🔥",
         "Can't believe they left us on such a cliffhanger. Next week can't come soon enough!",
-        "The sound design and the emotional track in the background made me tear up. Masterpiece.",
+        "The sound design and the emotional track in the background made me tear up. `Masterpiece` status.",
         "Honestly, the pacing is much better than the manga. Studio did a fantastic job here."
     ],
     movie: [
-        "One of the best movies I have watched this year. The cinematography is incredible.",
+        "One of the best movies I have watched this year. The cinematography is *incredible*.",
         "The plot twist in the second half caught me completely off guard. Highly recommended!",
         "A beautiful cinematic journey. ToonPlayer streaming quality made it look even better.",
         "Great movie, but the ending leaves a lot of questions. What do you all think?"
     ]
 };
+
+const POPULAR_GIFS = [
+    { name: "Shocked Luffy", url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hmd3o1NmgzaHByZHA3c3lhNnRkMnB3cnQ2ZWF4ZW1iaWNrdWppOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lmcyZjdD1n/C3brYLms1qFr2/giphy.gif" },
+    { name: "Let's Go Goku", url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzA2OHR6aWdtNWQ5ZzNidjF5MmFicGswczdzdmZrcHA3bzdhOW9tYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lmcyZjdD1n/11ym5gmgTYzpNS/giphy.gif" },
+    { name: "Popcorn Watching", url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N2c2t0OXJmd2E3bW4zdnl3MHptOWl6Y3R5MHpxdWFtNHE0NDlhMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lmcyZjdD1n/hVTouqNm673gI/giphy.gif" },
+    { name: "Crying Anime", url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnJqZWZ2cHptNHlzbDJ4ZXk4cnA1d252OXptMzkxYXJkNGs5ZW9hOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lmcyZjdD1n/8TJK6prRCagW4/giphy.gif" },
+    { name: "Applause", url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmtpYTllZGszbmJ1eWozNXZrbzYwdGFtMTNqZ2swOHpyaDFrNGg5YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lmcyZjdD1n/5Govl6GoC2xG0/giphy.gif" },
+    { name: "Mind Blown", url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3phNTVkOG5uMXd1OHU5azNzZXpyczJ2cm90cmNndTN0aG4ydWFqMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lmcyZjdD1n/xT0xeJpNRMB4wEsJe0/giphy.gif" }
+];
 
 const USERNAME_POOL = [
     "OtakuDragon", "CrunchyVibe", "SlayerX", "LuffyG5", "HarajukuDream",
@@ -46,6 +57,10 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [isSpoilerInput, setIsSpoilerInput] = useState(false);
+    
+    // GIF picker states
+    const [showGifPicker, setShowGifPicker] = useState(false);
+    const [selectedGif, setSelectedGif] = useState<string | null>(null);
 
     // Load comments from localStorage or initialize with mock data
     useEffect(() => {
@@ -64,7 +79,6 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
         const initialComments: Comment[] = mockTexts.map((text, idx) => {
             const timeAgo = idx === 0 ? "2 hours ago" : idx === 1 ? "6 hours ago" : idx === 2 ? "1 day ago" : "3 days ago";
             const username = USERNAME_POOL[idx % USERNAME_POOL.length];
-            const initial = username.charAt(0).toUpperCase();
             const avatar = `${AVATAR_COLOR_POOL[idx % AVATAR_COLOR_POOL.length]} text-white`;
             
             return {
@@ -75,7 +89,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
                 timestamp: timeAgo,
                 likes: Math.floor(Math.random() * 45) + 5,
                 dislikes: Math.floor(Math.random() * 5),
-                isSpoiler: idx === 1, // Make one of them a spoiler comment
+                isSpoiler: idx === 1,
                 showSpoiler: false
             };
         });
@@ -90,7 +104,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
 
     const handlePostComment = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!newComment.trim() && !selectedGif) return;
 
         const comment: Comment = {
             id: `user-${Date.now()}`,
@@ -101,13 +115,16 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
             likes: 0,
             dislikes: 0,
             isSpoiler: isSpoilerInput,
-            showSpoiler: false
+            showSpoiler: false,
+            gifUrl: selectedGif || undefined
         };
 
         const updated = [comment, ...comments];
         saveComments(updated);
         setNewComment("");
+        setSelectedGif(null);
         setIsSpoilerInput(false);
+        toast.success("Comment posted successfully!");
     };
 
     const handleLike = (id: string) => {
@@ -182,53 +199,120 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
         saveComments(updated);
     };
 
+    // Safe Markdown Parser (Converts bold, italics, inline code, and URLs safely)
+    const renderMarkdown = (text: string) => {
+        if (!text) return "";
+        let safe = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+        // bold **text**
+        safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // italic *text*
+        safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // inline code `code`
+        safe = safe.replace(/`(.*?)`/g, '<code class="bg-black/30 border border-white/5 px-1 py-0.5 rounded text-[11px] font-mono text-pink-400">$1</code>');
+        // linebreaks
+        safe = safe.replace(/\n/g, '<br/>');
+
+        return <span dangerouslySetInnerHTML={{ __html: safe }} />;
+    };
+
     return (
         <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-6 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
                 <div className="flex items-center gap-3">
                     <MessageSquare className="w-5 h-5 text-[var(--accent)]" />
-                    <h3 className="font-bold text-white text-lg font-sora">Comments & Discussion</h3>
+                    <h3 className="font-bold text-white text-lg font-sora">Discussion Chatroom</h3>
                 </div>
                 <span className="text-xs text-[var(--text-muted)] font-semibold bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
                     {comments.length} Comment{comments.length !== 1 ? 's' : ''}
                 </span>
             </div>
 
-            {/* Comment Form */}
+            {/* Comment Post Form */}
             <form onSubmit={handlePostComment} className="space-y-3">
                 <div className="relative">
                     <textarea
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Join the discussion... Share your thoughts!"
+                        placeholder="Write a comment... Markdown is supported (*italic*, **bold**, `code`)"
                         rows={3}
-                        className="w-full bg-[var(--bg-main)] text-white text-sm placeholder-[var(--text-muted)] border border-[var(--border-color)] rounded-xl p-4 outline-none focus:border-[var(--accent)]/50 transition-colors resize-none font-inter"
+                        className="w-full bg-[var(--bg-main)] text-white text-sm placeholder-[var(--text-muted)] border border-[var(--border-color)] rounded-xl p-4 outline-none focus:border-[var(--accent)]/50 transition-colors resize-none font-inter leading-relaxed"
                     />
+                    
+                    {selectedGif && (
+                        <div className="absolute bottom-4 left-4 flex items-center gap-2 p-1.5 bg-black/60 border border-white/10 rounded-xl">
+                            <img src={selectedGif} alt="selected-gif" className="h-14 rounded-lg object-contain" />
+                            <button 
+                                type="button" 
+                                onClick={() => setSelectedGif(null)}
+                                className="p-1 bg-white/10 hover:bg-white/20 rounded-full text-white"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
                 
-                <div className="flex items-center justify-between">
-                    <button
-                        type="button"
-                        onClick={() => setIsSpoilerInput(!isSpoilerInput)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
-                            isSpoilerInput
-                                ? "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20"
-                                : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
-                        }`}
-                    >
-                        <EyeOff className="w-3.5 h-3.5" />
-                        <span>Tag as Spoiler</span>
-                    </button>
+                <div className="flex items-center justify-between relative">
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setIsSpoilerInput(!isSpoilerInput)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+                                isSpoilerInput
+                                    ? "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20"
+                                    : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
+                            }`}
+                        >
+                            <EyeOff className="w-3.5 h-3.5" />
+                            <span>Tag Spoiler</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowGifPicker(!showGifPicker)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10 text-xs font-bold transition-all"
+                        >
+                            <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
+                            <span>Add GIF</span>
+                        </button>
+                    </div>
 
                     <button
                         type="submit"
-                        disabled={!newComment.trim()}
+                        disabled={!newComment.trim() && !selectedGif}
                         className="flex items-center gap-2 px-5 py-2 bg-[var(--accent)] text-white font-bold rounded-xl text-sm transition-all hover:shadow-[0_0_12px_var(--accent-glow)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:opacity-95"
                     >
                         <span>Comment</span>
                         <Send className="w-3.5 h-3.5" />
                     </button>
+
+                    {/* GIF Picker Popup Panel */}
+                    {showGifPicker && (
+                        <div className="absolute bottom-full left-0 mb-2 w-80 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl p-3 grid grid-cols-2 gap-2 z-50">
+                            <div className="col-span-2 flex items-center justify-between border-b border-white/5 pb-2 mb-1">
+                                <span className="text-[10px] font-black uppercase text-zinc-500">Trending GIFs</span>
+                                <button type="button" onClick={() => setShowGifPicker(false)} className="text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+                            </div>
+                            {POPULAR_GIFS.map(gif => (
+                                <button
+                                    key={gif.name}
+                                    type="button"
+                                    onClick={() => { setSelectedGif(gif.url); setShowGifPicker(false); }}
+                                    className="relative h-20 rounded-xl overflow-hidden border border-white/5 hover:border-[var(--accent)] transition-all bg-black cursor-pointer group"
+                                >
+                                    <img src={gif.url} alt={gif.name} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/40 flex items-end p-1 text-[9px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">{gif.name}</div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </form>
 
@@ -247,7 +331,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
                                 {comment.username.slice(0, 2).toUpperCase()}
                             </div>
 
-                            {/* Comment Content */}
+                            {/* Comment content */}
                             <div className="flex-1 min-w-0 space-y-2">
                                 <div className="flex items-center justify-between gap-2">
                                     <span className="font-bold text-white text-sm truncate font-sora">{comment.username}</span>
@@ -261,24 +345,29 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
                                     >
                                         <div className="flex items-center gap-2">
                                             <EyeOff className="w-3.5 h-3.5 text-red-400" />
-                                            <span>Comment contains spoilers. Click to reveal.</span>
+                                            <span>Contains spoilers. Click to reveal.</span>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-[var(--text-main)] text-sm font-inter leading-relaxed break-words relative">
-                                        {comment.content}
+                                    <div className="text-[var(--text-main)] text-sm font-inter leading-relaxed break-words relative space-y-2">
+                                        <div>{renderMarkdown(comment.content)}</div>
+                                        {comment.gifUrl && (
+                                            <div className="max-w-xs overflow-hidden rounded-xl border border-white/10 bg-black/20">
+                                                <img src={comment.gifUrl} alt="gif-response" className="h-32 object-contain" />
+                                            </div>
+                                        )}
                                         {comment.isSpoiler && (
-                                            <span 
+                                            <button 
                                                 onClick={() => toggleRevealSpoiler(comment.id)}
                                                 className="absolute -top-4 right-0 text-[9px] font-bold text-red-400/80 hover:text-red-400 cursor-pointer bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 select-none"
                                             >
                                                 Hide Spoiler
-                                            </span>
+                                            </button>
                                         )}
                                     </div>
                                 )}
 
-                                {/* Likes & Actions */}
+                                {/* Reactions */}
                                 <div className="flex items-center gap-4 pt-1">
                                     <button 
                                         onClick={() => handleLike(comment.id)}

@@ -10,6 +10,8 @@ import { usePathname } from "next/navigation";
 import ProfileSettings from "@/components/ProfileSettings";
 import { useMobileUI } from "@/context/MobileUIContext";
 import Footer from "@/components/Footer";
+import RandomizerModal from "@/components/RandomizerModal";
+import CommandPalette from "@/components/CommandPalette";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
@@ -18,6 +20,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isHomePage = pathname === '/';
   
   const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
+  const [isRandomizerOpen, setIsRandomizerOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   useEffect(() => {
     const detectDevice = () => {
@@ -39,11 +43,36 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     return () => window.removeEventListener("resize", detectDevice);
   }, []);
 
+  // Keyboard listeners for Surprise Me and Command Palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key.toLowerCase() === "r") {
+        setIsRandomizerOpen(true);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+    };
+    const handleEvent = () => setIsRandomizerOpen(true);
+    const handlePaletteEvent = () => setIsCommandPaletteOpen(true);
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("openRandomizer", handleEvent);
+    window.addEventListener("openCommandPalette", handlePaletteEvent);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("openRandomizer", handleEvent);
+      window.removeEventListener("openCommandPalette", handlePaletteEvent);
+    };
+  }, []);
+
   // Cleanup: showProfileSettings should only be triggered by user action
   useEffect(() => {
     if (showProfileSettings && typeof window !== 'undefined' && !localStorage.getItem("toonplayer_profile")) {
        setShowProfileSettings(false);
-    }
+     }
   }, []);
   
   const showSidebar = deviceMode === "pc" && !isWatchPage;
@@ -84,6 +113,14 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         <Footer />
       </div>
       <MobileModals />
+      <RandomizerModal 
+        isOpen={isRandomizerOpen} 
+        onClose={() => setIsRandomizerOpen(false)} 
+      />
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen} 
+        onClose={() => setIsCommandPaletteOpen(false)} 
+      />
       {showProfileSettings && (
         <ProfileSettings 
           isOpen={showProfileSettings} 

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import useSWR from 'swr';
-import { Play, ChevronLeft, ChevronRight, Clock, Calendar, Info, Heart, Check, Plus } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, Check, Plus, Volume2, VolumeX } from "lucide-react";
 import axios from "axios";
 import { HeroSkeleton } from "@/components/SkeletonLoader";
 import { useWatch } from "@/context/WatchContext";
@@ -27,9 +27,14 @@ export default function HeroCarousel() {
     const [current, setCurrent] = useState(0);
     const [slides, setSlides] = useState<Slide[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTrailerKey, setActiveTrailerKey] = useState<string | null>(null);
+    const [isMuted, setIsMuted] = useState(true);
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
+    
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const trailerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
     const { watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
 
     const fetcher = (url: string) => axios.get(url).then(res => res.data);
@@ -69,7 +74,7 @@ export default function HeroCarousel() {
                 return { id: item.id, title, description, image, cover, tags: ["HD", "Trending"], rating, release, quality: "HD", type, link };
             });
 
-            // Prioritize Michael Jackson's "Michael" (2026) for the theme
+            // Prioritize Michael Jackson's biopic if present
             const mjSlideIndex = formattedSlides.findIndex(s => s.id === 936075 || s.title?.toLowerCase().includes("michael"));
             if (mjSlideIndex > -1) {
                 const mjSlide = formattedSlides.splice(mjSlideIndex, 1)[0];
@@ -86,7 +91,7 @@ export default function HeroCarousel() {
         }
     };
 
-    // Auto-rotate with pause on interaction (8 seconds)
+    // Autoplay rotation
     const startAutoRotate = useCallback(() => {
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = setInterval(() => {
@@ -100,15 +105,41 @@ export default function HeroCarousel() {
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }, [slides.length, startAutoRotate]);
 
+    // Handle trailer preview on slide change
+    useEffect(() => {
+        if (slides.length === 0) return;
+        setActiveTrailerKey(null);
+        if (trailerTimeoutRef.current) clearTimeout(trailerTimeoutRef.current);
+
+        const activeSlide = slides[current];
+        
+        // Start trailer fetch after 3 seconds of standing on a slide
+        trailerTimeoutRef.current = setTimeout(async () => {
+            try {
+                const typeHint = activeSlide.type === "TV" ? "tv" : "movie";
+                const res = await axios.get(`/api/prime/details?id=${activeSlide.id}&type=${typeHint}`);
+                if (res.data?.trailer?.key) {
+                    setActiveTrailerKey(res.data.trailer.key);
+                }
+            } catch (err) {
+                console.log("No trailer found for active slide");
+            }
+        }, 3000);
+
+        return () => {
+            if (trailerTimeoutRef.current) clearTimeout(trailerTimeoutRef.current);
+        };
+    }, [current, slides]);
+
     const goToSlide = (index: number) => {
         setCurrent(index);
-        startAutoRotate(); // Reset timer on manual navigation
+        startAutoRotate();
     };
 
     const nextSlide = () => goToSlide((current + 1) % slides.length);
     const prevSlide = () => goToSlide((current - 1 + slides.length) % slides.length);
 
-    // Swipe gesture handlers
+    // Swipe handlers
     const handleTouchStart = (e: React.TouchEvent) => {
         setTouchStart(e.targetTouches[0].clientX);
     };
@@ -129,19 +160,23 @@ export default function HeroCarousel() {
         setTouchEnd(0);
     };
 
+    const toggleMute = () => {
+        setIsMuted(prev => !prev);
+        if (iframeRef.current) {
+            const command = isMuted ? '{"event":"command","func":"unMute","args":[]}' : '{"event":"command","func":"mute","args":[]}';
+            iframeRef.current.contentWindow?.postMessage(command, '*');
+        }
+    };
+
     if (isLoading) return <HeroSkeleton />;
     if (slides.length === 0) return (
-        <div className="relative w-full h-[42vh] md:h-[60vh] overflow-hidden bg-gradient-to-br from-[#0a0a1a] via-[#111133] to-[#0a0a1a]">
+        <div className="relative w-full h-[40vh] md:h-[60vh] overflow-hidden bg-gradient-to-br from-[#0a0a1a] via-[#111133] to-[#0a0a1a]">
             <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center px-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Play className="w-7 h-7 text-white/30" />
-                    </div>
                     <h2 className="text-xl md:text-2xl font-black text-white/60 font-sora">Trending Now</h2>
                     <p className="text-sm text-white/30 mt-1">Loading the latest hits...</p>
                 </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
         </div>
     );
 
@@ -165,66 +200,82 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[65vh] md:h-[80vh] min-h-[480px] md:min-h-[600px] max-h-[900px] overflow-hidden group bg-[var(--bg-main)]"
+            className="relative w-full h-[60vh] md:h-[70vh] min-h-[450px] md:min-h-[550px] max-h-[70vh] overflow-hidden group bg-[var(--bg-main)]"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
-            {/* Background Image — CSS crossfade for 60fps */}
-            {slides.map((slide, i) => (
-                <div
-                    key={slide.id}
-                    className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                    style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
-                >
-                    <div className="absolute inset-0">
-                        {/* Desktop Backdrop */}
-                        <Image
-                            src={slide.image}
-                            alt={slide.title}
-                            fill
-                            priority={i < 2}
-                            fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-top opacity-70 hidden md:block"
-                            sizes="100vw"
-                        />
-                        {/* Mobile Cover Poster */}
-                        <Image
-                            src={slide.cover}
-                            alt={slide.title}
-                            fill
-                            priority={i < 2}
-                            fetchPriority={i === 0 ? "high" : "low"}
-                            className="object-cover object-top opacity-50 block md:hidden"
-                            sizes="100vw"
-                        />
+            {/* Background Images / YouTube Video Trailer */}
+            {slides.map((slide, i) => {
+                const isActive = i === current;
+                return (
+                    <div
+                        key={slide.id}
+                        className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                        style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
+                    >
+                        {isActive && activeTrailerKey ? (
+                            <div className="absolute inset-0 w-full h-full pointer-events-none scale-[1.15]">
+                                <iframe
+                                    ref={iframeRef}
+                                    src={`https://www.youtube.com/embed/${activeTrailerKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${activeTrailerKey}&showinfo=0&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1`}
+                                    title="Hero Trailer"
+                                    className="w-full h-full border-0 object-cover"
+                                    allow="autoplay; encrypted-media"
+                                />
+                            </div>
+                        ) : (
+                            <div className="absolute inset-0">
+                                {/* Desktop Backdrop */}
+                                <Image
+                                    src={slide.image}
+                                    alt={slide.title}
+                                    fill
+                                    priority={i < 2}
+                                    className="object-cover object-top opacity-70 hidden md:block"
+                                    sizes="100vw"
+                                />
+                                {/* Mobile Cover Poster */}
+                                <Image
+                                    src={slide.cover}
+                                    alt={slide.title}
+                                    fill
+                                    priority={i < 2}
+                                    className="object-cover object-top opacity-50 block md:hidden"
+                                    sizes="100vw"
+                                />
+                            </div>
+                        )}
                     </div>
-                </div>
-            ))}
+                );
+            })}
 
-            {/* Symmetrical Vignette & Netflix-style Left Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-[70%] z-10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-[var(--bg-main)]/20 z-10" />
-            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[var(--bg-main)] to-transparent z-10" />
+            {/* Cinematic Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent w-full md:w-[70%] z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-[var(--bg-main)]/20 z-10 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-24 md:h-40 bg-gradient-to-t from-[var(--bg-main)] to-transparent z-10 pointer-events-none" />
             
-            {/* Content - Left-Aligned Cinematic Layout */}
-            <div className="absolute inset-0 flex flex-col justify-end pb-16 md:pb-28 px-4 md:px-12 z-20 max-w-[1600px] mx-auto w-full md:w-[65%]">
-                <div className="flex flex-col items-start text-left gap-3 md:gap-4 w-full">
+            {/* Left Content Area */}
+            <div className="absolute inset-0 flex flex-col justify-end pb-12 md:pb-20 px-4 md:px-12 z-20 max-w-[1600px] mx-auto w-full md:w-[65%] pointer-events-none">
+                <div className="flex flex-col items-start text-left gap-3 md:gap-4 w-full pointer-events-auto">
                     
                     {/* Trending Badge */}
-                    <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-sm flex items-center gap-1.5 shadow-lg w-max mb-2">
+                    <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-sm flex items-center gap-1.5 shadow-lg w-max mb-1 select-none">
                         TRENDING NOW
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-white line-clamp-2 font-sora drop-shadow-[0_4px_15px_rgba(0,0,0,0.8)]">
+                    <h1 
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white line-clamp-2 font-sora"
+                        style={{ textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 4px 30px rgba(0,0,0,0.9)" }}
+                    >
                         {activeSlide.title}
                     </h1>
 
                     {/* Metadata Badges */}
-                    <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-white/90">
+                    <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-white/90" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
                         {activeSlide.rating !== "?" && (
-                            <span className="text-green-500 font-bold drop-shadow-md">
+                            <span className="text-green-400 font-extrabold">
                                 {activeSlide.rating} Match
                             </span>
                         )}
@@ -238,64 +289,66 @@ export default function HeroCarousel() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-zinc-300 text-sm md:text-base lg:text-lg leading-relaxed max-w-2xl font-medium drop-shadow-md line-clamp-3 md:line-clamp-4 mt-2">
+                    <p 
+                        className="text-zinc-300 text-xs md:text-sm lg:text-base leading-relaxed max-w-2xl font-semibold line-clamp-3 md:line-clamp-4 mt-1"
+                        style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}
+                    >
                         {activeSlide.description}
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full sm:w-auto mt-4">
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full sm:w-auto mt-3">
                         <Link href={activeSlide.link} className="flex-1 sm:flex-none">
-                            <button className="w-full flex items-center justify-center gap-2 px-8 py-3 md:py-3.5 bg-white text-black hover:bg-gray-200 font-bold rounded-lg transition-colors shadow-lg active:scale-95">
-                                <Play className="w-5 h-5 md:w-6 md:h-6 fill-current" />
-                                <span className="text-base md:text-lg">Play</span>
+                            <button className="w-full flex items-center justify-center gap-2 px-8 py-2.5 md:py-3 bg-white text-black hover:bg-zinc-200 font-bold rounded-lg transition-colors shadow-lg active:scale-95">
+                                <Play className="w-4 h-4 md:w-5 h-5 fill-current" />
+                                <span className="text-sm md:text-base">Play</span>
                             </button>
                         </Link>
                         
-                        {/* Watchlist Toggle Action */}
                         <button 
                             onClick={toggleWatchlist}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 md:py-3.5 bg-gray-500/30 hover:bg-gray-500/50 backdrop-blur-md text-white font-bold rounded-lg border border-white/10 transition-colors shadow-lg active:scale-95"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 md:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-lg border border-white/10 transition-colors shadow-lg active:scale-95"
                         >
-                            {inWatchlist ? (
-                                <>
-                                    <Check className="w-5 h-5 md:w-6 md:h-6" />
-                                    <span className="text-base md:text-lg">Added</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Plus className="w-5 h-5 md:w-6 md:h-6" />
-                                    <span className="text-base md:text-lg">My List</span>
-                                </>
-                            )}
+                            {inWatchlist ? <Check className="w-4 h-4 md:w-5 h-5" /> : <Plus className="w-4 h-4 md:w-5 h-5" />}
+                            <span className="text-sm md:text-base">{inWatchlist ? "Added" : "My List"}</span>
                         </button>
+
+                        {/* Mute Button Toggle */}
+                        {activeTrailerKey && (
+                            <button 
+                                onClick={toggleMute}
+                                className="w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white transition-colors active:scale-90"
+                                title={isMuted ? "Unmute Trailer" : "Mute Trailer"}
+                            >
+                                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Navigation Controls */}
+            {/* Navigation & Audio Controls Right-bottom */}
             <div className="absolute bottom-6 right-4 md:right-8 flex items-center gap-3 z-30">
-                {/* Dot indicators */}
-                {/* Arrow buttons */}
                 <button
                     onClick={prevSlide}
-                    className="p-2.5 md:p-3 bg-black/40 hover:bg-black/60 text-white rounded border border-white/10 transition-colors active:scale-90"
+                    className="p-2 bg-black/40 hover:bg-black/60 text-white rounded border border-white/10 transition-colors active:scale-90"
                     aria-label="Previous slide"
                 >
-                    <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+                    <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                     onClick={nextSlide}
-                    className="p-2.5 md:p-3 bg-black/40 hover:bg-black/60 text-white rounded border border-white/10 transition-colors active:scale-90"
+                    className="p-2 bg-black/40 hover:bg-black/60 text-white rounded border border-white/10 transition-colors active:scale-90"
                     aria-label="Next slide"
                 >
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+                    <ChevronRight className="w-4 h-4" />
                 </button>
             </div>
 
-            {/* Progress Bar */}
+            {/* Slide progress row */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 z-30">
                 <div 
-                    className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500 ease-out" 
+                    className="h-full bg-gradient-to-r from-[var(--accent)] to-orange-500 transition-all duration-500 ease-out" 
                     style={{ width: `${((current + 1) / slides.length) * 100}%` }}
                 />
             </div>

@@ -94,6 +94,34 @@ export default function BrowseClient() {
 
     const observerTarget = useRef<HTMLDivElement>(null);
 
+    // Save filters to localStorage whenever they change
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const filters = { mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter };
+            localStorage.setItem("toonplayer_browse_filters", JSON.stringify(filters));
+        }
+    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
+
+    // Load filters on mount if URL parameters are not set
+    useEffect(() => {
+        if (typeof window !== "undefined" && !searchParams.toString()) {
+            const saved = localStorage.getItem("toonplayer_browse_filters");
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.mediaType) setMediaType(parsed.mediaType);
+                    if (parsed.selectedGenre) setSelectedGenre(parsed.selectedGenre);
+                    if (parsed.selectedNetwork) setSelectedNetwork(parsed.selectedNetwork);
+                    if (parsed.selectedYear) setSelectedYear(parsed.selectedYear);
+                    if (parsed.selectedLanguage) setSelectedLanguage(parsed.selectedLanguage);
+                    if (parsed.selectedCountry) setSelectedCountry(parsed.selectedCountry);
+                    if (parsed.selectedSort) setSelectedSort(parsed.selectedSort);
+                    if (parsed.selectedLetter) setSelectedLetter(parsed.selectedLetter);
+                } catch(e) {}
+            }
+        }
+    }, []);
+
     // Fetch catalog helper
     const fetchCatalog = useCallback(async (pageNum: number, isAppend: boolean) => {
         if (pageNum === 1) setLoading(true);
@@ -193,206 +221,208 @@ export default function BrowseClient() {
         <main className="min-h-screen pt-24 pb-20 px-4 md:px-8 bg-[#050505]">
             <div className="max-w-[1800px] mx-auto space-y-8">
                 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <h1 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3">
-                            <Compass className="w-8 h-8 text-[var(--accent)] shrink-0 animate-pulse" />
-                            Browse <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-transparent">Catalog</span>
-                        </h1>
-                        <p className="text-zinc-400 mt-2 font-medium text-sm">
-                            Explore dynamic catalog collections with infinite scrolling and premium filtering.
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="bg-[#12131A] border border-white/5 p-1 rounded-xl flex gap-1">
-                            <button
-                                onClick={() => { setMediaType("movie"); setSelectedNetwork(""); }}
-                                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                                    mediaType === "movie" 
-                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
-                                        : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
-                                }`}
-                            >
-                                <Film className="w-3.5 h-3.5 inline mr-2" />
-                                Movies
-                            </button>
-                            <button
-                                onClick={() => setMediaType("tv")}
-                                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                                    mediaType === "tv" 
-                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
-                                        : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
-                                }`}
-                            >
-                                <Tv className="w-3.5 h-3.5 inline mr-2" />
-                                TV Series
-                            </button>
+                {/* Header & Sticky Filter Panel */}
+                <div className="sticky top-14 md:top-16 z-30 bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5 space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h1 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3">
+                                <Compass className="w-8 h-8 text-[var(--accent)] shrink-0 animate-pulse" />
+                                Browse <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-transparent">Catalog</span>
+                            </h1>
+                            <p className="text-zinc-400 mt-2 font-medium text-sm">
+                                Explore dynamic catalog collections with infinite scrolling and premium filtering.
+                            </p>
                         </div>
 
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 h-11 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${
-                                showFilters 
-                                    ? "bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
-                                    : "bg-[#12131A] border-white/5 text-zinc-400 hover:text-white"
-                            }`}
-                        >
-                            <SlidersHorizontal className="w-4 h-4" />
-                            Filters
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-[#12131A] border border-white/5 p-1 rounded-xl flex gap-1">
+                                <button
+                                    onClick={() => { setMediaType("movie"); setSelectedNetwork(""); }}
+                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                                        mediaType === "movie" 
+                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
+                                            : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
+                                    }`}
+                                >
+                                    <Film className="w-3.5 h-3.5 inline mr-2" />
+                                    Movies
+                                </button>
+                                <button
+                                    onClick={() => setMediaType("tv")}
+                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                                        mediaType === "tv" 
+                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
+                                            : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
+                                    }`}
+                                >
+                                    <Tv className="w-3.5 h-3.5 inline mr-2" />
+                                    TV Series
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={`flex items-center gap-2 h-11 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${
+                                    showFilters 
+                                        ? "bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
+                                        : "bg-[#12131A] border-white/5 text-zinc-400 hover:text-white"
+                                }`}
+                            >
+                                <SlidersHorizontal className="w-4 h-4" />
+                                Filters
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <AnimatePresence>
-                    {showFilters && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
-                        >
-                            <div className="bg-[#12131A]/60 border border-white/5 rounded-2xl p-6 space-y-6 backdrop-blur-md">
-                                
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <ArrowUpDown className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sort By</span>
+                    <AnimatePresence>
+                        {showFilters && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="bg-[#12131A]/60 border border-white/5 rounded-2xl p-6 space-y-6 backdrop-blur-md">
+                                    
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <ArrowUpDown className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sort By</span>
+                                            </div>
+                                            <select
+                                                value={selectedSort}
+                                                onChange={(e) => setSelectedSort(e.target.value)}
+                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
+                                            >
+                                                {SORT_OPTIONS.map(opt => (
+                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <select
-                                            value={selectedSort}
-                                            onChange={(e) => setSelectedSort(e.target.value)}
-                                            className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                        >
-                                            {SORT_OPTIONS.map(opt => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <Calendar className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Year</span>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <Calendar className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Year</span>
+                                            </div>
+                                            <select
+                                                value={selectedYear}
+                                                onChange={(e) => setSelectedYear(e.target.value)}
+                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
+                                            >
+                                                <option value="">All Years</option>
+                                                {Array.from({ length: 37 }, (_, i) => String(2026 - i)).map(yr => (
+                                                    <option key={yr} value={yr}>{yr}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <select
-                                            value={selectedYear}
-                                            onChange={(e) => setSelectedYear(e.target.value)}
-                                            className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                        >
-                                            <option value="">All Years</option>
-                                            {Array.from({ length: 37 }, (_, i) => String(2026 - i)).map(yr => (
-                                                <option key={yr} value={yr}>{yr}</option>
-                                            ))}
-                                        </select>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <Globe className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Language</span>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <Globe className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Language</span>
+                                            </div>
+                                            <select
+                                                value={selectedLanguage}
+                                                onChange={(e) => setSelectedLanguage(e.target.value)}
+                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
+                                            >
+                                                <option value="">All Languages</option>
+                                                {LANGUAGES.map(lang => (
+                                                    <option key={lang.code} value={lang.code}>{lang.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <select
-                                            value={selectedLanguage}
-                                            onChange={(e) => setSelectedLanguage(e.target.value)}
-                                            className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                        >
-                                            <option value="">All Languages</option>
-                                            {LANGUAGES.map(lang => (
-                                                <option key={lang.code} value={lang.code}>{lang.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <Globe className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Region</span>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <Globe className="w-3 h-3 text-[var(--accent)]" /> <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Region</span>
+                                            </div>
+                                            <select
+                                                value={selectedCountry}
+                                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                                className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
+                                            >
+                                                {COUNTRIES.map(c => (
+                                                    <option key={c.code} value={c.code}>{c.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <select
-                                            value={selectedCountry}
-                                            onChange={(e) => setSelectedCountry(e.target.value)}
-                                            className="w-full bg-[#08080B] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none focus:border-[var(--accent)]/50 transition-colors font-bold"
-                                        >
-                                            {COUNTRIES.map(c => (
-                                                <option key={c.code} value={c.code}>{c.name}</option>
-                                            ))}
-                                        </select>
+
+                                        <div className="flex items-end">
+                                            <button
+                                                onClick={handleReset}
+                                                className="w-full h-10 border border-white/5 bg-[#08080B] hover:bg-white/5 text-zinc-300 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <RefreshCw className="w-3.5 h-3.5" />
+                                                Reset
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-end">
-                                        <button
-                                            onClick={handleReset}
-                                            className="w-full h-10 border border-white/5 bg-[#08080B] hover:bg-white/5 text-zinc-300 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <RefreshCw className="w-3.5 h-3.5" />
-                                            Reset
-                                        </button>
-                                    </div>
-                                </div>
+                                    {mediaType === "tv" && (
+                                        <div className="space-y-3 pt-2">
+                                            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Select Network Channel</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {NETWORKS.map(net => (
+                                                    <button
+                                                        key={net.id}
+                                                        onClick={() => setSelectedNetwork(selectedNetwork === net.id ? "" : net.id)}
+                                                        className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                                                            selectedNetwork === net.id
+                                                                ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_15px_var(--accent-glow)]"
+                                                                : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
+                                                        }`}
+                                                    >
+                                                        <span>{net.logo}</span>
+                                                        {net.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                                {mediaType === "tv" && (
                                     <div className="space-y-3 pt-2">
-                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Select Network Channel</h3>
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Filter by Genre</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            {NETWORKS.map(net => (
+                                            {GENRES.map(g => (
                                                 <button
-                                                    key={net.id}
-                                                    onClick={() => setSelectedNetwork(selectedNetwork === net.id ? "" : net.id)}
-                                                    className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                                                        selectedNetwork === net.id
-                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_15px_var(--accent-glow)]"
+                                                    key={g.id}
+                                                    onClick={() => setSelectedGenre(selectedGenre === g.id ? "" : g.id)}
+                                                    className={`px-3.5 py-2 border rounded-full text-[11px] font-extrabold transition-all cursor-pointer ${
+                                                        selectedGenre === g.id
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_15px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
-                                                    <span>{net.logo}</span>
-                                                    {net.name}
+                                                    {g.name}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
-                                )}
 
-                                <div className="space-y-3 pt-2">
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Filter by Genre</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {GENRES.map(g => (
-                                            <button
-                                                key={g.id}
-                                                onClick={() => setSelectedGenre(selectedGenre === g.id ? "" : g.id)}
-                                                className={`px-3.5 py-2 border rounded-full text-[11px] font-extrabold transition-all cursor-pointer ${
-                                                    selectedGenre === g.id
-                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_15px_var(--accent-glow)]"
-                                                        : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
-                                                }`}
-                                            >
-                                                {g.name}
-                                            </button>
-                                        ))}
+                                    <div className="space-y-3 pt-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Titles Starting With</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                            {ALPHABET.map(letter => (
+                                                <button
+                                                    key={letter}
+                                                    onClick={() => setSelectedLetter(selectedLetter === letter ? "" : letter)}
+                                                    className={`w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
+                                                        selectedLetter === letter
+                                                            ? "bg-[var(--accent)] text-white shadow-[0_0_10px_var(--accent-glow)]"
+                                                            : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5"
+                                                    }`}
+                                                >
+                                                    {letter}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="space-y-3 pt-2">
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Titles Starting With</h3>
-                                    <div className="flex flex-wrap gap-1">
-                                        {ALPHABET.map(letter => (
-                                            <button
-                                                key={letter}
-                                                onClick={() => setSelectedLetter(selectedLetter === letter ? "" : letter)}
-                                                className={`w-8 h-8 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
-                                                    selectedLetter === letter
-                                                        ? "bg-[var(--accent)] text-white shadow-[0_0_10px_var(--accent-glow)]"
-                                                        : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5"
-                                                }`}
-                                            >
-                                                {letter}
-                                            </button>
-                                        ))}
-                                    </div>
                                 </div>
-
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
                     <p className="text-sm text-zinc-400 font-semibold">
@@ -430,7 +460,7 @@ export default function BrowseClient() {
                     </div>
                 ) : (
                     <div>
-                        <div className="grid grid-cols-1 min-[370px]:grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
                             {items.map((item, idx) => (
                                 <motion.div
                                     key={`${item.id}-${idx}`}

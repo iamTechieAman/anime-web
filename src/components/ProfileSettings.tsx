@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Check, Save, Settings2, Play, Bell, TrendingUp, Sparkles, Bookmark, Users, Brain, Zap } from "lucide-react";
+import { X, User, Check, Save, Settings2, Play, Bell, TrendingUp, Sparkles, Bookmark, Users, Brain, Zap, Palette, Accessibility as AccessIcon, Keyboard } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNotifications, type NotificationPreferences } from "@/context/NotificationContext";
 
@@ -25,11 +25,12 @@ const AVATARS = [
 function ToggleSwitch({ value, onChange, color = "bg-[var(--accent)]" }: { value: boolean; onChange: (v: boolean) => void; color?: string }) {
     return (
         <button
+            type="button"
             onClick={() => onChange(!value)}
             className={`w-12 h-6 rounded-full p-1 transition-colors shrink-0 ${value ? color : 'bg-zinc-700'}`}
         >
             <motion.div
-                className="w-4 h-4 rounded-full bg-white shadow-md"
+                className="w-4 h-4 rounded-full bg-white shadow-md animate-none"
                 animate={{ x: value ? 24 : 0 }}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
@@ -46,7 +47,15 @@ const NOTIF_CATEGORIES: { key: keyof NotificationPreferences; label: string; des
     { key: 'aiSmartAlerts', label: 'AI Smart Alerts', desc: 'Personalized nudges based on your watch patterns', icon: Brain, color: 'text-pink-400', toggleColor: 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]' },
 ];
 
-const TABS = ['Account', 'Playback', 'Notifications'] as const;
+const ACCENT_COLORS = [
+    { name: "Orange", hex: "#F97316", glow: "rgba(249,115,22,0.4)" },
+    { name: "Red", hex: "#EF4444", glow: "rgba(239,68,68,0.4)" },
+    { name: "Purple", hex: "#A855F7", glow: "rgba(168,85,247,0.4)" },
+    { name: "Green", hex: "#10B981", glow: "rgba(16,185,129,0.4)" },
+    { name: "Blue", hex: "#3B82F6", glow: "rgba(59,130,246,0.4)" }
+];
+
+const TABS = ['Account', 'Playback', 'Appearance', 'Notifications', 'Accessibility'] as const;
 type Tab = typeof TABS[number];
 
 export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProps) {
@@ -63,6 +72,16 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
     const [multiAudio, setMultiAudio] = useState(true);
     const [dataSaver, setDataSaver] = useState(false);
     const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
+    const [bufferSize, setBufferSize] = useState("Standard");
+    const [playbackSpeed, setPlaybackSpeed] = useState("1.0");
+
+    // Appearance settings
+    const [theme, setTheme] = useState("Midnight Purple");
+    const [accentColor, setAccentColor] = useState("Orange");
+
+    // Accessibility settings
+    const [subtitleSize, setSubtitleSize] = useState("Medium");
+    const [subtitleFont, setSubtitleFont] = useState("Sora");
 
     const { preferences, updatePreference } = useNotifications();
 
@@ -90,15 +109,35 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                     if (parsed.multiAudio !== undefined) setMultiAudio(parsed.multiAudio);
                     if (parsed.dataSaver !== undefined) setDataSaver(parsed.dataSaver);
                     if (parsed.aggressiveSandbox !== undefined) setAggressiveSandbox(parsed.aggressiveSandbox);
+                    if (parsed.bufferSize) setBufferSize(parsed.bufferSize);
+                    if (parsed.playbackSpeed) setPlaybackSpeed(parsed.playbackSpeed);
+                    if (parsed.theme) setTheme(parsed.theme);
+                    if (parsed.accentColor) setAccentColor(parsed.accentColor);
+                    if (parsed.subtitleSize) setSubtitleSize(parsed.subtitleSize);
+                    if (parsed.subtitleFont) setSubtitleFont(parsed.subtitleFont);
                 } catch {}
             }
         }
     }, [isOpen]);
 
     const updateSetting = (key: string, value: any) => {
-        const newSettings = { autoplay, autoSkip, quality, smartSwitch, multiAudio, dataSaver, [key]: value };
+        const currentSettings = {
+            autoplay, autoSkip, quality, smartSwitch, multiAudio, dataSaver, aggressiveSandbox,
+            bufferSize, playbackSpeed, theme, accentColor, subtitleSize, subtitleFont
+        };
+        const newSettings = { ...currentSettings, [key]: value };
         localStorage.setItem("toonplayer_settings", JSON.stringify(newSettings));
         window.dispatchEvent(new Event('profileUpdated'));
+
+        // Handle live updates
+        if (key === 'accentColor') {
+            const match = ACCENT_COLORS.find(c => c.name === value);
+            if (match) {
+                document.documentElement.style.setProperty('--accent', match.hex);
+                document.documentElement.style.setProperty('--accent-glow', match.glow);
+            }
+        }
+
         switch (key) {
             case 'autoplay': setAutoplay(value); break;
             case 'autoSkip': setAutoSkip(value); break;
@@ -107,6 +146,12 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
             case 'multiAudio': setMultiAudio(value); break;
             case 'dataSaver': setDataSaver(value); break;
             case 'aggressiveSandbox': setAggressiveSandbox(value); break;
+            case 'bufferSize': setBufferSize(value); break;
+            case 'playbackSpeed': setPlaybackSpeed(value); break;
+            case 'theme': setTheme(value); break;
+            case 'accentColor': setAccentColor(value); break;
+            case 'subtitleSize': setSubtitleSize(value); break;
+            case 'subtitleFont': setSubtitleFont(value); break;
         }
     };
 
@@ -116,19 +161,8 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
         setTimeout(() => {
             const profile = { name: name.trim(), avatar: selectedAvatar };
             localStorage.setItem("toonplayer_profile", JSON.stringify(profile));
-            const savedProfilesStr = localStorage.getItem("toonplayer_profiles");
-            if (savedProfilesStr) {
-                try {
-                    const savedProfiles = JSON.parse(savedProfilesStr);
-                    const idx = savedProfiles.findIndex((p: any) => p.avatar === profile.avatar || p.name === profile.name);
-                    if (idx >= 0) {
-                        savedProfiles[idx] = profile;
-                        localStorage.setItem("toonplayer_profiles", JSON.stringify(savedProfiles));
-                    }
-                } catch {}
-            }
             window.dispatchEvent(new Event('profileUpdated'));
-            toast.success("Profile saved successfully!");
+            toast.success("Profile settings saved successfully!");
             setIsSaving(false);
             onClose();
         }, 600);
@@ -141,183 +175,283 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        className="absolute inset-0 bg-black/85 backdrop-blur-md"
                     />
 
                     <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        style={{ transform: 'translateZ(0)' }}
-                        className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-2xl overflow-hidden shadow-[var(--accent)]/10 flex flex-col max-h-[90vh] will-change-transform"
+                        className="relative w-full max-w-2xl bg-[#0B0713]/97 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-[var(--border-color)] flex items-center justify-between bg-white/5 shrink-0">
+                        <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/5 shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center border border-[var(--accent)]/20 animate-none">
                                     <Settings2 className="w-5 h-5 text-[var(--accent)]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black text-white tracking-tight font-sora">App Settings</h2>
-                                    <p className="text-xs text-[var(--text-muted)] font-medium">Personalize your ToonPlayer experience</p>
+                                    <h2 className="text-lg font-black text-white tracking-tight font-sora">App Configuration</h2>
+                                    <p className="text-xs text-zinc-500 font-semibold">Netflix + Crunchyroll Premium Parity</p>
                                 </div>
                             </div>
-                            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-[var(--text-muted)] hover:text-white">
-                                <X className="w-5 h-5" />
+                            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-zinc-500 hover:text-white">
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        {/* Tab Bar */}
-                        <div className="flex border-b border-[var(--border-color)] shrink-0 bg-white/5">
+                        {/* Tabs Navigation */}
+                        <div className="flex overflow-x-auto border-b border-white/5 shrink-0 bg-white/5 hide-scrollbar">
                             {TABS.map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`relative flex-1 py-3 text-sm font-bold transition-colors ${activeTab === tab ? 'text-white' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                    className={`relative px-6 py-3 text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap ${activeTab === tab ? 'text-white font-bold' : 'text-zinc-500 hover:text-white'}`}
                                 >
                                     {tab}
                                     {activeTab === tab && (
-                                        <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] rounded-full" />
+                                        <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]" />
                                     )}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto hide-scrollbar flex-1">
-                            <AnimatePresence mode="wait">
-                                {activeTab === 'Account' && (
-                                    <motion.div key="account" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
-                                        <div className="bg-white/5 p-5 rounded-2xl border border-[var(--border-color)] space-y-6">
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-white">Select Avatar</label>
-                                                <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
-                                                    {AVATARS.map((avatar) => (
-                                                        <button key={avatar} onClick={() => setSelectedAvatar(avatar)}
-                                                            className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all ${selectedAvatar === avatar ? "border-[var(--accent)] scale-110 shadow-lg shadow-[var(--accent)]/20" : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"}`}
-                                                        >
-                                                            <img src={avatar} alt="Avatar option" className="w-full h-full object-cover" />
-                                                            {selectedAvatar === avatar && (
-                                                                <div className="absolute inset-0 bg-[var(--accent)]/20 flex items-center justify-center">
-                                                                    <Check className="w-4 h-4 text-white drop-shadow-md" />
-                                                                </div>
-                                                            )}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-3">
-                                                <label className="text-xs font-bold text-white">Display Name</label>
-                                                <div className="relative">
-                                                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name"
-                                                        className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] focus:border-[var(--accent)]/50 rounded-xl px-4 py-3 text-sm text-white outline-none transition-all shadow-inner font-bold"
-                                                        maxLength={20} />
-                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[var(--text-muted)]">{name.length}/20</div>
-                                                </div>
+                        {/* Panels */}
+                        <div className="p-6 overflow-y-auto hide-scrollbar flex-1 space-y-6">
+                            {activeTab === 'Account' && (
+                                <motion.div key="account" className="space-y-6">
+                                    <div className="bg-white/5 p-5 rounded-2xl border border-white/5 space-y-6">
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-white">Select Avatar Profile</label>
+                                            <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+                                                {AVATARS.map((avatar) => (
+                                                    <button key={avatar} onClick={() => setSelectedAvatar(avatar)}
+                                                        className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all ${selectedAvatar === avatar ? "border-[var(--accent)] scale-110 shadow-lg" : "border-transparent opacity-60 hover:opacity-100"}`}
+                                                    >
+                                                        <img src={avatar} alt="" className="w-full h-full object-cover" />
+                                                        {selectedAvatar === avatar && (
+                                                            <div className="absolute inset-0 bg-[var(--accent)]/20 flex items-center justify-center">
+                                                                <Check className="w-4 h-4 text-white" />
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
-                                    </motion.div>
-                                )}
-
-                                {activeTab === 'Playback' && (
-                                    <motion.div key="playback" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4 bg-white/5 p-5 rounded-2xl border border-[var(--border-color)]">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-sm font-bold text-white">Default Video Quality</p>
-                                                <p className="text-xs text-[var(--text-muted)]">Select preferred stream resolution</p>
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-white">Display Name</label>
+                                            <div className="relative">
+                                                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name"
+                                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[var(--accent)]/50"
+                                                    maxLength={20} />
                                             </div>
-                                            <select value={quality} onChange={(e) => updateSetting('quality', e.target.value)}
-                                                className="bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-sm font-bold text-white outline-none focus:border-[var(--accent)]/50">
-                                                <option value="Auto">Auto</option>
-                                                <option value="1080p">1080p FHD</option>
-                                                <option value="720p">720p HD</option>
-                                            </select>
                                         </div>
-                                        <div className="w-full h-px bg-[var(--border-color)]" />
-                                        {[
-                                            { key: 'autoplay', label: 'Autoplay Next Episode', desc: 'Seamlessly start the next episode', value: autoplay, color: 'bg-[var(--accent)]' },
-                                            { key: 'autoSkip', label: 'Auto-skip Intro', desc: 'Automatically bypass anime openings', value: autoSkip, color: 'bg-blue-500', badge: 'Beta' },
-                                            { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-[var(--accent)]' },
-                                            { key: 'multiAudio', label: 'Prioritize Multi-Audio', desc: 'Favor ToonPlayer VIP streams', value: multiAudio, color: 'bg-[var(--accent)]' },
-                                            { key: 'dataSaver', label: 'Data & Battery Saver', desc: 'Reduce blur effects for smoother UI', value: dataSaver, color: 'bg-green-500' },
-                                            { key: 'aggressiveSandbox', label: 'Aggressive Ad-Blocker', desc: 'Prevents external popups and redirects', value: aggressiveSandbox, color: 'bg-red-500', badge: 'Secure' },
-                                        ].map((item, i, arr) => (
-                                            <div key={item.key}>
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-bold text-white">{item.label}</p>
-                                                            {item.badge && <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[8px] font-black uppercase tracking-wider border border-blue-500/20">{item.badge}</span>}
-                                                        </div>
-                                                        <p className="text-xs text-[var(--text-muted)]">{item.desc}</p>
-                                                    </div>
-                                                    <ToggleSwitch value={item.value} onChange={(v) => updateSetting(item.key, v)} color={item.color} />
-                                                </div>
-                                                {i < arr.length - 1 && <div className="w-full h-px bg-[var(--border-color)] mt-4" />}
-                                            </div>
-                                        ))}
-                                    </motion.div>
-                                )}
+                                    </div>
+                                </motion.div>
+                            )}
 
-                                {activeTab === 'Notifications' && (
-                                    <motion.div key="notifications" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
-                                        {/* AI Smart Alert Banner */}
-                                        <div className="relative overflow-hidden bg-gradient-to-r from-[var(--accent)]/20 to-[var(--accent-secondary)]/20 border border-[var(--accent)]/30 rounded-2xl p-4">
-                                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-[var(--accent)]/10 rounded-full blur-xl" />
-                                            <div className="flex items-start gap-3 relative">
-                                                <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 border border-[var(--accent)]/30 flex items-center justify-center shrink-0">
-                                                    <Brain className="w-5 h-5 text-[var(--accent)]" />
-                                                </div>
+                            {activeTab === 'Playback' && (
+                                <motion.div key="playback" className="space-y-4 bg-white/5 p-5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-bold text-white">Video Quality Preference</p>
+                                            <p className="text-xs text-zinc-500">Select default stream quality</p>
+                                        </div>
+                                        <select value={quality} onChange={(e) => updateSetting('quality', e.target.value)}
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            <option value="Auto">Auto Match</option>
+                                            <option value="1080p">1080p FHD</option>
+                                            <option value="720p">720p HD</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="w-full h-px bg-white/5" />
+
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-bold text-white">Buffer Size</p>
+                                            <p className="text-xs text-zinc-500">Video streaming network buffer chunk size</p>
+                                        </div>
+                                        <select value={bufferSize} onChange={(e) => updateSetting('bufferSize', e.target.value)}
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            <option value="Small">Small (Fast Start)</option>
+                                            <option value="Standard">Standard (Balanced)</option>
+                                            <option value="Large">Large (High Cache)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="w-full h-px bg-white/5" />
+
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-bold text-white">Playback Speed</p>
+                                            <p className="text-xs text-zinc-500">Preferred speed rate for video player</p>
+                                        </div>
+                                        <select value={playbackSpeed} onChange={(e) => updateSetting('playbackSpeed', e.target.value)}
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            <option value="0.5">0.5x Slow</option>
+                                            <option value="1.0">1.0x Normal</option>
+                                            <option value="1.25">1.25x</option>
+                                            <option value="1.5">1.5x</option>
+                                            <option value="2.0">2.0x Fast</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="w-full h-px bg-white/5" />
+
+                                    {[
+                                        { key: 'autoplay', label: 'Autoplay Next Episode', desc: 'Seamlessly start the next episode', value: autoplay, color: 'bg-[var(--accent)]' },
+                                        { key: 'autoSkip', label: 'Auto-skip Intro', desc: 'Automatically bypass anime openings', value: autoSkip, color: 'bg-blue-500' },
+                                        { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-[var(--accent)]' },
+                                        { key: 'aggressiveSandbox', label: 'Aggressive Ad-Blocker', desc: 'Prevents external popups and redirects', value: aggressiveSandbox, color: 'bg-red-500' },
+                                    ].map((item, i, arr) => (
+                                        <div key={item.key}>
+                                            <div className="flex items-center justify-between">
                                                 <div>
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <p className="text-sm font-black text-white">AI Smart Alerts</p>
-                                                        <span className="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest rounded bg-[var(--accent)]/30 text-[var(--accent)] border border-[var(--accent)]/30">New</span>
-                                                    </div>
-                                                    <p className="text-xs text-[var(--text-muted)] leading-relaxed font-medium">ToonPlayer analyzes your viewing patterns and sends personalized alerts — like notifying you when your usual watch time begins. It learns your taste to surface content you'll love.</p>
+                                                    <p className="text-sm font-bold text-white">{item.label}</p>
+                                                    <p className="text-xs text-zinc-500">{item.desc}</p>
                                                 </div>
+                                                <ToggleSwitch value={item.value} onChange={(v) => updateSetting(item.key, v)} color={item.color} />
+                                            </div>
+                                            {i < arr.length - 1 && <div className="w-full h-px bg-white/5 mt-4" />}
+                                        </div>
+                                    ))}
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'Appearance' && (
+                                <motion.div key="appearance" className="space-y-4 bg-white/5 p-5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Palette className="w-4 h-4 text-pink-400" />
+                                            <div>
+                                                <p className="text-sm font-bold text-white">Accent Highlight Color</p>
+                                                <p className="text-xs text-zinc-500">Pick highlight color details</p>
                                             </div>
                                         </div>
-
-                                        {/* Notification Categories */}
-                                        <div className="bg-white/5 rounded-2xl border border-[var(--border-color)] divide-y divide-[var(--border-color)]">
-                                            {NOTIF_CATEGORIES.map(({ key, label, desc, icon: Icon, color, toggleColor }) => (
-                                                <div key={key} className="flex items-center justify-between p-4 gap-4">
-                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                        <div className={`w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0`}>
-                                                            <Icon className={`w-4 h-4 ${color}`} />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className="text-sm font-bold text-white">{label}</p>
-                                                            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed truncate">{desc}</p>
-                                                        </div>
-                                                    </div>
-                                                    <ToggleSwitch
-                                                        value={preferences[key] ?? true}
-                                                        onChange={(v) => {
-                                                            updatePreference(key, v);
-                                                            toast.success(v ? `${label} alerts enabled` : `${label} alerts muted`, { duration: 1500, id: key });
-                                                        }}
-                                                        color={toggleColor}
-                                                    />
-                                                </div>
+                                        <div className="flex items-center gap-2">
+                                            {ACCENT_COLORS.map(c => (
+                                                <button
+                                                    key={c.name}
+                                                    type="button"
+                                                    onClick={() => updateSetting('accentColor', c.name)}
+                                                    style={{ backgroundColor: c.hex }}
+                                                    className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                                        accentColor === c.name ? 'border-white scale-110' : 'border-transparent opacity-80 hover:opacity-100'
+                                                    }`}
+                                                    title={c.name}
+                                                />
                                             ))}
                                         </div>
+                                    </div>
 
-                                        <p className="text-[11px] text-center text-[var(--text-muted)] px-4">
-                                            <Zap className="w-3 h-3 inline mr-1 text-amber-400" />
-                                            Preferences are saved instantly and apply to future notifications only.
-                                        </p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                    <div className="w-full h-px bg-white/5" />
+
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-bold text-white">Visual Interface Theme</p>
+                                            <p className="text-xs text-zinc-500">Choose base dark accent layout</p>
+                                        </div>
+                                        <select value={theme} onChange={(e) => updateSetting('theme', e.target.value)}
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            <option value="Midnight Purple">Midnight Purple (Default)</option>
+                                            <option value="Cinematic Dark">Cinematic Dark</option>
+                                            <option value="AMOLED Black">AMOLED Black</option>
+                                        </select>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'Notifications' && (
+                                <motion.div key="notifications" className="space-y-4">
+                                    <div className="bg-white/5 rounded-2xl border border-white/5 divide-y divide-white/5">
+                                        {NOTIF_CATEGORIES.map(({ key, label, desc, icon: Icon, color, toggleColor }) => (
+                                            <div key={key} className="flex items-center justify-between p-4 gap-4">
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                                                        <Icon className={`w-4 h-4 ${color}`} />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-bold text-white">{label}</p>
+                                                        <p className="text-[11px] text-zinc-500 truncate">{desc}</p>
+                                                    </div>
+                                                </div>
+                                                <ToggleSwitch
+                                                    value={preferences[key] ?? true}
+                                                    onChange={(v) => {
+                                                        updatePreference(key, v);
+                                                        toast.success(v ? `${label} alerts enabled` : `${label} alerts muted`);
+                                                    }}
+                                                    color={toggleColor}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'Accessibility' && (
+                                <motion.div key="accessibility" className="space-y-4 bg-white/5 p-5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <AccessIcon className="w-4 h-4 text-emerald-400" />
+                                            <div>
+                                                <p className="text-sm font-bold text-white">Subtitle Text Size</p>
+                                                <p className="text-xs text-zinc-500">Configure media track font sizing</p>
+                                            </div>
+                                        </div>
+                                        <select value={subtitleSize} onChange={(e) => updateSetting('subtitleSize', e.target.value)}
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            <option value="Small">Small</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="Large">Large</option>
+                                            <option value="Extra Large">Extra Large</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="w-full h-px bg-white/5" />
+
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-bold text-white">Subtitle Font Family</p>
+                                            <p className="text-xs text-zinc-500">Choose typeface for subtitles</p>
+                                        </div>
+                                        <select value={subtitleFont} onChange={(e) => updateSetting('subtitleFont', e.target.value)}
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            <option value="Sora">Sora (Default)</option>
+                                            <option value="Sans-Serif">Sans-Serif</option>
+                                            <option value="Serif">Serif</option>
+                                            <option value="Monospace">Monospace</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="w-full h-px bg-white/5" />
+
+                                    {/* Keyboard Shortcuts Guide */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-zinc-400 font-bold text-xs uppercase">
+                                            <Keyboard className="w-4 h-4 text-amber-500" />
+                                            <span>Quick Keyboard Shortcuts</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 p-3 bg-black/40 rounded-xl border border-white/5 text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                                            <div><kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-white mr-1.5">Space</kbd> Play / Pause</div>
+                                            <div><kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-white mr-1.5">F</kbd> Toggle Fullscreen</div>
+                                            <div><kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-white mr-1.5">R</kbd> Surprise Me modal</div>
+                                            <div><kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-white mr-1.5">Ctrl K</kbd> Search Palette</div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
 
-                        {/* Footer */}
-                        <div className="p-6 bg-white/5 border-t border-[var(--border-color)] flex gap-4 shrink-0">
-                            <button onClick={onClose} className="flex-1 py-3 px-6 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] font-bold hover:bg-white/5 transition-all active:scale-95 text-sm">
-                                {activeTab === 'Notifications' ? 'Close' : 'Cancel'}
+                        {/* Actions */}
+                        <div className="p-5 bg-white/5 border-t border-white/5 flex gap-4 shrink-0">
+                            <button onClick={onClose} className="flex-1 py-3 px-6 rounded-xl border border-white/10 text-zinc-400 font-bold hover:bg-white/5 transition-all text-xs uppercase tracking-widest">
+                                Close Settings
                             </button>
-                            {activeTab !== 'Notifications' && (
+                            {activeTab === 'Account' && (
                                 <button onClick={handleSaveProfile} disabled={isSaving}
-                                    className="flex-[2] py-3 px-6 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:from-[var(--accent-secondary)] hover:to-[var(--accent)] text-white font-black shadow-lg shadow-[var(--accent)]/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-sm border-0 cursor-pointer"
+                                    className="flex-[2] py-3 px-6 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white font-black rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-xs uppercase tracking-widest border-0 cursor-pointer"
                                 >
                                     {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" />Save Profile</>}
                                 </button>
