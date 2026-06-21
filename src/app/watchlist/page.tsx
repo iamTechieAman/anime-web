@@ -136,7 +136,8 @@ export default function WatchlistPage() {
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
       {/* Sticky header with glassmorphism */}
-      <div className="sticky top-[56px] md:top-[64px] z-40 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-white/5 px-6 md:px-12 py-4 space-y-4">
+      <div className="sticky top-[56px] md:top-[64px] z-40 bg-[var(--bg-main)]/90 backdrop-blur-xl border-b border-white/5 py-4">
+        <div className="max-w-[1800px] mx-auto px-6 md:px-12 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center">
@@ -261,9 +262,10 @@ export default function WatchlistPage() {
             )}
           </div>
         )}
+        </div>
       </div>
 
-      <div className="w-full px-6 md:px-12 py-8">
+      <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-8 w-full">
         {watchlist.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-28 text-center max-w-md mx-auto">
             <div className="w-20 h-20 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center mb-6 shadow-2xl shadow-[var(--accent-glow)]/10">

@@ -177,7 +177,7 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
 
     return (
         <div
-            className="w-full bg-[#171611]/90 backdrop-blur-2xl border-b border-white/[0.05] sticky top-[54px] md:top-[62px] z-[39] shadow-[0_6px_28px_rgba(0,0,0,0.55)]"
+            className="w-full bg-[#171611]/90 backdrop-blur-2xl border-b border-white/[0.05] sticky top-[56px] md:top-[64px] z-[39] shadow-[0_6px_28px_rgba(0,0,0,0.55)]"
             aria-label="Streaming provider filter"
         >
             {/* Loading bar */}

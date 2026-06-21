@@ -72,7 +72,7 @@ export default function ContinueWatchingRow() {
     };
 
     return (
-        <section className="mb-8 w-full overflow-hidden px-4 md:px-8">
+        <section className="mb-8 w-full overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
                 <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                 <Clock className="w-4 h-4 text-[var(--accent)]" />
