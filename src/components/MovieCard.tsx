@@ -85,7 +85,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
         >
             <Link href={watchHref} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] rounded-xl" draggable={false}>
                 {/* === Poster Container === */}
-                <div className="relative w-full overflow-hidden rounded-xl bg-zinc-900 shadow-md group-hover:shadow-2xl group-hover:shadow-black/60 transition-shadow duration-300" style={{ aspectRatio: '2/3' }}>
+                <div className="relative w-full overflow-hidden rounded-xl bg-[var(--bg-elevated)] shadow-md group-hover:shadow-2xl group-hover:shadow-black/60 transition-shadow duration-300" style={{ aspectRatio: '2/3' }}>
                     
                     {/* Shimmer skeleton while image loads */}
                     <div className="absolute inset-0 shimmer-card" />

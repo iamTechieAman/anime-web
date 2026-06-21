@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
-    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: 's4.anilist.co' },
       { protocol: 'https', hostname: 'allanime.day' },
@@ -61,6 +60,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'vidsrc.to' },
       { protocol: 'https', hostname: 'vidsrc.pro' },
       { protocol: 'https', hostname: 'peachify.top' },
+      { protocol: 'https', hostname: 'api.dicebear.com' },
     ],
   },
   async headers() {

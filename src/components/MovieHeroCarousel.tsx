@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Play, Info, Star, ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 
 interface HeroItem {
@@ -76,13 +77,13 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                     className="absolute inset-0"
                 >
                     {item.backdrop_path && (
-                        <img
+                        <Image
                             src={`${IMG_BASE}/original${item.backdrop_path}`}
                             alt={title}
-                            className="w-full h-full object-cover transition-transform duration-[10000ms] ease-linear hover:scale-110"
-                            loading={current === 0 ? "eager" : "lazy"}
-                            fetchPriority={current === 0 ? "high" : "auto"}
-                            decoding="async"
+                            fill
+                            className="object-cover transition-transform duration-[10000ms] ease-linear hover:scale-110"
+                            priority={current === 0}
+                            sizes="100vw"
                         />
                     )}
                 </motion.div>

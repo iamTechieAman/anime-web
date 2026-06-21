@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { Play, Star, ChevronRight } from "lucide-react";
 import Image from "next/image";
@@ -40,7 +40,7 @@ function resolveImage(show: Show): string | null {
     return null;
 }
 
-export default function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
+export default memo(function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
     const [isVisible, setIsVisible] = useState(false);
     const [imgError, setImgError] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
@@ -157,7 +157,7 @@ export default function AnimeCard({ show, isBanner = false }: { show: Show; isBa
     );
 }
 
-export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number }) {
+export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number }) {
     const [imgError, setImgError] = useState(false);
     const showId = show._id || show.id;
     const isTmdbContent = showId?.startsWith('tmdb:');
@@ -191,12 +191,13 @@ export function AnimeCardHorizontal({ show, rank }: { show: Show; rank?: number 
                 {/* Thumbnail */}
                 <div className="relative w-14 aspect-[2/3] rounded-md overflow-hidden bg-[var(--bg-card)] shrink-0 shadow-lg">
                     {(imageSrc && !imgError) ? (
-                        <img
+                        <Image
                             src={imageSrc}
                             alt={title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            fill
+                            sizes="56px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
-                            decoding="async"
                             onError={() => setImgError(true)}
                         />
                     ) : (

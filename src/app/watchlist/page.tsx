@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useWatch, WatchlistItem } from "@/context/WatchContext";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence, Reorder, useDragControls } from "framer-motion";
+import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type FilterType = "all" | "anime" | "movie" | "tv";
@@ -202,7 +203,7 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
     >
       <Link href={href} className="absolute inset-0 block w-full h-full select-none">
         {entry.poster ? (
-          <img src={entry.poster} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--bg-card)] flex items-center justify-center">
             <Play className="w-10 h-10 text-white/10" />
@@ -327,7 +328,7 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
       {/* Thumbnail */}
       <div className="w-12 h-[68px] rounded-xl overflow-hidden bg-black/40 shrink-0">
         {entry.poster
-          ? <img src={entry.poster} alt="" className="w-full h-full object-cover" />
+          ? <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="80px" className="object-cover" />
           : <div className="w-full h-full flex items-center justify-center"><Film className="w-4 h-4 text-zinc-700" /></div>
         }
       </div>

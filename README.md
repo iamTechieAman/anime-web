@@ -26,6 +26,12 @@ ToonPlayer is a high-performance, cinematic-quality content aggregator that lets
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 10 — Final Production Release Candidate (`June 2026`)
+- 🚀 **Anime Scraping Rewrite**: Completely replaced unstable HTML scraping (Aniwave, HiAnime, Consumet) on the homepage with the highly stable **AniList GraphQL API**. The Anime tab is now 100% resilient to breakage and maps seamlessly to the streaming proxy backend.
+- 🎨 **UI Standardization**: Global conversion of hardcoded colors (e.g. `bg-zinc-900`) to dynamic CSS variables (`bg-[var(--bg-elevated)]`) for perfect theme switching.
+- ♿ **Accessibility (a11y)**: Added `aria-label`s, explicit focus rings, and proper `<h1>` / `<h2>` document structure across all components.
+- 📦 **Optimization**: Purged all legacy `<img>` tags in favor of optimized `next/image` with strict sizing and `priority` preloading.
+
 ### Phase 6 — Watch History & Watchlist (`June 2026`)
 - 🕓 **Premium Watch History**: Virtualized infinite scroll with Day / Week / Month grouping, animated collapsible sections, animated progress bars with "Completed" (≥90%) badges, Rewatch vs Resume smart labeling, Bulk Select + Select All, JSON Export, type filter chips, toast-based confirmations (no native `confirm()`), and a premium animated empty state.
 - 📌 **Premium Watchlist**: Framer Motion `Reorder.Group` drag-and-drop list reordering with GripVertical handle, inline tag editor (no `prompt()` — keyboard Enter/Escape support), grid collection picker dropdown, folder tabs with item counts (Favorites, To Watch, Completed + custom), type filter chips, tag filter pills, Sort by Date / A–Z / Type, and animated empty state with floating decorators.

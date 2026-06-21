@@ -4,6 +4,7 @@ import React, { useState, useEffect, memo } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, CheckCircle, ChevronDown, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
 import { MovieGrid, type MovieItem } from "@/components/MovieCard";
@@ -12,7 +13,7 @@ import useSWR from 'swr';
 import type { ProviderSlug } from "@/components/ProviderBar";
 import dynamic from "next/dynamic";
 
-const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[55vh] md:h-[70vh] bg-zinc-900 animate-pulse w-full" /> });
+const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[55vh] md:h-[70vh] bg-[var(--bg-elevated)] animate-pulse w-full" /> });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
 const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });
@@ -137,12 +138,14 @@ const TopCollectionsRow = () => {
                         <Link 
                             href={col.link} 
                             key={col.id}
-                            className="snap-start shrink-0 relative w-[240px] sm:w-[280px] md:w-[320px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 bg-zinc-900 shadow-lg group hover:border-[var(--accent)]/30 hover:shadow-2xl transition-all duration-350 hover:scale-[1.02]"
+                            className="snap-start shrink-0 relative w-[240px] sm:w-[280px] md:w-[320px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 bg-[var(--bg-elevated)] shadow-lg group hover:border-[var(--accent)]/30 hover:shadow-2xl transition-all duration-350 hover:scale-[1.02]"
                         >
-                            <img 
+                            <Image 
                                 src={col.image} 
                                 alt={col.title} 
-                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700 ease-out" 
+                                fill
+                                sizes="(max-width: 768px) 280px, 320px"
+                                className="absolute inset-0 object-cover opacity-60 group-hover:scale-105 transition-transform duration-700 ease-out" 
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                             <div className="absolute inset-0 flex flex-col justify-end p-4 z-20 select-none">
@@ -505,7 +508,7 @@ export default function MoviesPage() {
                                             className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--accent)]/40 transition-all hover:scale-[1.02] duration-300 shadow-lg"
                                         >
                                             <div className="aspect-[2/3] relative">
-                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                                <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 33vw, 20vw" className="object-cover" />
                                                 <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-black uppercase tracking-tighter text-white border border-white/10">
                                                     {item.type}
                                                 </div>
@@ -870,7 +873,7 @@ export default function MoviesPage() {
                                                         <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent)]/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
-                                                                    <img src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                                    <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                                                                 ) : (
                                                                     <div className="text-zinc-600 font-bold text-lg">{item.title?.charAt(0)}</div>
                                                                 )}

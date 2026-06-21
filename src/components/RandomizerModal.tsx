@@ -114,7 +114,7 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 15 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="w-full max-w-lg bg-zinc-900/95 border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
+                className="w-full max-w-lg bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
             >
                 <button 
                     onClick={onClose}

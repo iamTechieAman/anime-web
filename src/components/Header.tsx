@@ -13,6 +13,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import Logo from "@/components/Logo";
 import Fuse from "fuse.js";
+import CustomProfileMenu from "@/components/CustomProfileMenu";
+import Image from "next/image";
 
 const GENRES = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Drama","Family","Fantasy","History","Horror","Music","Mystery","Romance","Science Fiction","Thriller","War","Western"];
 const FORMATS = ["TV","Movie","OVA","ONA","Special"];
@@ -185,7 +187,7 @@ export default function Header() {
 
   return (
     <>
-    <nav className={`fixed top-0 right-0 z-50 h-14 md:h-16 flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
+    <header className={`fixed top-0 right-0 z-50 h-14 md:h-16 flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
       showSidebar ? "left-0 md:left-[72px]" : "left-0"
     } ${isScrolled
       ? "bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
@@ -258,7 +260,7 @@ export default function Header() {
                   {suggestions.length>0?suggestions.map((item:any,i:number)=>(
                     <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
                       className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-[var(--accent)]':''}`}>
-                      <div className="w-12 h-16 overflow-hidden rounded-xl bg-zinc-900 shrink-0">{item.image&&<img src={item.image} alt="" className="w-full h-full object-cover"/>}</div>
+                      <div className="w-12 h-16 overflow-hidden rounded-xl bg-[var(--bg-elevated)] shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
                       <div className="flex-1 min-w-0">
                         <span className="text-base font-bold text-white block truncate">{item.title}</span>
                         <span className="text-xs text-zinc-400 font-semibold uppercase">{item.type} · {item.year}</span>
@@ -364,18 +366,12 @@ export default function Header() {
               </SignInButton>
             )}
             {isUserLoaded&&isSignedIn&&(
-              <UserButton appearance={{elements:{userButtonAvatarBox:"w-9 h-9 ring-2 ring-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)]",userButtonTrigger:"rounded-full"}}}>
-                <UserButton.MenuItems>
-                  <UserButton.Link label="Watchlist" labelIcon={<Bookmark className="w-3.5 h-3.5 text-pink-400"/>} href="/watchlist"/>
-                  <UserButton.Link label="Watch History" labelIcon={<Clock className="w-3.5 h-3.5 text-[var(--accent)]"/>} href="/history"/>
-                  <UserButton.Link label="Profile Settings" labelIcon={<User className="w-3.5 h-3.5 text-blue-400"/>} href="/profile"/>
-                </UserButton.MenuItems>
-              </UserButton>
+              <CustomProfileMenu />
             )}
           </div>
         </div>
       </div>
-    </nav>
+    </header>
     </>
   );
 }

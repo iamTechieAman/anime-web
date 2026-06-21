@@ -626,7 +626,7 @@ export default function BrowseClient() {
                         {/* Infinite scroll target trigger / status pill */}
                         <div ref={observerTarget} className="w-full flex flex-col items-center justify-center mt-12 mb-8 min-h-[50px]">
                             {loadingMore ? (
-                                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest bg-zinc-900/50 border border-white/5 px-5 py-2.5 rounded-full shadow-lg backdrop-blur-md">
+                                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest bg-[var(--bg-elevated)]/50 border border-white/5 px-5 py-2.5 rounded-full shadow-lg backdrop-blur-md">
                                     <Loader2 className="w-4 h-4 animate-spin text-[var(--accent)]" />
                                     Loading More Hits...
                                 </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
+import Image from "next/image";
 
 interface Profile {
   name: string;
@@ -99,7 +100,7 @@ export default function ProfileGate() {
                     onClick={() => handleSelectProfile(p)}
                   >
                     <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all duration-300 shadow-xl group-hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[var(--bg-card)]">
-                      <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                      <Image src={p.avatar} alt={p.name} fill sizes="128px" className="object-cover" />
                     </div>
                     <span className="text-sm md:text-base font-bold text-[var(--text-muted)] group-hover:text-white transition-colors">{p.name}</span>
                     <button 
@@ -131,10 +132,12 @@ export default function ProfileGate() {
                   <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[3px] mb-6 shadow-2xl transition-transform duration-300 group-hover:scale-105">
                     <div className="w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden flex items-center justify-center">
                       {profileName.trim() ? (
-                        <img 
+                        <Image 
                           src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(profileName)}`} 
                           alt="Avatar preview" 
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="160px"
+                          className="object-cover"
                         />
                       ) : (
                         <span className="text-5xl font-bold text-[var(--text-muted)] opacity-50">?</span>

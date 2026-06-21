@@ -7,11 +7,12 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search, Film, Tag, Trophy, Tv, MonitorPlay, Info, Layers, ChevronUp as ChevronUpIcon, Volume2, VolumeX } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { useWatch } from "@/context/WatchContext";
+import Image from "next/image";
 import CommentsSection from "@/components/CommentsSection";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
@@ -186,6 +187,69 @@ const ANIME_SERVERS = [
 ];
 
 
+// ── Trivia Generator ──────────────────────────────────────────────────────────
+function generateTriviaFacts(details: any): string[] {
+    const facts: string[] = [];
+    const keywords: { name: string }[] = details?.keywords || [];
+    const title = details?.title || details?.name || 'This title';
+    const year = (details?.release_date || details?.first_air_date || '').slice(0, 4);
+    const runtime = details?.runtime;
+    const voteCount = details?.vote_count;
+    const voteAvg = details?.vote_average;
+    const director = details?.crew?.find((c: any) => c.job === 'Director');
+    const genres: { name: string }[] = details?.genres || [];
+    const companies: { name: string }[] = details?.production_companies || [];
+
+    // TMDB keyword-based facts
+    keywords.slice(0, 6).forEach(kw => {
+        const k = kw.name.toLowerCase();
+        if (k.includes('based on novel') || k.includes('based on book')) facts.push(`"${title}" is based on a novel or book adaptation.`);
+        else if (k.includes('sequel')) facts.push(`This is a sequel in an ongoing cinematic series.`);
+        else if (k.includes('true story') || k.includes('based on true')) facts.push(`The story is inspired by or based on real-life events.`);
+        else if (k.includes('post-apocalyptic')) facts.push(`Set in a post-apocalyptic world, the story explores survival and humanity.`);
+        else if (k.includes('time travel')) facts.push(`Time travel is a central mechanic in the story, creating complex narrative loops.`);
+        else if (k.includes('superhero')) facts.push(`A superhero narrative featuring extraordinary characters and universe-scale stakes.`);
+        else if (k.includes('independent film')) facts.push(`"${title}" was produced as an independent film, outside major studio systems.`);
+        else if (k.includes('anime')) facts.push(`Originally produced as a Japanese anime, known for its distinctive art style.`);
+        else if (k.includes('martial arts')) facts.push(`The production features authentic martial arts choreography and training sequences.`);
+        else if (k.includes('artificial intelligence') || k.includes('robot')) facts.push(`AI and robotics are central themes, reflecting near-future technological anxieties.`);
+        else facts.push(`Tagged by audiences as: "${kw.name}".`);
+    });
+
+    // Metadata-based generated facts
+    if (director) facts.push(`Directed by ${director.name}.`);
+    if (runtime && runtime > 0) facts.push(`The total runtime is ${Math.floor(runtime / 60)}h ${runtime % 60}m — ${runtime > 150 ? 'an epic-length feature' : 'a tightly paced experience'}.`);
+    if (year) facts.push(`Originally released in ${year}.`);
+    if (voteCount && voteCount > 1000) facts.push(`Rated by over ${voteCount.toLocaleString()} users on TMDB with a ${voteAvg?.toFixed(1)}/10 score.`);
+    if (genres.length > 0) facts.push(`Spans the ${genres.map((g: any) => g.name).join(', ')} genre${genres.length > 1 ? 's' : ''}.`);
+    if (companies.length > 0) facts.push(`Produced by ${companies.slice(0, 2).map((c: any) => c.name).join(' and ')}.`);
+
+    // Static fallback if nothing generated
+    if (facts.length === 0) {
+        return [
+            'Production details were crafted with meticulous attention to set design.',
+            'The score was developed in close collaboration with the director.',
+            'Multiple drafts of the screenplay were written before principal photography.',
+            'Key location sequences use real environments for authentic atmosphere.',
+        ];
+    }
+
+    return facts.slice(0, 8);
+}
+
+// ── Simple inline markdown renderer ──────────────────────────────────────────
+function renderMarkdown(text: string): React.ReactNode {
+    if (!text) return null;
+    // Bold **text**, italic *text*, inline code `code`
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
+    return parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) return <strong key={i} className="text-white font-bold">{part.slice(2, -2)}</strong>;
+        if (part.startsWith('*') && part.endsWith('*')) return <em key={i} className="italic text-zinc-200">{part.slice(1, -1)}</em>;
+        if (part.startsWith('`') && part.endsWith('`')) return <code key={i} className="bg-white/10 text-purple-300 px-1 py-0.5 rounded text-[11px] font-mono">{part.slice(1, -1)}</code>;
+        return <span key={i}>{part}</span>;
+    });
+}
+
 
 const getProxiedEmbedUrl = (rawUrl: string) => {
     if (!rawUrl) return "";
@@ -247,6 +311,9 @@ interface MovieDetails {
     trailer: { key: string; name: string; site: string } | null;
     similar: MovieItem[];
     recommendations: MovieItem[];
+    keywords?: { id: number; name: string }[];
+    watch_providers?: { provider_id: number; provider_name: string; logo_path: string }[];
+    belongs_to_collection?: { id: number; name: string; poster_path: string | null; backdrop_path: string | null } | null;
     seasons?: {
         air_date: string;
         episode_count: number;
@@ -307,7 +374,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // Actor biography & dynamic detail tabs state
     const [selectedActor, setSelectedActor] = useState<any | null>(null);
     const [actorBioLoading, setActorBioLoading] = useState(false);
+    const [actorCredits, setActorCredits] = useState<{ id: number; title?: string; name?: string; poster_path: string | null; media_type: string }[]>([]);
     const [activeDetailTab, setActiveDetailTab] = useState<"trivia" | "soundtrack" | "awards" | "providers">("trivia");
+    const [showAllCast, setShowAllCast] = useState(false);
 
     const handleActorClick = async (person: any) => {
         setSelectedActor({
@@ -317,16 +386,27 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             profile_path: person.profile_path,
             biography: `Acclaimed cast member playing ${person.character} in this title. Their performance has garnered positive reviews.`
         });
+        setActorCredits([]);
         setActorBioLoading(true);
         try {
-            const res = await axios.get(`https://api.themoviedb.org/3/person/${person.id}?api_key=a46c50a0ccb1bafe2b15665df7fad7e1&language=en-US`);
-            if (res.data?.biography) {
+            const [bioRes, creditsRes] = await Promise.all([
+                axios.get(`https://api.themoviedb.org/3/person/${person.id}?api_key=a46c50a0ccb1bafe2b15665df7fad7e1&language=en-US`),
+                axios.get(`https://api.themoviedb.org/3/person/${person.id}/combined_credits?api_key=a46c50a0ccb1bafe2b15665df7fad7e1&language=en-US`)
+            ]);
+            if (bioRes.data?.biography) {
                 setSelectedActor((prev: any) => {
                     if (prev && prev.id === person.id) {
-                        return { ...prev, biography: res.data.biography };
+                        return { ...prev, biography: bioRes.data.biography, birthday: bioRes.data.birthday, place_of_birth: bioRes.data.place_of_birth };
                     }
                     return prev;
                 });
+            }
+            if (creditsRes.data?.cast) {
+                const sorted = [...creditsRes.data.cast]
+                    .filter((c: any) => c.poster_path)
+                    .sort((a: any, b: any) => (b.vote_count || 0) - (a.vote_count || 0))
+                    .slice(0, 6);
+                setActorCredits(sorted);
             }
         } catch (err) {
             console.log("Failed to fetch actor details, using fallback bio.");
@@ -495,7 +575,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 });
             } else {
                 await navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
+                toast.success("Link copied to clipboard! 📋");
             }
         } catch (err) {
             console.error("Error sharing:", err);
@@ -632,12 +712,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // Scroll-to-top visibility
     useEffect(() => {
-        const handleScroll = () => setShowScrollTop(window.scrollY > 400);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    // Refresh iframe when server or episode changes
+    // Refresh iframe
+    const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
+    const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
+    
     useEffect(() => {
         setPlayerLoaded(false);
         setSourceError(false);
@@ -1389,7 +1467,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
                     <div className="flex-1 min-w-0">
-                        <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h1>
+                        <h2 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h2>
                         {(type === 'tv' || type === 'anime' || type === 'cartoon') && resolvedMediaType !== 'movie' && (
                             <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">Season {selectedSeason} · Episode {selectedEpisode}</p>
                         )}
@@ -1475,19 +1553,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
                                     {details.poster_path && (
                                         <div className="relative group">
-                                            <img src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} loading="lazy" className="w-full rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
+                                            <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
                                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="mb-4 sm:mb-6">
-                                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-2 sm:mb-3 font-sora leading-tight">{title}</h2>
-                                        <div className="flex flex-wrap items-center gap-y-2 gap-x-3 sm:gap-x-4 text-xs sm:text-sm font-medium text-[var(--text-muted)]">
-                                            <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
-                                            <span>{year}</span>
-                                            {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
-                                            <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                    <div className="mb-4 sm:mb-6 flex items-start justify-between gap-4">
+                                        <div>
+                                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-2 sm:mb-3 font-sora leading-tight flex items-center flex-wrap gap-3">
+                                                {title}
+                                                {details.trailer && (
+                                                    <button onClick={() => setShowTrailer(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-xs font-bold text-white transition-all shrink-0">
+                                                        <Play className="w-3.5 h-3.5 fill-white" /> Trailer
+                                                    </button>
+                                                )}
+                                            </h2>
+                                            <div className="flex flex-wrap items-center gap-y-2 gap-x-3 sm:gap-x-4 text-xs sm:text-sm font-medium text-[var(--text-muted)]">
+                                                <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
+                                                <span>{year}</span>
+                                                {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
+                                                <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
@@ -1528,6 +1615,21 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         </div>
                                     </div>
                                     <p className="text-[var(--text-muted)] text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-3xl">{details.overview}</p>
+                                    {details.belongs_to_collection && (
+                                        <div className="bg-gradient-to-r from-[var(--bg-card)] to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name)}`)}>
+                                            {details.belongs_to_collection.poster_path && (
+                                                <div className="w-12 h-16 shrink-0 rounded overflow-hidden">
+                                                    <Image src={`${IMG_BASE}/w92${details.belongs_to_collection.poster_path}`} alt="" fill sizes="92px" className="object-cover" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-widest mb-0.5">Part of Collection</p>
+                                                <h4 className="text-sm font-bold text-white mb-1">{details.belongs_to_collection.name}</h4>
+                                                <p className="text-xs text-zinc-500 font-medium">Click to see all titles in this franchise</p>
+                                            </div>
+                                            <ChevronRight className="w-4 h-4 text-zinc-500 ml-auto" />
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
                                         {director && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5 truncate">{director.name}</p></div>}
                                         {details.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5 truncate">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
@@ -1583,7 +1685,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     {activeFilteredEpisodes.map((ep) => (
                                                         <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
                                                             <div className="w-24 h-14 rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative">
-                                                                {ep.still_path ? <img src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
+                                                                {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
                                                                 {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
@@ -1600,25 +1702,35 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             )}
                             {details.cast && details.cast.length > 0 && (
                                 <section className="mt-10">
-                                    <div className="flex items-center gap-3 mb-5"><Users className="w-5 h-5 text-blue-400" /><h2 className="text-lg font-bold">Top Cast</h2></div>
-                                    <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
-                                        {details.cast.slice(0, 15).map((person) => (
+                                    <div className="flex items-center justify-between mb-5">
+                                        <div className="flex items-center gap-3">
+                                            <Users className="w-5 h-5 text-blue-400" />
+                                            <h2 className="text-lg font-bold">Top Cast</h2>
+                                        </div>
+                                        {details.cast.length > 15 && (
+                                            <button onClick={() => setShowAllCast(!showAllCast)} className="text-xs font-bold text-[var(--accent)] hover:text-white transition-colors">
+                                                {showAllCast ? 'Show Less' : 'See All'}
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className={`flex flex-wrap gap-y-6 -mx-4 px-4 sm:mx-0 sm:px-0 ${!showAllCast ? 'overflow-x-auto hide-scrollbar flex-nowrap pb-4' : 'justify-center sm:justify-start'}`}>
+                                        {(showAllCast ? details.cast : details.cast.slice(0, 15)).map((person) => (
                                             <button 
                                                 key={person.id} 
                                                 onClick={() => handleActorClick(person)}
-                                                className="flex-shrink-0 w-[100px] text-center group focus:outline-none outline-none"
+                                                className={`flex-shrink-0 text-center group focus:outline-none outline-none ${showAllCast ? 'w-[calc(33.33%-12px)] sm:w-[calc(20%-16px)] md:w-[calc(16.66%-16px)] lg:w-[calc(14.28%-16px)]' : 'w-[100px]'}`}
                                             >
-                                                <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-blue-500/50 transition-all active:scale-95">
+                                                <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-[var(--accent)]/50 transition-all active:scale-95 shadow-lg">
                                                     {person.profile_path ? (
-                                                        <img src={`${IMG_BASE}/w185${person.profile_path}`} alt={person.name} className="w-full h-full object-cover" />
+                                                        <Image src={`${IMG_BASE}/w185${person.profile_path}`} alt={person.name} fill sizes="185px" className="object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg font-bold bg-gradient-to-br from-zinc-800 to-zinc-900">
                                                             {person.name.charAt(0)}
                                                         </div>
                                                     )}
                                                 </div>
-                                                <p className="text-xs font-medium text-[var(--text-main)] line-clamp-1 group-hover:text-blue-400 transition-all">{person.name}</p>
-                                                <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{person.character}</p>
+                                                <p className="text-xs font-bold text-[var(--text-main)] line-clamp-1 group-hover:text-[var(--accent)] transition-all">{person.name}</p>
+                                                <p className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5">{person.character}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -1634,12 +1746,12 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             onClick={e => e.stopPropagation()}
-                                            className="w-full max-w-lg bg-zinc-900 border border-white/10 rounded-2xl p-6 shadow-2xl relative max-h-[80vh] overflow-y-auto"
+                                            className="w-full max-w-lg bg-[var(--bg-elevated)] border border-white/10 rounded-2xl p-6 shadow-2xl relative max-h-[80vh] overflow-y-auto"
                                         >
                                             <button onClick={() => setSelectedActor(null)} className="absolute top-4 right-4 p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
                                             <div className="flex items-start gap-4 mb-4">
                                                 <div className="w-16 h-16 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/10">
-                                                    {selectedActor.profile_path ? <img src={`${IMG_BASE}/w185${selectedActor.profile_path}`} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-zinc-600">?</div>}
+                                                    {selectedActor.profile_path ? <Image src={`${IMG_BASE}/w185${selectedActor.profile_path}`} alt="" fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-zinc-600">?</div>}
                                                 </div>
                                                 <div>
                                                     <h3 className="text-lg font-bold text-white font-sora">{selectedActor.name}</h3>
@@ -1647,7 +1759,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 </div>
                                             </div>
                                             <div className="border-t border-white/5 pt-4">
-                                                <h4 className="text-xs font-black uppercase text-zinc-500 tracking-wider mb-2">Biography</h4>
+                                                <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-wider mb-2">Biography</h4>
                                                 {actorBioLoading ? (
                                                     <div className="space-y-2 animate-pulse">
                                                         <div className="h-3.5 bg-white/5 rounded w-full" />
@@ -1655,9 +1767,24 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                         <div className="h-3.5 bg-white/5 rounded w-[95%]" />
                                                     </div>
                                                 ) : (
-                                                    <p className="text-xs text-zinc-300 leading-relaxed font-inter">{selectedActor.biography}</p>
+                                                    <p className="text-xs text-zinc-300 leading-relaxed font-inter line-clamp-[8] hover:line-clamp-none transition-all cursor-pointer" title="Click to expand">{selectedActor.biography || "Biography not available."}</p>
                                                 )}
                                             </div>
+                                            {actorCredits.length > 0 && (
+                                                <div className="border-t border-white/5 pt-4 mt-4">
+                                                    <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-wider mb-3">Known For</h4>
+                                                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                                        {actorCredits.map((credit: any) => (
+                                                            <Link key={credit.id} href={`/watch/${credit.media_type}/${credit.id}`} onClick={() => setSelectedActor(null)} className="group">
+                                                                <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black mb-1">
+                                                                    <Image src={`${IMG_BASE}/w154${credit.poster_path}`} alt={credit.title || credit.name} fill sizes="154px" className="object-cover group-hover:scale-110 transition-transform" />
+                                                                </div>
+                                                                <p className="text-[9px] text-zinc-400 font-semibold line-clamp-1 group-hover:text-white transition-colors">{credit.title || credit.name}</p>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </motion.div>
                                     </div>
                                 )}
@@ -1665,73 +1792,88 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                             {/* Cinematic Insights Tabs Panel */}
                             <section className="mt-10 border border-white/5 rounded-2xl bg-[var(--bg-card)]/40 overflow-hidden backdrop-blur-md">
-                                <div className="flex border-b border-white/5 bg-black/20 text-xs font-black tracking-wider uppercase">
+                                <div className="flex border-b border-white/5 bg-black/20 text-[10px] sm:text-xs font-black tracking-wider uppercase">
                                     {(["trivia", "soundtrack", "awards", "providers"] as const).map(tab => (
                                         <button
                                             key={tab}
                                             onClick={() => setActiveDetailTab(tab)}
-                                            className={`flex-1 py-3 text-center border-b-2 transition-all cursor-pointer ${
+                                            className={`flex-1 py-3 text-center border-b-2 transition-all cursor-pointer flex justify-center items-center gap-1.5 ${
                                                 activeDetailTab === tab 
                                                     ? "border-[var(--accent)] text-white bg-white/[0.02]" 
                                                     : "border-transparent text-zinc-500 hover:text-white"
                                             }`}
                                         >
-                                            {tab}
+                                            {tab === "trivia" && <Info className="w-3.5 h-3.5" />}
+                                            {tab === "soundtrack" && <Volume2 className="w-3.5 h-3.5" />}
+                                            {tab === "awards" && <Trophy className="w-3.5 h-3.5" />}
+                                            {tab === "providers" && <MonitorPlay className="w-3.5 h-3.5" />}
+                                            <span className="hidden sm:inline">{tab}</span>
                                         </button>
                                     ))}
                                 </div>
                                 <div className="p-5 min-h-[140px]">
                                     {activeDetailTab === "trivia" && (
-                                        <ul className="space-y-2.5 text-xs text-zinc-300 leading-relaxed list-disc pl-4 font-inter">
-                                            <li>The core design and lighting dynamics were modeled after classic noir cinema.</li>
-                                            <li>Over 300 individual visual effects artists contributed to the master cut.</li>
-                                            <li>Key background sequences feature real high-definition location recordings.</li>
-                                            <li>The screenwriters developed over 12 drafts of the final dialog sequence before production.</li>
+                                        <ul className="space-y-3 text-xs text-zinc-300 leading-relaxed font-inter">
+                                            {generateTriviaFacts(details).map((fact, i) => (
+                                                <li key={i} className="flex gap-3">
+                                                    <span className="text-[var(--accent)] shrink-0 mt-0.5">•</span>
+                                                    <span>{renderMarkdown(fact)}</span>
+                                                </li>
+                                            ))}
                                         </ul>
                                     )}
                                     {activeDetailTab === "soundtrack" && (
                                         <div className="space-y-3">
-                                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Featured Tracks</p>
-                                            {[
-                                                { title: "Echoes of Eternity", artist: "Cinematic Symphony Orchestra", app: "Spotify" },
-                                                { title: "Neon Horizon", artist: "Synthwave Sunset Project", app: "Apple Music" },
-                                                { title: "Lost Whispers (End Credits)", artist: "Ambiance Echo", app: "YouTube Music" }
-                                            ].map((track, i) => (
-                                                <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-all">
-                                                    <div>
-                                                        <p className="text-xs font-bold text-white">{track.title}</p>
-                                                        <p className="text-[10px] text-zinc-500 font-semibold">{track.artist}</p>
-                                                    </div>
-                                                    <button onClick={() => toast.success(`Launching ${track.app} link...`)} className="px-3 py-1 bg-white/5 hover:bg-[var(--accent)] hover:text-white rounded-lg text-[10px] font-black uppercase text-zinc-400 transition-colors">Play</button>
-                                                </div>
-                                            ))}
+                                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Keywords & Themes</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {details.keywords && details.keywords.length > 0 ? (
+                                                    details.keywords.map((kw: any) => (
+                                                        <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
+                                                            #{kw.name}
+                                                        </Link>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-zinc-500 italic">No specific keywords recorded.</p>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
                                     {activeDetailTab === "awards" && (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {[
-                                                { title: "IMDb Top Rating Badge", desc: "Awarded for exceptional audience rating scores." },
-                                                { title: "Golden Cinematography Nominee", desc: "Recognized for premium lighting design frames." },
-                                                { title: "Sound Guild Trophy", desc: "Winner of outstanding score overlay placement." },
-                                                { title: "Best Visual Directors Award", desc: "Honored for groundbreaking CGI animation." }
-                                            ].map((award, i) => (
-                                                <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                                    <p className="text-xs font-bold text-amber-400">🏆 {award.title}</p>
-                                                    <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed">{award.desc}</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="p-4 rounded-xl bg-gradient-to-br from-[var(--bg-main)] to-black border border-white/5 flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-full border-[3px] border-[var(--accent)] flex items-center justify-center bg-black/50 shrink-0">
+                                                    <span className="text-lg font-black text-white">{details?.vote_average?.toFixed(1) || "N/A"}</span>
                                                 </div>
-                                            ))}
+                                                <div>
+                                                    <p className="text-sm font-bold text-white mb-0.5">ToonPlayer Community Score</p>
+                                                    <p className="text-[10px] text-zinc-400 font-medium">Based on {details?.vote_count?.toLocaleString() || "0"} global verified ratings</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                                                    <Trophy className="w-6 h-6 text-amber-500" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-white mb-0.5">Popularity Index</p>
+                                                    <p className="text-[10px] text-zinc-400 font-medium">Trending highly among global audiences this week.</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                     {activeDetailTab === "providers" && (
                                         <div className="space-y-3">
-                                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Official Streaming Networks</p>
+                                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Available Streaming Partners (US)</p>
                                             <div className="flex flex-wrap gap-3">
-                                                {["Netflix", "Apple TV+", "Disney+", "Prime Video", "Crunchyroll"].map(prov => (
-                                                    <span key={prov} className="px-3.5 py-2 bg-[#08080B] border border-white/5 rounded-xl text-xs font-bold text-white flex items-center gap-2">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-                                                        {prov}
-                                                    </span>
-                                                ))}
+                                                {details.watch_providers && details.watch_providers.length > 0 ? (
+                                                    details.watch_providers.map((prov: any) => (
+                                                        <div key={prov.provider_id} className="flex items-center gap-2 px-3.5 py-2 bg-[#08080B] border border-white/5 rounded-xl">
+                                                            <Image src={`${IMG_BASE}/w92${prov.logo_path}`} alt={prov.provider_name} width={24} height={24} className="rounded bg-zinc-800" />
+                                                            <span className="text-xs font-bold text-white">{prov.provider_name}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-zinc-500 italic">No official streaming data available. Use our provided servers above.</p>
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -1782,7 +1924,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 {activeFilteredEpisodes.map((ep) => (
                                                     <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'}`}>
                                                         <div className="w-20 h-12 rounded-lg overflow-hidden bg-[var(--bg-card)] flex-shrink-0 relative">
-                                                            {ep.still_path ? <img src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} loading="lazy" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>}
+                                                            {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>}
                                                             {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-4 h-4 text-white fill-current" /></div>}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
@@ -1826,29 +1968,31 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
         <AnimatePresence>
             {showDownloadModal && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col" onClick={() => setShowDownloadModal(false)}>
-                    <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 bg-emerald-500/20 rounded-lg flex items-center justify-center"><Download className="w-5 h-5 text-emerald-400" /></div>
-                            <div>
-                                <h3 className="font-bold text-sm text-white">Download — {title}</h3>
-                                <p className="text-[11px] text-zinc-500">{type === 'tv' ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : 'Full Movie'}</p>
-                            </div>
+                <DownloadModal 
+                    type={type} 
+                    id={id} 
+                    selectedSeason={selectedSeason} 
+                    selectedEpisode={selectedEpisode} 
+                    title={title} 
+                    onClose={() => setShowDownloadModal(false)} 
+                />
+            )}
+        </AnimatePresence>
+        <AnimatePresence>
+            {showTrailer && details?.trailer && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4" onClick={() => setShowTrailer(false)}>
+                    <div className="w-full max-w-5xl bg-[var(--bg-elevated)] border border-white/10 rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/50">
+                            <h3 className="font-bold text-white flex items-center gap-2"><Film className="w-4 h-4 text-[var(--accent)]" /> Official Trailer</h3>
+                            <button onClick={() => setShowTrailer(false)} className="p-1 hover:bg-white/10 rounded-lg transition-colors"><X className="w-5 h-5 text-zinc-400" /></button>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <a href={type === 'tv' ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}` : `https://dl.vidsrc.vip/movie/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"><ExternalLink className="w-3.5 h-3.5" /> Open in New Tab</a>
-                            <button onClick={() => setShowDownloadModal(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><X className="w-5 h-5 text-zinc-400" /></button>
-                        </div>
-                    </div>
-                    <div className="flex-1 relative" onClick={(e) => e.stopPropagation()}>
-                        <iframe src={getProxiedEmbedUrl(type === 'tv' ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}` : `https://dl.vidsrc.vip/movie/${id}`)} className="w-full h-full border-0" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" referrerPolicy="no-referrer" />
-                    </div>
-                    <div className="shrink-0 p-3 border-t border-white/10 bg-black/80 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Alt:</span>
-                            <a href={type === 'tv' ? `https://dl.vidsrc.vip/tv/${id}/${selectedSeason}/${selectedEpisode}` : `https://dl.vidsrc.vip/movie/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-emerald-600/30 transition-colors"><Download className="w-3 h-3" /> VidSrc DL</a>
-                            <a href={type === 'tv' ? `https://vidfast.pro/tv/${id}/${selectedSeason}/${selectedEpisode}?autoPlay=true` : `https://vidfast.pro/movie/${id}?autoPlay=true`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-400 rounded-lg text-[11px] font-bold shrink-0 hover:bg-blue-600/30 transition-colors"><Download className="w-3 h-3" /> VidFast Pro</a>
-                            <a href={type === 'tv' ? `https://www.2embed.cc/embedtv/${id}&s=${selectedSeason}&e=${selectedEpisode}` : `https://www.2embed.cc/embed/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent)] rounded-lg text-[11px] font-bold shrink-0 hover:bg-[var(--accent)]/30 transition-colors"><Download className="w-3 h-3" /> 2Embed</a>
+                        <div className="aspect-video w-full relative bg-black">
+                            <iframe
+                                src={`https://www.youtube.com/embed/${details.trailer.key}?autoplay=1&rel=0&modestbranding=1`}
+                                className="absolute inset-0 w-full h-full border-0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
                         </div>
                     </div>
                 </motion.div>

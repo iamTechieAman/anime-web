@@ -3,6 +3,7 @@
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Film, Play, Sparkles, Tv, ShieldCheck, Check, Star, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Logo from "@/components/Logo";
 
 // Real poster images from TMDB for the animated background grid
@@ -98,8 +99,8 @@ export default function NetflixAuthGate() {
               }
             >
               {[...BACKGROUND_POSTERS, ...BACKGROUND_POSTERS].map((src, i) => (
-                <div key={i} className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-zinc-900">
-                  <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <div key={i} className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-[var(--bg-elevated)]">
+                  <Image src={src} alt="Background poster" fill sizes="150px" className="object-cover" />
                 </div>
               ))}
             </div>

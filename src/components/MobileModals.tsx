@@ -6,6 +6,7 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import axios from "axios";
 import Fuse from "fuse.js";
 
@@ -255,7 +256,7 @@ export default function MobileModals() {
                                     <div className="p-4 bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent-secondary)]/10 rounded-xl border border-[var(--accent)]/20">
                                         <div className="flex items-center gap-3 mb-3">
                                             <div className="w-10 h-10 flex items-center justify-center p-1 bg-white/5 rounded-lg shrink-0">
-                                                <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div class="text-white font-black text-xs">TP</div>'; }} />
+                                                <Image src="/icon.png" alt="Logo" fill sizes="32px" className="object-contain" />
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-[var(--text-main)]">ToonPlayer</h4>
@@ -386,8 +387,8 @@ export default function MobileModals() {
                                                         onClick={() => setSearchOpen(false)}
                                                     >
                                                         <span className="text-sm font-black text-[var(--text-muted)]/50 w-5 text-center italic">0{i + 1}</span>
-                                                        <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-zinc-900 border border-white/5">
-                                                            {item.image && <img src={item.image} alt="" className="w-full h-full object-cover" />}
+                                                        <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-[var(--bg-elevated)] border border-white/5">
+                                                            {item.image && <Image src={item.image} alt="" fill sizes="48px" className="object-cover" />}
                                                         </div>
                                                         <span className="text-xs font-bold text-[var(--text-main)] truncate flex-1">{item.title}</span>
                                                         <Play className="w-4 h-4 text-[var(--accent)] mr-2 shrink-0" />
@@ -414,9 +415,9 @@ export default function MobileModals() {
                                                         }}
                                                         className="flex items-center gap-4 p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl active:scale-[0.98] transition-all"
                                                     >
-                                                        <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-zinc-900 border border-white/5">
+                                                        <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-[var(--bg-elevated)] border border-white/5">
                                                             {item.image ? (
-                                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                                                <Image src={item.image} alt={item.title || "Poster"} fill sizes="80px" className="object-cover" />
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center">
                                                                     <Play className="w-4 h-4 text-zinc-600" />

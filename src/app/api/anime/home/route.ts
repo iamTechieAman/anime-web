@@ -1,92 +1,63 @@
 import { NextResponse } from "next/server";
-import { getProvider } from "@/lib/providers";
+
+export const revalidate = 3600; // Cache for 1 hour
 
 export async function GET() {
     try {
-        const hianime = getProvider('hianime');
-        const anikai = getProvider('anikai');
-        const consumet = getProvider('consumet');
-        const aniwave = getProvider('aniwave');
-        const aniwatchtv = getProvider('aniwatchtv');
-
-        // Parallelize fetching with a total timeout
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("Timeout")), 8000)
-        );
-
-        const fetchHome = async () => {
-            try {
-                // Try Aniwave first (aniwaves.ru — live Aniwave mirror)
-                const [trending, latest] = await Promise.all([
-                    aniwave.getTrending?.() ?? Promise.resolve([]),
-                    aniwave.getRecent?.() ?? Promise.resolve([])
-                ]);
-                if (trending.length > 0 || latest.length > 0) {
-                    console.log("[AnimeHome] Successfully fetched from Aniwave");
-                    return { trending, latest, slides: [] };
-                }
-            } catch (e) {
-                console.warn('[AnimeHome] Aniwave failed, trying AniwatchTV:', e);
+        const query = `
+        query {
+          trending: Page(page: 1, perPage: 20) {
+            media(sort: POPULARITY_DESC, type: ANIME, isAdult: false) {
+              id
+              title { english romaji }
+              coverImage { extraLarge large }
             }
-
-            try {
-                // Try AniwatchTV second (aniwatchtv.com.ro — WP site with sub+dub)
-                const [trending, latest] = await Promise.all([
-                    aniwatchtv.getTrending?.() ?? Promise.resolve([]),
-                    aniwatchtv.getRecent?.() ?? Promise.resolve([])
-                ]);
-                if (trending.length > 0 || latest.length > 0) {
-                    console.log("[AnimeHome] Successfully fetched from AniwatchTV");
-                    return { trending, latest, slides: [] };
-                }
-            } catch (e) {
-                console.warn('[AnimeHome] AniwatchTV failed, trying HiAnime:', e);
+          }
+          latest: Page(page: 1, perPage: 20) {
+            media(sort: TRENDING_DESC, type: ANIME, status: RELEASING, isAdult: false) {
+              id
+              title { english romaji }
+              coverImage { extraLarge large }
             }
+          }
+        }
+        `;
 
-            try {
-                // Try HiAnime as fallback
-                const [trending, latest] = await Promise.all([
-                    hianime.getTrending?.() ?? Promise.resolve([]),
-                    hianime.getRecent?.() ?? Promise.resolve([])
-                ]);
+        const res = await fetch("https://graphql.anilist.co", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: JSON.stringify({ query }),
+            next: { revalidate: 3600 }
+        });
 
-                if (trending.length > 0 || latest.length > 0) {
-                    console.log("[AnimeHome] Successfully fetched from HiAnime");
-                    return { trending, latest, slides: [] };
-                }
-            } catch (e) {
-                console.warn("[AnimeHome] HiAnime failed, trying Consumet:", e);
-            }
+        const data = await res.json();
+        
+        if (!data?.data) {
+            throw new Error("Invalid AniList response");
+        }
 
-            try {
-                // Try Consumet (API-based)
-                const [trending, latest] = await Promise.all([
-                    consumet.getTrending?.() ?? Promise.resolve([]),
-                    consumet.getRecent?.() ?? Promise.resolve([])
-                ]);
+        const mapAniListToStandard = (item: any) => ({
+            id: String(item.id),
+            title: item.title.english || item.title.romaji,
+            image: item.coverImage.extraLarge || item.coverImage.large,
+            type: "anime"
+        });
 
-                if (trending.length > 0 || latest.length > 0) {
-                    console.log("[AnimeHome] Successfully fetched from Consumet");
-                    return { trending, latest, slides: [] };
-                }
-            } catch (e) {
-                console.error('[AnimeHome] All providers failed:', e);
-            }
+        const trending = data.data.trending.media.map(mapAniListToStandard);
+        const latest = data.data.latest.media.map(mapAniListToStandard);
 
-            return { trending: [], latest: [], slides: [] };
-        };
+        console.log(`[AnimeHome] Successfully fetched from AniList (Trending: ${trending.length}, Latest: ${latest.length})`);
 
-
-        const result: any = await Promise.race([fetchHome(), timeoutPromise]);
-
-        return NextResponse.json(result, {
+        return NextResponse.json({ trending, latest, slides: [] }, {
             headers: {
                 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
             }
         });
     } catch (error: any) {
         console.error("[AnimeHome] Critical Failure:", error.message);
-        return NextResponse.json({ trending: [], latest: [] }, { status: 200 });
+        return NextResponse.json({ trending: [], latest: [], slides: [] }, { status: 200 });
     }
 }
-

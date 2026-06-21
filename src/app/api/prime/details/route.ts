@@ -112,18 +112,22 @@ export async function GET(request: Request) {
         }
 
         // Fetch supplementary metadata in parallel for the resolved type
-        const [creditsRes, videosRes, similarRes, recommendationsRes] = await Promise.all([
+        const [creditsRes, videosRes, similarRes, recommendationsRes, keywordsRes, providersRes] = await Promise.all([
             fetch(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
             fetch(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
             fetch(`${TMDB_BASE}/${type}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
             fetch(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
+            fetch(`${TMDB_BASE}/${type}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }),
+            fetch(`${TMDB_BASE}/${type}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }),
         ]);
 
-        const [credits, videos, similar, recommendations] = await Promise.all([
+        const [credits, videos, similar, recommendations, keywordsData, providersData] = await Promise.all([
             creditsRes.ok ? creditsRes.json() : { cast: [], crew: [] },
             videosRes.ok ? videosRes.json() : { results: [] },
             similarRes.ok ? similarRes.json() : { results: [] },
             recommendationsRes.ok ? recommendationsRes.json() : { results: [] },
+            keywordsRes.ok ? keywordsRes.json() : { keywords: [], results: [] },
+            providersRes.ok ? providersRes.json() : { results: {} },
         ]);
 
         // Find trailer
@@ -131,14 +135,28 @@ export async function GET(request: Request) {
             (v: any) => v.type === "Trailer" && v.site === "YouTube"
         ) || videos.results?.[0];
 
+        // Normalize keywords (movies use 'keywords', TV uses 'results')
+        const keywords: { id: number; name: string }[] = keywordsData.keywords || keywordsData.results || [];
+
+        // Extract US watch providers (or first available country)
+        const providerResults = providersData.results || {};
+        const usProviders = providerResults['US'] || Object.values(providerResults)[0] || {};
+        const watchProviders = [
+            ...(usProviders.flatrate || []),
+            ...(usProviders.free || []),
+            ...(usProviders.ads || []),
+        ].slice(0, 8);
+
         return NextResponse.json({
             ...details,
             resolvedType: type,
-            cast: credits.cast?.slice(0, 20) || [],
+            cast: credits.cast?.slice(0, 30) || [],
             crew: credits.crew?.slice(0, 10) || [],
             trailer: trailer ? { key: trailer.key, name: trailer.name, site: trailer.site } : null,
             similar: similar.results?.slice(0, 12) || [],
             recommendations: recommendations.results?.slice(0, 12) || [],
+            keywords,
+            watch_providers: watchProviders,
         }, {
             headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' }
         });

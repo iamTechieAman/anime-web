@@ -4,16 +4,18 @@ import { Suspense, useEffect, useState } from "react";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
-import MobileModals from "@/components/MobileModals";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { usePathname } from "next/navigation";
-import ProfileSettings from "@/components/ProfileSettings";
 import { useMobileUI } from "@/context/MobileUIContext";
 import Footer from "@/components/Footer";
-import RandomizerModal from "@/components/RandomizerModal";
-import CommandPalette from "@/components/CommandPalette";
 import { AnimatePresence } from "framer-motion";
 import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
+import dynamic from "next/dynamic";
+
+const MobileModals = dynamic(() => import("@/components/MobileModals"), { ssr: false });
+const ProfileSettings = dynamic(() => import("@/components/ProfileSettings"), { ssr: false });
+const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
+const CommandPalette = dynamic(() => import("@/components/CommandPalette"), { ssr: false });
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();

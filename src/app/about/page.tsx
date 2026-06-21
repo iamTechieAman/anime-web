@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Github, Twitter, Mail, Shield, Zap, Sparkles, User, Cpu } from "lucide-react";
+import Image from "next/image";
 
 const timeline = [
     { year: "2024", title: "ToonPlayer V1.0 Launch", desc: "First release featuring local scrapers and standard anime video streams." },
@@ -30,7 +31,7 @@ export default function AboutPage() {
                         transition={{ duration: 0.5 }}
                         className="w-24 h-24 mx-auto flex items-center justify-center mb-6"
                     >
-                        <img src="/icon.png" alt="ToonPlayer Icon" className="w-full h-full object-contain filter drop-shadow-[0_0_20px_var(--accent-glow)]" />
+                        <Image src="/icon.png" alt="ToonPlayer Icon" width={96} height={96} className="w-full h-full object-contain filter drop-shadow-[0_0_20px_var(--accent-glow)]" />
                     </motion.div>
                     
                     <motion.h1 

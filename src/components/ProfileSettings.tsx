@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Check, Save, Settings2, Play, Bell, TrendingUp, Sparkles, Bookmark, Users, Brain, Zap, Palette, Accessibility as AccessIcon, Keyboard } from "lucide-react";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { useNotifications, type NotificationPreferences } from "@/context/NotificationContext";
 
@@ -228,7 +229,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                                     <button key={avatar} onClick={() => setSelectedAvatar(avatar)}
                                                         className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all ${selectedAvatar === avatar ? "border-[var(--accent)] scale-110 shadow-lg" : "border-transparent opacity-60 hover:opacity-100"}`}
                                                     >
-                                                        <img src={avatar} alt="" className="w-full h-full object-cover" />
+                                                        <Image src={avatar} alt="" fill sizes="56px" className="object-cover" />
                                                         {selectedAvatar === avatar && (
                                                             <div className="absolute inset-0 bg-[var(--accent)]/20 flex items-center justify-center">
                                                                 <Check className="w-4 h-4 text-white" />
@@ -258,7 +259,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             <p className="text-xs text-zinc-500">Select default stream quality</p>
                                         </div>
                                         <select value={quality} onChange={(e) => updateSetting('quality', e.target.value)}
-                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
                                             <option value="Auto">Auto Match</option>
                                             <option value="1080p">1080p FHD</option>
                                             <option value="720p">720p HD</option>
@@ -273,7 +274,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             <p className="text-xs text-zinc-500">Video streaming network buffer chunk size</p>
                                         </div>
                                         <select value={bufferSize} onChange={(e) => updateSetting('bufferSize', e.target.value)}
-                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
                                             <option value="Small">Small (Fast Start)</option>
                                             <option value="Standard">Standard (Balanced)</option>
                                             <option value="Large">Large (High Cache)</option>
@@ -288,7 +289,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             <p className="text-xs text-zinc-500">Preferred speed rate for video player</p>
                                         </div>
                                         <select value={playbackSpeed} onChange={(e) => updateSetting('playbackSpeed', e.target.value)}
-                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
                                             <option value="0.5">0.5x Slow</option>
                                             <option value="1.0">1.0x Normal</option>
                                             <option value="1.25">1.25x</option>
@@ -353,7 +354,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             <p className="text-xs text-zinc-500">Choose base dark accent layout</p>
                                         </div>
                                         <select value={theme} onChange={(e) => updateSetting('theme', e.target.value)}
-                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
                                             <option value="Midnight Purple">Midnight Purple (Default)</option>
                                             <option value="Cinematic Dark">Cinematic Dark</option>
                                             <option value="AMOLED Black">AMOLED Black</option>
@@ -401,7 +402,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             </div>
                                         </div>
                                         <select value={subtitleSize} onChange={(e) => updateSetting('subtitleSize', e.target.value)}
-                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
                                             <option value="Small">Small</option>
                                             <option value="Medium">Medium</option>
                                             <option value="Large">Large</option>
@@ -417,7 +418,7 @@ export default function ProfileSettings({ isOpen, onClose }: ProfileSettingsProp
                                             <p className="text-xs text-zinc-500">Choose typeface for subtitles</p>
                                         </div>
                                         <select value={subtitleFont} onChange={(e) => updateSetting('subtitleFont', e.target.value)}
-                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none">
+                                            className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
                                             <option value="Sora">Sora (Default)</option>
                                             <option value="Sans-Serif">Sans-Serif</option>
                                             <option value="Serif">Serif</option>

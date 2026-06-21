@@ -7,6 +7,7 @@ import {
   Calendar, Film, Tv2, Swords, Clock3, CheckCheck,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useWatch } from "@/context/WatchContext";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -206,10 +207,12 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       {/* Thumbnail */}
       <div className="relative w-24 md:w-36 shrink-0 bg-black/40 overflow-hidden select-none">
         {entry.poster ? (
-          <img
+          <Image
             src={entry.poster}
-            alt=""
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            alt={entry.title || "Poster"}
+            fill
+            sizes="(max-width: 768px) 96px, 144px"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-700">

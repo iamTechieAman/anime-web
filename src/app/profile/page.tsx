@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User, Bell, Clock, Bookmark, LogOut, Settings, BellRing } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useUser, useClerk } from "@clerk/nextjs";
@@ -92,7 +93,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-6 mb-12 p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)]">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[3px]">
                         <div className="w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden">
-                            <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                            <Image src={displayAvatar} alt="Avatar" fill sizes="80px" className="object-cover" />
                         </div>
                     </div>
                     <div>

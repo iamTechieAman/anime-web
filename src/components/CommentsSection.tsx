@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, ThumbsUp, ThumbsDown, Send, EyeOff, AlertCircle, Image as ImageIcon, Smile, HelpCircle, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { formatDistanceToNow } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import Image from "next/image";
 
 interface Comment {
     id: string;
@@ -62,8 +66,11 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
     const [showGifPicker, setShowGifPicker] = useState(false);
     const [selectedGif, setSelectedGif] = useState<string | null>(null);
 
+    const [isMounted, setIsMounted] = useState(false);
+
     // Load comments from localStorage or initialize with mock data
     useEffect(() => {
+        setIsMounted(true);
         const stored = localStorage.getItem(`comments_${contentId}`);
         if (stored) {
             try {
@@ -221,6 +228,8 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
         return <span dangerouslySetInnerHTML={{ __html: safe }} />;
     };
 
+    if (!isMounted) return null;
+
     return (
         <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-6 space-y-6">
             {/* Header */}
@@ -247,7 +256,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
                     
                     {selectedGif && (
                         <div className="absolute bottom-4 left-4 flex items-center gap-2 p-1.5 bg-black/60 border border-white/10 rounded-xl">
-                            <img src={selectedGif} alt="selected-gif" className="h-14 rounded-lg object-contain" />
+                            <Image src={selectedGif} alt="selected-gif" unoptimized width={100} height={56} className="h-14 w-auto rounded-lg object-contain" />
                             <button 
                                 type="button" 
                                 onClick={() => setSelectedGif(null)}
@@ -307,7 +316,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
                                     onClick={() => { setSelectedGif(gif.url); setShowGifPicker(false); }}
                                     className="relative h-20 rounded-xl overflow-hidden border border-white/5 hover:border-[var(--accent)] transition-all bg-black cursor-pointer group"
                                 >
-                                    <img src={gif.url} alt={gif.name} className="w-full h-full object-cover" />
+                                    <Image src={gif.url} alt={gif.name} unoptimized fill sizes="150px" className="object-cover" />
                                     <div className="absolute inset-0 bg-black/40 flex items-end p-1 text-[9px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">{gif.name}</div>
                                 </button>
                             ))}
@@ -353,7 +362,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
                                         <div>{renderMarkdown(comment.content)}</div>
                                         {comment.gifUrl && (
                                             <div className="max-w-xs overflow-hidden rounded-xl border border-white/10 bg-black/20">
-                                                <img src={comment.gifUrl} alt="gif-response" className="h-32 object-contain" />
+                                                <Image src={comment.gifUrl} alt="gif-response" unoptimized width={200} height={128} className="h-32 w-auto object-contain" />
                                             </div>
                                         )}
                                         {comment.isSpoiler && (

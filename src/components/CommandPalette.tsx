@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Film, Tv, Clock, Compass, X, Command, Mic, MicOff, Pin, PinOff, Sparkles, User, Tag, HelpCircle, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Image from "next/image";
 
 interface CommandPaletteProps {
     isOpen: boolean;
@@ -216,7 +217,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     initial={{ opacity: 0, scale: 0.96, y: -20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -20 }}
-                    className="w-full max-w-2xl bg-zinc-900/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col max-h-[75vh]"
+                    className="w-full max-w-2xl bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col max-h-[75vh]"
                 >
                     {/* Header Input */}
                     <div className="flex items-center gap-3 p-4 border-b border-white/10 shrink-0">
@@ -272,7 +273,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 }`}
                                             >
                                                 <div className="w-8 h-10 overflow-hidden rounded bg-zinc-950/40 border border-white/10 shrink-0">
-                                                    {item.image ? <img src={item.image} alt="" className="w-full h-full object-cover" /> : <Film className="w-4 h-4 m-auto text-zinc-500" />}
+                                                    {item.image ? <Image src={item.image} alt="" fill sizes="32px" className="object-cover" /> : <Film className="w-4 h-4 m-auto text-zinc-500" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">

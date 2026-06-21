@@ -965,9 +965,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
                     <div className="flex-1 min-w-0">
-                        <h1 className="font-black text-sm md:text-base lg:text-lg leading-tight text-white truncate tracking-tight">
+                        <h2 className="font-black text-sm md:text-base lg:text-lg leading-tight text-white truncate tracking-tight">
                             {animeTitle}
-                        </h1>
+                        </h2>
                         <p className="text-[10px] md:text-xs text-zinc-500 font-medium tracking-widest uppercase">Anime · Episode {currentEp}</p>
                     </div>
                 </nav>
@@ -1317,9 +1317,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
                     <div className="flex-1 min-w-0">
-                        <h1 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
+                        <h2 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">
                             {show.name || "Anime Stream"}
-                        </h1>
+                        </h2>
                         <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">
                             {episodes.length > 1 ? `Episode ${currentEp} · ${mode}` : `Movie · ${mode}`}
                         </p>

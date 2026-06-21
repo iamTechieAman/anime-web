@@ -52,6 +52,15 @@ export default function DiscoverClient() {
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [history, setHistory] = useState<string[]>([]);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Cleanup interval on unmount
+    useEffect(() => {
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, []);
+
     const [isListening, setIsListening] = useState(false);
     
     const recognitionRef = useRef<any>(null);
@@ -211,7 +220,7 @@ export default function DiscoverClient() {
         ];
         
         let stepIdx = 0;
-        const progressInterval = setInterval(() => {
+        intervalRef.current = setInterval(() => {
             if (stepIdx < progressSteps.length) {
                 setMessages(prev => prev.map(m => {
                     if (m.id === assistantMsgId) {
@@ -228,7 +237,7 @@ export default function DiscoverClient() {
             const res = await axios.get("/api/discover", { params: { prompt: combinedPrompt } });
             const searchResults = res.data.results || [];
 
-            clearInterval(progressInterval);
+            if (intervalRef.current) clearInterval(intervalRef.current);
 
             setMessages(prev => prev.map(m => {
                 if (m.id === assistantMsgId) {
@@ -248,7 +257,7 @@ export default function DiscoverClient() {
 
         } catch (err) {
             console.error("AI Discover search failed:", err);
-            clearInterval(progressInterval);
+            if (intervalRef.current) clearInterval(intervalRef.current);
 
             setMessages(prev => prev.map(m => {
                 if (m.id === assistantMsgId) {
@@ -350,19 +359,20 @@ export default function DiscoverClient() {
                                             value={input}
                                             onChange={(e) => setInput(e.target.value)}
                                             placeholder={placeholderText || "Describe your ideal watch..."}
-                                            className="w-full bg-transparent pl-4 pr-24 py-3.5 text-sm md:text-base text-white outline-none placeholder-white/20 font-bold"
+                                            className="w-full bg-transparent pl-4 pr-24 py-3.5 text-sm md:text-base text-white outline-none focus-visible:ring-2 focus-visible:ring-pink-500 rounded-2xl placeholder-white/20 font-bold"
                                         />
                                         <div className="absolute right-2 flex items-center gap-1.5">
                                             {/* Mic icon voice search */}
                                             <button
                                                 type="button"
                                                 onClick={toggleVoice}
-                                                className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                                                className={`p-2.5 rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${
                                                     isListening 
                                                         ? "bg-red-500/15 border-red-500/30 text-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.3)]" 
                                                         : "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
                                                 }`}
                                                 title="Voice Search"
+                                                aria-label="Voice Search"
                                             >
                                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
@@ -372,7 +382,8 @@ export default function DiscoverClient() {
                                             <button 
                                                 type="submit"
                                                 disabled={!input.trim()}
-                                                className="w-10 h-10 rounded-xl bg-pink-600 hover:bg-pink-500 disabled:opacity-30 text-white transition-all flex items-center justify-center cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-pink-600/15"
+                                                className="w-10 h-10 rounded-xl bg-pink-600 hover:bg-pink-500 disabled:opacity-30 text-white transition-all flex items-center justify-center cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-pink-600/15 outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                                aria-label="Send Query"
                                             >
                                                 <Send className="w-4 h-4" />
                                             </button>
