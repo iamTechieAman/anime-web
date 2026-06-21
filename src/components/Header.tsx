@@ -310,7 +310,7 @@ export default function Header() {
             <AnimatePresence>
               {showNotifications && (
                 <motion.div initial={{opacity:0,y:8,scale:0.95}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:8,scale:0.95}}
-                  className="absolute top-full right-0 mt-2 w-[88vw] max-w-[320px] sm:w-80 bg-[#0B0713]/97 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 overflow-hidden backdrop-blur-3xl">
+                  className="absolute top-full right-4 md:-right-2 mt-2 w-[90vw] md:w-[320px] max-w-[320px] bg-[#111113] border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-50">
                   <div className="p-3.5 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm">Notifications</span>

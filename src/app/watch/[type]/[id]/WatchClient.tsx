@@ -1563,7 +1563,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <div className="flex flex-col lg:flex-row gap-8 items-start">
                                 <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
                                     {details.poster_path && (
-                                        <div className="relative group">
+                                        <div className="relative group aspect-[2/3]">
                                             <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
                                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
@@ -1803,7 +1803,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                             {/* Cinematic Insights Tabs Panel */}
                             <section className="mt-10 border border-white/5 rounded-2xl bg-[var(--bg-card)]/40 overflow-hidden backdrop-blur-md">
-                                <div className="flex border-b border-white/5 bg-black/20 text-[10px] sm:text-xs font-black tracking-wider uppercase">
+                                <div className="flex border-b border-white/5 bg-black/20 text-[10px] sm:text-xs font-black tracking-wider uppercase overflow-x-auto hide-scrollbar flex-nowrap md:flex-wrap">
                                     {(["trivia", "soundtrack", "awards", "providers"] as const).map(tab => (
                                         <button
                                             key={tab}
