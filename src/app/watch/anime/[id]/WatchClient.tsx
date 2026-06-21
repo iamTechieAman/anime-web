@@ -1288,7 +1288,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 className="fixed inset-0 bg-black/90 z-[45] transition-opacity duration-300 cursor-pointer"
             />
         )}
-        <main className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-300">
+        <div className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-300">
             {/* No JavaScript Fallback */}
             <noscript>
                 <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">
@@ -1687,7 +1687,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 )}
 
             </div>
-        </main>
+        </div>
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
         </>
     );

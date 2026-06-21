@@ -230,6 +230,8 @@ export default function Header() {
                 <Search className={`w-4 h-4 ${isDiscoverMode?'text-[var(--accent)] animate-pulse':'text-zinc-500 group-focus-within:text-[var(--accent)]'}`}/>
               </button>
               <input type="text" value={searchQuery}
+                id="header-search-input"
+                aria-label="Search catalog"
                 onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);if(e.target.value.length>=2&&!isDiscoverMode)setShowSuggestions(true);}}
                 onFocus={()=>{if(!isDiscoverMode&&searchQuery.length>=1)setShowSuggestions(true);}}
                 onBlur={()=>setTimeout(()=>setShowSuggestions(false),200)}

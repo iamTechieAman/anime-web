@@ -101,6 +101,8 @@ export default function MobileNav() {
                     return (
                         <button
                             key={item.label}
+                            aria-label={item.label}
+                            aria-current={item.active ? "page" : undefined}
                             onClick={(e) => {
                                 // Haptic feedback
                                 if (navigator.vibrate) navigator.vibrate(10);

@@ -1351,7 +1351,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const activeFilteredEpisodes = getFilteredEpisodes();
     return (
         <>
-        <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
+        <div className="bg-[var(--bg-main)] text-[var(--text-main)]">
             {!isFocusMode && (
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
@@ -1666,7 +1666,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
                 )}
             </AnimatePresence>
-        </main>
+        </div>
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
         <AnimatePresence>
             {showDownloadModal && (
