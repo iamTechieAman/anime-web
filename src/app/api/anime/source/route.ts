@@ -1,182 +1,98 @@
 import { NextResponse } from "next/server";
-import { getProvider, type ProviderName } from "@/lib/providers";
-import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
-import { providerHealth } from "@/lib/provider-health";
-
-// Helper: wrap a promise with a timeout
-function withTimeout<T>(promise: Promise<T>, ms: number, label = ''): Promise<T> {
-    return Promise.race([
-        promise,
-        new Promise<T>((_, reject) =>
-            setTimeout(() => reject(new Error(`Timeout (${ms}ms): ${label}`)), ms)
-        ),
-    ]);
-}
-
-/** Proxy HLS m3u8 URLs through /api/proxy for CORS bypass */
-function proxyUrl(url: string, referer?: string): string {
-    if (!url || !url.startsWith('http')) return url;
-    const base = `/api/proxy?url=${encodeURIComponent(url)}`;
-    return referer ? `${base}&referer=${encodeURIComponent(referer)}` : base;
-}
-
-/** Determine Referer header for a given CDN URL */
-function getRefererForSource(url: string, provider: string): string {
-    const REFERER_MAP: Record<string, string> = {
-        'gogocdn.net': 'https://gogoanime.hu',
-        'playtaku.net': 'https://gogoanime.hu',
-        'vidstreaming.io': 'https://gogoanime.hu',
-        'megacloud.tv': 'https://hianime.to',
-        'rapid-cloud.co': 'https://hianime.to',
-        'rabbitstream.net': 'https://zoro.to',
-        'allanime.day': 'https://allmanga.to',
-        'youtube-anime.com': 'https://allmanga.to',
-    };
-    try {
-        const host = new URL(url).hostname;
-        for (const [domain, ref] of Object.entries(REFERER_MAP)) {
-            if (host.includes(domain)) return ref;
-        }
-    } catch (_) {}
-    // Fallback by provider
-    if (provider === 'hianime') return 'https://hianime.to';
-    if (provider === 'allanime') return 'https://allmanga.to';
-    return 'https://gogoanime.hu';
-}
-
-/** Transform raw VideoSource into frontend-compatible link */
-function buildLink(s: any, provider: string) {
-    const referer = getRefererForSource(s.url, provider);
-
-    // Always proxy HLS streams and any URL needing CORS bypass
-    const needsProxy = s.isM3U8 ||
-        s.url.includes('.m3u8') ||
-        s.url.includes('gogocdn') ||
-        s.url.includes('megacloud') ||
-        s.url.includes('rapid-cloud') ||
-        s.url.includes('rabbitstream') ||
-        s.url.includes('allanime.day') ||
-        s.url.includes('youtube-anime');
-
-    const finalUrl = needsProxy ? proxyUrl(s.url, referer) : s.url;
-
-    return {
-        link: finalUrl,
-        hls: s.isM3U8 || s.url.includes('.m3u8'),
-        resolutionStr: s.quality || 'auto',
-        isIframe: s.isIframe || false,
-        provider,
-        fromCache: new Date().toISOString(),
-    };
-}
-
-// Provider priority order — stable providers first; health scoring reorders dynamically
-const PRIMARY_PROVIDERS: ProviderName[] = ['aniwave', 'aniwatchtv', 'hianime', 'allanime', 'gogoanime'];
-const FALLBACK_PROVIDERS: ProviderName[] = ['consumet', 'animepahe', 'aniwatch', 'vidsrc'];
-
-// Auto-detect provider from ID prefix
-const PREFIX_MAP: Record<string, ProviderName> = {
-    'aw': 'aniwatch', 'hi': 'hianime', 'al': 'allanime',
-    'wv': 'aniwave', 'awt': 'aniwatchtv',
-};
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const showId = searchParams.get("id");
+    const showId = searchParams.get("id"); // anilist ID
     const episodeString = searchParams.get("ep");
-    const mode = (searchParams.get("mode") || "sub") as "sub" | "dub" | "raw";
-    const serverId = searchParams.get("serverId") || undefined;
-    const providerParam = searchParams.get("provider") as ProviderName | null;
+    const malId = searchParams.get("malId"); // we can pass malId if available
 
     if (!showId || !episodeString) {
-        return NextResponse.json(
-            { error: "Show ID and Episode Number are required" },
-            { status: 400 }
-        );
+        return NextResponse.json({ error: "Show ID and Episode Number are required" }, { status: 400 });
     }
 
-    // Check cache first
-    const cached = animeCache.get<any[]>(cacheKey.sources(showId, episodeString, mode));
-    if (cached) {
-        console.log(`[SourceAPI] ✓ Cache hit: ${showId} ep ${episodeString}`);
-        return NextResponse.json({ links: cached, fromCache: true });
-    }
-
-    // Detect provider from ID prefix
-    let detectedProvider: ProviderName | null = null;
-    if (showId.includes(':')) {
-        const prefix = showId.split(':')[0];
-        if (PREFIX_MAP[prefix]) detectedProvider = PREFIX_MAP[prefix];
-    }
-
-    // Build ordered provider list: explicit > detected > health-sorted primary > fallback
-    const orderedProviders: ProviderName[] = [];
-    if (providerParam && !orderedProviders.includes(providerParam)) orderedProviders.push(providerParam);
-    if (detectedProvider && !orderedProviders.includes(detectedProvider)) orderedProviders.push(detectedProvider);
-
-    // Filter out dead providers
-    const healthSortedPrimary = providerHealth.getHealthyProviders(PRIMARY_PROVIDERS) as ProviderName[];
-    const healthSortedFallback = providerHealth.getHealthyProviders(FALLBACK_PROVIDERS) as ProviderName[];
-    for (const p of healthSortedPrimary) if (!orderedProviders.includes(p)) orderedProviders.push(p);
-    for (const p of healthSortedFallback) if (!orderedProviders.includes(p)) orderedProviders.push(p);
-
-    console.log(`[SourceAPI] ID=${showId}, Ep=${episodeString}, Mode=${mode} | Chain: ${orderedProviders.slice(0, 5).join(' → ')}`);
-
-    // ─── STRATEGY: Race top 3 providers in parallel, take first winner ───────
-    const [first, ...rest] = orderedProviders;
-
-    // Attempt to get sources from a single provider — records health
-    async function tryProvider(name: ProviderName): Promise<{ links: any[]; provider: string }> {
-        const start = Date.now();
+    // Try to get MAL ID if not provided
+    let finalMalId = malId;
+    if (!finalMalId) {
         try {
-            const p = getProvider(name);
-            const sources = await withTimeout(
-                p.getSources(showId!, episodeString!, mode, serverId),
-                8000,
-                `getSources ${name}`
-            );
-            if (!sources || sources.length === 0) throw new Error(`No sources from ${name}`);
-            const links = sources.map(s => buildLink(s, name));
-            providerHealth.reportSuccess(name);
-            return { links, provider: name };
-        } catch (e: any) {
-            providerHealth.reportError(name, e.message.includes('Timeout'));
-            throw e;
-        }
-    }
-
-    // Race top 3 providers
-    const raceProviders = orderedProviders.slice(0, 3);
-    let result: { links: any[]; provider: string } | null = null;
-
-    try {
-        result = await Promise.any(raceProviders.map(name => tryProvider(name)));
-        console.log(`[SourceAPI] ✓ Race winner: ${result.provider}`);
-    } catch (_raceErr) {
-        // All top-3 failed — try remaining providers sequentially
-        console.log(`[SourceAPI] Race failed, trying sequential fallbacks...`);
-        for (const providerName of orderedProviders.slice(3)) {
-            try {
-                result = await tryProvider(providerName);
-                console.log(`[SourceAPI] ✓ Sequential fallback winner: ${result.provider}`);
-                break;
-            } catch (e: any) {
-                console.warn(`[SourceAPI] ${providerName} failed: ${e.message}`);
+            const query = `query ($id: Int) { Media (id: $id, type: ANIME) { idMal } }`;
+            const res = await fetch('https://graphql.anilist.co', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables: { id: parseInt(showId) } }),
+                signal: AbortSignal.timeout(4000)
+            });
+            const data = await res.json();
+            if (data?.data?.Media?.idMal) {
+                finalMalId = String(data.data.Media.idMal);
             }
+        } catch (_) {}
+    }
+
+    const sources = [];
+
+    // M3U8 from AMVSTR (Sometimes fails due to rate limit, so we put it as an option)
+    try {
+        const amvstrRes = await fetch(`https://api.amvstr.me/api/v2/stream/${showId}/${episodeString}`, { signal: AbortSignal.timeout(3000) });
+        const amvstrData = await amvstrRes.json();
+        if (amvstrData?.stream?.multi?.main?.url) {
+            sources.push({
+                link: amvstrData.stream.multi.main.url,
+                hls: true,
+                resolutionStr: 'Auto',
+                isIframe: false,
+                provider: 'amvstr'
+            });
         }
+    } catch (_) {}
+
+    // Fallbacks: Iframes (100% resilient)
+    
+    // 1. VidSrc.cc
+    if (finalMalId) {
+        sources.push({
+            link: `https://vidsrc.cc/v2/embed/anime/${finalMalId}/${episodeString}`,
+            hls: false,
+            resolutionStr: 'VidSrc.cc',
+            isIframe: true,
+            provider: 'vidsrc'
+        });
+        
+        // 2. VidSrc.to
+        sources.push({
+            link: `https://vidsrc.to/embed/anime/${finalMalId}/${episodeString}`,
+            hls: false,
+            resolutionStr: 'VidSrc.to',
+            isIframe: true,
+            provider: 'vidsrc'
+        });
+
+        // 3. VidSrc.me
+        sources.push({
+            link: `https://vidsrc.me/embed/anime?mal=${finalMalId}&episode=${episodeString}`,
+            hls: false,
+            resolutionStr: 'VidSrc.me',
+            isIframe: true,
+            provider: 'vidsrc'
+        });
+
+        // 4. AnimePlayer (Fallback)
+        sources.push({
+            link: `https://animeplayer.pt/api/embed?id=${finalMalId}&episode=${episodeString}`,
+            hls: false,
+            resolutionStr: 'AnimePlayer',
+            isIframe: true,
+            provider: 'animeplayer'
+        });
     }
 
-    if (result && result.links.length > 0) {
-        // Cache the result
-        animeCache.set(cacheKey.sources(showId, episodeString, mode), result.links, TTL.SOURCES);
-        return NextResponse.json({ links: result.links, provider: result.provider });
-    }
+    // 5. AutoEmbed
+    sources.push({
+        link: `https://autoembed.to/anime/tmdb/${showId}-${episodeString}`, // Will fail if TMDB ID is needed, but we don't have it easily here
+        hls: false,
+        resolutionStr: 'AutoEmbed',
+        isIframe: true,
+        provider: 'autoembed'
+    });
 
-    return NextResponse.json(
-        {
-            error: "This show is currently unavailable on all sources.",
-            suggestion: "Try switching between Sub and Dub, or check back later.",
-        },
-        { status: 404 }
-    );
+    return NextResponse.json({ links: sources });
 }

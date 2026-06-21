@@ -23,81 +23,74 @@ export async function GET(request: Request) {
     let animeShows: any[] = [];
     let movieShows: any[] = [];
 
-    // 1. Fetch Anime from Providers (skip if tab is "movies")
+    // 1. Fetch Anime from AniList (skip if tab is "movies")
     if (tab !== "movies") {
-        const providersToTry: ProviderName[] = providerParam
-            ? [providerParam as ProviderName]
-            : ["aniwave", "aniwatchtv", "hianime"];
-
-        for (const providerName of providersToTry) {
-            try {
-                console.log(`[A-Z] Trying anime provider: ${providerName} for letter: ${letter}`);
-                const animeProvider = getProvider(providerName);
-
-                if (!animeProvider.getAZList) continue;
-
-                const results = await withTimeout(animeProvider.getAZList(letter, page), 8000);
-
-                if (results && results.length > 0) {
-                    console.log(`[A-Z] Got ${results.length} anime from ${providerName}`);
-                    animeShows = results.map(result => ({
-                        _id: result.id,
-                        name: result.title,
-                        thumbnail: result.image,
-                        availableEpisodes: result.subOrDub,
-                        provider: result.provider || providerName,
-                        __typename: "Show",
-                        type: "Anime"
-                    }));
-                    break;
+        try {
+            console.log(`[A-Z] Fetching anime from AniList for letter: ${letter}`);
+            let graphqlQuery = `
+                query($page: Int, $perPage: Int, $search: String, $sort: [MediaSort]) {
+                    Page(page: $page, perPage: $perPage) {
+                        media(search: $search, type: ANIME, isAdult: false, sort: $sort) {
+                            id
+                            title { english romaji native }
+                            coverImage { extraLarge large }
+                            episodes
+                            status
+                            format
+                        }
+                    }
                 }
-            } catch (error: any) {
-                console.error(`[A-Z] Anime provider ${providerName} failed:`, error.message);
-                errors.push({ provider: providerName, error: error.message });
-            }
-        }
+            `;
 
-        // Fallback to TMDB for Anime if scraping failed
-        if (animeShows.length === 0) {
-            console.log(`[A-Z] Scraping failed, falling back to TMDB for anime`);
-            try {
-                if (letter === "all") {
-                    const res = await fetch(`${TMDB_BASE}/discover/tv?api_key=${TMDB_KEY}&language=en-US&with_original_language=ja&with_genres=16&page=${page}&sort_by=popularity.desc`);
-                    const data = res.ok ? await res.json() : { results: [] };
-                    animeShows = (data.results || []).map((item: any) => ({
-                        _id: `tmdb:tv:${item.id}`,
-                        name: item.name || item.original_name,
-                        thumbnail: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-                        availableEpisodes: { sub: 0, dub: 0 },
-                        provider: "tmdb",
-                        __typename: "Show",
-                        type: "Anime"
-                    })).filter((m: any) => m.thumbnail);
-                } else {
-                    const searchLetter = letter === "0-9" ? "1" : letter;
-                    const res = await fetch(`${TMDB_BASE}/search/tv?api_key=${TMDB_KEY}&language=en-US&query=${encodeURIComponent(searchLetter)}&page=${page}&include_adult=false`);
-                    const data = res.ok ? await res.json() : { results: [] };
-                    animeShows = (data.results || [])
-                        .filter((item: any) => item.original_language === 'ja' || (item.origin_country && item.origin_country.includes('JP')))
-                        .filter((item: any) => {
-                            if (letter === "0-9") return /^[0-9]/.test(item.name || item.original_name || "");
-                            return (item.name || item.original_name || "").toLowerCase().startsWith(letter.toLowerCase());
-                        })
-                        .map((item: any) => ({
-                            _id: `tmdb:tv:${item.id}`,
-                            name: item.name || item.original_name,
-                            thumbnail: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-                            availableEpisodes: { sub: 0, dub: 0 },
-                            provider: "tmdb",
-                            __typename: "Show",
-                            type: "Anime"
-                        })).filter((m: any) => m.thumbnail);
-                }
-            } catch (err: any) {
-                console.error(`[A-Z] TMDB fallback for anime failed:`, err.message);
+            const variables: any = {
+                page: page,
+                perPage: 20,
+                sort: ["POPULARITY_DESC"]
+            };
+
+            if (letter !== "all") {
+                variables.search = letter === "0-9" ? "1" : letter; // basic text search approximation for AniList AZ
             }
+
+            const res = await fetch("https://graphql.anilist.co", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: graphqlQuery, variables }),
+            });
+
+            const data = await res.json();
+            
+            if (data?.data?.Page?.media) {
+                let list = data.data.Page.media;
+                if (letter !== "all" && letter !== "0-9") {
+                    // Filter locally to enforce exact letter start
+                    list = list.filter((item: any) => {
+                        const title = item.title.english || item.title.romaji || "";
+                        return title.toLowerCase().startsWith(letter.toLowerCase());
+                    });
+                } else if (letter === "0-9") {
+                    list = list.filter((item: any) => {
+                        const title = item.title.english || item.title.romaji || "";
+                        return /^[0-9]/.test(title);
+                    });
+                }
+
+                animeShows = list.map((item: any) => ({
+                    _id: String(item.id),
+                    name: item.title.english || item.title.romaji || item.title.native,
+                    thumbnail: item.coverImage.extraLarge || item.coverImage.large,
+                    availableEpisodes: { sub: item.episodes || 0, dub: 0 },
+                    provider: "anilist",
+                    __typename: "Show",
+                    type: "Anime"
+                }));
+            }
+        } catch (error: any) {
+            console.error(`[A-Z] AniList failed:`, error.message);
+            errors.push({ provider: "anilist", error: error.message });
         }
     }
+
 
     // 2. Fetch Movies/TV from TMDB (skip if tab is "anime")
     if (tab !== "anime") {

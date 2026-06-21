@@ -847,6 +847,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         id,
                         ep: currentEp,
                         mode,
+                        malId: show.malId,
                         title: show.name,
                         provider: show.provider || provider,
                         serverId: selectedServer
