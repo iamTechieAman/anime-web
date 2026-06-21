@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="public/logo.webp" alt="ToonPlayer Logo" width="90" />
+  <img src="public/logo.webp" alt="ToonPlayer Logo" width="80" />
 </p>
 
 <h1 align="center">ToonPlayer</h1>
 <p align="center">
-  <strong>Netflix · Crunchyroll · Apple TV+ quality — Free Anime, Movies & TV Streaming</strong>
+  <strong>Free Anime & Movies Streaming Aggregator</strong>
 </p>
 
 <p align="center">

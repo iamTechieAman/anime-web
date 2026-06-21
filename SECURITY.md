@@ -2,28 +2,30 @@
 
 ## Supported Versions
 
-Currently, only the latest version of ToonPlayer is supported for security updates.
+ToonPlayer is maintained by an open-source community. Currently, we only provide security updates for the latest major version.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| v1.8.x  | :white_check_mark: |
-| < v1.8  | :x:                |
+| 5.0.x   | :white_check_mark: |
+| < 5.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-We take the security of ToonPlayer seriously. If you believe you have found a security vulnerability, please report it to us as follows:
+Security is a top priority for ToonPlayer. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
 
-1.  **Do not open a public GitHub issue**.
-2.  Email your findings to **iamTechieAman@gmail.com**.
-3.  Include as much detail as possible, including steps to reproduce and any potential impact.
+To report a security vulnerability, please **DO NOT** open a public issue. Instead, please email the core maintainer at **er.amankumar@hotmail.com**. 
 
-We will acknowledge your report within 48 hours and provide a timeline for a fix if necessary.
+Please include the following in your report:
+*   A description of the vulnerability.
+*   Steps to reproduce the vulnerability (a proof of concept is highly appreciated).
+*   Potential impact of the vulnerability.
 
-## Our Commitment
+We will try to acknowledge receipt of your vulnerability report within 48 hours and strive to send you regular updates about our progress. If a fix is implemented, we will notify you before publishing a public release.
 
-*   We will prioritize security fixes above new features.
-*   We will never intentionally include backdoors or malicious code.
-*   We use server-side scrapers to ensure that potentially malicious ad scripts from third-party providers are never executed in your primary browser context where possible.
+### Scope
 
----
-**Disclaimer:** ToonPlayer is a streaming aggregator. We do not host any content ourselves. Users are responsible for their own security when visiting external provider links.
+The scope of this security policy covers the ToonPlayer codebase and its official deployments. It does **not** cover the security of third-party streaming providers or scraping targets, as they are outside of our control. The built-in proxy and iframe sandboxing are designed to mitigate risks from third-party content.
+
+### Safe Harbor
+
+Any activities conducted in a manner consistent with this policy will be considered authorized conduct, and we will not initiate legal action against you. If legal action is initiated by a third party against you in connection with activities conducted under this policy, we will take steps to make it known that your actions were conducted in compliance with this policy.
