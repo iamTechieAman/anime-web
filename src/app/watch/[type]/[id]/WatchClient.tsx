@@ -603,6 +603,15 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [isTheatreMode, setIsTheatreMode] = useState(false);
     const [episodeSearch, setEpisodeSearch] = useState("");
+
+    const activeFilteredEpisodes = useMemo(() => {
+        if (!episodeSearch.trim()) return episodes;
+        const search = episodeSearch.toLowerCase();
+        return episodes.filter((ep: any) => {
+            if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
+            return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
+        });
+    }, [episodes, episodeSearch]);
     const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
 
     const hasNextEpisode = () => {
@@ -1392,14 +1401,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             </div>
         );
     };
-    const activeFilteredEpisodes = useMemo(() => {
-        if (!episodeSearch.trim()) return episodes;
-        const search = episodeSearch.toLowerCase();
-        return episodes.filter((ep: any) => {
-            if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
-            return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
-        });
-    }, [episodes, episodeSearch]);
     return (
         <>
         <div className="bg-[var(--bg-main)] text-[var(--text-main)]">
