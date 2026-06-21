@@ -5,6 +5,7 @@ import { Clock, Trash2, Play, Search, X, Download, CheckSquare, Square, ChevronR
 import Link from "next/link";
 import { useWatch } from "@/context/WatchContext";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HistoryPage() {
   const { history, clearHistory, removeFromHistory } = useWatch();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, ThumbsUp, ThumbsDown, Send, EyeOff, AlertCircle, Image as ImageIcon, Smile, HelpCircle } from "lucide-react";
+import { MessageSquare, ThumbsUp, ThumbsDown, Send, EyeOff, AlertCircle, Image as ImageIcon, Smile, HelpCircle, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface Comment {

@@ -27,6 +27,88 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const inputRef = useRef<HTMLInputElement>(null);
     const recognitionRef = useRef<any>(null);
 
+    function saveSearch(q: string) {
+        const updated = [q, ...recentSearches.filter(x => x !== q)].slice(0, 8);
+        setRecentSearches(updated);
+        localStorage.setItem("toonplayer_recent_searches", JSON.stringify(updated));
+    }
+
+    function togglePin(q: string, e: React.MouseEvent) {
+        e.stopPropagation();
+        let updated;
+        if (pinnedSearches.includes(q)) {
+            updated = pinnedSearches.filter(x => x !== q);
+        } else {
+            updated = [...pinnedSearches, q];
+        }
+        setPinnedSearches(updated);
+        localStorage.setItem("toonplayer_pinned_searches", JSON.stringify(updated));
+    }
+
+    function toggleVoice() {
+        if (!recognitionRef.current) {
+            alert("Speech recognition is not supported in this browser.");
+            return;
+        }
+        if (isListening) {
+            recognitionRef.current.stop();
+        } else {
+            recognitionRef.current.start();
+        }
+    }
+
+    function getFlattenedItems() {
+        const list: any[] = [];
+        
+        // Static commands
+        list.push({
+            name: "Surprise Me (Random Picker)",
+            action: () => { window.dispatchEvent(new Event("openRandomizer")); onClose(); }
+        });
+        list.push({
+            name: "Browse Movies",
+            action: () => { router.push("/browse?type=movie"); onClose(); }
+        });
+        list.push({
+            name: "Browse TV Shows",
+            action: () => { router.push("/browse?type=tv"); onClose(); }
+        });
+
+        // Pinned
+        pinnedSearches.forEach(term => {
+            list.push({
+                name: `Search Pinned: ${term}`,
+                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }
+            });
+        });
+
+        // Recents
+        recentSearches.forEach(term => {
+            list.push({
+                name: `Search Recent: ${term}`,
+                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }
+            });
+        });
+
+        // Results
+        results.forEach(item => {
+            list.push({
+                name: item.title,
+                action: () => { router.push(item.href); saveSearch(item.title); onClose(); }
+            });
+        });
+
+        return list;
+    }
+
+    function triggerItemAtIndex(index: number) {
+        const items = getFlattenedItems();
+        const selected = items[index];
+        if (selected) {
+            selected.action();
+        }
+    }
+
     // Debounce query
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -120,88 +202,6 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, activeIndex, allItemsCount, results, recentSearches, pinnedSearches]);
-
-    const saveSearch = (q: string) => {
-        const updated = [q, ...recentSearches.filter(x => x !== q)].slice(0, 8);
-        setRecentSearches(updated);
-        localStorage.setItem("toonplayer_recent_searches", JSON.stringify(updated));
-    };
-
-    const togglePin = (q: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        let updated;
-        if (pinnedSearches.includes(q)) {
-            updated = pinnedSearches.filter(x => x !== q);
-        } else {
-            updated = [...pinnedSearches, q];
-        }
-        setPinnedSearches(updated);
-        localStorage.setItem("toonplayer_pinned_searches", JSON.stringify(updated));
-    };
-
-    const toggleVoice = () => {
-        if (!recognitionRef.current) {
-            alert("Speech recognition is not supported in this browser.");
-            return;
-        }
-        if (isListening) {
-            recognitionRef.current.stop();
-        } else {
-            recognitionRef.current.start();
-        }
-    };
-
-    const triggerItemAtIndex = (index: number) => {
-        const items = getFlattenedItems();
-        const selected = items[index];
-        if (selected) {
-            selected.action();
-        }
-    };
-
-    const getFlattenedItems = () => {
-        const list: any[] = [];
-        
-        // Static commands
-        list.push({
-            name: "Surprise Me (Random Picker)",
-            action: () => { window.dispatchEvent(new Event("openRandomizer")); onClose(); }
-        });
-        list.push({
-            name: "Browse Movies",
-            action: () => { router.push("/browse?type=movie"); onClose(); }
-        });
-        list.push({
-            name: "Browse TV Shows",
-            action: () => { router.push("/browse?type=tv"); onClose(); }
-        });
-
-        // Pinned
-        pinnedSearches.forEach(term => {
-            list.push({
-                name: `Search Pinned: ${term}`,
-                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }
-            });
-        });
-
-        // Recents
-        recentSearches.forEach(term => {
-            list.push({
-                name: `Search Recent: ${term}`,
-                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`); saveSearch(term); onClose(); }
-            });
-        });
-
-        // Results
-        results.forEach(item => {
-            list.push({
-                name: item.title,
-                action: () => { router.push(item.href); saveSearch(item.title); onClose(); }
-            });
-        });
-
-        return list;
-    };
 
     if (!isOpen) return null;
 
