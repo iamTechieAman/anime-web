@@ -11,7 +11,7 @@ const POPULAR_MOVIES = ["1084244", "155", "27205", "157336", "299534", "129", "3
 const POPULAR_ANIME = ["11061", "16498", "21511", "5114", "1535", "19", "20", "2251", "101922", "113415", "140960"];
 const POPULAR_SHOWS = ["94605", "60625", "1396", "60059", "119051", "66732", "82856", "71446", "1434", "63174"];
 const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Horror", "Mystery", "Romance", "Sci-Fi", "Thriller"];
-const STUDIOS = ["MAPPA", "Ufotable", "Madhouse", "Bones", "Wit Studio", "Ghibli", "Marvel Studios", "Warner Bros.", "Pixar", "Universal Pictures"];
+const STUDIOS = ["A24", "Paramount", "Sony Pictures", "Legendary", "Lionsgate", "Disney", "Marvel Studios", "Warner Bros.", "Pixar", "Universal Pictures"];
 const TOP_RATED = [
     { type: "movie", id: "278" }, // Shawshank Redemption
     { type: "movie", id: "238" }, // The Godfather

@@ -8,6 +8,30 @@ import { useState, useEffect } from "react";
 
 const PLACEHOLDER = "/tmdb_placeholder.webp";
 
+const formatProgressStr = (current: number, total: number) => {
+    if (!total || total <= 0) return '0%';
+    return `${Math.min(100, Math.round((current / total) * 100))}%`;
+};
+
+const AnimatedProgressBar = ({ current, total }: { current: number, total: number }) => {
+    const [width, setWidth] = useState('0%');
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setWidth(formatProgressStr(current, total));
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [current, total]);
+
+    return (
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 rounded-b-2xl overflow-hidden pointer-events-none">
+            <div 
+                className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-out" 
+                style={{ width }}
+            />
+        </div>
+    );
+};
+
 export default function ContinueWatchingRow() {
     const { history, removeFromHistory } = useWatch();
     const [removingId, setRemovingId] = useState<string | null>(null);
@@ -28,11 +52,6 @@ export default function ContinueWatchingRow() {
         return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
     };
 
-    const formatProgress = (current: number, total: number) => {
-        if (!total || total <= 0) return '0%';
-        return `${Math.min(100, Math.round((current / total) * 100))}%`;
-    };
-
     const formatTimeLeft = (current: number, total: number) => {
         if (!total || total <= 0 || !current) return null;
         const secondsLeft = Math.max(0, total - current);
@@ -49,26 +68,6 @@ export default function ContinueWatchingRow() {
             removeFromHistory(id);
             setRemovingId(null);
         }, 200);
-    };
-
-    // Progress Bar Sub-component to handle animation on mount at the bottom of the card
-    const AnimatedProgressBar = ({ current, total }: { current: number, total: number }) => {
-        const [width, setWidth] = useState('0%');
-        useEffect(() => {
-            const timer = setTimeout(() => {
-                setWidth(formatProgress(current, total));
-            }, 300);
-            return () => clearTimeout(timer);
-        }, [current, total]);
-
-        return (
-            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 rounded-b-2xl overflow-hidden pointer-events-none">
-                <div 
-                    className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-out" 
-                    style={{ width }}
-                />
-            </div>
-        );
     };
 
     return (
@@ -136,7 +135,7 @@ export default function ContinueWatchingRow() {
                                             )}
                                             {entry.duration > 0 && (
                                                 <span className="text-[9px] text-[var(--text-muted)] font-medium">
-                                                    {timeLeft ? `${timeLeft} · ` : ""}{formatProgress(entry.currentTime, entry.duration)}
+                                                    {timeLeft ? `${timeLeft} · ` : ""}{formatProgressStr(entry.currentTime, entry.duration)}
                                                 </span>
                                             )}
                                         </div>

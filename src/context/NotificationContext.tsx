@@ -187,17 +187,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       if (isUsualWatchTime) alertToSend = AI_ALERTS[0]; // peak time alert
       else if (watchStreak >= 3) alertToSend = AI_ALERTS[1]; // streak alert
 
-      const alreadySent = existingNotifs.some(n => n.id === alertToSend.id);
-      if (alreadySent) return;
+      setNotifications(prev => {
+        const alreadySent = prev.some(n => n.id === alertToSend.id);
+        if (alreadySent) return prev;
 
-      const newNotif: Notification = {
-        ...alertToSend,
-        timestamp: Date.now(),
-        read: false,
-      };
-      const updated = [newNotif, ...existingNotifs];
-      localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
-      setNotifications([...updated]);
+        const newNotif: Notification = {
+          ...alertToSend,
+          timestamp: Date.now(),
+          read: false,
+        };
+        const updated = [newNotif, ...prev];
+        localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+        return updated;
+      });
     }, 4000);
 
     // ─── Community Activity Alert ─────────────────────────────────────
@@ -205,15 +207,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const prefs = JSON.parse(localStorage.getItem('toonplayer_notif_prefs') || JSON.stringify(DEFAULT_PREFS));
       if (!prefs.community) return;
 
-      const existingNotifs: Notification[] = JSON.parse(localStorage.getItem('toonplayer_notifications') || '[]');
       const alert = COMMUNITY_ALERTS[Math.floor(Math.random() * COMMUNITY_ALERTS.length)];
-      const alreadySent = existingNotifs.some(n => n.id === alert.id);
-      if (alreadySent) return;
+      setNotifications(prev => {
+        const alreadySent = prev.some(n => n.id === alert.id);
+        if (alreadySent) return prev;
 
-      const newNotif: Notification = { ...alert, timestamp: Date.now(), read: false };
-      const updated = [newNotif, ...existingNotifs];
-      localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
-      setNotifications([...updated]);
+        const newNotif: Notification = { ...alert, timestamp: Date.now(), read: false };
+        const updated = [newNotif, ...prev];
+        localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+        return updated;
+      });
     }, 8000);
 
     // ─── New Episode Simulation (Trending Show) ───────────────────────
@@ -221,23 +224,24 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const prefs = JSON.parse(localStorage.getItem('toonplayer_notif_prefs') || JSON.stringify(DEFAULT_PREFS));
       if (!prefs.episodes) return;
 
-      const existingNotifs: Notification[] = JSON.parse(localStorage.getItem('toonplayer_notifications') || '[]');
-      const hasMockEp = existingNotifs.some(n => n.id === 'ep_demon_slayer_s3e1');
-      if (hasMockEp) return;
+      setNotifications(prev => {
+        const hasMockEp = prev.some(n => n.id === 'ep_demon_slayer_s3e1');
+        if (hasMockEp) return prev;
 
-      const newNotif: Notification = {
-        id: 'ep_demon_slayer_s3e1',
-        title: '🔥 New Episode — Demon Slayer',
-        message: 'Hashira Training Arc - Episode 5 is now streaming in 1080p. Your watchlist updated!',
-        type: 'info',
-        category: 'episodes',
-        timestamp: Date.now(),
-        read: false,
-        link: '/search?query=Demon+Slayer',
-      };
-      const updated = [newNotif, ...existingNotifs];
-      localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
-      setNotifications([...updated]);
+        const newNotif: Notification = {
+          id: 'ep_demon_slayer_s3e1',
+          title: '🔥 New Episode — Demon Slayer',
+          message: 'Hashira Training Arc - Episode 5 is now streaming in 1080p. Your watchlist updated!',
+          type: 'info',
+          category: 'episodes',
+          timestamp: Date.now(),
+          read: false,
+          link: '/search?query=Demon+Slayer',
+        };
+        const updated = [newNotif, ...prev];
+        localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+        return updated;
+      });
     }, 12000);
 
     return () => {

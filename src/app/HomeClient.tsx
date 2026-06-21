@@ -165,6 +165,9 @@ const TopCollectionsRow = () => {
     );
 };
 
+// Global fetcher for SWR to prevent re-allocation on every render
+const fetcher = (url: string) => axios.get(url).then(res => res.data);
+
 export default function MoviesPage() {
     const [activeTab, setActiveTab] = useState("movies");
     const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
@@ -226,9 +229,6 @@ export default function MoviesPage() {
     const [videos, setVideos] = useState<any[]>([]);
     const [mjItems, setMjItems] = useState<any[]>([]);
 
-    // Fetch Movie Data for Unified Home
-    const fetcher = (url: string) => axios.get(url).then(res => res.data);
-    
     // Fetch current user from secure API
     const { data: userData } = useSWR('/api/auth/me', fetcher, {
         revalidateOnFocus: false,       // don't re-fetch auth when user alt-tabs

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import React from "react";
 import Script from "next/script";
 import axios from "axios";
@@ -163,28 +163,28 @@ const ANIME_SERVERS = [
         id: "toon4k_anime",
         name: "Toon4K",
         badge: "4K",
-        getUrl: (id: string, ep: number) =>
-            `https://vidlink.pro/tv/${id}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true`
+        getUrl: (id: string, ep: number, tmdbId: string | null) =>
+            tmdbId ? `https://vidlink.pro/tv/${tmdbId}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true` : `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
     },
     {
         id: "vidsrc_anime",
         name: "VidSrc",
         badge: "Sub",
-        getUrl: (id: string, ep: number) =>
-            `https://vidsrc.to/embed/anime/${id}/${ep}`
+        getUrl: (id: string, ep: number, tmdbId: string | null) =>
+            tmdbId ? `https://vidsrc.to/embed/tv/${tmdbId}/1/${ep}` : `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
     },
     {
         id: "vidsrc_pro_anime",
         name: "VidSrc Pro",
         badge: "HD",
-        getUrl: (id: string, ep: number) =>
-            `https://vidsrc.pro/embed/anime/${id}/1/${ep}?autoplay=1`
+        getUrl: (id: string, ep: number, tmdbId: string | null) =>
+            tmdbId ? `https://vidsrc.pro/embed/tv/${tmdbId}/1/${ep}?autoplay=1` : `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
     },
     {
         id: "vidsrc_me_anime",
         name: "VidSrc Alt",
         badge: "Dub",
-        getUrl: (id: string, ep: number) =>
+        getUrl: (id: string, ep: number, tmdbId: string | null) =>
             `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
     },
 ];
@@ -367,7 +367,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [showServers, setShowServers] = useState(false);
     const [iframeKey, setIframeKey] = useState(0);
 
-    const isAnimeServer = type === 'anime' || (activeServer ? (activeServer.type === 'anime' || ANIME_SERVERS.some(s => s.id === activeServer.id)) : false);
+    const isAnimeServer = useMemo(() =>
+        type === 'anime' || (activeServer ? (activeServer.type === 'anime' || ANIME_SERVERS.some(s => s.id === activeServer.id)) : false),
+        [type, activeServer]
+    );
 
 
     // Cast & Auto-Next state
@@ -392,20 +395,19 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setActorCredits([]);
         setActorBioLoading(true);
         try {
-            const [bioRes, creditsRes] = await Promise.all([
-                axios.get(`https://api.themoviedb.org/3/person/${person.id}?api_key=a46c50a0ccb1bafe2b15665df7fad7e1&language=en-US`),
-                axios.get(`https://api.themoviedb.org/3/person/${person.id}/combined_credits?api_key=a46c50a0ccb1bafe2b15665df7fad7e1&language=en-US`)
-            ]);
-            if (bioRes.data?.biography) {
+            // Use server-side proxy to prevent API key exposure in client bundle
+            const personRes = await axios.get(`/api/prime/person?id=${person.id}`);
+            const { bio, credits } = personRes.data;
+            if (bio?.biography) {
                 setSelectedActor((prev: any) => {
                     if (prev && prev.id === person.id) {
-                        return { ...prev, biography: bioRes.data.biography, birthday: bioRes.data.birthday, place_of_birth: bioRes.data.place_of_birth };
+                        return { ...prev, biography: bio.biography, birthday: bio.birthday, place_of_birth: bio.place_of_birth };
                     }
                     return prev;
                 });
             }
-            if (creditsRes.data?.cast) {
-                const sorted = [...creditsRes.data.cast]
+            if (credits?.cast) {
+                const sorted = [...credits.cast]
                     .filter((c: any) => c.poster_path)
                     .sort((a: any, b: any) => (b.vote_count || 0) - (a.vote_count || 0))
                     .slice(0, 6);
@@ -435,13 +437,16 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [serversList, setServersList] = useState<any[]>(SERVERS);
-    const currentMediaTypeServers = typeof type === "string"
-        ? serversList.filter(s => {
-            if (!s.type) return true;
-            const targetType = (type === "cartoon") ? "tv" : type;
-            return s.type === targetType;
-        })
-        : serversList;
+    const currentMediaTypeServers = useMemo(() =>
+        typeof type === "string"
+            ? serversList.filter(s => {
+                if (!s.type) return true;
+                const targetType = (type === "cartoon") ? "tv" : type;
+                return s.type === targetType;
+            })
+            : serversList,
+        [type, serversList]
+    );
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
@@ -454,7 +459,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
 
     // TV Auto-Next logic
-    const handleVideoEnded = () => {
+    const handleVideoEnded = useCallback(() => {
         if (type !== 'tv' || episodes.length === 0) return;
         
         const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
@@ -484,7 +489,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         } else {
             toast("You have reached the latest available episode.", { icon: "✅" });
         }
-    };
+    }, [type, episodes, selectedEpisode, showNextOverlay]);
 
     const handleVideoEndedRef = useRef<Function | null>(null);
     useEffect(() => {
@@ -687,7 +692,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         router.push(newUrl.pathname + newUrl.search, { scroll: false });
     };
 
-    // Read query parameters or history on load
+    // Read query parameters or history on load — use ref flag to run ONCE only
+    const historyRestoredRef = useRef(false);
     useEffect(() => {
         const s = searchParams?.get("season") || searchParams?.get("s");
         const e = searchParams?.get("episode") || searchParams?.get("e") || searchParams?.get("ep");
@@ -695,20 +701,20 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (s || e) {
             if (s) setSelectedSeason(parseInt(s) || 1);
             if (e) setSelectedEpisode(parseInt(e) || 1);
-        } else if (type === 'tv' && id) {
-            const finalId = id;
-            if (finalId) {
-                // Find most recently watched episode of this TV show from history
-                const historyItem = history.find((i: any) => i.showId === finalId);
-                if (historyItem) {
-                    if (historyItem.season) setSelectedSeason(historyItem.season);
-                    if (historyItem.episodeNumber || historyItem.episodeId) {
-                        setSelectedEpisode(Number(historyItem.episodeNumber || historyItem.episodeId) || 1);
-                    }
+        } else if (type === 'tv' && id && !historyRestoredRef.current) {
+            // Find most recently watched episode of this TV show from history (once per mount)
+            const historyItem = history.find((i: any) => i.showId === id);
+            if (historyItem) {
+                historyRestoredRef.current = true;
+                if (historyItem.season) setSelectedSeason(historyItem.season);
+                if (historyItem.episodeNumber || historyItem.episodeId) {
+                    setSelectedEpisode(Number(historyItem.episodeNumber || historyItem.episodeId) || 1);
                 }
             }
         }
-    }, [searchParams, id, type, animeData, tmdbIdForAnime, history]);
+    // Remove `history` from deps to prevent infinite loop — use ref guard above
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams, id, type]);
 
 
 
@@ -727,92 +733,17 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     }, []);
 
 
+    // Refs to always get current episode/season inside setInterval (avoid stale closures)
+    const selectedEpisodeRef = useRef(selectedEpisode);
+    const selectedSeasonRef = useRef(selectedSeason);
+    useEffect(() => { selectedEpisodeRef.current = selectedEpisode; }, [selectedEpisode]);
+    useEffect(() => { selectedSeasonRef.current = selectedSeason; }, [selectedSeason]);
+
     useEffect(() => {
         setPlayerLoaded(false);
         setSourceError(false);
         setIframeKey(prev => prev + 1);
-        
-        // Ensure auto-play / next-episode / timeupdate handling
-        const handleMessage = (e: MessageEvent) => {
-            const isEndEvent = e.data && (
-                e.data.type === "videoEnd" || 
-                e.data.event === "ended" || 
-                e.data === "video_ended" ||
-                e.data.type === "player_ended"
-            );
-
-            if (isEndEvent && (type === 'tv' || type === 'anime') && resolvedMediaType !== 'movie') {
-                // Trigger Netflix-style countdown overlay instead of direct jump
-                if (showNextOverlay) return; // Already counting down
-                
-                setShowNextOverlay(true);
-                setNextCountdown(5);
-                
-                if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                
-                nextIntervalRef.current = setInterval(() => {
-                    setNextCountdown(prev => {
-                        if (prev <= 1) {
-                            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                            setShowNextOverlay(false);
-                            
-                            // Load next episode
-                            let nextEp = selectedEpisode + 1;
-                            let nextSeason = selectedSeason;
-                            const seasons = details?.seasons;
-                            const currentSeasonData = seasons?.find(s => s.season_number === selectedSeason);
-                            
-                            if (currentSeasonData && nextEp > currentSeasonData.episode_count) {
-                                nextSeason += 1;
-                                nextEp = 1;
-                            }
-                            
-                            const newUrl = new URL(window.location.href);
-                            newUrl.searchParams.set("s", nextSeason.toString());
-                            newUrl.searchParams.set("e", nextEp.toString());
-                            router.push(newUrl.pathname + newUrl.search, { scroll: false });
-                            
-                            return 0;
-                        }
-                        return prev - 1;
-                    });
-                }, 1000);
-            }
-
-            // Time update parsing for progress saving
-            const isTimeUpdate = e.data && (
-                e.data.type === "timeupdate" || 
-                e.data.event === "timeupdate" ||
-                e.data.name === "timeupdate" ||
-                e.data.event === "time_update"
-            );
-            if (isTimeUpdate) {
-                const currentTime = e.data.currentTime || e.data.data?.currentTime || e.data.data?.time || 0;
-                const duration = e.data.duration || e.data.data?.duration || 0;
-                if (currentTime > 0 && duration > 0) {
-                    try {
-                        const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
-                        addToHistory({
-                            id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
-                            showId: finalId,
-                            type: type as any,
-                            title: details?.title || details?.name || animeData?.name || "Untitled",
-                            poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
-                            episodeId: String(selectedEpisode),
-                            episodeNumber: selectedEpisode,
-                            currentTime: Math.floor(currentTime),
-                            duration: Math.floor(duration),
-                            season: selectedSeason,
-                        } as any);
-                    } catch (err) {
-                        console.warn("Failed to save progress update:", err);
-                    }
-                }
-            }
-        };
-        window.addEventListener("message", handleMessage);
-        return () => window.removeEventListener("message", handleMessage);
-    }, [activeServer, selectedSeason, selectedEpisode, type, details?.seasons, router]);
+    }, [activeServer, selectedSeason, selectedEpisode, mode]);
 
     const isFirstLoadRef = useRef(true);
     // Load App Settings & Fetch DB Servers
@@ -1040,7 +971,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
                         const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`);
                         setDetails(detailsRes.data);
-                        if (detailsRes.data.resolvedType) {
+                        if (detailsRes.data.resolvedType && initialType !== "anime" && initialType !== "cartoon") {
                             setType(detailsRes.data.resolvedType);
                         }
                     } else {
@@ -1142,25 +1073,30 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         fetchData();
     }, [id, initialType]);
 
-    // Fetch episodes when season changes
+    // Fetch episodes when season changes — with AbortController to prevent race conditions
     useEffect(() => {
         if (type !== 'tv' || !id || !details) return;
+        const controller = new AbortController();
 
         const fetchEpisodes = async () => {
             setLoadingEpisodes(true);
             try {
-                const res = await axios.get(`/api/prime/season?id=${id}&season=${selectedSeason}`);
+                const res = await axios.get(`/api/prime/season?id=${id}&season=${selectedSeason}`, {
+                    signal: controller.signal
+                });
                 const eps = res.data.episodes || [];
                 // Sort episodes by episode number ascending
                 eps.sort((a: EpisodeInfo, b: EpisodeInfo) => a.episode_number - b.episode_number);
                 setEpisodes(eps);
-            } catch (err) {
+            } catch (err: any) {
+                if (axios.isCancel(err) || err?.name === 'CanceledError') return; // ignore abort
                 console.error("Failed to fetch episodes:", err);
             } finally {
                 setLoadingEpisodes(false);
             }
         };
         fetchEpisodes();
+        return () => controller.abort();
     }, [type, id, selectedSeason, details]);
 
     // Update anime episodes when mode (sub/dub) changes
@@ -1172,32 +1108,28 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         }
     }, [type, animeData, mode]);
 
-    // Refresh iframe when server or episode changes
+    // Save to watch history when episode/season changes (separate from iframe reload)
     useEffect(() => {
-        setIframeKey((prev) => prev + 1);
-        setSourceError(false); // Reset error on change
-
-        // Save to watch history (including season for TV resume)
-        if (details && (id || tmdbIdForAnime)) {
-            try {
-                const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
-                addToHistory({
-                    id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
-                    showId: finalId,
-                    type: type as any,
-                    title: details?.title || details?.name || animeData?.name || "Untitled",
-                    poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
-                    episodeId: String(selectedEpisode),
-                    episodeNumber: selectedEpisode,
-                    currentTime: 0,
-                    duration: 0,
-                    season: selectedSeason,
-                } as any);
-            } catch (e) {
-                console.error("Failed to save history:", e);
-            }
+        if (!details || (!id && !tmdbIdForAnime)) return;
+        try {
+            const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
+            addToHistory({
+                id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
+                showId: finalId,
+                type: type as any,
+                title: details?.title || details?.name || animeData?.name || "Untitled",
+                poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
+                episodeId: String(selectedEpisode),
+                episodeNumber: selectedEpisode,
+                currentTime: 0,
+                duration: 0,
+                season: selectedSeason,
+            } as any);
+        } catch (e) {
+            console.error("Failed to save history:", e);
         }
-    }, [activeServer, selectedSeason, selectedEpisode, mode, details, animeData, tmdbIdForAnime]);
+    // addToHistory is stable (useCallback with [isLoggedIn]) so safe to include
+    }, [selectedSeason, selectedEpisode, type, id, tmdbIdForAnime]);
 
     if (loading) {
         return (
@@ -1278,7 +1210,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         resolvedMediaType = "tv";
     }
     const embedUrl = isAnimeServer 
-        ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode)
+        ? (activeServer as any).getUrl(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime)
         : activeServer.getUrl(resolvedMediaType, activeId, selectedSeason, selectedEpisode);
     const renderPlayer = () => {
         return (
@@ -1460,15 +1392,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             </div>
         );
     };
-    const getFilteredEpisodes = () => {
+    const activeFilteredEpisodes = useMemo(() => {
         if (!episodeSearch.trim()) return episodes;
         const search = episodeSearch.toLowerCase();
         return episodes.filter((ep: any) => {
             if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
             return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
         });
-    };
-    const activeFilteredEpisodes = getFilteredEpisodes();
+    }, [episodes, episodeSearch]);
     return (
         <>
         <div className="bg-[var(--bg-main)] text-[var(--text-main)]">
