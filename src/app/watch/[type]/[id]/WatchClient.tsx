@@ -1438,19 +1438,20 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <div className={`w-full ${isFocusMode ? "h-dvh bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
                 {!isFocusMode && (
-                    <div className="flex flex-col gap-6 items-start w-full">
+                    <div className="flex flex-col gap-6 items-start w-full bg-[#09090B]">
                         <div className="flex-1 w-full min-w-0">
-                            <section data-testid="detail-hero" className="relative isolate overflow-hidden bg-[#09090B] w-full h-[50vh] md:h-[60vh] lg:h-[70vh] flex flex-col justify-end">
-                                <div
-                                    data-testid="detail-backdrop"
-                                    className="pointer-events-none absolute top-0 left-0 right-0 z-0 h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden bg-black"
-                                    style={{
-                                        WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)',
-                                        maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)'
-                                    }}
-                                    aria-hidden="true"
-                                >
-                                    {details.backdrop_path && (
+                            {/* HeroSection */}
+                            {details.backdrop_path && (
+                                <section data-testid="detail-hero" className="relative isolate overflow-hidden bg-[#09090B] w-full h-[50vh] md:h-[60vh] lg:h-[70vh]">
+                                    <div
+                                        data-testid="detail-backdrop"
+                                        className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-black"
+                                        style={{
+                                            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)',
+                                            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)'
+                                        }}
+                                        aria-hidden="true"
+                                    >
                                         <Image
                                             src={`${IMG_BASE}/original${details.backdrop_path}`}
                                             alt=""
@@ -1459,14 +1460,72 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             sizes="100vw"
                                             className="object-cover object-center"
                                         />
-                                    )}
-                                    <div className="absolute inset-0 bg-black/70" />
-                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#09090B]" />
+                                        <div className="absolute inset-0 bg-black/70" />
+                                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#09090B]" />
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* PlayerSection */}
+                            <div className="relative z-10 bg-[#09090B] p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto mt-6">
+                                {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
+                                {/* ── SERVER SELECTION BAR ── */}
+                                <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.06] bg-[var(--bg-card)]/50">
+                                    <div className="flex items-center gap-2 border-b border-white/[0.04] bg-[var(--accent)]/8 px-4 py-2.5">
+                                        <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-green-400" />
+                                        <p className="truncate text-xs font-semibold text-zinc-400">
+                                            Watching <span className="font-bold text-white">{title}</span>
+                                            {resolvedMediaType !== 'movie' && <span className="text-zinc-500"> · S{selectedSeason}E{selectedEpisode}</span>}
+                                        </p>
+                                        <span className="ml-auto flex shrink-0 items-center gap-1 text-[10px] font-black uppercase tracking-widest text-[var(--accent)]">
+                                            <Server className="h-3 w-3" /> {activeServer.name}
+                                        </span>
+                                    </div>
+                                    <div className="scrollbar-none overflow-x-auto px-3 py-2.5">
+                                        <div className="flex min-w-max items-center gap-2">
+                                            {(() => {
+                                                const base = type === "anime"
+                                                    ? [...ANIME_SERVERS, ...serversList.filter((s: any) => !s.type || s.type === 'tv')]
+                                                    : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
+                                                const seen = new Set<string>();
+                                                return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+                                            })().map((server: any) => {
+                                                const isActive = activeServer.id === server.id;
+                                                const isFailed = failedServers.has(server.id);
+                                                return (
+                                                    <button
+                                                        key={server.id}
+                                                        onClick={() => handleManualServerSelect(server)}
+                                                        disabled={isFailed && !isActive}
+                                                        title={isFailed ? `${server.name} — unavailable` : server.name}
+                                                        className={`flex flex-none items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all duration-200 ${
+                                                            isActive
+                                                                ? 'border-[var(--accent)] bg-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]'
+                                                                : isFailed
+                                                                    ? 'cursor-not-allowed border-white/[0.05] bg-transparent text-zinc-600 opacity-40'
+                                                                    : 'border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white'
+                                                        }`}
+                                                    >
+                                                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'animate-pulse bg-white' : isFailed ? 'bg-red-500' : 'bg-zinc-600'}`} />
+                                                        {server.name}
+                                                        {server.badge && (
+                                                            <span className={`rounded px-1 py-px text-[8px] font-black uppercase tracking-widest ${isActive ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-zinc-500'}`}>
+                                                                {server.badge}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="relative z-10 flex flex-col items-start gap-6 px-4 pb-6 sm:px-6 lg:flex-row lg:px-8 lg:pb-8 max-w-[1600px] mx-auto w-full pt-16">
-                                <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
+                            </div>
+
+                            {/* Metadata Section */}
+                            <div className="relative z-10 bg-[#09090B] p-6 md:p-8 rounded-[24px] border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
+                                <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative">
                                     {details.poster_path && (
-                                        <div className="relative group aspect-[2/3]">
+                                        <div className="relative group aspect-[2/3] w-full">
                                             <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
                                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
@@ -1538,7 +1597,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     {details.belongs_to_collection && (
                                         <div className="bg-gradient-to-r from-[var(--bg-card)] to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name)}`, { scroll: false })}>
                                             {details.belongs_to_collection.poster_path && (
-                                                <div className="w-12 h-16 shrink-0 rounded overflow-hidden">
+                                                <div className="w-12 h-16 shrink-0 rounded overflow-hidden relative">
                                                     <Image src={`${IMG_BASE}/w92${details.belongs_to_collection.poster_path}`} alt="" fill sizes="92px" className="object-cover" />
                                                 </div>
                                             )}
@@ -1557,61 +1616,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         {details.vote_count && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5 truncate">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
                                     </div>
                                 </div>
-                                </div>
-                            </section>
-                            <div className="relative z-10 bg-zinc-950 p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto">
-                                {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
-                                {/* ── SERVER SELECTION BAR ── */}
-                                <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.06] bg-[var(--bg-card)]/50">
-                                    <div className="flex items-center gap-2 border-b border-white/[0.04] bg-[var(--accent)]/8 px-4 py-2.5">
-                                        <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-green-400" />
-                                        <p className="truncate text-xs font-semibold text-zinc-400">
-                                            Watching <span className="font-bold text-white">{title}</span>
-                                            {resolvedMediaType !== 'movie' && <span className="text-zinc-500"> · S{selectedSeason}E{selectedEpisode}</span>}
-                                        </p>
-                                        <span className="ml-auto flex shrink-0 items-center gap-1 text-[10px] font-black uppercase tracking-widest text-[var(--accent)]">
-                                            <Server className="h-3 w-3" /> {activeServer.name}
-                                        </span>
-                                    </div>
-                                    <div className="scrollbar-none overflow-x-auto px-3 py-2.5">
-                                        <div className="flex min-w-max items-center gap-2">
-                                            {(() => {
-                                                const base = type === "anime"
-                                                    ? [...ANIME_SERVERS, ...serversList.filter((s: any) => !s.type || s.type === 'tv')]
-                                                    : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
-                                                const seen = new Set<string>();
-                                                return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-                                            })().map((server: any) => {
-                                                const isActive = activeServer.id === server.id;
-                                                const isFailed = failedServers.has(server.id);
-                                                return (
-                                                    <button
-                                                        key={server.id}
-                                                        onClick={() => handleManualServerSelect(server)}
-                                                        disabled={isFailed && !isActive}
-                                                        title={isFailed ? `${server.name} — unavailable` : server.name}
-                                                        className={`flex flex-none items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all duration-200 ${
-                                                            isActive
-                                                                ? 'border-[var(--accent)] bg-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]'
-                                                                : isFailed
-                                                                    ? 'cursor-not-allowed border-white/[0.05] bg-transparent text-zinc-600 opacity-40'
-                                                                    : 'border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white'
-                                                        }`}
-                                                    >
-                                                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'animate-pulse bg-white' : isFailed ? 'bg-red-500' : 'bg-zinc-600'}`} />
-                                                        {server.name}
-                                                        {server.badge && (
-                                                            <span className={`rounded px-1 py-px text-[8px] font-black uppercase tracking-widest ${isActive ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-zinc-500'}`}>
-                                                                {server.badge}
-                                                            </span>
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
+
                             {type === 'tv' && details.seasons && details.seasons.length > 0 && (
                                 <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8">
                                     <div className="flex flex-col gap-4 mb-6">
@@ -1694,7 +1700,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 onClick={() => handleActorClick(person)}
                                                 className={`flex-shrink-0 text-center group focus:outline-none outline-none ${showAllCast ? 'w-[calc(33.33%-12px)] sm:w-[calc(20%-16px)] md:w-[calc(16.66%-16px)] lg:w-[calc(14.28%-16px)]' : 'w-[100px]'}`}
                                             >
-                                                <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-[var(--accent)]/50 transition-all active:scale-95 shadow-lg">
+                                                <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-[var(--accent)]/50 transition-all active:scale-95 shadow-lg relative">
                                                     {person.profile_path ? (
                                                         <Image src={`${IMG_BASE}/w185${person.profile_path}`} alt={person.name} fill sizes="185px" className="object-cover" />
                                                     ) : (
@@ -1724,7 +1730,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         >
                                             <button onClick={() => setSelectedActor(null)} className="absolute top-4 right-4 p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
                                             <div className="flex items-start gap-4 mb-4">
-                                                <div className="w-16 h-16 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/10">
+                                                <div className="w-16 h-16 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/10 relative">
                                                     {selectedActor.profile_path ? <Image src={`${IMG_BASE}/w185${selectedActor.profile_path}`} alt="" fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-zinc-600">?</div>}
                                                 </div>
                                                 <div>
@@ -1750,7 +1756,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                                         {actorCredits.map((credit: any) => (
                                                             <Link key={credit.id} href={`/watch/${credit.media_type}/${credit.id}`} onClick={() => setSelectedActor(null)} className="group">
-                                                                <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black mb-1">
+                                                                <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black mb-1 relative">
                                                                     <Image src={`${IMG_BASE}/w154${credit.poster_path}`} alt={credit.title || credit.name} fill sizes="154px" className="object-cover group-hover:scale-110 transition-transform" />
                                                                 </div>
                                                                 <p className="text-[9px] text-zinc-400 font-semibold line-clamp-1 group-hover:text-white transition-colors">{credit.title || credit.name}</p>
@@ -1858,19 +1864,19 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 )}
             </div>
             {!isFocusMode && details.recommendations && details.recommendations.length > 0 && (
-                <section className="relative z-10 mt-10 bg-zinc-950 px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 mt-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                     <MovieRow items={details.recommendations} type={type} />
                 </section>
             )}
             {!isFocusMode && details.similar && details.similar.length > 0 && (
-                <section className="relative z-10 bg-zinc-950 px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                     <MovieRow items={details.similar} type={type} />
                 </section>
             )}
             {!isFocusMode && (
-                <section className="relative z-10 bg-zinc-950 px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 mt-[48px] max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 mt-[48px] max-w-[1600px] mx-auto w-full">
                     <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
                 </section>
             )}
