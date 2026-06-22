@@ -74,7 +74,7 @@ function MovieSearchContent() {
         : "Discover Content";
 
     return (
-        <main className="min-h-screen pt-6 pb-24 px-4 md:px-8 w-full bg-[var(--bg-main)]">
+        <main className="min-h-dvh pt-6 pb-24 px-4 md:px-8 w-full bg-[var(--bg-main)]">
             {/* Search Header */}
             <motion.div 
                 initial={{ opacity: 0, y: -20 }}
@@ -223,7 +223,7 @@ function MovieSearchContent() {
 export default function MovieSearchPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen pt-24 flex items-center justify-center bg-[var(--bg-main)]">
+            <div className="min-h-dvh pt-24 flex items-center justify-center bg-[var(--bg-main)]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                     <p className="text-sm text-[var(--text-muted)] animate-pulse">Loading Search...</p>

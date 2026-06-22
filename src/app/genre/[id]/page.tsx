@@ -35,7 +35,7 @@ export default function GenrePage() {
     const capitalizedGenre = genre ? genre.charAt(0).toUpperCase() + genre.slice(1) : "";
 
     return (
-        <main className="min-h-screen pt-24 pb-12 px-4 md:px-8">
+        <main className="min-h-dvh pt-24 pb-12 px-4 md:px-8">
             <div className="max-w-[2000px] mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

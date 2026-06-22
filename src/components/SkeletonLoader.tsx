@@ -87,7 +87,7 @@ export const GridSkeleton = memo(function GridSkeleton({ count = 12 }: { count?:
 // --- Details Skeleton (for watch pages) ---
 export const DetailsSkeleton = memo(function DetailsSkeleton() {
     return (
-        <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
+        <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)]">
             {/* Player skeleton */}
             <div className="pt-14">
                 <div className="max-w-7xl mx-auto">

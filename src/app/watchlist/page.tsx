@@ -513,7 +513,7 @@ export default function WatchlistPage() {
   const filterLabels = { all: "All", anime: "Anime", movie: "Movies", tv: "TV" } as const;
 
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
+    <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
 
       {/* ── Sticky Toolbar ───────────────────────────────────────── */}
       <div className="sticky top-[56px] md:top-[64px] z-40 bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/5">

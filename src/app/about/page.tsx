@@ -20,7 +20,7 @@ const stats = [
 
 export default function AboutPage() {
     return (
-        <main className="min-h-screen pt-24 pb-20 px-6 md:px-12 bg-[var(--bg-main)] overflow-x-hidden">
+        <main className="min-h-dvh pt-24 pb-20 px-6 md:px-12 bg-[var(--bg-main)] overflow-x-hidden">
             <div className="w-full max-w-6xl mx-auto space-y-28">
                 
                 {/* Hero Section */}

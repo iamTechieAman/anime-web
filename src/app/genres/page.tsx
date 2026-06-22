@@ -30,7 +30,7 @@ const genres = [
 
 export default function GenresPage() {
     return (
-        <main className="min-h-screen pt-24 pb-20 px-6 md:px-12 bg-[var(--bg-main)]">
+        <main className="min-h-dvh pt-24 pb-20 px-6 md:px-12 bg-[var(--bg-main)]">
             <div className="w-full max-w-[1800px] mx-auto">
                 <header className="mb-12">
                     <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">

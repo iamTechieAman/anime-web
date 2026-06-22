@@ -82,7 +82,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const showSidebar = deviceMode === "pc" && !isWatchPage;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
+    <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
@@ -90,7 +90,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       </Suspense>
 
       {/* Content area: adaptive padding based on sidebar visibility */}
-      <div className={`flex flex-col min-h-screen relative ${
+      <div className={`flex flex-col min-h-dvh relative ${
         showSidebar ? "pl-0 md:pl-[72px] peer-hover/sidebar:md:pl-[240px]" : "pl-0"
       } transition-[padding] duration-300 ease-in-out ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 

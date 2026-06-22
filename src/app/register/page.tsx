@@ -27,7 +27,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-[var(--bg-main)]">
+    <main className="min-h-dvh flex items-center justify-center p-4 bg-[var(--bg-main)]">
       <div className="w-full max-w-md bg-[var(--bg-card)]/30 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_20px_50px_-20px_var(--accent-glow)]">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/20 flex items-center justify-center mb-4 border border-[var(--accent)]/30">

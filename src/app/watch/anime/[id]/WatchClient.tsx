@@ -940,7 +940,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     if (loadingShow) {
         return (
-            <div className="min-h-screen bg-[var(--bg-main)] flex flex-col items-center justify-center gap-4">
+            <div className="min-h-dvh bg-[var(--bg-main)] flex flex-col items-center justify-center gap-4">
                 <Loader2 className="w-12 h-12 animate-spin text-[var(--accent)]" />
                 <p className="text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Initializing Experience</p>
             </div>
@@ -956,7 +956,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 {/* Navbar */}
-                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
+                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -1032,7 +1032,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
     const renderPlayer = () => {
         return (
-            <div className={`w-full ${isFocusMode ? "h-screen" : "aspect-video"} bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+            <div className={`w-full ${isFocusMode ? "h-dvh" : "aspect-video"} bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">
@@ -1308,7 +1308,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -1332,7 +1332,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 )}
 
                 {(isTheatreMode || isFocusMode) && (
-                    <div className={`w-full ${isFocusMode ? "h-screen bg-black rounded-none border-0 overflow-hidden animate-fade-in" : "mb-6"}`}>{renderPlayer()}</div>
+                    <div className={`w-full ${isFocusMode ? "h-dvh bg-black rounded-none border-0 overflow-hidden animate-fade-in" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
 
                 {!isFocusMode && (
@@ -1610,7 +1610,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         {/* Sidebar - Fixed Height Vertical Episode List */}
                         {episodes.length > 1 && (
                             <div className="w-full xl:w-[350px] flex-shrink-0">
-                                <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100vh-120px)] xl:sticky xl:top-[90px]">
+                                <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100dvh-120px)] xl:sticky xl:top-[90px]">
                                     {/* Sticky Header with Search */}
                                     <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
                                         <div className="flex items-center justify-between mb-3">

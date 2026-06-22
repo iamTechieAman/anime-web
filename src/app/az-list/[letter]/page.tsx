@@ -49,7 +49,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
     }, [letter, page, activeTab]);
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans">
+        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] font-sans">
             {/* Navbar */}
             <div className="sticky top-[60px] md:top-[64px] z-30 px-4 py-3 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)]">
                 <div className="w-full flex items-center gap-4">

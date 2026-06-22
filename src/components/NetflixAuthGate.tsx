@@ -75,7 +75,7 @@ export default function NetflixAuthGate() {
 
 
   return (
-    <div className="relative min-h-screen min-h-dvh w-full bg-[#050507] text-white flex flex-col overflow-hidden font-inter">
+    <div className="relative min-h-dvh min-h-dvh w-full bg-[#050507] text-white flex flex-col overflow-hidden font-inter">
 
       {/* ── 1. Animated Poster Background ── */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">

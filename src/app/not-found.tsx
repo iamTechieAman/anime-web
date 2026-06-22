@@ -3,7 +3,7 @@ import { Ghost, Home, Search } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col items-center justify-center p-4 text-center z-50 relative">
+    <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col items-center justify-center p-4 text-center z-50 relative">
       <div className="max-w-md w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/20 blur-3xl rounded-full" />

@@ -454,7 +454,7 @@ export default function HistoryPage() {
   const groupLabels: Record<GroupMode, string> = { day: "Day", week: "Week", month: "Month" };
 
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
+    <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pb-24 md:pb-10">
 
       {/* ── Sticky Toolbar ───────────────────────────────────────── */}
       <div className="sticky top-[56px] md:top-[64px] z-40 bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/5">

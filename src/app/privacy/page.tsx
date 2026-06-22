@@ -28,7 +28,7 @@ export default function PrivacyPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
+        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="text-center space-y-4">

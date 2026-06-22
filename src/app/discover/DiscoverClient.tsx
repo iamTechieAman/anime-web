@@ -304,7 +304,7 @@ export default function DiscoverClient() {
     };
 
     return (
-        <div className="flex-1 w-full bg-[#050505] pt-6 pb-12 px-4 md:px-8 flex flex-col min-h-[calc(100vh-4rem)]">
+        <div className="flex-1 w-full bg-[#050505] pt-6 pb-12 px-4 md:px-8 flex flex-col min-h-[calc(100dvh-4rem)]">
             <div className="max-w-[1800px] mx-auto w-full flex-1 flex flex-col">
                 
                 {/* Header Row */}

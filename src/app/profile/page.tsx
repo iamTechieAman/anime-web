@@ -78,7 +78,7 @@ export default function ProfilePage() {
         window.location.href = "/";
     };
 
-    if (!isLoaded) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+    if (!isLoaded) return <div className="min-h-dvh flex items-center justify-center text-white">Loading...</div>;
     if (!user) return null;
 
     const displayName = user.fullName || user.username || user.primaryEmailAddress?.emailAddress.split('@')[0] || "ToonPlayer User";
@@ -86,7 +86,7 @@ export default function ProfilePage() {
     const displayAvatar = user.imageUrl || `https://api.dicebear.com/9.x/avataaars/svg?seed=${displayName}`;
 
     return (
-        <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] pb-24 pt-6">
+        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pb-24 pt-6">
             <div className="max-w-4xl mx-auto px-4 md:px-8">
                 
                 {/* Profile Header */}

@@ -74,7 +74,7 @@ function serveCleanPlayer(videoUrl: string) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Video Player</title>
         <style>
-            body { margin: 0; padding: 0; background: #000; overflow: hidden; width: 100vw; height: 100vh; }
+            body { margin: 0; padding: 0; background: #000; overflow: hidden; width: 100vw; height: 100dvh; }
             video { width: 100%; height: 100%; object-fit: contain; }
             #error-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); color: white; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; }
             #play-fallback { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
@@ -179,7 +179,7 @@ function serveFallbackIframe(targetUrl: string) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Secure Player</title>
         <style>
-            body { margin: 0; padding: 0; background: #000; overflow: hidden; width: 100vw; height: 100vh; }
+            body { margin: 0; padding: 0; background: #000; overflow: hidden; width: 100vw; height: 100dvh; }
             iframe { width: 100%; height: 100%; border: none; }
             #cover { position: absolute; inset: 0; z-index: 100; pointer-events: auto; background: transparent; display: flex; align-items: center; justify-content: center; }
             #click-to-play { padding: 12px 24px; background: rgba(59, 130, 246, 0.9); color: white; font-family: sans-serif; font-weight: bold; border-radius: 8px; cursor: pointer; backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }

@@ -1141,8 +1141,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     if (loading) {
         return (
-            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
-                <div className="flex items-center justify-center min-h-screen">
+            <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)]">
+                <div className="flex items-center justify-center min-h-dvh">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                         <p className="text-[var(--text-muted)] text-sm animate-pulse">Loading content...</p>
@@ -1229,7 +1229,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4 }}
                     className={`relative w-full ${
-                        isFocusMode ? "h-screen rounded-none" : "aspect-video rounded-xl sm:rounded-2xl"
+                        isFocusMode ? "h-dvh rounded-none" : "aspect-video rounded-xl sm:rounded-2xl"
                     } bg-[#0a0a0a] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
                 >
                     {/* Loading State */}
@@ -1402,9 +1402,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
     return (
         <>
-        <div className="relative isolate min-h-screen overflow-x-clip bg-[#09090B] text-[var(--text-main)]">
+        <div className="relative isolate min-h-dvh overflow-x-clip bg-[#09090B] text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-[#050505] border-b border-white/[0.06] flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -1422,25 +1422,22 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     )}
                 </div>
             )}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-16 w-full max-w-[1600px] mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-4 mt-[env(safe-area-inset-top)] mb-[env(safe-area-inset-bottom)]"}`}>
+            <div className={`${isFocusMode ? "pt-0 w-full" : "w-full pb-4 mb-[env(safe-area-inset-bottom)]"}`}>
                 {isFocusMode && (
                     <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl mt-[env(safe-area-inset-top)] ml-[env(safe-area-inset-left)]">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
                     </button>
                 )}
                 {(isTheatreMode || isFocusMode) && (
-                    <div className={`w-full ${isFocusMode ? "h-screen bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
+                    <div className={`w-full ${isFocusMode ? "h-dvh bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
                 {!isFocusMode && (
-                    <div className="flex flex-col xl:flex-row gap-6 items-start">
+                    <div className="flex flex-col gap-6 items-start w-full">
                         <div className="flex-1 w-full min-w-0">
-                            <section
-                                data-testid="detail-hero"
-                                className="relative isolate overflow-hidden rounded-2xl bg-[#09090B]"
-                            >
+                            <section data-testid="detail-hero" className="relative isolate overflow-hidden bg-[#09090B] w-full h-[50vh] md:h-[60vh] lg:h-[70vh] flex flex-col justify-end">
                                 <div
                                     data-testid="detail-backdrop"
-                                    className="pointer-events-none absolute inset-x-0 top-0 z-0 h-full max-h-[50vh] overflow-hidden md:max-h-[60vh] lg:max-h-[70vh]"
+                                    className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden"
                                     aria-hidden="true"
                                 >
                                     {details.backdrop_path && (
@@ -1453,11 +1450,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             className="object-cover object-center"
                                         />
                                     )}
-                                    <div className="absolute inset-0 bg-black/60" />
-                                    <div className="absolute inset-0 bg-gradient-to-r from-[#09090B]/95 via-[#09090B]/65 to-[#09090B]/30" />
-                                    <div className="absolute inset-0 bg-gradient-to-b from-[#09090B]/15 via-[#09090B]/45 to-[#09090B]" />
+                                    <div className="absolute inset-0 bg-black/70" />
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#09090B]" />
                                 </div>
-                                <div className="relative z-10 flex flex-col items-start gap-8 px-4 py-6 sm:px-6 md:py-8 lg:flex-row lg:px-8">
+                                <div className="relative z-10 flex flex-col items-start gap-6 px-4 pb-6 sm:px-6 lg:flex-row lg:px-8 lg:pb-8 max-w-[1600px] mx-auto w-full pt-16">
                                 <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px]">
                                     {details.poster_path && (
                                         <div className="relative group aspect-[2/3]">
@@ -1547,7 +1543,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
                                 </div>
                             </section>
-                            <div className="relative z-10 bg-[#09090B] pt-6">
+                            <div className="relative z-10 bg-[#09090B] p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto">
                                 {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                 {/* ── SERVER SELECTION BAR ── */}
                                 <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.06] bg-[var(--bg-card)]/50">
@@ -1601,7 +1597,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
                             </div>
                             {type === 'tv' && details.seasons && details.seasons.length > 0 && (
-                                <section className="mt-10 xl:hidden">
+                                <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8">
                                     <div className="flex flex-col gap-4 mb-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
@@ -1663,7 +1659,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </section>
                             )}
                             {details.cast && details.cast.length > 0 && (
-                                <section className="mt-10">
+                                <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8">
                                     <div className="flex items-center justify-between mb-5">
                                         <div className="flex items-center gap-3">
                                             <Users className="w-5 h-5 text-blue-400" />
@@ -1753,7 +1749,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </AnimatePresence>
 
                             {/* Cinematic Insights Tabs Panel */}
-                            <section className="mt-10 border border-white/5 rounded-2xl bg-[var(--bg-card)]/40 overflow-hidden backdrop-blur-md">
+                            <section className="mt-10 border border-white/5 rounded-2xl bg-[#111111] overflow-hidden w-full max-w-[1600px] mx-auto">
                                 <div className="flex border-b border-white/5 bg-black/20 text-[10px] sm:text-xs font-black tracking-wider uppercase overflow-x-auto hide-scrollbar flex-nowrap md:flex-wrap">
                                     {(["trivia", "soundtrack", "awards", "providers"] as const).map(tab => (
                                         <button
@@ -1842,82 +1838,23 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
                             </section>
                         </div>
-                        {type === "tv" && details.seasons && details.seasons.length > 0 && (
-                            <div className="hidden xl:flex w-full xl:w-[380px] xl:shrink-0 xl:sticky xl:top-[80px] xl:max-h-[calc(100vh-120px)] xl:flex-col xl:overflow-hidden bg-[var(--bg-card)]/40 backdrop-blur-md rounded-2xl border border-[var(--border-color)] py-4 pl-4 pr-1 space-y-4">
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-base font-bold text-white">Episodes</h2>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
-                                                <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="List View"><List className="w-3.5 h-3.5" /></button>
-                                                <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="Grid View"><LayoutGrid className="w-3.5 h-3.5" /></button>
                                             </div>
-                                            <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-main)] px-2 py-0.5 rounded-md font-bold">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>
-                                        </div>
-                                    </div>
-                                    {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
-                                        <div className="relative">
-                                            <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-main)] font-semibold py-2 pl-3 pr-10 rounded-xl outline-none focus:border-[var(--accent)] transition-colors cursor-pointer text-xs">
-                                                {details.seasons.filter(s => s.season_number > 0).sort((a, b) => a.season_number - b.season_number).map((season) => <option key={season.id} value={season.season_number}>Season {season.season_number} ({season.episode_count} eps)</option>)}
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                                        </div>
-                                    )}
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                                        <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-[var(--accent)] transition-colors placeholder:text-zinc-500" />
-                                        {episodeSearch && <button onClick={() => setEpisodeSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
-                                    </div>
-                                </div>
-                                {loadingEpisodes ? (
-                                    <div className="flex justify-center items-center py-12"><div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" /></div>
-                                ) : (
-                                    <>
-                                        {episodeLayoutMode === "grid" ? (
-                                            <div className="grid grid-cols-5 gap-1.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                                                {activeFilteredEpisodes.map((ep) => (
-                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-2.5 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                                                {activeFilteredEpisodes.map((ep) => (
-                                                    <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#08080B] hover:border-[var(--accent)]/30'}`}>
-                                                        <div className="w-20 h-12 rounded-lg overflow-hidden bg-[var(--bg-card)] flex-shrink-0 relative">
-                                                            {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[9px] text-[var(--text-muted)]">No Img</div>}
-                                                            {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-4 h-4 text-white fill-current" /></div>}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className={`text-xs font-bold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
-                                                            <span className="text-[9px] text-[var(--text-muted)] mt-0.5 block">{ep.runtime > 0 ? `${ep.runtime}m` : 'TV Show'}</span>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        )}
-                    </div>
                 )}
             </div>
             {!isFocusMode && details.recommendations && details.recommendations.length > 0 && (
-                <section className="relative z-10 mt-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8">
+                <section className="relative z-10 mt-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                     <MovieRow items={details.recommendations} type={type} />
                 </section>
             )}
             {!isFocusMode && details.similar && details.similar.length > 0 && (
-                <section className="relative z-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8">
+                <section className="relative z-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                     <MovieRow items={details.similar} type={type} />
                 </section>
             )}
             {!isFocusMode && (
-                <section className="relative z-10 bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8">
+                <section className="relative z-10 bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 mt-[48px] max-w-[1600px] mx-auto w-full">
                     <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
                 </section>
             )}

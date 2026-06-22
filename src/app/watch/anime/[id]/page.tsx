@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function WatchPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     return (
-        <Suspense fallback={<div className="min-h-screen pt-24 text-center text-orange-400 font-bold bg-[var(--bg-main)]">Loading Player...</div>}>
+        <Suspense fallback={<div className="min-h-dvh pt-24 text-center text-orange-400 font-bold bg-[var(--bg-main)]">Loading Player...</div>}>
             <WatchClient id={id} />
         </Suspense>
     );

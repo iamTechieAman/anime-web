@@ -258,7 +258,7 @@ export async function GET(request: NextRequest) {
         if (!response!.ok) {
             // Return a detectable error HTML page instead of propagating the status code.
             // This allows the client-side auto-scan engine to detect the failure and rotate.
-            const errHtml = `<!DOCTYPE html><html><body style="background:#0a0a0a;color:#ef4444;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:12px;"><div style="font-size:48px">⚠️</div><div style="font-size:18px;font-weight:bold;">Embed fetch failed</div><div style="font-size:12px;color:#888">${response!.status} — ${decodedUrl.slice(0,80)}</div></body></html>`;
+            const errHtml = `<!DOCTYPE html><html><body style="background:#0a0a0a;color:#ef4444;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100dvh;margin:0;flex-direction:column;gap:12px;"><div style="font-size:48px">⚠️</div><div style="font-size:18px;font-weight:bold;">Embed fetch failed</div><div style="font-size:12px;color:#888">${response!.status} — ${decodedUrl.slice(0,80)}</div></body></html>`;
             return new NextResponse(errHtml, {
                 status: 200,
                 headers: {
@@ -420,7 +420,7 @@ export async function GET(request: NextRequest) {
         console.error('[EmbedProxy] Error:', err.message);
         const isTimeout = err.name === 'AbortError' || err.message?.includes('abort');
         const errMsg = isTimeout ? 'Request timed out' : err.message;
-        const errHtml = `<!DOCTYPE html><html><body style="background:#0a0a0a;color:#ef4444;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:12px;"><div style="font-size:48px">⚠️</div><div style="font-size:18px;font-weight:bold;">Embed proxy error</div><div style="font-size:12px;color:#888">${errMsg}</div></body></html>`;
+        const errHtml = `<!DOCTYPE html><html><body style="background:#0a0a0a;color:#ef4444;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100dvh;margin:0;flex-direction:column;gap:12px;"><div style="font-size:48px">⚠️</div><div style="font-size:18px;font-weight:bold;">Embed proxy error</div><div style="font-size:12px;color:#888">${errMsg}</div></body></html>`;
         return new NextResponse(errHtml, {
             status: 200,
             headers: {
