@@ -243,7 +243,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -20 }}
                     onClick={e => e.stopPropagation()}
-                    className="w-full max-w-2xl bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col"
+                    className="w-[90vw] sm:w-[420px] md:w-[480px] bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col"
                 >
                     {/* Header Input */}
                     <div className="flex items-center gap-3 p-4 border-b border-white/10 shrink-0">

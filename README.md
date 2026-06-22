@@ -29,6 +29,12 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 16 — Global Micro Polish & UI Hardening (`June 2026`)
+- ✨ **Apple TV+ Motion**: Refined sidebar navigation and layout shifts by locking transitions to a strict 300ms `ease-out` function.
+- 📐 **Zero-Shift Cards**: Unified all card assets (Movies, TV, Anime) to a pristine `16px` border radius with a standardized `1.02` hover scale multiplier, eliminating visual tearing and metadata jumps.
+- 🔍 **Adaptive Search UX**: Clamped the Command Palette and search modals to precise viewport ratios (`480px` desktop, `420px` tablet, `90vw` mobile) ensuring zero overflow or cutoff states.
+- 🖼️ **Aspect Integrity**: Strictly enforced `object-contain` for logos, `aspect-square` for avatars, and `aspect-[2/3]` for posters globally to guarantee absolute pixel-perfect layout preservation before hydration.
+
 ### Phase 15 — Production Acceptance Testing (PAT) (`June 2026`)
 - 🏁 **Production Ready**: Successfully executed the final Regression Elimination (PASS 48) and Production Acceptance Testing (PASS 49).
 - 🧩 **Zero-Bug Parity**: Guaranteed zero hydration mismatches, zero Cumulative Layout Shifts (CLS <0.01), and zero infinite render loops across the entire application.

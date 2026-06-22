@@ -81,7 +81,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
 
     return (
-        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-300 hover:scale-[1.06] hover:z-30 w-full h-full`}>
+        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-300 hover:z-30 w-full h-full`}>
             <Link href={getHref()} className="block w-full h-full">
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
@@ -92,7 +92,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                                 alt={title}
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
-                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
                                 placeholder="blur"
                                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                                 loading="lazy"
