@@ -458,6 +458,53 @@ p, .text-body {
 }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
+/* Menu drawer only: keep the scrollbar inside its own content gutter. */
+.mobile-menu-drawer {
+  width: 90vw;
+  max-width: 420px;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 12px);
+  overflow: hidden;
+  contain: layout paint;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mobile-menu-drawer :where(svg, img, .drawer-safe-icon) {
+  display: block;
+  flex: none;
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+  overflow: hidden;
+}
+
+.mobile-menu-drawer .drawer-safe-icon {
+  min-width: 0;
+  min-height: 0;
+}
+
+.mobile-menu-scrollbar {
+  padding-right: 12px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mobile-menu-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-menu-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.24);
+  border-radius: 9999px;
+}
+
 /* Custom scrollbar for desktop */
 @media (min-width: 769px) {
   ::-webkit-scrollbar {

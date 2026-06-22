@@ -25,6 +25,7 @@ export default function MobileModals() {
     const [autoPlay, setAutoPlay] = useState(false);
     const [autoNext, setAutoNext] = useState(false);
     const [isDiscoverMode, setIsDiscoverMode] = useState(false);
+    const [logoError, setLogoError] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -139,6 +140,16 @@ export default function MobileModals() {
         }
     }, [isSearchOpen]);
 
+    useEffect(() => {
+        if (!isMenuOpen && !isSearchOpen) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isMenuOpen, isSearchOpen]);
+
     const saveSearch = (q: string) => {
         if (!q.trim()) return;
         const newRecent = [q.trim(), ...recentSearches.filter(s => s !== q.trim())].slice(0, 5);
@@ -168,7 +179,7 @@ export default function MobileModals() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80"
+                        className="fixed inset-0 z-[60] flex items-end justify-center bg-black/80 pt-[env(safe-area-inset-top)] md:items-center md:p-4"
                         onClick={() => setMenuOpen(false)}
                         style={{ willChange: "opacity" }}
                     >
@@ -178,13 +189,13 @@ export default function MobileModals() {
                             exit={{ y: "100%" }}
                             transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full md:max-w-md bg-[var(--bg-card)] border-t md:border border-[var(--border-color)] rounded-t-2xl md:rounded-2xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col will-change-transform"
+                            className="mobile-menu-drawer isolate flex w-[90vw] max-w-[420px] flex-col overflow-hidden rounded-t-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xl md:rounded-2xl"
                         >
                             <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
                                 <div className="w-12 h-1.5 bg-[var(--text-muted)]/30 rounded-full"></div>
                             </div>
 
-                            <div className="p-5 overflow-y-auto">
+                            <div className="mobile-menu-scrollbar min-h-0 flex-1 overflow-y-auto pl-5 pt-5 pb-[calc(20px+env(safe-area-inset-bottom,0px))]">
                                 <div className="flex items-center justify-between mb-5">
                                     <h2 className="text-xl font-black text-[var(--text-main)]">Menu</h2>
                                     <button
@@ -205,12 +216,12 @@ export default function MobileModals() {
                                                 <button
                                                     key={link.name}
                                                     onClick={() => { setMenuOpen(false); router.push(link.href, { scroll: false }); }}
-                                                    className="flex items-center gap-2.5 p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)] hover:border-white/20 transition-colors active:scale-95 text-left"
+                                                    className="flex min-w-0 items-center gap-2.5 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] p-3 text-left transition-colors hover:border-white/20 active:scale-95"
                                                 >
-                                                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${link.color} flex items-center justify-center shadow-lg shrink-0`}>
-                                                        <Icon className="w-4 h-4 text-white" />
+                                                    <div className={`flex h-8 w-8 max-w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${link.color} shadow-lg`}>
+                                                        <Icon className="drawer-safe-icon h-4 w-4 text-white" />
                                                     </div>
-                                                    <span className="text-xs font-bold text-[var(--text-main)] truncate">{link.name}</span>
+                                                    <span className="min-w-0 truncate text-xs font-bold text-[var(--text-main)]">{link.name}</span>
                                                 </button>
                                             );
                                         })}
@@ -225,7 +236,7 @@ export default function MobileModals() {
                                     <div className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
-                                                <Zap className="w-5 h-5" />
+                                                <Zap className="drawer-safe-icon w-5 h-5" />
                                             </div>
                                             <div>
                                                 <p className="font-bold text-sm text-[var(--text-main)]">Auto Play</p>
@@ -241,29 +252,43 @@ export default function MobileModals() {
                                     </div>
 
                                     {/* Features Info */}
-                                    <div className="p-3 bg-gradient-to-r from-[var(--accent)]/5 to-[var(--accent-secondary)]/5 rounded-xl border border-[var(--border-color)]">
+                                    <div className="shrink-0 h-auto overflow-hidden rounded-xl border border-[var(--border-color)] bg-gradient-to-r from-[var(--accent)]/5 to-[var(--accent-secondary)]/5 p-4">
                                         <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--accent)] uppercase tracking-tight">
-                                            <Sparkles className="w-3 h-3" />
+                                            <Sparkles className="drawer-safe-icon w-3 h-3" />
                                             Premium Features Active
                                         </div>
-                                        <p className="mt-1 text-[10px] text-[var(--text-muted)]">Auto-Next and Dark Theme are permanently enabled for the best experience.</p>
+                                        <p className="mt-1 break-words text-[10px] leading-relaxed text-[var(--text-muted)]">Auto-Next and Dark Theme are permanently enabled for the best experience.</p>
                                     </div>
                                 </div>
 
                                 {/* App Info */}
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">About</h3>
-                                    <div className="p-4 bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent-secondary)]/10 rounded-xl border border-[var(--accent)]/20">
+                                    <div className="overflow-hidden rounded-xl border border-[var(--accent)]/20 bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent-secondary)]/10 p-4 transform-gpu translate-z-0 will-change-transform">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-10 h-10 flex items-center justify-center p-1 bg-white/5 rounded-lg shrink-0">
-                                                <Image src="/icon.png" alt="Logo" fill sizes="32px" className="object-contain" />
+                                            <div className="relative flex h-10 w-10 max-h-12 max-w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white/5 p-1">
+                                                {logoError ? (
+                                                    <Play aria-hidden="true" className="drawer-safe-icon h-full w-full max-w-[48px] max-h-[48px] object-contain fill-[var(--accent)] text-[var(--accent)]" />
+                                                ) : (
+                                                    <Image
+                                                        src="/icon-512x512.png"
+                                                        alt="ToonPlayer logo"
+                                                        width={32}
+                                                        height={32}
+                                                        sizes="32px"
+                                                        loading="eager"
+                                                        unoptimized
+                                                        className="h-8 w-8 max-h-12 max-w-12 object-contain"
+                                                        onError={() => setLogoError(true)}
+                                                    />
+                                                )}
                                             </div>
-                                            <div>
+                                            <div className="min-w-0">
                                                 <h4 className="font-bold text-sm text-[var(--text-main)]">ToonPlayer</h4>
-                                                <p className="text-[10px] text-[var(--text-muted)]">v3.5 • Full Experience</p>
+                                                <p className="break-words text-[10px] leading-relaxed text-[var(--text-muted)]">v3.5 • Full Experience</p>
                                             </div>
                                         </div>
-                                        <p className="text-[11px] text-[var(--text-muted)] leading-relaxed mb-3">
+                                        <p className="mb-3 break-words text-[11px] leading-relaxed text-[var(--text-muted)]">
                                             Premium anime & movie streaming. Built with love by Aman Kumar.
                                         </p>
                                         <div className="flex gap-2">
@@ -418,8 +443,8 @@ export default function MobileModals() {
                                                             {item.image ? (
                                                                 <Image src={item.image} alt={item.title || "Poster"} fill sizes="80px" className="object-cover" />
                                                             ) : (
-                                                                <div className="w-full h-full flex items-center justify-center">
-                                                                    <Play className="w-4 h-4 text-zinc-600" />
+                                                                <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                                                                    <Play className="w-full h-full max-w-[48px] max-h-[48px] object-contain text-zinc-600 p-2" />
                                                                 </div>
                                                             )}
                                                         </div>

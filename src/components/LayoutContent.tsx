@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
+import MobileModals from "@/components/MobileModals";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { usePathname } from "next/navigation";
 import { useMobileUI } from "@/context/MobileUIContext";
@@ -12,7 +13,6 @@ import { AnimatePresence } from "framer-motion";
 import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 import dynamic from "next/dynamic";
 
-const MobileModals = dynamic(() => import("@/components/MobileModals"), { ssr: false });
 const ProfileSettings = dynamic(() => import("@/components/ProfileSettings"), { ssr: false });
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
 const CommandPalette = dynamic(() => import("@/components/CommandPalette"), { ssr: false });
