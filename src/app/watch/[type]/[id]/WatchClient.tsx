@@ -16,6 +16,7 @@ import Image from "next/image";
 import CommentsSection from "@/components/CommentsSection";
 import dynamic from "next/dynamic";
 import MovieHero from "../../components/MovieHero";
+import ProviderBar from "../../components/ProviderBar";
 import { useUser } from "@clerk/nextjs";
 
 const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
@@ -1442,61 +1443,24 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <div className="flex flex-col gap-6 items-start w-full bg-[#09090B]">
                         <div className="flex-1 w-full min-w-0">
                             {/* HeroSection via Component */}
-                            <MovieHero backdropPath={details.backdrop_path}>
+                            <MovieHero backdropPath={details.backdrop_path} />
 
                             {/* PlayerSection */}
-                            <div className="relative z-10 bg-[#09090B] p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto mt-6">
+                            <div className="relative z-10 bg-[#09090B] p-4 md:p-6 rounded-[24px] w-full max-w-[1600px] mx-auto mt-6 shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
                                 {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                 {/* ── SERVER SELECTION BAR ── */}
-                                <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.06] bg-[var(--bg-card)]/50">
-                                    <div className="flex items-center gap-2 border-b border-white/[0.04] bg-[var(--accent)]/8 px-4 py-2.5">
-                                        <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-green-400" />
-                                        <p className="truncate text-xs font-semibold text-zinc-400">
-                                            Watching <span className="font-bold text-white">{title}</span>
-                                            {resolvedMediaType !== 'movie' && <span className="text-zinc-500"> · S{selectedSeason}E{selectedEpisode}</span>}
-                                        </p>
-                                        <span className="ml-auto flex shrink-0 items-center gap-1 text-[10px] font-black uppercase tracking-widest text-[var(--accent)]">
-                                            <Server className="h-3 w-3" /> {activeServer.name}
-                                        </span>
-                                    </div>
-                                    <div className="scrollbar-none overflow-x-auto px-3 py-2.5">
-                                        <div className="flex min-w-max items-center gap-2">
-                                            {(() => {
-                                                const base = type === "anime"
-                                                    ? [...ANIME_SERVERS, ...serversList.filter((s: any) => !s.type || s.type === 'tv')]
-                                                    : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
-                                                const seen = new Set<string>();
-                                                return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-                                            })().map((server: any) => {
-                                                const isActive = activeServer.id === server.id;
-                                                const isFailed = failedServers.has(server.id);
-                                                return (
-                                                    <button
-                                                        key={server.id}
-                                                        onClick={() => handleManualServerSelect(server)}
-                                                        disabled={isFailed && !isActive}
-                                                        title={isFailed ? `${server.name} — unavailable` : server.name}
-                                                        className={`flex flex-none items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all duration-200 ${
-                                                            isActive
-                                                                ? 'border-[var(--accent)] bg-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]'
-                                                                : isFailed
-                                                                    ? 'cursor-not-allowed border-white/[0.05] bg-transparent text-zinc-600 opacity-40'
-                                                                    : 'border-white/[0.07] bg-white/[0.04] text-zinc-400 hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white'
-                                                        }`}
-                                                    >
-                                                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'animate-pulse bg-white' : isFailed ? 'bg-red-500' : 'bg-zinc-600'}`} />
-                                                        {server.name}
-                                                        {server.badge && (
-                                                            <span className={`rounded px-1 py-px text-[8px] font-black uppercase tracking-widest ${isActive ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-zinc-500'}`}>
-                                                                {server.badge}
-                                                            </span>
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
+                                <ProviderBar
+                                    title={title}
+                                    type={type}
+                                    resolvedMediaType={resolvedMediaType as string}
+                                    selectedSeason={selectedSeason}
+                                    selectedEpisode={selectedEpisode}
+                                    activeServer={activeServer}
+                                    failedServers={failedServers}
+                                    serversList={serversList}
+                                    animeServers={ANIME_SERVERS}
+                                    onSelectServer={handleManualServerSelect}
+                                />
                             </div>
 
                             {/* Metadata Section */}
@@ -1558,7 +1522,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     <p className="font-bold text-xs sm:text-sm">{type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex flex-wrap gap-2 sm:gap-3">
+                                            <div className="flex flex-col sm:flex-row gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
                                                 <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
                                                 <button onClick={() => {
                                                      if (!isSignedIn) {
@@ -1837,25 +1801,24 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     )}
                                 </div>
                             </section>
-                            </MovieHero>
                         </div>
-                                            </div>
+                    </div>
                 )}
             </div>
             {!isFocusMode && details.recommendations && details.recommendations.length > 0 && (
-                <section className="relative z-10 mt-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 mt-[48px] bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                     <MovieRow items={details.recommendations} type={type} />
                 </section>
             )}
             {!isFocusMode && details.similar && details.similar.length > 0 && (
-                <section className="relative z-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 mt-[48px] bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                     <MovieRow items={details.similar} type={type} />
                 </section>
             )}
             {!isFocusMode && (
-                <section className="relative z-10 bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 mt-[48px] max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 mt-[48px] bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
                 </section>
             )}
