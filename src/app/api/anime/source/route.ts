@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 
+async function withTimeout<T>(promise: Promise<T>, ms: number = 3000): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const showId = searchParams.get("id"); // anilist ID
@@ -32,7 +39,7 @@ export async function GET(request: Request) {
 
     // M3U8 from AMVSTR (Sometimes fails due to rate limit, so we put it as an option)
     try {
-        const amvstrRes = await fetch(`https://api.amvstr.me/api/v2/stream/${showId}/${episodeString}`, { signal: AbortSignal.timeout(3000) });
+        const amvstrRes = await withTimeout(fetch(`https://api.amvstr.me/api/v2/stream/${showId}/${episodeString}`, { signal: AbortSignal.timeout(3000) }), 3000);
         const amvstrData = await amvstrRes.json();
         if (amvstrData?.stream?.multi?.main?.url) {
             sources.push({

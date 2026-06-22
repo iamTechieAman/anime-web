@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 
+async function withTimeout<T>(promise: Promise<T>, ms: number = 3000): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
@@ -99,7 +106,7 @@ export async function GET(req: Request) {
             }
             
             const fallbackUrl = new URL(`/data/${fileName}`, req.url);
-            const fallbackRes = await fetch(fallbackUrl);
+            const fallbackRes = await withTimeout(fetch(fallbackUrl), 3000);
             if (fallbackRes.ok) {
                 const data = await fallbackRes.json();
                 console.log(`[Discover API] Loaded fallback static file: ${fileName}`);

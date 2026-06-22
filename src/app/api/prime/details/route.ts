@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 
+async function withTimeout<T>(promise: Promise<T>, ms: number = 3000): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TVMAZE_BASE = "https://api.tvmaze.com";
@@ -71,6 +78,7 @@ async function tvmazeCrossValidate(title: string): Promise<boolean> {
         const res = await fetch(`${TVMAZE_BASE}/singlesearch/shows?q=${encoded}`, {
             next: { revalidate: 7200 },
         });
+
         if (!res.ok) return false;
         const data = await res.json();
         // If TVMaze found a show, it's episodic TV
@@ -100,7 +108,7 @@ export async function GET(request: Request) {
             const isEpisodic = await tvmazeCrossValidate(details.title);
             if (isEpisodic) {
                 // Re-fetch as TV if TVMaze confirms it's a series
-                const tvRes = await fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } });
+                const tvRes = await withTimeout(fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }), 3000);
                 if (tvRes.ok) {
                     const tvData = await tvRes.json();
                     if (!tvData.status_message) {

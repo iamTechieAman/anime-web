@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import WatchClient from "./WatchClient";
+import { fetchWithTimeout } from "@/lib/utils/fetch";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -8,8 +9,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     try {
         // Fetch show data for metadata
         // Note: In a real app, you might want to cache this or use a shared fetch utility
-        const res = await fetch(`https://toonplayer.in/api/anime/episodes?id=${id}`).then(r => r.json());
-        const show = res.show;
+        const res = await fetchWithTimeout(fetch(`https://toonplayer.in/api/anime/episodes?id=${id}`), 3000);
+        const data = await res.json();
+        const show = data.show;
 
         if (!show) {
             return {

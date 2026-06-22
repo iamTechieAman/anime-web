@@ -5,15 +5,17 @@ import { DetailsSkeleton } from "@/components/SkeletonLoader";
 
 const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
 
+import { fetchWithTimeout } from "@/lib/utils/fetch";
+
 export async function generateMetadata({ params }: { params: Promise<{ type: string; id: string }> }): Promise<Metadata> {
     const { type, id: rawId } = await params;
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
 
     try {
-        const res = await fetch(
+        const res = await fetchWithTimeout(fetch(
             `https://api.themoviedb.org/3/${type === 'anime' ? 'tv' : type}/${id}?api_key=${TMDB_KEY}`,
             { next: { revalidate: 3600 } }
-        );
+        ), 3000);
         
         if (!res.ok) throw new Error(`TMDB returned ${res.status}`);
         const data = await res.json();
@@ -80,7 +82,7 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
     let metaImage = "https://toonplayer.in/icon.png";
 
     try {
-        const res = await fetch(`https://api.themoviedb.org/3/${type === 'anime' ? 'tv' : type}/${id}?api_key=${TMDB_KEY}`);
+        const res = await fetchWithTimeout(fetch(`https://api.themoviedb.org/3/${type === 'anime' ? 'tv' : type}/${id}?api_key=${TMDB_KEY}`), 3000);
         const data = await res.json();
         metaTitle = data.title || data.name || metaTitle;
         metaDesc = data.overview || metaDesc;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProvider, type ProviderName } from "@/lib/providers";
 
+
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
