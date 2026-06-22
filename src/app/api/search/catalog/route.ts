@@ -60,7 +60,7 @@ async function fetchCatalog() {
                     id: item.id,
                     title: item.title.english || item.title.romaji || item.title.native,
                     altTitles: [item.title.english, item.title.romaji, item.title.native].filter(Boolean),
-                    image: item.coverImage.medium,
+                    image: item.coverImage?.medium || "",
                     type: 'anime',
                     year: item.seasonYear,
                     format: item.format,

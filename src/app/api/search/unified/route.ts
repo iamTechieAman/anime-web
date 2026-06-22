@@ -56,7 +56,7 @@ export async function GET(request: Request) {
                     id: item.id,
                     title: item.title.english || item.title.romaji,
                     altTitles: [item.title.english, item.title.romaji, item.title.native].filter(Boolean),
-                    image: item.coverImage.extraLarge || item.coverImage.large || item.coverImage.medium,
+                    image: item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || "",
                     type: 'anime',
                     year: item.seasonYear,
                     format: item.format,

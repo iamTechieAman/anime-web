@@ -78,7 +78,7 @@ export async function GET(request: Request) {
                 animeShows = list.map((item: any) => ({
                     _id: String(item.id),
                     name: item.title.english || item.title.romaji || item.title.native,
-                    thumbnail: item.coverImage.extraLarge || item.coverImage.large,
+                    thumbnail: item.coverImage?.extraLarge || item.coverImage?.large || "",
                     availableEpisodes: { sub: item.episodes || 0, dub: 0 },
                     provider: "anilist",
                     __typename: "Show",
