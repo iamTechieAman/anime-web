@@ -37,11 +37,11 @@ img {
 
 :root {
   /* ToonPlayer V5.0 Dark Cinematic Theme */
-  --bg-main: #09090B;
-  --bg-surface: #111113;
-  --bg-elevated: #151518;
-  --bg-card: #18181B;
-  --bg-overlay: rgba(9, 9, 11, 0.96);
+  --bg-main: #0A0A0B;
+  --bg-surface: #0f0f12;
+  --bg-elevated: #141419;
+  --bg-card: #1E1B29;
+  --bg-overlay: rgba(10, 10, 11, 0.96);
   
   --text-main: #ffffff;
   --text-secondary: #e4e4e7;
@@ -52,8 +52,8 @@ img {
   
   --accent: #7C3AED;
   --accent-secondary: #A855F7;
-  --accent-glow: rgba(124, 58, 237, 0.28);
-  --accent-warm: #7C3AED;
+  --accent-glow: rgba(192, 132, 252, 0.28);
+  --accent-warm: #C084FC;
 
   --secondary: #22D3EE;
   --danger: #EF4444;
@@ -95,11 +95,11 @@ img {
 }
 
 .dark {
-  --bg-main: #09090B;
-  --bg-surface: #111113;
-  --bg-elevated: #151518;
-  --bg-card: #18181B;
-  --bg-overlay: rgba(9, 9, 11, 0.96);
+  --bg-main: #0A0A0B;
+  --bg-surface: #0f0f12;
+  --bg-elevated: #141419;
+  --bg-card: #1E1B29;
+  --bg-overlay: rgba(10, 10, 11, 0.96);
   
   --text-main: #ffffff;
   --text-secondary: #e4e4e7;

@@ -171,7 +171,7 @@ export default function MobileModals() {
     return (
         <>
             {/* About/Menu Modal */}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 {isMenuOpen && (
                     <motion.div
                         key="about-modal"
@@ -308,7 +308,7 @@ export default function MobileModals() {
             </AnimatePresence>
 
             {/* Mobile Search Overlay */}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 {isSearchOpen && (
                     <motion.div
                         key="search-overlay"

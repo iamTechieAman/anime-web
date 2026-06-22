@@ -114,9 +114,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       </div>
       <MobileModals />
       <RandomizerFloatingTrigger />
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isRandomizerOpen && (
           <RandomizerModal 
+            key="randomizer-modal"
             onClose={() => setIsRandomizerOpen(false)} 
           />
         )}

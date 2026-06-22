@@ -67,6 +67,39 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
     // GIF picker states
     const [showGifPicker, setShowGifPicker] = useState(false);
     const [selectedGif, setSelectedGif] = useState<string | null>(null);
+    const [searchGifQuery, setSearchGifQuery] = useState("");
+    const [tenorGifs, setTenorGifs] = useState<any[]>([]);
+    const [isFetchingGifs, setIsFetchingGifs] = useState(false);
+
+    useEffect(() => {
+        if (!showGifPicker || !searchGifQuery.trim()) {
+            setTenorGifs([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            setIsFetchingGifs(true);
+            try {
+                // Using Tenor's public API key or a robust fallback search
+                const res = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(searchGifQuery)}&key=LIVDSRZULELA&client_key=toonplayer&limit=8`);
+                const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    const gifs = data.results.map((g: any) => ({
+                        name: g.content_description || "GIF",
+                        url: g.media_formats?.gif?.url || g.media_formats?.tinygif?.url
+                    })).filter((g: any) => !!g.url);
+                    setTenorGifs(gifs);
+                } else {
+                    setTenorGifs([]);
+                }
+            } catch (e) {
+                console.error("GIF fetch error", e);
+                setTenorGifs([]);
+            } finally {
+                setIsFetchingGifs(false);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchGifQuery, showGifPicker]);
 
     const [isMounted, setIsMounted] = useState(false);
 
@@ -315,22 +348,35 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
 
                     {/* GIF Picker Popup Panel */}
                     {showGifPicker && (
-                        <div className="absolute bottom-full left-0 mb-2 w-80 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl p-3 grid grid-cols-2 gap-2 z-50">
-                            <div className="col-span-2 flex items-center justify-between border-b border-white/5 pb-2 mb-1">
-                                <span className="text-[10px] font-black uppercase text-zinc-500">Trending GIFs</span>
+                        <div className="absolute bottom-full left-0 mb-2 w-80 sm:w-96 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl p-3 flex flex-col z-50">
+                            <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
+                                <span className="text-[10px] font-black uppercase text-zinc-500">GIF Search</span>
                                 <button type="button" onClick={() => setShowGifPicker(false)} className="text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
                             </div>
-                            {POPULAR_GIFS.map(gif => (
-                                <button
-                                    key={gif.name}
-                                    type="button"
-                                    onClick={() => { setSelectedGif(gif.url); setShowGifPicker(false); }}
-                                    className="relative h-20 rounded-xl overflow-hidden border border-white/5 hover:border-[var(--accent)] transition-all bg-black cursor-pointer group"
-                                >
-                                    <Image src={gif.url} alt={gif.name} unoptimized fill sizes="150px" className="object-cover" />
-                                    <div className="absolute inset-0 bg-black/40 flex items-end p-1 text-[9px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">{gif.name}</div>
-                                </button>
-                            ))}
+                            <input
+                                type="text"
+                                placeholder="Search Tenor..."
+                                value={searchGifQuery}
+                                onChange={(e) => setSearchGifQuery(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs mb-3 focus:border-[var(--accent)] outline-none transition-colors"
+                            />
+                            <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                                {isFetchingGifs ? (
+                                    <div className="col-span-2 text-center text-xs text-zinc-500 py-4">Loading...</div>
+                                ) : (
+                                    (tenorGifs.length > 0 ? tenorGifs : POPULAR_GIFS).map((gif, i) => (
+                                        <button
+                                            key={`${gif.name}-${i}`}
+                                            type="button"
+                                            onClick={() => { setSelectedGif(gif.url); setShowGifPicker(false); setSearchGifQuery(""); }}
+                                            className="relative h-20 rounded-xl overflow-hidden border border-white/5 hover:border-[var(--accent)] transition-all bg-black cursor-pointer group"
+                                        >
+                                            <Image src={gif.url} alt={gif.name} unoptimized fill sizes="150px" className="object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 flex items-end p-1 text-[9px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity truncate">{gif.name}</div>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
