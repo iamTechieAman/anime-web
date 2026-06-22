@@ -8,6 +8,7 @@ import { Play, ChevronLeft, ChevronRight, Check, Plus, Volume2, VolumeX, Shuffle
 import axios from "axios";
 import { HeroSkeleton } from "@/components/SkeletonLoader";
 import { useWatch } from "@/context/WatchContext";
+import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 interface Slide {
     id: number | string;
@@ -24,6 +25,10 @@ interface Slide {
 }
 
 export default function HeroCarousel() {
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+
     const [current, setCurrent] = useState(0);
     const [slides, setSlides] = useState<Slide[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +73,8 @@ export default function HeroCarousel() {
             return;
         }
         try {
-            const formattedSlides: Slide[] = rawSlides.slice(0, 15).map((item: any) => {
+            const filteredSlides = isKidsMode ? rawSlides.filter(s => isKidsFriendly(s)) : rawSlides;
+            const formattedSlides: Slide[] = filteredSlides.slice(0, 15).map((item: any) => {
                 const isTv = item.media_type === 'tv' || !item.title;
                 const title = item.title || item.name;
                 const description = item.overview || "No description available.";

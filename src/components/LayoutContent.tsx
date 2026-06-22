@@ -17,6 +17,9 @@ import ProfileGate from "@/components/ProfileGate";
 
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
 const CommandPalette = dynamic(() => import("@/components/CommandPalette"), { ssr: false });
+const LoginModal = dynamic(() => import("@/components/LoginModal"), { ssr: false });
+const ProfileEditModal = dynamic(() => import("@/components/ProfileEditModal"), { ssr: false });
+const SettingsModal = dynamic(() => import("@/components/SettingsModal"), { ssr: false });
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
@@ -27,6 +30,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const [deviceMode, setDeviceMode] = useState<"mobile" | "pc" | "tv">("pc");
   const [isRandomizerOpen, setIsRandomizerOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const detectDevice = () => {
@@ -48,7 +54,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     return () => window.removeEventListener("resize", detectDevice);
   }, []);
 
-  // Keyboard listeners for Surprise Me and Command Palette
+  // Keyboard listeners for Surprise Me and Command Palette + Custom Modal Event Listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -62,14 +68,23 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     };
     const handleEvent = () => setIsRandomizerOpen(true);
     const handlePaletteEvent = () => setIsCommandPaletteOpen(true);
+    const handleLoginEvent = () => setIsLoginOpen(true);
+    const handleProfileEvent = () => setIsProfileOpen(true);
+    const handleSettingsEvent = () => setIsSettingsOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("openRandomizer", handleEvent);
     window.addEventListener("openCommandPalette", handlePaletteEvent);
+    window.addEventListener("openLoginModal", handleLoginEvent);
+    window.addEventListener("openProfileModal", handleProfileEvent);
+    window.addEventListener("openSettingsModal", handleSettingsEvent);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("openRandomizer", handleEvent);
       window.removeEventListener("openCommandPalette", handlePaletteEvent);
+      window.removeEventListener("openLoginModal", handleLoginEvent);
+      window.removeEventListener("openProfileModal", handleProfileEvent);
+      window.removeEventListener("openSettingsModal", handleSettingsEvent);
     };
   }, []);
 
@@ -127,6 +142,11 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         onClose={() => setIsCommandPaletteOpen(false)} 
       />
       <ProfileGate />
+
+      {/* Global Portal Modals */}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <ProfileEditModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
     </div>
   );

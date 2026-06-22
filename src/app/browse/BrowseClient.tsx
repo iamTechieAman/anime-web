@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { MovieCard, type MovieItem } from "@/components/MovieCard";
 import { GridSkeleton } from "@/components/SkeletonLoader";
+import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 const GENRES = [
     { name: "Action", id: "28" },
@@ -69,6 +70,10 @@ const SORT_OPTIONS = [
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 export default function BrowseClient() {
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -630,7 +635,7 @@ export default function BrowseClient() {
                 ) : (
                     <div className="flex-1 flex flex-col justify-between">
                         <div className="responsive-grid">
-                            {items.map((item) => (
+                            {(isKidsMode ? items.filter(item => isKidsFriendly(item)) : items).map((item) => (
                                 <div key={item.id} className="w-full">
                                     <MovieCard item={item} type={item.media_type || mediaType} />
                                 </div>

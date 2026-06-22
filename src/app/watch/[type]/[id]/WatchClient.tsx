@@ -18,6 +18,7 @@ import dynamic from "next/dynamic";
 import MovieHero from "../../components/MovieHero";
 import ProviderBar from "../../components/ProviderBar";
 import { useUser } from "@clerk/nextjs";
+import { useUserStore } from "@/store/userStore";
 
 const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
 
@@ -363,7 +364,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { history, addToHistory, getHistoryItem, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+        const { history, addToHistory, getHistoryItem, watchlist, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isGuestProfile = activeProfile?.type === 'guest';
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [activeServer, setActiveServer] = useState<any>(SERVERS[0]); // Start with first server immediately
     const [loading, setLoading] = useState(true);
@@ -656,6 +660,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     }, [castAvailable, rawVideoSource]);
 
     const toggleWatchlist = () => {
+        if (isGuestProfile) {
+            toast.error("Watchlist is not available for Guest profiles. Please switch profiles or log in.", { icon: "🔒" });
+            return;
+        }
         if (inWatchlist) {
             removeFromWatchlist(id);
         } else {
@@ -1585,6 +1593,302 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     return (
         <>
         <div className="relative isolate min-h-dvh overflow-x-clip bg-[#09090B] text-[var(--text-main)]">
+            {!isFocusMode && (
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                        <h2 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h2>
+                        {(type === 'tv' || type === 'anime' || type === 'cartoon') && resolvedMediaType !== 'movie' && (
+                            <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">Season {selectedSeason} · Episode {selectedEpisode}</p>
+                        )}
+                    </div>
+                    {details?.vote_average && details.vote_average > 0 && (
+                        <div className="shrink-0 hidden sm:flex items-center gap-1 px-2 py-1 bg-white/[0.04] border border-white/[0.08] rounded-md">
+                            <span className="text-yellow-400 text-[11px]">★</span>
+                            <span className="text-[11px] font-bold text-zinc-300">{details.vote_average.toFixed(1)}</span>
+                        </div>
+                    )}
+                </div>
+            )}
+            <div className={`${isFocusMode ? "pt-0 w-full" : "w-full pb-4 mb-[env(safe-area-inset-bottom)]"}`}>
+                {isFocusMode && (
+                    <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl mt-[env(safe-area-inset-top)] ml-[env(safe-area-inset-left)]">
+                        <X className="w-3.5 h-3.5" /> Exit Focus Mode
+                    </button>
+                )}
+                {(isTheatreMode || isFocusMode) && (
+                    <div className={`w-full ${isFocusMode ? "h-dvh bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
+                )}
+                {!isFocusMode && (
+                    <div className="flex flex-col gap-6 items-start w-full bg-[#09090B]">
+                        <div className="flex-1 w-full min-w-0">
+                            {/* HeroSection via Component */}
+                            {renderHero()}
+
+                            {/* Player & Episode Layout */}
+                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 flex flex-col xl:flex-row gap-6 items-start">
+                                {/* Player Column (70%) */}
+                                <div className="flex-1 w-full xl:w-[70%] bg-[#09090B] p-4 md:p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+                                    {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
+                                    {/* ── SERVER SELECTION BAR ── */}
+                                    {renderProviders()}
+                                </div>
+
+                                {/* Desktop Episodes Sidebar (30%) */}
+                                {renderDesktopEpisodes()}
+                            </div>
+
+                            {/* Mobile/Tablet Episodes (Hidden on Desktop) */}
+                            {renderMobileEpisodes()}
+                            {/* Metadata Section */}
+                            <div className="relative z-10 bg-[#09090B] p-6 md:p-8 rounded-[24px] border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
+                                <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative">
+                                    {details?.poster_path && (
+                                        <div className="relative group aspect-[2/3] w-full">
+                                            <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
+                                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="mb-4 sm:mb-6 flex items-start justify-between gap-4">
+                                        <div>
+                                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-2 sm:mb-3 font-sora leading-tight flex items-center flex-wrap gap-3">
+                                                {title}
+                                                {details?.trailer && (
+                                                    <button onClick={() => setShowTrailer(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-xs font-bold text-white transition-all shrink-0">
+                                                        <Play className="w-3.5 h-3.5 fill-white" /> Trailer
+                                                    </button>
+                                                )}
+                                            </h2>
+                                            <div className="flex flex-wrap items-center gap-y-2 gap-x-3 sm:gap-x-4 text-xs sm:text-sm font-medium text-[var(--text-muted)]">
+                                                <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
+                                                <span>{year}</span>
+                                                {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
+                                                <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+                                        {details?.genres?.map((genre: any) => (
+                                            <span key={genre.id} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-full text-[10px] sm:text-xs font-bold tracking-wide text-zinc-300 hover:text-white hover:bg-white/10 transition-all">{genre.name}</span>
+                                        ))}
+                                    </div>
+                                    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-6 sm:mb-8">
+                                        {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
+                                            <div className="mb-6">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2"><Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes</h3>
+                                                    <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
+                                                        <button onClick={() => setMode("sub")} className={`px-3 sm:px-4 py-1 rounded-md text-[10px] sm:text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>SUB</button>
+                                                        <button onClick={() => setMode("dub")} className={`px-3 sm:px-4 py-1 rounded-md text-[10px] sm:text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>DUB</button>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
+                                                    {episodes.map((epNum: string) => (
+                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+                                            <div className="flex items-center gap-3 sm:gap-4">
+                                                <div className="bg-blue-600/10 p-2.5 sm:p-3 rounded-xl border border-blue-500/20"><Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 fill-current" /></div>
+                                                <div>
+                                                    <p className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Now Playing</p>
+                                                    <p className="font-bold text-xs sm:text-sm">{type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
+                                                <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
+                                                <button onClick={() => {
+                                                     if (!isSignedIn) {
+                                                         toast.error("Downloads are reserved for registered members. Please Sign In.");
+                                                     } else {
+                                                         setShowDownloadModal(true);
+                                                     }
+                                                 }} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
+                                                <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-[var(--border-color)] transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-[var(--text-muted)] text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-3xl">{details?.overview}</p>
+                                    {details?.belongs_to_collection && (
+                                        <div className="bg-gradient-to-r from-[var(--bg-card)] to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name)}`, { scroll: false })}>
+                                            {details.belongs_to_collection.poster_path && (
+                                                <div className="w-12 h-16 shrink-0 rounded overflow-hidden relative">
+                                                    <Image src={`${IMG_BASE}/w92${details.belongs_to_collection.poster_path}`} alt="" fill sizes="92px" className="object-cover" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-widest mb-0.5">Part of Collection</p>
+                                                <h4 className="text-sm font-bold text-white mb-1">{details.belongs_to_collection.name}</h4>
+                                                <p className="text-xs text-zinc-500 font-medium">Click to see all titles in this franchise</p>
+                                            </div>
+                                            <ChevronRight className="w-4 h-4 text-zinc-500 ml-auto" />
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
+                                        {director && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5 truncate">{director.name}</p></div>}
+                                        {details?.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5 truncate">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
+                                        {details?.status && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Status</span><p className="text-white font-medium mt-0.5 truncate">{details.status}</p></div>}
+                                        {details?.vote_count && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5 truncate">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {renderCast()}
+
+                            {/* Clickable Actor Biography Modal */}
+                            <AnimatePresence>
+                                {selectedActor && (
+                                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" onClick={() => setSelectedActor(null)}>
+                                        <motion.div 
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            onClick={e => e.stopPropagation()}
+                                            className="w-full max-w-lg bg-[var(--bg-elevated)] border border-white/10 rounded-2xl p-6 shadow-2xl relative max-h-[80vh] overflow-y-auto"
+                                        >
+                                            <button onClick={() => setSelectedActor(null)} className="absolute top-4 right-4 p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+                                            <div className="flex items-start gap-4 mb-4">
+                                                <div className="w-16 h-16 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/10 relative">
+                                                    {selectedActor.profile_path ? <Image src={`${IMG_BASE}/w185${selectedActor.profile_path}`} alt="" fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-zinc-600">?</div>}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-white font-sora">{selectedActor.name}</h3>
+                                                    <p className="text-xs text-blue-400 font-semibold">{selectedActor.character}</p>
+                                                </div>
+                                            </div>
+                                            <div className="border-t border-white/5 pt-4">
+                                                <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-wider mb-2">Biography</h4>
+                                                {actorBioLoading ? (
+                                                    <div className="space-y-2 animate-pulse">
+                                                        <div className="h-3.5 bg-white/5 rounded w-full" />
+                                                        <div className="h-3.5 bg-white/5 rounded w-[90%]" />
+                                                        <div className="h-3.5 bg-white/5 rounded w-[95%]" />
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-zinc-300 leading-relaxed font-inter line-clamp-[8] hover:line-clamp-none transition-all cursor-pointer" title="Click to expand">{selectedActor.biography || "Biography not available."}</p>
+                                                )}
+                                            </div>
+                                            {actorCredits.length > 0 && (
+                                                <div className="border-t border-white/5 pt-4 mt-4">
+                                                    <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-wider mb-3">Known For</h4>
+                                                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                                        {actorCredits.map((credit: any) => (
+                                                            <Link key={credit.id} href={`/watch/${credit.media_type}/${credit.id}`} onClick={() => setSelectedActor(null)} className="group">
+                                                                <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black mb-1 relative">
+                                                                    <Image src={`${IMG_BASE}/w154${credit.poster_path}`} alt={credit.title || credit.name} fill sizes="154px" className="object-cover group-hover:scale-110 transition-transform" />
+                                                                </div>
+                                                                <p className="text-[9px] text-zinc-400 font-semibold line-clamp-1 group-hover:text-white transition-colors">{credit.title || credit.name}</p>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Cinematic Insights Tabs Panel */}
+                            <section className="mt-10 border border-white/5 rounded-2xl bg-[#111111] overflow-hidden w-full max-w-[1600px] mx-auto">
+                                <div className="flex border-b border-white/5 bg-black/20 text-[10px] sm:text-xs font-black tracking-wider uppercase overflow-x-auto hide-scrollbar flex-nowrap md:flex-wrap">
+                                    {(["trivia", "soundtrack", "awards", "providers"] as const).map(tab => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveDetailTab(tab)}
+                                            className={`flex-1 py-3 text-center border-b-2 transition-all cursor-pointer flex justify-center items-center gap-1.5 ${
+                                                activeDetailTab === tab 
+                                                    ? "border-[var(--accent)] text-white bg-white/[0.02]" 
+                                                    : "border-transparent text-zinc-500 hover:text-white"
+                                            }`}
+                                        >
+                                            {tab === "trivia" && <Info className="w-3.5 h-3.5" />}
+                                            {tab === "soundtrack" && <Volume2 className="w-3.5 h-3.5" />}
+                                            {tab === "awards" && <Trophy className="w-3.5 h-3.5" />}
+                                            {tab === "providers" && <MonitorPlay className="w-3.5 h-3.5" />}
+                                            <span className="hidden sm:inline">{tab}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="p-5 min-h-[140px]">
+                                    {activeDetailTab === "trivia" && (
+                                        <ul className="space-y-3 text-xs text-zinc-300 leading-relaxed font-inter">
+                                            {triviaFacts.map((fact, i) => (
+                                                <li key={i} className="flex gap-3">
+                                                    <span className="text-[var(--accent)] shrink-0 mt-0.5">•</span>
+                                                    <span>{renderMarkdown(fact)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    {activeDetailTab === "soundtrack" && (
+                                        <div className="space-y-3">
+                                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Keywords & Themes</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {details?.keywords && details.keywords.length > 0 ? (
+                                                    details.keywords.map((kw: any) => (
+                                                        <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
+                                                            #{kw.name}
+                                                        </Link>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-zinc-500 italic">No specific keywords recorded.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {activeDetailTab === "awards" && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="p-4 rounded-xl bg-gradient-to-br from-[var(--bg-main)] to-black border border-white/5 flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-full border-[3px] border-[var(--accent)] flex items-center justify-center bg-black/50 shrink-0">
+                                                    <span className="text-lg font-black text-white">{details?.vote_average?.toFixed(1) || "N/A"}</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-white mb-0.5">ToonPlayer Community Score</p>
+                                                    <p className="text-[10px] text-zinc-400 font-medium">Based on {details?.vote_count?.toLocaleString() || "0"} global verified ratings</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                                                    <Trophy className="w-6 h-6 text-amber-500" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-white mb-0.5">Popularity Index</p>
+                                                    <p className="text-[10px] text-zinc-400 font-medium">Trending highly among global audiences this week.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {activeDetailTab === "providers" && (
+                                        <div className="space-y-3">
+                                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Available Streaming Partners (US)</p>
+                                            <div className="flex flex-wrap gap-3">
+                                                {details?.watch_providers && details.watch_providers.length > 0 ? (
+                                                    details.watch_providers.map((prov: any) => (
+                                                        <div key={prov.provider_id} className="flex items-center gap-2 px-3.5 py-2 bg-[#08080B] border border-white/5 rounded-xl">
+                                                            <Image src={`${IMG_BASE}/w92${prov.logo_path}`} alt={prov.provider_name} width={24} height={24} className="rounded bg-zinc-800" />
+                                                            <span className="text-xs font-bold text-white">{prov.provider_name}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-zinc-500 italic">No official streaming data available. Use our provided servers above.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                )}
+            </div>
+            {!isFocusMode && renderRecommendations()}
+            {!isFocusMode && renderSimilar()}
             {!isFocusMode && renderComments()}
             <AnimatePresence>
                 {showScrollTop && !isFocusMode && (

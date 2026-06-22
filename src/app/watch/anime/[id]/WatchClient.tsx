@@ -15,6 +15,7 @@ import CommentsSection from "@/components/CommentsSection";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useWatch } from "@/context/WatchContext";
+import { useUserStore } from "@/store/userStore";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -340,6 +341,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     };
 
     const { addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isGuestProfile = activeProfile?.type === 'guest';
     
     // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
     const handleAutoFallback = useCallback(() => {
@@ -527,6 +531,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     const toggleBookmark = () => {
         if (!show) return;
+        if (isGuestProfile) {
+            toast.error("Watchlist is not available for Guest profiles. Please switch profiles or log in.", { icon: "🔒" });
+            return;
+        }
 
         if (isBookmarked) {
             removeFromWatchlist(fullId);

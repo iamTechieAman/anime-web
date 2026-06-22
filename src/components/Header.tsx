@@ -15,6 +15,7 @@ import Logo from "@/components/Logo";
 import Fuse from "fuse.js";
 import CustomProfileMenu from "@/components/CustomProfileMenu";
 import Image from "next/image";
+import { useUserStore } from "@/store/userStore";
 
 const GENRES = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Drama","Family","Fantasy","History","Horror","Music","Mystery","Romance","Science Fiction","Thriller","War","Western"];
 const FORMATS = ["TV","Movie","OVA","ONA","Special"];
@@ -27,6 +28,7 @@ export default function Header() {
   const pathname = usePathname();
   const [deviceMode, setDeviceMode] = useState<"mobile"|"pc"|"tv">("pc");
   const [isTvSearchOpen, setIsTvSearchOpen] = useState(false);
+  const { activeProfileId } = useUserStore();
 
   useEffect(() => {
     const detect = () => {
@@ -347,7 +349,7 @@ export default function Header() {
                     )}
                   </div>
                   <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
-                    <button onClick={()=>{setShowNotifications(false);router.push('/settings', { scroll: false });}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
+                    <button onClick={()=>{setShowNotifications(false);window.dispatchEvent(new Event("openSettingsModal"));}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
                     {notifications.length>0&&<button onClick={clearNotifications} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all">Clear All</button>}
                   </div>
                 </motion.div>
@@ -358,14 +360,15 @@ export default function Header() {
           {/* Auth */}
           <div className="flex items-center pl-2 border-l border-white/[0.07]">
             {!isUserLoaded&&<div className="w-16 sm:w-20 h-9 rounded-xl bg-white/[0.05] animate-pulse"/>}
-            {isUserLoaded&&!isSignedIn&&(
-              <SignInButton mode="modal">
-                <button className="h-9 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-90 active:scale-95 transition-all font-black text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap">
-                  <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
-                </button>
-              </SignInButton>
+            {isUserLoaded&&!activeProfileId&&(
+              <button 
+                onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
+                className="h-9 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-90 active:scale-95 transition-all font-black text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap"
+              >
+                <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
+              </button>
             )}
-            {isUserLoaded&&isSignedIn&&(
+            {isUserLoaded&&activeProfileId&&(
               <CustomProfileMenu />
             )}
           </div>

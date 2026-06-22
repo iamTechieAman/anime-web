@@ -209,6 +209,15 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
 
     // ── History ───────────────────────────────────────────────────
     const addToHistory = useCallback(async (item: Omit<WatchHistoryItem, 'updatedAt'>) => {
+        if (typeof window !== 'undefined') {
+            try {
+                const stored = localStorage.getItem('toonplayer_profile');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.type === 'guest') return; // Guest cannot save history
+                }
+            } catch (_) {}
+        }
         const fullItem = { ...item, updatedAt: Date.now() };
         setHistory(prev => {
             const filtered = prev.filter(i => i.id !== item.id);
@@ -252,6 +261,15 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
     const isInWatchlist = useCallback((id: string) => watchlist.some(i => i.id === id), [watchlist]);
 
     const addToWatchlist = useCallback(async (item: Omit<WatchlistItem, 'addedAt' | 'collection' | 'tags' | 'order'>) => {
+        if (typeof window !== 'undefined') {
+            try {
+                const stored = localStorage.getItem('toonplayer_profile');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.type === 'guest') return; // Guest cannot save watchlist
+                }
+            } catch (_) {}
+        }
         if (watchlist.some(i => i.id === item.id)) return;
         const fullItem: WatchlistItem = {
             ...item,

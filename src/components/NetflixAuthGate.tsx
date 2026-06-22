@@ -122,11 +122,12 @@ export default function NetflixAuthGate() {
         </div>
 
         {/* Sign In button */}
-        <SignInButton mode="modal">
-          <button className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-secondary)] active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-[var(--accent)]/30 cursor-pointer min-h-[44px]">
-            Sign In
-          </button>
-        </SignInButton>
+        <button 
+          onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
+          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-secondary)] active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-[var(--accent)]/30 cursor-pointer min-h-[44px]"
+        >
+          Sign In
+        </button>
       </header>
 
       {/* ── 3. Hero Content ── */}
@@ -153,18 +154,20 @@ export default function NetflixAuthGate() {
 
         {/* CTA Buttons */}
         <div className="w-full max-w-sm sm:max-w-md flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10 sm:mb-14">
-          <SignUpButton mode="modal">
-            <button className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:from-[var(--accent-secondary)] hover:to-[var(--accent)] active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl shadow-[var(--accent)]/30 flex items-center justify-center gap-2 group cursor-pointer min-h-[52px]">
-              Get Started Free
-              <Play className="w-4 h-4 fill-white text-white group-hover:translate-x-1 transition-transform" />
-            </button>
-          </SignUpButton>
+          <button 
+            onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
+            className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:from-[var(--accent-secondary)] hover:to-[var(--accent)] active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl shadow-[var(--accent)]/30 flex items-center justify-center gap-2 group cursor-pointer min-h-[52px]"
+          >
+            Get Started Free
+            <Play className="w-4 h-4 fill-white text-white group-hover:translate-x-1 transition-transform" />
+          </button>
 
-          <SignInButton mode="modal">
-            <button className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-white/6 hover:bg-white/12 border border-white/15 active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm min-h-[52px]">
-              Sign In to Account
-            </button>
-          </SignInButton>
+          <button 
+            onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
+            className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-white/6 hover:bg-white/12 border border-white/15 active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm min-h-[52px]"
+          >
+            Sign In to Account
+          </button>
         </div>
 
         {/* Trust badges */}

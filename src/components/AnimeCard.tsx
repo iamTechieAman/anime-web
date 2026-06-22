@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { Play, Star, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 export interface Show {
     _id?: string;
@@ -240,14 +241,19 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
 });
 
 export function AnimeGrid({ shows }: { shows: Show[] }) {
-    if (!shows || shows.length === 0) {
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const filteredShows = isKidsMode ? shows.filter(show => isKidsFriendly(show as any)) : shows;
+
+    if (!filteredShows || filteredShows.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-4 md:py-6 text-center">
                 <p className="text-[var(--text-muted)] mb-2">No anime found.</p>
             </div>
         );
     }
-    const validShows = shows.filter(show => show && (show.image || show.poster_path || show.backdrop_path || show.title || show.name));
+    const validShows = filteredShows.filter(show => show && (show.image || show.poster_path || show.backdrop_path || show.title || show.name));
     return (
         <div className="responsive-grid">
             {validShows.map((show, i) => (

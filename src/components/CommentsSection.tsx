@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
+import { useUserStore } from "@/store/userStore";
 
 interface Comment {
     id: string;
@@ -60,6 +61,11 @@ const AVATAR_COLOR_POOL = [
 
 const CommentsSection = memo(function CommentsSection({ contentId, category = "anime" }: { contentId: string; category?: "anime" | "movie" | "tv" }) {
     const { isSignedIn } = useUser();
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isGuestProfile = activeProfile?.type === 'guest';
+    const canComment = isSignedIn && !isGuestProfile;
+
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [isSpoilerInput, setIsSpoilerInput] = useState(false);
@@ -170,6 +176,10 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
     };
 
     const handleLike = (id: string) => {
+        if (!canComment) {
+            toast.error("Please sign in or select a non-guest profile to like comments.");
+            return;
+        }
         const updated = comments.map(c => {
             if (c.id !== id) return c;
             
@@ -202,6 +212,10 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
     };
 
     const handleDislike = (id: string) => {
+        if (!canComment) {
+            toast.error("Please sign in or select a non-guest profile to dislike comments.");
+            return;
+        }
         const updated = comments.map(c => {
             if (c.id !== id) return c;
 
@@ -280,19 +294,19 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
 
             {/* Comment Post Form */}
             <form onSubmit={handlePostComment} className="space-y-3 relative">
-                {!isSignedIn && (
+                {!canComment && (
                     <div className="flex items-center gap-3 p-4 mb-2 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-400 text-xs font-semibold">
                         <AlertCircle className="w-4 h-4 shrink-0" />
-                        <span>Registered members only. Please sign in to write comments.</span>
+                        <span>Registered members only. Please sign in or switch profiles to write comments.</span>
                     </div>
                 )}
                 <div className="relative">
                     <textarea
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder={isSignedIn ? "Write a comment... Markdown is supported (*italic*, **bold**, `code`)" : "Please sign in to write comments."}
+                        placeholder={canComment ? "Write a comment... Markdown is supported (*italic*, **bold**, `code`)" : "Please sign in or switch profiles to write comments."}
                         rows={3}
-                        disabled={!isSignedIn}
+                        disabled={!canComment}
                         className="w-full bg-[var(--bg-main)] text-white text-sm placeholder-[var(--text-muted)] border border-[var(--border-color)] rounded-xl p-4 outline-none focus:border-[var(--accent)]/50 transition-colors resize-none font-inter leading-relaxed disabled:opacity-40 disabled:cursor-not-allowed"
                     />
                     
@@ -315,7 +329,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                         <button
                             type="button"
                             onClick={() => setIsSpoilerInput(!isSpoilerInput)}
-                            disabled={!isSignedIn}
+                            disabled={!canComment}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                                 isSpoilerInput
                                     ? "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20"
@@ -325,21 +339,21 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                             <EyeOff className="w-3.5 h-3.5" />
                             <span>Tag Spoiler</span>
                         </button>
-
+ 
                         <button
                             type="button"
                             onClick={() => setShowGifPicker(!showGifPicker)}
-                            disabled={!isSignedIn}
+                            disabled={!canComment}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
                             <span>Add GIF</span>
                         </button>
                     </div>
-
+ 
                     <button
                         type="submit"
-                        disabled={!isSignedIn || (!newComment.trim() && !selectedGif)}
+                        disabled={!canComment || (!newComment.trim() && !selectedGif)}
                         className="flex items-center gap-2 px-5 py-2 bg-[var(--accent)] text-white font-bold rounded-xl text-sm transition-all hover:shadow-[0_0_12px_var(--accent-glow)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:opacity-95"
                     >
                         <span>Comment</span>

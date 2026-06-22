@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Play, Star, Flame, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import React from "react";
 import Image from "next/image";
+import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 // Shared movie item type
 export interface MovieItem {
@@ -187,7 +188,12 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 
 // === MOVIE GRID ===
 export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
-    const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const filteredItems = isKidsMode ? items.filter(item => isKidsFriendly(item)) : items;
+
+    const validItems = filteredItems.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
     return (
         <div className="responsive-grid">
             {validItems.map((item, idx) => (
@@ -231,7 +237,20 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
         el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
     };
 
-    const validItems = items.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+
+    // Hide Horror and Thriller genre rows entirely in Kids Mode
+    const lowerTitle = (title || "").toLowerCase();
+    if (isKidsMode && (lowerTitle.includes("horror") || lowerTitle.includes("thriller") || lowerTitle.includes("crime") || lowerTitle.includes("hbo"))) {
+        return null;
+    }
+
+    const filteredItems = isKidsMode ? items.filter(item => isKidsFriendly(item)) : items;
+    const validItems = filteredItems.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
+
+    if (validItems.length === 0) return null;
 
     return (
         <div className="relative group/row w-full">

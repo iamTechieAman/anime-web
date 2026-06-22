@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AnimeCard, { type Show } from "./AnimeCard";
 import { Loader2, Sparkles } from "lucide-react";
+import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 export default function SimilarAnime({ currentShowId, showName }: { currentShowId: string; showName: string }) {
     const [similar, setSimilar] = useState<Show[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const displayedSimilar = isKidsMode ? similar.filter(show => isKidsFriendly(show as any)) : similar;
 
     useEffect(() => {
         const fetchSimilar = async () => {
@@ -32,7 +38,7 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
         fetchSimilar();
     }, [currentShowId]);
 
-    if (!loading && similar.length === 0) return null;
+    if (!loading && displayedSimilar.length === 0) return null;
 
     return (
         <div className="mt-12 mb-8">
@@ -52,7 +58,7 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
                     </div>
                 ) : (
                     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-                        {similar.map((show, idx) => (
+                        {displayedSimilar.map((show, idx) => (
                             <AnimeCard key={`similar-${show._id}-${idx}`} show={show} />
                         ))}
                     </div>

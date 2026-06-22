@@ -10,6 +10,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useMobileUI } from "@/context/MobileUIContext";
 import UserAvatar from "./UserAvatar";
+import { useUserStore } from "@/store/userStore";
 
 interface CustomProfileMenuProps {
   buttonClassName?: string;
@@ -17,9 +18,12 @@ interface CustomProfileMenuProps {
 
 export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfileMenuProps) {
   const { user } = useUser();
-  const { signOut } = useClerk();
+  const { signOut, openSignIn } = useClerk();
   const router = useRouter();
   const { setShowProfileSettings } = useMobileUI();
+
+  const { profiles, activeProfileId } = useUserStore();
+  const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles.find(p => p.id === 'profile-guest') || profiles[0];
 
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
@@ -32,14 +36,24 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     setIsMounted(true);
   }, []);
 
-  const initials = user ? ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "U" : "U";
+  const initials = user 
+    ? ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "U" 
+    : (activeProfile?.name?.[0] || "G").toUpperCase();
 
-  const menuItems = [
+  const isGuestProfile = activeProfile?.type === 'guest';
+  const showFullMenu = user && !isGuestProfile;
+
+  const menuItems = showFullMenu ? [
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
     { label: "Watch History", icon: Clock, href: "/history", color: "text-[var(--accent)]" },
-    { label: "Profile Settings", icon: Settings, href: "/settings", color: "text-blue-400" },
-    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
-    { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" },
+    { label: "Profile Settings", icon: Settings, action: () => window.dispatchEvent(new Event("openSettingsModal")), color: "text-blue-400" },
+    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileModal")), color: "text-purple-400" },
+    user 
+      ? { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" }
+      : { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
+  ] : [
+    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileModal")), color: "text-purple-400" },
+    { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
   ];
 
   const updateMenuPosition = useCallback(() => {
@@ -148,7 +162,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     setFocusedIndex(-1);
   };
 
-  if (!isMounted || !user) return null;
+  if (!isMounted) return null;
 
   return (
     <>
@@ -158,8 +172,8 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
         className={`relative w-9 h-9 rounded-full ring-2 ring-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
       >
         <UserAvatar 
-          src={user.imageUrl} 
-          alt={user.fullName || "User"} 
+          src={user ? user.imageUrl : activeProfile?.avatar} 
+          alt={user ? (user.fullName || "User") : (activeProfile?.name || "Guest")} 
           initials={initials} 
           size={40} 
           className="w-full h-full rounded-full" 
@@ -182,16 +196,16 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
               <div className="p-4 border-b border-white/5 flex items-center gap-3 bg-white/5">
                 <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
                   <UserAvatar 
-                    src={user.imageUrl} 
-                    alt={user.fullName || "User"} 
+                    src={user ? user.imageUrl : activeProfile?.avatar} 
+                    alt={user ? (user.fullName || "User") : (activeProfile?.name || "Guest")} 
                     initials={initials} 
                     size={40} 
                     className="w-full h-full" 
                   />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold text-white truncate">{user.fullName || "User"}</span>
-                  <span className="text-[10px] text-zinc-400 truncate">{user.primaryEmailAddress?.emailAddress}</span>
+                  <span className="text-sm font-bold text-white truncate">{user ? (user.fullName || "User") : (activeProfile?.name || "Guest")}</span>
+                  <span className="text-[10px] text-zinc-400 truncate">{user ? user.primaryEmailAddress?.emailAddress : "Guest Mode"}</span>
                 </div>
               </div>
 

@@ -5,7 +5,9 @@ export interface Profile {
   id: string;
   name: string;
   avatar: string;
-  isKids?: boolean;
+  type: 'adult' | 'teen' | 'kids' | 'guest';
+  isKids: boolean;
+  theme: string;
 }
 
 export interface WatchHistoryItem {
@@ -39,7 +41,7 @@ interface UserState {
   addProfile: (profile: Omit<Profile, 'id'>) => void;
   removeProfile: (id: string) => void;
   setActiveProfile: (id: string | null) => void;
-  syncProfile: (profile: Profile) => void; // Sync external profile (e.g. Clerk)
+  syncProfile: (profile: Partial<Profile> & { id: string; name: string; avatar: string }) => void; // Sync external profile (e.g. Clerk)
   updateSettings: (profileId: string, settings: Partial<UserSettings>) => void;
   addToHistory: (profileId: string, item: WatchHistoryItem) => void;
   addToWatchlist: (profileId: string, item: any) => void;
@@ -55,9 +57,69 @@ const defaultSettings: UserSettings = {
 };
 
 const defaultProfiles: Profile[] = [
-  { id: 'profile-kids', name: 'Kids', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Kids', isKids: true },
-  { id: 'profile-guest', name: 'Guest', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Guest' }
+  { id: 'profile-adult', name: 'Adult', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Adult', type: 'adult', isKids: false, theme: 'red' },
+  { id: 'profile-teen', name: 'Teen', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Teen', type: 'teen', isKids: false, theme: 'blue' },
+  { id: 'profile-kids', name: 'Kids', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Kids', type: 'kids', isKids: true, theme: 'green' },
+  { id: 'profile-guest', name: 'Guest', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Guest', type: 'guest', isKids: false, theme: 'purple' }
 ];
+
+export function isKidsFriendly(item: any): boolean {
+  if (!item) return false;
+  
+  const title = (item.title || item.name || "").toLowerCase();
+  const overview = (item.overview || "").toLowerCase();
+  
+  // Explicitly hide Horror, Thriller, Adult, Crime
+  const blockedKeywords = [
+    "horror", "thriller", "slasher", "gore", "bloody", "crime", "murder", "assassin",
+    "serial killer", "erotic", "adult", "sexy", "dracula", "fifty shades", "vampire",
+    "mafia", "gangster", "narcos", "breaking bad", "death note", "chainsaw man"
+  ];
+  
+  if (item.adult) return false;
+  
+  if (blockedKeywords.some(keyword => title.includes(keyword))) {
+    return false;
+  }
+  
+  const genreIds = item.genre_ids || [];
+  if (genreIds.some((id: number) => id === 27 || id === 53 || id === 80)) {
+    return false;
+  }
+  
+  const genres = item.genres || [];
+  if (genres.some((g: any) => {
+    const name = typeof g === 'string' ? g.toLowerCase() : (g.name || "").toLowerCase();
+    return name.includes('horror') || name.includes('thriller') || name.includes('crime') || name.includes('adult');
+  })) {
+    return false;
+  }
+  
+  // Only show Kids movies, Kids anime, Cartoons, Pixar, Disney, Dreamworks, Studio Ghibli, Family
+  const allowedKeywords = [
+    "kids", "kid", "cartoon", "pixar", "disney", "dreamworks", "ghibli", "family", "toy story",
+    "shrek", "frozen", "nemo", "lion king", "mickey", "donald", "anime", "pokemon", "naruto", "one piece",
+    "doraemon", "shin chan", "ben 10", "powerpuff", "tom and jerry", "rick and morty", "adventure time",
+    "ed, edd n eddy", "grinch"
+  ];
+  
+  if (allowedKeywords.some(keyword => title.includes(keyword))) {
+    return true;
+  }
+  
+  if (genreIds.some((id: number) => id === 10751 || id === 10762 || id === 16)) {
+    return true;
+  }
+  
+  if (genres.some((g: any) => {
+    const name = typeof g === 'string' ? g.toLowerCase() : (g.name || "").toLowerCase();
+    return name.includes('family') || name.includes('kids') || name.includes('animation') || name.includes('child');
+  })) {
+    return true;
+  }
+  
+  return false;
+}
 
 export const useUserStore = create<UserState>()(
   persist(
@@ -69,7 +131,7 @@ export const useUserStore = create<UserState>()(
       settings: {},
 
       addProfile: (profile) => set((state) => ({
-        profiles: [...state.profiles, { ...profile, id: `profile-${Date.now()}` }]
+        profiles: [...state.profiles, { ...profile, id: `profile-${Date.now()}` } as Profile]
       })),
 
       removeProfile: (id) => set((state) => ({
@@ -77,16 +139,38 @@ export const useUserStore = create<UserState>()(
         activeProfileId: state.activeProfileId === id ? null : state.activeProfileId
       })),
 
-      setActiveProfile: (id) => set({ activeProfileId: id }),
+      setActiveProfile: (id) => set((state) => {
+        if (typeof window !== 'undefined') {
+          if (id) {
+            const profile = state.profiles.find(p => p.id === id);
+            if (profile) {
+              localStorage.setItem("toonplayer_profile", JSON.stringify(profile));
+              localStorage.setItem(`kids-filter-${id}`, profile.isKids ? 'true' : 'false');
+            }
+          } else {
+            localStorage.removeItem("toonplayer_profile");
+          }
+          setTimeout(() => {
+            window.dispatchEvent(new Event("profileUpdated"));
+          }, 0);
+        }
+        return { activeProfileId: id };
+      }),
 
       syncProfile: (profile) => set((state) => {
+        const fullProfile = {
+          type: 'adult' as const,
+          isKids: false,
+          theme: 'red',
+          ...profile
+        };
         const exists = state.profiles.find(p => p.id === profile.id);
         if (exists) {
             return {
-                profiles: state.profiles.map(p => p.id === profile.id ? { ...p, ...profile } : p)
+                profiles: state.profiles.map(p => p.id === profile.id ? { ...p, ...fullProfile } as Profile : p)
             };
         }
-        return { profiles: [profile, ...state.profiles] };
+        return { profiles: [fullProfile as Profile, ...state.profiles] };
       }),
 
       updateSettings: (profileId, newSettings) => set((state) => ({
@@ -131,7 +215,6 @@ export const useUserStore = create<UserState>()(
     {
       name: 'toonplayer-unified-store',
       storage: createJSONStorage(() => {
-        // Fallback to in-memory if localStorage fails (e.g., incognito)
         try {
           return window.localStorage;
         } catch {
