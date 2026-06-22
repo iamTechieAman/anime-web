@@ -79,7 +79,7 @@ export default function Header() {
     axios.get('/api/search/catalog').then(res => {
       const catalog = res.data.results || [];
       setGlobalCatalog(catalog);
-      fuseRef.current = new Fuse(catalog, { keys:[{name:'title',weight:2},{name:'_searchTitle',weight:1.5},{name:'type',weight:0.5}], threshold:0.3, distance:50, minMatchCharLength:2, shouldSort:true });
+      fuseRef.current = new Fuse(catalog, { keys:[{name:'title',weight:2},{name:'altTitles',weight:1.8},{name:'_searchTitle',weight:1.5},{name:'type',weight:0.5}], threshold:0.3, distance:50, minMatchCharLength:2, shouldSort:true });
     }).catch(() => {});
   }, []);
 
@@ -118,7 +118,7 @@ export default function Header() {
         const res = await axios.get(UNIFIED_SEARCH_URL, { params:{ q } });
         const net = res.data.results || [];
         if (net.length > 0) {
-          const nf = new Fuse(net, { keys:[{name:'title',weight:2},{name:'format',weight:1}], threshold:0.3, distance:100, shouldSort:true });
+          const nf = new Fuse(net, { keys:[{name:'title',weight:2},{name:'altTitles',weight:1.8},{name:'format',weight:1}], threshold:0.3, distance:100, shouldSort:true });
           const ranked = nf.search(q).map(r => r.item);
           const final = ranked.length > 0 ? ranked : net;
           setSuggestions(prev => {
@@ -131,7 +131,7 @@ export default function Header() {
           });
         }
       } catch(e) {}
-    }, 300);
+    }, 200);
     return () => clearTimeout(t);
   }, [searchQuery]);
 

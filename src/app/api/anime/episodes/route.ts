@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { AnimeProviderManager } from "@/lib/providers/AnimeProviderManager";
 
 export const revalidate = 1800;
 
@@ -14,68 +15,40 @@ export async function GET(request: Request) {
     const id = fullId.includes(':') ? fullId.split(':').slice(1).join(':') : fullId;
 
     try {
-        const query = `
-        query ($id: Int) { 
-            Media (id: $id, type: ANIME) { 
-                id
-                idMal
-                title { romaji english native } 
-                coverImage { extraLarge large }
-                episodes
-                nextAiringEpisode { episode }
-            } 
-        }`;
+        // Try to get rich episode data directly from Consumet
+        // Consumet supports Anilist IDs via /meta/anilist/info/:id
+        const info = await AnimeProviderManager.getInfo(id, 'consumet');
 
-        const res = await fetch('https://graphql.anilist.co', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, variables: { id: parseInt(id) } }),
-            next: { revalidate: 1800 }
-        });
-
-        const data = await res.json();
-        const media = data?.data?.Media;
-
-        if (!media) {
-            return NextResponse.json({ error: "Anime not found on AniList" }, { status: 404 });
+        if (!info) {
+            return NextResponse.json({ error: "Anime not found via providers" }, { status: 404 });
         }
 
-        let totalEpisodes = media.episodes;
-        if (!totalEpisodes && media.nextAiringEpisode?.episode) {
-            totalEpisodes = media.nextAiringEpisode.episode - 1;
-        }
-
-        // If AniList doesn't know, fallback to Jikan
-        if (!totalEpisodes && media.idMal) {
-            try {
-                const jRes = await fetch(`https://api.jikan.moe/v4/anime/${media.idMal}`, { signal: AbortSignal.timeout(5000) });
-                const jData = await jRes.json();
-                if (jData?.data?.episodes) {
-                    totalEpisodes = jData.data.episodes;
-                }
-            } catch (_) {}
-        }
-
-        // If STILL unknown, assume 12 or 24? Actually, better to just provide 1 to 100 if unknown, or rely on streaming API
-        if (!totalEpisodes) {
-            totalEpisodes = 24; // Default fallback for unknown
-        }
-
-        const episodesList = Array.from({ length: totalEpisodes }, (_, i) => String(i + 1));
+        // We map the episodes to ensure they're rich
+        const episodesList = info.episodes.map(ep => ({
+            id: ep.id,
+            number: ep.number,
+            title: ep.title,
+            image: (ep as any).image,
+            description: (ep as any).description,
+            isFiller: (ep as any).isFiller,
+            hasDub: (ep as any).hasDub,
+        }));
 
         const show = {
             _id: id,
-            name: media.title.english || media.title.romaji || 'Unknown',
-            englishName: media.title.english || null,
-            romajiName: media.title.romaji || null,
-            thumbnail: media.coverImage.extraLarge || media.coverImage.large,
-            anilistId: media.id,
-            malId: media.idMal,
+            name: info.title || 'Unknown',
+            englishName: info.title || null,
+            romajiName: info.otherNames?.[0] || null,
+            thumbnail: info.image,
+            anilistId: parseInt(id) || info.anilistId,
+            malId: info.malId,
+            description: info.description,
             availableEpisodesDetail: { 
                 sub: episodesList, 
-                dub: episodesList // We'll assume dub exists and let source fetcher fail if not
+                // We'll pass the same rich list to dub, and filter later if needed
+                dub: episodesList
             },
-            provider: 'anilist',
+            provider: 'consumet',
         };
 
         return NextResponse.json({ show });

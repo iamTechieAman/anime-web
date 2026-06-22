@@ -49,8 +49,13 @@ const getProxiedEmbedUrl = (rawUrl: string | null) => {
 /** Memoized episode button to prevent full list re-render on every currentEp change */
 const EpisodeButton = React.memo(function EpisodeButton({
     ep, currentEp, onClick
-}: { ep: string | number; currentEp: string; onClick: () => void }) {
-    const isActive = String(currentEp) === String(ep);
+}: { ep: any; currentEp: string; onClick: () => void }) {
+    const epNum = typeof ep === 'object' ? String(ep.number || ep.id) : String(ep);
+    const title = typeof ep === 'object' ? ep.title : null;
+    const isFiller = typeof ep === 'object' ? ep.isFiller : false;
+    const thumbnail = typeof ep === 'object' ? ep.image : null;
+    const isActive = String(currentEp) === epNum;
+    
     const ref = React.useRef<HTMLButtonElement>(null);
 
     // Auto-scroll disabled to prevent page jumping
@@ -63,9 +68,23 @@ const EpisodeButton = React.memo(function EpisodeButton({
                 isActive ? "bg-[var(--accent)]/15 border border-[var(--accent)]/30" : "hover:bg-white/5 border border-transparent"
             }`}
         >
-            <span className={`text-sm font-semibold transition-colors ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-white'}`}>
-                Episode {ep}
-            </span>
+            <div className="flex gap-3 w-full items-center">
+                {thumbnail && (
+                    <div className="w-20 h-12 flex-shrink-0 rounded bg-zinc-800 overflow-hidden relative border border-white/5">
+                        <img src={thumbnail} alt="thumbnail" className="w-full h-full object-cover" loading="lazy" />
+                        <div className="absolute inset-0 bg-black/20" />
+                    </div>
+                )}
+                <div className="flex flex-col items-start min-w-0">
+                    <span className={`text-sm font-bold truncate transition-colors ${isActive ? 'text-[var(--accent)]' : 'text-zinc-300 group-hover:text-white'}`}>
+                        {title && title.toLowerCase() !== `episode ${epNum}` ? title : `Episode ${epNum}`}
+                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] text-zinc-500 font-semibold tracking-wider">EP {epNum}</span>
+                        {isFiller && <span className="text-[8px] bg-amber-500/10 text-amber-500 px-1.5 py-[1px] rounded uppercase font-black border border-amber-500/20">Filler</span>}
+                    </div>
+                </div>
+            </div>
             {isActive && (
                 <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-[0_0_10px_var(--accent-glow)]">
                     <Play className="w-3 h-3 text-white fill-white ml-0.5" />
@@ -207,9 +226,9 @@ interface ShowData {
     provider?: string;
     thumbnail?: string;
     availableEpisodesDetail: {
-        sub: string[];
-        dub: string[];
-        raw: string[];
+        sub: any[];
+        dub: any[];
+        raw: any[];
     };
 }
 
@@ -293,17 +312,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [iframeKey, setIframeKey] = useState(0);
 
     const hasNextEpisode = () => {
-        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         return currentIdx !== -1 && currentIdx + 1 < availableEps.length;
     };
 
     const hasPrevEpisode = () => {
-        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         return currentIdx > 0;
     };
 
     const handleNextEpisode = () => {
-        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         if (currentIdx !== -1 && currentIdx + 1 < availableEps.length) {
             const nextEp = availableEps[currentIdx + 1];
             setCurrentEp(String(nextEp));
@@ -312,7 +331,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     };
 
     const handlePrevEpisode = () => {
-        const currentIdx = availableEps.map(String).indexOf(String(currentEp));
+        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         if (currentIdx > 0) {
             const prevEp = availableEps[currentIdx - 1];
             setCurrentEp(String(prevEp));
@@ -653,12 +672,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 const currentEps = fetchedShow.availableEpisodesDetail?.[modeParam || initialMode] || [];
                 
-                if (epParam && currentEps.map(String).includes(String(epParam))) {
+                if (epParam && currentEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(String(epParam))) {
                     setCurrentEp(String(epParam));
-                } else if (historyItem && historyItem.episodeId && currentEps.map(String).includes(String(historyItem.episodeId))) {
+                } else if (historyItem && historyItem.episodeId && currentEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(String(historyItem.episodeId))) {
                     setCurrentEp(String(historyItem.episodeId));
                 } else if (currentEps.length > 0) {
-                    setCurrentEp(currentEps.includes("1") ? "1" : String(currentEps[0]));
+                    setCurrentEp(currentEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes("1") ? "1" : String((typeof currentEps[0] === 'object' ? String(currentEps[0].number||currentEps[0].id) : String(currentEps[0]))));
                 }
 
                 // Parallelly fetch TMDB ID if name is available
@@ -827,7 +846,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             // For native anime servers — check episode availability
             if (show.availableEpisodesDetail) {
                 const availableEps = show.availableEpisodesDetail[mode] || [];
-                if (!availableEps.includes(currentEp)) {
+                if (!availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(currentEp)) {
                     // Auto-switch to a movie server instead of showing error
                     console.warn(`EP ${currentEp} not in ${mode}`);
                     setError(`Episode ${currentEp} is not available in ${mode.toUpperCase()} mode.`);
@@ -907,7 +926,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         if (!autoNext) return;
         
         const availableEps = show?.availableEpisodesDetail?.[mode] || [];
-        const currentIndex = availableEps.map(String).indexOf(String(currentEp));
+        const currentIndex = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         
         if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
             // Trigger Netflix-style countdown overlay
@@ -924,7 +943,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
                         setShowNextOverlay(false);
                         
-                        const nextEp = availableEps[currentIndex + 1];
+                        const nextEp = (typeof availableEps[currentIndex + 1] === 'object' ? String(availableEps[currentIndex + 1].number||availableEps[currentIndex + 1].id) : String(availableEps[currentIndex + 1]));
                         setCurrentEp(String(nextEp));
                         toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
                         return 0;
@@ -1246,9 +1265,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 onClick={() => {
                                                     if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
                                                     setShowNextOverlay(false);
-                                                    const currentIndex = availableEps.map(String).indexOf(String(currentEp));
+                                                    const currentIndex = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
                                                     if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
-                                                        const nextEp = availableEps[currentIndex + 1];
+                                                        const nextEp = (typeof availableEps[currentIndex + 1] === 'object' ? String(availableEps[currentIndex + 1].number||availableEps[currentIndex + 1].id) : String(availableEps[currentIndex + 1]));
                                                         setCurrentEp(String(nextEp));
                                                     }
                                                 }}
@@ -1637,7 +1656,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
                                         {(() => {
                                             const filteredEpisodes = epFilter
-                                                ? episodes.filter(ep => String(ep).includes(epFilter))
+                                                ? episodes.filter(ep => String(typeof ep === 'object' ? (ep.number||ep.id) : ep).includes(epFilter))
                                                 : episodes;
                                             
                                             if (episodeLayoutMode === "grid") {
@@ -1646,8 +1665,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                         {filteredEpisodes.map((ep) => (
                                                             <button 
                                                                 key={ep} 
-                                                                onClick={() => setCurrentEp(String(ep))} 
-                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(ep) ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                                onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))} 
+                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}
                                                             >
                                                                 {ep}
                                                             </button>
@@ -1661,7 +1680,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                     key={ep}
                                                     ep={ep}
                                                     currentEp={currentEp}
-                                                    onClick={() => setCurrentEp(String(ep))}
+                                                    onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))}
                                                 />
                                             ));
                                         })()

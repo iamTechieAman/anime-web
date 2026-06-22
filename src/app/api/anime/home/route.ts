@@ -39,12 +39,15 @@ export async function GET() {
             throw new Error("Invalid AniList response");
         }
 
-        const mapAniListToStandard = (item: any) => ({
-            id: String(item.id),
-            title: item.title.english || item.title.romaji,
-            image: item.coverImage.extraLarge || item.coverImage.large,
-            type: "anime"
-        });
+        const mapAniListToStandard = (item: any) => {
+            const anilistImage = item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium;
+            return {
+                id: String(item.id),
+                title: item.title.english || item.title.romaji,
+                image: anilistImage || '/placeholder.jpg',
+                type: "anime"
+            };
+        };
 
         const trending = data.data.trending.media.map(mapAniListToStandard);
         const latest = data.data.latest.media.map(mapAniListToStandard);

@@ -29,6 +29,13 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 13 — Anime System Reconstruction (`June 2026`)
+- ⛩️ **Anime Data Models**: Upgraded internal types to support `AnimeMeta` and `RichAnimeEpisode` containing richer metadata such as multiple titles, filler status, and thumbnails.
+- 🛡️ **Provider Redundancy**: Built `AnimeProviderManager.ts`, a smart orchestrator that wraps Gogoanime (Consumet) and AniList to securely fetch and fallback for rich episode metadata, vastly improving stream success rate and API reliability.
+- 🖼️ **Image Fallback Engine**: Built `src/lib/utils/image.ts`, which guarantees an unbreakable image resolution hierarchy: `AniList > TMDB > MAL > Placeholder`. Applied this strictly across `MovieCard`, `HeroCarousel`, and homepage APIs. No more broken image carousels!
+- 📺 **WatchClient Architecture**: Overhauled the side panel episode list inside `WatchClient.tsx` to handle rich episodes. It now gracefully displays thumbnails, precise episode numbering, and **Filler badges**, directly imitating Crunchyroll's premium episode list.
+- 🔍 **Header Unified Search**: Modified the anime search functionality in `Header.tsx` to support **Fuzzy matching** of Native, Romaji, and English titles with a highly responsive 200ms debounce.
+
 ### Phase 12 — Profile & Authentication Reconstruction (`June 2026`)
 - 🔒 **Clerk OAuth Migration**: Replaced legacy custom JWT auth flow with robust Clerk authentication supporting Google, GitHub, and Discord OAuth.
 - 👤 **Dynamic Profiles**: Hooked user login states to a unified `toonplayer-unified-store`. History and watchlists are strictly siloed per `profileId`, completely removing hardcoded guest defaults.

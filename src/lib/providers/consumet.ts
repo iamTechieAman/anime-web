@@ -51,11 +51,15 @@ export class ConsumetProvider implements AnimeProvider {
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const data = await fetchFromInstances(`/meta/anilist/info/${id}`);
+            const data = await fetchFromInstances(`/meta/anilist/info/${id}?provider=gogoanime`);
             const episodes = (data.episodes || []).map((ep: any) => ({
                 id: ep.id,
                 number: ep.number,
                 title: ep.title || `Episode ${ep.number}`,
+                image: ep.image,
+                description: ep.description,
+                isFiller: ep.isFiller,
+                hasDub: ep.hasDub,
             }));
             return {
                 id: data.id,

@@ -48,7 +48,7 @@ async function fetchCatalog() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji } coverImage { medium } seasonYear format } } }`
+                query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji native } coverImage { medium } seasonYear format } } }`
             }),
             next: { revalidate: 1800 }
         });
@@ -58,7 +58,8 @@ async function fetchCatalog() {
             animeData.data.Page.media.forEach((item: any) => {
                 catalog.push({
                     id: item.id,
-                    title: item.title.english || item.title.romaji,
+                    title: item.title.english || item.title.romaji || item.title.native,
+                    altTitles: [item.title.english, item.title.romaji, item.title.native].filter(Boolean),
                     image: item.coverImage.medium,
                     type: 'anime',
                     year: item.seasonYear,

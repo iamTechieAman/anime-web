@@ -13,6 +13,16 @@ export interface AnimeEpisode {
     title?: string;
 }
 
+export interface RichAnimeEpisode extends AnimeEpisode {
+    image?: string;
+    description?: string;
+    duration?: number;
+    isFiller?: boolean;
+    isRecap?: boolean;
+    hasDub?: boolean;
+    airDate?: string;
+}
+
 export interface AnimeDetails {
     id: string;
     title: string;
@@ -36,6 +46,55 @@ export interface AnimeDetails {
     malId?: number;
     type?: string;
     status?: string;
+}
+
+export interface AnimeMeta {
+    id: string;
+    malId?: number;
+    anilistId?: number;
+    titles: {
+        romaji?: string;
+        english?: string;
+        native?: string;
+    };
+    synonyms?: string[];
+    description?: string;
+    coverImage: {
+        extraLarge?: string;
+        large?: string;
+        medium?: string;
+        color?: string;
+    };
+    bannerImage?: string;
+    format?: string;
+    status?: string;
+    episodes?: number;
+    duration?: number;
+    chapters?: number;
+    volumes?: number;
+    season?: string;
+    seasonYear?: number;
+    averageScore?: number;
+    popularity?: number;
+    source?: string;
+    genres?: string[];
+    studios?: string[];
+    tags?: Array<{
+        name: string;
+        description: string;
+        rank: number;
+        isMediaSpoiler: boolean;
+    }>;
+    trailer?: {
+        id: string;
+        site: string;
+        thumbnail: string;
+    };
+    nextAiringEpisode?: {
+        airingAt: number;
+        timeUntilAiring: number;
+        episode: number;
+    };
 }
 
 export interface VideoSource {
