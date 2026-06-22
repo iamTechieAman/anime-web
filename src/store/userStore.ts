@@ -48,6 +48,20 @@ interface UserState {
   removeFromWatchlist: (profileId: string, itemId: string) => void;
 }
 
+export function getAvatarUrl(name: string, theme: string = 'orange'): string {
+  const initials = (name || "?").trim().substring(0, 2).toUpperCase();
+  const themeColors: Record<string, string> = {
+    red: 'E50914',
+    blue: '00A8E1',
+    green: '1CE783',
+    purple: '9933FF',
+    orange: 'F97316'
+  };
+  const color = themeColors[theme] || themeColors['orange'];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="#${color}"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="38" font-weight="bold">${initials}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 const defaultSettings: UserSettings = {
   autoplay: true,
   autoSkipIntro: false,
@@ -57,10 +71,8 @@ const defaultSettings: UserSettings = {
 };
 
 const defaultProfiles: Profile[] = [
-  { id: 'profile-adult', name: 'Adult', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Adult', type: 'adult', isKids: false, theme: 'red' },
-  { id: 'profile-teen', name: 'Teen', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Teen', type: 'teen', isKids: false, theme: 'blue' },
-  { id: 'profile-kids', name: 'Kids', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Kids', type: 'kids', isKids: true, theme: 'green' },
-  { id: 'profile-guest', name: 'Guest', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Guest', type: 'guest', isKids: false, theme: 'purple' }
+  { id: 'profile-kids', name: 'Kids', avatar: getAvatarUrl('Kids', 'green'), type: 'kids', isKids: true, theme: 'green' },
+  { id: 'profile-guest', name: 'Guest', avatar: getAvatarUrl('Guest', 'purple'), type: 'guest', isKids: false, theme: 'purple' }
 ];
 
 export function isKidsFriendly(item: any): boolean {
@@ -69,19 +81,21 @@ export function isKidsFriendly(item: any): boolean {
   const title = (item.title || item.name || "").toLowerCase();
   const overview = (item.overview || "").toLowerCase();
   
-  // Explicitly hide Horror, Thriller, Adult, Crime
+  // Hide: 18+, Horror, Erotic, Violence, Thriller, Crime
   const blockedKeywords = [
-    "horror", "thriller", "slasher", "gore", "bloody", "crime", "murder", "assassin",
-    "serial killer", "erotic", "adult", "sexy", "dracula", "fifty shades", "vampire",
-    "mafia", "gangster", "narcos", "breaking bad", "death note", "chainsaw man"
+    "18+", "horror", "erotic", "violence", "gore", "bloody", "slasher", "sexy", "adult", 
+    "nsfw", "ecchi", "hentai", "thriller", "crime", "murder", "assassin", "gangster", 
+    "mafia", "suicide", "dark", "satan", "demon slayer", "chainsaw man", "jujutsu kaisen",
+    "attack on titan", "death note", "tokyo ghoul", "hellsing", "berserk", "goblin slayer"
   ];
   
   if (item.adult) return false;
   
-  if (blockedKeywords.some(keyword => title.includes(keyword))) {
+  if (blockedKeywords.some(keyword => title.includes(keyword) || overview.includes(keyword))) {
     return false;
   }
   
+  // Block via TMDB genre IDs (27 = Horror, 53 = Thriller, 80 = Crime)
   const genreIds = item.genre_ids || [];
   if (genreIds.some((id: number) => id === 27 || id === 53 || id === 80)) {
     return false;
@@ -90,30 +104,32 @@ export function isKidsFriendly(item: any): boolean {
   const genres = item.genres || [];
   if (genres.some((g: any) => {
     const name = typeof g === 'string' ? g.toLowerCase() : (g.name || "").toLowerCase();
-    return name.includes('horror') || name.includes('thriller') || name.includes('crime') || name.includes('adult');
+    return name.includes('horror') || name.includes('thriller') || name.includes('crime') || name.includes('adult') || name.includes('erotic') || name.includes('violence');
   })) {
     return false;
   }
   
-  // Only show Kids movies, Kids anime, Cartoons, Pixar, Disney, Dreamworks, Studio Ghibli, Family
+  // Only allow: Kids Movies, Kids Anime, Kids Shows, Disney, Pixar, Cartoons, Family
   const allowedKeywords = [
     "kids", "kid", "cartoon", "pixar", "disney", "dreamworks", "ghibli", "family", "toy story",
-    "shrek", "frozen", "nemo", "lion king", "mickey", "donald", "anime", "pokemon", "naruto", "one piece",
-    "doraemon", "shin chan", "ben 10", "powerpuff", "tom and jerry", "rick and morty", "adventure time",
-    "ed, edd n eddy", "grinch"
+    "shrek", "frozen", "nemo", "lion king", "mickey", "donald", "doraemon", "shin chan", "ben 10",
+    "powerpuff", "tom and jerry", "adventure time", "pokemon", "naruto", "one piece", "anime",
+    "animation", "cocomelon", "peppa", "barbie", "lego", "nickelodeon", "disney+", "pixar", "spongebob",
+    "looney tunes", "scooby", "avatar the last airbender", "phineas", "gravity falls"
   ];
   
   if (allowedKeywords.some(keyword => title.includes(keyword))) {
     return true;
   }
   
+  // TMDB Genres: 10751 = Family, 10762 = Kids, 16 = Animation
   if (genreIds.some((id: number) => id === 10751 || id === 10762 || id === 16)) {
     return true;
   }
   
   if (genres.some((g: any) => {
     const name = typeof g === 'string' ? g.toLowerCase() : (g.name || "").toLowerCase();
-    return name.includes('family') || name.includes('kids') || name.includes('animation') || name.includes('child');
+    return name.includes('family') || name.includes('kids') || name.includes('animation') || name.includes('child') || name.includes('disney') || name.includes('pixar') || name.includes('cartoon');
   })) {
     return true;
   }
@@ -130,9 +146,14 @@ export const useUserStore = create<UserState>()(
       watchlist: {},
       settings: {},
 
-      addProfile: (profile) => set((state) => ({
-        profiles: [...state.profiles, { ...profile, id: `profile-${Date.now()}` } as Profile]
-      })),
+      addProfile: (profile) => set((state) => {
+        const avatar = (profile.avatar && !profile.avatar.includes('dicebear.com')) 
+          ? profile.avatar 
+          : getAvatarUrl(profile.name, profile.theme || 'orange');
+        return {
+          profiles: [...state.profiles, { ...profile, avatar, id: `profile-${Date.now()}` } as Profile]
+        };
+      }),
 
       removeProfile: (id) => set((state) => ({
         profiles: state.profiles.filter(p => p.id !== id),

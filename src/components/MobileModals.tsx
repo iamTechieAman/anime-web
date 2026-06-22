@@ -1,6 +1,4 @@
-"use client";
-
-import { X, Search, TrendingUp, LayoutGrid, Star, Sparkles, Settings, Zap, Shield, Globe, ChevronRight, Compass, Play, Clock } from "lucide-react";
+import { X, Search, TrendingUp, LayoutGrid, Star, Sparkles, Settings, Zap, Shield, Globe, ChevronRight, Compass, Play, Clock, Pin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
 import Fuse from "fuse.js";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const quickLinks = [
     { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-[var(--accent)] to-[var(--accent-secondary)]" },
@@ -28,8 +27,10 @@ export default function MobileModals() {
     const [logoError, setLogoError] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
+    const debouncedQuery = useDebounce(searchQuery, 200);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
+    const [pinnedSearches, setPinnedSearches] = useState<string[]>([]);
     const [globalCatalog, setGlobalCatalog] = useState<any[]>([]);
     const [fuse, setFuse] = useState<Fuse<any> | null>(null);
 
@@ -47,13 +48,24 @@ export default function MobileModals() {
         localStorage.setItem('toonplayer_autoplay', String(val));
     };
 
-    // Load recent searches and catalog on mount
+    // Load recent & pinned searches and catalog
     useEffect(() => {
+        if (!isSearchOpen) return;
         const saved = localStorage.getItem("toonplayer_recent_searches");
         if (saved) {
             try { setRecentSearches(JSON.parse(saved)); } catch (e) {}
         }
-        
+        const pinned = localStorage.getItem("toonplayer_pinned_searches");
+        if (pinned) {
+            try { setPinnedSearches(JSON.parse(pinned)); } catch (e) {}
+        } else {
+            const defaultPinned = ["Anime", "Movies", "TV", "Collections", "Actors"];
+            setPinnedSearches(defaultPinned);
+            localStorage.setItem("toonplayer_pinned_searches", JSON.stringify(defaultPinned));
+        }
+    }, [isSearchOpen]);
+
+    useEffect(() => {
         const fetchCatalog = async () => {
             try {
                 const res = await axios.get('/api/search/catalog');
@@ -79,7 +91,7 @@ export default function MobileModals() {
 
     // Perform suggestions lookup
     useEffect(() => {
-        const cleanQuery = searchQuery.trim().replace(/\s+/g, ' ');
+        const cleanQuery = debouncedQuery.trim().replace(/\s+/g, ' ');
         if (!cleanQuery) {
             setSuggestions([]);
             return;
@@ -88,49 +100,54 @@ export default function MobileModals() {
         // 1. Local fuzzy search
         if (fuse) {
             const matches = fuse.search(cleanQuery).map(r => r.item);
-            if (matches.length > 0) {
-                setSuggestions(matches.slice(0, 10));
-            }
+            setSuggestions(matches.slice(0, 10));
         }
 
-        // 2. Debounced network search
-        const timer = setTimeout(async () => {
-            if (cleanQuery.length < 2) return;
-            try {
-                const response = await axios.get('/api/search/unified', {
-                    params: { q: cleanQuery }
+        if (cleanQuery.length < 2) return;
+
+        // 2. Network search
+        axios.get('/api/search/unified', {
+            params: { q: cleanQuery }
+        }).then(response => {
+            const networkItems = response.data.results || [];
+            if (networkItems.length > 0) {
+                const netFuse = new Fuse(networkItems, {
+                    keys: [
+                        { name: 'title', weight: 2 },
+                        { name: 'format', weight: 1 }
+                    ],
+                    threshold: 0.3,
+                    distance: 100,
+                    shouldSort: true
                 });
-                const networkItems = response.data.results || [];
-                if (networkItems.length > 0) {
-                    const netFuse = new Fuse(networkItems, {
-                        keys: [
-                            { name: 'title', weight: 2 },
-                            { name: 'format', weight: 1 }
-                        ],
-                        threshold: 0.3,
-                        distance: 100,
-                        shouldSort: true
-                    });
-                    const ranked = netFuse.search(cleanQuery).map(r => r.item);
-                    const finalNetwork = ranked.length > 0 ? ranked : networkItems;
+                const ranked = netFuse.search(cleanQuery).map(r => r.item);
+                const finalNetwork = ranked.length > 0 ? ranked : networkItems;
 
-                    setSuggestions(prev => {
-                        const combined = [...prev, ...finalNetwork];
-                        const seen = new Set();
-                        const unique = combined.filter(item => {
-                            const key = `${item.id}-${(item.title || "").toLowerCase().trim()}`;
-                            if (seen.has(key)) return false;
-                            seen.add(key);
-                            return true;
-                        });
-                        return unique.slice(0, 10);
-                    });
-                }
-            } catch (e) {}
-        }, 300);
+                setSuggestions(prev => {
+                    const combined = [...prev, ...finalNetwork];
+                    const seen = new Set();
+                    return combined.filter(item => {
+                        const key = `${item.id}-${(item.title || "").toLowerCase().trim()}`;
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    }).slice(0, 10);
+                });
+            }
+        }).catch(() => {});
+    }, [debouncedQuery, fuse]);
 
-        return () => clearTimeout(timer);
-    }, [searchQuery, fuse]);
+    // Close search overlay on Escape
+    useEffect(() => {
+        if (!isSearchOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setSearchOpen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isSearchOpen, setSearchOpen]);
 
     // Reset search on open state change
     useEffect(() => {
@@ -357,9 +374,32 @@ export default function MobileModals() {
                             {/* If query is empty */}
                             {!searchQuery.trim() ? (
                                 <>
+                                    {/* Pinned Searches */}
+                                    {pinnedSearches.length > 0 && (
+                                        <div className="pt-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] mb-3 flex items-center gap-1.5">
+                                                <Pin className="w-3 h-3" /> Pinned Searches
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {pinnedSearches.map((s, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => {
+                                                            setSearchQuery(s);
+                                                            handleMobileSearchSubmit(s);
+                                                        }}
+                                                        className="px-3 py-1.5 bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-xl text-xs font-bold text-[var(--accent)] active:scale-95 transition-all"
+                                                    >
+                                                        {s}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Recent Searches */}
                                     {recentSearches.length > 0 && (
-                                        <div className="pt-4">
+                                        <div>
                                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-1.5">
                                                 <Clock className="w-3 h-3 text-[var(--accent)]" /> Recent Searches
                                             </p>
@@ -381,7 +421,7 @@ export default function MobileModals() {
                                     )}
 
                                     {/* Popular Genres */}
-                                    <div className={recentSearches.length === 0 ? "pt-4" : ""}>
+                                    <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-3">Popular Genres</p>
                                         <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                                             {["Action", "Romance", "Comedy", "Fantasy", "Thriller", "Sci-Fi", "Horror", "Drama", "Mystery", "Adventure"].map((genre) => (
@@ -428,7 +468,7 @@ export default function MobileModals() {
                                     {suggestions.length > 0 ? (
                                         <>
                                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Suggestions</p>
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 max-h-[280px] overflow-y-auto rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 p-2">
                                                 {suggestions.map((item) => (
                                                     <Link
                                                         key={`${item.type}-${item.id}`}
@@ -453,6 +493,11 @@ export default function MobileModals() {
                                                             <div className="flex items-center gap-2">
                                                                 <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-[var(--accent)] text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
                                                                 <span className="text-[10px] text-[var(--text-muted)] font-semibold">{item.format} • {item.year}</span>
+                                                                {item.rating && (
+                                                                    <span className="flex items-center gap-0.5 text-[10px] text-amber-400 font-bold shrink-0">
+                                                                        ⭐ {item.rating}
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <Play className="w-4 h-4 text-[var(--accent)] mr-2 shrink-0" />

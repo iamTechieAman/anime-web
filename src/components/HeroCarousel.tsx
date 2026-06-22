@@ -27,7 +27,7 @@ interface Slide {
 export default function HeroCarousel() {
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
-    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const isKidsMode = activeProfile?.isKids || false;
 
     const [current, setCurrent] = useState(0);
     const [slides, setSlides] = useState<Slide[]>([]);

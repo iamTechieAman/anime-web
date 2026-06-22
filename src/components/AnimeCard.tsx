@@ -243,7 +243,7 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
 export function AnimeGrid({ shows }: { shows: Show[] }) {
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
-    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const isKidsMode = activeProfile?.isKids || false;
     const filteredShows = isKidsMode ? shows.filter(show => isKidsFriendly(show as any)) : shows;
 
     if (!filteredShows || filteredShows.length === 0) {

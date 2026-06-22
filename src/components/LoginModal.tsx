@@ -10,6 +10,15 @@ import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
 import { useUserStore } from "@/store/userStore";
 
+const ProfileAvatar = ({ src, alt, sizes = "80px" }: { src: string, alt: string, sizes?: string }) => {
+  const [error, setError] = useState(false);
+  return error || !src ? (
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-900 text-white font-black text-2xl select-none rounded-lg">{alt.charAt(0).toUpperCase()}</div>
+  ) : (
+    <Image src={src} alt={alt} fill sizes={sizes} className="object-cover rounded-lg" onError={() => setError(true)} />
+  );
+};
+
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,7 +76,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     try {
       const name = guestName.trim();
-      const newProfileId = `profile-guest-${Date.now()}`;
       
       // Add guest profile
       addProfile({
@@ -78,9 +86,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         theme: 'purple'
       });
 
-      // Find and activate the profile. Since addProfile uses Date.now(), let's wait a frame or check profiles.
-      // Alternatively, let's trigger it directly. 
-      // Note: addProfile generates ID internally. Let's find the newly added profile or activate a temporary state.
       setTimeout(() => {
         const updatedStore = useUserStore.getState();
         const created = updatedStore.profiles.find(p => p.name === name && p.avatar === selectedAvatar && p.type === 'guest');
@@ -107,7 +112,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   return (
     <ModalPortal isOpen={isOpen} onClose={onClose} className="max-w-[440px]">
       <div className="relative p-6 sm:p-8 flex flex-col min-h-0 overflow-y-auto">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white cursor-pointer z-20"
@@ -191,7 +195,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 />
               </div>
 
-              {/* Avatar Selection Grid */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Choose Avatar</label>
                 <div className="grid grid-cols-4 gap-2.5">
@@ -207,7 +210,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         } cursor-pointer`}
                       >
                         <div className="relative w-full h-full">
-                          <Image src={avatar.url} alt={avatar.name} fill className="object-cover rounded-lg" sizes="80px" />
+                          <ProfileAvatar src={avatar.url} alt={avatar.name} sizes="80px" />
                         </div>
                         {isSelected && (
                           <div className="absolute top-1 right-1 bg-[var(--accent)] rounded-full p-0.5 shadow-md">

@@ -44,7 +44,8 @@ async function fetchCatalog() {
                     type: item.media_type === 'movie' ? 'movie' : 'tv',
                     year: (item.release_date || item.first_air_date || '').split('-')[0],
                     format: item.media_type.toUpperCase(),
-                    href: `/watch/${item.media_type}/${item.id}`
+                    href: `/watch/${item.media_type}/${item.id}`,
+                    rating: item.vote_average ? item.vote_average.toFixed(1) : null
                 });
             });
         }
@@ -59,7 +60,7 @@ async function fetchCatalog() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji native } coverImage { medium } seasonYear format } } }`
+                    query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji native } coverImage { medium } seasonYear format averageScore } } }`
                 }),
                 next: { revalidate: 1800 }
             }),
@@ -77,7 +78,8 @@ async function fetchCatalog() {
                     type: 'anime',
                     year: item.seasonYear,
                     format: item.format,
-                    href: `/watch/anime/${item.id}`
+                    href: `/watch/anime/${item.id}`,
+                    rating: item.averageScore ? (item.averageScore / 10).toFixed(1) : null
                 });
             });
         }

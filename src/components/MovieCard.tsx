@@ -190,7 +190,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
 export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { items: MovieItem[]; type?: string }) {
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
-    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const isKidsMode = activeProfile?.isKids || false;
     const filteredItems = isKidsMode ? items.filter(item => isKidsFriendly(item)) : items;
 
     const validItems = filteredItems.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
@@ -239,7 +239,7 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
 
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
-    const isKidsMode = activeProfile?.isKids || (typeof window !== 'undefined' && localStorage.getItem(`kids-filter-${activeProfileId}`) === 'true');
+    const isKidsMode = activeProfile?.isKids || false;
 
     // Hide Horror and Thriller genre rows entirely in Kids Mode
     const lowerTitle = (title || "").toLowerCase();

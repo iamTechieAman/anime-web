@@ -6,6 +6,7 @@ import { Search, Film, Tv, Clock, Compass, X, Command, Mic, MicOff, Pin, PinOff,
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Image from "next/image";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface CommandPaletteProps {
     isOpen: boolean;
@@ -18,7 +19,7 @@ const COLLECTIONS = ["Trending Now", "Premium 4K", "Classic Animes", "Netflix Or
 export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     const router = useRouter();
     const [query, setQuery] = useState("");
-    const [debouncedQuery, setDebouncedQuery] = useState("");
+    const debouncedQuery = useDebounce(query, 200);
     const [activeIndex, setActiveIndex] = useState(0);
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -29,7 +30,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const recognitionRef = useRef<any>(null);
 
     function saveSearch(q: string) {
-        const updated = [q, ...recentSearches.filter(x => x !== q)].slice(0, 8);
+        if (!q.trim()) return;
+        const updated = [q.trim(), ...recentSearches.filter(x => x !== q.trim())].slice(0, 10);
         setRecentSearches(updated);
         localStorage.setItem("toonplayer_recent_searches", JSON.stringify(updated));
     }
@@ -58,69 +60,79 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         }
     }
 
-    function getFlattenedItems() {
+    const getNavigableItems = () => {
         const list: any[] = [];
-        
-        // Static commands
-        list.push({
-            name: "Surprise Me (Random Picker)",
-            action: () => { window.dispatchEvent(new Event("openRandomizer")); onClose(); }
-        });
-        list.push({
-            name: "Browse Movies",
-            action: () => { router.push("/browse?type=movie", { scroll: false }); onClose(); }
-        });
-        list.push({
-            name: "Browse TV Shows",
-            action: () => { router.push("/browse?type=tv", { scroll: false }); onClose(); }
-        });
-        list.push({
-            name: "AI Discovery (Smart Recommendations)",
-            action: () => { router.push("/discover", { scroll: false }); onClose(); }
-        });
-
-        // Pinned
-        pinnedSearches.forEach(term => {
-            list.push({
-                name: `Search Pinned: ${term}`,
-                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }
+        if (query.trim()) {
+            results.forEach(item => {
+                list.push({
+                    type: "result",
+                    title: item.title,
+                    action: () => {
+                        router.push(item.href, { scroll: false });
+                        saveSearch(item.title);
+                        onClose();
+                    }
+                });
             });
-        });
-
-        // Recents
-        recentSearches.forEach(term => {
-            list.push({
-                name: `Search Recent: ${term}`,
-                action: () => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }
+        } else {
+            pinnedSearches.forEach(term => {
+                list.push({
+                    type: "pinned",
+                    title: term,
+                    action: () => {
+                        router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false });
+                        saveSearch(term);
+                        onClose();
+                    }
+                });
             });
-        });
-
-        // Results
-        results.forEach(item => {
-            list.push({
-                name: item.title,
-                action: () => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }
+            recentSearches.forEach(term => {
+                list.push({
+                    type: "recent",
+                    title: term,
+                    action: () => {
+                        router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false });
+                        saveSearch(term);
+                        onClose();
+                    }
+                });
             });
-        });
-
+            list.push({
+                type: "system",
+                title: "Browse Movies",
+                action: () => {
+                    router.push("/browse?type=movie", { scroll: false });
+                    onClose();
+                }
+            });
+            list.push({
+                type: "system",
+                title: "Browse TV Shows",
+                action: () => {
+                    router.push("/browse?type=tv", { scroll: false });
+                    onClose();
+                }
+            });
+            list.push({
+                type: "system",
+                title: "AI Discovery",
+                action: () => {
+                    router.push("/discover", { scroll: false });
+                    onClose();
+                }
+            });
+        }
         return list;
-    }
+    };
 
     function triggerItemAtIndex(index: number) {
-        const items = getFlattenedItems();
-        const selected = items[index];
+        const items = getNavigableItems();
+        const clampedIndex = Math.max(0, Math.min(index, items.length - 1));
+        const selected = items[clampedIndex];
         if (selected) {
             selected.action();
         }
     }
-
-    // Debounce query
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedQuery(query);
-        }, 200);
-        return () => clearTimeout(handler);
-    }, [query]);
 
     // Load recent & pinned searches from localStorage
     useEffect(() => {
@@ -132,9 +144,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             const pinned = localStorage.getItem("toonplayer_pinned_searches");
             if (pinned) {
                 try { setPinnedSearches(JSON.parse(pinned)); } catch (e) {}
+            } else {
+                const defaultPinned = ["Anime", "Movies", "TV", "Collections", "Actors"];
+                setPinnedSearches(defaultPinned);
+                localStorage.setItem("toonplayer_pinned_searches", JSON.stringify(defaultPinned));
             }
         }
     }, [isOpen]);
+
+    // Reset active index when query/results/lists change
+    useEffect(() => {
+        setActiveIndex(0);
+    }, [query, results.length, recentSearches.length, pinnedSearches.length]);
 
     // Speech recognition setup
     useEffect(() => {
@@ -185,7 +206,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     }, [isOpen]);
 
     // Keyboard navigation
-    const allItemsCount = results.length + pinnedSearches.length + recentSearches.length + 3; // results + static items
+    const navigableItems = getNavigableItems();
+    const allItemsCount = navigableItems.length;
     useEffect(() => {
         if (!isOpen) return;
 
@@ -194,10 +216,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 onClose();
             } else if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setActiveIndex(prev => (prev + 1) % allItemsCount);
+                setActiveIndex(prev => (allItemsCount > 0 ? (prev + 1) % allItemsCount : 0));
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
-                setActiveIndex(prev => (prev - 1 + allItemsCount) % allItemsCount);
+                setActiveIndex(prev => (allItemsCount > 0 ? (prev - 1 + allItemsCount) % allItemsCount : 0));
             } else if (e.key === "Enter") {
                 e.preventDefault();
                 triggerItemAtIndex(activeIndex);
@@ -206,18 +228,22 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen, activeIndex, allItemsCount, results, recentSearches, pinnedSearches]);
+    }, [isOpen, activeIndex, allItemsCount]);
 
     if (!isOpen) return null;
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[130] flex items-start justify-center pt-[10vh] px-4 bg-black/85 backdrop-blur-md">
+            <div 
+                onClick={onClose}
+                className="fixed inset-0 z-[130] flex items-start justify-center pt-[10vh] px-4 bg-black/85 backdrop-blur-md cursor-pointer"
+            >
                 <motion.div
                     initial={{ opacity: 0, scale: 0.96, y: -20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: -20 }}
-                    className="w-full max-w-2xl bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col max-h-[75vh]"
+                    onClick={e => e.stopPropagation()}
+                    className="w-full max-w-2xl bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col"
                 >
                     {/* Header Input */}
                     <div className="flex items-center gap-3 p-4 border-b border-white/10 shrink-0">
@@ -248,7 +274,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     </div>
 
                     {/* Results Container */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-3 space-y-4 max-h-[280px] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3">
                         {loading && (
                             <div className="p-8 text-center text-zinc-500 text-xs font-bold animate-pulse">
                                 Loading matched titles...
@@ -261,7 +287,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                 <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase px-3 mb-2">Search Results</p>
                                 <div className="space-y-1">
                                     {results.map((item, idx) => {
-                                        const actualIdx = 3 + pinnedSearches.length + recentSearches.length + idx;
+                                        const actualIdx = idx;
                                         const isSelected = actualIdx === activeIndex;
                                         return (
                                             <div
@@ -272,13 +298,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                     isSelected ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent-glow)]" : "text-zinc-300 hover:bg-white/5"
                                                 }`}
                                             >
-                                                <div className="w-8 h-10 overflow-hidden rounded bg-zinc-950/40 border border-white/10 shrink-0">
+                                                <div className="w-8 h-10 relative overflow-hidden rounded bg-zinc-950/40 border border-white/10 shrink-0">
                                                     {item.image ? <Image src={item.image} alt="" fill sizes="32px" className="object-cover" /> : <Film className="w-4 h-4 m-auto text-zinc-500" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-xs font-bold truncate block">{item.title}</span>
                                                         <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase shrink-0 ${item.type === 'anime' ? 'bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/10' : 'bg-blue-500/20 text-blue-400 border border-blue-500/10'}`}>{item.type}</span>
+                                                        {item.rating && (
+                                                            <span className="flex items-center gap-0.5 text-[10px] text-amber-400 font-bold shrink-0">
+                                                                ⭐ {item.rating}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <span className="text-[10px] text-zinc-400 font-semibold">{item.format} · {item.year}</span>
                                                 </div>
@@ -305,7 +336,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         </p>
                                         <div className="grid grid-cols-2 gap-1.5 p-1">
                                             {pinnedSearches.map((term, idx) => {
-                                                const actualIdx = 3 + idx;
+                                                const actualIdx = idx;
                                                 const isSelected = actualIdx === activeIndex;
                                                 return (
                                                     <div
@@ -334,7 +365,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         </p>
                                         <div className="space-y-1">
                                             {recentSearches.map((term, idx) => {
-                                                const actualIdx = 3 + pinnedSearches.length + idx;
+                                                const actualIdx = pinnedSearches.length + idx;
                                                 const isSelected = actualIdx === activeIndex;
                                                 return (
                                                     <div
@@ -363,41 +394,43 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         )}
 
                         {/* Static Navigation Commands */}
-                        <div>
-                            <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase px-3 mb-2">System Commands</p>
-                            <div className="space-y-1">
-                                <button
-                                    onClick={() => { window.dispatchEvent(new Event("openRandomizer")); onClose(); }}
-                                    onMouseEnter={() => setActiveIndex(0)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                                        activeIndex === 0 ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
-                                    }`}
-                                >
-                                    <Sparkles className="w-4 h-4 shrink-0 text-amber-400" />
-                                    <span className="text-xs font-bold">Surprise Me (Random Picker)</span>
-                                </button>
-                                <button
-                                    onClick={() => { router.push("/browse?type=movie", { scroll: false }); onClose(); }}
-                                    onMouseEnter={() => setActiveIndex(1)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                                        activeIndex === 1 ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
-                                    }`}
-                                >
-                                    <Film className="w-4 h-4 shrink-0 text-blue-400" />
-                                    <span className="text-xs font-bold">Browse Movies</span>
-                                </button>
-                                <button
-                                    onClick={() => { router.push("/browse?type=tv", { scroll: false }); onClose(); }}
-                                    onMouseEnter={() => setActiveIndex(2)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                                        activeIndex === 2 ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
-                                    }`}
-                                >
-                                    <Tv className="w-4 h-4 shrink-0 text-green-400" />
-                                    <span className="text-xs font-bold">Browse TV Shows</span>
-                                </button>
+                        {!query && (
+                            <div>
+                                <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase px-3 mb-2">System Commands</p>
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={() => { router.push("/browse?type=movie", { scroll: false }); onClose(); }}
+                                        onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length)}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                                            activeIndex === (pinnedSearches.length + recentSearches.length) ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
+                                        }`}
+                                    >
+                                        <Film className="w-4 h-4 shrink-0 text-blue-400" />
+                                        <span className="text-xs font-bold">Browse Movies</span>
+                                    </button>
+                                    <button
+                                        onClick={() => { router.push("/browse?type=tv", { scroll: false }); onClose(); }}
+                                        onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length + 1)}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                                            activeIndex === (pinnedSearches.length + recentSearches.length + 1) ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
+                                        }`}
+                                    >
+                                        <Tv className="w-4 h-4 shrink-0 text-green-400" />
+                                        <span className="text-xs font-bold">Browse TV Shows</span>
+                                    </button>
+                                    <button
+                                        onClick={() => { router.push("/discover", { scroll: false }); onClose(); }}
+                                        onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length + 2)}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
+                                            activeIndex === (pinnedSearches.length + recentSearches.length + 2) ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
+                                        }`}
+                                    >
+                                        <Sparkles className="w-4 h-4 shrink-0 text-amber-400" />
+                                        <span className="text-xs font-bold">AI Discovery</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Genres Quick Navigation */}
                         {!query && (

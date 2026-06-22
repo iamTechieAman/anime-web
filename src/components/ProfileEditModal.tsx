@@ -191,7 +191,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                   );
                 })}
 
-                {profiles.length < 6 && (
+                {true && (
                   <button
                     onClick={handleCreateOpen}
                     className="group flex flex-col items-center gap-3 cursor-pointer"

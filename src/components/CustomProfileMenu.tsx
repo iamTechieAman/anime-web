@@ -40,8 +40,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     ? ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "U" 
     : (activeProfile?.name?.[0] || "G").toUpperCase();
 
-  const isGuestProfile = activeProfile?.type === 'guest';
-  const showFullMenu = user && !isGuestProfile;
+  const showFullMenu = !!activeProfile;
 
   const menuItems = showFullMenu ? [
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },

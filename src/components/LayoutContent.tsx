@@ -57,7 +57,17 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   // Keyboard listeners for Surprise Me and Command Palette + Custom Modal Event Listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const target = e.target as HTMLElement;
+      if (
+        target && (
+          target.tagName === "INPUT" || 
+          target.tagName === "TEXTAREA" || 
+          target.isContentEditable ||
+          target.closest("input, textarea, [contenteditable]")
+        )
+      ) {
+        return;
+      }
       if (e.key.toLowerCase() === "r") {
         setIsRandomizerOpen(true);
       }
@@ -102,7 +112,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
       {/* Content area: adaptive padding based on sidebar visibility */}
       <div className={`flex flex-col min-h-dvh relative ${
-        showSidebar ? "pl-0 md:pl-[72px] peer-hover/sidebar:md:pl-[240px]" : "pl-0"
+        showSidebar ? "pl-0 md:pl-[80px]" : "pl-0"
       } transition-[padding] duration-300 ease-in-out ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}

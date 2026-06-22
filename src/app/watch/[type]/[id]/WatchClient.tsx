@@ -480,7 +480,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         <div className="flex justify-center items-center py-12"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
                                     ) : (
                                         <>
-                                            {episodeLayoutMode === "grid" ? (
+                                            {activeFilteredEpisodes.length === 0 ? (
+                                                <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                                                    <List className="w-8 h-8 text-zinc-600 mb-3" />
+                                                    <p className="text-sm font-bold text-zinc-400">No episodes found</p>
+                                                    <p className="text-xs text-zinc-600 mt-1">Try adjusting your search</p>
+                                                </div>
+                                            ) : episodeLayoutMode === "grid" ? (
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
                                                     {activeFilteredEpisodes.map((ep) => (
                                                         <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
@@ -491,7 +497,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     {activeFilteredEpisodes.map((ep) => (
                                                         <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex ${mode === 'mobile' ? 'flex-col min-w-[200px] snap-center items-start' : 'items-center'} gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
                                                             <div className={`${mode === 'mobile' ? 'w-full aspect-video' : 'w-24 h-14'} rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative`}>
-                                                                {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
+                                                                {(ep.still_path || details?.backdrop_path || details?.poster_path) ? <Image src={`${IMG_BASE}/w185${ep.still_path || details?.backdrop_path || details?.poster_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />}
                                                                 {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0 w-full">
@@ -967,29 +973,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
             if (nextServer) {
                 setLoadingStatus(`Switching to backup server: ${nextServer.name}...`);
-                toast.error(`Server ${activeServer.name} is unresponsive. Rotating to ${nextServer.name}...`, {
-                    icon: "🔄",
-                    style: {
-                        background: "rgba(20, 20, 20, 0.95)",
-                        border: "1px solid rgba(124, 58, 237, 0.3)",
-                        fontSize: "12px",
-                        fontWeight: "bold"
-                    }
-                });
                 // Update active server state on the next tick to avoid state sync locks
                 fallbackTimeoutRef.current = setTimeout(() => setActiveServer(nextServer), 50);
             } else {
                 setSourceError(true);
-                toast.error("All available streaming sources are currently unreachable. Please try the alternative mirrors below or download.", {
-                    duration: 6000,
-                    style: {
-                        background: "rgba(20, 20, 20, 0.95)",
-                        color: "#fff",
-                        border: "1px solid rgba(239, 68, 68, 0.3)",
-                        fontSize: "12px",
-                        fontWeight: "bold"
-                    }
-                });
             }
             return next;
         });
@@ -1505,8 +1492,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
 
     const renderEpisodesSidebar = () => {
+        if (type === 'movie' || episodes.length === 0) return null;
         return (
-            <div className="hidden xl:flex w-[30%] bg-[#09090B] p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] flex-col h-[calc(100vh-140px)] sticky top-6 overflow-y-auto custom-scrollbar">
+            <div className="hidden xl:flex w-[450px] shrink-0 bg-[#09090B] p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] flex-col h-[calc(100vh-140px)] sticky top-6 overflow-y-auto custom-scrollbar resize-x min-w-[300px] max-w-[600px]">
                 {renderEpisodesList('desktop')}
             </div>
         );
@@ -1515,6 +1503,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderDesktopEpisodes = renderEpisodesSidebar;
 
     const renderMobileEpisodes = () => {
+        if (type === 'movie' || episodes.length === 0) return null;
         return (
             <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8 xl:hidden">
                 {renderEpisodesList('mobile')}
@@ -1629,8 +1618,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                             {/* Player & Episode Layout */}
                             <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 flex flex-col xl:flex-row gap-6 items-start">
-                                {/* Player Column (70%) */}
-                                <div className="flex-1 w-full xl:w-[70%] bg-[#09090B] p-4 md:p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+                                {/* Player Column */}
+                                <div className="flex-1 w-full min-w-0 bg-[#09090B] p-4 md:p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
                                     {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                     {/* ── SERVER SELECTION BAR ── */}
                                     {renderProviders()}

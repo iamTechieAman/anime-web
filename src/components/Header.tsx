@@ -190,7 +190,7 @@ export default function Header() {
   return (
     <>
     <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[calc(3.5rem+env(safe-area-inset-top,0px))] md:h-[calc(4rem+env(safe-area-inset-top,0px))] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
-      showSidebar ? "left-0 md:left-[72px]" : "left-0"
+      showSidebar ? "left-0 md:left-[80px]" : "left-0"
     } ${isScrolled
       ? "bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
       : "bg-gradient-to-b from-black/70 to-transparent border-b border-transparent"
@@ -208,7 +208,7 @@ export default function Header() {
 
         {/* Logo */}
         <Link href="/" className={`flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none ${showSidebar ? "md:hidden" : ""}`} onClick={clearSearch} aria-label="ToonPlayer Home">
-          <div className="w-7 h-7 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
+          <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
             <Logo />
           </div>
           <span className="flex flex-col leading-none">
@@ -228,20 +228,22 @@ export default function Header() {
 
         {/* PC Search Bar */}
         {deviceMode==="pc" && (
-          <button 
-            onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
-            className="flex-1 min-w-0 max-w-[360px] lg:max-w-[500px] xl:max-w-[580px] hidden md:flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-xl hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-          >
-            <div className="flex-1 flex items-center min-w-0 pl-3 pr-2 h-full gap-2">
-              <Search className="w-4 h-4 text-zinc-500 shrink-0" />
-              <span className="text-[13px] text-zinc-500 font-medium flex-1 truncate">
-                Search movies, anime, actors, genres...
-              </span>
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[10px] text-zinc-400 font-bold select-none">
-                <span>Ctrl</span><span>K</span>
-              </kbd>
-            </div>
-          </button>
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:flex items-center justify-center w-full max-w-[360px] lg:max-w-[500px] xl:max-w-[580px]">
+            <button 
+              onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
+              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-xl hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            >
+              <div className="flex-1 flex items-center min-w-0 pl-3 pr-2 h-full gap-2">
+                <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+                <span className="text-[13px] text-zinc-500 font-medium flex-1 truncate">
+                  Search movies, anime, actors, genres...
+                </span>
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[10px] text-zinc-400 font-bold select-none">
+                  <span>Ctrl</span><span>K</span>
+                </kbd>
+              </div>
+            </button>
+          </div>
         )}
 
         {/* TV Search Overlay */}
@@ -255,7 +257,7 @@ export default function Header() {
                 </div>
                 <div className="relative flex items-center p-2 bg-white/[0.04] border border-white/10 rounded-2xl focus-within:border-[var(--accent)]/50 transition-all">
                   <Search className="w-6 h-6 text-zinc-400 ml-3 shrink-0"/>
-                  <input type="text" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
+                  <input type="text" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} onKeyDown={(e) => { if (e.key === "Enter" && searchQuery.length >= 2) { if (suggestions.length > 0) { router.push(suggestions[0].href || `/watch/${suggestions[0].type}/${suggestions[0].id}`, { scroll: false }); setIsTvSearchOpen(false); saveRecent(suggestions[0].title); } else { handleSearch(null, searchQuery); setIsTvSearchOpen(false); } } }} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
                   {searchQuery&&<button onClick={()=>setSearchQuery("")} className="p-2"><X className="w-5 h-5 text-zinc-400"/></button>}
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 hide-scrollbar">

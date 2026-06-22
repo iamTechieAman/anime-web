@@ -63,8 +63,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
     const { isSignedIn } = useUser();
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
-    const isGuestProfile = activeProfile?.type === 'guest';
-    const canComment = isSignedIn && !isGuestProfile;
+    const canComment = !!activeProfile;
 
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
@@ -156,8 +155,8 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
 
         const comment: Comment = {
             id: `user-${Date.now()}`,
-            username: "You (Member)",
-            avatar: "bg-[var(--accent)] text-black font-black",
+            username: activeProfile?.name || "You",
+            avatar: activeProfile?.avatar || "bg-[var(--accent)] text-black font-black",
             content: newComment.trim(),
             timestamp: "Just now",
             likes: 0,
@@ -177,7 +176,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
 
     const handleLike = (id: string) => {
         if (!canComment) {
-            toast.error("Please sign in or select a non-guest profile to like comments.");
+            toast.error("Please select a profile to like comments.");
             return;
         }
         const updated = comments.map(c => {
@@ -213,7 +212,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
 
     const handleDislike = (id: string) => {
         if (!canComment) {
-            toast.error("Please sign in or select a non-guest profile to dislike comments.");
+            toast.error("Please select a profile to dislike comments.");
             return;
         }
         const updated = comments.map(c => {
@@ -407,9 +406,15 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                     comments.map((comment) => (
                         <div key={comment.id} className="group/item flex gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.02] hover:border-white/[0.04] hover:bg-white/[0.04] transition-all">
                             {/* Avatar */}
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xs select-none ${comment.avatar}`}>
-                                {comment.username.slice(0, 2).toUpperCase()}
-                            </div>
+                            {comment.avatar && (comment.avatar.startsWith('http') || comment.avatar.startsWith('data:')) ? (
+                                <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0">
+                                    <Image src={comment.avatar} alt={comment.username} fill sizes="36px" className="object-cover" />
+                                </div>
+                            ) : (
+                                <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xs select-none ${comment.avatar || 'bg-[var(--accent)] text-black font-black'}`}>
+                                    {comment.username.slice(0, 2).toUpperCase()}
+                                </div>
+                            )}
 
                             {/* Comment content */}
                             <div className="flex-1 min-w-0 space-y-2">
