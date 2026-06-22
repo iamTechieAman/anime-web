@@ -672,12 +672,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 const currentEps = fetchedShow.availableEpisodesDetail?.[modeParam || initialMode] || [];
                 
-                if (epParam && currentEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(String(epParam))) {
+                if (epParam && currentEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(String(epParam))) {
                     setCurrentEp(String(epParam));
-                } else if (historyItem && historyItem.episodeId && currentEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(String(historyItem.episodeId))) {
+                } else if (historyItem && historyItem.episodeId && currentEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(String(historyItem.episodeId))) {
                     setCurrentEp(String(historyItem.episodeId));
                 } else if (currentEps.length > 0) {
-                    setCurrentEp(currentEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes("1") ? "1" : String((typeof currentEps[0] === 'object' ? String(currentEps[0].number||currentEps[0].id) : String(currentEps[0]))));
+                    setCurrentEp(currentEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes("1") ? "1" : String((typeof currentEps[0] === 'object' ? String(currentEps[0].number||currentEps[0].id) : String(currentEps[0]))));
                 }
 
                 // Parallelly fetch TMDB ID if name is available
@@ -995,7 +995,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             className="absolute inset-0 w-full h-full border-0"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
-                            onLoad={(e) => {
+                            onLoad={(e: any) => {
                                 try {
                                     const iframe = e.target as HTMLIFrameElement;
                                     const doc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -1133,7 +1133,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     className="w-full h-full border-0 bg-black"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
                                     allowFullScreen
-                                    onLoad={(e) => {
+                                    onLoad={(e: any) => {
                                         setLoadingSource(false);
                                         try {
                                             const iframe = e.target as HTMLIFrameElement;

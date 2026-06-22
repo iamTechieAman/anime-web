@@ -9,8 +9,8 @@ import { useSignIn, useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
 
 export default function LoginPage() {
-  const { signIn, isLoaded: signInLoaded } = useSignIn();
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
+  const { signIn, isLoaded: signInLoaded } = useSignIn() as any;
+  const { isLoaded: userLoaded, isSignedIn } = useUser() as any;
   const { addProfile, setActiveProfile } = useUserStore();
   const router = useRouter();
 
