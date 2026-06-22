@@ -432,6 +432,72 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // Cleanup countdown timer on unmount
     useEffect(() => {
+    const renderEpisodesList = (mode: 'desktop' | 'mobile') => {
+        if (type !== 'tv' || !details.seasons || details.seasons.length === 0) return null;
+        return (
+            <div className={`w-full ${mode === 'desktop' ? 'h-full flex flex-col' : ''}`}>
+                                    <div className="flex flex-col gap-4 mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                                                <h2 className="text-xl font-bold">Episodes</h2>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                                                    <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><List className="w-3.5 h-3.5" /></button>
+                                                    <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><LayoutGrid className="w-3.5 h-3.5" /></button>
+                                                </div>
+                                                {episodes.length > 0 && <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row gap-3">
+                                            {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
+                                                <div className="relative flex-1 sm:max-w-[200px]">
+                                                    <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm">
+                                                        {details.seasons.filter(s => s.season_number > 0).sort((a, b) => a.season_number - b.season_number).map((season) => <option key={season.id} value={season.season_number}>Season {season.season_number} ({season.episode_count} eps)</option>)}
+                                                    </select>
+                                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+                                                </div>
+                                            )}
+                                            <div className="relative flex-1">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                                                <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-[var(--accent)] transition-colors placeholder:text-zinc-500" />
+                                                {episodeSearch && <button onClick={() => setEpisodeSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {loadingEpisodes ? (
+                                        <div className="flex justify-center items-center py-12"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+                                    ) : (
+                                        <>
+                                            {episodeLayoutMode === "grid" ? (
+                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
+                                                    {activeFilteredEpisodes.map((ep) => (
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className={mode === 'mobile' ? "flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-col sm:overflow-visible sm:snap-none sm:pb-0" : "flex flex-col gap-2"}>
+                                                    {activeFilteredEpisodes.map((ep) => (
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex ${mode === 'mobile' ? 'flex-col min-w-[200px] snap-center items-start' : 'items-center'} gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
+                                                            <div className={`${mode === 'mobile' ? 'w-full aspect-video' : 'w-24 h-14'} rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative`}>
+                                                                {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
+                                                                {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0 w-full">
+                                                                <p className={`text-sm font-semibold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
+                                                                <div className="flex items-center gap-2 mt-0.5">{ep.air_date && <span className="text-[10px] text-[var(--text-muted)]">{ep.air_date}</span>}{ep.runtime > 0 && <span className="text-[10px] text-[var(--text-muted)]">{ep.runtime}m</span>}</div>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+            </div>
+        );
+    };
+
         return () => {
             if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
         };
@@ -1445,8 +1511,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* HeroSection via Component */}
                             <MovieHero backdropPath={details.backdrop_path} />
 
-                            {/* PlayerSection */}
-                            <div className="relative z-10 bg-[#09090B] p-4 md:p-6 rounded-[24px] w-full max-w-[1600px] mx-auto mt-6 shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+                            {/* Player & Episode Layout */}
+                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 flex flex-col xl:flex-row gap-6 items-start">
+                                {/* Player Column (70%) */}
+                                <div className="flex-1 w-full xl:w-[70%] bg-[#09090B] p-4 md:p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
                                 {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                 {/* ── SERVER SELECTION BAR ── */}
                                 <ProviderBar
@@ -1461,8 +1529,18 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     animeServers={ANIME_SERVERS}
                                     onSelectServer={handleManualServerSelect}
                                 />
+                                </div>
+
+                                {/* Desktop Episodes Sidebar (30%) */}
+                                <div className="hidden xl:flex w-[30%] bg-[#09090B] p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] flex-col h-[calc(100vh-140px)] sticky top-6 overflow-y-auto custom-scrollbar">
+                                    {renderEpisodesList('desktop')}
+                                </div>
                             </div>
 
+                            {/* Mobile/Tablet Episodes (Hidden on Desktop) */}
+                            <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8 xl:hidden">
+                                {renderEpisodesList('mobile')}
+                            </section>
                             {/* Metadata Section */}
                             <div className="relative z-10 bg-[#09090B] p-6 md:p-8 rounded-[24px] border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
                                 <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative">
@@ -1560,68 +1638,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
                             </div>
 
-                            {type === 'tv' && details.seasons && details.seasons.length > 0 && (
-                                <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8">
-                                    <div className="flex flex-col gap-4 mb-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                                                <h2 className="text-xl font-bold">Episodes</h2>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
-                                                    <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><List className="w-3.5 h-3.5" /></button>
-                                                    <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><LayoutGrid className="w-3.5 h-3.5" /></button>
-                                                </div>
-                                                {episodes.length > 0 && <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>}
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row gap-3">
-                                            {details.seasons && details.seasons.filter(s => s.season_number > 0).length > 1 && (
-                                                <div className="relative flex-1 sm:max-w-[200px]">
-                                                    <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm">
-                                                        {details.seasons.filter(s => s.season_number > 0).sort((a, b) => a.season_number - b.season_number).map((season) => <option key={season.id} value={season.season_number}>Season {season.season_number} ({season.episode_count} eps)</option>)}
-                                                    </select>
-                                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-                                                </div>
-                                            )}
-                                            <div className="relative flex-1">
-                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                                                <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-[var(--accent)] transition-colors placeholder:text-zinc-500" />
-                                                {episodeSearch && <button onClick={() => setEpisodeSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {loadingEpisodes ? (
-                                        <div className="flex justify-center items-center py-12"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
-                                    ) : (
-                                        <>
-                                            {episodeLayoutMode === "grid" ? (
-                                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
-                                                    {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col gap-2">
-                                                    {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
-                                                            <div className="w-24 h-14 rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative">
-                                                                {ep.still_path ? <Image src={`${IMG_BASE}/w185${ep.still_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] text-xs">No Img</div>}
-                                                                {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className={`text-sm font-semibold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
-                                                                <div className="flex items-center gap-2 mt-0.5">{ep.air_date && <span className="text-[10px] text-[var(--text-muted)]">{ep.air_date}</span>}{ep.runtime > 0 && <span className="text-[10px] text-[var(--text-muted)]">{ep.runtime}m</span>}</div>
-                                                            </div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </section>
-                            )}
                             {details.cast && details.cast.length > 0 && (
                                 <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8">
                                     <div className="flex items-center justify-between mb-5">

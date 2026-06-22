@@ -39,6 +39,7 @@ interface UserState {
   addProfile: (profile: Omit<Profile, 'id'>) => void;
   removeProfile: (id: string) => void;
   setActiveProfile: (id: string | null) => void;
+  syncProfile: (profile: Profile) => void; // Sync external profile (e.g. Clerk)
   updateSettings: (profileId: string, settings: Partial<UserSettings>) => void;
   addToHistory: (profileId: string, item: WatchHistoryItem) => void;
   addToWatchlist: (profileId: string, item: any) => void;
@@ -54,7 +55,6 @@ const defaultSettings: UserSettings = {
 };
 
 const defaultProfiles: Profile[] = [
-  { id: 'profile-aman', name: 'Aman', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Aman' },
   { id: 'profile-kids', name: 'Kids', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Kids', isKids: true },
   { id: 'profile-guest', name: 'Guest', avatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Guest' }
 ];
@@ -78,6 +78,16 @@ export const useUserStore = create<UserState>()(
       })),
 
       setActiveProfile: (id) => set({ activeProfileId: id }),
+
+      syncProfile: (profile) => set((state) => {
+        const exists = state.profiles.find(p => p.id === profile.id);
+        if (exists) {
+            return {
+                profiles: state.profiles.map(p => p.id === profile.id ? { ...p, ...profile } : p)
+            };
+        }
+        return { profiles: [profile, ...state.profiles] };
+      }),
 
       updateSettings: (profileId, newSettings) => set((state) => ({
         settings: {

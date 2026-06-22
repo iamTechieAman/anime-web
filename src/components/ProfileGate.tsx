@@ -5,18 +5,34 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useUserStore, Profile } from "@/store/userStore";
+import { useUser } from "@clerk/nextjs";
 
 export default function ProfileGate() {
-  const { profiles, activeProfileId, setActiveProfile, addProfile, removeProfile } = useUserStore();
+  const { profiles, activeProfileId, setActiveProfile, addProfile, removeProfile, syncProfile } = useUserStore();
   const [showGate, setShowGate] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [isClient, setIsClient] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  
+  const { user, isLoaded } = useUser();
+  const [synced, setSynced] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     
+    if (isLoaded && user && !synced) {
+      const clerkProfileId = `profile-${user.id}`;
+      const clerkName = user.firstName || user.username || "My Profile";
+      const clerkAvatar = user.imageUrl || `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(clerkName)}`;
+      
+      syncProfile({ id: clerkProfileId, name: clerkName, avatar: clerkAvatar });
+      setSynced(true);
+      
+      // If we are just signing in and have no active profile, we show the gate.
+      // But we now have the synced profile available in the `profiles` list.
+    }
+
     // Show gate on first visit, logout, or if no active profile
     if (!activeProfileId) {
       setShowGate(true);

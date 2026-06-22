@@ -29,6 +29,12 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 12 — Profile & Authentication Reconstruction (`June 2026`)
+- 🔒 **Clerk OAuth Migration**: Replaced legacy custom JWT auth flow with robust Clerk authentication supporting Google, GitHub, and Discord OAuth.
+- 👤 **Dynamic Profiles**: Hooked user login states to a unified `toonplayer-unified-store`. History and watchlists are strictly siloed per `profileId`, completely removing hardcoded guest defaults.
+- 📺 **Netflix-Style Player Layout**: Reconstructed `WatchClient` to use a true 70/30 Player-to-Episode desktop split. The player consumes 70% width while the episode list sticks neatly to the right 30% on wide screens.
+- 📱 **Mobile/Tablet Carousel**: The episode view transitions fluidly into a horizontal scrolling carousel (`snap-x`) on mobile to conserve vertical space.
+
 ### Phase 11 — Layout Engine & Detail Page Reconstruction (`June 2026`)
 - 🏗️ **Single-Column Architecture**: Rebuilt `WatchClient` components (Movie, TV, and Anime) to use a strict vertical layout flow, eliminating flex-row overlaps and horizontal shifting.
 - 🖼️ **Full-Bleed MovieHero**: Refactored the backdrop container to support true 100vw edge-to-edge stretching with strict constraints, fixing cross-device bleeding.

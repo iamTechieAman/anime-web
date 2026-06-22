@@ -61,9 +61,19 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
         isFlipped = true;
       }
 
+      // Constrain to viewport bounds to prevent clipping
+      if (top + menuRect.height > viewportHeight && !isFlipped) {
+        top = viewportHeight - menuRect.height - 16;
+      }
+
       // Align right
       let right = viewportWidth - buttonRect.right;
-      if (right < 10) right = 10;
+      if (right < 16) right = 16;
+
+      const maxWidth = viewportWidth < 768 ? viewportWidth * 0.9 : 320;
+      if (right + maxWidth > viewportWidth) {
+          right = viewportWidth - maxWidth - 16;
+      }
 
       setMenuStyle({
         position: 'fixed',
@@ -166,7 +176,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
               style={menuStyle}
-              className="w-56 bg-[#0B0713]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col pointer-events-auto"
+              className="bg-[#141419]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col w-[90vw] md:w-[320px]"
             >
               {/* Header */}
               <div className="p-4 border-b border-white/5 flex items-center gap-3 bg-white/5">
