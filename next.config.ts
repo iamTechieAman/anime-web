@@ -32,6 +32,8 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      { protocol: 'https', hostname: 'api.dicebear.com' },
+      { protocol: 'https', hostname: 'img.clerk.com' },
       { protocol: 'https', hostname: 's4.anilist.co' },
       { protocol: 'https', hostname: 'allanime.day' },
       { protocol: 'https', hostname: 'static.animesho.one' },

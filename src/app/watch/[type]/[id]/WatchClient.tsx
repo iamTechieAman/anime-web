@@ -432,6 +432,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // Cleanup countdown timer on unmount
     useEffect(() => {
+        return () => {
+            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        };
+    }, []);
+
     const renderEpisodesList = (mode: 'desktop' | 'mobile') => {
         if (type !== 'tv' || !details.seasons || details.seasons.length === 0) return null;
         return (
@@ -498,10 +503,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         );
     };
 
-        return () => {
-            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-        };
-    }, []);
+
     
     // User Settings Support
     const [smartSwitchEnabled, setSmartSwitchEnabled] = useState(true);
