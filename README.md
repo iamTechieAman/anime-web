@@ -29,6 +29,12 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 11 — Layout Engine & Detail Page Reconstruction (`June 2026`)
+- 🏗️ **Single-Column Architecture**: Rebuilt `WatchClient` components (Movie, TV, and Anime) to use a strict vertical layout flow, eliminating flex-row overlaps and horizontal shifting.
+- 🖼️ **Full-Bleed MovieHero**: Refactored the backdrop container to support true 100vw edge-to-edge stretching with strict constraints, fixing cross-device bleeding.
+- 📱 **Dynamic Viewport Migration**: Globally replaced `100vh`, `h-screen`, and `min-h-screen` with Tailwind v4's dynamic `dvh` (`min-h-dvh`, `h-dvh`) to prevent address bar clipping on mobile devices.
+- ✨ **Component Hardening**: Removed transparent trivia bugs, nested player detachments, and overlapping footers for a Netflix-quality presentation.
+
 ### Phase 10 — Final Production Release Candidate (`June 2026`)
 - 🚀 **Anime Scraping Rewrite**: Completely replaced unstable HTML scraping (Aniwave, HiAnime, Consumet) on the homepage with the highly stable **AniList GraphQL API**. The Anime tab is now 100% resilient to breakage and maps seamlessly to the streaming proxy backend.
 - 🎨 **UI Standardization**: Global conversion of hardcoded colors (e.g. `bg-zinc-900`) to dynamic CSS variables (`bg-[var(--bg-elevated)]`) for perfect theme switching.
