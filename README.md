@@ -34,6 +34,8 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 - 🖼️ **Full-Bleed MovieHero**: Refactored the backdrop container to support true 100vw edge-to-edge stretching with strict constraints, fixing cross-device bleeding.
 - 📱 **Dynamic Viewport Migration**: Globally replaced `100vh`, `h-screen`, and `min-h-screen` with Tailwind v4's dynamic `dvh` (`min-h-dvh`, `h-dvh`) to prevent address bar clipping on mobile devices.
 - ✨ **Component Hardening**: Removed transparent trivia bugs, nested player detachments, and overlapping footers for a Netflix-quality presentation.
+- 📜 **Scroll Safety (Phase 5)**: Configured `scroll={false}` on letter-based filter navigation (`AZFilter.tsx`) to prevent unwanted scroll jumps while preserving natural scroll-to-top behavior for page-to-page transitions.
+- 🎲 **Randomizer Parity (Phase 11)**: Enabled click-away modal dismissal and updated redirects inside the Surprise Me randomizer modal to load Watch and Search pages from the top.
 
 ### Phase 10 — Final Production Release Candidate (`June 2026`)
 - 🚀 **Anime Scraping Rewrite**: Completely replaced unstable HTML scraping (Aniwave, HiAnime, Consumet) on the homepage with the highly stable **AniList GraphQL API**. The Anime tab is now 100% resilient to breakage and maps seamlessly to the streaming proxy backend.

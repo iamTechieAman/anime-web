@@ -21,6 +21,7 @@ export default function AZFilter() {
                         key={letter}
                         href={letter === "All" ? "/" : `/az-list/${letter}`}
                         onClick={() => setActive(letter)}
+                        scroll={false}
                     >
                         <motion.div
                             whileHover={{ scale: 1.05 }}

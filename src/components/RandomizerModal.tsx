@@ -49,31 +49,31 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
                 type = "movie";
                 targetId = POPULAR_MOVIES[Math.floor(Math.random() * POPULAR_MOVIES.length)];
                 toast.success("Chosen a blockbuster Movie for you!", { icon: "🎬" });
-                router.push(`/watch/${type}/${targetId}`, { scroll: false });
+                router.push(`/watch/${type}/${targetId}`);
             } else if (mode === "anime") {
                 type = "anime";
                 targetId = POPULAR_ANIME[Math.floor(Math.random() * POPULAR_ANIME.length)];
                 toast.success("Fate selected a popular Anime for you!", { icon: "🎏" });
-                router.push(`/watch/anime/${targetId}`, { scroll: false });
+                router.push(`/watch/anime/${targetId}`);
             } else if (mode === "genre") {
                 const pickedGenre = GENRES[Math.floor(Math.random() * GENRES.length)];
                 toast.success(`Picked Genre: ${pickedGenre}!`);
-                router.push(`/search?genre=${pickedGenre}`, { scroll: false });
+                router.push(`/search?genre=${pickedGenre}`);
             } else if (mode === "year") {
                 const pickedYear = Math.floor(Math.random() * (2026 - 2000 + 1)) + 2000;
                 toast.success(`Picked Year: ${pickedYear}!`);
-                router.push(`/search?status=Completed&query=${pickedYear}`, { scroll: false });
+                router.push(`/search?status=Completed&query=${pickedYear}`);
             } else if (mode === "studio") {
                 const pickedStudio = STUDIOS[Math.floor(Math.random() * STUDIOS.length)];
                 toast.success(`Picked Production House: ${pickedStudio}!`);
-                router.push(`/search?query=${encodeURIComponent(pickedStudio)}`, { scroll: false });
+                router.push(`/search?query=${encodeURIComponent(pickedStudio)}`);
             } else if (mode === "top") {
                 const pick = TOP_RATED[Math.floor(Math.random() * TOP_RATED.length)];
                 toast.success("Streaming an acclaimed Top-Rated classic!", { icon: "⭐" });
                 if (pick.type === "anime") {
-                    router.push(`/watch/anime/${pick.id}`, { scroll: false });
+                    router.push(`/watch/anime/${pick.id}`);
                 } else {
-                    router.push(`/watch/${pick.type}/${pick.id}`, { scroll: false });
+                    router.push(`/watch/${pick.type}/${pick.id}`);
                 }
             } else {
                 // Surprise Me - completely random
@@ -81,15 +81,15 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
                 if (chance < 0.33) {
                     type = "movie";
                     targetId = POPULAR_MOVIES[Math.floor(Math.random() * POPULAR_MOVIES.length)];
-                    router.push(`/watch/${type}/${targetId}`, { scroll: false });
+                    router.push(`/watch/${type}/${targetId}`);
                 } else if (chance < 0.66) {
                     type = "anime";
                     targetId = POPULAR_ANIME[Math.floor(Math.random() * POPULAR_ANIME.length)];
-                    router.push(`/watch/anime/${targetId}`, { scroll: false });
+                    router.push(`/watch/anime/${targetId}`);
                 } else {
                     type = "tv";
                     targetId = POPULAR_SHOWS[Math.floor(Math.random() * POPULAR_SHOWS.length)];
-                    router.push(`/watch/${type}/${targetId}`, { scroll: false });
+                    router.push(`/watch/${type}/${targetId}`);
                 }
                 toast.success("Destiny has chosen! Enjoy the stream...", { icon: "✨" });
             }
@@ -107,14 +107,16 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            onClick={onClose}
+            className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md cursor-pointer"
         >
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 15 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="w-full max-w-lg bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-lg bg-[var(--bg-elevated)]/95 border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden cursor-default"
             >
                 <button 
                     onClick={onClose}
