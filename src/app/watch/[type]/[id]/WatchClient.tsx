@@ -15,6 +15,7 @@ import { useWatch } from "@/context/WatchContext";
 import Image from "next/image";
 import CommentsSection from "@/components/CommentsSection";
 import dynamic from "next/dynamic";
+import MovieHero from "../../components/MovieHero";
 import { useUser } from "@clerk/nextjs";
 
 const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
@@ -1440,31 +1441,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 {!isFocusMode && (
                     <div className="flex flex-col gap-6 items-start w-full bg-[#09090B]">
                         <div className="flex-1 w-full min-w-0">
-                            {/* HeroSection */}
-                            {details.backdrop_path && (
-                                <section data-testid="detail-hero" className="relative isolate overflow-hidden bg-[#09090B] w-full h-[50vh] md:h-[60vh] lg:h-[70vh]">
-                                    <div
-                                        data-testid="detail-backdrop"
-                                        className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-black"
-                                        style={{
-                                            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)',
-                                            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)'
-                                        }}
-                                        aria-hidden="true"
-                                    >
-                                        <Image
-                                            src={`${IMG_BASE}/original${details.backdrop_path}`}
-                                            alt=""
-                                            fill
-                                            priority
-                                            sizes="100vw"
-                                            className="object-cover object-center"
-                                        />
-                                        <div className="absolute inset-0 bg-black/70" />
-                                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#09090B]" />
-                                    </div>
-                                </section>
-                            )}
+                            {/* HeroSection via Component */}
+                            <MovieHero backdropPath={details.backdrop_path}>
 
                             {/* PlayerSection */}
                             <div className="relative z-10 bg-[#09090B] p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto mt-6">
@@ -1859,6 +1837,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     )}
                                 </div>
                             </section>
+                            </MovieHero>
                         </div>
                                             </div>
                 )}
