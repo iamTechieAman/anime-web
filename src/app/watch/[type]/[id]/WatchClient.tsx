@@ -1443,7 +1443,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <section data-testid="detail-hero" className="relative isolate overflow-hidden bg-[#09090B] w-full h-[50vh] md:h-[60vh] lg:h-[70vh] flex flex-col justify-end">
                                 <div
                                     data-testid="detail-backdrop"
-                                    className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden bg-black"
+                                    className="pointer-events-none absolute top-0 left-0 right-0 z-0 h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden bg-black"
                                     style={{
                                         WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)',
                                         maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)'
