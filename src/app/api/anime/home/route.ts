@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 3600; // Cache for 1 hour
 
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 export async function GET() {
     try {
         const query = `
@@ -23,7 +30,7 @@ export async function GET() {
         }
         `;
 
-        const res = await fetch("https://graphql.anilist.co", {
+        const res = await withTimeout(fetch("https://graphql.anilist.co", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -31,7 +38,7 @@ export async function GET() {
             },
             body: JSON.stringify({ query }),
             next: { revalidate: 3600 }
-        });
+        }), 3000);
 
         const data = await res.json();
         

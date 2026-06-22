@@ -20,6 +20,13 @@ query($search: String) {
 }
 `;
 
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const rawQuery = searchParams.get('q') || searchParams.get('query') || '';
@@ -31,26 +38,26 @@ export async function GET(request: Request) {
 
     try {
         const [anilistRes, tmdbRes] = await Promise.allSettled([
-            axios.post(ANILIST_URL, {
-                query: ANILIST_QUERY,
-                variables: { search: query }
-            }),
-            axios.get(TMDB_SEARCH_URL, {
-                params: {
-                    api_key: TMDB_API_KEY,
-                    query: query,
-                    language: 'en-US',
-                    page: 1,
-                    include_adult: false
-                }
-            })
+            withTimeout(
+                fetch(ANILIST_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: ANILIST_QUERY, variables: { search: query } }),
+                    next: { revalidate: 3600 }
+                }),
+                3000
+            ).then(res => res.json()),
+            withTimeout(
+                fetch(`${TMDB_SEARCH_URL}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1&include_adult=false`, { next: { revalidate: 3600 } }),
+                3000
+            ).then(res => res.json())
         ]);
 
         const results: any[] = [];
 
         // Process AniList Results
         if (anilistRes.status === 'fulfilled') {
-            const anime = anilistRes.value.data.data.Page.media || [];
+            const anime = anilistRes.value.data?.Page?.media || [];
             anime.forEach((item: any) => {
                 results.push({
                     id: item.id,
@@ -67,7 +74,7 @@ export async function GET(request: Request) {
 
         // Process TMDB Results
         if (tmdbRes.status === 'fulfilled') {
-            const movies = tmdbRes.value.data.results || [];
+            const movies = tmdbRes.value.results || [];
             movies.slice(0, 10).forEach((item: any) => {
                 if (item.media_type === 'person') return;
                 

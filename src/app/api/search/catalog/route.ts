@@ -8,6 +8,13 @@ let cachedCatalog: any[] | null = null;
 let cacheTimestamp = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 async function fetchCatalog() {
     const now = Date.now();
     if (cachedCatalog && (now - cacheTimestamp) < CACHE_DURATION) {
@@ -17,10 +24,13 @@ async function fetchCatalog() {
     const catalog: any[] = [];
 
     try {
-        // Fetch trending from TMDB
-        const tmdbRes = await fetch(
-            `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_KEY}`,
-            { next: { revalidate: 1800 } } // ISR: revalidate every 30min
+        // Fetch trending from TMDB with a strict 3000ms timeout
+        const tmdbRes = await withTimeout(
+            fetch(
+                `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_KEY}`,
+                { next: { revalidate: 1800 } }
+            ),
+            3000
         );
         const tmdbData = await tmdbRes.json();
 
@@ -38,20 +48,23 @@ async function fetchCatalog() {
                 });
             });
         }
-    } catch (e) {
-        console.error('[Catalog API] TMDB fetch failed:', e);
+    } catch (e: any) {
+        console.error('[Catalog API] TMDB fetch failed or timed out:', e.message);
     }
 
     try {
-        // Fetch trending anime from AniList
-        const animeRes = await fetch(ANILIST_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji native } coverImage { medium } seasonYear format } } }`
+        // Fetch trending anime from AniList with a strict 3000ms timeout
+        const animeRes = await withTimeout(
+            fetch(ANILIST_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `query { Page(page:1, perPage:30) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji native } coverImage { medium } seasonYear format } } }`
+                }),
+                next: { revalidate: 1800 }
             }),
-            next: { revalidate: 1800 }
-        });
+            3000
+        );
         const animeData = await animeRes.json();
 
         if (animeData.data?.Page?.media) {

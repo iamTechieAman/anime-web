@@ -3,6 +3,13 @@ import { NextResponse } from "next/server";
 const TMDB_KEY = process.env.TMDB_API_KEY || "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
+    ]);
+}
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -33,7 +40,7 @@ export async function GET(request: Request) {
             url = `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&page=${page}&language=en-US&with_genres=${genreId}&sort_by=popularity.desc`;
         }
 
-        const res = await fetch(url, { next: { revalidate: 3600 } });
+        const res = await withTimeout(fetch(url, { next: { revalidate: 3600 } }), 3000);
         if (!res.ok) throw new Error(`TMDB API error: ${res.status}`);
 
         const data = await res.json();
