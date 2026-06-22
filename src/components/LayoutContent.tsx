@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import { AnimatePresence } from "framer-motion";
 import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 import dynamic from "next/dynamic";
+import ProfileGate from "@/components/ProfileGate";
 
 
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
@@ -124,6 +125,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         isOpen={isCommandPaletteOpen} 
         onClose={() => setIsCommandPaletteOpen(false)} 
       />
+      <ProfileGate />
 
     </div>
   );

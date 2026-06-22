@@ -25,17 +25,37 @@ export default function ProfileGate() {
     }
     
     const saved = localStorage.getItem("toonplayer_profiles");
+    let loadedProfiles: Profile[] = [];
     if (saved) {
       try { 
-        const parsed = JSON.parse(saved);
-        setProfiles(parsed); 
-        if (parsed.length === 0) setIsCreating(true);
+        loadedProfiles = JSON.parse(saved);
       } catch (e) {
-        setIsCreating(true);
+        // Fallback
       }
-    } else {
-      setIsCreating(true);
     }
+    
+    if (loadedProfiles.length === 0) {
+      // Pre-seed profiles
+      loadedProfiles = [
+        { name: "Aman", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Aman" },
+        { name: "Kids", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Kids" },
+        { name: "Guest", avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Guest" }
+      ];
+      localStorage.setItem("toonplayer_profiles", JSON.stringify(loadedProfiles));
+    }
+    
+    setProfiles(loadedProfiles);
+    setIsCreating(false);
+  }, []);
+
+  useEffect(() => {
+    const handleOpen = () => {
+      setShowGate(true);
+    };
+    window.addEventListener("openProfileGate", handleOpen);
+    return () => {
+      window.removeEventListener("openProfileGate", handleOpen);
+    };
   }, []);
 
   const handleSelectProfile = (profile: Profile) => {
@@ -99,7 +119,7 @@ export default function ProfileGate() {
                     className="relative group cursor-pointer flex flex-col items-center gap-3"
                     onClick={() => handleSelectProfile(p)}
                   >
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all duration-300 shadow-xl group-hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[var(--bg-card)]">
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all duration-300 shadow-xl group-hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[var(--bg-card)]">
                       <Image src={p.avatar} alt={p.name} fill sizes="128px" className="object-cover" />
                     </div>
                     <span className="text-sm md:text-base font-bold text-[var(--text-muted)] group-hover:text-white transition-colors">{p.name}</span>
@@ -130,7 +150,7 @@ export default function ProfileGate() {
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-sm mx-auto">
                 <div className="group relative w-full">
                   <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 p-[3px] mb-6 shadow-2xl transition-transform duration-300 group-hover:scale-105">
-                    <div className="w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden flex items-center justify-center">
+                    <div className="relative w-full h-full bg-[var(--bg-card)] rounded-full overflow-hidden flex items-center justify-center">
                       {profileName.trim() ? (
                         <Image 
                           src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(profileName)}`} 

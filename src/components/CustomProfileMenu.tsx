@@ -39,6 +39,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
     { label: "Watch History", icon: Clock, href: "/history", color: "text-[var(--accent)]" },
     { label: "Profile Settings", icon: Settings, href: "/settings", color: "text-blue-400" },
+    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
     { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" },
   ];
 

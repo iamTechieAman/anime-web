@@ -69,20 +69,56 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
     const [customCollections, setCustomCollections] = useState<string[]>(DEFAULT_COLLECTIONS);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [activeProfile, setActiveProfile] = useState<string>('');
+
+    const getProfileName = useCallback((): string => {
+        if (typeof window === 'undefined') return '';
+        try {
+            const stored = localStorage.getItem('toonplayer_profile');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                return parsed.name || '';
+            }
+        } catch (_) {}
+        return '';
+    }, []);
+
+    const getProfileSuffix = useCallback((): string => {
+        const name = getProfileName();
+        return name ? `_${name.toLowerCase()}` : '';
+    }, [getProfileName]);
+
+    // Listen to profile updates
+    useEffect(() => {
+        const updateProfile = () => {
+            const name = getProfileName();
+            setActiveProfile(name);
+        };
+        updateProfile();
+        window.addEventListener('profileUpdated', updateProfile);
+        return () => window.removeEventListener('profileUpdated', updateProfile);
+    }, [getProfileName]);
 
     // ── Initial Load ──────────────────────────────────────────────
     useEffect(() => {
         const loadInitialData = async () => {
             // Always load custom collections from localStorage first
             try {
-                const storedCols = localStorage.getItem('toonplayer_collections');
+                const suffix = getProfileSuffix();
+                const storedCols = localStorage.getItem(`toonplayer_collections${suffix}`);
                 if (storedCols) {
                     const parsed = JSON.parse(storedCols) as string[];
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         setCustomCollections(parsed);
+                    } else {
+                        setCustomCollections(DEFAULT_COLLECTIONS);
                     }
+                } else {
+                    setCustomCollections(DEFAULT_COLLECTIONS);
                 }
-            } catch (_) {}
+            } catch (_) {
+                setCustomCollections(DEFAULT_COLLECTIONS);
+            }
 
             try {
                 const res = await fetch('/api/user/me');
@@ -109,36 +145,49 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
 
         const loadFromLocalStorage = () => {
             try {
-                const storedHistory = localStorage.getItem('toonplayer_history');
-                const storedWatchlist = localStorage.getItem('toonplayer_watchlist');
-                if (storedHistory) setHistory(JSON.parse(storedHistory));
+                const suffix = getProfileSuffix();
+                const storedHistory = localStorage.getItem(`toonplayer_history${suffix}`);
+                const storedWatchlist = localStorage.getItem(`toonplayer_watchlist${suffix}`);
+                if (storedHistory) {
+                    setHistory(JSON.parse(storedHistory));
+                } else {
+                    setHistory([]);
+                }
                 if (storedWatchlist) {
                     const wl = (JSON.parse(storedWatchlist) as Partial<WatchlistItem>[]).map(
                         (item, idx) => normalizeWatchlistItem(item, idx)
                     );
                     setWatchlist(wl);
+                } else {
+                    setWatchlist([]);
                 }
-            } catch (_) {}
+            } catch (_) {
+                setHistory([]);
+                setWatchlist([]);
+            }
         };
 
         loadInitialData();
-    }, []);
+    }, [activeProfile, getProfileSuffix]);
 
     // ── Persistence ───────────────────────────────────────────────
     useEffect(() => {
         if (!isLoaded || isLoggedIn) return;
-        localStorage.setItem('toonplayer_history', JSON.stringify(history));
-    }, [history, isLoaded, isLoggedIn]);
+        const suffix = getProfileSuffix();
+        localStorage.setItem(`toonplayer_history${suffix}`, JSON.stringify(history));
+    }, [history, isLoaded, isLoggedIn, activeProfile, getProfileSuffix]);
 
     useEffect(() => {
         if (!isLoaded || isLoggedIn) return;
-        localStorage.setItem('toonplayer_watchlist', JSON.stringify(watchlist));
-    }, [watchlist, isLoaded, isLoggedIn]);
+        const suffix = getProfileSuffix();
+        localStorage.setItem(`toonplayer_watchlist${suffix}`, JSON.stringify(watchlist));
+    }, [watchlist, isLoaded, isLoggedIn, activeProfile, getProfileSuffix]);
 
     useEffect(() => {
         if (!isLoaded) return;
-        localStorage.setItem('toonplayer_collections', JSON.stringify(customCollections));
-    }, [customCollections, isLoaded]);
+        const suffix = getProfileSuffix();
+        localStorage.setItem(`toonplayer_collections${suffix}`, JSON.stringify(customCollections));
+    }, [customCollections, isLoaded, activeProfile, getProfileSuffix]);
 
     // ── Collections ───────────────────────────────────────────────
     const addCollection = useCallback((name: string): boolean => {
