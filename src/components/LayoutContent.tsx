@@ -97,7 +97,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${
           (isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-16'
-        } bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-main)]/90`}>
+        } isolate overflow-x-clip bg-[#09090B]`}>
           {/* Subtle global ambient glow */}
           <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-orange-900/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>

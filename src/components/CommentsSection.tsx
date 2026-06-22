@@ -231,7 +231,7 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
     if (!isMounted) return null;
 
     return (
-        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-6 space-y-6">
+        <div className="relative isolate bg-[#111113] rounded-2xl border border-[var(--border-color)] p-6 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
                 <div className="flex items-center gap-3">
