@@ -195,68 +195,8 @@ export default function ProviderBar({ activeProvider, onProviderChange, isLoadin
 
             <div className="w-full max-w-[1800px] mx-auto px-3 sm:px-6 lg:px-12">
 
-                {/* ── MOBILE: Glassmorphism Dropdown (< sm) ── */}
-                <div className="flex sm:hidden py-2.5 relative">
-                    <button
-                        id="provider-mobile-toggle"
-                        onClick={() => setMobileOpen(prev => !prev)}
-                        className="flex items-center gap-2.5 w-full px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-sm text-sm font-semibold text-white transition-all active:scale-[0.98]"
-                        aria-haspopup="listbox"
-                        aria-expanded={mobileOpen}
-                    >
-                        <span className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className={`shrink-0 ${activeProviderInfo.color}`}>{activeProviderInfo.logo}</span>
-                            <span className="truncate">{activeProviderInfo.label}</span>
-                        </span>
-                        <ChevronDown
-                            className={`w-4 h-4 text-white/50 shrink-0 transition-transform duration-200 ${mobileOpen ? 'rotate-180' : ''}`}
-                        />
-                    </button>
-
-                    {/* Dropdown Panel */}
-                    <AnimatePresence>
-                        {mobileOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                                transition={{ duration: 0.15, ease: "easeOut" }}
-                                className="absolute top-full left-0 right-0 mt-1 z-[50] bg-[#14141c]/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.7)]"
-                                role="listbox"
-                                aria-label="Select streaming provider"
-                            >
-                                {PROVIDERS.map((provider) => {
-                                    const isActive = activeProvider === provider.slug;
-                                    return (
-                                        <button
-                                            key={provider.slug}
-                                            role="option"
-                                            aria-selected={isActive}
-                                            onClick={() => {
-                                                onProviderChange(provider.slug);
-                                                setMobileOpen(false);
-                                            }}
-                                            className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-semibold transition-colors text-left border-b border-white/[0.04] last:border-b-0 ${
-                                                isActive
-                                                    ? 'bg-white/[0.08] text-white'
-                                                    : 'text-white/60 hover:bg-white/[0.04] hover:text-white'
-                                            }`}
-                                        >
-                                            <span className={`shrink-0 ${isActive ? provider.color : ''}`}>
-                                                {provider.logo}
-                                            </span>
-                                            <span className="flex-1 truncate">{provider.label}</span>
-                                            {isActive && <Check className="w-4 h-4 text-[var(--accent)] shrink-0" />}
-                                        </button>
-                                    );
-                                })}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* ── TABLET / DESKTOP: Horizontal scrollable chip row ── */}
-                <div className="hidden sm:flex items-center gap-2 py-3 overflow-x-auto flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth">
+                {/* ── GLOBAL: Horizontal scrollable chip row ── */}
+                <div className="flex items-center gap-2 py-3 overflow-x-auto flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth">
                     {PROVIDERS.map((provider) => {
                         const isActive = activeProvider === provider.slug;
 

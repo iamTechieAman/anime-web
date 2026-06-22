@@ -29,6 +29,12 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 17 — Player Container & Navigation Hardening (`June 2026`)
+- 🍿 **Cinematic Layout Constraint**: Forced absolute layout geometry onto the primary Player component—locking to `1600px` max-width, strict `16/9` inner frame with an invisible `24px` radius mask, replicating modern streaming aesthetics.
+- 📱 **Mobile Edge Freedom**: Reworked mobile layout constraints to utilize `100vw` with `env(safe-area-inset)` bindings. Eliminated notch clipping, edge bleed, and unhandled scrolling behaviors during theatre mode.
+- 🎛️ **Zero-Wrap Server Row**: Replaced fragile mobile glassmorphism dropdowns with a unified, universally scrolling horizontal chip layout, mathematically preventing multi-line layout shifts across all viewport breakpoints.
+- 🚀 **Hydration Protection**: Secured `<0.02 CLS` during player initializations by locking conditional layouts to separate z-indexed layers rather than altering the core flexbox layout hierarchy.
+
 ### Phase 16 — Global Micro Polish & UI Hardening (`June 2026`)
 - ✨ **Apple TV+ Motion**: Refined sidebar navigation and layout shifts by locking transitions to a strict 300ms `ease-out` function.
 - 📐 **Zero-Shift Cards**: Unified all card assets (Movies, TV, Anime) to a pristine `16px` border radius with a standardized `1.02` hover scale multiplier, eliminating visual tearing and metadata jumps.
