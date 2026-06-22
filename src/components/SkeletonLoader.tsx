@@ -31,11 +31,11 @@ export const HeroSkeleton = memo(function HeroSkeleton() {
 // --- Card Skeleton ---
 export const CardSkeleton = memo(function CardSkeleton() {
     return (
-        <div className="skeleton-card">
-            <div className="skeleton-poster" />
-            <div className="skeleton-text">
-                <div />
-                <div />
+        <div className="w-full">
+            <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shimmer-card bg-zinc-900 border border-white/5" />
+            <div className="mt-2 px-0.5 space-y-1.5">
+                <div className="h-3.5 rounded w-4/5 shimmer-card bg-zinc-900" />
+                <div className="h-2.5 rounded w-1/2 shimmer-card bg-zinc-900" />
             </div>
         </div>
     );
@@ -48,17 +48,17 @@ export const RowSkeleton = memo(function RowSkeleton({ count = 6 }: { count?: nu
             {/* Section header skeleton */}
             <div className="flex items-center gap-3">
                 <div className="w-1 h-5 bg-[var(--accent)] rounded-full" />
-                <div className="w-5 h-5 skeleton-shine rounded" />
-                <div className="w-40 h-5 skeleton-shine rounded" />
+                <div className="w-5 h-5 shimmer-card bg-zinc-900 rounded" />
+                <div className="w-40 h-5 shimmer-card bg-zinc-900 rounded" />
             </div>
             {/* Cards row */}
             <div className="flex gap-3 overflow-hidden">
                 {Array.from({ length: count }).map((_, i) => (
                     <div key={i} className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px]">
-                        <div className="relative w-full aspect-[2/3] rounded-xl bg-white/5 overflow-hidden skeleton-shine mb-2" />
-                        <div className="space-y-2 px-0.5">
-                            <div className="h-3.5 skeleton-shine rounded w-4/5" />
-                            <div className="h-2.5 skeleton-shine rounded w-1/2" />
+                        <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shimmer-card bg-zinc-900 border border-white/5 mb-2" />
+                        <div className="mt-2 px-0.5 space-y-1.5">
+                            <div className="h-3.5 rounded w-4/5 shimmer-card bg-zinc-900" />
+                            <div className="h-2.5 rounded w-1/2 shimmer-card bg-zinc-900" />
                         </div>
                     </div>
                 ))}
@@ -73,10 +73,10 @@ export const GridSkeleton = memo(function GridSkeleton({ count = 12 }: { count?:
         <div className="responsive-grid">
             {Array.from({ length: count }).map((_, i) => (
                 <div key={i} className="w-full">
-                    <div className="relative w-full aspect-[2/3] rounded-xl bg-white/5 overflow-hidden skeleton-shine mb-2" />
-                    <div className="space-y-2 px-0.5">
-                        <div className="h-3.5 skeleton-shine rounded w-4/5" />
-                        <div className="h-2.5 skeleton-shine rounded w-1/2" />
+                    <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shimmer-card bg-zinc-900 border border-white/5 mb-2" />
+                    <div className="mt-2 px-0.5 space-y-1.5">
+                        <div className="h-3.5 rounded w-4/5 shimmer-card bg-zinc-900" />
+                        <div className="h-2.5 rounded w-1/2 shimmer-card bg-zinc-900" />
                     </div>
                 </div>
             ))}

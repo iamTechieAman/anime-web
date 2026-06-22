@@ -91,6 +91,7 @@ export default function BrowseClient() {
     const [showFilters, setShowFilters] = useState(false);
 
     const observerTarget = useRef<HTMLDivElement>(null);
+    const isFetchingRef = useRef(false);
 
     // Lock body scrolling when filter drawer is open
     useEffect(() => {
@@ -161,6 +162,8 @@ export default function BrowseClient() {
 
     // Fetch catalog helper
     const fetchCatalog = useCallback(async (pageNum: number, isAppend: boolean) => {
+        if (isFetchingRef.current) return;
+        isFetchingRef.current = true;
         if (pageNum === 1) setLoading(true);
         else setLoadingMore(true);
         setError(null);
@@ -231,6 +234,7 @@ export default function BrowseClient() {
         } finally {
             setLoading(false);
             setLoadingMore(false);
+            isFetchingRef.current = false;
         }
     }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
 
@@ -242,16 +246,30 @@ export default function BrowseClient() {
 
     // Handle Infinite Scroll
     useEffect(() => {
-        if (loading || loadingMore || page >= totalPages || error) return;
-
         const observer = new IntersectionObserver(
             entries => {
-                if (entries[0].isIntersecting) {
-                    const nextPage = page + 1;
-                    fetchCatalog(nextPage, true);
+                if (entries[0].isIntersecting && !isFetchingRef.current) {
+                    setPage(prevPage => {
+                        const nextPage = prevPage + 1;
+                        if (nextPage <= totalPages) {
+                            if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+                                window.requestIdleCallback(() => {
+                                    fetchCatalog(nextPage, true);
+                                });
+                            } else {
+                                setTimeout(() => {
+                                    fetchCatalog(nextPage, true);
+                                }, 50);
+                            }
+                        }
+                        return prevPage;
+                    });
                 }
             },
-            { threshold: 0.1 }
+            { 
+                threshold: 0.3,
+                rootMargin: "300px"
+            }
         );
 
         const target = observerTarget.current;
@@ -259,8 +277,9 @@ export default function BrowseClient() {
 
         return () => {
             if (target) observer.unobserve(target);
+            observer.disconnect();
         };
-    }, [page, totalPages, loading, loadingMore, error, fetchCatalog]);
+    }, [totalPages, fetchCatalog]);
 
     return (
         <div className="flex-1 w-full bg-[#050505] pt-6 pb-12 px-4 md:px-8 flex flex-col">
@@ -611,15 +630,10 @@ export default function BrowseClient() {
                 ) : (
                     <div className="flex-1 flex flex-col justify-between">
                         <div className="responsive-grid">
-                            {items.map((item, idx) => (
-                                <motion.div
-                                    key={`${item.id}-${idx}`}
-                                    initial={{ opacity: 0, scale: 0.96 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.25, delay: Math.min(idx * 0.02, 0.3) }}
-                                >
+                            {items.map((item) => (
+                                <div key={item.id} className="w-full">
                                     <MovieCard item={item} type={item.media_type || mediaType} />
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
 

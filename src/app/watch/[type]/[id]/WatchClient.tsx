@@ -481,6 +481,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         });
     }, [episodes, episodeSearch]);
 
+    const triviaFacts = useMemo(() => {
+        return generateTriviaFacts(details);
+    }, [details]);
+
 
     // TV Auto-Next logic
     const handleVideoEnded = useCallback(() => {
@@ -1224,7 +1228,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         : activeServer.getUrl(resolvedMediaType, activeId, selectedSeason, selectedEpisode);
     const renderPlayer = () => {
         return (
-            <div className="relative w-full">
+            <div className="relative w-full z-20">
                 {/* ── VIDEO CONTAINER ── */}
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -1439,7 +1443,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <section data-testid="detail-hero" className="relative isolate overflow-hidden bg-[#09090B] w-full h-[50vh] md:h-[60vh] lg:h-[70vh] flex flex-col justify-end">
                                 <div
                                     data-testid="detail-backdrop"
-                                    className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden"
+                                    className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden bg-black"
+                                    style={{
+                                        WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)',
+                                        maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0) 100%)'
+                                    }}
                                     aria-hidden="true"
                                 >
                                     {details.backdrop_path && (
@@ -1551,7 +1559,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
                                 </div>
                             </section>
-                            <div className="relative z-10 bg-[#09090B] p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto">
+                            <div className="relative z-10 bg-zinc-950 p-[32px] rounded-[24px] w-full max-w-[1600px] mx-auto">
                                 {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                 {/* ── SERVER SELECTION BAR ── */}
                                 <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.06] bg-[var(--bg-card)]/50">
@@ -1780,7 +1788,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 <div className="p-5 min-h-[140px]">
                                     {activeDetailTab === "trivia" && (
                                         <ul className="space-y-3 text-xs text-zinc-300 leading-relaxed font-inter">
-                                            {generateTriviaFacts(details).map((fact, i) => (
+                                            {triviaFacts.map((fact, i) => (
                                                 <li key={i} className="flex gap-3">
                                                     <span className="text-[var(--accent)] shrink-0 mt-0.5">•</span>
                                                     <span>{renderMarkdown(fact)}</span>
@@ -1850,19 +1858,19 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 )}
             </div>
             {!isFocusMode && details.recommendations && details.recommendations.length > 0 && (
-                <section className="relative z-10 mt-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 mt-10 bg-zinc-950 px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                     <MovieRow items={details.recommendations} type={type} />
                 </section>
             )}
             {!isFocusMode && details.similar && details.similar.length > 0 && (
-                <section className="relative z-10 bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 bg-zinc-950 px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                     <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                     <MovieRow items={details.similar} type={type} />
                 </section>
             )}
             {!isFocusMode && (
-                <section className="relative z-10 bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 mt-[48px] max-w-[1600px] mx-auto w-full">
+                <section className="relative z-10 bg-zinc-950 px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 mt-[48px] max-w-[1600px] mx-auto w-full">
                     <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
                 </section>
             )}

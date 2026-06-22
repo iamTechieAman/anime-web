@@ -590,6 +590,12 @@ p, .text-body {
   100% { background-position: -200% 0; }
 }
 
+.shimmer-card {
+  background: linear-gradient(90deg, #18181b 25%, #27272a 50%, #18181b 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.8s infinite linear;
+}
+
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.4; filter: blur(10px); }
   50% { opacity: 0.7; filter: blur(15px); }

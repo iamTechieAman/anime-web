@@ -347,7 +347,7 @@ export default function Header() {
                     )}
                   </div>
                   <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
-                    <button onClick={()=>{setShowNotifications(false);router.push('/settings');}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
+                    <button onClick={()=>{setShowNotifications(false);router.push('/settings', { scroll: false });}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
                     {notifications.length>0&&<button onClick={clearNotifications} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all">Clear All</button>}
                   </div>
                 </motion.div>

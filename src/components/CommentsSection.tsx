@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { MessageSquare, ThumbsUp, ThumbsDown, Send, EyeOff, AlertCircle, Image as ImageIcon, Smile, HelpCircle, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -58,7 +58,7 @@ const AVATAR_COLOR_POOL = [
     "bg-rose-600", "bg-amber-600", "bg-fuchsia-600", "bg-sky-600"
 ];
 
-export default function CommentsSection({ contentId, category = "anime" }: { contentId: string; category?: "anime" | "movie" | "tv" }) {
+const CommentsSection = memo(function CommentsSection({ contentId, category = "anime" }: { contentId: string; category?: "anime" | "movie" | "tv" }) {
     const { isSignedIn } = useUser();
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
@@ -412,4 +412,6 @@ export default function CommentsSection({ contentId, category = "anime" }: { con
             </div>
         </div>
     );
-}
+});
+
+export default CommentsSection;
