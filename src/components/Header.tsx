@@ -208,7 +208,7 @@ export default function Header() {
 
         {/* Logo */}
         <Link href="/" className={`flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none ${showSidebar ? "md:hidden" : ""}`} onClick={clearSearch} aria-label="ToonPlayer Home">
-          <div className="w-7 h-7 shrink-0" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
+          <div className="w-7 h-7 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
             <Logo />
           </div>
           <span className="flex flex-col leading-none">

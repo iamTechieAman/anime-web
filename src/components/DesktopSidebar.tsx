@@ -38,7 +38,7 @@ export default function DesktopSidebar() {
             {/* Branded Logo */}
             <div className="mb-8 shrink-0 flex items-center justify-center group-hover:justify-start h-10 w-full px-3 group-hover:px-[18px] transition-all duration-300 relative">
                 <Link href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
-                    <div className="w-11 h-11 flex items-center justify-center shrink-0">
+                    <div className="w-11 h-11 flex items-center justify-center shrink-0 relative">
                         <Logo />
                     </div>
                     <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">

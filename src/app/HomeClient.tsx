@@ -13,7 +13,7 @@ import useSWR from 'swr';
 import type { ProviderSlug } from "@/components/ProviderBar";
 import dynamic from "next/dynamic";
 
-const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[55vh] md:h-[70vh] bg-[var(--bg-elevated)] animate-pulse w-full" /> });
+const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] bg-[var(--bg-elevated)] animate-pulse w-full" /> });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
 const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });

@@ -52,7 +52,7 @@ export const RowSkeleton = memo(function RowSkeleton({ count = 6 }: { count?: nu
                 <div className="w-40 h-5 shimmer-card bg-zinc-900 rounded" />
             </div>
             {/* Cards row */}
-            <div className="flex gap-3 overflow-hidden">
+            <div className="netflix-row overflow-hidden">
                 {Array.from({ length: count }).map((_, i) => (
                     <div key={i} className="flex-shrink-0 w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px]">
                         <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shimmer-card bg-zinc-900 border border-white/5 mb-2" />
@@ -121,14 +121,15 @@ export const DetailsSkeleton = memo(function DetailsSkeleton() {
 // --- Continue Watching Skeleton ---
 export const ContinueWatchingSkeleton = memo(function ContinueWatchingSkeleton() {
     return (
-        <section className="mb-10">
+        <section className="mb-8 w-full overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
-                <div className="w-5 h-5 skeleton-shine rounded" />
+                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                <div className="w-4 h-4 skeleton-shine rounded" />
                 <div className="w-40 h-5 skeleton-shine rounded" />
             </div>
-            <div className="flex gap-4 overflow-hidden">
+            <div className="flex items-center gap-4 overflow-hidden pb-2">
                 {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="flex-none w-[200px] md:w-[280px] aspect-video rounded-xl skeleton-shine" />
+                    <div key={i} className="shrink-0 rounded-2xl bg-zinc-900 border border-white/5 skeleton-shine h-[120px] md:h-[140px] lg:h-[160px] w-[220px] md:w-[250px] lg:w-[280px]" />
                 ))}
             </div>
         </section>

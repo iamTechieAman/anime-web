@@ -112,7 +112,7 @@ export default function NetflixAuthGate() {
       <header className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-4 sm:py-5 flex items-center justify-between max-w-screen-2xl mx-auto pt-[env(safe-area-inset-top)]">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 relative">
             <Logo />
           </div>
           <span className="flex flex-col leading-none">

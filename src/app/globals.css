@@ -828,15 +828,16 @@ p, .text-body {
 
 .skeleton-hero {
   width: 100%;
-  height: 42vh;
-  max-height: 600px;
+  height: 50vh;
+  min-height: 340px;
   background-color: var(--bg-card);
   border-radius: 1rem;
   border: 1px solid var(--border-color);
 }
 @media (min-width: 768px) {
   .skeleton-hero {
-    height: 60vh;
+    height: 70vh;
+    min-height: 480px;
   }
 }
 
@@ -1426,15 +1427,25 @@ html, body {
 /* KILL hover transforms on touch devices */
 @media (hover: none) and (pointer: coarse) {
   /* Disable hover scale/translate transforms */
-  .premium-card:hover {
-    transform: none;
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3);
+  .premium-card:hover,
+  .group:hover,
+  .group:hover * {
+    transform: none !important;
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3) !important;
   }
 
   .card-hover-expand:hover {
     transform: none;
     box-shadow: none;
     z-index: auto;
+  }
+
+  /* Disable hover opacity overlays on touch screens (e.g. play overlays, cards slide-up metadata) */
+  .group:hover .premium-card-overlay,
+  .group:hover .absolute.opacity-0,
+  .group:hover .opacity-0 {
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 
   /* Active feedback only */
