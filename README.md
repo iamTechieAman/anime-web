@@ -29,6 +29,16 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 14 — Premium Modals & Parity Audits (`June 2026`)
+- 🖥️ **Reusable Modal Portal**: Built `ModalPortal.tsx`, a portal-based overlay manager with a glassmorphism backdrop (`blur(30px)`), keyboard focus trap, body scroll locking, Escape closing, and outside click listeners.
+- 👤 **Unified Guest Login Flow**: Integrated Google, GitHub, and Discord Clerk OAuth inside the unified login modal alongside a robust Guest Login flow featuring an interactive grid of 8 cartoon avatars (Totoro, Goku, Luffy, Naruto, Nezuko, etc.) saved persistently to local storage.
+- 👥 **Interactive Profile Modal**: Created `ProfileEditModal.tsx` allowing users to switch, edit (name, avatar, color theme, kids mode toggle), delete, and add profiles dynamically without losing watch context.
+- ⚙️ **Premium Settings Modal**: Created `SettingsModal.tsx` carrying full settings configuration tabs (Account, Playback rules, Appearance, Notifications, Accessibility) as a premium portal overlay.
+- 🎨 **Layout & CLS Standardizations**:
+  - Replaced legacy Clerk modal bindings and page redirect triggers in headers and auth gates with the custom portal modals.
+  - Aligned all `RowSkeleton` and `ContinueWatchingSkeleton` card dimensions, paddings, and height styles with loaded carousels to eradicate Cumulative Layout Shift (CLS).
+  - Fixed parent logo bounding classes, ensuring next/image constraints apply and logo scales correctly across high-resolution displays.
+
 ### Phase 13 — Anime System Reconstruction (`June 2026`)
 - ⛩️ **Anime Data Models**: Upgraded internal types to support `AnimeMeta` and `RichAnimeEpisode` containing richer metadata such as multiple titles, filler status, and thumbnails.
 - 🛡️ **Provider Redundancy**: Built `AnimeProviderManager.ts`, a smart orchestrator that wraps Gogoanime (Consumet) and AniList to securely fetch and fallback for rich episode metadata, vastly improving stream success rate and API reliability.
