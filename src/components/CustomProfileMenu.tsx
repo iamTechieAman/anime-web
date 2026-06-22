@@ -26,15 +26,19 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [dropdownImageError, setDropdownImageError] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  const initials = user ? ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "U" : "U";
+
   const menuItems = [
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
     { label: "Watch History", icon: Clock, href: "/history", color: "text-[var(--accent)]" },
-    { label: "Profile Settings", icon: Settings, action: () => setShowProfileSettings(true), color: "text-blue-400" },
+    { label: "Profile Settings", icon: Settings, href: "/settings", color: "text-blue-400" },
     { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" },
   ];
 
@@ -143,7 +147,20 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
         onClick={toggleMenu}
         className={`relative w-9 h-9 rounded-full ring-2 ring-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
       >
-        <Image src={user.imageUrl} alt={user.fullName || "User"} fill sizes="40px" className="object-cover" />
+        {imageError || !user.imageUrl ? (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500 to-pink-600 text-white font-extrabold text-xs select-none">
+            {initials}
+          </div>
+        ) : (
+          <Image 
+            src={user.imageUrl} 
+            alt={user.fullName || "User"} 
+            fill 
+            sizes="40px" 
+            className="object-cover" 
+            onError={() => setImageError(true)} 
+          />
+        )}
       </button>
 
       {isMounted && createPortal(
@@ -160,8 +177,21 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
             >
               {/* Header */}
               <div className="p-4 border-b border-white/5 flex items-center gap-3 bg-white/5">
-                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
-                   <Image src={user.imageUrl} alt={user.fullName || "User"} fill sizes="48px" className="object-cover" />
+                <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
+                  {dropdownImageError || !user.imageUrl ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500 to-pink-600 text-white font-extrabold text-sm select-none">
+                      {initials}
+                    </div>
+                  ) : (
+                    <Image 
+                      src={user.imageUrl} 
+                      alt={user.fullName || "User"} 
+                      fill 
+                      sizes="48px" 
+                      className="object-cover" 
+                      onError={() => setDropdownImageError(true)} 
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-bold text-white truncate">{user.fullName || "User"}</span>

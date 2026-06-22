@@ -111,8 +111,8 @@ export default function DesktopSidebar() {
             {/* Bottom Section */}
             <div className="flex flex-col gap-1.5 px-3 shrink-0">
                 {/* Settings Toggle */}
-                <button
-                    onClick={() => setShowProfileSettings(true)}
+                <Link
+                    href="/settings"
                     className="relative flex items-center h-11 px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item w-full text-left"
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
@@ -127,7 +127,7 @@ export default function DesktopSidebar() {
                     <div className="absolute left-[80px] px-3 py-1.5 bg-[#12131A] border border-white/10 rounded-lg text-white text-[10px] font-black tracking-wider uppercase whitespace-nowrap opacity-0 pointer-events-none transition-all duration-200 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:group-hover/item:opacity-0 z-50 shadow-2xl">
                         Settings
                     </div>
-                </button>
+                </Link>
 
                 {/* Support Link */}
                 <Link

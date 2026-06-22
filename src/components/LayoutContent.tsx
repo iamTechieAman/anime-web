@@ -13,7 +13,7 @@ import { AnimatePresence } from "framer-motion";
 import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 import dynamic from "next/dynamic";
 
-const ProfileSettings = dynamic(() => import("@/components/ProfileSettings"), { ssr: false });
+
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
 const CommandPalette = dynamic(() => import("@/components/CommandPalette"), { ssr: false });
 
@@ -72,12 +72,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     };
   }, []);
 
-  // Cleanup: showProfileSettings should only be triggered by user action
-  useEffect(() => {
-    if (showProfileSettings && typeof window !== 'undefined' && !localStorage.getItem("toonplayer_profile")) {
-       setShowProfileSettings(false);
-     }
-  }, []);
+
   
   const showSidebar = deviceMode === "pc" && !isWatchPage;
 
@@ -129,12 +124,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         isOpen={isCommandPaletteOpen} 
         onClose={() => setIsCommandPaletteOpen(false)} 
       />
-      {showProfileSettings && (
-        <ProfileSettings 
-          isOpen={showProfileSettings} 
-          onClose={() => setShowProfileSettings(false)} 
-        />
-      )}
+
     </div>
   );
 }

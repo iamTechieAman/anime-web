@@ -36,6 +36,9 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 - ✨ **Component Hardening**: Removed transparent trivia bugs, nested player detachments, and overlapping footers for a Netflix-quality presentation.
 - 📜 **Scroll Safety (Phase 5)**: Configured `scroll={false}` on letter-based filter navigation (`AZFilter.tsx`) to prevent unwanted scroll jumps while preserving natural scroll-to-top behavior for page-to-page transitions.
 - 🎲 **Randomizer Parity (Phase 11)**: Enabled click-away modal dismissal and updated redirects inside the Surprise Me randomizer modal to load Watch and Search pages from the top.
+- ⚙️ **Settings Page Migration (Phase 9)**: Converted the legacy settings modal into a dedicated `/settings` dashboard page with a premium Netflix-style layout, while cleaning up state bindings in the header, sidebar, and layout wrapper.
+- 📱 **Safe-Area Notch Padding (Phase 4)**: Adjusted fixed header top paddings and heights using CSS env variables (`safe-area-inset-top`) to prevent overlapping notch bars in standalone PWA views.
+- 👤 **Graceful Initials Fallback (Phase 8)**: Added error handlers to Clerk avatars inside the custom profile menu to display capitalized initials inside a styled gradient circle on network failure, and fixed relative-bounds parent constraints.
 
 ### Phase 10 — Final Production Release Candidate (`June 2026`)
 - 🚀 **Anime Scraping Rewrite**: Completely replaced unstable HTML scraping (Aniwave, HiAnime, Consumet) on the homepage with the highly stable **AniList GraphQL API**. The Anime tab is now 100% resilient to breakage and maps seamlessly to the streaming proxy backend.

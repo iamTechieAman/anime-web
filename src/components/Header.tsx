@@ -187,7 +187,7 @@ export default function Header() {
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 h-14 md:h-16 flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[calc(3.5rem+env(safe-area-inset-top,0px))] md:h-[calc(4rem+env(safe-area-inset-top,0px))] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
       showSidebar ? "left-0 md:left-[72px]" : "left-0"
     } ${isScrolled
       ? "bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
@@ -347,7 +347,7 @@ export default function Header() {
                     )}
                   </div>
                   <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
-                    <button onClick={()=>{setShowNotifications(false);setShowProfileSettings(true);}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
+                    <button onClick={()=>{setShowNotifications(false);router.push('/settings');}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
                     {notifications.length>0&&<button onClick={clearNotifications} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all">Clear All</button>}
                   </div>
                 </motion.div>
