@@ -1520,7 +1520,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="w-full lg:hidden mb-6 block mt-4 px-0">
+            <div className="w-full lg:hidden mb-6 block mt-4 px-4 sm:px-6">
                 {renderEpisodesList('mobile')}
             </div>
         );
@@ -1632,7 +1632,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {renderHero()}
 
                             {/* Player & Episode Layout */}
-                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-8 lg:mt-10 mb-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-0 sm:mt-8 lg:mt-10 mb-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
                                 {/* Player Column */}
                                 <div className={`flex-1 w-full min-w-0 bg-bg-main p-0 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
                                     {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
