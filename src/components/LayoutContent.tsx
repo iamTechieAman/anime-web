@@ -100,10 +100,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
 
   
-  const showSidebar = deviceMode === "pc" && !isWatchPage;
+  const showSidebar = !isWatchPage;
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden w-full m-0 p-0">
+    <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] w-full m-0 p-0">
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
@@ -118,7 +118,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${
           (isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-16'
-        } isolate overflow-x-clip bg-[#09090B]`}>
+        } isolate bg-[#09090B]`}>
           {/* Subtle global ambient glow */}
           <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-orange-900/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>

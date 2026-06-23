@@ -1018,12 +1018,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     }, []);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchData = async () => {
             setLoading(true);
             try {
                 if (initialType === "anime" || initialType === "cartoon") {
                     // 1. Fetch Anime/Cartoon Episodes/Metadata
-                    const animeRes = await axios.get(`/api/anime/episodes?id=${id}`);
+                    const animeRes = await axios.get(`/api/anime/episodes?id=${id}`, { signal: controller.signal });
                     const show = animeRes.data.show;
                     setAnimeData(show);
 
@@ -1034,19 +1036,21 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     
                     for (const q of searchQueries) {
                         try {
-                            const tmdbSearch = await axios.get(`/api/prime/search?q=${encodeURIComponent(q)}`);
+                            const tmdbSearch = await axios.get(`/api/prime/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
                             if (tmdbSearch.data.results?.length > 0) {
                                 tmdbMatch = tmdbSearch.data.results[0];
                                 break;
                             }
-                        } catch (e) {}
+                        } catch (e) {
+                            if (axios.isCancel(e)) throw e;
+                        }
                     }
 
                     if (tmdbMatch) {
                         setTmdbIdForAnime(tmdbMatch.id.toString());
                         // Normalize media_type — TMDB multi-search can omit it
                         const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
-                        const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`);
+                        const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`, { signal: controller.signal });
                         setDetails(detailsRes.data);
                         if (detailsRes.data.resolvedType && initialType !== "anime" && initialType !== "cartoon") {
                             setType(detailsRes.data.resolvedType);
@@ -1088,9 +1092,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     let res = null;
                     for (let attempt = 0; attempt < 2; attempt++) {
                         try {
-                            res = await axios.get(`/api/prime/details?id=${id}&type=${initialType}`);
+                            res = await axios.get(`/api/prime/details?id=${id}&type=${initialType}`, { signal: controller.signal });
                             if (res.data) break;
                         } catch (retryErr) {
+                            if (axios.isCancel(retryErr)) throw retryErr;
                             if (attempt === 1) throw retryErr;
                             await new Promise(r => setTimeout(r, 1000));
                         }
@@ -1108,11 +1113,12 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         throw new Error('No data returned from TMDB');
                     }
                 }
-            } catch (err) {
+            } catch (err: any) {
+                if (axios.isCancel(err) || err.name === 'CanceledError') return;
                 console.error("Failed to fetch page data:", err);
                 // Try robust fallback via TMDB Details which auto-classifies media type
                 try {
-                    const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${initialType === 'movie' ? 'movie' : 'tv'}`);
+                    const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${initialType === 'movie' ? 'movie' : 'tv'}`, { signal: controller.signal });
                     if (fallbackRes.data) {
                         setDetails(fallbackRes.data);
                         if (fallbackRes.data.resolvedType) {
@@ -1148,6 +1154,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             }
         };
         fetchData();
+        return () => controller.abort();
     }, [id, initialType]);
 
     // Fetch episodes when season changes — with AbortController to prevent race conditions

@@ -34,18 +34,19 @@ export default function DesktopSidebar() {
     ];
 
     return (
-        <aside className="peer/sidebar group fixed left-0 top-0 bottom-0 w-[80px] hover:w-[280px] transition-[width] duration-300 ease-out bg-[#08080B]/95 backdrop-blur-md border-r border-white/5 hidden md:flex flex-col py-6 z-[60]">
-            {/* Branded Logo */}
-            <div className="mb-8 shrink-0 flex items-center justify-center group-hover:justify-start h-10 w-full px-3 group-hover:px-[18px] transition-all duration-300 relative">
-                <Link href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
-                    <div className="w-11 h-11 flex items-center justify-center shrink-0 relative">
-                        <Logo />
-                    </div>
-                    <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-                        Toon<span className="text-[var(--accent)]">Player</span>
-                    </span>
-                </Link>
-            </div>
+        <div className="peer/sidebar group fixed left-0 top-0 bottom-0 w-[80px] hidden md:block z-[60]">
+            <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-300 ease-out bg-[#08080B]/95 backdrop-blur-md border-r border-white/5 flex flex-col py-6 shadow-2xl">
+                {/* Branded Logo */}
+                <div className="mb-8 shrink-0 flex items-center h-10 w-full px-3 transition-all duration-300 relative">
+                    <Link href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
+                        <div className="w-11 h-11 flex items-center justify-center shrink-0 relative">
+                            <Logo />
+                        </div>
+                        <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent pointer-events-none group-hover:pointer-events-auto">
+                            Toon<span className="text-[var(--accent)]">Player</span>
+                        </span>
+                    </Link>
+                </div>
 
             {/* Navigation Sections */}
             <div className="flex-1 flex flex-col gap-1.5 px-3">
@@ -178,5 +179,6 @@ export default function DesktopSidebar() {
                 </span>
             </div>
         </aside>
+        </div>
     );
 }

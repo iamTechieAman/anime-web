@@ -239,12 +239,12 @@ export default function HeroCarousel() {
                         style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
                     >
                         {isActive && activeTrailerKey ? (
-                            <div className="absolute inset-0 w-full h-full pointer-events-none scale-[1.15]">
+                            <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
                                 <iframe
                                     ref={iframeRef}
                                     src={`https://www.youtube.com/embed/${activeTrailerKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${activeTrailerKey}&showinfo=0&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1`}
                                     title="Hero Trailer"
-                                    className="w-full h-full border-0 object-cover"
+                                    className="absolute top-1/2 left-1/2 w-[300vw] h-[300vh] sm:w-[200vw] sm:h-[200vh] lg:w-[150vw] lg:h-[150vh] -translate-x-1/2 -translate-y-1/2 border-0"
                                     allow="autoplay; encrypted-media"
                                 />
                             </div>

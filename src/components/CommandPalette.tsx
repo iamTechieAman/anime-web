@@ -186,14 +186,25 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             return;
         }
 
+        const controller = new AbortController();
         setLoading(true);
-        axios.get(`/api/search/unified?q=${encodeURIComponent(debouncedQuery)}`)
+        axios.get(`/api/search/unified?q=${encodeURIComponent(debouncedQuery)}`, {
+            signal: controller.signal
+        })
             .then(res => {
                 const items = res.data.results || [];
                 setResults(items);
             })
-            .catch(() => {})
-            .finally(() => setLoading(false));
+            .catch((err) => {
+                if (axios.isCancel(err) || err.name === 'CanceledError') return;
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            });
+            
+        return () => controller.abort();
     }, [debouncedQuery]);
 
     // Auto-focus input on open
