@@ -18,7 +18,7 @@ export default function RegisterPage() {
     try {
       await axios.post("/api/auth/register", formData);
       toast.success("Account created! Please login.");
-      router.push("/login");
+      router.push("/login", { scroll: false });
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Registration failed");
     } finally {
@@ -92,7 +92,7 @@ export default function RegisterPage() {
         <div className="mt-8 pt-6 border-t border-white/5 text-center">
           <p className="text-sm text-[var(--text-muted)]">
             Already have an account?{" "}
-            <Link href="/login" className="text-[var(--accent)] font-bold hover:underline">Sign In</Link>
+            <Link scroll={false} href="/login" className="text-[var(--accent)] font-bold hover:underline">Sign In</Link>
           </p>
         </div>
       </div>

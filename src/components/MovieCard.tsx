@@ -84,7 +84,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             ref={cardRef}
             className={`group relative w-full card-virtualized transition-all duration-300 ease-out will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'} ${isFeatured ? 'col-span-1' : ''}`}
         >
-            <Link href={watchHref} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] rounded-2xl" draggable={false}>
+            <Link scroll={false} href={watchHref} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] rounded-2xl" draggable={false}>
                 {/* === Poster Container === */}
                 <div className="relative w-full overflow-hidden rounded-2xl bg-[var(--bg-elevated)] shadow-md group-hover:shadow-2xl group-hover:shadow-black/60 transition-shadow duration-300" style={{ aspectRatio: '2/3' }}>
                     

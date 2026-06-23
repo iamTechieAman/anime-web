@@ -44,7 +44,7 @@ export default function RandomizePage() {
               toast.success(`Fate chose: ${item.title || item.name}!`, { icon: "✨" });
               
               setTimeout(() => {
-                if (active) router.replace(`/watch/${mediaType}/${targetId}`);
+                if (active) router.replace(`/watch/${mediaType}/${targetId}`, { scroll: false });
               }, 1200);
           }
         } else {
@@ -61,7 +61,7 @@ export default function RandomizePage() {
         if (active) {
             setStatusText("Restoring static timeline fallback...");
             setTimeout(() => {
-              if (active) router.replace(`/watch/${type}/${id}`);
+              if (active) router.replace(`/watch/${type}/${id}`, { scroll: false });
             }, 1000);
         }
       }

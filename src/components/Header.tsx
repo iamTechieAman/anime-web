@@ -189,7 +189,7 @@ export default function Header() {
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[calc(72px+env(safe-area-inset-top,0px))] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
       showSidebar ? "left-0 md:left-[80px]" : "left-0"
     } ${isScrolled
       ? "bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
@@ -205,32 +205,32 @@ export default function Header() {
       </AnimatePresence>
 
       <div className="w-full max-w-[1800px] mx-auto flex items-center justify-between gap-2 sm:gap-3 md:gap-4 min-w-0">
-        <div className="flex items-center min-w-0">
-
-        {/* Logo */}
-        <Link href="/" className={`flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none ${showSidebar ? "md:hidden" : ""}`} onClick={clearSearch} aria-label="ToonPlayer Home">
-          <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
-            <Logo />
-          </div>
-          <span className="flex flex-col leading-none">
-            <span className="text-[14px] sm:text-[15px] font-black tracking-tight text-white" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Toon</span>
-            <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
-          </span>
-        </Link>
+        
+        {/* Left Section - Logo */}
+        <div className={`flex items-center shrink-0 ${showSidebar ? "md:hidden" : "md:w-[40px] overflow-visible"}`}>
+          <Link href="/" className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none" onClick={clearSearch} aria-label="ToonPlayer Home" scroll={false}>
+            <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
+              <Logo />
+            </div>
+            <span className="flex flex-col leading-none md:hidden lg:flex">
+              <span className="text-[14px] sm:text-[15px] font-black tracking-tight text-white" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Toon</span>
+              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
+            </span>
+          </Link>
         </div>
 
         {/* TV Nav */}
         {deviceMode==="tv" && (
           <div className="flex items-center gap-3 ml-4 mr-auto text-xs font-black uppercase tracking-wider text-zinc-400">
-            <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white"><Play className="w-4 h-4 fill-current text-[var(--accent)]"/>Home</Link>
+            <Link href="/" scroll={false} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white"><Play className="w-4 h-4 fill-current text-[var(--accent)]"/>Home</Link>
             <button onClick={()=>{setSearchQuery("");setIsTvSearchOpen(true);}} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors cursor-pointer"><Search className="w-4 h-4"/>Search</button>
-            <Link href="/watchlist" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors"><Bookmark className="w-4 h-4 text-pink-400"/>My List</Link>
+            <Link href="/watchlist" scroll={false} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors"><Bookmark className="w-4 h-4 text-pink-400"/>My List</Link>
           </div>
         )}
 
-        {/* PC Search Bar */}
+        {/* Center Section - PC Search Bar */}
         {deviceMode==="pc" && (
-          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:flex items-center justify-center w-full max-w-[720px]">
+          <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[500px] max-w-[900px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
               className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-xl hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
@@ -264,7 +264,7 @@ export default function Header() {
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 hide-scrollbar">
                   {suggestions.length>0?suggestions.map((item:any,i:number)=>(
-                    <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
+                    <Link scroll={false} key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
                       className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-[var(--accent)]':''}`}>
                       <div className="w-12 h-16 overflow-hidden rounded-xl bg-[var(--bg-elevated)] shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
                       <div className="flex-1 min-w-0">
@@ -279,8 +279,8 @@ export default function Header() {
           )}
         </AnimatePresence>
 
-        {/* Right Actions */}
-        <div className="ml-auto flex items-center gap-2 shrink-0">
+        {/* Right Section - Actions */}
+        <div className="flex items-center gap-3 shrink-0">
 
           {/* Mobile Search */}
           {deviceMode==="mobile" && (

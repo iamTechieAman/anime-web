@@ -23,9 +23,9 @@ export default function Footer() {
                 {/* Links & Copyright */}
                 <div className="flex flex-col items-center gap-4 text-center w-full max-w-2xl mx-auto">
                     <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs font-bold text-[var(--text-muted)]">
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-                        <Link href="/terms" className="hover:text-white transition-colors">DMCA</Link>
-                        <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+                        <Link scroll={false} href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link scroll={false} href="/terms" className="hover:text-white transition-colors">DMCA</Link>
+                        <Link scroll={false} href="/contact" className="hover:text-white transition-colors">Contact</Link>
                         <a href="https://github.com/iamTechieAman/anime-web" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">
                             <Github className="w-4 h-4" /> GitHub
                         </a>

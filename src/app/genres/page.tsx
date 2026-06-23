@@ -53,7 +53,7 @@ export default function GenresPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30, delay: i * 0.02 }}
                             >
-                                <Link 
+                                <Link scroll={false} 
                                     href={`/search?genre=${genre.name}`}
                                     className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-500 ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
                                 >

@@ -38,7 +38,7 @@ export default function DesktopSidebar() {
             <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-300 ease-out bg-[#08080B]/95 backdrop-blur-md border-r border-white/5 flex flex-col py-6 shadow-2xl">
                 {/* Branded Logo */}
                 <div className="mb-8 shrink-0 flex items-center h-10 w-full px-3 transition-all duration-300 relative">
-                    <Link href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
+                    <Link scroll={false} href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
                         <div className="w-11 h-11 flex items-center justify-center shrink-0 relative">
                             <Logo />
                         </div>
@@ -95,7 +95,7 @@ export default function DesktopSidebar() {
                     );
 
                     return item.href ? (
-                        <Link key={item.name} href={item.href} className={cssClass}>
+                        <Link scroll={false} key={item.name} href={item.href} className={cssClass}>
                             {content}
                         </Link>
                     ) : (

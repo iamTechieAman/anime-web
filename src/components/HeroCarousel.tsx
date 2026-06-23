@@ -322,7 +322,7 @@ export default function HeroCarousel() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full sm:w-auto mt-3">
-                        <Link href={activeSlide.link} className="flex-1 sm:flex-none">
+                        <Link scroll={false} href={activeSlide.link} className="flex-1 sm:flex-none">
                             <button className="w-full flex items-center justify-center gap-2 px-8 py-2 md:py-2.5 bg-white text-black hover:bg-zinc-200 font-bold rounded-md transition-colors shadow-lg active:scale-95">
                                 <Play className="w-4 h-4 md:w-5 h-5 fill-current" />
                                 <span className="text-sm md:text-base">Play</span>

@@ -135,7 +135,7 @@ const TopCollectionsRow = () => {
             <div className="w-full">
                 <div className="flex items-center gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2">
                     {TOP_COLLECTIONS.map((col) => (
-                        <Link 
+                        <Link scroll={false} 
                             href={col.link} 
                             key={col.id}
                             className="snap-start shrink-0 relative w-[240px] sm:w-[280px] md:w-[320px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 bg-[var(--bg-elevated)] shadow-lg group hover:border-[var(--accent)]/30 hover:shadow-2xl transition-all duration-350 hover:scale-[1.02]"

@@ -53,7 +53,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
             {/* Navbar */}
             <div className="sticky top-[60px] md:top-[64px] z-30 px-4 py-3 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)]">
                 <div className="w-full flex items-center gap-4">
-                    <Link href="/" className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <Link scroll={false} href="/" className="p-2 hover:bg-white/10 rounded-full transition-colors">
                         <ArrowLeft className="w-5 h-5 text-zinc-400" />
                     </Link>
                     <div>

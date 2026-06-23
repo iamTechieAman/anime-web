@@ -40,7 +40,7 @@ export default function GenrePage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-white transition-colors mb-2">
+                        <Link scroll={false} href="/" className="inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-white transition-colors mb-2">
                             <ChevronLeft className="w-4 h-4" /> Back Home
                         </Link>
                         <h1 className="text-3xl md:text-4xl font-black font-sora text-white">
@@ -90,7 +90,7 @@ export default function GenrePage() {
                         <p className="text-[var(--text-muted)] max-w-sm">
                             We couldn&apos;t find any anime for this genre at the moment. Try switching providers or checking back later.
                         </p>
-                        <Link href="/" className="mt-6 px-6 py-2 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all">
+                        <Link scroll={false} href="/" className="mt-6 px-6 py-2 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all">
                             Browse Home
                         </Link>
                     </div>

@@ -109,7 +109,7 @@ export default function ProfilePage() {
                     <div className="space-y-4">
                         <h2 className="text-lg font-bold font-sora mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-orange-400" /> Account Hub</h2>
                         
-                        <Link href="/history" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
+                        <Link scroll={false} href="/history" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
                             <div className="flex items-center gap-3">
                                 <Clock className="w-5 h-5 text-[var(--text-muted)]" />
                                 <span className="font-medium">Watch History</span>
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                             <span className="text-xs text-[var(--text-muted)] bg-white/5 px-2 py-1 rounded-md">{history?.length || 0} items</span>
                         </Link>
 
-                        <Link href="/watchlist" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
+                        <Link scroll={false} href="/watchlist" className="flex items-center justify-between p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] hover:border-orange-500/50 transition-colors">
                             <div className="flex items-center gap-3">
                                 <Bookmark className="w-5 h-5 text-[var(--text-muted)]" />
                                 <span className="font-medium">My Watchlist</span>

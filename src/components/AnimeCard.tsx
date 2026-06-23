@@ -82,7 +82,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
 
     return (
         <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-300 hover:z-30 w-full h-full`}>
-            <Link href={getHref()} className="block w-full h-full">
+            <Link scroll={false} href={getHref()} className="block w-full h-full">
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
                     {(imageSrc && !imgError) ? (
@@ -180,7 +180,7 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
 
     return (
         <div key={`${showId}-${rank}`} className="card-reveal card-visible">
-            <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
+            <Link scroll={false} href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
                 {rank !== undefined && (
                     <div className="w-6 text-center shrink-0">
                         <span className={`text-xl font-black ${rank < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}>

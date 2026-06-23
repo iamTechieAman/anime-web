@@ -26,7 +26,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (userLoaded && isSignedIn) {
-      router.push("/");
+      router.push("/", { scroll: false });
     }
   }, [userLoaded, isSignedIn, router]);
 
@@ -72,7 +72,7 @@ export default function LoginPage() {
       window.dispatchEvent(new Event("profileUpdated"));
     }
     
-    router.push("/");
+    router.push("/", { scroll: false });
   };
 
   if (!signInLoaded || !userLoaded || isSignedIn) {
