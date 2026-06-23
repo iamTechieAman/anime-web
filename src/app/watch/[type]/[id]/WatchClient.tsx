@@ -1504,7 +1504,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="hidden xl:flex flex-col w-[420px] 2xl:w-[450px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] resize-x overflow-x-auto min-w-[320px] max-w-[600px] bg-[#09090B] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+            <div className="hidden xl:flex flex-col w-[420px] 2xl:w-[450px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] resize-x overflow-x-auto min-w-[320px] max-w-[600px] bg-[var(--bg-main)] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                     {renderEpisodesList('desktop')}
                 </div>
@@ -1569,7 +1569,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderRecommendations = () => {
         if (!details?.recommendations || details?.recommendations?.length === 0) return null;
         return (
-            <section className="relative z-10 mt-[48px] bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[48px] bg-[var(--bg-main)] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                 <MovieRow items={details?.recommendations || []} type={type} />
             </section>
@@ -1579,7 +1579,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderSimilar = () => {
         if (!details?.similar || details?.similar?.length === 0) return null;
         return (
-            <section className="relative z-10 mt-[48px] bg-[#09090B] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[48px] bg-[var(--bg-main)] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                 <MovieRow items={details?.similar || []} type={type} />
             </section>
@@ -1588,7 +1588,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     const renderComments = () => {
         return (
-            <section className="relative z-10 mt-[48px] bg-[#09090B] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[48px] bg-[var(--bg-main)] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                 <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
             </section>
         );
@@ -1596,9 +1596,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     return (
         <>
-        <div className="relative isolate min-h-dvh overflow-x-clip bg-[#09090B] text-[var(--text-main)]">
+        <div className="relative isolate min-h-dvh overflow-x-clip bg-[var(--bg-main)] text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -1616,7 +1616,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     )}
                 </div>
             )}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "w-full pb-4 mb-[env(safe-area-inset-bottom)]"}`}>
+            <div className={`${isFocusMode ? "pt-0 w-full" : "w-full pt-[calc(60px+env(safe-area-inset-top))] md:pt-[calc(72px+env(safe-area-inset-top))] pb-4 mb-[env(safe-area-inset-bottom)]"}`}>
                 {isFocusMode && (
                     <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl mt-[env(safe-area-inset-top)] ml-[env(safe-area-inset-left)]">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
@@ -1626,7 +1626,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <div className={`w-full ${isFocusMode ? "h-[100dvh] bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
                 {!isFocusMode && (
-                    <div className="flex flex-col gap-6 items-start w-full bg-[#09090B]">
+                    <div className="flex flex-col gap-6 items-start w-full bg-[var(--bg-main)]">
                         <div className="flex-1 w-full min-w-0">
                             {/* HeroSection via Component */}
                             {renderHero()}
@@ -1634,7 +1634,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Player & Episode Layout */}
                             <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 flex flex-col xl:flex-row gap-6 items-start">
                                 {/* Player Column */}
-                                <div className={`flex-1 w-full min-w-0 bg-[#09090B] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
+                                <div className={`flex-1 w-full min-w-0 bg-[var(--bg-main)] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
                                     {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                     {/* ── SERVER SELECTION BAR ── */}
                                     {renderProviders()}
@@ -1647,7 +1647,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Mobile/Tablet Episodes (Hidden on Desktop) */}
                             {renderMobileEpisodes()}
                             {/* Metadata Section */}
-                            <div className="relative z-10 bg-[#09090B] p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
+                            <div className="relative z-10 bg-[var(--bg-main)] p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
                                 <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                     {details?.poster_path && (
                                         <div className="relative group aspect-[2/3] w-full">

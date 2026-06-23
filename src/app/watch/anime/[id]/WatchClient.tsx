@@ -1335,7 +1335,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-[100] h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     </Link>
@@ -1351,7 +1351,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             )}
 
             {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-14 md:pt-16 w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[calc(60px+env(safe-area-inset-top))] md:pt-[calc(72px+env(safe-area-inset-top))] w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
                 {isFocusMode && (
                     <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
@@ -1366,7 +1366,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                         {/* Player Column */}
-                        <div className="flex-1 w-full min-w-0 touch-pan-y bg-[#09090B] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
+                        <div className="flex-1 w-full min-w-0 touch-pan-y bg-[var(--bg-main)] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
                             {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
 
                             {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
