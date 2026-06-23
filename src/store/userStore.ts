@@ -147,7 +147,7 @@ export const useUserStore = create<UserState>()(
       settings: {},
 
       addProfile: (profile) => set((state) => {
-        const avatar = (profile.avatar && !profile.avatar.includes('dicebear.com')) 
+        const avatar = profile.avatar
           ? profile.avatar 
           : getAvatarUrl(profile.name, profile.theme || 'orange');
         return {
@@ -167,9 +167,15 @@ export const useUserStore = create<UserState>()(
             if (profile) {
               localStorage.setItem("toonplayer_profile", JSON.stringify(profile));
               localStorage.setItem(`kids-filter-${id}`, profile.isKids ? 'true' : 'false');
+              window.sessionStorage.setItem("toonplayer-session-active", "true");
+              window.sessionStorage.setItem("toonplayer_active_profile_id", id);
+              document.cookie = `toonplayer_active_profile_id=${id}; path=/; max-age=31536000; SameSite=Lax`;
             }
           } else {
             localStorage.removeItem("toonplayer_profile");
+            window.sessionStorage.removeItem("toonplayer-session-active");
+            window.sessionStorage.removeItem("toonplayer_active_profile_id");
+            document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
           }
           setTimeout(() => {
             window.dispatchEvent(new Event("profileUpdated"));

@@ -20,7 +20,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const router = useRouter();
     const [query, setQuery] = useState("");
     const debouncedQuery = useDebounce(query, 200);
-    const [activeIndex, setActiveIndex] = useState(0);
+    const [activeIndex, setActiveIndex] = useState(-1);
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [isListening, setIsListening] = useState(false);
@@ -164,7 +164,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
     // Reset active index when query/results/lists change
     useEffect(() => {
-        setActiveIndex(0);
+        setActiveIndex(-1);
     }, [query, results.length, recentSearches.length, pinnedSearches.length]);
 
     // Speech recognition setup
@@ -238,19 +238,33 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                 onClose();
             } else if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setActiveIndex(prev => (allItemsCount > 0 ? (prev + 1) % allItemsCount : 0));
+                setActiveIndex(prev => {
+                    if (allItemsCount === 0) return -1;
+                    if (prev === -1) return 0;
+                    return (prev + 1) % allItemsCount;
+                });
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
-                setActiveIndex(prev => (allItemsCount > 0 ? (prev - 1 + allItemsCount) % allItemsCount : 0));
+                setActiveIndex(prev => {
+                    if (allItemsCount === 0) return -1;
+                    if (prev === -1 || prev === 0) return allItemsCount - 1;
+                    return (prev - 1) % allItemsCount;
+                });
             } else if (e.key === "Enter") {
                 e.preventDefault();
-                triggerItemAtIndex(activeIndex);
+                if (activeIndex === -1 && query.trim()) {
+                    router.push(`/search?query=${encodeURIComponent(query.trim())}`, { scroll: false });
+                    saveSearch(query);
+                    onClose();
+                } else if (activeIndex >= 0) {
+                    triggerItemAtIndex(activeIndex);
+                }
             }
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen, activeIndex, allItemsCount]);
+    }, [isOpen, activeIndex, allItemsCount, query, router, onClose]);
 
     if (!isOpen) return null;
 

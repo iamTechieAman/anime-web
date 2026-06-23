@@ -197,6 +197,11 @@ export default function BrowseClient() {
                 let fetchedResults = res.data.results || [];
                 currentTotalPages = res.data.total_pages || 1;
 
+                // Client-side kids filter
+                if (isKidsMode) {
+                    fetchedResults = fetchedResults.filter(isKidsFriendly);
+                }
+
                 // Client-side alphabet filter
                 if (selectedLetter) {
                     const letter = selectedLetter.toLowerCase();
@@ -208,8 +213,9 @@ export default function BrowseClient() {
 
                 combinedResults = [...combinedResults, ...fetchedResults];
 
-                // If not filtering by letter, or got enough items, or hit total pages, stop
-                if (!selectedLetter || combinedResults.length >= 8 || currentPageNum >= currentTotalPages) {
+                // If not filtering by letter and not kids mode, or got enough items, or hit total pages, stop
+                const minTarget = isKidsMode ? 12 : 8;
+                if ((!selectedLetter && !isKidsMode) || combinedResults.length >= minTarget || currentPageNum >= currentTotalPages) {
                     break;
                 }
 
@@ -241,13 +247,13 @@ export default function BrowseClient() {
             setLoadingMore(false);
             isFetchingRef.current = false;
         }
-    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
+    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter, isKidsMode]);
 
     // Fetch initial results on change
     useEffect(() => {
         setPage(1);
         fetchCatalog(1, false);
-    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter, fetchCatalog]);
+    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter, isKidsMode, fetchCatalog]);
 
     // Handle Infinite Scroll
     useEffect(() => {
@@ -635,7 +641,7 @@ export default function BrowseClient() {
                 ) : (
                     <div className="flex-1 flex flex-col justify-between">
                         <div className="responsive-grid">
-                            {(isKidsMode ? items.filter(item => isKidsFriendly(item)) : items).map((item) => (
+                            {items.map((item) => (
                                 <div key={item.id} className="w-full">
                                     <MovieCard item={item} type={item.media_type || mediaType} />
                                 </div>

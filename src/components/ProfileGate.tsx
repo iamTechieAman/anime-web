@@ -30,6 +30,7 @@ const ProfileAvatar = ({ src, alt, sizes = "120px" }: { src?: string | null, alt
 export default function ProfileGate() {
   const { profiles, activeProfileId, setActiveProfile, addProfile, removeProfile, syncProfile } = useUserStore();
   const [showGate, setShowGate] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [isKids, setIsKids] = useState(false);
@@ -43,9 +44,7 @@ export default function ProfileGate() {
   useEffect(() => {
     setIsClient(true);
     
-    // Netflix-style session tracking using sessionStorage
-    const isNewSession = typeof window !== "undefined" && window.sessionStorage.getItem("toonplayer-session-active") !== "true";
-
+    // Sync external profile (Clerk) if logged in
     if (isLoaded && user && !synced) {
       const clerkProfileId = `profile-${user.id}`;
       const clerkName = user.firstName || user.username || "My Profile";
@@ -55,14 +54,40 @@ export default function ProfileGate() {
       setSynced(true);
     }
 
-    if (isNewSession) {
-      // Clear active profile on new session to show the gate
-      setActiveProfile(null);
-      setShowGate(true);
-    } else if (!activeProfileId) {
-      setShowGate(true);
-    } else {
-      setShowGate(false);
+    const checkPersistedProfile = () => {
+      let activeId = activeProfileId;
+      if (!activeId && typeof window !== "undefined") {
+        try {
+          const storeData = window.localStorage.getItem("toonplayer-unified-store");
+          if (storeData) {
+            const parsed = JSON.parse(storeData);
+            if (parsed && parsed.state && parsed.state.activeProfileId) {
+              activeId = parsed.state.activeProfileId;
+            }
+          }
+        } catch (e) {}
+
+        if (!activeId) {
+          const match = document.cookie.match(/(^|;)\s*toonplayer_active_profile_id\s*=\s*([^;]+)/);
+          if (match) {
+            activeId = match[2];
+          }
+        }
+      }
+
+      if (activeId) {
+        if (activeProfileId !== activeId) {
+          setActiveProfile(activeId);
+        }
+        setShowGate(false);
+      } else {
+        setShowGate(true);
+      }
+      setHasChecked(true);
+    };
+
+    if (!hasChecked) {
+      checkPersistedProfile();
     }
 
     const handleOpen = () => setShowGate(true);
@@ -70,6 +95,8 @@ export default function ProfileGate() {
       setActiveProfile(null);
       if (typeof window !== "undefined") {
         window.sessionStorage.removeItem("toonplayer-session-active");
+        window.sessionStorage.removeItem("toonplayer_active_profile_id");
+        document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
       setShowGate(true);
     };
@@ -81,7 +108,7 @@ export default function ProfileGate() {
       window.removeEventListener("openProfileGate", handleOpen);
       window.removeEventListener("userLogout", handleLogout);
     };
-  }, [activeProfileId, setActiveProfile, isLoaded, user, synced, syncProfile]);
+  }, [activeProfileId, setActiveProfile, isLoaded, user, synced, syncProfile, hasChecked]);
 
   const handleSelectProfile = (profile: Profile) => {
     setSelectedId(profile.id);
@@ -91,6 +118,8 @@ export default function ProfileGate() {
       setActiveProfile(profile.id);
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem("toonplayer-session-active", "true");
+        window.sessionStorage.setItem("toonplayer_active_profile_id", profile.id);
+        document.cookie = `toonplayer_active_profile_id=${profile.id}; path=/; max-age=31536000; SameSite=Lax`;
       }
       setShowGate(false);
       setSelectedId(null);

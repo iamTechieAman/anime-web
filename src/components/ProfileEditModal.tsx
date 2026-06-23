@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
-import { useUserStore, Profile } from "@/store/userStore";
+import { useUserStore, Profile, getAvatarUrl } from "@/store/userStore";
 import UserAvatar from "./UserAvatar";
 
 interface ProfileEditModalProps {
@@ -47,6 +47,14 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
   const [isKids, setIsKids] = useState(false);
   const [theme, setTheme] = useState("orange");
 
+  // Dynamically update initials/gradient preview on typing
+  useEffect(() => {
+    const isGenerated = !selectedAvatar || selectedAvatar.startsWith("data:image/");
+    if (isGenerated) {
+      setSelectedAvatar(getAvatarUrl(profileName, theme));
+    }
+  }, [profileName, theme]);
+
   useEffect(() => {
     if (isOpen) {
       setMode('list');
@@ -78,7 +86,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
 
   const handleCreateOpen = () => {
     setProfileName("");
-    setSelectedAvatar(AVATARS[Math.floor(Math.random() * AVATARS.length)].url);
+    setSelectedAvatar("");
     setIsKids(false);
     setTheme(THEMES[Math.floor(Math.random() * THEMES.length)].name);
     setMode('create');
@@ -294,6 +302,19 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Select Avatar</label>
                 <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  {/* Dynamic Initials Preset Option */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAvatar(getAvatarUrl(profileName, theme))}
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-gradient-to-br from-accent to-accent-secondary p-1 transition-all ${
+                      selectedAvatar.startsWith("data:image/") ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
+                    } cursor-pointer`}
+                  >
+                    <div className="w-full h-full flex items-center justify-center text-white font-extrabold text-base select-none">
+                      {(profileName || "?").trim().substring(0, 2).toUpperCase() || "?"}
+                    </div>
+                  </button>
+
                   {AVATARS.map((avatar) => {
                     const isSelected = selectedAvatar === avatar.url;
                     return (

@@ -811,7 +811,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             }
         }
     // Keep history out of the dependencies; the ref guard restores it only once.
-    }, [searchParams, id, type, history]);
+    }, [searchParams, id, type]);
 
 
 

@@ -29,6 +29,13 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 23 — Final Logic Recovery & Persistence Stabilization (`June 2026`)
+- 👥 **Bulletproof "Who's Watching" Gate**: Standardized active profile persistence across cookies, `localStorage`, and `sessionStorage`, completely resolving F5/reload flashes.
+- 🎨 **Dynamic AI Avatars**: Enabled dynamic gradient initials avatar generation on typing profile names, preserving selected presets.
+- 🛡️ **Kids Mode & Smart Catalog Paging**: Refined `isKidsFriendly` keyword blocks and automated extra page loading during discover fetches to guarantee full rows.
+- 📱 **Video Player State Preservation**: Eliminated history-driven iframe resets and keyboard navigation stale closures.
+- 📥 **Anime Downloads**: Integrated client-side `DownloadModal` with direct HLS-to-MP4 download proxy support.
+
 ### Phase 22 — Anime Recovery & Scraper Stabilization (`June 2026`)
 - 🎌 **Signed API Scraper**: Reverse-engineered the `hianime.lol` SPA backend API at `https://anime.sankavollerei.web.id/api` and extracted the cryptographic keys to calculate XOR (SHA256) and chained HMAC-SHA256 signatures, completely bypassing Cloudflare Turnstile blocks.
 - 🍿 **Direct HLS Streams**: Enabled direct extraction of `.m3u8` master playlists with fallback inline iframe sources and `AllAnimeProvider` auto-rotation.

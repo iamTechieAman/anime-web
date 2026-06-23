@@ -6,7 +6,7 @@ import Script from "next/script";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -19,6 +19,7 @@ import { useUserStore } from "@/store/userStore";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
+const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
 
 const getProxiedEmbedUrl = (rawUrl: string | null) => {
     if (!rawUrl) return "";
@@ -318,6 +319,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [isTheatreMode, setIsTheatreMode] = useState(false);
     const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
     const [iframeKey, setIframeKey] = useState(0);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
 
     const hasNextEpisode = () => {
         const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
@@ -531,6 +533,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "instant" });
     }, [id, currentEp, selectedServer]);
+
+    // Reset player state and captured stream links when rotating sources
+    useEffect(() => {
+        setRawVideoSource(null);
+        setIframeKey(prev => prev + 1);
+    }, [selectedServer, currentEp, mode]);
 
     const isBookmarked = isInWatchlist(fullId);
 
@@ -1633,26 +1641,35 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         </p>
                                     </div>
                                     
-                                    <button
-                                        onClick={toggleBookmark}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shrink-0 ${
-                                            isBookmarked 
-                                                ? "bg-accent/10 text-accent border-accent/40 hover:bg-accent/20" 
-                                                : "bg-white/5 text-[var(--text-muted)] border-border-color hover:text-white hover:bg-white/10"
-                                        }`}
-                                    >
-                                        {isBookmarked ? (
-                                            <>
-                                                <BookmarkCheck className="w-5 h-5 fill-current" />
-                                                <span className="hidden sm:inline font-bold text-sm">In Watchlist</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <BookmarkPlus className="w-5 h-5" />
-                                                <span className="hidden sm:inline font-bold text-sm">Add to Watchlist</span>
-                                            </>
-                                        )}
-                                    </button>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <button
+                                            onClick={() => setShowDownloadModal(true)}
+                                            className="flex items-center gap-1.5 sm:gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 justify-center cursor-pointer"
+                                        >
+                                            <Download className="w-4 h-4" /> Download
+                                        </button>
+                                        
+                                        <button
+                                            onClick={toggleBookmark}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
+                                                isBookmarked 
+                                                    ? "bg-accent/10 text-accent border-accent/40 hover:bg-accent/20" 
+                                                    : "bg-white/5 text-[var(--text-muted)] border-border-color hover:text-white hover:bg-white/10"
+                                            } cursor-pointer`}
+                                        >
+                                            {isBookmarked ? (
+                                                <>
+                                                    <BookmarkCheck className="w-5 h-5 fill-current" />
+                                                    <span className="hidden sm:inline font-bold text-sm">In Watchlist</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <BookmarkPlus className="w-5 h-5" />
+                                                    <span className="hidden sm:inline font-bold text-sm">Add to Watchlist</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1742,6 +1759,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             </div>
         </div>
+        <AnimatePresence>
+            {showDownloadModal && (
+                <DownloadModal
+                    type="anime"
+                    id={fullId}
+                    selectedSeason={1}
+                    selectedEpisode={parseInt(currentEp) || 1}
+                    title={show?.name || "Anime"}
+                    onClose={() => setShowDownloadModal(false)}
+                    rawVideoSource={rawVideoSource}
+                />
+            )}
+        </AnimatePresence>
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
         </>
     );

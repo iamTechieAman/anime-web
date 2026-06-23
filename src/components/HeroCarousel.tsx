@@ -65,7 +65,7 @@ export default function HeroCarousel() {
             console.error("Failed to fetch home slides:", error);
             setIsLoading(false);
         }
-    }, [trendingData, error]);
+    }, [trendingData, error, isKidsMode]);
 
     const processSlides = (rawSlides: any[]) => {
         if (!Array.isArray(rawSlides)) {

@@ -46,12 +46,12 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
     { label: "Watch History", icon: Clock, href: "/history", color: "text-accent" },
     { label: "Profile Settings", icon: Settings, action: () => window.dispatchEvent(new Event("openSettingsModal")), color: "text-blue-400" },
-    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileModal")), color: "text-purple-400" },
+    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
     user 
       ? { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" }
       : { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
   ] : [
-    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileModal")), color: "text-purple-400" },
+    { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
     { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
   ];
 

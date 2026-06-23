@@ -6,6 +6,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, X, TrendingUp, Sparkles, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { MovieGrid, type MovieItem } from "@/components/MovieCard";
+import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 const GENRE_MAP: Record<string, number> = {
     "Action": 28, "Adventure": 12, "Animation": 16, "Comedy": 35,
@@ -29,6 +30,10 @@ const SORT_OPTIONS = [
 ];
 
 function MovieSearchContent() {
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isKidsMode = activeProfile?.isKids || false;
+
     const searchParams = useSearchParams();
     const router = useRouter();
     const query = searchParams?.get("query") || searchParams?.get("q") || "";
@@ -50,7 +55,11 @@ function MovieSearchContent() {
 
         axios.get(`/api/prime/search?${params.toString()}`)
             .then(res => {
-                setResults(res.data.results || []);
+                let fetched = res.data.results || [];
+                if (isKidsMode) {
+                    fetched = fetched.filter(isKidsFriendly);
+                }
+                setResults(fetched);
                 setError(null);
             })
             .catch(err => {
@@ -59,7 +68,7 @@ function MovieSearchContent() {
                 setResults([]);
             })
             .finally(() => setLoading(false));
-    }, [query, genre, status]);
+    }, [query, genre, status, isKidsMode]);
 
     useEffect(() => {
         performSearch();
