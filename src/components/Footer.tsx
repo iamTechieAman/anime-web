@@ -2,18 +2,19 @@
 
 import Link from "next/link";
 import { Github, Heart } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="relative z-10 w-full bg-[#050505] border-t border-[rgba(255,255,255,0.06)] pt-8 pb-24 md:pb-8 mt-auto">
+        <footer className="relative z-10 w-full bg-[var(--bg-main)] border-t border-[rgba(255,255,255,0.06)] pt-8 pb-24 md:pb-8 mt-auto">
             <div className="max-w-[1800px] mx-auto px-6 flex flex-col items-center justify-center gap-6">
                 {/* Brand & TMDB Disclaimer */}
                 <div className="flex flex-col items-center gap-3 text-center">
-                    <span className="text-lg font-black tracking-wider uppercase text-white font-sora">
-                        Toon<span className="text-[var(--accent)]">Player</span>
-                    </span>
+                    <div className="flex justify-center items-center h-[36px] w-[36px] relative" style={{ filter: "drop-shadow(0 0 8px rgba(139,92,246,0.4))" }}>
+                        <Logo />
+                    </div>
                     <p className="text-[11px] text-[var(--text-muted)] max-w-sm sm:max-w-md leading-relaxed">
                         This site does not store files. We only index links. Powered by TMDB.
                     </p>

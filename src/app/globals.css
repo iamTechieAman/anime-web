@@ -13,7 +13,7 @@
 html,
 body {
   overflow-x: hidden;
-  background: #09090B;
+  background: var(--bg-main);
   /* iPhone notch / Dynamic Island safe area */
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
@@ -36,24 +36,24 @@ img {
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* ToonPlayer V5.0 Dark Cinematic Theme */
-  --bg-main: #0A0A0B;
-  --bg-surface: #0f0f12;
-  --bg-elevated: #141419;
-  --bg-card: #1E1B29;
-  --bg-overlay: rgba(10, 10, 11, 0.96);
+  /* ToonPlayer V5.0 Final Release Candidate Dark Cinematic Theme */
+  --bg-main: #050507;
+  --bg-surface: #11131C;
+  --bg-elevated: #171923;
+  --bg-card: #0A0B12;
+  --bg-overlay: rgba(5, 5, 7, 0.96);
   
   --text-main: #ffffff;
   --text-secondary: #e4e4e7;
   --text-muted: #a1a1aa;
   
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
   
-  --accent: #7C3AED;
+  --accent: #8B5CF6;
   --accent-secondary: #A855F7;
-  --accent-glow: rgba(192, 132, 252, 0.28);
-  --accent-warm: #C084FC;
+  --accent-glow: rgba(139, 92, 246, 0.28);
+  --accent-warm: #EC4899;
 
   --secondary: #22D3EE;
   --danger: #EF4444;
