@@ -495,7 +495,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             ) : (
                                                 <div className={mode === 'mobile' ? "flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-col sm:overflow-visible sm:snap-none sm:pb-0" : "flex flex-col gap-2"}>
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex ${mode === 'mobile' ? 'flex-col min-w-[200px] snap-center items-start' : 'items-center'} gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-accent bg-accent/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-border-color bg-[#12131A] hover:border-accent/30'}`}>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex ${mode === 'mobile' ? 'flex-col min-w-[200px] snap-center items-start' : 'items-center'} gap-3 p-3 rounded-xl border transition-all duration-[250ms] ease-out hover:-translate-y-[2px] hover:shadow-lg text-left ${selectedEpisode === ep.episode_number ? 'border-accent bg-accent/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-border-color bg-[#12131A] hover:border-accent/30'}`}>
                                                             <div className={`${mode === 'mobile' ? 'w-full aspect-video' : 'w-24 h-14'} rounded-lg overflow-hidden bg-bg-main flex-shrink-0 relative`}>
                                                                 {(ep.still_path || details?.backdrop_path || details?.poster_path) ? <Image src={`${IMG_BASE}/w185${ep.still_path || details?.backdrop_path || details?.poster_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />}
                                                                 {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
@@ -550,6 +550,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [isTheatreMode, setIsTheatreMode] = useState(false);
     const [episodeSearch, setEpisodeSearch] = useState("");
     const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
+    const [showEpisodesDrawer, setShowEpisodesDrawer] = useState(false);
 
     const activeFilteredEpisodes = useMemo(() => {
         if (!episodeSearch.trim()) return episodes;
@@ -1509,7 +1510,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="hidden lg:flex flex-col w-[380px] xl:w-[420px] 2xl:w-[460px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] bg-bg-main rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+            <div className="hidden lg:flex flex-col w-full h-[calc(100dvh-120px)] sticky top-[90px] rounded-[22px] overflow-hidden bg-white/[0.02] backdrop-blur-md border border-white/[0.05] shadow-[0_10px_40px_rgba(0,0,0,0.45)]">
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                     {renderEpisodesList('desktop')}
                 </div>
@@ -1525,9 +1526,23 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="w-full lg:hidden mb-6 block mt-4 px-4 sm:px-6">
-                {renderEpisodesList('mobile')}
-            </div>
+            <>
+                {/* Mobile View: Carousel (under max-md) */}
+                <div className="w-full md:hidden mb-6 block mt-4 px-4 sm:px-6">
+                    {renderEpisodesList('mobile')}
+                </div>
+
+                {/* Tablet View: Bottom Sheet Trigger Card (md to lg) */}
+                <div className="w-full hidden md:max-lg:block mb-6 mt-4 px-4 sm:px-6">
+                    <button 
+                        onClick={() => setShowEpisodesDrawer(true)} 
+                        className="w-full py-4 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white font-bold transition-all active:scale-95 cursor-pointer shadow-lg"
+                    >
+                        <List className="w-5 h-5 text-accent" />
+                        <span>Show Episodes List ({activeFilteredEpisodes.length} Episodes)</span>
+                    </button>
+                </div>
+            </>
         );
     };
 
@@ -1574,7 +1589,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderRecommendations = () => {
         if (!details?.recommendations || details?.recommendations?.length === 0) return null;
         return (
-            <section className="relative z-10 mt-[40px] bg-bg-main px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[40px] bg-bg-main px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                 <MovieRow items={details?.recommendations || []} type={type} />
             </section>
@@ -1584,7 +1599,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderSimilar = () => {
         if (!details?.similar || details?.similar?.length === 0) return null;
         return (
-            <section className="relative z-10 mt-[40px] bg-bg-main px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[40px] bg-bg-main px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                 <MovieRow items={details?.similar || []} type={type} />
             </section>
@@ -1593,7 +1608,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     const renderComments = () => {
         return (
-            <section className="relative z-10 mt-[48px] mb-[64px] bg-bg-main px-0 pt-6 pb-0 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[48px] mb-[64px] bg-bg-main px-0 pt-6 pb-0 sm:px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto w-full">
                 <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
             </section>
         );
@@ -1636,30 +1651,56 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* HeroSection via Component */}
                             {renderHero()}
 
-                            {/* Title Section (Page top = 16px, Title -> Player = 24px) */}
-                            <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-[24px]">
-                                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight font-sora leading-tight flex items-center flex-wrap gap-3 text-white">
-                                    {title}
+                            {/* Proximity attached header (Gap player/header = 12px) */}
+                            <div className="relative z-10 w-full max-w-[1800px] mx-auto px-4 sm:px-6 md:px-8 mb-[12px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-white">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <button 
+                                        onClick={() => router.back()} 
+                                        className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all active:scale-95 group cursor-pointer"
+                                    >
+                                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                                    </button>
+                                    <div className="min-w-0">
+                                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black font-sora tracking-tight truncate leading-tight flex items-center gap-2">
+                                            {title}
+                                        </h1>
+                                        {((type === 'tv' || type === 'cartoon') && resolvedMediaType !== 'movie') && (
+                                            <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
+                                                Season {selectedSeason} <span className="text-zinc-600">·</span> Episode {selectedEpisode}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 sm:ml-auto">
                                     {details?.trailer && (
-                                        <button onClick={() => setShowTrailer(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-xs font-bold text-white transition-all shrink-0">
-                                            <Play className="w-3.5 h-3.5 fill-white" /> Trailer
+                                        <button 
+                                            onClick={() => setShowTrailer(true)} 
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-xs font-bold text-white transition-all shrink-0 cursor-pointer"
+                                        >
+                                            <Play className="w-3 h-3 fill-white" /> Trailer
                                         </button>
                                     )}
-                                </h1>
+                                    {details?.vote_average && details.vote_average > 0 && (
+                                        <div className="flex items-center gap-1 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 font-bold text-xs">
+                                            <span>★</span>
+                                            <span>{details.vote_average.toFixed(1)}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Player & Episode Layout */}
-                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-0 mb-0 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+                            <div className="relative z-10 w-full max-w-[1800px] mx-auto mt-0 mb-0 grid grid-cols-1 lg:grid-cols-[74%_minmax(0,26%)] gap-6 items-start">
                                 {/* Player Column */}
-                                <div className={`flex-1 w-full min-w-0 bg-bg-main p-0 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
+                                <div className={`w-full min-w-0 bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden ${type === 'movie' ? 'mx-auto' : ''}`}>
                                     {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
-                                    {/* ── SERVER SELECTION BAR (Player -> Providers = 16px) ── */}
-                                    <div className="mt-[16px]">
+                                    {/* ── SERVER SELECTION BAR ── */}
+                                    <div className="mt-0">
                                         {renderProviders()}
                                     </div>
                                 </div>
 
-                                {/* Desktop Episodes Sidebar (30%) */}
+                                {/* Desktop Episodes Sidebar (26%) */}
                                 {renderDesktopEpisodes()}
                             </div>
 
@@ -1667,7 +1708,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {renderMobileEpisodes()}
 
                             {/* Metadata Section (Providers -> Metadata = 20px, pb-0 to let description bottom margin control spacing) */}
-                            <div className="relative z-10 bg-bg-main p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1600px] mx-auto mt-[20px] flex flex-col gap-6 items-start pb-0 sm:pb-0 md:pb-0">
+                            <div className="relative z-10 bg-bg-main p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1800px] mx-auto mt-[20px] flex flex-col gap-6 items-start pb-0 sm:pb-0 md:pb-0">
                                 <div className="flex flex-col lg:flex-row gap-6 md:gap-8 items-start w-full">
                                     <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                         {details?.poster_path && (
@@ -1895,6 +1936,46 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 </motion.div>
             )}
         </AnimatePresence>
+        <AnimatePresence>
+            {showEpisodesDrawer && (
+                <>
+                    {/* Backdrop */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.5 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowEpisodesDrawer(false)}
+                        className="fixed inset-0 bg-black z-[100] md:max-lg:block hidden"
+                    />
+                    {/* Drawer Container */}
+                    <motion.div 
+                        initial={{ y: "100%" }}
+                        animate={{ y: 0 }}
+                        exit={{ y: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed bottom-0 left-0 right-0 h-[60dvh] bg-[#0c0c0e]/95 backdrop-blur-xl border-t border-white/10 rounded-t-[24px] z-[101] md:max-lg:flex flex-col hidden p-6"
+                    >
+                        {/* Handle bar */}
+                        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setShowEpisodesDrawer(false)} />
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-white text-lg">Episodes</h3>
+                            <button onClick={() => setShowEpisodesDrawer(false)} className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-all"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            {renderEpisodesList('desktop')}
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+
+        {/* Floating Button for Tablet Episodes Drawer */}
+        <button 
+            onClick={() => setShowEpisodesDrawer(true)}
+            className="fixed bottom-20 right-6 z-[99] md:max-lg:flex hidden items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm text-white rounded-full font-bold shadow-2xl active:scale-95 transition-all hover:scale-105 cursor-pointer"
+        >
+            <List className="w-4 h-4" /> View Episodes
+        </button>
         </>
     );
 }

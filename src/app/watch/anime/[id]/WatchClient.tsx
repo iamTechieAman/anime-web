@@ -6,7 +6,7 @@ import Script from "next/script";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid, Download } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid, Download, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -73,7 +73,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
         <button
             ref={ref}
             onClick={onClick}
-            className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-colors group ${
+            className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-all duration-[250ms] ease-out hover:-translate-y-[2px] hover:shadow-lg group ${
                 isActive ? "bg-accent/15 border border-accent/30" : "hover:bg-white/5 border border-transparent"
             }`}
         >
@@ -320,6 +320,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
     const [iframeKey, setIframeKey] = useState(0);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
+    const [showEpisodesDrawer, setShowEpisodesDrawer] = useState(false);
 
     const hasNextEpisode = () => {
         const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
@@ -1324,6 +1325,48 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     const episodes = show.availableEpisodesDetail?.[mode] || [];
 
+    const renderAnimeCarousel = () => {
+        const filteredEpisodes = epFilter
+            ? episodes.filter(ep => String(typeof ep === 'object' ? (ep.number||ep.id) : ep).includes(epFilter))
+            : episodes;
+        return (
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                {filteredEpisodes.map((ep) => {
+                    const epNum = String(typeof ep === 'object' ? (ep.number||ep.id) : ep);
+                    const isActive = String(currentEp) === epNum;
+                    return (
+                        <button
+                            key={epNum}
+                            onClick={() => setCurrentEp(epNum)}
+                            className={`flex-shrink-0 w-[180px] snap-center p-3 rounded-xl border text-left transition-all duration-[250ms] ease-out hover:-translate-y-[2px] hover:shadow-lg ${
+                                isActive
+                                    ? 'border-accent bg-accent/15 border-accent/40 shadow-[0_0_12px_var(--accent-glow)]'
+                                    : 'border-white/5 bg-[#12131A] hover:border-accent/30'
+                            }`}
+                        >
+                            <div className="w-full aspect-video rounded-lg overflow-hidden bg-bg-main relative mb-2">
+                                {typeof ep === 'object' && ep.image ? (
+                                    <img src={ep.image} alt={ep.title || `Episode ${epNum}`} className="w-full h-full object-cover" loading="lazy" />
+                                ) : show.thumbnail ? (
+                                    <img src={show.thumbnail} alt={`Episode ${epNum}`} className="w-full h-full object-cover" loading="lazy" />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />
+                                )}
+                                {isActive && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-4 h-4 text-white fill-current" /></div>}
+                            </div>
+                            <p className={`text-xs font-semibold line-clamp-1 ${isActive ? 'text-accent font-bold' : 'text-white'}`}>
+                                EP {epNum}
+                            </p>
+                            {typeof ep === 'object' && ep.title && (
+                                <p className="text-[10px] text-zinc-500 truncate mt-0.5">{ep.title}</p>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+        );
+    };
+
     return (
         <>
         {/* Dim Lights Background Overlay */}
@@ -1373,7 +1416,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             )}
 
             {/* Content Container - Padded from top to avoid Navbar overlap (Page top = 16px) */}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[calc(60px+env(safe-area-inset-top)+16px)] md:pt-[calc(72px+env(safe-area-inset-top)+16px)] w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[calc(60px+env(safe-area-inset-top)+16px)] md:pt-[calc(72px+env(safe-area-inset-top)+16px)] w-full max-w-[1800px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
                 {isFocusMode && (
                     <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
@@ -1386,18 +1429,44 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 {!isFocusMode && (
                     <>
-                    {/* Title Section (Title -> Player = 24px) */}
-                    <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 mb-[24px]">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight font-sora leading-tight text-white">
-                            {show.name}
-                        </h1>
+                    {/* Proximity attached header (Gap player/header = 12px) */}
+                    <div className="relative z-10 w-full max-w-[1800px] mx-auto px-4 sm:px-6 md:px-8 mb-[12px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-white">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <button 
+                                onClick={() => router.back()} 
+                                className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all active:scale-95 group cursor-pointer"
+                            >
+                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                            </button>
+                            <div className="min-w-0">
+                                <h1 className="text-xl sm:text-2xl md:text-3xl font-black font-sora tracking-tight truncate leading-tight flex items-center gap-2">
+                                    {show.name}
+                                </h1>
+                                {/* Episode Info (Compact) */}
+                                {episodes.length > 1 ? (
+                                    <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
+                                        Episode {currentEp} <span className="text-zinc-600">·</span> {mode.toUpperCase()}
+                                    </p>
+                                ) : (
+                                    <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
+                                        Movie <span className="text-zinc-600">·</span> {mode.toUpperCase()}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        {show.rating && (
+                            <div className="flex items-center gap-1 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 font-bold text-xs sm:ml-auto">
+                                <span>★</span>
+                                <span>{show.rating}</span>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
+                    <div className="relative z-10 w-full max-w-[1800px] mx-auto mt-0 mb-0 grid grid-cols-1 xl:grid-cols-[74%_minmax(0,26%)] gap-6 items-start">
 
                         {/* Player Column */}
-                        <div className="flex-1 w-full min-w-0 touch-pan-y bg-bg-main p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
-                            {!isTheatreMode && <div className="mb-[16px]">{renderPlayer()}</div>}
+                        <div className="w-full min-w-0 touch-pan-y bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden">
+                            {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
 
                             {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
                             <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md mb-4">
@@ -1679,14 +1748,37 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     {show.description || show.synopsis || "No description available."}
                                 </p>
                             </div>
+
+                            {/* Mobile/Tablet Episodes */}
+                            {episodes.length > 1 && (
+                                <>
+                                    {/* Mobile View: Carousel (under max-md) */}
+                                    <div className="w-full md:hidden mb-6 block mt-4">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-bold text-white text-base">Episodes</h3>
+                                        </div>
+                                        {renderAnimeCarousel()}
+                                    </div>
+
+                                    {/* Tablet View: Bottom Sheet Trigger Card (md to xl) */}
+                                    <div className="w-full hidden md:max-xl:block mb-6 mt-4">
+                                        <button 
+                                            onClick={() => setShowEpisodesDrawer(true)} 
+                                            className="w-full py-4 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white font-bold transition-all active:scale-95 cursor-pointer shadow-lg"
+                                        >
+                                            <List className="w-5 h-5 text-accent" />
+                                            <span>Show Episodes List ({episodes.length} Episodes)</span>
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
-                        {/* Sidebar - Fixed Height Vertical Episode List */}
+                        {/* Sidebar - Sticky Desktop (Visible on xl and above) */}
                         {episodes.length > 1 && (
-                            <div className="w-full xl:w-[350px] flex-shrink-0">
-                                <div className="bg-bg-card rounded-lg border border-border-color flex flex-col h-[500px] xl:h-[calc(100dvh-120px)] xl:sticky xl:top-[90px]">
+                            <div className="hidden xl:flex flex-col w-full h-[calc(100dvh-120px)] sticky top-[90px] rounded-[22px] overflow-hidden bg-white/[0.02] backdrop-blur-md border border-white/[0.05] shadow-[0_10px_40px_rgba(0,0,0,0.45)]">
                                     {/* Sticky Header with Search */}
-                                    <div className="p-4 border-b border-border-color relative bg-bg-card z-10 rounded-t-lg">
+                                    <div className="p-4 border-b border-white/5 relative bg-transparent z-10 rounded-t-lg">
                                         <div className="flex items-center justify-between mb-3">
                                             <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
                                             <div className="flex items-center gap-2">
@@ -1741,7 +1833,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         })()
                                         }
                                     </div>
-                                </div>
                             </div>
                         )}
 
@@ -1772,6 +1863,92 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 />
             )}
         </AnimatePresence>
+        <AnimatePresence>
+            {showEpisodesDrawer && (
+                <>
+                    {/* Backdrop */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.5 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowEpisodesDrawer(false)}
+                        className="fixed inset-0 bg-black z-[100] md:max-xl:block hidden"
+                    />
+                    {/* Drawer Container */}
+                    <motion.div 
+                        initial={{ y: "100%" }}
+                        animate={{ y: 0 }}
+                        exit={{ y: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed bottom-0 left-0 right-0 h-[60dvh] bg-[#0c0c0e]/95 backdrop-blur-xl border-t border-white/10 rounded-t-[24px] z-[101] md:max-xl:flex flex-col hidden p-6"
+                    >
+                        {/* Handle bar */}
+                        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setShowEpisodesDrawer(false)} />
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-white text-lg">Episodes</h3>
+                            <button onClick={() => setShowEpisodesDrawer(false)} className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-all"><X className="w-5 h-5" /></button>
+                        </div>
+                        {/* Search in Drawer */}
+                        <div className="relative mb-4">
+                            <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input 
+                                type="number"
+                                placeholder="Search episode..."
+                                value={epFilter}
+                                className="w-full bg-bg-main pl-9 pr-3 py-2 rounded-md border border-border-color outline-none focus:border-accent/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
+                                onChange={(e) => setEpFilter(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1">
+                            {(() => {
+                                const filteredEpisodes = epFilter
+                                    ? episodes.filter(ep => String(typeof ep === 'object' ? (ep.number||ep.id) : ep).includes(epFilter))
+                                    : episodes;
+                                
+                                if (episodeLayoutMode === "grid") {
+                                    return (
+                                        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-1.5 p-1">
+                                            {filteredEpisodes.map((ep) => (
+                                                <button 
+                                                    key={ep} 
+                                                    onClick={() => {
+                                                        setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
+                                                        setShowEpisodesDrawer(false);
+                                                    }} 
+                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                >
+                                                    {typeof ep === 'object' ? (ep.number||ep.id) : ep}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    );
+                                }
+
+                                return filteredEpisodes.map((ep) => (
+                                    <EpisodeButton
+                                        key={ep}
+                                        ep={ep}
+                                        currentEp={currentEp}
+                                        onClick={() => {
+                                            setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
+                                            setShowEpisodesDrawer(false);
+                                        }}
+                                    />
+                                ));
+                            })()}
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+
+        {/* Floating Button for Tablet Episodes Drawer */}
+        <button 
+            onClick={() => setShowEpisodesDrawer(true)}
+            className="fixed bottom-20 right-6 z-[99] md:max-xl:flex hidden items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm text-white rounded-full font-bold shadow-2xl active:scale-95 transition-all hover:scale-105 cursor-pointer"
+        >
+            <List className="w-4 h-4" /> View Episodes
+        </button>
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
         </>
     );
