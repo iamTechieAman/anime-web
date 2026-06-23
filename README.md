@@ -29,6 +29,12 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 21 — Watch Page Rhythm & Spacing Polish (`June 2026`)
+- 📏 **Strict Grid Rhythm**: Eradicated all arbitrary margins across the Watch Page, strictly enforcing a 4px-baseline interval grid for flawless geometric balance.
+- 📐 **Player Normalization**: Locked player wrapper geometry with absolute 24px margins, a 24px border radius, and true-bleed padding for a native theater look.
+- 📱 **Fluid Clearances**: Applied CSS `env(safe-area-inset)` dynamic paddings coupled with breakpoint-specific offsets (16px Desktop, 12px Tablet, 8px Mobile) to eliminate layout clipping.
+- ⚡ **Apple TV+ Motion Physics**: Extracted rigid animations, replacing them with a custom `.ease-apple` (`cubic-bezier(0.22, 1, 0.36, 1)`) transition profile using `will-change-transform` for 60FPS fluid interactions globally.
+
 ### Phase 20 — Premium Cinematic Theme Polish (`June 2026`)
 - 🎨 **Cinematic Glassmorphism**: Overhauled global design tokens, migrating from legacy flat oranges to a premium Netflix/Apple TV+ inspired Purple/Pink gradient aesthetic (`#7C3AED` to `#EC4899`).
 - 💎 **Premium Overlays**: Upgraded Headers and Desktop Sidebars to use solid Glassmorphism (`rgba(8,8,12,0.72) backdrop-blur-[24px]`) and unified all active states with cinematic glowing indicators.
