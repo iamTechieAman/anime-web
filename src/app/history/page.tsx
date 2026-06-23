@@ -257,7 +257,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between p-4 py-3.5">
         <div className="space-y-1.5">
-          <Link scroll={false} href={href} className="block">
+          <Link href={href} className="block">
             <h3 className="font-black text-sm md:text-base text-white line-clamp-1 font-sora tracking-tight hover:text-[var(--accent)] transition-colors">
               {entry.title}
             </h3>

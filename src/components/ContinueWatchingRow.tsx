@@ -122,7 +122,7 @@ export default function ContinueWatchingRow() {
                                 {/* Right Content */}
                                 <div className="flex-1 min-w-0 flex flex-col justify-between p-3 md:p-3.5 lg:p-4 select-none pb-5">
                                     <div className="space-y-1">
-                                        <Link scroll={false} href={getHistoryLink(entry)} className="block group/link">
+                                        <Link href={getHistoryLink(entry)} className="block group/link">
                                             <h3 className="font-black text-xs sm:text-sm text-white line-clamp-1 font-sora tracking-tight group-hover/link:text-[var(--accent)] transition-colors">
                                                 {entry.title}
                                             </h3>
@@ -142,7 +142,7 @@ export default function ContinueWatchingRow() {
                                     </div>
 
                                     {/* Small Pill Resume */}
-                                    <Link scroll={false} 
+                                    <Link 
                                         href={getHistoryLink(entry)}
                                         className="px-3 py-1 bg-white/5 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white hover:text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-[250ms] flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
                                     >

@@ -984,7 +984,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 {/* Navbar */}
                 <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
-                    <Link scroll={false} href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">
@@ -1039,13 +1039,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </div>
 
                         <div className="mt-8 flex flex-col gap-3">
-                            <Link scroll={false} 
+                            <Link 
                                 href="/"
                                 className="w-full max-w-xs py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                             >
                                 <ChevronLeft className="w-4 h-4" /> Return Home
                             </Link>
-                            <Link scroll={false} 
+                            <Link 
                                 href="/search"
                                 className="w-full max-w-xs py-3 border border-[var(--border-color)] hover:bg-[var(--bg-card)] text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                             >
@@ -1321,7 +1321,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <p className="text-[var(--text-muted)] mb-6">
                             Video streaming requires JavaScript to function. Please enable JavaScript in your browser to watch anime.
                         </p>
-                        <Link scroll={false} href="/" className="px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-bold inline-block">
+                        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-bold inline-block">
                             Return Home
                         </Link>
                     </div>
@@ -1336,7 +1336,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
             {!isFocusMode && (
                 <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
-                    <Link scroll={false} href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">

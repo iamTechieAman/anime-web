@@ -1241,7 +1241,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         return (
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
-                    <Link scroll={false} href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                    <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex flex-col items-center text-center max-w-[60%] px-4">
@@ -1599,7 +1599,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <div className="relative isolate min-h-dvh overflow-x-clip bg-[var(--bg-main)] text-[var(--text-main)]">
             {!isFocusMode && (
                 <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05] flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
-                    <Link scroll={false} href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                    <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">
@@ -1779,7 +1779,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     <h4 className="text-[10px] font-black uppercase text-zinc-500 tracking-wider mb-3">Known For</h4>
                                                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                                         {actorCredits.map((credit: any) => (
-                                                            <Link scroll={false} key={credit.id} href={`/watch/${credit.media_type}/${credit.id}`} onClick={() => setSelectedActor(null)} className="group">
+                                                            <Link key={credit.id} href={`/watch/${credit.media_type}/${credit.id}`} onClick={() => setSelectedActor(null)} className="group">
                                                                 <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black mb-1 relative">
                                                                     <Image src={`${IMG_BASE}/w154${credit.poster_path}`} alt={credit.title || credit.name} fill sizes="154px" className="object-cover group-hover:scale-110 transition-transform" will-change-transform />
                                                                 </div>
@@ -1832,7 +1832,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             <div className="flex flex-wrap gap-2">
                                                 {details?.keywords && details.keywords.length > 0 ? (
                                                     details.keywords.map((kw: any) => (
-                                                        <Link scroll={false} key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
+                                                        <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
                                                             #{kw.name}
                                                         </Link>
                                                     ))

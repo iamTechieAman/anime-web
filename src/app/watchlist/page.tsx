@@ -200,7 +200,7 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
       transition={{ duration: 0.2 }}
       className="group relative rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)]/50 hover:shadow-[0_8px_40px_-8px_var(--accent-glow)] hover:-translate-y-1 transition-all duration-[250ms] aspect-[2/3]"
     >
-      <Link scroll={false} href={href} className="absolute inset-0 block w-full h-full select-none">
+      <Link href={href} className="absolute inset-0 block w-full h-full select-none">
         {entry.poster ? (
           <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-[250ms] group-hover:scale-105" will-change-transform />
         ) : (
