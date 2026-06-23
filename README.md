@@ -29,6 +29,11 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 19 — Release QA & Functional Recovery (`June 2026`)
+- 🔓 **Universal Download Access**: Removed strict authentication gating on download capabilities, granting guests full uninterrupted access to offline media without triggering login barriers.
+- ✨ **Avatar Shimmer**: Integrated a pulse shimmer into `UserAvatar` during remote image resolution to prevent layout holes, coupled with graceful text initial fallbacks on error.
+- ⚡ **Core Recovery**: Restored functional integrity across search debouncing (200ms), keyboard navigation handlers, and global responsive layouts while preserving 60FPS GPU animations.
+
 ### Phase 18 — Global Responsive Hardening (`June 2026`)
 - 📐 **Rigid UI Sizing**: Enforced mathematically precise heights across the application core (`72px` unified Header, `40x40` scaled Avatars, `32px` rigid Logos, `70vh` strict hero boundaries). 
 - 📱 **Mobile Edge Freedom**: Systematically eliminated fragile `100vh`/`h-screen` viewport bindings globally, migrating to `100dvh` to ensure perfect safe-area layout calculation on iOS/Android browsers without URL-bar collision.

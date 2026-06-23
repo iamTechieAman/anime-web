@@ -11,6 +11,7 @@ interface UserAvatarProps {
 
 export default function UserAvatar({ src, alt = "Avatar", initials = "?", size = 40, className = "" }: UserAvatarProps) {
   const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   // If no source or error occurred, show fallback
   if (!src || error) {
@@ -26,7 +27,7 @@ export default function UserAvatar({ src, alt = "Avatar", initials = "?", size =
 
   return (
     <div 
-      className={`relative shrink-0 overflow-hidden ${className}`}
+      className={`relative shrink-0 overflow-hidden ${!loaded ? 'bg-white/10 animate-pulse' : ''} ${className}`}
       style={{ width: size, height: size, borderRadius: "50%" }}
     >
       <Image
@@ -34,8 +35,9 @@ export default function UserAvatar({ src, alt = "Avatar", initials = "?", size =
         alt={alt}
         fill
         sizes={`${size}px`}
-        className="object-cover"
+        className={`object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
       />
     </div>
   );

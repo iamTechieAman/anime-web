@@ -1692,13 +1692,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             </div>
                                             <div className="flex flex-col sm:flex-row gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
                                                 <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
-                                                <button onClick={() => {
-                                                     if (!isSignedIn) {
-                                                         toast.error("Downloads are reserved for registered members. Please Sign In.");
-                                                     } else {
-                                                         setShowDownloadModal(true);
-                                                     }
-                                                 }} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
+                                                <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
                                                 <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-[var(--border-color)] transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
                                             </div>
                                         </div>
