@@ -204,7 +204,8 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-[1800px] mx-auto flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
+      <div className="w-full max-w-[1800px] mx-auto flex items-center justify-between gap-2 sm:gap-3 md:gap-4 min-w-0">
+        <div className="flex items-center min-w-0">
 
         {/* Logo */}
         <Link href="/" className={`flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none ${showSidebar ? "md:hidden" : ""}`} onClick={clearSearch} aria-label="ToonPlayer Home">
@@ -216,6 +217,7 @@ export default function Header() {
             <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
           </span>
         </Link>
+        </div>
 
         {/* TV Nav */}
         {deviceMode==="tv" && (

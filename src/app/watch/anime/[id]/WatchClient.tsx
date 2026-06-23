@@ -1059,7 +1059,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
     const renderPlayer = () => {
         return (
-            <div className={`w-full ${isFocusMode ? "h-dvh" : "aspect-video"} bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+            <div className={`w-full ${isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-xl md:rounded-2xl"} bg-black overflow-hidden border-0 sm:border border-[var(--border-color)] relative shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">
@@ -1359,14 +1359,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 )}
 
                 {(isTheatreMode || isFocusMode) && (
-                    <div className={`w-full ${isFocusMode ? "h-dvh bg-black rounded-none border-0 overflow-hidden animate-fade-in" : "mb-6"}`}>{renderPlayer()}</div>
+                    <div className={`w-full ${isFocusMode ? "h-[100dvh] bg-black rounded-none border-0 overflow-hidden animate-fade-in" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
 
                 {!isFocusMode && (
                     <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                         {/* Player Column */}
-                        <div className="flex-1 w-full min-w-0 touch-pan-y">
+                        <div className="flex-1 w-full min-w-0 touch-pan-y bg-[#09090B] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
                             {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
 
                             {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}

@@ -1305,8 +1305,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4 }}
                     className={`relative w-full ${
-                        isFocusMode ? "h-dvh rounded-none" : "aspect-video rounded-xl sm:rounded-2xl"
-                    } bg-[#0a0a0a] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
+                        isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-xl md:rounded-2xl"
+                    } bg-[#0a0a0a] overflow-hidden shadow-none sm:shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
                 >
                     {/* Loading State */}
                     {!playerLoaded && (
@@ -1499,10 +1499,15 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
 
     const renderEpisodesSidebar = () => {
-        if (type === 'movie' || episodes.length === 0) return null;
+        if (type === 'movie') return null;
+        if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
+        if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
+        
         return (
-            <div className="hidden xl:flex w-[450px] shrink-0 bg-[#09090B] p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] flex-col h-[calc(100dvh-140px)] sticky top-6 overflow-y-auto custom-scrollbar resize-x min-w-[300px] max-w-[600px]">
-                {renderEpisodesList('desktop')}
+            <div className="hidden xl:flex flex-col w-[420px] 2xl:w-[450px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] resize-x overflow-x-auto min-w-[320px] max-w-[600px] bg-[#09090B] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                    {renderEpisodesList('desktop')}
+                </div>
             </div>
         );
     };
@@ -1510,11 +1515,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderDesktopEpisodes = renderEpisodesSidebar;
 
     const renderMobileEpisodes = () => {
-        if (type === 'movie' || episodes.length === 0) return null;
+        if (type === 'movie') return null;
+        if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
+        if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
+        
         return (
-            <section className="mt-10 w-full max-w-[1600px] mx-auto px-4 lg:px-8 xl:hidden">
+            <div className="w-full xl:hidden mb-6 block mt-4 px-4 lg:px-8">
                 {renderEpisodesList('mobile')}
-            </section>
+            </div>
         );
     };
 
@@ -1615,7 +1623,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     </button>
                 )}
                 {(isTheatreMode || isFocusMode) && (
-                    <div className={`w-full ${isFocusMode ? "h-dvh bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
+                    <div className={`w-full ${isFocusMode ? "h-[100dvh] bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
                 {!isFocusMode && (
                     <div className="flex flex-col gap-6 items-start w-full bg-[#09090B]">
@@ -1626,7 +1634,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Player & Episode Layout */}
                             <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 flex flex-col xl:flex-row gap-6 items-start">
                                 {/* Player Column */}
-                                <div className="flex-1 w-full min-w-0 bg-[#09090B] p-4 md:p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+                                <div className={`flex-1 w-full min-w-0 bg-[#09090B] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
                                     {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
                                     {/* ── SERVER SELECTION BAR ── */}
                                     {renderProviders()}
@@ -1639,8 +1647,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Mobile/Tablet Episodes (Hidden on Desktop) */}
                             {renderMobileEpisodes()}
                             {/* Metadata Section */}
-                            <div className="relative z-10 bg-[#09090B] p-6 md:p-8 rounded-[24px] border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
-                                <div className="flex-shrink-0 w-[100px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative">
+                            <div className="relative z-10 bg-[#09090B] p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
+                                <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                     {details?.poster_path && (
                                         <div className="relative group aspect-[2/3] w-full">
                                             <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
