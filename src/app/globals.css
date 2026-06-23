@@ -2322,3 +2322,9 @@ textarea:focus-visible {
   outline: 2px solid var(--accent) !important;
   outline-offset: 2px !important;
 }
+
+
+/* Apple TV+ Cinematic Easing */
+.ease-apple {
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}

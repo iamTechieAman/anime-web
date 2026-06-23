@@ -206,7 +206,7 @@ export default function AboutPage() {
                 {/* Creator & Disclaimer Section */}
                 <section className="space-y-12">
                     <div className="bg-[var(--bg-card)]/40 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-[var(--border-color)] relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/5 blur-[100px] -z-10 group-hover:bg-[var(--accent)]/10 transition-colors duration-700" />
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/5 blur-[100px] -z-10 group-hover:bg-[var(--accent)]/10 transition-colors duration-[250ms]" />
                         
                         <div className="flex flex-col md:flex-row gap-10 items-center">
                             <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-[var(--accent)]/20 p-1 shrink-0 bg-gradient-to-tr from-[var(--bg-card)] to-[var(--bg-main)]">

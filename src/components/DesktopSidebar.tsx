@@ -35,7 +35,7 @@ export default function DesktopSidebar() {
 
     return (
         <div className="peer/sidebar group fixed left-0 top-0 bottom-0 w-[80px] hidden md:block z-[60]">
-            <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-[250ms] ease-out bg-white/[0.03] backdrop-blur-[20px] border-r border-white/[0.05] flex flex-col py-6 shadow-2xl">
+            <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-[250ms] ease-apple bg-white/[0.03] backdrop-blur-[20px] border-r border-white/[0.05] flex flex-col py-6 shadow-2xl">
                 {/* Branded Logo */}
                 <div className="mb-8 shrink-0 flex items-center h-10 w-full px-3 transition-all duration-[250ms] relative">
                     <Link scroll={false} href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">

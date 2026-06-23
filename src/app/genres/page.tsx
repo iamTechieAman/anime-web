@@ -58,7 +58,7 @@ export default function GenresPage() {
                                     className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-[250ms] ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
                                 >
                                     {/* Ambient Glow */}
-                                    <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms]`} />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent z-10" />
 
                                     {/* Glass reflection line */}

@@ -205,7 +205,7 @@ export default function ProfileGate() {
             ) : (
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-md mx-auto">
                 <div className="group relative w-full">
-                  <div className="w-[120px] h-[120px] mx-auto rounded-xl bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative">
+                  <div className="w-[120px] h-[120px] mx-auto rounded-xl bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative" will-change-transform>
                     {profileName.trim() ? (
                       <ProfileAvatar src={getAvatarUrl(profileName.trim(), theme)} alt="Avatar preview" />
                     ) : (

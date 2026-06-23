@@ -1242,7 +1242,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
                     <Link scroll={false} href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                        <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                        <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex flex-col items-center text-center max-w-[60%] px-4">
                         <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
@@ -1303,9 +1303,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className={`relative w-full ${
-                        isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-xl md:rounded-2xl"
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className={`relative w-full will-change-transform ${
+                        isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-[24px]"
                     } bg-[#0a0a0a] overflow-hidden shadow-none sm:shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
                 >
                     {/* Loading State */}
@@ -1504,7 +1504,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="hidden xl:flex flex-col w-[420px] 2xl:w-[450px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] resize-x overflow-x-auto min-w-[320px] max-w-[600px] bg-[var(--bg-main)] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+            <div className="hidden lg:flex flex-col w-[380px] xl:w-[420px] 2xl:w-[460px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] bg-[var(--bg-main)] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                     {renderEpisodesList('desktop')}
                 </div>
@@ -1520,7 +1520,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="w-full xl:hidden mb-6 block mt-4 px-4 lg:px-8">
+            <div className="w-full lg:hidden mb-6 block mt-4 px-0">
                 {renderEpisodesList('mobile')}
             </div>
         );
@@ -1598,9 +1598,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <>
         <div className="relative isolate min-h-dvh overflow-x-clip bg-[var(--bg-main)] text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
+                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05] flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
                     <Link scroll={false} href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">
                         <h2 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h2>
@@ -1632,12 +1632,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {renderHero()}
 
                             {/* Player & Episode Layout */}
-                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 flex flex-col xl:flex-row gap-6 items-start">
+                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 mb-6 flex flex-col lg:flex-row gap-6 items-start">
                                 {/* Player Column */}
-                                <div className={`flex-1 w-full min-w-0 bg-[var(--bg-main)] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
-                                    {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
+                                <div className={`flex-1 w-full min-w-0 bg-[var(--bg-main)] p-0 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
+                                    {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
                                     {/* ── SERVER SELECTION BAR ── */}
-                                    {renderProviders()}
+                                    <div className="mt-4">
+                                        {renderProviders()}
+                                    </div>
                                 </div>
 
                                 {/* Desktop Episodes Sidebar (30%) */}
@@ -1651,13 +1653,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                     {details?.poster_path && (
                                         <div className="relative group aspect-[2/3] w-full">
-                                            <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" />
+                                            <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" will-change-transform />
                                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="mb-4 sm:mb-6 flex items-start justify-between gap-4">
+                                    <div className="mb-6 flex items-start justify-between gap-4">
                                         <div>
                                             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-2 sm:mb-3 font-sora leading-tight flex items-center flex-wrap gap-3">
                                                 {title}
@@ -1779,7 +1781,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                         {actorCredits.map((credit: any) => (
                                                             <Link scroll={false} key={credit.id} href={`/watch/${credit.media_type}/${credit.id}`} onClick={() => setSelectedActor(null)} className="group">
                                                                 <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black mb-1 relative">
-                                                                    <Image src={`${IMG_BASE}/w154${credit.poster_path}`} alt={credit.title || credit.name} fill sizes="154px" className="object-cover group-hover:scale-110 transition-transform" />
+                                                                    <Image src={`${IMG_BASE}/w154${credit.poster_path}`} alt={credit.title || credit.name} fill sizes="154px" className="object-cover group-hover:scale-110 transition-transform" will-change-transform />
                                                                 </div>
                                                                 <p className="text-[9px] text-zinc-400 font-semibold line-clamp-1 group-hover:text-white transition-colors">{credit.title || credit.name}</p>
                                                             </Link>

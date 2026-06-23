@@ -985,7 +985,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 {/* Navbar */}
                 <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
                     <Link scroll={false} href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">
                         <h2 className="font-black text-sm md:text-base lg:text-lg leading-tight text-white truncate tracking-tight">
@@ -1176,7 +1176,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             }}
                                             className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
                                         >
-                                            <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform">
+                                            <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform" will-change-transform>
                                                 <Play className="w-5 h-5 fill-current" />
                                                 Tap anywhere to enable audio
                                             </div>
@@ -1337,7 +1337,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             {!isFocusMode && (
                 <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
                     <Link scroll={false} href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">
                         <h2 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">

@@ -202,7 +202,7 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
     >
       <Link scroll={false} href={href} className="absolute inset-0 block w-full h-full select-none">
         {entry.poster ? (
-          <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-[250ms] group-hover:scale-105" />
+          <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-[250ms] group-hover:scale-105" will-change-transform />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--bg-card)] flex items-center justify-center">
             <Play className="w-10 h-10 text-white/10" />
@@ -211,7 +211,7 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         {/* Play overlay */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-[var(--accent)] flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-[250ms] shadow-[0_0_30px_var(--accent-glow)]">
+          <div className="w-14 h-14 rounded-full bg-[var(--accent)] flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-[250ms] shadow-[0_0_30px_var(--accent-glow)]" will-change-transform>
             <Play className="w-6 h-6 text-white fill-white ml-1" />
           </div>
         </div>

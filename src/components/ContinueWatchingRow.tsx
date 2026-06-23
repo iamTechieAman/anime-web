@@ -25,7 +25,7 @@ const AnimatedProgressBar = ({ current, total }: { current: number, total: numbe
     return (
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 rounded-b-2xl overflow-hidden pointer-events-none">
             <div 
-                className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-out" 
+                className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-apple" 
                 style={{ width }}
             />
         </div>
@@ -98,7 +98,7 @@ export default function ContinueWatchingRow() {
                                         alt={entry.title || "Continue watching"}
                                         fill
                                         sizes="(max-width: 768px) 80px, (max-width: 1024px) 90px, 100px"
-                                        className="object-cover transition-transform duration-[250ms] group-hover/poster:scale-105"
+                                        className="object-cover transition-transform duration-[250ms] group-hover/poster:scale-105" will-change-transform
                                         onError={(e) => {
                                             const target = e.currentTarget as HTMLImageElement;
                                             if (target.src !== PLACEHOLDER) target.src = PLACEHOLDER;

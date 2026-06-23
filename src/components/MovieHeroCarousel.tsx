@@ -81,7 +81,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             src={`${IMG_BASE}/original${item.backdrop_path}`}
                             alt={title}
                             fill
-                            className="object-cover transition-transform duration-[10000ms] ease-linear hover:scale-110"
+                            className="object-cover transition-transform duration-[10000ms] ease-linear hover:scale-110" will-change-transform
                             priority={current === 0}
                             sizes="100vw"
                         />

@@ -235,7 +235,7 @@ export default function HeroCarousel() {
                 return (
                     <div
                         key={slide.id}
-                        className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                        className="absolute inset-0 transition-opacity duration-[250ms] ease-apple-out"
                         style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
                     >
                         {isActive && activeTrailerKey ? (
@@ -384,7 +384,7 @@ export default function HeroCarousel() {
             {/* Slide progress row */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 z-30">
                 <div 
-                    className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] transition-all duration-[250ms] ease-out" 
+                    className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] transition-all duration-[250ms] ease-apple" 
                     style={{ width: `${((current + 1) / slides.length) * 100}%` }}
                 />
             </div>

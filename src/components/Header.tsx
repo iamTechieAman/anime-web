@@ -189,7 +189,7 @@ export default function Header() {
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-[250ms] ease-out ${
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-[250ms] ease-apple ${
       showSidebar ? "left-0 md:left-[80px]" : "left-0"
     } ${isScrolled
       ? "bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05]"
@@ -208,7 +208,7 @@ export default function Header() {
         
         {/* Left Section - Logo */}
         <div className={`flex items-center shrink-0 ${showSidebar ? "md:hidden" : "md:w-[40px] overflow-visible"}`}>
-          <Link href="/" className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none" onClick={clearSearch} aria-label="ToonPlayer Home" scroll={false}>
+          <Link href="/" className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none" will-change-transform onClick={clearSearch} aria-label="ToonPlayer Home" scroll={false}>
             <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
               <Logo />
             </div>
@@ -233,7 +233,7 @@ export default function Header() {
           <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[500px] max-w-[900px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
-              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-out text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-apple text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
             >
               <div className="flex-1 flex items-center min-w-0 pl-4 pr-2 h-full gap-2">
                 <Search className="w-4 h-4 text-zinc-500 shrink-0" />

@@ -145,7 +145,7 @@ const TopCollectionsRow = () => {
                                 alt={col.title} 
                                 fill
                                 sizes="(max-width: 768px) 280px, 320px"
-                                className="absolute inset-0 object-cover opacity-60 group-hover:scale-105 transition-transform duration-700 ease-out" 
+                                className="absolute inset-0 object-cover opacity-60 group-hover:scale-105 transition-transform duration-[250ms] ease-apple" will-change-transform 
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                             <div className="absolute inset-0 flex flex-col justify-end p-4 z-20 select-none">
@@ -870,7 +870,7 @@ export default function MoviesPage() {
                                                         <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent)]/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
-                                                                    <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-[250ms]" />
+                                                                    <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-[250ms]" will-change-transform />
                                                                 ) : (
                                                                     <div className="text-zinc-600 font-bold text-lg">{item.title?.charAt(0)}</div>
                                                                 )}
@@ -1029,7 +1029,7 @@ export default function MoviesPage() {
                             <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-[var(--accent)]/30 transition-all duration-[250ms] shadow-lg">
                                 <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-[var(--accent)] transition-colors list-none">
                                     {faq.q}
-                                    <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-[250ms]" />
+                                    <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-[250ms]" will-change-transform />
                                 </summary>
                                 <div className="px-6 pb-6 text-body">{faq.a}</div>
                             </details>
