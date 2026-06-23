@@ -1626,7 +1626,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <div className={`w-full ${isFocusMode ? "h-[100dvh] bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
                 {!isFocusMode && (
-                    <div className="flex flex-col gap-6 items-start w-full bg-bg-main">
+                    <div className="flex flex-col gap-6 items-start w-full bg-transparent">
                         <div className="flex-1 w-full min-w-0">
                             {/* HeroSection via Component */}
                             {renderHero()}
