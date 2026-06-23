@@ -1350,8 +1350,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 </div>
             )}
 
-            {/* Content Container - Padded from top to avoid Navbar overlap */}
-            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[calc(60px+env(safe-area-inset-top))] md:pt-[calc(72px+env(safe-area-inset-top))] w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
+            {/* Content Container - Padded from top to avoid Navbar overlap (Page top = 16px) */}
+            <div className={`${isFocusMode ? "pt-0 w-full" : "pt-[calc(60px+env(safe-area-inset-top)+16px)] md:pt-[calc(72px+env(safe-area-inset-top)+16px)] w-full max-w-[1920px] mx-auto pb-8 px-0 sm:px-4 md:px-6 lg:px-8 relative z-10"}`}>
                 {isFocusMode && (
                     <button onClick={() => setIsFocusMode(false)} className="fixed top-4 left-4 z-[999] flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black border border-white/10 rounded-xl text-xs font-bold text-white transition-all shadow-xl">
                         <X className="w-3.5 h-3.5" /> Exit Focus Mode
@@ -1363,11 +1363,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 )}
 
                 {!isFocusMode && (
+                    <>
+                    {/* Title Section (Title -> Player = 24px) */}
+                    <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 mb-[24px]">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight font-sora leading-tight text-white">
+                            {show.name}
+                        </h1>
+                    </div>
+
                     <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                         {/* Player Column */}
                         <div className="flex-1 w-full min-w-0 touch-pan-y bg-bg-main p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
-                            {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
+                            {!isTheatreMode && <div className="mb-[16px]">{renderPlayer()}</div>}
 
                             {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
                             <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md mb-4">
@@ -1602,10 +1610,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </div>
                             </div>
 
-                            {/* Metadata */}
-                            <div className="mt-6 flex flex-col gap-2 relative">
+                            {/* Metadata (Providers -> Metadata = 20px) */}
+                            <div className="mt-[20px] flex flex-col gap-2 relative">
                                 <div className="flex items-start justify-between gap-4">
-                                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex-1 font-sora">{show.name}</h1>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm text-[var(--text-muted)] font-semibold">
+                                            {episodes.length > 1 ? `Watching Episode ${currentEp} in ${mode.toUpperCase()}` : `Watching Movie in ${mode.toUpperCase()}`}
+                                        </p>
+                                    </div>
                                     
                                     <button
                                         onClick={toggleBookmark}
@@ -1628,8 +1640,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         )}
                                     </button>
                                 </div>
-                                <p className="text-sm text-[var(--text-muted)]">
-                                    {episodes.length > 1 ? `Watching Episode ${currentEp} in ${mode.toUpperCase()}` : `Watching Movie in ${mode.toUpperCase()}`}
+                            </div>
+
+                            {/* Description (Metadata -> Description = 24px, Description -> Recommendations = 40px) */}
+                            <div className="mt-[24px] mb-[40px] w-full">
+                                <p className="text-zinc-400 text-xs sm:text-sm md:text-base leading-relaxed max-w-3xl">
+                                    {show.description || show.synopsis || "No description available."}
                                 </p>
                             </div>
                         </div>
@@ -1699,11 +1715,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         )}
 
                     </div>
+                    </>
                 )}
 
                 {/* Smart Recommendations - Full Width Below Player+Sidebar */}
                 {!isFocusMode && (
-                    <div className="mt-6 w-full space-y-6">
+                    <div className="mt-0 mb-[64px] w-full space-y-[48px]">
                         <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
                         <CommentsSection contentId={id} category="anime" />
                     </div>
