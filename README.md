@@ -29,6 +29,11 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 18 — Global Responsive Hardening (`June 2026`)
+- 📐 **Rigid UI Sizing**: Enforced mathematically precise heights across the application core (`72px` unified Header, `40x40` scaled Avatars, `32px` rigid Logos, `70vh` strict hero boundaries). 
+- 📱 **Mobile Edge Freedom**: Systematically eliminated fragile `100vh`/`h-screen` viewport bindings globally, migrating to `100dvh` to ensure perfect safe-area layout calculation on iOS/Android browsers without URL-bar collision.
+- ⚡ **Animation Acceleration**: Isolated GPU-only transforms mapping exclusively to opacity and `translate3d` axes, completely preventing main-thread layout thrashing during transition execution.
+
 ### Phase 17 — Player Container & Navigation Hardening (`June 2026`)
 - 🍿 **Cinematic Layout Constraint**: Forced absolute layout geometry onto the primary Player component—locking to `1600px` max-width, strict `16/9` inner frame with an invisible `24px` radius mask, replicating modern streaming aesthetics.
 - 📱 **Mobile Edge Freedom**: Reworked mobile layout constraints to utilize `100vw` with `env(safe-area-inset)` bindings. Eliminated notch clipping, edge bleed, and unhandled scrolling behaviors during theatre mode.

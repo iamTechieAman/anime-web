@@ -57,7 +57,7 @@ export default function LoginPage() {
   };
 
   if (!signInLoaded || !userLoaded || isSignedIn) {
-    return <div className="min-h-screen bg-black" />; // Blank while redirecting
+    return <div className="min-h-[100dvh] bg-black" />; // Blank while redirecting
   }
 
   return (

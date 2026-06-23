@@ -168,7 +168,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className={`relative w-9 h-9 rounded-full ring-2 ring-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
+        className={`relative w-9 h-9 md:w-10 md:h-10 rounded-full ring-2 ring-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
       >
         <UserAvatar 
           src={user ? user.imageUrl : activeProfile?.avatar} 

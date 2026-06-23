@@ -189,7 +189,7 @@ export default function Header() {
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[calc(3.5rem+env(safe-area-inset-top,0px))] md:h-[calc(4rem+env(safe-area-inset-top,0px))] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[calc(72px+env(safe-area-inset-top,0px))] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
       showSidebar ? "left-0 md:left-[80px]" : "left-0"
     } ${isScrolled
       ? "bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
@@ -228,7 +228,7 @@ export default function Header() {
 
         {/* PC Search Bar */}
         {deviceMode==="pc" && (
-          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:flex items-center justify-center w-full max-w-[360px] lg:max-w-[500px] xl:max-w-[580px]">
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:flex items-center justify-center w-full max-w-[720px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
               className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-xl hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"

@@ -1494,7 +1494,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderEpisodesSidebar = () => {
         if (type === 'movie' || episodes.length === 0) return null;
         return (
-            <div className="hidden xl:flex w-[450px] shrink-0 bg-[#09090B] p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] flex-col h-[calc(100vh-140px)] sticky top-6 overflow-y-auto custom-scrollbar resize-x min-w-[300px] max-w-[600px]">
+            <div className="hidden xl:flex w-[450px] shrink-0 bg-[#09090B] p-6 rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] flex-col h-[calc(100dvh-140px)] sticky top-6 overflow-y-auto custom-scrollbar resize-x min-w-[300px] max-w-[600px]">
                 {renderEpisodesList('desktop')}
             </div>
         );
