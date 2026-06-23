@@ -29,6 +29,20 @@ const ALLOWED_IMAGE_ORIGINS = [
     'artworks.thetvdb.com',
     'cdn.animenewsnetwork.com',
     'i.imgur.com',
+    'img.hianime.to',
+    'img.hianime.lol',
+    'hianime.to',
+    'hianime.lol',
+    'static.animesho.one',
+    'allanime.day',
+    'cdn.anipixcdn.co',
+    'img.anikai.to',
+    'static.anikai.to',
+    'media.kitsu.io',
+    'allmanga.to',
+    'img.netto.com',
+    'api.dicebear.com',
+    'img.clerk.com',
 ];
 
 function isAllowedImage(url: string): boolean {

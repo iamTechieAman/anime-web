@@ -350,7 +350,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
     };
 
-    const { addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+    const { history, addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
     const isGuestProfile = activeProfile?.type === 'guest';
@@ -691,7 +691,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 // Use watch history if available to resume playback
                 // Use URL parameter > history > default
-                const historyItem = getHistoryItem(fullId);
+                const historyItem = history.find((i: any) => i.showId === fullId);
                 const epParam = new URLSearchParams(window.location.search).get("ep");
                 const modeParam = new URLSearchParams(window.location.search).get("mode") as "sub" | "dub";
                 
@@ -791,7 +791,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const fetchServers = async () => {
             setLoadingServers(true);
             try {
-                const res = await axios.get(`/api/anime/servers?episodeId=${currentEp}&provider=${provider || ''}`);
+                const availableEps = show?.availableEpisodesDetail?.[mode] || [];
+                const epObj = availableEps.find((e: any) => typeof e === 'object' ? String(e.number || e.id) === String(currentEp) : String(e) === String(currentEp));
+                const episodeIdForApi = (typeof epObj === 'object' && epObj ? epObj.id : currentEp) || currentEp;
+
+                const res = await axios.get(`/api/anime/servers?episodeId=${episodeIdForApi}&provider=${provider || ''}`);
                 let nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
                 
                 // If no servers for specific mode (sub/dub), show all native servers as fallback

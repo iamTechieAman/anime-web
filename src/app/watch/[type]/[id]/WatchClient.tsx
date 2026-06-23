@@ -800,7 +800,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (s || e) {
             if (s) setSelectedSeason(parseInt(s) || 1);
             if (e) setSelectedEpisode(parseInt(e) || 1);
-        } else if (type === 'tv' && id && !historyRestoredRef.current) {
+        } else if (type === 'tv' && id && !historyRestoredRef.current && history && history.length > 0) {
             // Find most recently watched episode of this TV show from history (once per mount)
             const historyItem = history.find((i: any) => i.showId === id);
             if (historyItem) {
@@ -811,8 +811,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 }
             }
         }
-    // Keep history out of the dependencies; the ref guard restores it only once.
-    }, [searchParams, id, type]);
+    // Keep history in the dependencies to re-trigger once it is loaded asynchronously
+    }, [searchParams, id, type, history]);
 
 
 
@@ -1200,26 +1200,27 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // Save to watch history when episode/season changes (separate from iframe reload)
     useEffect(() => {
-        if (!details || (!id && !tmdbIdForAnime)) return;
+        if (!details && !animeData) return;
+        if (!id && !tmdbIdForAnime) return;
         try {
             const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
+            const historyId = type === 'movie' ? finalId : `${finalId}-${selectedSeason}-${selectedEpisode}`;
             addToHistory({
-                id: `${finalId}-${selectedSeason}-${selectedEpisode}`,
+                id: historyId,
                 showId: finalId,
                 type: type as any,
                 title: details?.title || details?.name || animeData?.name || "Untitled",
                 poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
-                episodeId: String(selectedEpisode),
-                episodeNumber: selectedEpisode,
+                episodeId: type === 'movie' ? undefined : String(selectedEpisode),
+                episodeNumber: type === 'movie' ? undefined : selectedEpisode,
                 currentTime: 0,
                 duration: 0,
-                season: selectedSeason,
+                season: type === 'movie' ? undefined : selectedSeason,
             } as any);
         } catch (e) {
             console.error("Failed to save history:", e);
         }
-    // addToHistory is stable (useCallback with [isLoggedIn]) so safe to include
-    }, [selectedSeason, selectedEpisode, type, id, tmdbIdForAnime]);
+    }, [selectedSeason, selectedEpisode, type, id, tmdbIdForAnime, details, animeData, addToHistory]);
 
     if (loading) {
         return (
@@ -1690,9 +1691,15 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </div>
 
                             {/* Player & Episode Layout */}
-                            <div className="relative z-10 w-full max-w-[1800px] mx-auto mt-0 mb-0 grid grid-cols-1 lg:grid-cols-[74%_minmax(0,26%)] gap-6 items-start">
+                            <div className={`relative z-10 w-full max-w-[1800px] mx-auto mt-0 mb-0 ${
+                                (type === 'movie' || resolvedMediaType === 'movie') 
+                                    ? 'flex flex-col' 
+                                    : 'grid grid-cols-1 lg:grid-cols-[74%_minmax(0,26%)] gap-6 items-start'
+                            }`}>
                                 {/* Player Column */}
-                                <div className={`w-full min-w-0 bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden ${type === 'movie' ? 'mx-auto' : ''}`}>
+                                <div className={`w-full min-w-0 bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden ${
+                                    (type === 'movie' || resolvedMediaType === 'movie') ? 'max-w-[1300px] mx-auto' : ''
+                                }`}>
                                     {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
                                     {/* ── SERVER SELECTION BAR ── */}
                                     <div className="mt-0">

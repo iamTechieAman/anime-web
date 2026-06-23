@@ -377,6 +377,17 @@ Contributions are welcome! Please read our guidelines:
 
 ---
 
+## 🔧 Logic Stability & Scraper Integration (PASS 64)
+
+Recent system updates have introduced key improvements to ToonPlayer's core aggregation engine, watch history tracking, and visual parity configurations:
+
+- 📺 **Self-Healing Anime Resolving**: Integrated an intelligent title-lookup mapping fallback. If the Consumet scraper experiences downtime, numeric AniList IDs automatically query the AniList GraphQL API for metadata, search HiAnime using clean keywords, and resolve episodes/servers dynamically.
+- 💾 **Robust Watch History Hook**: Fixed `addToHistory` hook dependencies to trigger immediately after async details or anime data resolves. Movie keys are now generated without TV episode parameters (preventing `undefined` values) so watch history restores reliably.
+- 🖼️ **SVG Remote Image Rendering**: Enabled `dangerouslyAllowSVG` in Next.js image configurations and authorized all target anime CDNs in the image proxy. This ensures custom profile avatars from DiceBear and scraper-hosted anime posters render properly.
+- 🎬 **Watch Page UI Polish**: Centered the player grid container and collapsed the unused 26% right sidebar column when playing a Movie, presenting a balanced, distraction-free view.
+
+---
+
 ## ⚠️ Disclaimer
 
 > ToonPlayer is a **content aggregator** built for **educational and research purposes only**. It does not host, store, or distribute any copyrighted media. All video streams are sourced from third-party providers and are displayed via publicly accessible embeds. The developers are not responsible for any content served by external sources.

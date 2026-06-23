@@ -31,6 +31,8 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
     remotePatterns: [
       { protocol: 'https', hostname: 'api.dicebear.com' },
       { protocol: 'https', hostname: 'img.clerk.com' },
