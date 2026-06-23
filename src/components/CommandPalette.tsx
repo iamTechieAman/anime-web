@@ -80,7 +80,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     type: "pinned",
                     title: term,
                     action: () => {
-                        router.push(`/search?query=${encodeURIComponent(term, { scroll: false })}`, { scroll: false });
+                        router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false });
                         saveSearch(term);
                         onClose();
                     }
@@ -91,7 +91,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     type: "recent",
                     title: term,
                     action: () => {
-                        router.push(`/search?query=${encodeURIComponent(term, { scroll: false })}`, { scroll: false });
+                        router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false });
                         saveSearch(term);
                         onClose();
                     }
@@ -352,7 +352,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 return (
                                                     <div
                                                         key={term}
-                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term, { scroll: false })}`, { scroll: false }); saveSearch(term); onClose(); }}
+                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
                                                         className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer border transition-all ${
                                                             isSelected ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] border-transparent text-white" : "bg-white/5 border-white/5 hover:border-white/10 text-zinc-300"
@@ -381,7 +381,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 return (
                                                     <div
                                                         key={term}
-                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term, { scroll: false })}`, { scroll: false }); saveSearch(term); onClose(); }}
+                                                        onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
                                                         className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-left transition-all ${
                                                             isSelected ? "bg-white/10 text-white" : "text-zinc-300 hover:bg-white/5"
@@ -453,7 +453,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                     {GENRES.map(genre => (
                                         <button
                                             key={genre}
-                                            onClick={() => { router.push(`/search?genre=${encodeURIComponent(genre, { scroll: false })}`, { scroll: false }); onClose(); }}
+                                            onClick={() => { router.push(`/search?genre=${encodeURIComponent(genre)}`, { scroll: false }); onClose(); }}
                                             className="px-2.5 py-1 bg-white/5 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:text-white border border-white/5 hover:border-transparent rounded-lg text-[11px] font-bold text-zinc-400 transition-all cursor-pointer"
                                         >
                                             {genre}
@@ -473,7 +473,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                     {COLLECTIONS.map(collection => (
                                         <button
                                             key={collection}
-                                            onClick={() => { router.push(`/search?query=${encodeURIComponent(collection, { scroll: false })}`, { scroll: false }); onClose(); }}
+                                            onClick={() => { router.push(`/search?query=${encodeURIComponent(collection)}`, { scroll: false }); onClose(); }}
                                             className="flex items-center gap-2 p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-xs font-bold text-zinc-300 transition-all text-left"
                                         >
                                             <Compass className="w-3.5 h-3.5 text-accent-warm" />

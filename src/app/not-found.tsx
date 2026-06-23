@@ -22,6 +22,7 @@ export default function NotFound() {
             <div className="flex flex-col w-full gap-3">
                 <Link
                     href="/"
+                    scroll={false}
                     className="w-full flex items-center justify-center gap-2 bg-accent-warm text-white py-3.5 rounded-xl font-bold hover:bg-accent-warm transition-colors active:scale-95 shadow-lg shadow-accent-warm/20"
                 >
                     <Home className="w-4 h-4" />
@@ -29,6 +30,7 @@ export default function NotFound() {
                 </Link>
                 <Link
                     href="/discover"
+                    scroll={false}
                     className="w-full flex items-center justify-center gap-2 bg-bg-main border border-border-color text-white py-3.5 rounded-xl font-bold hover:bg-white/5 transition-colors active:scale-95"
                 >
                     <Search className="w-4 h-4" />

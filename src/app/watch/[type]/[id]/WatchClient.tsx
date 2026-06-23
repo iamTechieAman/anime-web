@@ -836,6 +836,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     useEffect(() => { selectedEpisodeRef.current = selectedEpisode; }, [selectedEpisode]);
     useEffect(() => { selectedSeasonRef.current = selectedSeason; }, [selectedSeason]);
 
+    // Scroll to top exactly once when title (id/type), episode, or provider changes
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
+    }, [id, type, selectedEpisode, selectedSeason, activeServer?.id]);
+
     useEffect(() => {
         setPlayerLoaded(false);
         setSourceError(false);
@@ -1241,7 +1246,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         return (
             <main className="bg-bg-main text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-bg-main/90 backdrop-blur-md border-b border-border-color flex items-center justify-center pt-[env(safe-area-inset-top)]">
-                    <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
+                    <Link href="/" scroll={false} className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex flex-col items-center text-center max-w-[60%] px-4">
@@ -1599,7 +1604,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <div className="relative isolate min-h-dvh overflow-x-clip bg-bg-main text-[var(--text-main)]">
             {!isFocusMode && (
                 <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
-                    <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
+                    <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
                     <div className="flex-1 min-w-0">
@@ -1722,7 +1727,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         </div>
                                         
                                         {details?.belongs_to_collection && (
-                                            <div className="bg-gradient-to-r from-bg-card to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name, { scroll: false })}`, { scroll: false })}>
+                                            <div className="bg-gradient-to-r from-bg-card to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name)}`, { scroll: false })}>
                                                 {details.belongs_to_collection.poster_path && (
                                                     <div className="w-12 h-16 shrink-0 rounded overflow-hidden relative">
                                                         <Image src={`${IMG_BASE}/w92${details.belongs_to_collection.poster_path}`} alt="" fill sizes="92px" className="object-cover" />
@@ -1787,7 +1792,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 <div className="flex flex-wrap gap-2">
                                                     {details?.keywords && details.keywords.length > 0 ? (
                                                         details.keywords.map((kw: any) => (
-                                                            <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
+                                                            <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} scroll={false} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
                                                                 #{kw.name}
                                                             </Link>
                                                         ))

@@ -134,6 +134,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                             <div className="flex items-center justify-center gap-4 pt-2 flex-wrap">
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
+                                    scroll={false}
                                     className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-black font-extrabold text-base rounded-xl hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.3)]"
                                 >
                                     <Play className="w-6 h-6 fill-black" />
@@ -141,6 +142,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                                 </Link>
                                 <Link
                                     href={`/watch/${type}/${item.id}`}
+                                    scroll={false}
                                     className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 backdrop-blur-md text-white font-bold text-base rounded-xl hover:bg-white/20 transition-colors border border-white/20 shadow-xl hover:scale-105 active:scale-95"
                                 >
                                     <Info className="w-6 h-6" />

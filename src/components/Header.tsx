@@ -208,7 +208,7 @@ export default function Header() {
         
         {/* Left Section - Logo */}
         <div className={`flex items-center shrink-0 ${showSidebar ? "md:hidden" : "md:w-[40px] overflow-visible"}`}>
-          <Link href="/" className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none" will-change-transform onClick={clearSearch} aria-label="ToonPlayer Home">
+          <Link href="/" scroll={false} className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none" will-change-transform onClick={clearSearch} aria-label="ToonPlayer Home">
             <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
               <Logo />
             </div>
@@ -222,9 +222,9 @@ export default function Header() {
         {/* TV Nav */}
         {deviceMode==="tv" && (
           <div className="flex items-center gap-3 ml-4 mr-auto text-xs font-black uppercase tracking-wider text-zinc-400">
-            <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white"><Play className="w-4 h-4 fill-current text-accent"/>Home</Link>
+            <Link href="/" scroll={false} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white"><Play className="w-4 h-4 fill-current text-accent"/>Home</Link>
             <button onClick={()=>{setSearchQuery("");setIsTvSearchOpen(true);}} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors cursor-pointer"><Search className="w-4 h-4"/>Search</button>
-            <Link href="/watchlist" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors"><Bookmark className="w-4 h-4 text-pink-400"/>My List</Link>
+            <Link href="/watchlist" scroll={false} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors"><Bookmark className="w-4 h-4 text-pink-400"/>My List</Link>
           </div>
         )}
 
@@ -264,7 +264,7 @@ export default function Header() {
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 hide-scrollbar">
                   {suggestions.length>0?suggestions.map((item:any,i:number)=>(
-                    <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
+                    <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} scroll={false} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
                       className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-accent':''}`}>
                       <div className="w-12 h-16 overflow-hidden rounded-xl bg-bg-elevated shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
                       <div className="flex-1 min-w-0">

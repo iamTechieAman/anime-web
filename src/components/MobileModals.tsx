@@ -447,6 +447,7 @@ export default function MobileModals() {
                                                     <Link
                                                         key={i}
                                                         href={item.href || (item.id ? `/watch/${item.type || 'anime'}/${item.id}` : '#')}
+                                                        scroll={false}
                                                         className="flex items-center gap-4 p-2 bg-bg-card border border-border-color rounded-2xl active:scale-[0.98] transition-all"
                                                         onClick={() => setSearchOpen(false)}
                                                     >
@@ -473,6 +474,7 @@ export default function MobileModals() {
                                                     <Link
                                                         key={`${item.type}-${item.id}`}
                                                         href={item.href || `/watch/${item.type}/${item.id}`}
+                                                        scroll={false}
                                                         onClick={() => {
                                                             setSearchOpen(false);
                                                             saveSearch(item.title);

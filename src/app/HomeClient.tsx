@@ -502,6 +502,7 @@ export default function MoviesPage() {
                                         <Link
                                             key={`${item.type}-${item.id}`}
                                             href={item.href}
+                                            scroll={false}
                                             className="group relative bg-bg-card rounded-xl overflow-hidden border border-border-color hover:border-accent/40 transition-all hover:scale-[1.02] duration-[250ms] shadow-lg"
                                         >
                                             <div className="aspect-[2/3] relative">

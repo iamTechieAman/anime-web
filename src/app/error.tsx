@@ -42,6 +42,7 @@ export default function GlobalError({
                 </button>
                 <Link
                     href="/"
+                    scroll={false}
                     className="w-full flex items-center justify-center gap-2 bg-bg-main border border-border-color text-white py-3.5 rounded-xl font-bold hover:bg-white/5 transition-colors active:scale-95"
                 >
                     <Home className="w-4 h-4" />

@@ -371,6 +371,11 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                 placeholder="Search Tenor..."
                                 value={searchGifQuery}
                                 onChange={(e) => setSearchGifQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs mb-3 focus:border-accent outline-none transition-colors"
                             />
                             <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
@@ -425,7 +430,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
 
                                 {comment.isSpoiler && !comment.showSpoiler ? (
                                     <div 
-                                        onClick={() => toggleRevealSpoiler(comment.id)}
+                                        onClick={(e) => { e.preventDefault(); toggleRevealSpoiler(comment.id); }}
                                         className="bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-between transition-colors select-none"
                                     >
                                         <div className="flex items-center gap-2">
@@ -443,7 +448,8 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                         )}
                                         {comment.isSpoiler && (
                                             <button 
-                                                onClick={() => toggleRevealSpoiler(comment.id)}
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); toggleRevealSpoiler(comment.id); }}
                                                 className="absolute -top-4 right-0 text-[9px] font-bold text-red-400/80 hover:text-red-400 cursor-pointer bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 select-none"
                                             >
                                                 Hide Spoiler
@@ -455,7 +461,8 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                 {/* Reactions */}
                                 <div className="flex items-center gap-4 pt-1">
                                     <button 
-                                        onClick={() => handleLike(comment.id)}
+                                        type="button"
+                                        onClick={(e) => { e.preventDefault(); handleLike(comment.id); }}
                                         className={`flex items-center gap-1.5 text-xs transition-colors hover:text-white ${comment.userLiked ? 'text-accent font-bold' : 'text-[var(--text-muted)]'}`}
                                     >
                                         <ThumbsUp className="w-3.5 h-3.5" />
@@ -463,7 +470,8 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                     </button>
 
                                     <button 
-                                        onClick={() => handleDislike(comment.id)}
+                                        type="button"
+                                        onClick={(e) => { e.preventDefault(); handleDislike(comment.id); }}
                                         className={`flex items-center gap-1.5 text-xs transition-colors hover:text-white ${comment.userDisliked ? 'text-red-400 font-bold' : 'text-[var(--text-muted)]'}`}
                                     >
                                         <ThumbsDown className="w-3.5 h-3.5" />

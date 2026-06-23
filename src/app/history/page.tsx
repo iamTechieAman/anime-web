@@ -99,6 +99,7 @@ function EmptyState() {
       </p>
       <Link
         href="/"
+        scroll={false}
         className="px-8 py-3 bg-gradient-to-r from-accent to-accent-secondary text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-[250ms] hover:scale-105 active:scale-95"
       >
         Browse Catalog
@@ -239,6 +240,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <Link
             href={href}
+            scroll={false}
             className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform" will-change-transform
             aria-label="Resume"
           >
@@ -257,7 +259,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between p-4 py-3.5">
         <div className="space-y-1.5">
-          <Link href={href} className="block">
+          <Link href={href} scroll={false} className="block">
             <h3 className="font-black text-sm md:text-base text-white line-clamp-1 font-sora tracking-tight hover:text-accent transition-colors">
               {entry.title}
             </h3>
@@ -311,6 +313,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       <div className="flex flex-col items-center justify-center gap-2 px-3 md:px-4 py-3 shrink-0 border-l border-border-color select-none">
         <Link
           href={href}
+          scroll={false}
           className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/80 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
         >
           <Play className="w-3 h-3 fill-white" />

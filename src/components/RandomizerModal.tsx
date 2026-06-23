@@ -66,7 +66,7 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
             } else if (mode === "studio") {
                 const pickedStudio = STUDIOS[Math.floor(Math.random() * STUDIOS.length)];
                 toast.success(`Picked Production House: ${pickedStudio}!`);
-                router.push(`/search?query=${encodeURIComponent(pickedStudio, { scroll: false })}`, { scroll: false });
+                router.push(`/search?query=${encodeURIComponent(pickedStudio)}`, { scroll: false });
             } else if (mode === "top") {
                 const pick = TOP_RATED[Math.floor(Math.random() * TOP_RATED.length)];
                 toast.success("Streaming an acclaimed Top-Rated classic!", { icon: "⭐" });

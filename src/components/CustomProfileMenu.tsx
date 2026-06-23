@@ -232,6 +232,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
                       <Link
                         key={item.label}
                         href={item.href}
+                        scroll={false}
                         className={className}
                         onClick={() => setIsOpen(false)}
                         onMouseEnter={() => setFocusedIndex(index)}

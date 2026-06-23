@@ -114,6 +114,7 @@ export default function DesktopSidebar() {
                 {/* Settings Toggle */}
                 <Link
                     href="/settings"
+                    scroll={false}
                     className="relative flex items-center h-11 px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item w-full text-left"
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
@@ -133,6 +134,7 @@ export default function DesktopSidebar() {
                 {/* Support Link */}
                 <Link
                     href="/contact"
+                    scroll={false}
                     className="relative flex items-center h-11 px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item"
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">

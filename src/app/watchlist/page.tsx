@@ -65,12 +65,14 @@ function EmptyState() {
       <div className="flex items-center gap-3">
         <Link
           href="/"
+          scroll={false}
           className="px-6 py-3 bg-gradient-to-r from-accent to-accent-secondary text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-[250ms] hover:scale-105 active:scale-95"
         >
           Browse Catalog
         </Link>
         <Link
           href="/ai"
+          scroll={false}
           className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl text-sm font-bold transition-all duration-[250ms] hover:scale-105 active:scale-95"
         >
           AI Discovery
@@ -200,7 +202,7 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
       transition={{ duration: 0.2 }}
       className="group relative rounded-2xl overflow-hidden bg-bg-card border border-border-color hover:border-accent/50 hover:shadow-[0_8px_40px_-8px_var(--accent-glow)] hover:-translate-y-1 transition-all duration-[250ms] aspect-[2/3]"
     >
-      <Link href={href} className="absolute inset-0 block w-full h-full select-none">
+      <Link href={href} scroll={false} className="absolute inset-0 block w-full h-full select-none">
         {entry.poster ? (
           <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-[250ms] group-hover:scale-105" will-change-transform />
         ) : (
@@ -336,6 +338,7 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
       <div className="flex-1 min-w-0">
         <Link
           href={href}
+          scroll={false}
           className="font-black text-sm md:text-base text-white hover:text-accent transition-colors line-clamp-1 font-sora tracking-tight"
         >
           {entry.title}
@@ -369,6 +372,7 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
 
         <Link
           href={href}
+          scroll={false}
           className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/80 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white text-xs font-black rounded-xl transition-all hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
         >
           <Play className="w-3 h-3 fill-white" />
