@@ -43,9 +43,9 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
     return (
         <div className="mt-12 mb-8">
             <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-[var(--accent-warm)] animate-pulse" />
+                <Sparkles className="w-5 h-5 text-accent-warm animate-pulse" />
                 <h2 className="text-lg md:text-xl font-bold text-white font-sora">
-                    Because you watched <span className="text-[var(--accent-warm)]">{showName.split(' ')[0]}</span>...
+                    Because you watched <span className="text-accent-warm">{showName.split(' ')[0]}</span>...
                 </h2>
             </div>
             
@@ -53,7 +53,7 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
                 {loading ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="aspect-[3/4.5] bg-white/5 rounded-xl animate-pulse border border-[var(--border-color)]" />
+                            <div key={i} className="aspect-[3/4.5] bg-white/5 rounded-xl animate-pulse border border-border-color" />
                         ))}
                     </div>
                 ) : (

@@ -39,19 +39,19 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
 
     if (!heroItems.length) {
         return (
-            <div className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[70vh] pb-12 md:pb-16 bg-[var(--bg-main)]">
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] to-transparent" />
+            <div className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[70vh] pb-12 md:pb-16 bg-bg-main">
+                <div className="absolute inset-0 bg-gradient-to-t from-bg-main to-transparent" />
                 <div className="absolute bottom-10 md:bottom-16 left-0 right-0 max-w-[1800px] mx-auto px-4 md:px-6 w-full space-y-4">
-                    <div className="h-10 md:h-14 w-[60%] bg-[var(--bg-card)] rounded-xl animate-pulse" />
+                    <div className="h-10 md:h-14 w-[60%] bg-bg-card rounded-xl animate-pulse" />
                     <div className="flex gap-3">
-                        <div className="h-5 w-20 bg-[var(--bg-card)] rounded-md animate-pulse" />
-                        <div className="h-5 w-16 bg-[var(--bg-card)] rounded-md animate-pulse" />
-                        <div className="h-5 w-12 bg-[var(--bg-card)] rounded-md animate-pulse" />
+                        <div className="h-5 w-20 bg-bg-card rounded-md animate-pulse" />
+                        <div className="h-5 w-16 bg-bg-card rounded-md animate-pulse" />
+                        <div className="h-5 w-12 bg-bg-card rounded-md animate-pulse" />
                     </div>
-                    <div className="h-16 w-[80%] max-w-xl bg-[var(--bg-card)] rounded-lg animate-pulse" />
+                    <div className="h-16 w-[80%] max-w-xl bg-bg-card rounded-lg animate-pulse" />
                     <div className="flex gap-3 pt-2">
-                        <div className="h-12 w-28 bg-[var(--bg-card)] rounded-xl animate-pulse" />
-                        <div className="h-12 w-32 bg-[var(--bg-card)] rounded-xl animate-pulse" />
+                        <div className="h-12 w-28 bg-bg-card rounded-xl animate-pulse" />
+                        <div className="h-12 w-32 bg-bg-card rounded-xl animate-pulse" />
                     </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
     const type = item.media_type || "movie";
 
     return (
-        <div className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[70vh] pb-12 md:pb-16 overflow-hidden bg-[var(--bg-main)]">
+        <div className="relative w-full h-[55vh] md:h-[70vh] min-h-[420px] md:min-h-[550px] max-h-[70vh] pb-12 md:pb-16 overflow-hidden bg-bg-main">
             {/* Background images with crossfade */}
             <AnimatePresence mode="wait">
                 <motion.div
@@ -92,8 +92,8 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
             {/* Multi-layer gradient overlays for cinematic look */}
             <div className="absolute inset-0 bg-black/30" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.85)_100%)]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/45 to-transparent w-full" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 md:h-44 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-bg-main/45 to-transparent w-full" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 md:h-44 bg-gradient-to-t from-bg-main via-bg-main/80 to-transparent" />
 
             {/* Content */}
             <div className="absolute inset-0 flex items-center justify-center pb-8 md:pb-12 z-20 pt-16">
@@ -183,7 +183,7 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                         key={i}
                         onClick={() => setCurrent(i)}
                         className={`transition-all duration-[250ms] rounded-full ${i === current
-                            ? "w-8 h-2 bg-[var(--accent-warm)] shadow-glow-warm"
+                            ? "w-8 h-2 bg-accent-warm shadow-glow-warm"
                             : "w-2 h-2 bg-white/30 hover:bg-white/50"
                             }`}
                     />

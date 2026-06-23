@@ -4,6 +4,18 @@
 @theme {
   --font-sora: "Manrope", sans-serif;
   --font-inter: "Inter", sans-serif;
+
+  /* Color Theme Mapping for Tailwind v4 */
+  --color-bg-main: var(--bg-main);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-card: var(--bg-card);
+  
+  --color-border-color: var(--border-color);
+  
+  --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-warm: var(--accent-warm);
 }
 
 

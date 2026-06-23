@@ -156,7 +156,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
         const comment: Comment = {
             id: `user-${Date.now()}`,
             username: activeProfile?.name || "You",
-            avatar: activeProfile?.avatar || "bg-[var(--accent)] text-black font-black",
+            avatar: activeProfile?.avatar || "bg-accent text-black font-black",
             content: newComment.trim(),
             timestamp: "Just now",
             likes: 0,
@@ -279,11 +279,11 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
     if (!isMounted) return null;
 
     return (
-        <div className="relative isolate bg-[#111113] rounded-2xl border border-[var(--border-color)] p-6 space-y-6">
+        <div className="relative isolate bg-[#111113] rounded-2xl border border-border-color p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
+            <div className="flex items-center justify-between pb-4 border-b border-border-color">
                 <div className="flex items-center gap-3">
-                    <MessageSquare className="w-5 h-5 text-[var(--accent)]" />
+                    <MessageSquare className="w-5 h-5 text-accent" />
                     <h3 className="font-bold text-white text-lg font-sora">Discussion Chatroom</h3>
                 </div>
                 <span className="text-xs text-[var(--text-muted)] font-semibold bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
@@ -294,7 +294,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
             {/* Comment Post Form */}
             <form onSubmit={handlePostComment} className="space-y-3 relative">
                 {!canComment && (
-                    <div className="flex items-center gap-3 p-4 mb-2 bg-[var(--accent-warm)]/10 border border-[var(--accent-warm)]/20 rounded-xl text-[var(--accent-warm)] text-xs font-semibold">
+                    <div className="flex items-center gap-3 p-4 mb-2 bg-accent-warm/10 border border-accent-warm/20 rounded-xl text-accent-warm text-xs font-semibold">
                         <AlertCircle className="w-4 h-4 shrink-0" />
                         <span>Registered members only. Please sign in or switch profiles to write comments.</span>
                     </div>
@@ -306,7 +306,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                         placeholder={canComment ? "Write a comment... Markdown is supported (*italic*, **bold**, `code`)" : "Please sign in or switch profiles to write comments."}
                         rows={3}
                         disabled={!canComment}
-                        className="w-full bg-[var(--bg-main)] text-white text-sm placeholder-[var(--text-muted)] border border-[var(--border-color)] rounded-xl p-4 outline-none focus:border-[var(--accent)]/50 transition-colors resize-none font-inter leading-relaxed disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="w-full bg-bg-main text-white text-sm placeholder-[var(--text-muted)] border border-border-color rounded-xl p-4 outline-none focus:border-accent/50 transition-colors resize-none font-inter leading-relaxed disabled:opacity-40 disabled:cursor-not-allowed"
                     />
                     
                     {selectedGif && (
@@ -332,7 +332,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                                 isSpoilerInput
                                     ? "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20"
-                                    : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
+                                    : "bg-white/5 text-[var(--text-muted)] border-border-color hover:text-white hover:bg-white/10"
                             }`}
                         >
                             <EyeOff className="w-3.5 h-3.5" />
@@ -343,9 +343,9 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                             type="button"
                             onClick={() => setShowGifPicker(!showGifPicker)}
                             disabled={!canComment}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white/5 text-[var(--text-muted)] border-border-color hover:text-white hover:bg-white/10 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            <ImageIcon className="w-3.5 h-3.5 text-[var(--accent-warm)]" />
+                            <ImageIcon className="w-3.5 h-3.5 text-accent-warm" />
                             <span>Add GIF</span>
                         </button>
                     </div>
@@ -353,7 +353,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                     <button
                         type="submit"
                         disabled={!canComment || (!newComment.trim() && !selectedGif)}
-                        className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white font-bold rounded-xl text-sm transition-all hover:shadow-[0_0_12px_var(--accent-glow)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:opacity-95"
+                        className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white font-bold rounded-xl text-sm transition-all hover:shadow-[0_0_12px_var(--accent-glow)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:opacity-95"
                     >
                         <span>Comment</span>
                         <Send className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                 placeholder="Search Tenor..."
                                 value={searchGifQuery}
                                 onChange={(e) => setSearchGifQuery(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs mb-3 focus:border-[var(--accent)] outline-none transition-colors"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs mb-3 focus:border-accent outline-none transition-colors"
                             />
                             <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
                                 {isFetchingGifs ? (
@@ -382,7 +382,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                             key={`${gif.name}-${i}`}
                                             type="button"
                                             onClick={() => { setSelectedGif(gif.url); setShowGifPicker(false); setSearchGifQuery(""); }}
-                                            className="relative h-20 rounded-xl overflow-hidden border border-white/5 hover:border-[var(--accent)] transition-all bg-black cursor-pointer group"
+                                            className="relative h-20 rounded-xl overflow-hidden border border-white/5 hover:border-accent transition-all bg-black cursor-pointer group"
                                         >
                                             <Image src={gif.url} alt={gif.name} unoptimized fill sizes="150px" className="object-cover" />
                                             <div className="absolute inset-0 bg-black/40 flex items-end p-1 text-[9px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity truncate">{gif.name}</div>
@@ -411,7 +411,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                     <Image src={comment.avatar} alt={comment.username} fill sizes="36px" className="object-cover" />
                                 </div>
                             ) : (
-                                <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xs select-none ${comment.avatar || 'bg-[var(--accent)] text-black font-black'}`}>
+                                <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xs select-none ${comment.avatar || 'bg-accent text-black font-black'}`}>
                                     {comment.username.slice(0, 2).toUpperCase()}
                                 </div>
                             )}
@@ -456,7 +456,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                                 <div className="flex items-center gap-4 pt-1">
                                     <button 
                                         onClick={() => handleLike(comment.id)}
-                                        className={`flex items-center gap-1.5 text-xs transition-colors hover:text-white ${comment.userLiked ? 'text-[var(--accent)] font-bold' : 'text-[var(--text-muted)]'}`}
+                                        className={`flex items-center gap-1.5 text-xs transition-colors hover:text-white ${comment.userLiked ? 'text-accent font-bold' : 'text-[var(--text-muted)]'}`}
                                     >
                                         <ThumbsUp className="w-3.5 h-3.5" />
                                         <span>{comment.likes}</span>

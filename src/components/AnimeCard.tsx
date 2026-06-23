@@ -105,7 +105,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
 
                     {/* Rating badge */}
                     {rating && (
-                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/70 z-10 text-[10px] font-bold text-[var(--accent-warm)]">
+                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/70 z-10 text-[10px] font-bold text-accent-warm">
                             <Star className="w-2.5 h-2.5 fill-current" />
                             {rating}
                         </div>
@@ -115,7 +115,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                     <div className="premium-card-overlay">
                         <div className="premium-card-overlay-content space-y-2">
                             {/* Play CTA Indicator */}
-                            <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-lg mb-1">
+                            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-lg mb-1">
                                 <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                             </div>
                             
@@ -137,7 +137,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                     <h4 className="text-[11px] md:text-xs font-extrabold text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
                     <div className="flex items-center gap-1.5 mt-1 text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold">
                         {rating && (
-                            <span className="text-[var(--accent-warm)] font-extrabold flex items-center gap-0.5">
+                            <span className="text-accent-warm font-extrabold flex items-center gap-0.5">
                                 ★{rating}
                             </span>
                         )}
@@ -148,7 +148,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                             </>
                         )}
                         <span className="text-white/25">•</span>
-                        <span className="text-[var(--accent)] uppercase font-bold text-[8px] tracking-wider">
+                        <span className="text-accent uppercase font-bold text-[8px] tracking-wider">
                             {show.type || show.media_type || "ANIME"}
                         </span>
                     </div>
@@ -183,14 +183,14 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
             <Link href={getHref()} className="group flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors items-center relative overflow-hidden">
                 {rank !== undefined && (
                     <div className="w-6 text-center shrink-0">
-                        <span className={`text-xl font-black ${rank < 3 ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}>
+                        <span className={`text-xl font-black ${rank < 3 ? 'text-accent' : 'text-[var(--text-muted)]'}`}>
                             {rank + 1}
                         </span>
                     </div>
                 )}
 
                 {/* Thumbnail */}
-                <div className="relative w-14 aspect-[2/3] rounded-md overflow-hidden bg-[var(--bg-card)] shrink-0 shadow-lg">
+                <div className="relative w-14 aspect-[2/3] rounded-md overflow-hidden bg-bg-card shrink-0 shadow-lg">
                     {(imageSrc && !imgError) ? (
                         <Image
                             src={imageSrc}
@@ -213,15 +213,15 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
 
                 {/* Meta */}
                 <div className="flex-1 min-w-0 pr-4">
-                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-[var(--accent)] transition-colors tracking-tight">
+                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-accent transition-colors tracking-tight">
                         {title}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-bold text-[var(--accent)]/80 uppercase">
+                        <span className="text-[10px] font-bold text-accent/80 uppercase">
                             {show.type || show.media_type || "TV"}
                         </span>
                         {rating && (
-                            <div className="flex items-center gap-1 text-[10px] text-[var(--accent-warm)] font-bold">
+                            <div className="flex items-center gap-1 text-[10px] text-accent-warm font-bold">
                                 <Star className="w-2.5 h-2.5 fill-current" />
                                 {rating}
                             </div>
@@ -234,7 +234,7 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
                 </div>
 
                 {/* Glow on hover */}
-                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-[var(--accent)] transition-all duration-[250ms] group-hover:w-full" />
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-accent transition-all duration-[250ms] group-hover:w-full" />
             </Link>
         </div>
     );

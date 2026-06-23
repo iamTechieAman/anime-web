@@ -66,7 +66,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
             ref={ref}
             onClick={onClick}
             className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-colors group ${
-                isActive ? "bg-[var(--accent)]/15 border border-[var(--accent)]/30" : "hover:bg-white/5 border border-transparent"
+                isActive ? "bg-accent/15 border border-accent/30" : "hover:bg-white/5 border border-transparent"
             }`}
         >
             <div className="flex gap-3 w-full items-center">
@@ -77,7 +77,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
                     </div>
                 )}
                 <div className="flex flex-col items-start min-w-0">
-                    <span className={`text-sm font-bold truncate transition-colors ${isActive ? 'text-[var(--accent)]' : 'text-zinc-300 group-hover:text-white'}`}>
+                    <span className={`text-sm font-bold truncate transition-colors ${isActive ? 'text-accent' : 'text-zinc-300 group-hover:text-white'}`}>
                         {title && title.toLowerCase() !== `episode ${epNum}` ? title : `Episode ${epNum}`}
                     </span>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -87,7 +87,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
                 </div>
             </div>
             {isActive && (
-                <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-[0_0_10px_var(--accent-glow)]">
+                <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shadow-[0_0_10px_var(--accent-glow)]">
                     <Play className="w-3 h-3 text-white fill-white ml-0.5" />
                 </div>
             )}
@@ -967,8 +967,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     if (loadingShow) {
         return (
-            <div className="min-h-dvh bg-[var(--bg-main)] flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-12 h-12 animate-spin text-[var(--accent)]" />
+            <div className="min-h-dvh bg-bg-main flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-12 h-12 animate-spin text-accent" />
                 <p className="text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Initializing Experience</p>
             </div>
         );
@@ -981,7 +981,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const fallbackEmbedUrl2 = `https://vidsrc.to/embed/anime/${id}/1`;
         
         return (
-            <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
+            <main className="bg-bg-main text-[var(--text-main)]">
                 {/* Navbar */}
                 <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
@@ -997,7 +997,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 <div className="pt-14 md:pt-16 px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
                     {/* Fallback Player */}
-                    <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-[var(--border-color)] relative shadow-2xl">
+                    <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-border-color relative shadow-2xl">
                         <iframe
                             src={getProxiedEmbedUrl(fallbackEmbedUrl)}
                             className="absolute inset-0 w-full h-full border-0"
@@ -1032,7 +1032,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 { name: "Peachify", url: `https://peachify.top/?type=tv&id=${id}&s=1&e=1` },
                                 { name: "VidLink", url: `https://vidlink.pro/tv/${id}/1/1?autoplay=true` },
                             ].map(server => (
-                                <a key={server.name} href={server.url} target="_blank" rel="noopener" className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-xs font-medium hover:bg-[var(--border-color)] transition-colors">
+                                <a key={server.name} href={server.url} target="_blank" rel="noopener" className="px-4 py-2 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">
                                     {server.name}
                                 </a>
                             ))}
@@ -1041,13 +1041,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <div className="mt-8 flex flex-col gap-3">
                             <Link 
                                 href="/"
-                                className="w-full max-w-xs py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                className="w-full max-w-xs py-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                             >
                                 <ChevronLeft className="w-4 h-4" /> Return Home
                             </Link>
                             <Link 
                                 href="/search"
-                                className="w-full max-w-xs py-3 border border-[var(--border-color)] hover:bg-[var(--bg-card)] text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                className="w-full max-w-xs py-3 border border-border-color hover:bg-bg-card text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                             >
                                 <Search className="w-4 h-4" /> Try Searching
                             </Link>
@@ -1059,12 +1059,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
     const renderPlayer = () => {
         return (
-            <div className={`w-full ${isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-xl md:rounded-2xl"} bg-black overflow-hidden border-0 sm:border border-[var(--border-color)] relative shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+            <div className={`w-full ${isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-xl md:rounded-2xl"} bg-black overflow-hidden border-0 sm:border border-border-color relative shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-[var(--accent)]/20 blur-2xl rounded-full scale-150 animate-pulse"></div>
-                            <Loader2 className="w-16 h-16 animate-spin text-[var(--accent)] relative z-10" />
+                            <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full scale-150 animate-pulse"></div>
+                            <Loader2 className="w-16 h-16 animate-spin text-accent relative z-10" />
                         </div>
                         <div className="text-center relative z-10 px-4">
                             <h3 className="text-lg font-black text-white tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_var(--accent-glow)]">
@@ -1076,7 +1076,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </div>
                     </div>
                 ) : error ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-[var(--bg-card)]/80 backdrop-blur-lg">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-bg-card/80 backdrop-blur-lg">
                         <AlertCircle className="w-8 h-8 md:w-10 md:h-10 text-red-600/80" />
                         <div className="max-w-md">
                             <p className="font-bold text-[var(--text-main)] text-base md:text-lg">Stream Unavailable</p>
@@ -1091,7 +1091,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         manualServerRef.current = "peachify";
                                         setSelectedServer("peachify");
                                     }}
-                                    className="px-4 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
+                                    className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
                                 >
                                     <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
                                 </button>
@@ -1104,7 +1104,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         manualServerRef.current = "fmovies";
                                         setSelectedServer("fmovies");
                                     }}
-                                    className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-[var(--accent)]/40"
+                                    className="px-4 py-2 bg-bg-card border border-border-color text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-accent/40"
                                 >
                                     FMovies
                                 </button>
@@ -1118,13 +1118,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     if (nextServerId) manualServerRef.current = nextServerId;
                                     setSelectedServer(nextServerId);
                                 }}
-                                className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-[var(--accent)]/40 flex items-center gap-1.5"
+                                className="px-4 py-2 bg-bg-card border border-border-color text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-accent/40 flex items-center gap-1.5"
                             >
                                 <RefreshCw className="w-3.5 h-3.5" /> Retry All
                             </button>
                             
                             {castAvailable && (
-                                <div className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-blue-500/50">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-bg-card border border-border-color text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-blue-500/50">
                                     {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
                                 </div>
                             )}
@@ -1176,7 +1176,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             }}
                                             className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
                                         >
-                                            <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform" will-change-transform>
+                                            <div className="bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform" will-change-transform>
                                                 <Play className="w-5 h-5 fill-current" />
                                                 Tap anywhere to enable audio
                                             </div>
@@ -1311,17 +1311,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 className="fixed inset-0 bg-black/90 z-[45] transition-opacity duration-[250ms] cursor-pointer"
             />
         )}
-        <div className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-[250ms]">
+        <div className="bg-bg-main text-[var(--text-main)] font-sans selection:bg-accent/20 transition-colors duration-[250ms]">
             {/* No JavaScript Fallback */}
             <noscript>
-                <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">
-                    <div className="max-w-md bg-[var(--bg-card)] border border-red-500/30 rounded-2xl p-8 text-center">
+                <div className="fixed inset-0 z-[100] bg-bg-main/95 backdrop-blur-md flex items-center justify-center p-6">
+                    <div className="max-w-md bg-bg-card border border-red-500/30 rounded-2xl p-8 text-center">
                         <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold mb-3 text-[var(--text-main)]">JavaScript Required</h2>
                         <p className="text-[var(--text-muted)] mb-6">
                             Video streaming requires JavaScript to function. Please enable JavaScript in your browser to watch anime.
                         </p>
-                        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-bold inline-block">
+                        <Link href="/" className="px-6 py-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-bold inline-block">
                             Return Home
                         </Link>
                     </div>
@@ -1330,7 +1330,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Background Glow - Hidden on mobile for performance */}
             <div className="fixed inset-0 pointer-events-none z-0 hidden md:block">
-                <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-[var(--accent)]/10 rounded-full blur-[24px] mix-blend-screen opacity-20"></div>
+                <div className="absolute top-[-10%] left-[20%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[24px] mix-blend-screen opacity-20"></div>
             </div>
 
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
@@ -1366,7 +1366,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="flex flex-col xl:flex-row gap-4 md:gap-6 items-start">
 
                         {/* Player Column */}
-                        <div className="flex-1 w-full min-w-0 touch-pan-y bg-[var(--bg-main)] p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
+                        <div className="flex-1 w-full min-w-0 touch-pan-y bg-bg-main p-0 sm:p-4 md:p-6 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05]">
                             {!isTheatreMode && <div className="mb-6">{renderPlayer()}</div>}
 
                             {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
@@ -1401,7 +1401,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         }}
                                         className={`p-2 border rounded-xl transition-all ${
                                             isTheatreMode 
-                                                ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
+                                                ? "bg-accent/20 border-accent text-accent font-bold shadow-[0_0_10px_var(--accent-glow)]" 
                                                 : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                                         }`}
                                         title="Theatre Mode"
@@ -1418,7 +1418,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         }}
                                         className={`p-2 border rounded-xl transition-all ${
                                             isFocusMode 
-                                                ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)] font-bold shadow-[0_0_10px_var(--accent-glow)]" 
+                                                ? "bg-accent/20 border-accent text-accent font-bold shadow-[0_0_10px_var(--accent-glow)]" 
                                                 : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                                         }`}
                                         title="Cinematic Focus Mode"
@@ -1446,7 +1446,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     <Shield className="w-3 h-3" />
                                     SafeStream Protected
                                 </button>
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-[10px] font-black uppercase tracking-wider">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-wider">
                                     <Zap className="w-3 h-3" />
                                     Edge Optimized
                                 </div>
@@ -1461,21 +1461,21 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-400">
                                     <div className="space-y-2">
                                         <p className="flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1 flex-shrink-0" />
                                             <span>If video is not found or refused to connect, switch to alternative servers.</span>
                                         </p>
                                         <p className="flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1 flex-shrink-0" />
                                             <span>Disable <b>Ad-Blockers</b> if you see a blank player or "Connection Refused".</span>
                                         </p>
                                     </div>
                                     <div className="space-y-2">
                                         <p className="flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1 flex-shrink-0" />
                                             <span>Try switching from <b>SUB to DUB</b> (or vice versa) if one source fails.</span>
                                         </p>
                                         <p className="flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1 flex-shrink-0" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1 flex-shrink-0" />
                                             <span>If links return 404, try dynamic fallback movie servers.</span>
                                         </p>
                                     </div>
@@ -1483,21 +1483,21 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             </div>
 
                             {/* Server & Meta Controls - JustAnime Style */}
-                            <div className="mt-4 bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="mt-4 bg-bg-card p-4 rounded-lg border border-border-color flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
                                     {/* Type Selection (SUB/DUB) */}
                                     <div className="flex items-center gap-3">
                                         <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Source:</span>
-                                        <div className="flex bg-[var(--bg-main)] p-1 rounded-md border border-[var(--border-color)]">
+                                        <div className="flex bg-bg-main p-1 rounded-md border border-border-color">
                                             <button
                                                 onClick={() => setMode("sub")}
-                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
                                             >
                                                 SUB
                                             </button>
                                             <button
                                                 onClick={() => setMode("dub")}
-                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
                                             >
                                                 DUB
                                             </button>
@@ -1518,7 +1518,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         }}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
                                             selectedServer === "peachify" 
-                                            ? "bg-[var(--accent)]/10 border-[var(--accent)]/40 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
+                                            ? "bg-accent/10 border-accent/40 text-accent shadow-[0_0_15px_var(--accent-glow)]" 
                                             : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
                                         }`}
                                     >
@@ -1531,10 +1531,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Server:</span>
                                         <button
                                             onClick={() => setShowServerDropdown(!showServerDropdown)}
-                                            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-main)] hover:bg-white/5 border border-[var(--border-color)] rounded-lg text-sm font-bold text-white transition-all min-w-[180px] justify-between group"
+                                            className="flex items-center gap-2 px-4 py-2 bg-bg-main hover:bg-white/5 border border-border-color rounded-lg text-sm font-bold text-white transition-all min-w-[180px] justify-between group"
                                         >
                                             <div className="flex items-center gap-2">
-                                                <Server className="w-4 h-4 text-[var(--accent)]" />
+                                                <Server className="w-4 h-4 text-accent" />
                                                 <span>{servers.find(s => s.serverId === selectedServer)?.serverName || "Select Server"}</span>
                                             </div>
                                             <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] group-hover:text-white transition-transform ${showServerDropdown ? 'rotate-180' : ''}`} />
@@ -1546,9 +1546,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                    className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-md"
+                                                    className="absolute bottom-full left-0 mb-2 w-64 bg-bg-card border border-border-color rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-md"
                                                 >
-                                                    <div className="p-3 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                                                    <div className="p-3 border-b border-border-color bg-white/5 flex items-center justify-between">
                                                         <div className="flex flex-col">
                                                             <span className="text-xs font-black uppercase text-white tracking-widest">Select Source</span>
                                                         </div>
@@ -1564,12 +1564,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                                 }}
                                                                 className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
                                                                     selectedServer === server.serverId
-                                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/10 text-white border border-[var(--accent)]/30 shadow-lg"
+                                                                        ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/10 text-white border border-accent/30 shadow-lg"
                                                                         : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
                                                                 }`}
                                                             >
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent)]/10 text-[var(--accent)]">
+                                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10 text-accent">
                                                                         <Play className={`w-3.5 h-3.5 ${selectedServer === server.serverId ? 'fill-current' : ''}`} />
                                                                     </div>
                                                                     <div className="text-left">
@@ -1580,7 +1580,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                                     </div>
                                                                 </div>
                                                                 {selectedServer === server.serverId && (
-                                                                    <Check className="w-4 h-4 text-[var(--accent)]" />
+                                                                    <Check className="w-4 h-4 text-accent" />
                                                                 )}
                                                             </button>
                                                         ))}
@@ -1592,7 +1592,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--text-muted)]">
-                                    <div className="flex items-center gap-2 text-[var(--accent)]">
+                                    <div className="flex items-center gap-2 text-accent">
                                         <Sparkles className="w-4 h-4" />
                                         Premium Auto-Features Active
                                     </div>
@@ -1611,8 +1611,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         onClick={toggleBookmark}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shrink-0 ${
                                             isBookmarked 
-                                                ? "bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/40 hover:bg-[var(--accent)]/20" 
-                                                : "bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10"
+                                                ? "bg-accent/10 text-accent border-accent/40 hover:bg-accent/20" 
+                                                : "bg-white/5 text-[var(--text-muted)] border-border-color hover:text-white hover:bg-white/10"
                                         }`}
                                     >
                                         {isBookmarked ? (
@@ -1637,13 +1637,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         {/* Sidebar - Fixed Height Vertical Episode List */}
                         {episodes.length > 1 && (
                             <div className="w-full xl:w-[350px] flex-shrink-0">
-                                <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] flex flex-col h-[500px] xl:h-[calc(100dvh-120px)] xl:sticky xl:top-[90px]">
+                                <div className="bg-bg-card rounded-lg border border-border-color flex flex-col h-[500px] xl:h-[calc(100dvh-120px)] xl:sticky xl:top-[90px]">
                                     {/* Sticky Header with Search */}
-                                    <div className="p-4 border-b border-[var(--border-color)] relative bg-[var(--bg-card)] z-10 rounded-t-lg">
+                                    <div className="p-4 border-b border-border-color relative bg-bg-card z-10 rounded-t-lg">
                                         <div className="flex items-center justify-between mb-3">
                                             <h3 className="font-bold text-white text-lg font-sora">Episodes</h3>
                                             <div className="flex items-center gap-2">
-                                                <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                                                <div className="flex bg-bg-main p-0.5 rounded-lg border border-border-color">
                                                     <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="List View"><List className="w-3.5 h-3.5" /></button>
                                                     <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`} title="Grid View"><LayoutGrid className="w-3.5 h-3.5" /></button>
                                                 </div>
@@ -1655,7 +1655,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 type="number"
                                                 placeholder="Search episode..."
                                                 value={epFilter}
-                                                className="w-full bg-[var(--bg-main)] pl-9 pr-3 py-2 rounded-md border border-[var(--border-color)] outline-none focus:border-[var(--accent)]/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
+                                                className="w-full bg-bg-main pl-9 pr-3 py-2 rounded-md border border-border-color outline-none focus:border-accent/40 transition-colors text-sm text-white placeholder-[var(--text-muted)] font-inter"
                                                 onChange={(e) => setEpFilter(e.target.value)}
                                             />
                                         </div>
@@ -1674,7 +1674,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                             <button 
                                                                 key={ep} 
                                                                 onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))} 
-                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-[var(--accent)] bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
                                                             >
                                                                 {ep}
                                                             </button>

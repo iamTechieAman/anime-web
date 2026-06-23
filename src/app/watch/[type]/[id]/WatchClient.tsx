@@ -449,21 +449,21 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     <div className="flex flex-col gap-4 mb-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                                                <div className="w-1 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                                                 <h2 className="text-xl font-bold">Episodes</h2>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <div className="flex bg-[var(--bg-main)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                                                <div className="flex bg-bg-main p-0.5 rounded-lg border border-border-color">
                                                     <button onClick={() => setEpisodeLayoutMode("list")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><List className="w-3.5 h-3.5" /></button>
                                                     <button onClick={() => setEpisodeLayoutMode("grid")} className={`p-1 rounded-md transition-all ${episodeLayoutMode === "grid" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}><LayoutGrid className="w-3.5 h-3.5" /></button>
                                                 </div>
-                                                {episodes.length > 0 && <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-card)] px-2 py-1 rounded-md">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>}
+                                                {episodes.length > 0 && <span className="text-xs text-[var(--text-muted)] bg-bg-card px-2 py-1 rounded-md">{activeFilteredEpisodes.length} EP{activeFilteredEpisodes.length !== 1 ? 's' : ''}</span>}
                                             </div>
                                         </div>
                                         <div className="flex flex-col sm:flex-row gap-3">
                                             {details?.seasons && details?.seasons.filter(s => s.season_number > 0).length > 1 && (
                                                 <div className="relative flex-1 sm:max-w-[200px]">
-                                                    <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm">
+                                                    <select value={selectedSeason} onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }} className="w-full appearance-none bg-bg-card border border-border-color text-[var(--text-main)] font-medium py-2 pl-4 pr-10 rounded-xl outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm">
                                                         {details.seasons.filter(s => s.season_number > 0).sort((a, b) => a.season_number - b.season_number).map((season) => <option key={season.id} value={season.season_number}>Season {season.season_number} ({season.episode_count} eps)</option>)}
                                                     </select>
                                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
@@ -471,7 +471,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             )}
                                             <div className="relative flex-1">
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                                                <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-[var(--accent)] transition-colors placeholder:text-zinc-500" />
+                                                <input type="text" placeholder="Search episode name or number..." value={episodeSearch} onChange={(e) => setEpisodeSearch(e.target.value)} className="w-full bg-bg-card border border-border-color text-white text-xs rounded-xl py-2 pl-9 pr-4 outline-none focus:border-accent transition-colors placeholder:text-zinc-500" />
                                                 {episodeSearch && <button onClick={() => setEpisodeSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
                                             </div>
                                         </div>
@@ -489,19 +489,19 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             ) : episodeLayoutMode === "grid" ? (
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
                                                     ))}
                                                 </div>
                                             ) : (
                                                 <div className={mode === 'mobile' ? "flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-col sm:overflow-visible sm:snap-none sm:pb-0" : "flex flex-col gap-2"}>
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex ${mode === 'mobile' ? 'flex-col min-w-[200px] snap-center items-start' : 'items-center'} gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-[var(--border-color)] bg-[#12131A] hover:border-[var(--accent)]/30'}`}>
-                                                            <div className={`${mode === 'mobile' ? 'w-full aspect-video' : 'w-24 h-14'} rounded-lg overflow-hidden bg-[var(--bg-main)] flex-shrink-0 relative`}>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`flex ${mode === 'mobile' ? 'flex-col min-w-[200px] snap-center items-start' : 'items-center'} gap-3 p-3 rounded-xl border transition-all text-left ${selectedEpisode === ep.episode_number ? 'border-accent bg-accent/10 shadow-[0_0_12px_var(--accent-glow)]' : 'border-border-color bg-[#12131A] hover:border-accent/30'}`}>
+                                                            <div className={`${mode === 'mobile' ? 'w-full aspect-video' : 'w-24 h-14'} rounded-lg overflow-hidden bg-bg-main flex-shrink-0 relative`}>
                                                                 {(ep.still_path || details?.backdrop_path || details?.poster_path) ? <Image src={`${IMG_BASE}/w185${ep.still_path || details?.backdrop_path || details?.poster_path}`} alt={ep.name} fill sizes="185px" className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />}
                                                                 {selectedEpisode === ep.episode_number && <div className="absolute inset-0 flex items-center justify-center bg-black/50"><Play className="w-5 h-5 text-white fill-current" /></div>}
                                                             </div>
                                                             <div className="flex-1 min-w-0 w-full">
-                                                                <p className={`text-sm font-semibold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-[var(--accent)]' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
+                                                                <p className={`text-sm font-semibold line-clamp-1 ${selectedEpisode === ep.episode_number ? 'text-accent' : 'text-white'}`}>E{ep.episode_number}. {ep.name}</p>
                                                                 <div className="flex items-center gap-2 mt-0.5">{ep.air_date && <span className="text-[10px] text-[var(--text-muted)]">{ep.air_date}</span>}{ep.runtime > 0 && <span className="text-[10px] text-[var(--text-muted)]">{ep.runtime}m</span>}</div>
                                                             </div>
                                                         </button>
@@ -1217,7 +1217,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     if (loading) {
         return (
-            <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)]">
+            <main className="min-h-dvh bg-bg-main text-[var(--text-main)]">
                 <div className="flex items-center justify-center min-h-dvh">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -1239,8 +1239,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             1
         );
         return (
-            <main className="bg-[var(--bg-main)] text-[var(--text-main)]">
-                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] flex items-center justify-center pt-[env(safe-area-inset-top)]">
+            <main className="bg-bg-main text-[var(--text-main)]">
+                <div className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-bg-main/90 backdrop-blur-md border-b border-border-color flex items-center justify-center pt-[env(safe-area-inset-top)]">
                     <Link href="/" className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" will-change-transform />
                     </Link>
@@ -1253,7 +1253,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 <div className="pt-[90px] md:pt-[110px] lg:pt-[140px]">
                     <div className="relative w-full bg-black">
                         <div className="w-full">
-                            <div className="relative w-full aspect-video bg-[var(--bg-card)] rounded-b-xl overflow-hidden">
+                            <div className="relative w-full aspect-video bg-bg-card rounded-b-xl overflow-hidden">
                                 <iframe 
                                     src={getProxiedEmbedUrl(embedUrl)} 
                                     className="absolute inset-0 w-full h-full border-0" 
@@ -1267,7 +1267,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <p className="text-[var(--text-muted)]">Detailed metadata is unavailable. Try switching servers if the content doesn&apos;t play.</p>
                         <div className="flex flex-wrap gap-2 justify-center mt-4">
                             {SERVERS.slice(0, 6).map((server) => (
-                                <a key={server.id} href={server.getUrl(type === "anime" ? "tv" : type, fallbackId, 1, 1)} target="_blank" rel="noopener" className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-xs font-medium hover:bg-[var(--border-color)] transition-colors">{server.name}</a>
+                                <a key={server.id} href={server.getUrl(type === "anime" ? "tv" : type, fallbackId, 1, 1)} target="_blank" rel="noopener" className="px-3 py-1.5 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">{server.name}</a>
                             ))}
                         </div>
                     </div>
@@ -1312,16 +1312,16 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     {!playerLoaded && (
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0a0a0a] gap-4">
                             <div className="relative flex items-center justify-center">
-                                <div className="absolute w-20 h-20 rounded-full border border-[var(--accent)]/20 animate-ping" />
-                                <div className="w-14 h-14 rounded-full border-[3px] border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
-                                <Play className="absolute w-5 h-5 text-[var(--accent)]" />
+                                <div className="absolute w-20 h-20 rounded-full border border-accent/20 animate-ping" />
+                                <div className="w-14 h-14 rounded-full border-[3px] border-accent/20 border-t-accent animate-spin" />
+                                <Play className="absolute w-5 h-5 text-accent" />
                             </div>
                             <div className="text-center">
                                 <p className="text-white text-xs font-black uppercase tracking-[0.2em] animate-pulse">{loadingStatus}</p>
                                 <p className="text-zinc-600 text-[10px] font-medium mt-1 uppercase tracking-wider">{activeServer.name}</p>
                             </div>
                             {isUpcoming && (
-                                <span className="px-4 py-1.5 bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</span>
+                                <span className="px-4 py-1.5 bg-accent/20 text-accent border border-accent/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</span>
                             )}
                         </div>
                     )}
@@ -1330,12 +1330,12 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     {isUpcoming && playerLoaded && (
                         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
                             <div className="text-center max-w-sm">
-                                <div className="w-16 h-16 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent)]/20">
-                                    <Calendar className="w-8 h-8 text-[var(--accent)]" />
+                                <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-accent/20">
+                                    <Calendar className="w-8 h-8 text-accent" />
                                 </div>
                                 <h2 className="text-lg font-black text-white uppercase tracking-wide mb-2">Upcoming</h2>
                                 <p className="text-xs text-zinc-400 leading-relaxed mb-6">This episode hasn't aired yet. Check back soon.</p>
-                                <button onClick={() => router.back()} className="px-6 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all">Go Back</button>
+                                <button onClick={() => router.back()} className="px-6 py-2.5 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all">Go Back</button>
                             </div>
                         </div>
                     )}
@@ -1350,7 +1350,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">Try a different server below</p>
                             <div className="flex gap-2 flex-wrap justify-center">
                                 <button onClick={() => { setSourceError(false); setIframeKey(prev => prev + 1); }}
-                                    className="px-4 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
+                                    className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
                                     <RefreshCw className="w-3.5 h-3.5" /> Retry
                                 </button>
                                 <button onClick={handleAutoFallback}
@@ -1460,13 +1460,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </button>
                             <button onClick={() => { setIsTheatreMode(!isTheatreMode); if (isFocusMode) setIsFocusMode(false); }}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
-                                    isTheatreMode ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    isTheatreMode ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 border-accent/40 text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`} title="Theatre Mode">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
                             </button>
                             <button onClick={() => { setIsFocusMode(!isFocusMode); if (isTheatreMode) setIsTheatreMode(false); }}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
-                                    isFocusMode ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    isFocusMode ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 border-accent/40 text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`} title="Focus Mode">
                                 <Shield className="w-3.5 h-3.5" />
                             </button>
@@ -1504,7 +1504,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
-            <div className="hidden lg:flex flex-col w-[380px] xl:w-[420px] 2xl:w-[460px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] bg-[var(--bg-main)] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
+            <div className="hidden lg:flex flex-col w-[380px] xl:w-[420px] 2xl:w-[460px] shrink-0 sticky top-[90px] h-[calc(100dvh-120px)] bg-bg-main rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.05]">
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                     {renderEpisodesList('desktop')}
                 </div>
@@ -1536,7 +1536,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         <h2 className="text-lg font-bold">Top Cast</h2>
                     </div>
                     {details?.cast?.length > 15 && (
-                        <button onClick={() => setShowAllCast(!showAllCast)} className="text-xs font-bold text-[var(--accent)] hover:text-white transition-colors">
+                        <button onClick={() => setShowAllCast(!showAllCast)} className="text-xs font-bold text-accent hover:text-white transition-colors">
                             {showAllCast ? 'Show Less' : 'See All'}
                         </button>
                     )}
@@ -1548,7 +1548,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             onClick={() => handleActorClick(person)}
                             className={`flex-shrink-0 text-center group focus:outline-none outline-none ${showAllCast ? 'w-[calc(33.33%-12px)] sm:w-[calc(20%-16px)] md:w-[calc(16.66%-16px)] lg:w-[calc(14.28%-16px)]' : 'w-[100px]'}`}
                         >
-                            <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-[var(--bg-card)] border-2 border-transparent group-hover:border-[var(--accent)]/50 transition-all active:scale-95 shadow-lg relative">
+                            <div className="w-[80px] h-[80px] mx-auto mb-2 rounded-full overflow-hidden bg-bg-card border-2 border-transparent group-hover:border-accent/50 transition-all active:scale-95 shadow-lg relative">
                                 {person.profile_path ? (
                                     <Image src={`${IMG_BASE}/w185${person.profile_path}`} alt={person.name} fill sizes="185px" className="object-cover" />
                                 ) : (
@@ -1557,7 +1557,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     </div>
                                 )}
                             </div>
-                            <p className="text-xs font-bold text-[var(--text-main)] line-clamp-1 group-hover:text-[var(--accent)] transition-all">{person.name}</p>
+                            <p className="text-xs font-bold text-[var(--text-main)] line-clamp-1 group-hover:text-accent transition-all">{person.name}</p>
                             <p className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5">{person.character}</p>
                         </button>
                     ))}
@@ -1569,8 +1569,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderRecommendations = () => {
         if (!details?.recommendations || details?.recommendations?.length === 0) return null;
         return (
-            <section className="relative z-10 mt-[48px] bg-[var(--bg-main)] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
-                <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
+            <section className="relative z-10 mt-[48px] bg-bg-main px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">You May Also Like</h2></div>
                 <MovieRow items={details?.recommendations || []} type={type} />
             </section>
         );
@@ -1579,8 +1579,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderSimilar = () => {
         if (!details?.similar || details?.similar?.length === 0) return null;
         return (
-            <section className="relative z-10 mt-[48px] bg-[var(--bg-main)] px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
-                <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
+            <section className="relative z-10 mt-[48px] bg-bg-main px-0 py-6 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+                <div className="flex items-center gap-3 mb-4"><div className="w-1 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" /><h2 className="text-lg font-bold">Similar</h2></div>
                 <MovieRow items={details?.similar || []} type={type} />
             </section>
         );
@@ -1588,7 +1588,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     const renderComments = () => {
         return (
-            <section className="relative z-10 mt-[48px] bg-[var(--bg-main)] px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+            <section className="relative z-10 mt-[48px] bg-bg-main px-0 py-6 pb-12 sm:px-4 md:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
                 <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
             </section>
         );
@@ -1596,7 +1596,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     return (
         <>
-        <div className="relative isolate min-h-dvh overflow-x-clip bg-[var(--bg-main)] text-[var(--text-main)]">
+        <div className="relative isolate min-h-dvh overflow-x-clip bg-bg-main text-[var(--text-main)]">
             {!isFocusMode && (
                 <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05] flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
@@ -1626,7 +1626,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <div className={`w-full ${isFocusMode ? "h-[100dvh] bg-black rounded-none border-0 overflow-hidden" : "mb-6"}`}>{renderPlayer()}</div>
                 )}
                 {!isFocusMode && (
-                    <div className="flex flex-col gap-6 items-start w-full bg-[var(--bg-main)]">
+                    <div className="flex flex-col gap-6 items-start w-full bg-bg-main">
                         <div className="flex-1 w-full min-w-0">
                             {/* HeroSection via Component */}
                             {renderHero()}
@@ -1634,7 +1634,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Player & Episode Layout */}
                             <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 mb-6 flex flex-col lg:flex-row gap-6 items-start">
                                 {/* Player Column */}
-                                <div className={`flex-1 w-full min-w-0 bg-[var(--bg-main)] p-0 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
+                                <div className={`flex-1 w-full min-w-0 bg-bg-main p-0 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
                                     {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
                                     {/* ── SERVER SELECTION BAR ── */}
                                     <div className="mt-4">
@@ -1649,11 +1649,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {/* Mobile/Tablet Episodes (Hidden on Desktop) */}
                             {renderMobileEpisodes()}
                             {/* Metadata Section */}
-                            <div className="relative z-10 bg-[var(--bg-main)] p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
+                            <div className="relative z-10 bg-bg-main p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1600px] mx-auto mt-6 flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
                                 <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                     {details?.poster_path && (
                                         <div className="relative group aspect-[2/3] w-full">
-                                            <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-[var(--border-color)] transition-transform group-hover:scale-[1.02]" will-change-transform />
+                                            <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-border-color transition-transform group-hover:scale-[1.02]" will-change-transform />
                                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                     )}
@@ -1673,7 +1673,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
                                                 <span>{year}</span>
                                                 {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
-                                                <span className="px-2 py-0.5 rounded border border-[var(--border-color)] text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                                <span className="px-2 py-0.5 rounded border border-border-color text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1682,19 +1682,19 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             <span key={genre.id} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-full text-[10px] sm:text-xs font-bold tracking-wide text-zinc-300 hover:text-white hover:bg-white/10 transition-all">{genre.name}</span>
                                         ))}
                                     </div>
-                                    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-4 md:p-6 mb-6 sm:mb-8">
+                                    <div className="bg-bg-card rounded-xl border border-border-color p-4 md:p-6 mb-6 sm:mb-8">
                                         {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
                                             <div className="mb-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <h3 className="font-bold text-base sm:text-lg flex items-center gap-2"><Play className="w-4 h-4 text-blue-500 fill-current" /> Episodes</h3>
-                                                    <div className="flex bg-[var(--bg-main)] p-1 rounded-lg border border-[var(--border-color)]">
+                                                    <div className="flex bg-bg-main p-1 rounded-lg border border-border-color">
                                                         <button onClick={() => setMode("sub")} className={`px-3 sm:px-4 py-1 rounded-md text-[10px] sm:text-xs font-bold transition-all ${mode === "sub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>SUB</button>
                                                         <button onClick={() => setMode("dub")} className={`px-3 sm:px-4 py-1 rounded-md text-[10px] sm:text-xs font-bold transition-all ${mode === "dub" ? "bg-white text-black" : "text-[var(--text-muted)] hover:text-white"}`}>DUB</button>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
                                                     {episodes.map((epNum: string) => (
-                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-[var(--accent)]/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
+                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-accent/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
                                                     ))}
                                                 </div>
                                             </div>
@@ -1708,22 +1708,22 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 </div>
                                             </div>
                                             <div className="flex flex-col sm:flex-row gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
-                                                <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
+                                                <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-accent/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
                                                 <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
-                                                <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-[var(--border-color)] transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
+                                                <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-bg-card border border-border-color text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-border-color transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
                                             </div>
                                         </div>
                                     </div>
                                     <p className="text-[var(--text-muted)] text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-3xl">{details?.overview}</p>
                                     {details?.belongs_to_collection && (
-                                        <div className="bg-gradient-to-r from-[var(--bg-card)] to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name, { scroll: false })}`, { scroll: false })}>
+                                        <div className="bg-gradient-to-r from-bg-card to-transparent border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-4 hover:border-white/20 transition-all cursor-pointer" onClick={() => router.push(`/search?q=${encodeURIComponent(details.belongs_to_collection!.name, { scroll: false })}`, { scroll: false })}>
                                             {details.belongs_to_collection.poster_path && (
                                                 <div className="w-12 h-16 shrink-0 rounded overflow-hidden relative">
                                                     <Image src={`${IMG_BASE}/w92${details.belongs_to_collection.poster_path}`} alt="" fill sizes="92px" className="object-cover" />
                                                 </div>
                                             )}
                                             <div>
-                                                <p className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-widest mb-0.5">Part of Collection</p>
+                                                <p className="text-[10px] text-accent font-bold uppercase tracking-widest mb-0.5">Part of Collection</p>
                                                 <h4 className="text-sm font-bold text-white mb-1">{details.belongs_to_collection.name}</h4>
                                                 <p className="text-xs text-zinc-500 font-medium">Click to see all titles in this franchise</p>
                                             </div>
@@ -1731,10 +1731,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         </div>
                                     )}
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
-                                        {director && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5 truncate">{director.name}</p></div>}
-                                        {details?.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5 truncate">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
-                                        {details?.status && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Status</span><p className="text-white font-medium mt-0.5 truncate">{details.status}</p></div>}
-                                        {details?.vote_count && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-[var(--border-color)]"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5 truncate">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
+                                        {director && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-border-color"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Director</span><p className="text-white font-medium mt-0.5 truncate">{director.name}</p></div>}
+                                        {details?.spoken_languages && details.spoken_languages.length > 0 && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-border-color"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1"><Globe className="w-3 h-3" /> Language</span><p className="text-white font-medium mt-0.5 truncate">{details?.spoken_languages?.[0]?.english_name || "English"}</p></div>}
+                                        {details?.status && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-border-color"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Status</span><p className="text-white font-medium mt-0.5 truncate">{details.status}</p></div>}
+                                        {details?.vote_count && <div className="bg-white/[0.03] rounded-xl p-2.5 sm:p-3 border border-border-color"><span className="text-[var(--text-muted)] text-[10px] sm:text-xs uppercase tracking-wider">Votes</span><p className="text-white font-medium mt-0.5 truncate">{details?.vote_count?.toLocaleString() || "0"}</p></div>}
                                     </div>
                                 </div>
                             </div>
@@ -1750,7 +1750,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             onClick={e => e.stopPropagation()}
-                                            className="w-full max-w-lg bg-[var(--bg-elevated)] border border-white/10 rounded-2xl p-6 shadow-2xl relative max-h-[80vh] overflow-y-auto"
+                                            className="w-full max-w-lg bg-bg-elevated border border-white/10 rounded-2xl p-6 shadow-2xl relative max-h-[80vh] overflow-y-auto"
                                         >
                                             <button onClick={() => setSelectedActor(null)} className="absolute top-4 right-4 p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
                                             <div className="flex items-start gap-4 mb-4">
@@ -1803,7 +1803,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             onClick={() => setActiveDetailTab(tab)}
                                             className={`flex-1 py-3 text-center border-b-2 transition-all cursor-pointer flex justify-center items-center gap-1.5 ${
                                                 activeDetailTab === tab 
-                                                    ? "border-[var(--accent)] text-white bg-white/[0.02]" 
+                                                    ? "border-accent text-white bg-white/[0.02]" 
                                                     : "border-transparent text-zinc-500 hover:text-white"
                                             }`}
                                         >
@@ -1820,7 +1820,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         <ul className="space-y-3 text-xs text-zinc-300 leading-relaxed font-inter">
                                             {triviaFacts.map((fact, i) => (
                                                 <li key={i} className="flex gap-3">
-                                                    <span className="text-[var(--accent)] shrink-0 mt-0.5">•</span>
+                                                    <span className="text-accent shrink-0 mt-0.5">•</span>
                                                     <span>{renderMarkdown(fact)}</span>
                                                 </li>
                                             ))}
@@ -1844,8 +1844,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     )}
                                     {activeDetailTab === "awards" && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-4 rounded-xl bg-gradient-to-br from-[var(--bg-main)] to-black border border-white/5 flex items-center gap-4">
-                                                <div className="w-14 h-14 rounded-full border-[3px] border-[var(--accent)] flex items-center justify-center bg-black/50 shrink-0">
+                                            <div className="p-4 rounded-xl bg-gradient-to-br from-bg-main to-black border border-white/5 flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-full border-[3px] border-accent flex items-center justify-center bg-black/50 shrink-0">
                                                     <span className="text-lg font-black text-white">{details?.vote_average?.toFixed(1) || "N/A"}</span>
                                                 </div>
                                                 <div>
@@ -1892,7 +1892,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             {!isFocusMode && renderComments()}
             <AnimatePresence>
                 {showScrollTop && !isFocusMode && (
-                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
+                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
                 )}
             </AnimatePresence>
         </div>
@@ -1912,9 +1912,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <AnimatePresence>
             {showTrailer && details?.trailer && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4" onClick={() => setShowTrailer(false)}>
-                    <div className="w-full max-w-5xl bg-[var(--bg-elevated)] border border-white/10 rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="w-full max-w-5xl bg-bg-elevated border border-white/10 rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/50">
-                            <h3 className="font-bold text-white flex items-center gap-2"><Film className="w-4 h-4 text-[var(--accent)]" /> Official Trailer</h3>
+                            <h3 className="font-bold text-white flex items-center gap-2"><Film className="w-4 h-4 text-accent" /> Official Trailer</h3>
                             <button onClick={() => setShowTrailer(false)} className="p-1 hover:bg-white/10 rounded-lg transition-colors"><X className="w-5 h-5 text-zinc-400" /></button>
                         </div>
                         <div className="aspect-video w-full relative bg-black">

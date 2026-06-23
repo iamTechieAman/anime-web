@@ -37,15 +37,15 @@ const ACCENT_COLORS = [
 ];
 
 const NOTIF_CATEGORIES: { key: keyof NotificationPreferences; label: string; desc: string; icon: any; color: string; toggleColor: string }[] = [
-    { key: 'episodes', label: 'New Episodes', desc: 'Alert when new episodes drop for shows you follow', icon: Play, color: 'text-[var(--accent)]', toggleColor: 'bg-[var(--accent)]' },
+    { key: 'episodes', label: 'New Episodes', desc: 'Alert when new episodes drop for shows you follow', icon: Play, color: 'text-accent', toggleColor: 'bg-accent' },
     { key: 'trending', label: 'Trending Shows', desc: 'Discover what\'s hot on the platform right now', icon: TrendingUp, color: 'text-red-400', toggleColor: 'bg-red-500' },
-    { key: 'recommendations', label: 'Recommendations', desc: 'Personalized picks curated just for your taste', icon: Sparkles, color: 'text-cyan-400', toggleColor: 'bg-[var(--accent-secondary)]' },
+    { key: 'recommendations', label: 'Recommendations', desc: 'Personalized picks curated just for your taste', icon: Sparkles, color: 'text-cyan-400', toggleColor: 'bg-accent-secondary' },
     { key: 'watchlist', label: 'Watchlist Updates', desc: 'When new seasons or episodes arrive for saved shows', icon: Bookmark, color: 'text-blue-400', toggleColor: 'bg-blue-500' },
     { key: 'community', label: 'Community Activity', desc: 'What ToonPlayer users in your region are watching', icon: Users, color: 'text-green-400', toggleColor: 'bg-green-500' },
-    { key: 'aiSmartAlerts', label: 'AI Smart Alerts', desc: 'Personalized nudges based on your watch patterns', icon: Brain, color: 'text-pink-400', toggleColor: 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]' },
+    { key: 'aiSmartAlerts', label: 'AI Smart Alerts', desc: 'Personalized nudges based on your watch patterns', icon: Brain, color: 'text-pink-400', toggleColor: 'bg-gradient-to-r from-accent to-accent-secondary' },
 ];
 
-function ToggleSwitch({ value, onChange, color = "bg-[var(--accent)]" }: { value: boolean; onChange: (v: boolean) => void; color?: string }) {
+function ToggleSwitch({ value, onChange, color = "bg-accent" }: { value: boolean; onChange: (v: boolean) => void; color?: string }) {
     return (
         <button
             type="button"
@@ -228,11 +228,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     onClick={() => setActiveTab(tab)}
                                     className={`flex items-center gap-3 px-4 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer whitespace-nowrap w-full text-left border ${
                                         isActive 
-                                            ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/10 border-[var(--accent)]/20 text-white shadow-sm' 
+                                            ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/10 border-accent/20 text-white shadow-sm' 
                                             : 'border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
                                     }`}
                                 >
-                                    <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--accent)]' : ''}`} />
+                                    <Icon className={`w-4 h-4 ${isActive ? 'text-accent' : ''}`} />
                                     <span>{tab}</span>
                                 </button>
                             );
@@ -254,7 +254,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     <div className="space-y-6">
                                         <div className="space-y-1">
                                             <h3 className="text-base font-bold text-white flex items-center gap-2">
-                                                <User className="w-5 h-5 text-[var(--accent)]" /> Profile Management
+                                                <User className="w-5 h-5 text-accent" /> Profile Management
                                             </h3>
                                             <p className="text-xs text-zinc-500 font-semibold">Customize your streaming identity</p>
                                         </div>
@@ -269,13 +269,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                             onClick={() => setSelectedAvatar(avatar)}
                                                             className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${
                                                                 selectedAvatar === avatar 
-                                                                    ? "border-[var(--accent)] scale-110 shadow-lg" 
+                                                                    ? "border-accent scale-110 shadow-lg" 
                                                                     : "border-transparent opacity-60 hover:opacity-100"
                                                             }`}
                                                         >
                                                             <Image src={avatar} alt="DiceBear Avatar" fill sizes="56px" className="object-cover" />
                                                             {selectedAvatar === avatar && (
-                                                                <div className="absolute inset-0 bg-[var(--accent)]/20 flex items-center justify-center">
+                                                                <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                                                                     <Check className="w-4 h-4 text-white" />
                                                                 </div>
                                                             )}
@@ -291,7 +291,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                         value={name} 
                                                         onChange={(e) => setName(e.target.value)} 
                                                         placeholder="Enter name"
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[var(--accent)]/50 font-medium"
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-accent/50 font-medium"
                                                         maxLength={20} 
                                                     />
                                                 </div>
@@ -300,7 +300,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         <button 
                                             onClick={handleSaveProfile} 
                                             disabled={isSaving}
-                                            className="w-full max-w-xs py-3 px-6 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white font-black rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-xs uppercase tracking-widest border-0 cursor-pointer"
+                                            className="w-full max-w-xs py-3 px-6 bg-gradient-to-r from-accent to-accent-secondary text-white font-black rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 text-xs uppercase tracking-widest border-0 cursor-pointer"
                                         >
                                             {isSaving ? (
                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -328,7 +328,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <select 
                                                     value={quality} 
                                                     onChange={(e) => updateSetting('quality', e.target.value)}
-                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                                 >
                                                     <option value="Auto">Auto Match</option>
                                                     <option value="1080p">1080p FHD</option>
@@ -346,7 +346,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <select 
                                                     value={bufferSize} 
                                                     onChange={(e) => updateSetting('bufferSize', e.target.value)}
-                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                                 >
                                                     <option value="Small">Small (Fast Start)</option>
                                                     <option value="Standard">Standard (Balanced)</option>
@@ -364,7 +364,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <select 
                                                     value={playbackSpeed} 
                                                     onChange={(e) => updateSetting('playbackSpeed', e.target.value)}
-                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                                 >
                                                     <option value="0.5">0.5x Slow</option>
                                                     <option value="1.0">1.0x Normal</option>
@@ -377,9 +377,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                             <div className="w-full h-px bg-white/5" />
 
                                             {[
-                                                { key: 'autoplay', label: 'Autoplay Next Episode', desc: 'Seamlessly start the next episode', value: autoplay, color: 'bg-[var(--accent)]' },
+                                                { key: 'autoplay', label: 'Autoplay Next Episode', desc: 'Seamlessly start the next episode', value: autoplay, color: 'bg-accent' },
                                                 { key: 'autoSkip', label: 'Auto-skip Intro', desc: 'Automatically bypass anime openings', value: autoSkip, color: 'bg-blue-500' },
-                                                { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-[var(--accent)]' },
+                                                { key: 'smartSwitch', label: 'Smart Server Switching', desc: 'Auto-bypass broken or dead servers', value: smartSwitch, color: 'bg-accent' },
                                                 { key: 'aggressiveSandbox', label: 'Aggressive Ad-Blocker', desc: 'Prevents external popups and redirects', value: aggressiveSandbox, color: 'bg-red-500' },
                                             ].map((item, i, arr) => (
                                                 <div key={item.key}>
@@ -437,7 +437,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <select 
                                                     value={theme} 
                                                     onChange={(e) => updateSetting('theme', e.target.value)}
-                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                                 >
                                                     <option value="Midnight Purple">Midnight Purple (Default)</option>
                                                     <option value="Cinematic Dark">Cinematic Dark</option>
@@ -499,7 +499,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <select 
                                                     value={subtitleSize} 
                                                     onChange={(e) => updateSetting('subtitleSize', e.target.value)}
-                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                                 >
                                                     <option value="Small">Small</option>
                                                     <option value="Medium">Medium</option>
@@ -518,7 +518,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <select 
                                                     value={subtitleFont} 
                                                     onChange={(e) => updateSetting('subtitleFont', e.target.value)}
-                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                                                    className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                                 >
                                                     <option value="Sora">Sora (Default)</option>
                                                     <option value="Sans-Serif">Sans-Serif</option>

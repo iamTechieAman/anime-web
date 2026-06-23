@@ -49,15 +49,15 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
     }, [letter, page, activeTab]);
 
     return (
-        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] font-sans">
+        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] font-sans">
             {/* Navbar */}
-            <div className="sticky top-[60px] md:top-[64px] z-30 px-4 py-3 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-[var(--border-color)]">
+            <div className="sticky top-[60px] md:top-[64px] z-30 px-4 py-3 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-border-color">
                 <div className="w-full flex items-center gap-4">
                     <Link scroll={false} href="/" className="p-2 hover:bg-white/10 rounded-full transition-colors">
                         <ArrowLeft className="w-5 h-5 text-zinc-400" />
                     </Link>
                     <div>
-                        <h1 className="font-bold text-lg">Browse: <span className="text-[var(--accent-warm)]">{displayLetter}</span></h1>
+                        <h1 className="font-bold text-lg">Browse: <span className="text-accent-warm">{displayLetter}</span></h1>
                         <p className="text-xs text-[var(--text-muted)]">
                             {!loading && `${shows.length} results`}
                         </p>
@@ -67,7 +67,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
 
             <div className="pb-24 md:pb-12 w-full px-4 md:px-6 space-y-6 pt-6">
                 {/* A-Z Filter Bar */}
-                <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] sticky top-[124px] md:top-[128px] z-40 shadow-xl">
+                <div className="bg-bg-card p-3 rounded-xl border border-border-color sticky top-[124px] md:top-[128px] z-40 shadow-xl">
                     <AZFilter />
                 </div>
 
@@ -83,15 +83,15 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                 className={`
                                     flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap
                                     ${isActive
-                                        ? "bg-[var(--accent-warm)] text-white shadow-lg shadow-orange-900/30"
-                                        : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--border-color)] hover:text-white"
+                                        ? "bg-accent-warm text-white shadow-lg shadow-orange-900/30"
+                                        : "bg-bg-card text-[var(--text-muted)] border border-border-color hover:bg-border-color hover:text-white"
                                     }
                                 `}
                             >
                                 <Icon className="w-4 h-4" />
                                 {tab.label}
                                 {!loading && (
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-[var(--border-color)]'}`}>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-border-color'}`}>
                                         {tab.id === "everything" ? shows.length :
                                          tab.id === "anime" ? animeCount :
                                          movieCount}
@@ -113,8 +113,8 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                             className="flex flex-col items-center justify-center py-4 md:py-6"
                         >
                             <div className="relative">
-                                <div className="absolute inset-0 bg-[var(--accent-warm)]/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                                <Loader2 className="w-12 h-12 animate-spin text-[var(--accent-warm)] relative z-10" />
+                                <div className="absolute inset-0 bg-accent-warm/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                                <Loader2 className="w-12 h-12 animate-spin text-accent-warm relative z-10" />
                             </div>
                             <p className="text-[var(--text-muted)] animate-pulse mt-4 text-sm">
                                 Loading {activeTab === "movies" ? "movies & TV" : activeTab === "anime" ? "anime" : "content"} starting with "{displayLetter}"...
@@ -132,7 +132,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                 <p className="text-red-400 font-medium mb-4">{error}</p>
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="px-6 py-2.5 bg-[var(--accent-warm)] text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
+                                    className="px-6 py-2.5 bg-accent-warm text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
                                 >
                                     Retry
                                 </button>
@@ -167,7 +167,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                     onClick={() => {
                                         setPage(p => Math.max(1, p - 1));
                                     }}
-                                    className="px-6 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl disabled:opacity-30 hover:bg-[var(--border-color)] transition-colors font-medium"
+                                    className="px-6 py-2.5 bg-bg-card border border-border-color rounded-xl disabled:opacity-30 hover:bg-border-color transition-colors font-medium"
                                 >
                                     ← Previous
                                 </button>
@@ -179,7 +179,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                     onClick={() => {
                                         setPage(p => p + 1);
                                     }}
-                                    className="px-6 py-2.5 bg-[var(--accent-warm)] text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
+                                    className="px-6 py-2.5 bg-accent-warm text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
                                 >
                                     Next →
                                 </button>

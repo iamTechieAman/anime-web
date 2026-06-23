@@ -38,13 +38,13 @@ const ProviderBar = memo(function ProviderBar({
 
     return (
         <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#141419]/50 shadow-xl w-full">
-            <div className="flex items-center gap-2 border-b border-white/[0.04] bg-[var(--accent)]/10 px-4 py-3">
+            <div className="flex items-center gap-2 border-b border-white/[0.04] bg-accent/10 px-4 py-3">
                 <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
                 <p className="truncate text-xs sm:text-sm font-semibold text-zinc-400">
                     Watching <span className="font-bold text-white">{title}</span>
                     {resolvedMediaType !== 'movie' && <span className="text-zinc-500"> · S{selectedSeason}E{selectedEpisode}</span>}
                 </p>
-                <span className="ml-auto flex shrink-0 items-center gap-1.5 text-[10px] sm:text-xs font-black uppercase tracking-widest text-[var(--accent)]">
+                <span className="ml-auto flex shrink-0 items-center gap-1.5 text-[10px] sm:text-xs font-black uppercase tracking-widest text-accent">
                     <Server className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> {activeServer.name}
                 </span>
             </div>
@@ -61,7 +61,7 @@ const ProviderBar = memo(function ProviderBar({
                                 title={isFailed ? `${server.name} — unavailable` : server.name}
                                 className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 sm:px-4 py-2 text-xs font-bold transition-all duration-200 snap-center whitespace-nowrap ${
                                     isActive
-                                        ? 'border-[var(--accent)] bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_12px_var(--accent-glow)]'
+                                        ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_12px_var(--accent-glow)]'
                                         : isFailed
                                             ? 'cursor-not-allowed border-white/[0.05] bg-transparent text-zinc-600 opacity-40'
                                             : 'border-white/[0.07] bg-[#1E1B29] text-zinc-400 hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white'

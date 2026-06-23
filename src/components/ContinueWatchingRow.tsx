@@ -25,7 +25,7 @@ const AnimatedProgressBar = ({ current, total }: { current: number, total: numbe
     return (
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 rounded-b-2xl overflow-hidden pointer-events-none">
             <div 
-                className="h-full bg-[var(--accent)] transition-[width] duration-1000 ease-apple" 
+                className="h-full bg-accent transition-[width] duration-1000 ease-apple" 
                 style={{ width }}
             />
         </div>
@@ -73,8 +73,8 @@ export default function ContinueWatchingRow() {
     return (
         <section className="mb-8 w-full overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                <Clock className="w-4 h-4 text-[var(--accent)]" />
+                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                <Clock className="w-4 h-4 text-accent" />
                 <h2 className="text-base md:text-lg font-black font-sora tracking-tight text-white">Continue Watching</h2>
             </div>
             
@@ -87,7 +87,7 @@ export default function ContinueWatchingRow() {
                         return (
                             <div
                                 key={entry.id}
-                                className={`snap-start shrink-0 flex items-stretch rounded-2xl bg-[var(--bg-card)]/40 backdrop-blur-md border border-white/5 overflow-hidden transition-all duration-350 hover:border-[var(--accent)]/30 hover:shadow-2xl hover:scale-[1.02] relative ${
+                                className={`snap-start shrink-0 flex items-stretch rounded-2xl bg-bg-card/40 backdrop-blur-md border border-white/5 overflow-hidden transition-all duration-350 hover:border-accent/30 hover:shadow-2xl hover:scale-[1.02] relative ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 } h-[120px] md:h-[140px] lg:h-[160px] w-[220px] md:w-[250px] lg:w-[280px]`}
                             >
@@ -123,13 +123,13 @@ export default function ContinueWatchingRow() {
                                 <div className="flex-1 min-w-0 flex flex-col justify-between p-3 md:p-3.5 lg:p-4 select-none pb-5">
                                     <div className="space-y-1">
                                         <Link href={getHistoryLink(entry)} className="block group/link">
-                                            <h3 className="font-black text-xs sm:text-sm text-white line-clamp-1 font-sora tracking-tight group-hover/link:text-[var(--accent)] transition-colors">
+                                            <h3 className="font-black text-xs sm:text-sm text-white line-clamp-1 font-sora tracking-tight group-hover/link:text-accent transition-colors">
                                                 {entry.title}
                                             </h3>
                                         </Link>
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                             {entry.episodeId && (
-                                                <span className="text-[9px] font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded border border-[var(--accent)]/20">
+                                                <span className="text-[9px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
                                                     {entry.type === 'tv' ? `S1 · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
                                                 </span>
                                             )}
@@ -144,7 +144,7 @@ export default function ContinueWatchingRow() {
                                     {/* Small Pill Resume */}
                                     <Link 
                                         href={getHistoryLink(entry)}
-                                        className="px-3 py-1 bg-white/5 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white hover:text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-[250ms] flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
+                                        className="px-3 py-1 bg-white/5 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white hover:text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-[250ms] flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
                                     >
                                         <Play className="w-2.5 h-2.5 fill-current" />
                                         <span>Resume</span>

@@ -11,7 +11,7 @@ export default function Logo({ className = "" }: { className?: string }) {
             className={`relative flex items-center justify-center cursor-pointer select-none shrink-0 w-full h-full ${className}`}
         >
             {/* Ambient Background Glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-[var(--accent)] to-[#22D3EE] opacity-25 blur-[8px] rounded-full scale-110" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-accent to-[#22D3EE] opacity-25 blur-[8px] rounded-full scale-110" />
 
             <Image 
                 src="/icon.png" 

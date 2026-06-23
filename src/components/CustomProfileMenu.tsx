@@ -44,7 +44,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
 
   const menuItems = showFullMenu ? [
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
-    { label: "Watch History", icon: Clock, href: "/history", color: "text-[var(--accent)]" },
+    { label: "Watch History", icon: Clock, href: "/history", color: "text-accent" },
     { label: "Profile Settings", icon: Settings, action: () => window.dispatchEvent(new Event("openSettingsModal")), color: "text-blue-400" },
     { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileModal")), color: "text-purple-400" },
     user 
@@ -168,7 +168,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className={`relative w-9 h-9 md:w-10 md:h-10 rounded-full ring-2 ring-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
+        className={`relative w-9 h-9 md:w-10 md:h-10 rounded-full ring-2 ring-accent/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
       >
         <UserAvatar 
           src={user ? user.imageUrl : activeProfile?.avatar} 
@@ -224,7 +224,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
                   );
 
                   const className = `flex items-center gap-3 p-2 rounded-xl transition-all cursor-pointer ${
-                    isFocused ? "bg-[var(--accent)]/10 border-[var(--accent)]/20" : "hover:bg-white/5 border-transparent"
+                    isFocused ? "bg-accent/10 border-accent/20" : "hover:bg-white/5 border-transparent"
                   } border w-full text-left`;
 
                   if (item.href) {

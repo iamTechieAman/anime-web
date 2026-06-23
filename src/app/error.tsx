@@ -17,8 +17,8 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col items-center justify-center p-4 text-center z-50 relative">
-      <div className="max-w-md w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] flex flex-col items-center justify-center p-4 text-center z-50 relative">
+      <div className="max-w-md w-full bg-bg-card border border-border-color rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-red-500/20 blur-3xl rounded-full" />
         
@@ -42,7 +42,7 @@ export default function GlobalError({
                 </button>
                 <Link
                     href="/"
-                    className="w-full flex items-center justify-center gap-2 bg-[var(--bg-main)] border border-[var(--border-color)] text-white py-3.5 rounded-xl font-bold hover:bg-white/5 transition-colors active:scale-95"
+                    className="w-full flex items-center justify-center gap-2 bg-bg-main border border-border-color text-white py-3.5 rounded-xl font-bold hover:bg-white/5 transition-colors active:scale-95"
                 >
                     <Home className="w-4 h-4" />
                     Return Home

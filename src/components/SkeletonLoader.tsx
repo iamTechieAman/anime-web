@@ -6,7 +6,7 @@ import { memo } from "react";
 export const HeroSkeleton = memo(function HeroSkeleton() {
     return (
         <div className="skeleton-hero relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent z-10" />
             <div className="absolute bottom-12 left-6 md:left-12 z-20 space-y-4 w-full max-w-lg">
                 {/* Badge */}
                 <div className="w-32 h-6 skeleton-shine rounded" />
@@ -47,7 +47,7 @@ export const RowSkeleton = memo(function RowSkeleton({ count = 6 }: { count?: nu
         <div className="space-y-4">
             {/* Section header skeleton */}
             <div className="flex items-center gap-3">
-                <div className="w-1 h-5 bg-[var(--accent)] rounded-full" />
+                <div className="w-1 h-5 bg-accent rounded-full" />
                 <div className="w-5 h-5 shimmer-card bg-zinc-900 rounded" />
                 <div className="w-40 h-5 shimmer-card bg-zinc-900 rounded" />
             </div>
@@ -87,7 +87,7 @@ export const GridSkeleton = memo(function GridSkeleton({ count = 12 }: { count?:
 // --- Details Skeleton (for watch pages) ---
 export const DetailsSkeleton = memo(function DetailsSkeleton() {
     return (
-        <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)]">
+        <div className="min-h-dvh bg-bg-main text-[var(--text-main)]">
             {/* Player skeleton */}
             <div className="pt-14">
                 <div className="max-w-7xl mx-auto">
@@ -123,7 +123,7 @@ export const ContinueWatchingSkeleton = memo(function ContinueWatchingSkeleton()
     return (
         <section className="mb-8 w-full overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                 <div className="w-4 h-4 skeleton-shine rounded" />
                 <div className="w-40 h-5 skeleton-shine rounded" />
             </div>
@@ -139,7 +139,7 @@ export const ContinueWatchingSkeleton = memo(function ContinueWatchingSkeleton()
 // --- Trending Stars Skeleton ---
 export const TrendingStarsSkeleton = memo(function TrendingStarsSkeleton() {
     return (
-        <div className="bg-[var(--bg-card)]/50 p-6 rounded-2xl border border-[var(--border-color)]">
+        <div className="bg-bg-card/50 p-6 rounded-2xl border border-border-color">
             <div className="h-5 w-36 skeleton-shine rounded mb-6" />
             <div className="grid grid-cols-2 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (

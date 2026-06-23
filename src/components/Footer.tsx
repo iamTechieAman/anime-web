@@ -8,7 +8,7 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="relative z-10 w-full bg-[var(--bg-main)] border-t border-[rgba(255,255,255,0.06)] pt-8 pb-24 md:pb-8 mt-auto">
+        <footer className="relative z-10 w-full bg-bg-main border-t border-[rgba(255,255,255,0.06)] pt-8 pb-24 md:pb-8 mt-auto">
             <div className="max-w-[1800px] mx-auto px-6 flex flex-col items-center justify-center gap-6">
                 {/* Brand & TMDB Disclaimer */}
                 <div className="flex flex-col items-center gap-3 text-center">

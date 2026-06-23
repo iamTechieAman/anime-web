@@ -10,10 +10,10 @@ import Fuse from "fuse.js";
 import { useDebounce } from "@/hooks/useDebounce";
 
 const quickLinks = [
-    { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-[var(--accent)] to-[var(--accent-secondary)]" },
+    { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-accent to-accent-secondary" },
     { name: "Trending Now", href: "/search?genre=Action", icon: TrendingUp, color: "from-rose-500 to-pink-600" },
     { name: "Browse Genres", href: "/genres", icon: LayoutGrid, color: "from-cyan-500 to-blue-600" },
-    { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "from-yellow-500 to-[var(--accent-warm)]" },
+    { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "from-yellow-500 to-accent-warm" },
     { name: "New Releases", href: "/search?status=Ongoing", icon: Sparkles, color: "from-emerald-500 to-green-600" },
 ];
 
@@ -206,7 +206,7 @@ export default function MobileModals() {
                             exit={{ y: "100%" }}
                             transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
                             onClick={(e) => e.stopPropagation()}
-                            className="mobile-menu-drawer isolate flex w-[90vw] max-w-[420px] flex-col overflow-hidden rounded-t-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xl md:rounded-2xl"
+                            className="mobile-menu-drawer isolate flex w-[90vw] max-w-[420px] flex-col overflow-hidden rounded-t-2xl border border-border-color bg-bg-card shadow-xl md:rounded-2xl"
                         >
                             <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
                                 <div className="w-12 h-1.5 bg-[var(--text-muted)]/30 rounded-full"></div>
@@ -217,7 +217,7 @@ export default function MobileModals() {
                                     <h2 className="text-xl font-black text-[var(--text-main)]">Menu</h2>
                                     <button
                                         onClick={() => setMenuOpen(false)}
-                                        className="p-2 bg-[var(--bg-main)] hover:bg-[var(--border-color)] rounded-full transition-colors"
+                                        className="p-2 bg-bg-main hover:bg-border-color rounded-full transition-colors"
                                     >
                                         <X className="w-5 h-5 text-[var(--text-main)]" />
                                     </button>
@@ -233,7 +233,7 @@ export default function MobileModals() {
                                                 <button
                                                     key={link.name}
                                                     onClick={() => { setMenuOpen(false); router.push(link.href, { scroll: false }); }}
-                                                    className="flex min-w-0 items-center gap-2.5 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] p-3 text-left transition-colors hover:border-white/20 active:scale-95"
+                                                    className="flex min-w-0 items-center gap-2.5 overflow-hidden rounded-xl border border-border-color bg-bg-main p-3 text-left transition-colors hover:border-white/20 active:scale-95"
                                                 >
                                                     <div className={`flex h-8 w-8 max-w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${link.color} shadow-lg`}>
                                                         <Icon className="drawer-safe-icon h-4 w-4 text-white" />
@@ -250,7 +250,7 @@ export default function MobileModals() {
                                     <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Settings</h3>
 
                                     {/* Auto Play */}
-                                    <div className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-[var(--border-color)]">
+                                    <div className="flex items-center justify-between p-3 bg-bg-main rounded-xl border border-border-color">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
                                                 <Zap className="drawer-safe-icon w-5 h-5" />
@@ -269,8 +269,8 @@ export default function MobileModals() {
                                     </div>
 
                                     {/* Features Info */}
-                                    <div className="shrink-0 h-auto overflow-hidden rounded-xl border border-[var(--border-color)] bg-gradient-to-r from-[var(--accent)]/5 to-[var(--accent-secondary)]/5 p-4">
-                                        <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--accent)] uppercase tracking-tight">
+                                    <div className="shrink-0 h-auto overflow-hidden rounded-xl border border-border-color bg-gradient-to-r from-accent/5 to-accent-secondary/5 p-4">
+                                        <div className="flex items-center gap-2 text-[10px] font-bold text-accent uppercase tracking-tight">
                                             <Sparkles className="drawer-safe-icon w-3 h-3" />
                                             Premium Features Active
                                         </div>
@@ -281,11 +281,11 @@ export default function MobileModals() {
                                 {/* App Info */}
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">About</h3>
-                                    <div className="overflow-hidden rounded-xl border border-[var(--accent)]/20 bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent-secondary)]/10 p-4 transform-gpu translate-z-0 will-change-transform">
+                                    <div className="overflow-hidden rounded-xl border border-accent/20 bg-gradient-to-br from-accent/10 to-accent-secondary/10 p-4 transform-gpu translate-z-0 will-change-transform">
                                         <div className="flex items-center gap-3 mb-3">
                                             <div className="relative flex h-10 w-10 max-h-12 max-w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white/5 p-1">
                                                 {logoError ? (
-                                                    <Play aria-hidden="true" className="drawer-safe-icon h-full w-full max-w-[48px] max-h-[48px] object-contain fill-[var(--accent)] text-[var(--accent)]" />
+                                                    <Play aria-hidden="true" className="drawer-safe-icon h-full w-full max-w-[48px] max-h-[48px] object-contain fill-accent text-accent" />
                                                 ) : (
                                                     <Image
                                                         src="/icon-512x512.png"
@@ -309,7 +309,7 @@ export default function MobileModals() {
                                             Premium anime & movie streaming. Built with love by Aman Kumar.
                                         </p>
                                         <div className="flex gap-2">
-                                            <a href="https://github.com/iamTechieAman" target="_blank" className="flex-1 py-2 text-center bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--border-color)] transition-colors">
+                                            <a href="https://github.com/iamTechieAman" target="_blank" className="flex-1 py-2 text-center bg-bg-main border border-border-color rounded-lg text-[11px] font-bold text-[var(--text-main)] hover:bg-border-color transition-colors">
                                                 GitHub
                                             </a>
                                             <a href="https://linkedin.com" target="_blank" className="flex-1 py-2 text-center bg-[#0077b5] text-white rounded-lg text-[11px] font-bold hover:bg-[#006097] transition-colors">
@@ -333,11 +333,11 @@ export default function MobileModals() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[55] bg-[var(--bg-main)] flex flex-col md:hidden pt-safe"
+                        className="fixed inset-0 z-[55] bg-bg-main flex flex-col md:hidden pt-safe"
                         style={{ willChange: 'opacity' }}
                     >
                         {/* Top bar (sticky) */}
-                        <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border-color)] bg-[var(--bg-main)] shrink-0">
+                        <div className="flex items-center gap-3 px-4 py-4 border-b border-border-color bg-bg-main shrink-0">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                                 <form onSubmit={(e) => {
@@ -349,12 +349,12 @@ export default function MobileModals() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={isDiscoverMode ? "Describe what you want..." : searchPlaceholder}
-                                        className={`w-full text-[var(--text-main)] border rounded-xl pl-10 pr-[88px] py-3 ring-0 focus:ring-0 outline-none focus:outline-none transition-all text-sm shadow-none ${isDiscoverMode ? 'bg-[var(--accent)]/10 border-[var(--accent)]/50 focus:border-[var(--accent)]' : 'bg-[var(--bg-card)] border-[var(--border-color)] focus:border-[var(--accent)]/60'}`}
+                                        className={`w-full text-[var(--text-main)] border rounded-xl pl-10 pr-[88px] py-3 ring-0 focus:ring-0 outline-none focus:outline-none transition-all text-sm shadow-none ${isDiscoverMode ? 'bg-accent/10 border-accent/50 focus:border-accent' : 'bg-bg-card border-border-color focus:border-accent/60'}`}
                                     />
                                     <button 
                                         type="button"
                                         onClick={() => setIsDiscoverMode(!isDiscoverMode)}
-                                        className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg shadow-[var(--accent)]/30' : 'bg-[var(--bg-main)] text-[var(--text-muted)] hover:text-white border border-[var(--border-color)]'}`}
+                                        className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg shadow-accent/30' : 'bg-bg-main text-[var(--text-muted)] hover:text-white border border-border-color'}`}
                                     >
                                         <Sparkles className="w-3 h-3" />
                                         AI
@@ -363,7 +363,7 @@ export default function MobileModals() {
                             </div>
                             <button
                                 onClick={() => setSearchOpen(false)}
-                                className="p-2 bg-[var(--bg-card)] rounded-xl transition-colors active:scale-95 shrink-0"
+                                className="p-2 bg-bg-card rounded-xl transition-colors active:scale-95 shrink-0"
                             >
                                 <X className="w-5 h-5 text-[var(--text-muted)]" />
                             </button>
@@ -377,7 +377,7 @@ export default function MobileModals() {
                                     {/* Pinned Searches */}
                                     {pinnedSearches.length > 0 && (
                                         <div className="pt-4">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] mb-3 flex items-center gap-1.5">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-accent mb-3 flex items-center gap-1.5">
                                                 <Pin className="w-3 h-3" /> Pinned Searches
                                             </p>
                                             <div className="flex flex-wrap gap-2">
@@ -388,7 +388,7 @@ export default function MobileModals() {
                                                             setSearchQuery(s);
                                                             handleMobileSearchSubmit(s);
                                                         }}
-                                                        className="px-3 py-1.5 bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-xl text-xs font-bold text-[var(--accent)] active:scale-95 transition-all"
+                                                        className="px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-xl text-xs font-bold text-accent active:scale-95 transition-all"
                                                     >
                                                         {s}
                                                     </button>
@@ -401,7 +401,7 @@ export default function MobileModals() {
                                     {recentSearches.length > 0 && (
                                         <div>
                                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-1.5">
-                                                <Clock className="w-3 h-3 text-[var(--accent)]" /> Recent Searches
+                                                <Clock className="w-3 h-3 text-accent" /> Recent Searches
                                             </p>
                                             <div className="flex flex-wrap gap-2">
                                                 {recentSearches.map((s, i) => (
@@ -411,7 +411,7 @@ export default function MobileModals() {
                                                             setSearchQuery(s);
                                                             handleMobileSearchSubmit(s);
                                                         }}
-                                                        className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-main)] active:scale-95 transition-all"
+                                                        className="px-3 py-1.5 bg-bg-card border border-border-color rounded-xl text-xs font-bold text-[var(--text-main)] active:scale-95 transition-all"
                                                     >
                                                         {s}
                                                     </button>
@@ -428,7 +428,7 @@ export default function MobileModals() {
                                                 <button 
                                                     key={genre}
                                                     onClick={() => { setSearchOpen(false); router.push(`/search?genre=${genre}`, { scroll: false }); }}
-                                                    className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)]/50 transition-colors active:scale-95 shrink-0"
+                                                    className="px-4 py-2 bg-bg-card border border-border-color rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-accent hover:border-accent/50 transition-colors active:scale-95 shrink-0"
                                                 >
                                                     {genre}
                                                 </button>
@@ -439,7 +439,7 @@ export default function MobileModals() {
                                     {/* Trending Hits */}
                                     {globalCatalog.length > 0 && (
                                         <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--accent)] mb-3 flex items-center gap-1.5">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-accent mb-3 flex items-center gap-1.5">
                                                 <TrendingUp className="w-3 h-3" /> Trending Hits
                                             </p>
                                             <div className="space-y-2">
@@ -447,15 +447,15 @@ export default function MobileModals() {
                                                     <Link
                                                         key={i}
                                                         href={item.href || (item.id ? `/watch/${item.type || 'anime'}/${item.id}` : '#')}
-                                                        className="flex items-center gap-4 p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl active:scale-[0.98] transition-all"
+                                                        className="flex items-center gap-4 p-2 bg-bg-card border border-border-color rounded-2xl active:scale-[0.98] transition-all"
                                                         onClick={() => setSearchOpen(false)}
                                                     >
                                                         <span className="text-sm font-black text-[var(--text-muted)]/50 w-5 text-center italic">0{i + 1}</span>
-                                                        <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-[var(--bg-elevated)] border border-white/5">
+                                                        <div className="w-10 h-12 relative shrink-0 overflow-hidden rounded-lg bg-bg-elevated border border-white/5">
                                                             {item.image && <Image src={item.image} alt="" fill sizes="48px" className="object-cover" />}
                                                         </div>
                                                         <span className="text-xs font-bold text-[var(--text-main)] truncate flex-1">{item.title}</span>
-                                                        <Play className="w-4 h-4 text-[var(--accent)] mr-2 shrink-0" />
+                                                        <Play className="w-4 h-4 text-accent mr-2 shrink-0" />
                                                     </Link>
                                                 ))}
                                             </div>
@@ -477,9 +477,9 @@ export default function MobileModals() {
                                                             setSearchOpen(false);
                                                             saveSearch(item.title);
                                                         }}
-                                                        className="flex items-center gap-4 p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl active:scale-[0.98] transition-all"
+                                                        className="flex items-center gap-4 p-2 bg-bg-card border border-border-color rounded-2xl active:scale-[0.98] transition-all"
                                                     >
-                                                        <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-[var(--bg-elevated)] border border-white/5">
+                                                        <div className="w-12 h-16 relative shrink-0 overflow-hidden rounded-xl bg-bg-elevated border border-white/5">
                                                             {item.image ? (
                                                                 <Image src={item.image} alt={item.title || "Poster"} fill sizes="80px" className="object-cover" />
                                                             ) : (
@@ -491,7 +491,7 @@ export default function MobileModals() {
                                                         <div className="flex-1 min-w-0">
                                                             <span className="text-xs font-black text-[var(--text-main)] block truncate mb-1">{item.title}</span>
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
+                                                                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
                                                                 <span className="text-[10px] text-[var(--text-muted)] font-semibold">{item.format} • {item.year}</span>
                                                                 {item.rating && (
                                                                     <span className="flex items-center gap-0.5 text-[10px] text-amber-400 font-bold shrink-0">
@@ -500,14 +500,14 @@ export default function MobileModals() {
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <Play className="w-4 h-4 text-[var(--accent)] mr-2 shrink-0" />
+                                                        <Play className="w-4 h-4 text-accent mr-2 shrink-0" />
                                                     </Link>
                                                 ))}
                                             </div>
 
                                             <button 
                                                 onClick={() => handleMobileSearchSubmit(searchQuery)}
-                                                className="w-full py-3.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-[var(--accent)]/20 active:scale-[0.98]"
+                                                className="w-full py-3.5 bg-gradient-to-r from-accent to-accent-secondary text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-accent/20 active:scale-[0.98]"
                                             >
                                                 See All Results
                                             </button>

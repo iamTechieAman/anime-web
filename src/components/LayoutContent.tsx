@@ -103,7 +103,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const showSidebar = !isWatchPage;
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] w-full m-0 p-0">
+    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0">
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
@@ -120,12 +120,12 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
           (isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-16'
         } isolate bg-[#09090B]`}>
           {/* Subtle global ambient glow */}
-          <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-[var(--accent)]/[0.04] to-transparent pointer-events-none z-0" />
+          <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-accent/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-8 h-8 border-2 border-[var(--accent-warm)] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-accent-warm border-t-transparent rounded-full animate-spin" />
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold animate-pulse">Loading</p>
                 </div>
               </div>

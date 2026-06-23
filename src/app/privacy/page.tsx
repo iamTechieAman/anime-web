@@ -28,7 +28,7 @@ export default function PrivacyPage() {
     ];
 
     return (
-        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
+        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="text-center space-y-4">
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            className="p-8 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-4"
+                            className="p-8 bg-bg-card rounded-2xl border border-border-color space-y-4"
                         >
                             <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center">
                                 <section.icon className="w-5 h-5 text-blue-400" />

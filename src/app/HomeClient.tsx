@@ -13,7 +13,7 @@ import useSWR from 'swr';
 import type { ProviderSlug } from "@/components/ProviderBar";
 import dynamic from "next/dynamic";
 
-const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] bg-[var(--bg-elevated)] animate-pulse w-full" /> });
+const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] bg-bg-elevated animate-pulse w-full" /> });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
 const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });
@@ -128,8 +128,8 @@ const TopCollectionsRow = () => {
     return (
         <section className="mb-8 md:mb-12 w-full overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                <Sparkles className="w-4 h-4 text-accent" />
                 <h2 className="text-base md:text-lg font-black font-sora tracking-tight text-white">Curated Collections</h2>
             </div>
             <div className="w-full">
@@ -138,7 +138,7 @@ const TopCollectionsRow = () => {
                         <Link scroll={false} 
                             href={col.link} 
                             key={col.id}
-                            className="snap-start shrink-0 relative w-[240px] sm:w-[280px] md:w-[320px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 bg-[var(--bg-elevated)] shadow-lg group hover:border-[var(--accent)]/30 hover:shadow-2xl transition-all duration-350 hover:scale-[1.02]"
+                            className="snap-start shrink-0 relative w-[240px] sm:w-[280px] md:w-[320px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 bg-bg-elevated shadow-lg group hover:border-accent/30 hover:shadow-2xl transition-all duration-350 hover:scale-[1.02]"
                         >
                             <Image 
                                 src={col.image} 
@@ -149,8 +149,8 @@ const TopCollectionsRow = () => {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                             <div className="absolute inset-0 flex flex-col justify-end p-4 z-20 select-none">
-                                <span className="text-[8px] font-black tracking-widest text-[var(--accent)] uppercase mb-1">COLLECTION</span>
-                                <h3 className="text-sm md:text-base font-black text-white font-sora tracking-tight leading-tight mb-1 group-hover:text-[var(--accent)] transition-colors">
+                                <span className="text-[8px] font-black tracking-widest text-accent uppercase mb-1">COLLECTION</span>
+                                <h3 className="text-sm md:text-base font-black text-white font-sora tracking-tight leading-tight mb-1 group-hover:text-accent transition-colors">
                                     {col.title}
                                 </h3>
                                 <p className="text-[10px] text-zinc-400 font-medium line-clamp-2 leading-relaxed">
@@ -437,10 +437,10 @@ export default function MoviesPage() {
     }, [paramsInUrl]);
 
     return (
-        <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-[var(--accent-warm)]/25 transition-colors duration-[250ms]">
+        <div className="bg-bg-main text-[var(--text-main)] selection:bg-accent-warm/25 transition-colors duration-[250ms]">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[var(--accent)]/[0.03] to-transparent" />
+                <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-accent/[0.03] to-transparent" />
             </div>
 
             <div className="relative z-10 w-full">
@@ -464,8 +464,8 @@ export default function MoviesPage() {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer relative z-50 border ${activeTab === tab.id
-                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
-                                            : "bg-[var(--bg-card)] border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white border-transparent shadow-[0_0_20px_rgba(88,101,242,0.35)] scale-105"
+                                            : "bg-bg-card border-white/5 text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
                                         }`}
                                     >
                                         <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
@@ -493,7 +493,7 @@ export default function MoviesPage() {
                     {searchQuery ? (
                         <div className="space-y-6">
                             <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                                <Search className="w-6 h-6 text-[var(--accent)]" />
+                                <Search className="w-6 h-6 text-accent" />
                                 {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
                             </h2>
                             {searchResults.length > 0 ? (
@@ -502,7 +502,7 @@ export default function MoviesPage() {
                                         <Link
                                             key={`${item.type}-${item.id}`}
                                             href={item.href}
-                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--accent)]/40 transition-all hover:scale-[1.02] duration-[250ms] shadow-lg"
+                                            className="group relative bg-bg-card rounded-xl overflow-hidden border border-border-color hover:border-accent/40 transition-all hover:scale-[1.02] duration-[250ms] shadow-lg"
                                         >
                                             <div className="aspect-[2/3] relative">
                                                 <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 33vw, 20vw" className="object-cover" />
@@ -511,7 +511,7 @@ export default function MoviesPage() {
                                                 </div>
                                             </div>
                                             <div className="p-3">
-                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-[var(--accent)] transition-colors tracking-tight">{item.title}</h3>
+                                                <h3 className="text-sm font-bold text-white truncate leading-tight mb-1 group-hover:text-accent transition-colors tracking-tight">{item.title}</h3>
                                                 <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-medium">
                                                     <span>{item.format}</span>
                                                     <span>{item.year}</span>
@@ -549,7 +549,7 @@ export default function MoviesPage() {
                                             </div>
                                             <button
                                                 onClick={() => setActiveProvider("all")}
-                                                className="px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white font-bold text-sm transition-all"
+                                                className="px-6 py-3 rounded-full bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white font-bold text-sm transition-all"
                                             >
                                                 Browse All Content
                                             </button>
@@ -563,8 +563,8 @@ export default function MoviesPage() {
                                 {/* Trending row for active provider */}
                                 {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
                                     <section className="mb-4 relative">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[16px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-[var(--accent)]" isFeatured />
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-accent" isFeatured />
                                         <LazySection><MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge /></LazySection>
                                     </section>
                                 )}
@@ -572,8 +572,8 @@ export default function MoviesPage() {
                                 {/* Smart Recommendations (only when no provider active) */}
                                 {activeProvider === "all" && activeTab !== "anime" && recommendedItems.length > 0 && (
                                     <section className="mb-8 md:mb-12 relative">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[16px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-[var(--accent)]" isFeatured />
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
+                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-accent" isFeatured />
                                         <LazySection>
                                             <MovieRow 
                                                 items={recommendedItems} 
@@ -592,18 +592,18 @@ export default function MoviesPage() {
                                 {deviceMode === "tv" ? (
                                     <div className="space-y-6 md:space-y-8">
                                         <section className="relative">
-                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-[var(--accent)]/8 rounded-full blur-[16px] pointer-events-none" />
-                                            <SectionHeader icon={Tv} title="Featured Toons" color="text-[var(--accent)]" isFeatured />
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
+                                            <SectionHeader icon={Tv} title="Featured Toons" color="text-accent" isFeatured />
                                             <LazySection><MovieRow items={CARTOONS_DATA} title="tv-featured-toons" isLarge /></LazySection>
                                         </section>
                                         
                                         <section className="relative">
-                                            <SectionHeader icon={Flame} title="New Releases" color="text-[var(--accent-warm)]" />
+                                            <SectionHeader icon={Flame} title="New Releases" color="text-accent-warm" />
                                             <LazySection><MovieRow items={[...CARTOONS_DATA, ...trending.slice(0, 5)]} title="tv-new-releases" /></LazySection>
                                         </section>
 
                                         <section className="relative">
-                                            <SectionHeader icon={Play} title="Game-Streaming Highlights" color="text-[var(--accent-secondary)]" isFeatured />
+                                            <SectionHeader icon={Play} title="Game-Streaming Highlights" color="text-accent-secondary" isFeatured />
                                             <LazySection><MovieRow items={GAMING_STREAMS_DATA} title="tv-gaming-highlights" /></LazySection>
                                         </section>
                                     </div>
@@ -618,13 +618,13 @@ export default function MoviesPage() {
                                             <>
                                                 {providerData[activeProvider].movies?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-[var(--accent)]" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-accent" isFeatured />
                                                         <LazySection><MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-movies`} isLarge /></LazySection>
                                                     </section>
                                                 )}
                                                 {providerData[activeProvider].topRated?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated" color="text-[var(--accent-warm)]" />
+                                                        <SectionHeader icon={Star} title="Top Rated" color="text-accent-warm" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !i.name)} type="movie" title={`${activeProvider}-toprated`} /></LazySection>
                                                     </section>
                                                 )}
@@ -633,25 +633,25 @@ export default function MoviesPage() {
                                             <>
                                                 {((loading && trending.filter(m => (m as any).media_type === 'movie' || !m.name).length === 0) || trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title="Trending Movies" color="text-[var(--accent)]" isFeatured />
+                                                        <SectionHeader icon={Flame} title="Trending Movies" color="text-accent" isFeatured />
                                                         {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <LazySection><MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && popular.length === 0) || popular.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Film} title="Popular Movies" color="text-[var(--accent)]" />
+                                                        <SectionHeader icon={Film} title="Popular Movies" color="text-accent" />
                                                         {popular.length > 0 ? <LazySection><MovieRow items={popular} type="movie" title="movies-popular" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && nowPlaying.length === 0) || nowPlaying.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-[var(--accent-warm)]" />
+                                                        <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-accent-warm" />
                                                         {nowPlaying.length > 0 ? <LazySection><MovieRow items={nowPlaying} type="movie" title="now-playing" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && topRated.length === 0) || topRated.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated Movies" color="text-[var(--accent-warm)]" isFeatured />
+                                                        <SectionHeader icon={Star} title="Top Rated Movies" color="text-accent-warm" isFeatured />
                                                         {topRated.length > 0 ? <LazySection><MovieGrid items={topRated} type="movie" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
@@ -660,7 +660,7 @@ export default function MoviesPage() {
                                                     if ((loading && !items) || (items && items.length > 0)) {
                                                         return (
                                                             <section key={genre.title} id={`genre-${genre.genreId}`}>
-                                                                <SectionHeader icon={genre.icon} title={genre.title} color="text-[var(--accent)]" />
+                                                                <SectionHeader icon={genre.icon} title={genre.title} color="text-accent" />
                                                                 {items && items.length > 0 ? (
                                                                     <LazySection><MovieRow items={items} type={genre.type} title={genre.title} /></LazySection>
                                                                 ) : (
@@ -685,13 +685,13 @@ export default function MoviesPage() {
                                             <>
                                                 {providerData[activeProvider].tv?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-[var(--accent)]" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-accent" isFeatured />
                                                         <LazySection><MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-tv`} isLarge /></LazySection>
                                                     </section>
                                                 )}
                                                 {providerData[activeProvider].topRated?.filter((i:any) => !!i.name).length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-[var(--accent-warm)]" />
+                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-accent-warm" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !!i.name)} type="tv" title={`${activeProvider}-toprated-tv`} /></LazySection>
                                                     </section>
                                                 )}
@@ -700,19 +700,19 @@ export default function MoviesPage() {
                                             <>
                                                 {((loading && trending.filter(m => (m as any).media_type === 'tv' || m.name).length === 0) || trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title="Trending TV Shows" color="text-[var(--accent)]" isFeatured />
+                                                        <SectionHeader icon={Flame} title="Trending TV Shows" color="text-accent" isFeatured />
                                                         {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <LazySection><MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Tv} title="Popular TV Shows" color="text-[var(--accent)]" />
+                                                        <SectionHeader icon={Tv} title="Popular TV Shows" color="text-accent" />
                                                         {tvPopular.length > 0 ? <LazySection><MovieRow items={tvPopular} type="tv" title="tv-popular" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && tvTopRated.length === 0) || tvTopRated.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-[var(--accent-warm)]" isFeatured />
+                                                        <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-accent-warm" isFeatured />
                                                         {tvTopRated.length > 0 ? <LazySection><MovieGrid items={tvTopRated} type="tv" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
@@ -746,12 +746,12 @@ export default function MoviesPage() {
                                         {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-[var(--accent)]" isFeatured />
+                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-accent" isFeatured />
                                                     <LazySection><MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-anime`} isLarge /></LazySection>
                                                 </section>
                                                 {providerData[activeProvider].movies?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-[var(--accent-secondary)]" />
+                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-accent-secondary" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-anime-movies`} /></LazySection>
                                                     </section>
                                                 )}
@@ -760,7 +760,7 @@ export default function MoviesPage() {
                                             <>
                                                 {((loading && animeTrending.length === 0) || animeTrending.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title="Trending Anime" color="text-[var(--accent)]" isFeatured />
+                                                        <SectionHeader icon={Flame} title="Trending Anime" color="text-accent" isFeatured />
                                                         {animeTrending.length > 0 ? (
                                                             <LazySection>
                                                                 <MovieRow
@@ -781,7 +781,7 @@ export default function MoviesPage() {
                                                 )}
                                                 {((loading && animeLatest.length === 0) || animeLatest.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-[var(--accent)]" />
+                                                        <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-accent" />
                                                         {animeLatest.length > 0 ? (
                                                             <LazySection>
                                                                 <MovieRow
@@ -810,11 +810,11 @@ export default function MoviesPage() {
                                         className="space-y-8 md:space-y-12"
                                     >
                                         <section>
-                                            <SectionHeader icon={Tv} title="Featured PC Toons" color="text-[var(--accent)]" isFeatured />
+                                            <SectionHeader icon={Tv} title="Featured PC Toons" color="text-accent" isFeatured />
                                             <LazySection><MovieRow items={CARTOONS_DATA} title="featured-pc-toons" isLarge /></LazySection>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Sparkles} title="Latest Animated Releases" color="text-[var(--accent-warm)]" />
+                                            <SectionHeader icon={Sparkles} title="Latest Animated Releases" color="text-accent-warm" />
                                             <LazySection><MovieGrid items={CARTOONS_DATA} type="tv" /></LazySection>
                                         </section>
                                     </div>
@@ -826,11 +826,11 @@ export default function MoviesPage() {
                                         className="space-y-8 md:space-y-12"
                                     >
                                         <section>
-                                            <SectionHeader icon={Play} title="Live Streaming Highlights" color="text-[var(--accent)]" isFeatured />
+                                            <SectionHeader icon={Play} title="Live Streaming Highlights" color="text-accent" isFeatured />
                                             <LazySection><MovieRow items={GAMING_STREAMS_DATA} title="live-streaming-highlights" isLarge /></LazySection>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Sparkles} title="Popular Gaming Hub Channels" color="text-[var(--accent-secondary)]" />
+                                            <SectionHeader icon={Sparkles} title="Popular Gaming Hub Channels" color="text-accent-secondary" />
                                             <LazySection><MovieGrid items={GAMING_STREAMS_DATA} type="movie" /></LazySection>
                                         </section>
                                     </div>
@@ -840,19 +840,19 @@ export default function MoviesPage() {
                                     <div className="space-y-8 md:space-y-12">
                                         {((loading && trending.length === 0) || trending.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={TrendingUp} title="Global Trending" color="text-[var(--accent)]" isFeatured />
+                                                <SectionHeader icon={TrendingUp} title="Global Trending" color="text-accent" isFeatured />
                                                 {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
                                             </section>
                                         )}
                                         {((loading && popular.length === 0) || popular.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-[var(--accent-secondary)]" />
+                                                <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-accent-secondary" />
                                                 {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
                                             </section>
                                         )}
                                         {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Tv} title="Trending Series" color="text-[var(--accent)]" />
+                                                <SectionHeader icon={Tv} title="Trending Series" color="text-accent" />
                                                 {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
                                             </section>
                                         )}
@@ -862,12 +862,12 @@ export default function MoviesPage() {
                                 {activeTab === "discover" && (
                                     <div className="space-y-2 md:space-y-3">
                                         {((loading && mjItems.length === 0) || mjItems.length > 0) && (
-                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent-warm)]/20 border border-[var(--accent)]/20 overflow-hidden">
-                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
-                                                <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-[var(--accent-warm)]" isFeatured />
+                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-accent/20 to-accent-warm/20 border border-accent/20 overflow-hidden">
+                                                <div className="absolute -right-20 -top-20 w-80 h-80 bg-accent/10 rounded-full blur-3xl" />
+                                                <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-accent-warm" isFeatured />
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                                                     {mjItems.map((item, i) => (
-                                                        <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent)]/30 transition-all cursor-pointer group">
+                                                        <div key={i} className="bg-bg-card p-4 rounded-2xl border border-white/5 hover:border-accent/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
                                                                     <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-[250ms]" will-change-transform />
@@ -884,12 +884,12 @@ export default function MoviesPage() {
                                         )}
                                         {((loading && podcasts.length === 0) || podcasts.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Zap} title="Trending Podcasts" color="text-[var(--accent-secondary)]" />
+                                                <SectionHeader icon={Zap} title="Trending Podcasts" color="text-accent-secondary" />
                                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                     {podcasts.map((pod, i) => (
-                                                        <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent-secondary)]/30 transition-all cursor-pointer group">
-                                                            <div className="w-16 h-16 rounded-xl bg-[var(--accent-secondary)]/10 flex items-center justify-center border border-[var(--accent-secondary)]/20 flex-shrink-0 group-hover:bg-[var(--accent-secondary)]/20">
-                                                                <Play className="w-6 h-6 text-[var(--accent-secondary)]" />
+                                                        <div key={i} className="flex items-center gap-4 bg-bg-card p-4 rounded-2xl border border-white/5 hover:border-accent-secondary/30 transition-all cursor-pointer group">
+                                                            <div className="w-16 h-16 rounded-xl bg-accent-secondary/10 flex items-center justify-center border border-accent-secondary/20 flex-shrink-0 group-hover:bg-accent-secondary/20">
+                                                                <Play className="w-6 h-6 text-accent-secondary" />
                                                             </div>
                                                             <div className="min-w-0">
                                                                 <h3 className="text-sm font-bold text-white truncate">{pod.title}</h3>
@@ -902,12 +902,12 @@ export default function MoviesPage() {
                                         )}
                                         {((loading && books.length === 0) || books.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Popcorn} title="Trending Books" color="text-[var(--accent)]" />
+                                                <SectionHeader icon={Popcorn} title="Trending Books" color="text-accent" />
                                                 <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
                                                     {books.map((book, i) => (
                                                         <div key={i} className="flex-shrink-0 w-[160px] group cursor-pointer">
-                                                            <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-[var(--accent)]/40 transition-all flex flex-col items-center justify-center p-4 text-center">
-                                                                <div className="w-10 h-1 bg-[var(--accent)] mb-4" />
+                                                            <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-accent/40 transition-all flex flex-col items-center justify-center p-4 text-center">
+                                                                <div className="w-10 h-1 bg-accent mb-4" />
                                                                 <h3 className="text-xs font-bold text-white leading-tight mb-2">{book.title}</h3>
                                                                 <p className="text-[9px] text-zinc-500">{book.author}</p>
                                                             </div>
@@ -919,17 +919,17 @@ export default function MoviesPage() {
                                         )}
                                         {((loading && songs.length === 0) || songs.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Flame} title="Trending Songs" color="text-[var(--accent)]" />
+                                                <SectionHeader icon={Flame} title="Trending Songs" color="text-accent" />
                                                 <div className="space-y-2">
                                                     {songs.map((song, i) => (
-                                                        <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)]/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
+                                                        <div key={i} className="flex items-center gap-4 bg-bg-card/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
                                                             <span className="text-xs font-bold text-zinc-600 w-4">{i + 1}</span>
                                                             <div className="flex-1 min-w-0">
                                                                 <h3 className="text-sm font-bold text-white truncate">{song.title}</h3>
                                                                 <p className="text-[10px] text-zinc-500">{song.artist}</p>
                                                             </div>
                                                             <span className="text-[10px] font-bold text-zinc-500">{song.year}</span>
-                                                            <Play className="w-4 h-4 text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            <Play className="w-4 h-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
                                                         </div>
                                                     ))}
                                                 </div>
@@ -937,13 +937,13 @@ export default function MoviesPage() {
                                         )}
                                         {((loading && videos.length === 0) || videos.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Film} title="Trending Videos" color="text-[var(--accent)]" />
+                                                <SectionHeader icon={Film} title="Trending Videos" color="text-accent" />
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     {videos.map((vid, i) => (
                                                         <div key={i} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
                                                             <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <div className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center">
+                                                                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
                                                                     <Play className="w-6 h-6 text-white fill-white ml-1" />
                                                                 </div>
                                                             </div>
@@ -971,7 +971,7 @@ export default function MoviesPage() {
 
                 <section className="mb-6 md:mb-8 max-w-[1400px] mx-auto px-6 lg:px-12 relative hidden">
                     {/* Subtle ambient glow for the bottom region */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-[var(--accent)]/10 rounded-full blur-[24px] pointer-events-none z-0" />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-2xl h-64 bg-accent/10 rounded-full blur-[24px] pointer-events-none z-0" />
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
                         <div className="space-y-8">
@@ -983,32 +983,32 @@ export default function MoviesPage() {
                             </p>
                             <div className="pt-4">
                                 <h3 className="text-title mb-6 flex items-center gap-3">
-                                    <Sparkles className="w-6 h-6 text-[var(--accent)]" />
+                                    <Sparkles className="w-6 h-6 text-accent" />
                                     Why Choose ToonPlayer?
                                 </h3>
                                 <ul className="space-y-4">
                                     {["Watch HD movies and anime online", "Fast and user-friendly interface", "Explore trending and top-rated content", "Regularly updated library"].map((feat, i) => (
                                         <li key={i} className="flex items-center gap-4 text-body font-bold text-white/90">
-                                            <CheckCircle className="w-5 h-5 text-[var(--accent)]" /> {feat}
+                                            <CheckCircle className="w-5 h-5 text-accent" /> {feat}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                         </div>
-                        <div className="bg-gradient-to-br from-[var(--bg-card)] to-transparent rounded-[2rem] p-10 border border-white/5 relative overflow-hidden group shadow-2xl">
-                           <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
+                        <div className="bg-gradient-to-br from-bg-card to-transparent rounded-[2rem] p-10 border border-white/5 relative overflow-hidden group shadow-2xl">
+                           <div className="absolute -right-20 -top-20 w-80 h-80 bg-accent/10 rounded-full blur-3xl" />
                            <h3 className="text-2xl font-black text-white mb-4 flex items-center gap-3 font-sora">
-                               <Flame className="w-6 h-6 text-[var(--accent)]" /> 
+                               <Flame className="w-6 h-6 text-accent" /> 
                                Stream Anytime, Anywhere
                            </h3>
                            <p className="text-body mb-8">ToonPlayer works beautifully across all devices including mobile, tablet, and desktop, giving you seamless access to entertainment on the go.</p>
                            <div className="mt-8 border-t border-white/10 pt-8 flex items-center justify-between">
                                 <div>
-                                    <h4 className="text-metadata text-[var(--accent)] mb-2">Platform Status</h4>
+                                    <h4 className="text-metadata text-accent mb-2">Platform Status</h4>
                                     <p className="text-sm font-medium text-white/50 italic">Actively updated with thousands of titles.</p>
                                 </div>
                                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                    <Zap className="w-5 h-5 text-[var(--accent-secondary)]" />
+                                    <Zap className="w-5 h-5 text-accent-secondary" />
                                 </div>
                            </div>
                         </div>
@@ -1017,7 +1017,7 @@ export default function MoviesPage() {
 
                 <section className="mb-32 max-w-[900px] mx-auto px-6 lg:px-12 hidden">
                     <h2 className="text-heading mb-6 md:mb-8 flex items-center gap-4 justify-center">
-                        <Info className="w-6 h-6 text-[var(--accent)]" /> Frequently Asked Questions
+                        <Info className="w-6 h-6 text-accent" /> Frequently Asked Questions
                     </h2>
                     <div className="space-y-4">
                         {[
@@ -1026,8 +1026,8 @@ export default function MoviesPage() {
                             { q: "What devices does ToonPlayer support?", a: "ToonPlayer works on all devices — smartphones, tablets, laptops, desktops, and smart TVs through any modern web browser." },
                             { q: "Does ToonPlayer have anime?", a: "Yes! ToonPlayer has a massive anime library with sub and dub options. Browse by genre or search for your favorites." },
                         ].map((faq, i) => (
-                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-[var(--accent)]/30 transition-all duration-[250ms] shadow-lg">
-                                <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-[var(--accent)] transition-colors list-none">
+                            <details key={i} className="group bg-bg-card border border-white/5 rounded-2xl overflow-hidden hover:border-accent/30 transition-all duration-[250ms] shadow-lg">
+                                <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-accent transition-colors list-none">
                                     {faq.q}
                                     <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-[250ms]" will-change-transform />
                                 </summary>
@@ -1045,7 +1045,7 @@ export default function MoviesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-full shadow-[0_0_20px_rgba(88,101,242,0.4)] backdrop-blur-sm transition-colors"
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-full shadow-[0_0_20px_rgba(88,101,242,0.4)] backdrop-blur-sm transition-colors"
                     >
                         <ChevronUp className="w-5 h-5" />
                     </motion.button>
@@ -1060,13 +1060,13 @@ const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, br
     return (
         <div className="flex items-end gap-2.5 md:gap-3 mb-3 md:mb-4 text-[var(--text-main)] transition-all">
             {isFeatured ? (
-                <div className="w-1.5 h-8 bg-gradient-to-t from-[var(--accent)] to-[var(--accent-secondary)] rounded-full shadow-[0_0_15px_var(--accent-glow)]" />
+                <div className="w-1.5 h-8 bg-gradient-to-t from-accent to-accent-secondary rounded-full shadow-[0_0_15px_var(--accent-glow)]" />
             ) : (
-                <div className="w-1 h-5 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
             )}
             <div className="flex flex-col">
                 <div className="flex items-center gap-2 md:gap-3">
-                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-[var(--accent)] drop-shadow-md`} />
+                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-accent drop-shadow-md`} />
                     <h2 className={`${isFeatured ? 'text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base md:text-lg font-black tracking-tight font-sora'} ${brandColor || 'text-white'}`}>{title}</h2>
                 </div>
                 {isFeatured && (

@@ -224,7 +224,7 @@ export default function HeroCarousel() {
 
     return (
         <div 
-            className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] max-h-[70vh] overflow-hidden group bg-[var(--bg-main)]"
+            className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] max-h-[70vh] overflow-hidden group bg-bg-main"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -275,16 +275,16 @@ export default function HeroCarousel() {
             })}
 
             {/* Cinematic Gradient Overlays */}
-            <div className="absolute inset-y-0 left-0 w-full md:w-[60%] bg-gradient-to-r from-[var(--bg-main)] via-[var(--bg-main)]/90 via-[var(--bg-main)]/50 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-transparent to-black/35 z-10 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 right-0 h-28 md:h-44 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/70 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-full md:w-[60%] bg-gradient-to-r from-bg-main via-bg-main/90 via-bg-main/50 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-black/35 z-10 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-28 md:h-44 bg-gradient-to-t from-bg-main via-bg-main/70 to-transparent z-10 pointer-events-none" />
             
             {/* Left Content Area */}
             <div className="absolute inset-0 flex flex-col justify-end pb-12 md:pb-20 px-4 md:px-12 z-20 max-w-[1600px] mx-auto w-full md:w-[65%] pointer-events-none">
                 <div className="flex flex-col items-start text-left gap-3 md:gap-4 w-full pointer-events-auto">
                     
                     {/* Trending Badge */}
-                    <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-sm flex items-center gap-1.5 shadow-lg w-max mb-1 select-none">
+                    <div className="bg-gradient-to-r from-accent to-accent-secondary text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-sm flex items-center gap-1.5 shadow-lg w-max mb-1 select-none">
                         TRENDING NOW
                     </div>
 
@@ -384,7 +384,7 @@ export default function HeroCarousel() {
             {/* Slide progress row */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 z-30">
                 <div 
-                    className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] transition-all duration-[250ms] ease-apple" 
+                    className="h-full bg-gradient-to-r from-accent to-accent-warm transition-all duration-[250ms] ease-apple" 
                     style={{ width: `${((current + 1) / slides.length) * 100}%` }}
                 />
             </div>

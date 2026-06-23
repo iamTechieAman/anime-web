@@ -52,7 +52,7 @@ export default function GenrePage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-[var(--bg-card)] rounded-lg p-1 border border-[var(--border-color)]">
+                        <div className="flex bg-bg-card rounded-lg p-1 border border-border-color">
                              <button 
                                 onClick={() => setViewMode('grid')}
                                 className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-[var(--text-muted)] hover:text-white'}`}
@@ -66,7 +66,7 @@ export default function GenrePage() {
                                 <List className="w-4 h-4" />
                              </button>
                         </div>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-muted)] hover:text-white transition-colors">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-bg-card border border-border-color rounded-lg text-sm text-[var(--text-muted)] hover:text-white transition-colors">
                             <SlidersHorizontal className="w-4 h-4" /> Filter
                         </button>
                     </div>
@@ -76,14 +76,14 @@ export default function GenrePage() {
                 {isLoading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
                         {[...Array(24)].map((_, i) => (
-                            <div key={i} className="aspect-[3/4] bg-[var(--bg-card)] animate-pulse rounded-lg" />
+                            <div key={i} className="aspect-[3/4] bg-bg-card animate-pulse rounded-lg" />
                         ))}
                     </div>
                 ) : shows.length > 0 ? (
                     <AnimeGrid shows={shows} />
                 ) : (
                     <div className="flex flex-col items-center justify-center py-4 md:py-6 text-center">
-                        <div className="w-20 h-20 bg-[var(--bg-card)] rounded-full flex items-center justify-center mb-4">
+                        <div className="w-20 h-20 bg-bg-card rounded-full flex items-center justify-center mb-4">
                             <Grid className="w-10 h-10 text-[var(--text-muted)]" />
                         </div>
                         <h2 className="text-xl font-bold text-white mb-2">No Anime Found</h2>

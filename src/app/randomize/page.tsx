@@ -78,7 +78,7 @@ export default function RandomizePage() {
     <div className="min-h-dvh bg-[#050505] flex flex-col items-center justify-center p-4">
       <div className="relative w-24 h-24 mb-6">
         <div className="absolute inset-0 border-4 border-pink-500/20 rounded-full animate-ping"></div>
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-full shadow-[0_0_30px_rgba(236,72,153,0.35)]">
+        <div className="absolute inset-0 flex items-center justify-center bg-bg-card border border-border-color rounded-full shadow-[0_0_30px_rgba(236,72,153,0.35)]">
           <Loader2 className="w-10 h-10 text-pink-500 animate-spin" />
         </div>
       </div>

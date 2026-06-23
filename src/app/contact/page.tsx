@@ -20,7 +20,7 @@ export default function ContactPage() {
     };
 
     return (
-        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
+        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 
                 {/* Left Side: Info */}
@@ -35,7 +35,7 @@ export default function ContactPage() {
                             ToonPlayer Support
                         </motion.div>
                         <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[0.95]">
-                            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)]">Touch.</span>
+                            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-warm">Touch.</span>
                         </h1>
                         <p className="text-[var(--text-muted)] text-base md:text-lg max-w-md leading-relaxed">
                             Have a content request, found a bug, or need to report a DMCA issue? We are here to help.
@@ -43,7 +43,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex items-start gap-4 p-5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl group hover:border-blue-500/30 transition-all">
+                        <div className="flex items-start gap-4 p-5 bg-bg-card border border-border-color rounded-2xl group hover:border-blue-500/30 transition-all">
                             <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
                                 <Mail className="w-6 h-6 text-blue-400" />
                             </div>
@@ -54,14 +54,14 @@ export default function ContactPage() {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-4 p-5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl group hover:border-[var(--accent-warm)]/30 transition-all">
-                            <div className="w-12 h-12 bg-[var(--accent-warm)]/10 rounded-xl flex items-center justify-center shrink-0">
-                                <ShieldAlert className="w-6 h-6 text-[var(--accent-warm)]" />
+                        <div className="flex items-start gap-4 p-5 bg-bg-card border border-border-color rounded-2xl group hover:border-accent-warm/30 transition-all">
+                            <div className="w-12 h-12 bg-accent-warm/10 rounded-xl flex items-center justify-center shrink-0">
+                                <ShieldAlert className="w-6 h-6 text-accent-warm" />
                             </div>
                             <div>
                                 <h3 className="text-white font-bold mb-1">DMCA & Legal</h3>
                                 <p className="text-sm text-[var(--text-muted)] mb-4">Please include all relevant URLs for faster processing.</p>
-                                <button className="px-4 py-2 bg-[var(--accent-warm)]/10 border border-[var(--accent-warm)]/20 text-[var(--accent-warm)] text-xs font-bold rounded-lg hover:bg-[var(--accent-warm)] hover:text-white transition-all">Report Content</button>
+                                <button className="px-4 py-2 bg-accent-warm/10 border border-accent-warm/20 text-accent-warm text-xs font-bold rounded-lg hover:bg-accent-warm hover:text-white transition-all">Report Content</button>
                             </div>
                         </div>
                     </div>
@@ -77,7 +77,7 @@ export default function ContactPage() {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[var(--bg-card)] border border-[var(--border-color)] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden"
+                    className="bg-bg-card border border-border-color p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[100px] -z-10" />
                     
@@ -88,7 +88,7 @@ export default function ContactPage() {
                                 required
                                 type="text" 
                                 placeholder="Enter your name"
-                                className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium"
+                                className="w-full bg-bg-main border border-border-color rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium"
                             />
                         </div>
                         <div className="space-y-2">
@@ -97,7 +97,7 @@ export default function ContactPage() {
                                 required
                                 type="email" 
                                 placeholder="you@example.com"
-                                className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium"
+                                className="w-full bg-bg-main border border-border-color rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium"
                             />
                         </div>
                         <div className="space-y-2">
@@ -106,7 +106,7 @@ export default function ContactPage() {
                                 required
                                 rows={5}
                                 placeholder="How can we help you today?"
-                                className="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium resize-none"
+                                className="w-full bg-bg-main border border-border-color rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium resize-none"
                             />
                         </div>
                         

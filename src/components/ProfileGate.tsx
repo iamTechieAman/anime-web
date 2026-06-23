@@ -122,7 +122,7 @@ export default function ProfileGate() {
           animate={{ opacity: 1, backgroundColor: "var(--bg-main)" }}
           exit={{ opacity: 0, filter: "blur(10px)" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 bg-[var(--bg-main)]"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 bg-bg-main"
         >
           <motion.div
             initial={{ opacity: 0, scale: 1.1 }}

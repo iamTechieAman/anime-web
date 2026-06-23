@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 export default function BrowsePage() {
     return (
         <Suspense fallback={
-            <div className="min-h-dvh pt-24 flex items-center justify-center bg-[var(--bg-main)]">
+            <div className="min-h-dvh pt-24 flex items-center justify-center bg-bg-main">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
                     <p className="text-sm text-[var(--text-muted)] animate-pulse font-bold tracking-widest uppercase">Loading Catalog...</p>
                 </div>
             </div>

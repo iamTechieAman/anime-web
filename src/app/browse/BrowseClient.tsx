@@ -295,8 +295,8 @@ export default function BrowseClient() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <h1 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3">
-                                <Compass className="w-8 h-8 text-[var(--accent)] shrink-0 animate-pulse" />
-                                Browse <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-transparent">Catalog</span>
+                                <Compass className="w-8 h-8 text-accent shrink-0 animate-pulse" />
+                                Browse <span className="bg-gradient-to-r from-accent to-accent-secondary bg-clip-text text-transparent">Catalog</span>
                             </h1>
                             <p className="text-zinc-400 mt-2 font-medium text-sm">
                                 Explore dynamic catalog collections with infinite scrolling and premium filtering.
@@ -309,7 +309,7 @@ export default function BrowseClient() {
                                     onClick={() => setFilterParam("type", "movie")}
                                     className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "movie" 
-                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
@@ -320,7 +320,7 @@ export default function BrowseClient() {
                                     onClick={() => setFilterParam("type", "tv")}
                                     className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "tv" 
-                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-lg" 
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
@@ -333,7 +333,7 @@ export default function BrowseClient() {
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={`flex items-center gap-2 h-11 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer ${
                                     showFilters 
-                                        ? "bg-[var(--accent)]/10 border border-[var(--accent)]/30 text-[var(--accent)] shadow-[0_0_15px_var(--accent-glow)]" 
+                                        ? "bg-accent/10 border border-accent/30 text-accent shadow-[0_0_15px_var(--accent-glow)]" 
                                         : "bg-[#12131A] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                 }`}
                             >
@@ -368,7 +368,7 @@ export default function BrowseClient() {
                                 {/* Header */}
                                 <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/20">
                                     <div className="flex items-center gap-2">
-                                        <SlidersHorizontal className="w-5 h-5 text-[var(--accent)]" />
+                                        <SlidersHorizontal className="w-5 h-5 text-accent" />
                                         <span className="text-base font-extrabold text-white tracking-wide">Catalog Filters</span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -398,7 +398,7 @@ export default function BrowseClient() {
                                                 onClick={() => setFilterParam("type", "movie")}
                                                 className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                                                     mediaType === "movie"
-                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-md"
+                                                        ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-md"
                                                         : "text-zinc-400 hover:text-white"
                                                 }`}
                                             >
@@ -409,7 +409,7 @@ export default function BrowseClient() {
                                                 onClick={() => setFilterParam("type", "tv")}
                                                 className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
                                                     mediaType === "tv"
-                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white shadow-md"
+                                                        ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-md"
                                                         : "text-zinc-400 hover:text-white"
                                                 }`}
                                             >
@@ -422,7 +422,7 @@ export default function BrowseClient() {
                                     {/* Sorting selection */}
                                     <div className="space-y-3">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
-                                            <ArrowUpDown className="w-3 h-3 text-[var(--accent)]" /> Sort By
+                                            <ArrowUpDown className="w-3 h-3 text-accent" /> Sort By
                                         </span>
                                         <div className="grid grid-cols-2 gap-2">
                                             {SORT_OPTIONS.map(opt => (
@@ -431,7 +431,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("sort_by", opt.value)}
                                                     className={`px-3 py-2 border rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
                                                         selectedSort === opt.value
-                                                            ? "bg-[var(--accent)]/15 text-[var(--accent)] border-[var(--accent)]/40 shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-accent/15 text-accent border-accent/40 shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -444,14 +444,14 @@ export default function BrowseClient() {
                                     {/* Year scroll selection */}
                                     <div className="space-y-3">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
-                                            <Calendar className="w-3 h-3 text-[var(--accent)]" /> Release Year
+                                            <Calendar className="w-3 h-3 text-accent" /> Release Year
                                         </span>
                                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                             <button
                                                 onClick={() => setFilterParam("year", "")}
                                                 className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                                     selectedYear === ""
-                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                         : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                 }`}
                                             >
@@ -463,7 +463,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("year", selectedYear === yr ? "" : yr)}
                                                     className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                                         selectedYear === yr
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -483,7 +483,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("genre_id", selectedGenre === g.id ? "" : g.id)}
                                                     className={`px-3.5 py-2 border rounded-full text-xs font-bold transition-all cursor-pointer ${
                                                         selectedGenre === g.id
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -496,14 +496,14 @@ export default function BrowseClient() {
                                     {/* Language selector */}
                                     <div className="space-y-3">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
-                                            <Globe className="w-3 h-3 text-[var(--accent)]" /> Original Language
+                                            <Globe className="w-3 h-3 text-accent" /> Original Language
                                         </span>
                                         <div className="flex flex-wrap gap-2">
                                             <button
                                                 onClick={() => setFilterParam("language", "")}
                                                 className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                     selectedLanguage === ""
-                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                         : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                 }`}
                                             >
@@ -515,7 +515,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("language", selectedLanguage === lang.code ? "" : lang.code)}
                                                     className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                         selectedLanguage === lang.code
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -528,7 +528,7 @@ export default function BrowseClient() {
                                     {/* Region selector */}
                                     <div className="space-y-3">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
-                                            <Globe className="w-3 h-3 text-[var(--accent)]" /> Watch Region
+                                            <Globe className="w-3 h-3 text-accent" /> Watch Region
                                         </span>
                                         <div className="flex flex-wrap gap-2">
                                             {COUNTRIES.map(c => (
@@ -537,7 +537,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("country", selectedCountry === c.code ? "" : c.code)}
                                                     className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                         selectedCountry === c.code
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -559,7 +559,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("network_id", selectedNetwork === net.id ? "" : net.id)}
                                                     className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                                                         selectedNetwork === net.id
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -580,7 +580,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("letter", selectedLetter === letter ? "" : letter)}
                                                     className={`h-9 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
                                                         selectedLetter === letter
-                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_10px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_10px_var(--accent-glow)]"
                                                             : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5 border border-white/5"
                                                     }`}
                                                 >
@@ -615,7 +615,7 @@ export default function BrowseClient() {
                         <p className="text-zinc-500 text-sm mb-6">{error}</p>
                         <button
                             onClick={() => fetchCatalog(1, false)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all cursor-pointer"
+                            className="px-6 py-2.5 bg-gradient-to-r from-accent to-accent-secondary text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all cursor-pointer"
                         >
                             Retry Loading
                         </button>
@@ -645,8 +645,8 @@ export default function BrowseClient() {
                         {/* Infinite scroll target trigger / status pill */}
                         <div ref={observerTarget} className="w-full flex flex-col items-center justify-center mt-12 mb-8 min-h-[50px]">
                             {loadingMore ? (
-                                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest bg-[var(--bg-elevated)]/50 border border-white/5 px-5 py-2.5 rounded-full shadow-lg backdrop-blur-md">
-                                    <Loader2 className="w-4 h-4 animate-spin text-[var(--accent)]" />
+                                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest bg-bg-elevated/50 border border-white/5 px-5 py-2.5 rounded-full shadow-lg backdrop-blur-md">
+                                    <Loader2 className="w-4 h-4 animate-spin text-accent" />
                                     Loading More Hits...
                                 </div>
                             ) : page >= totalPages && items.length > 0 ? (

@@ -43,7 +43,7 @@ export default function DesktopSidebar() {
                             <Logo />
                         </div>
                         <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms] whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent pointer-events-none group-hover:pointer-events-auto">
-                            Toon<span className="text-[var(--accent)]">Player</span>
+                            Toon<span className="text-accent">Player</span>
                         </span>
                     </Link>
                 </div>
@@ -65,7 +65,7 @@ export default function DesktopSidebar() {
                             {isActive && (
                                 <motion.div 
                                     layoutId="activeGlow"
-                                    className="absolute left-0 w-[3px] h-6 bg-gradient-to-b from-[var(--accent)] to-[var(--accent-warm)] rounded-r-full shadow-[var(--shadow-glow-primary)]"
+                                    className="absolute left-0 w-[3px] h-6 bg-gradient-to-b from-accent to-accent-warm rounded-r-full shadow-[var(--shadow-glow-primary)]"
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 />
                             )}
@@ -75,7 +75,7 @@ export default function DesktopSidebar() {
                                 <Icon 
                                     className={`w-[18px] h-[18px] transition-all duration-[250ms] ${
                                         isActive 
-                                            ? "text-[var(--accent)] drop-shadow-[0_0_8px_var(--accent-glow)] scale-110" 
+                                            ? "text-accent drop-shadow-[0_0_8px_var(--accent-glow)] scale-110" 
                                             : "group-hover/item:scale-115 group-hover/item:text-white"
                                     }`}
                                     strokeWidth={2.2}

@@ -10,9 +10,9 @@ import {
 
 const genres = [
     { name: "Action", icon: Sword, color: "from-rose-600/20 to-red-500/20", border: "group-hover:border-rose-500/50", iconBg: "bg-rose-500", desc: "Adrenaline-fueled adventures", size: "col-span-2 md:col-span-2 row-span-1" },
-    { name: "Adventure", icon: Map, color: "from-[var(--accent)]/20 to-[var(--accent-warm)]/20", border: "group-hover:border-[var(--accent-warm)]/50", iconBg: "bg-[var(--accent-warm)]", desc: "Epic journeys and quests", size: "col-span-1 md:col-span-1 row-span-1" },
+    { name: "Adventure", icon: Map, color: "from-accent/20 to-accent-warm/20", border: "group-hover:border-accent-warm/50", iconBg: "bg-accent-warm", desc: "Epic journeys and quests", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "Animation", icon: Sparkles, color: "from-amber-500/20 to-yellow-400/20", border: "group-hover:border-amber-400/50", iconBg: "bg-amber-500", desc: "Animated worlds and stories", size: "col-span-1 md:col-span-1 row-span-2" },
-    { name: "Comedy", icon: Laugh, color: "from-yellow-500/20 to-[var(--accent-warm)]/20", border: "group-hover:border-yellow-500/50", iconBg: "bg-yellow-500", desc: "Laughter and fun moments", size: "col-span-1 md:col-span-1 row-span-1" },
+    { name: "Comedy", icon: Laugh, color: "from-yellow-500/20 to-accent-warm/20", border: "group-hover:border-yellow-500/50", iconBg: "bg-yellow-500", desc: "Laughter and fun moments", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "Crime", icon: Shield, color: "from-zinc-700/20 to-slate-500/20", border: "group-hover:border-zinc-500/50", iconBg: "bg-zinc-500", desc: "Detectives and outlaws", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "Drama", icon: Heart, color: "from-pink-600/20 to-rose-500/20", border: "group-hover:border-pink-500/50", iconBg: "bg-pink-500", desc: "Emotional and powerful tales", size: "col-span-2 md:col-span-2 row-span-1" },
     { name: "Family", icon: Users, color: "from-emerald-600/20 to-teal-500/20", border: "group-hover:border-emerald-500/50", iconBg: "bg-emerald-500", desc: "Content for all ages", size: "col-span-1 md:col-span-1 row-span-1" },
@@ -25,16 +25,16 @@ const genres = [
     { name: "Sci-Fi", icon: Rocket, color: "from-sky-600/20 to-indigo-500/20", border: "group-hover:border-sky-500/50", iconBg: "bg-sky-500", desc: "Future tech and space travel", size: "col-span-2 md:col-span-2 row-span-1" },
     { name: "Thriller", icon: Skull, color: "from-red-700/20 to-rose-600/20", border: "group-hover:border-red-500/50", iconBg: "bg-red-600", desc: "Suspense and intense action", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "War", icon: Shield, color: "from-gray-800/20 to-slate-650/20", border: "group-hover:border-gray-650/50", iconBg: "bg-gray-700", desc: "Military conflicts and heroism", size: "col-span-1 md:col-span-1 row-span-1" },
-    { name: "Western", icon: Compass, color: "from-[var(--accent)]/20 to-[var(--accent-warm)]/20", border: "group-hover:border-amber-800/50", iconBg: "bg-orange-800", desc: "The wild west and frontiers", size: "col-span-1 md:col-span-1 row-span-1" },
+    { name: "Western", icon: Compass, color: "from-accent/20 to-accent-warm/20", border: "group-hover:border-amber-800/50", iconBg: "bg-orange-800", desc: "The wild west and frontiers", size: "col-span-1 md:col-span-1 row-span-1" },
 ];
 
 export default function GenresPage() {
     return (
-        <main className="min-h-dvh pt-24 pb-20 px-6 md:px-12 bg-[var(--bg-main)]">
+        <main className="min-h-dvh pt-24 pb-20 px-6 md:px-12 bg-bg-main">
             <div className="w-full max-w-[1800px] mx-auto">
                 <header className="mb-12">
                     <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">
-                        Explore <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)]">Genres</span>
+                        Explore <span className="bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent-secondary">Genres</span>
                     </h1>
                     <p className="text-[var(--text-muted)] text-base md:text-lg max-w-2xl font-medium">
                         Discover your next favorite show by browsing through our curated categories.
@@ -55,7 +55,7 @@ export default function GenresPage() {
                             >
                                 <Link scroll={false} 
                                     href={`/search?genre=${genre.name}`}
-                                    className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-[250ms] ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
+                                    className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-bg-card/40 border border-border-color backdrop-blur-md transition-all duration-[250ms] ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
                                 >
                                     {/* Ambient Glow */}
                                     <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms]`} />
@@ -71,7 +71,7 @@ export default function GenresPage() {
                                         </div>
                                         
                                         <div className={`${isTall ? "mt-auto pt-6" : "mt-0 md:mt-auto text-left"}`}>
-                                            <h3 className="text-base md:text-xl font-black text-white group-hover:text-[var(--accent)] transition-colors tracking-tight leading-snug">
+                                            <h3 className="text-base md:text-xl font-black text-white group-hover:text-accent transition-colors tracking-tight leading-snug">
                                                 {genre.name}
                                             </h3>
                                             <p className="text-[10px] md:text-xs text-[var(--text-muted)] mt-1 font-medium group-hover:text-white/80 transition-colors line-clamp-1">

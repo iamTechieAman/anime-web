@@ -131,8 +131,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </button>
 
         <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center mb-4 border border-[var(--accent)]/20 shadow-[0_0_30px_var(--accent-glow)] shrink-0">
-            <Play className="w-7 h-7 text-[var(--accent)] fill-current translate-x-0.5" />
+          <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-4 border border-accent/20 shadow-[0_0_30px_var(--accent-glow)] shrink-0">
+            <Play className="w-7 h-7 text-accent fill-current translate-x-0.5" />
           </div>
           <h2 className="text-2xl font-black font-sora text-white tracking-tight">ToonPlayer</h2>
           <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Premium Streaming Experience</p>
@@ -200,7 +200,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   maxLength={15}
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  className="w-full bg-black/45 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[var(--accent)] transition-all"
+                  className="w-full bg-black/45 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-accent transition-all"
                   placeholder="Enter your name"
                 />
               </div>
@@ -216,14 +216,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         type="button"
                         onClick={() => setSelectedAvatar(avatar.url)}
                         className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-white/5 p-1 transition-all ${
-                          isSelected ? "border-[var(--accent)] scale-105 bg-white/10" : "border-transparent hover:border-white/20"
+                          isSelected ? "border-accent scale-105 bg-white/10" : "border-transparent hover:border-white/20"
                         } cursor-pointer`}
                       >
                         <div className="relative w-full h-full">
                           <ProfileAvatar src={avatar.url} alt={avatar.name} sizes="80px" />
                         </div>
                         {isSelected && (
-                          <div className="absolute top-1 right-1 bg-[var(--accent)] rounded-full p-0.5 shadow-md">
+                          <div className="absolute top-1 right-1 bg-accent rounded-full p-0.5 shadow-md">
                             <Check className="w-2.5 h-2.5 text-white" />
                           </div>
                         )}
@@ -244,7 +244,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <button
                   type="submit"
                   disabled={!guestName.trim()}
-                  className="flex-[2] flex items-center justify-center gap-1.5 px-5 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-bold shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex-[2] flex items-center justify-center gap-1.5 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-bold shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Start Watching
                 </button>

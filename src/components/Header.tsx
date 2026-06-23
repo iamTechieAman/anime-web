@@ -169,7 +169,7 @@ export default function Header() {
   const HL = ({ text, highlight }: { text:string, highlight:string }) => {
     if (!highlight.trim()) return <span>{text}</span>;
     const esc = highlight.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    return <span className="truncate">{text.split(new RegExp(`(${esc})`,"gi")).map((p,i)=>p.toLowerCase()===highlight.toLowerCase().trim()?<b key={i} className="text-[var(--accent)]">{p}</b>:<span key={i} className="text-[var(--text-secondary)]">{p}</span>)}</span>;
+    return <span className="truncate">{text.split(new RegExp(`(${esc})`,"gi")).map((p,i)=>p.toLowerCase()===highlight.toLowerCase().trim()?<b key={i} className="text-accent">{p}</b>:<span key={i} className="text-[var(--text-secondary)]">{p}</span>)}</span>;
   };
 
   const clearSearch = () => { setSearchQuery(""); setSuggestions([]); setShowSuggestions(false); };
@@ -214,7 +214,7 @@ export default function Header() {
             </div>
             <span className="flex flex-col leading-none md:hidden lg:flex">
               <span className="text-[14px] sm:text-[15px] font-black tracking-tight text-white" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Toon</span>
-              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)]" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
+              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent-warm" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
             </span>
           </Link>
         </div>
@@ -222,7 +222,7 @@ export default function Header() {
         {/* TV Nav */}
         {deviceMode==="tv" && (
           <div className="flex items-center gap-3 ml-4 mr-auto text-xs font-black uppercase tracking-wider text-zinc-400">
-            <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white"><Play className="w-4 h-4 fill-current text-[var(--accent)]"/>Home</Link>
+            <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors text-white"><Play className="w-4 h-4 fill-current text-accent"/>Home</Link>
             <button onClick={()=>{setSearchQuery("");setIsTvSearchOpen(true);}} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors cursor-pointer"><Search className="w-4 h-4"/>Search</button>
             <Link href="/watchlist" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors"><Bookmark className="w-4 h-4 text-pink-400"/>My List</Link>
           </div>
@@ -233,7 +233,7 @@ export default function Header() {
           <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[500px] max-w-[900px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
-              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-apple text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-apple text-left outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <div className="flex-1 flex items-center min-w-0 pl-4 pr-2 h-full gap-2">
                 <Search className="w-4 h-4 text-zinc-500 shrink-0" />
@@ -254,10 +254,10 @@ export default function Header() {
             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-[#07070b]/98 z-[100] flex flex-col items-center justify-start pt-24 px-10">
               <div className="w-full max-w-3xl flex flex-col gap-6">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span className="text-xl font-black uppercase tracking-widest text-[var(--accent)]">Search</span>
+                  <span className="text-xl font-black uppercase tracking-widest text-accent">Search</span>
                   <button onClick={()=>setIsTvSearchOpen(false)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full"><X className="w-6 h-6"/></button>
                 </div>
-                <div className="relative flex items-center p-2 bg-white/[0.04] border border-white/10 rounded-2xl focus-within:border-[var(--accent)]/50 transition-all">
+                <div className="relative flex items-center p-2 bg-white/[0.04] border border-white/10 rounded-2xl focus-within:border-accent/50 transition-all">
                   <Search className="w-6 h-6 text-zinc-400 ml-3 shrink-0"/>
                   <input type="text" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} onKeyDown={(e) => { if (e.key === "Enter" && searchQuery.length >= 2) { if (suggestions.length > 0) { router.push(suggestions[0].href || `/watch/${suggestions[0].type}/${suggestions[0].id}`, { scroll: false }); setIsTvSearchOpen(false); saveRecent(suggestions[0].title); } else { handleSearch(null, searchQuery); setIsTvSearchOpen(false); } } }} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
                   {searchQuery&&<button onClick={()=>setSearchQuery("")} className="p-2"><X className="w-5 h-5 text-zinc-400"/></button>}
@@ -265,8 +265,8 @@ export default function Header() {
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 hide-scrollbar">
                   {suggestions.length>0?suggestions.map((item:any,i:number)=>(
                     <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
-                      className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-[var(--accent)]':''}`}>
-                      <div className="w-12 h-16 overflow-hidden rounded-xl bg-[var(--bg-elevated)] shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
+                      className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-accent':''}`}>
+                      <div className="w-12 h-16 overflow-hidden rounded-xl bg-bg-elevated shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
                       <div className="flex-1 min-w-0">
                         <span className="text-base font-bold text-white block truncate">{item.title}</span>
                         <span className="text-xs text-zinc-400 font-semibold uppercase">{item.type} · {item.year}</span>
@@ -307,7 +307,7 @@ export default function Header() {
           <div ref={notifRef} className="relative hidden sm:block">
             <button aria-label="Notifications"
               onClick={()=>{if(!showNotifications){setShowNotifications(true);markAllAsRead();}else setShowNotifications(false);setShowFilters(false);setShowProfileDropdown(false);}}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${showNotifications?'bg-[var(--accent)]/10 border-[var(--accent)]/20 text-[var(--accent)]':'bg-white/[0.04] border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${showNotifications?'bg-accent/10 border-accent/20 text-accent':'bg-white/[0.04] border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>
               <div className="relative">
                 <Bell className="w-4 h-4"/>
                 {isMounted&&unreadCount>0&&<span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-overlay)] animate-pulse"/>}
@@ -317,22 +317,22 @@ export default function Header() {
               {showNotifications && (
                 <motion.div initial={{opacity:0,y:8,scale:0.95}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:8,scale:0.95}}
                   className="absolute top-full right-4 md:-right-2 mt-2 w-[90vw] md:w-[320px] max-w-[320px] bg-[#111113] border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-50">
-                  <div className="p-3.5 border-b border-[var(--border-color)] bg-white/5 flex items-center justify-between">
+                  <div className="p-3.5 border-b border-border-color bg-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm">Notifications</span>
-                      {unreadCount>0&&<span className="px-1.5 py-0.5 rounded-full bg-[var(--accent)]/20 text-[var(--accent)] text-[10px] font-black">{unreadCount}</span>}
+                      {unreadCount>0&&<span className="px-1.5 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-black">{unreadCount}</span>}
                     </div>
-                    <button onClick={()=>markAllAsRead()} className="text-[10px] uppercase tracking-widest text-[var(--accent)] font-black">Mark read</button>
+                    <button onClick={()=>markAllAsRead()} className="text-[10px] uppercase tracking-widest text-accent font-black">Mark read</button>
                   </div>
                   <div className="max-h-[340px] overflow-y-auto hide-scrollbar">
                     {notifications.length>0?(
-                      <div className="divide-y divide-[var(--border-color)]">
+                      <div className="divide-y divide-border-color">
                         {notifications.map((n:any)=>{
-                          const meta:Record<string,{label:string,color:string}>={episodes:{label:'New Episode',color:'text-[var(--accent)] bg-[var(--accent)]/10'},trending:{label:'Trending',color:'text-red-400 bg-red-500/10'},recommendations:{label:'AI Pick',color:'text-cyan-400 bg-cyan-500/10'},watchlist:{label:'Watchlist',color:'text-blue-400 bg-blue-500/10'},community:{label:'Community',color:'text-green-400 bg-green-500/10'},system:{label:'System',color:'text-zinc-400 bg-zinc-500/10'}};
+                          const meta:Record<string,{label:string,color:string}>={episodes:{label:'New Episode',color:'text-accent bg-accent/10'},trending:{label:'Trending',color:'text-red-400 bg-red-500/10'},recommendations:{label:'AI Pick',color:'text-cyan-400 bg-cyan-500/10'},watchlist:{label:'Watchlist',color:'text-blue-400 bg-blue-500/10'},community:{label:'Community',color:'text-green-400 bg-green-500/10'},system:{label:'System',color:'text-zinc-400 bg-zinc-500/10'}};
                           const m=meta[n.category]||meta['system'];
                           return (
-                            <div key={n.id} className={`p-3.5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read?'bg-[var(--accent)]/5':''}`} onClick={()=>{markAsRead(n.id);if(n.link)router.push(n.link, { scroll: false });}}>
-                              {!n.read&&<div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--accent)] rounded-r"/>}
+                            <div key={n.id} className={`p-3.5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read?'bg-accent/5':''}`} onClick={()=>{markAsRead(n.id);if(n.link)router.push(n.link, { scroll: false });}}>
+                              {!n.read&&<div className="absolute left-0 top-0 bottom-0 w-0.5 bg-accent rounded-r"/>}
                               <div className="flex justify-between items-start mb-1 gap-2">
                                 <div className="flex-1 min-w-0">
                                   <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${m.color}`}>{m.label}</span>
@@ -352,8 +352,8 @@ export default function Header() {
                       </div>
                     )}
                   </div>
-                  <div className="border-t border-[var(--border-color)] flex divide-x divide-[var(--border-color)]">
-                    <button onClick={()=>{setShowNotifications(false);window.dispatchEvent(new Event("openSettingsModal"));}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--accent)] font-black hover:bg-[var(--accent)]/5 transition-all">⚙ Manage</button>
+                  <div className="border-t border-border-color flex divide-x divide-border-color">
+                    <button onClick={()=>{setShowNotifications(false);window.dispatchEvent(new Event("openSettingsModal"));}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-accent font-black hover:bg-accent/5 transition-all">⚙ Manage</button>
                     {notifications.length>0&&<button onClick={clearNotifications} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all">Clear All</button>}
                   </div>
                 </motion.div>
@@ -367,7 +367,7 @@ export default function Header() {
             {isUserLoaded&&!activeProfileId&&(
               <button 
                 onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
-                className="h-9 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white hover:opacity-90 active:scale-95 transition-all font-black text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap"
+                className="h-9 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-accent to-accent-secondary text-white hover:opacity-90 active:scale-95 transition-all font-black text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap"
               >
                 <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
               </button>

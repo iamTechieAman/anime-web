@@ -28,16 +28,16 @@ export default function TermsPage() {
     ];
 
     return (
-        <main className="min-h-dvh bg-[var(--bg-main)] text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
+        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="text-center space-y-4">
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="w-16 h-16 bg-[var(--accent-warm)]/10 rounded-2xl mx-auto flex items-center justify-center mb-6"
+                        className="w-16 h-16 bg-accent-warm/10 rounded-2xl mx-auto flex items-center justify-center mb-6"
                     >
-                        <FileText className="w-8 h-8 text-[var(--accent-warm)]" />
+                        <FileText className="w-8 h-8 text-accent-warm" />
                     </motion.div>
                     <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">Terms of Service</h1>
                     <p className="text-[var(--text-muted)] text-lg">Agreement for Using ToonPlayer.in</p>
@@ -52,10 +52,10 @@ export default function TermsPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            className="p-8 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-4"
+                            className="p-8 bg-bg-card rounded-2xl border border-border-color space-y-4"
                         >
                             <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center">
-                                <section.icon className="w-5 h-5 text-[var(--accent-warm)]" />
+                                <section.icon className="w-5 h-5 text-accent-warm" />
                             </div>
                             <h2 className="text-xl font-bold text-white">{section.title}</h2>
                             <p className="text-[var(--text-muted)] text-sm leading-relaxed">

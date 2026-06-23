@@ -110,7 +110,7 @@ export default function HealthPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 border-b border-white/5 pb-8">
                 <div>
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent flex items-center gap-3">
-                        <Activity className="w-8 h-8 text-[var(--accent)] animate-pulse" />
+                        <Activity className="w-8 h-8 text-accent animate-pulse" />
                         OTT System Health Dashboard
                     </h1>
                     <p className="text-zinc-400 text-xs md:text-sm mt-2 font-medium">
@@ -125,7 +125,7 @@ export default function HealthPage() {
                     <button
                         onClick={triggerPing}
                         disabled={isPinging || isLoading}
-                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] hover:opacity-90 active:scale-98 text-white font-black uppercase text-xs tracking-wider px-5 py-3 rounded-xl transition-all shadow-[0_8px_25px_var(--accent-glow)] border-0 disabled:opacity-50 cursor-pointer"
+                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-accent-secondary hover:opacity-90 active:scale-98 text-white font-black uppercase text-xs tracking-wider px-5 py-3 rounded-xl transition-all shadow-[0_8px_25px_var(--accent-glow)] border-0 disabled:opacity-50 cursor-pointer"
                     >
                         <RefreshCw className={`w-4 h-4 ${isPinging ? 'animate-spin' : ''}`} />
                         {isPinging ? 'Pinging Checkers...' : 'Trigger Live Ping'}
@@ -191,7 +191,7 @@ export default function HealthPage() {
                 {/* Providers detail block */}
                 <div className="lg:col-span-2 space-y-4">
                     <h2 className="text-lg font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2 mb-2">
-                        <Zap className="w-5 h-5 text-[var(--accent)]" />
+                        <Zap className="w-5 h-5 text-accent" />
                         Active Streamers & Metadata Checkers
                     </h2>
 
@@ -205,7 +205,7 @@ export default function HealthPage() {
                         <div className="bg-[#0c0d14]/50 border border-white/5 rounded-2xl p-10 text-center">
                             <ShieldAlert className="w-12 h-12 text-zinc-500 mx-auto mb-3 opacity-30" />
                             <p className="text-sm text-zinc-400">No health metrics collected yet.</p>
-                            <button onClick={triggerPing} className="mt-4 text-xs font-black uppercase text-[var(--accent)]">Check Status Now</button>
+                            <button onClick={triggerPing} className="mt-4 text-xs font-black uppercase text-accent">Check Status Now</button>
                         </div>
                     ) : (
                         providers.map((p) => {
@@ -301,7 +301,7 @@ export default function HealthPage() {
                 <div className="space-y-6">
                     <div className="bg-[#0c0d14]/75 border border-white/5 rounded-2xl p-6 backdrop-blur-md">
                         <h2 className="text-sm font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2 mb-4">
-                            <ShieldAlert className="w-4 h-4 text-[var(--accent)]" />
+                            <ShieldAlert className="w-4 h-4 text-accent" />
                             Automated Fallback Chain
                         </h2>
                         
@@ -323,7 +323,7 @@ export default function HealthPage() {
                                         <div key={c.name}>
                                             <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 rounded-xl p-3">
                                                 <div className="flex items-center gap-2.5">
-                                                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-black">
+                                                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-accent/10 text-accent text-[10px] font-black">
                                                         {c.step}
                                                     </span>
                                                     <span className="text-xs font-bold text-white">{c.name}</span>
@@ -353,7 +353,7 @@ export default function HealthPage() {
                                         <div key={c.name}>
                                             <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 rounded-xl p-3">
                                                 <div className="flex items-center gap-2.5">
-                                                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] font-black">
+                                                    <span className="w-5 h-5 flex items-center justify-center rounded-full bg-accent/10 text-accent text-[10px] font-black">
                                                         {c.step}
                                                     </span>
                                                     <span className="text-xs font-bold text-white">{c.name}</span>

@@ -74,7 +74,7 @@ function MovieSearchContent() {
         : "Discover Content";
 
     return (
-        <main className="min-h-dvh pt-6 pb-24 px-4 md:px-8 w-full bg-[var(--bg-main)]">
+        <main className="min-h-dvh pt-6 pb-24 px-4 md:px-8 w-full bg-bg-main">
             {/* Search Header */}
             <motion.div 
                 initial={{ opacity: 0, y: -20 }}
@@ -83,7 +83,7 @@ function MovieSearchContent() {
             >
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl md:text-4xl font-black text-[var(--text-main)]">
-                        <span className="bg-gradient-to-r from-[var(--accent)] via-amber-400 to-yellow-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-accent via-amber-400 to-yellow-400 bg-clip-text text-transparent">
                             {title}
                         </span>
                     </h1>
@@ -91,7 +91,7 @@ function MovieSearchContent() {
                     {/* Filters Toggle */}
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${showFilters ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-[var(--text-muted)]'}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${showFilters ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-bg-card border border-border-color text-[var(--text-muted)] hover:text-white hover:border-[var(--text-muted)]'}`}
                     >
                         <SlidersHorizontal className="w-4 h-4" />
                         <span className="hidden sm:inline">Filters</span>
@@ -107,7 +107,7 @@ function MovieSearchContent() {
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                         >
-                            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 mb-4 space-y-4">
+                            <div className="bg-bg-card border border-border-color rounded-2xl p-4 mb-4 space-y-4">
                                 {/* Genres */}
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2 block">Genre</label>
@@ -118,7 +118,7 @@ function MovieSearchContent() {
                                                 onClick={() => {
                                                     router.push(genre === g ? '/search' : `/search?genre=${g}`, { scroll: false });
                                                 }}
-                                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${genre === g ? 'bg-[var(--accent-warm)] text-white shadow-lg shadow-[var(--accent-warm)]/20' : 'bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[var(--accent-warm)]/50 hover:text-[var(--accent-warm)]'}`}
+                                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${genre === g ? 'bg-accent-warm text-white shadow-lg shadow-accent-warm/20' : 'bg-bg-main border border-border-color text-[var(--text-muted)] hover:border-accent-warm/50 hover:text-accent-warm'}`}
                                             >
                                                 {g}
                                             </button>
@@ -140,7 +140,7 @@ function MovieSearchContent() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: i * 0.05 }}
                                 onClick={() => router.push(`/search?genre=${g}`, { scroll: false })}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all active:scale-95 ${genre === g ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-white hover:border-blue-500/50'}`}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all active:scale-95 ${genre === g ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-bg-card border border-border-color text-[var(--text-muted)] hover:text-white hover:border-blue-500/50'}`}
                             >
                                 {g}
                             </motion.button>
@@ -205,7 +205,7 @@ function MovieSearchContent() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col flex-1 items-center justify-center text-center py-4 md:py-6"
                 >
-                    <div className="w-20 h-20 bg-[var(--bg-card)] rounded-2xl flex items-center justify-center mb-6 border border-[var(--border-color)]">
+                    <div className="w-20 h-20 bg-bg-card rounded-2xl flex items-center justify-center mb-6 border border-border-color">
                         <Search className="w-8 h-8 text-[var(--text-muted)]" />
                     </div>
                     <p className="text-xl font-bold mb-2 text-[var(--text-main)]">
@@ -223,7 +223,7 @@ function MovieSearchContent() {
 export default function MovieSearchPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-dvh pt-24 flex items-center justify-center bg-[var(--bg-main)]">
+            <div className="min-h-dvh pt-24 flex items-center justify-center bg-bg-main">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                     <p className="text-sm text-[var(--text-muted)] animate-pulse">Loading Search...</p>

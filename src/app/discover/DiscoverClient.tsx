@@ -22,7 +22,7 @@ const SUGGESTIONS = [
     { text: "Sad anime", desc: "Emotional stories and beautiful tearjerkers", emoji: "🌧️", gradient: "from-rose-600/20 to-pink-600/5 hover:border-rose-500/50 hover:shadow-rose-500/5" },
     { text: "Studio Ghibli", desc: "Magical adventures & cozy comforting aesthetics", emoji: "🌳", gradient: "from-emerald-600/20 to-teal-600/5 hover:border-emerald-500/50 hover:shadow-emerald-500/5" },
     { text: "Mind bending", desc: "Psychological thrillers, plot twists & mystery", emoji: "🧠", gradient: "from-blue-600/20 to-cyan-600/5 hover:border-blue-500/50 hover:shadow-blue-500/5" },
-    { text: "Kdrama", desc: "Acclaimed Korean romances & comforting comedies", emoji: "🇰🇷", gradient: "from-amber-600/20 to-[var(--accent-warm)]/5 hover:border-amber-500/50 hover:shadow-amber-500/5" },
+    { text: "Kdrama", desc: "Acclaimed Korean romances & comforting comedies", emoji: "🇰🇷", gradient: "from-amber-600/20 to-accent-warm/5 hover:border-amber-500/50 hover:shadow-amber-500/5" },
     { text: "Hidden gems", desc: "Acclaimed but obscure films & series to discover", emoji: "💎", gradient: "from-violet-600/20 to-fuchsia-600/5 hover:border-violet-500/50 hover:shadow-violet-500/5" },
 ];
 

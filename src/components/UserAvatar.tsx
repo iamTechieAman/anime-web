@@ -17,7 +17,7 @@ export default function UserAvatar({ src, alt = "Avatar", initials = "?", size =
   if (!src || error) {
     return (
       <div 
-        className={`flex items-center justify-center bg-gradient-to-br from-[var(--accent)] to-[var(--accent-secondary)] text-white font-extrabold select-none shrink-0 ${className}`}
+        className={`flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-extrabold select-none shrink-0 ${className}`}
         style={{ width: size, height: size, borderRadius: "50%" }}
       >
         <span style={{ fontSize: size * 0.4 }}>{initials}</span>

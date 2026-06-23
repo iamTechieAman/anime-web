@@ -103,8 +103,8 @@ export default function LoginPage() {
         className="relative z-10 w-full max-w-[420px] bg-[#141419]/80 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 sm:p-10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8)] overflow-hidden"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center mb-6 border border-[var(--accent)]/20 shadow-[0_0_30px_var(--accent-glow)]">
-            <Play className="w-8 h-8 text-[var(--accent)] fill-current translate-x-0.5" />
+          <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 border border-accent/20 shadow-[0_0_30px_var(--accent-glow)]">
+            <Play className="w-8 h-8 text-accent fill-current translate-x-0.5" />
           </div>
           <h1 className="text-3xl font-black font-sora text-white tracking-tight">ToonPlayer</h1>
           <p className="text-sm text-[var(--text-muted)] mt-2 font-medium">Premium Streaming Experience</p>
@@ -161,7 +161,7 @@ export default function LoginPage() {
                 maxLength={15}
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[var(--accent)] transition-all"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none focus:border-accent transition-all"
                 placeholder="Enter your name"
               />
             </div>
@@ -176,7 +176,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={!guestName.trim()}
-                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Start Watching
               </button>
