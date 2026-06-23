@@ -77,32 +77,42 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       const name = guestName.trim();
       
-      // Add guest profile
-      addProfile({
-        name,
-        avatar: selectedAvatar,
-        type: 'guest',
-        isKids: false,
-        theme: 'purple'
-      });
+      // Check if this exact guest name exists
+      const currentStore = useUserStore.getState();
+      const existing = currentStore.profiles.find(p => p.name === name && p.type === 'guest');
 
-      setTimeout(() => {
-        const updatedStore = useUserStore.getState();
-        const created = updatedStore.profiles.find(p => p.name === name && p.avatar === selectedAvatar && p.type === 'guest');
-        if (created) {
-          setActiveProfile(created.id);
-        } else {
-          setActiveProfile('profile-guest');
-        }
+      if (existing) {
+        // If it exists, just use it
+        setActiveProfile(existing.id);
+      } else {
+        // Add new guest profile
+        addProfile({
+          name,
+          avatar: selectedAvatar,
+          type: 'guest',
+          isKids: false,
+          theme: 'purple'
+        });
         
-        if (typeof window !== "undefined") {
-          window.sessionStorage.setItem("toonplayer-session-active", "true");
-          window.dispatchEvent(new Event("profileUpdated"));
-        }
-        toast.success(`Welcome to ToonPlayer, ${name}!`);
-        onClose();
-        router.refresh();
-      }, 50);
+        // Let state update, then find the newly created one
+        setTimeout(() => {
+          const updatedStore = useUserStore.getState();
+          const created = updatedStore.profiles.find(p => p.name === name && p.type === 'guest');
+          if (created) {
+            setActiveProfile(created.id);
+          } else {
+            setActiveProfile('profile-guest');
+          }
+        }, 50);
+      }
+
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("toonplayer-session-active", "true");
+        window.dispatchEvent(new Event("profileUpdated"));
+      }
+      toast.success(`Welcome to ToonPlayer, ${name}!`);
+      onClose();
+      router.refresh();
 
     } catch (error) {
       toast.error("Guest login failed.");

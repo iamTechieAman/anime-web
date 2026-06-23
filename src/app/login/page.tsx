@@ -48,11 +48,30 @@ export default function LoginPage() {
 
   const handleGuestLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guestName.trim()) return;
-    const id = `profile-guest-${Date.now()}`;
-    const avatar = `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(guestName.trim())}`;
-    addProfile({ name: guestName.trim(), avatar });
-    setActiveProfile(id); // Set active to bypass gate
+    const name = guestName.trim();
+    if (!name) return;
+
+    const currentStore = useUserStore.getState();
+    const existing = currentStore.profiles.find(p => p.name === name && p.type === 'guest');
+
+    if (existing) {
+      setActiveProfile(existing.id);
+    } else {
+      const avatar = `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+      addProfile({ name, avatar, type: 'guest', isKids: false, theme: 'purple' });
+      
+      setTimeout(() => {
+        const updatedStore = useUserStore.getState();
+        const created = updatedStore.profiles.find(p => p.name === name && p.type === 'guest');
+        if (created) setActiveProfile(created.id);
+      }, 50);
+    }
+    
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("toonplayer-session-active", "true");
+      window.dispatchEvent(new Event("profileUpdated"));
+    }
+    
     router.push("/");
   };
 
