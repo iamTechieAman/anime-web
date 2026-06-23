@@ -1598,7 +1598,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <>
         <div className="relative isolate min-h-dvh overflow-x-clip bg-bg-main text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05] flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
+                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
                     <Link href="/" className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
@@ -1632,7 +1632,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {renderHero()}
 
                             {/* Player & Episode Layout */}
-                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-6 mb-6 flex flex-col lg:flex-row gap-6 items-start">
+                            <div className="relative z-10 w-full max-w-[1600px] mx-auto mt-8 lg:mt-10 mb-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
                                 {/* Player Column */}
                                 <div className={`flex-1 w-full min-w-0 bg-bg-main p-0 rounded-none sm:rounded-[24px] shadow-none sm:shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-0 sm:border border-white/[0.05] ${type === 'movie' ? 'mx-auto' : ''}`}>
                                     {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
