@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
 import { useUserStore, Profile } from "@/store/userStore";
+import UserAvatar from "./UserAvatar";
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -174,7 +175,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                           boxShadow: !isManaging && isActive ? `0 0 20px ${themeColor}40` : 'none'
                         }}
                       >
-                        <Image src={p.avatar} alt={p.name} fill sizes="112px" className="object-cover" />
+                        <UserAvatar src={p.avatar} alt={p.name} initials={p.name[0] || "?"} size={112} className="w-full h-full rounded-2xl" />
                         
                         {/* Manage Overlay */}
                         {isManaging && (
@@ -235,7 +236,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
               <div className="flex flex-col md:flex-row gap-6 items-center">
                 {/* Visual Preview */}
                 <div className="relative w-32 h-32 rounded-2xl overflow-hidden border-4 border-accent bg-zinc-800 shrink-0">
-                  <Image src={selectedAvatar} alt="Profile Avatar" fill sizes="128px" className="object-cover" />
+                  <UserAvatar src={selectedAvatar} alt="Profile Avatar" initials={profileName[0] || "?"} size={128} className="w-full h-full rounded-2xl" />
                 </div>
 
                 <div className="flex-1 w-full space-y-4">

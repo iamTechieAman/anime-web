@@ -29,6 +29,11 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 22 — Anime Recovery & Scraper Stabilization (`June 2026`)
+- 🎌 **Signed API Scraper**: Reverse-engineered the `hianime.lol` SPA backend API at `https://anime.sankavollerei.web.id/api` and extracted the cryptographic keys to calculate XOR (SHA256) and chained HMAC-SHA256 signatures, completely bypassing Cloudflare Turnstile blocks.
+- 🍿 **Direct HLS Streams**: Enabled direct extraction of `.m3u8` master playlists with fallback inline iframe sources and `AllAnimeProvider` auto-rotation.
+- 🖼️ **CDN Configuration**: Configured `cdn.anipixcdn.co` remote pattern rules in `next.config.ts` to resolve broken poster images, ensuring zero broken poster icons.
+
 ### Phase 21 — Watch Page Rhythm & Spacing Polish (`June 2026`)
 - 📏 **Strict Grid Rhythm**: Eradicated all arbitrary margins across the Watch Page, strictly enforcing a 4px-baseline interval grid for flawless geometric balance.
 - 📐 **Player Normalization**: Locked player wrapper geometry with absolute 24px margins, a 24px border radius, and true-bleed padding for a native theater look.

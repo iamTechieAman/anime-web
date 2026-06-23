@@ -23,6 +23,7 @@ const ALLOWED_SUBTITLE_ORIGINS = [
     'youtube-anime.com',
     // HiAnime / Zoro
     'hianime.to',
+    'hianime.lol',
     'zoro.to',
     's.megacloud.tv',
     'megacloud.tv',

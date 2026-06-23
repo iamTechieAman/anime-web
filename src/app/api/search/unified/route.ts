@@ -16,6 +16,7 @@ query($search: String) {
       seasonYear
       type
       averageScore
+      synonyms
     }
   }
 }
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
                 results.push({
                     id: item.id,
                     title: item.title.english || item.title.romaji,
-                    altTitles: [item.title.english, item.title.romaji, item.title.native].filter(Boolean),
+                    altTitles: [item.title.english, item.title.romaji, item.title.native, ...(item.synonyms || [])].filter(Boolean),
                     image: item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || "",
                     type: 'anime',
                     year: item.seasonYear,
@@ -93,25 +94,47 @@ export async function GET(request: Request) {
             });
         }
 
-
-
         // Sort by relevance (Normalized Title distance)
         const sortedResults = results.sort((a, b) => {
             const aTitle = (a.title || "").toLowerCase();
             const bTitle = (b.title || "").toLowerCase();
             const q = query.toLowerCase();
             
-            // Exact match priority
+            // Exact match priority (primary title)
             const aExact = aTitle === q;
             const bExact = bTitle === q;
             if (aExact && !bExact) return -1;
             if (bExact && !aExact) return 1;
 
-            // Starts with match priority
+            // Exact match priority (alternative titles / Japanese / synonyms)
+            const aAltExact = a.altTitles?.some((t: string) => t.toLowerCase() === q);
+            const bAltExact = b.altTitles?.some((t: string) => t.toLowerCase() === q);
+            if (aAltExact && !bAltExact) return -1;
+            if (bAltExact && !aAltExact) return 1;
+
+            // Starts with match priority (primary title)
             const aStarts = aTitle.startsWith(q);
             const bStarts = bTitle.startsWith(q);
             if (aStarts && !bStarts) return -1;
             if (bStarts && !aStarts) return 1;
+
+            // Starts with match priority (alternative titles / Japanese / synonyms)
+            const aAltStarts = a.altTitles?.some((t: string) => t.toLowerCase().startsWith(q));
+            const bAltStarts = b.altTitles?.some((t: string) => t.toLowerCase().startsWith(q));
+            if (aAltStarts && !bAltStarts) return -1;
+            if (bAltStarts && !aAltStarts) return 1;
+
+            // Includes match priority (primary title)
+            const aIncludes = aTitle.includes(q);
+            const bIncludes = bTitle.includes(q);
+            if (aIncludes && !bIncludes) return -1;
+            if (bIncludes && !aIncludes) return 1;
+
+            // Includes match priority (alternative titles / Japanese / synonyms)
+            const aAltIncludes = a.altTitles?.some((t: string) => t.toLowerCase().includes(q));
+            const bAltIncludes = b.altTitles?.some((t: string) => t.toLowerCase().includes(q));
+            if (aAltIncludes && !bAltIncludes) return -1;
+            if (bAltIncludes && !aAltIncludes) return 1;
 
             return 0;
         });

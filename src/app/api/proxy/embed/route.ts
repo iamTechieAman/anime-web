@@ -14,15 +14,15 @@ import * as cheerio from 'cheerio';
 
 // Known anime embed origins and their expected referer
 const EMBED_REFERERS: Record<string, string> = {
-    'megacloud.tv': 'https://hianime.to',
-    'mega.nz': 'https://hianime.to',
+    'megacloud.tv': 'https://hianime.lol',
+    'mega.nz': 'https://hianime.lol',
     'rapid-cloud.co': 'https://zoro.to',
     'rabbitstream.net': 'https://zoro.to',
     'allanime.day': 'https://allmanga.to',
     'gogocdn.net': 'https://gogoanime.hu',
     'playtaku.net': 'https://gogoanime.hu',
     'vidstreaming.io': 'https://gogoanime.hu',
-    'anime-taku.net': 'https://hianime.to',
+    'anime-taku.net': 'https://hianime.lol',
     'vidlink.pro': 'https://vidlink.pro',
     'vidsrc.to': 'https://vidsrc.to',
     'vidsrc.pro': 'https://vidsrc.pro',
@@ -46,7 +46,7 @@ function getRefererForUrl(url: string, override?: string): string {
         }
         return parsed.origin;
     } catch (_) {}
-    return 'https://hianime.to';
+    return 'https://hianime.lol';
 }
 
 function isAllowedEmbed(_url: string): boolean {

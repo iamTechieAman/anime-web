@@ -127,10 +127,20 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
     function triggerItemAtIndex(index: number) {
         const items = getNavigableItems();
+        if (items.length === 0 && query.trim()) {
+            router.push(`/search?query=${encodeURIComponent(query.trim())}`, { scroll: false });
+            saveSearch(query);
+            onClose();
+            return;
+        }
         const clampedIndex = Math.max(0, Math.min(index, items.length - 1));
         const selected = items[clampedIndex];
         if (selected) {
             selected.action();
+        } else if (query.trim()) {
+            router.push(`/search?query=${encodeURIComponent(query.trim())}`, { scroll: false });
+            saveSearch(query);
+            onClose();
         }
     }
 
@@ -193,7 +203,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         })
             .then(res => {
                 const items = res.data.results || [];
-                setResults(items);
+                setResults(items.slice(0, 10));
             })
             .catch((err) => {
                 if (axios.isCancel(err) || err.name === 'CanceledError') return;
@@ -212,7 +222,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         if (isOpen) {
             setQuery("");
             setActiveIndex(0);
-            setTimeout(() => inputRef.current?.focus(), 80);
+            inputRef.current?.focus();
+            setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [isOpen]);
 

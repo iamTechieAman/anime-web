@@ -1,19 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import AnimeCard, { type Show } from "./AnimeCard";
-import { Loader2, Sparkles } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 export default function SimilarAnime({ currentShowId, showName }: { currentShowId: string; showName: string }) {
     const [similar, setSimilar] = useState<Show[]>([]);
     const [loading, setLoading] = useState(true);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
 
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
     const isKidsMode = activeProfile?.isKids || false;
     const displayedSimilar = isKidsMode ? similar.filter(show => isKidsFriendly(show as any)) : similar;
+
+    const checkScroll = useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 8);
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
+    }, []);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        checkScroll();
+        el.addEventListener('scroll', checkScroll, { passive: true });
+        const ro = new ResizeObserver(checkScroll);
+        ro.observe(el);
+        return () => { 
+            el.removeEventListener('scroll', checkScroll); 
+            ro.disconnect(); 
+        };
+    }, [checkScroll, displayedSimilar]);
+
+    const scroll = (dir: 'left' | 'right') => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const cardWidth = el.querySelector('[data-card]')?.clientWidth || 200;
+        const visibleCards = Math.floor(el.clientWidth / cardWidth);
+        const amount = cardWidth * Math.max(2, visibleCards - 1);
+        el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
+    };
 
     useEffect(() => {
         const fetchSimilar = async () => {
@@ -49,20 +81,48 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
                 </h2>
             </div>
             
-            <div className="relative overflow-hidden w-full">
+            <div className="relative group/row w-full overflow-hidden">
+                {/* Prev arrow */}
+                <button
+                    onClick={() => scroll('left')}
+                    aria-label="Scroll left"
+                    className={`absolute left-0 top-0 bottom-[40px] z-20 w-10 flex items-center justify-center bg-gradient-to-r from-bg-main to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 ${canScrollLeft ? '' : 'pointer-events-none !opacity-0'}`}
+                >
+                    <div className="w-8 h-8 rounded-full bg-zinc-800/80 border border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-700 transition-colors">
+                        <ChevronLeft className="w-4 h-4 text-white" />
+                    </div>
+                </button>
+
+                {/* Content Container */}
                 {loading ? (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                    <div className="flex gap-3 overflow-hidden py-4">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="aspect-[3/4.5] bg-white/5 rounded-xl animate-pulse border border-border-color" />
+                            <div key={i} className="w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px] aspect-[2/3] bg-white/5 rounded-xl animate-pulse border border-border-color shrink-0" />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                    <div
+                        ref={scrollRef}
+                        className="netflix-row"
+                    >
                         {displayedSimilar.map((show, idx) => (
-                            <AnimeCard key={`similar-${show._id}-${idx}`} show={show} />
+                            <div key={`similar-${show._id || show.id}-${idx}`} data-card className="netflix-card-snap w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px]">
+                                <AnimeCard show={show} />
+                            </div>
                         ))}
                     </div>
                 )}
+
+                {/* Next arrow */}
+                <button
+                    onClick={() => scroll('right')}
+                    aria-label="Scroll right"
+                    className={`absolute right-0 top-0 bottom-[40px] z-20 w-10 flex items-center justify-center bg-gradient-to-l from-bg-main to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 ${canScrollRight ? '' : 'pointer-events-none !opacity-0'}`}
+                >
+                    <div className="w-8 h-8 rounded-full bg-zinc-800/80 border border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-700 transition-colors">
+                        <ChevronRight className="w-4 h-4 text-white" />
+                    </div>
+                </button>
             </div>
         </div>
     );

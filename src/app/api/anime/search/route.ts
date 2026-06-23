@@ -32,6 +32,7 @@ export async function GET(request: Request) {
                         episodes
                         status
                         format
+                        synonyms
                     }
                 }
             }
@@ -77,7 +78,8 @@ export async function GET(request: Request) {
             __typename: "Show",
             type: "anime",
             status: item.status,
-            format: item.format
+            format: item.format,
+            synonyms: item.synonyms || []
         }));
 
         return NextResponse.json({ shows });

@@ -47,6 +47,13 @@ const getProxiedEmbedUrl = (rawUrl: string | null) => {
 
 
 
+function cleanString(str: any): string | null {
+    if (!str) return null;
+    const s = String(str).trim();
+    if (/^(unknown|undefined|null|no image|no img|no_image|no_img|placeholder|none)$/i.test(s)) return null;
+    return s;
+}
+
 /** Memoized episode button to prevent full list re-render on every currentEp change */
 const EpisodeButton = React.memo(function EpisodeButton({
     ep, currentEp, onClick
@@ -54,7 +61,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
     const epNum = typeof ep === 'object' ? String(ep.number || ep.id) : String(ep);
     const title = typeof ep === 'object' ? ep.title : null;
     const isFiller = typeof ep === 'object' ? ep.isFiller : false;
-    const thumbnail = typeof ep === 'object' ? ep.image : null;
+    const thumbnail = typeof ep === 'object' ? cleanString(ep.image) : null;
     const isActive = String(currentEp) === epNum;
     
     const ref = React.useRef<HTMLButtonElement>(null);

@@ -381,6 +381,8 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                             <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
                                 {isFetchingGifs ? (
                                     <div className="col-span-2 text-center text-xs text-zinc-500 py-4">Loading...</div>
+                                ) : (searchGifQuery.trim() && tenorGifs.length === 0) ? (
+                                    <div className="col-span-2 text-center text-xs text-zinc-500 py-6 font-semibold">No GIFs found for "{searchGifQuery}"</div>
                                 ) : (
                                     (tenorGifs.length > 0 ? tenorGifs : POPULAR_GIFS).map((gif, i) => (
                                         <button

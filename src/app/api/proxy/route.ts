@@ -3,15 +3,15 @@ import { getUA } from "@/lib/user-agents";
 
 // Domain-to-Referer lookup for anime CDNs
 const CDN_REFERERS: Record<string, string> = {
-    'megacloud.tv': 'https://hianime.to',
-    'mega.nz': 'https://hianime.to',
+    'megacloud.tv': 'https://hianime.lol',
+    'mega.nz': 'https://hianime.lol',
     'rapid-cloud.co': 'https://zoro.to',
     'rabbitstream.net': 'https://zoro.to',
     'allanime.day': 'https://allmanga.to',
     'gogocdn.net': 'https://gogoanime.hu',
     'playtaku.net': 'https://gogoanime.hu',
     'vidstreaming.io': 'https://gogoanime.hu',
-    'anime-taku.net': 'https://hianime.to',
+    'anime-taku.net': 'https://hianime.lol',
     'vidlink.pro': 'https://vidlink.pro',
     'vidsrc.to': 'https://vidsrc.to',
     'vidsrc.pro': 'https://vidsrc.pro',
@@ -26,7 +26,7 @@ const CDN_REFERERS: Record<string, string> = {
     'youtube-anime.com': 'https://allmanga.to',
     'animepahe.ru': 'https://animepahe.ru',
     'kwik.si': 'https://animepahe.ru',
-    'files.cache.luluvdo.com': 'https://hianime.to',
+    'files.cache.luluvdo.com': 'https://hianime.lol',
 };
 
 function getReferer(url: string, override?: string | null): string {

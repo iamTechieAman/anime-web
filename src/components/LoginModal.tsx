@@ -10,12 +10,23 @@ import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
 import { useUserStore } from "@/store/userStore";
 
-const ProfileAvatar = ({ src, alt, sizes = "80px" }: { src: string, alt: string, sizes?: string }) => {
+const ProfileAvatar = ({ src, alt, sizes = "80px" }: { src?: string | null, alt?: string | null, sizes?: string }) => {
   const [error, setError] = useState(false);
-  return error || !src ? (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-900 text-white font-black text-2xl select-none rounded-lg">{alt.charAt(0).toUpperCase()}</div>
+  const isInvalidSrc = !src || 
+    src === "null" || 
+    src === "undefined" || 
+    src.trim() === "" || 
+    src.includes("undefined") ||
+    src.includes("/undefined") ||
+    src.includes("/null");
+  const fallbackChar = (alt && typeof alt === 'string' && alt.trim().length > 0) 
+    ? alt.trim().charAt(0).toUpperCase() 
+    : "?";
+  
+  return error || isInvalidSrc ? (
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-black text-2xl select-none rounded-lg">{fallbackChar}</div>
   ) : (
-    <Image src={src} alt={alt} fill sizes={sizes} className="object-cover rounded-lg" onError={() => setError(true)} />
+    <Image src={src!} alt={alt || "Avatar"} fill sizes={sizes} className="object-cover rounded-lg" onError={() => setError(true)} />
   );
 };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface UserAvatarProps {
@@ -9,18 +9,36 @@ interface UserAvatarProps {
   className?: string;
 }
 
-export default function UserAvatar({ src, alt = "Avatar", initials = "?", size = 40, className = "" }: UserAvatarProps) {
+export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, className = "" }: UserAvatarProps) {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
+  // Reset states if src changes
+  useEffect(() => {
+    setError(false);
+    setLoaded(false);
+  }, [src]);
+
+  const isInvalidSrc = !src || 
+    src === "null" || 
+    src === "undefined" || 
+    src.trim() === "" || 
+    src.includes("undefined") ||
+    src.includes("/undefined") ||
+    src.includes("/null");
+
+  const safeInitials = (initials && initials.trim().length > 0)
+    ? initials.trim()
+    : (alt && alt.trim().length > 0 ? alt.trim().charAt(0).toUpperCase() : "?");
+
   // If no source or error occurred, show fallback
-  if (!src || error) {
+  if (isInvalidSrc || error) {
     return (
       <div 
         className={`flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-extrabold select-none shrink-0 ${className}`}
         style={{ width: size, height: size, borderRadius: "50%" }}
       >
-        <span style={{ fontSize: size * 0.4 }}>{initials}</span>
+        <span style={{ fontSize: size * 0.4 }}>{safeInitials}</span>
       </div>
     );
   }
@@ -35,7 +53,7 @@ export default function UserAvatar({ src, alt = "Avatar", initials = "?", size =
         alt={alt}
         fill
         sizes={`${size}px`}
-        className={`object-cover transition-opacity duration-[250ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`object-cover transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />

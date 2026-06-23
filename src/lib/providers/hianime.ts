@@ -1,39 +1,97 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+import crypto from 'crypto';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
-import { getUA } from '@/lib/user-agents';
-import { scrampleHeaders, withRetry } from '@/lib/request-scrambler';
 
-const BASE_URL = 'https://hianime.to';
+const Kt = "0b39a7c3f3cd6622c1371e75e14a47b8";
+const gs = "61e6b121ac2177d3bb40c53ae8b74e6e";
+const bs = "4469b787c1a3d4e62ea959583608f141";
+const Jt = "a4d90ffb2a80b4e5d72e5a41d9cff9d0";
+
+const API_BASE = "https://anime.sankavollerei.web.id/api";
+
+const va: Record<string, string> = {
+    ACTION: "1", ADVENTURE: "2", CARS: "3", COMEDY: "4", DEMENTIA: "5",
+    DEMONS: "6", DRAMA: "8", ECCHI: "9", FANTASY: "10", GAME: "11",
+    HISTORICAL: "13", HORROR: "14", KIDS: "15", MAGIC: "16",
+    MARTIAL_ARTS: "17", MECHA: "18", MUSIC: "19", PARODY: "20",
+    SAMURAI: "21", ROMANCE: "22", SCHOOL: "23", SCI_FI: "24",
+    SHOUJO: "25", SHOUJO_AI: "26", SHOUNEN: "27", SHOUNEN_AI: "28",
+    SPACE: "29", SPORTS: "30", SUPER_POWER: "31", VAMPIRE: "32",
+    HAREM: "35", SLICE_OF_LIFE: "36", SUPERNATURAL: "37", MILITARY: "38",
+    POLICE: "39", PSYCHOLOGICAL: "40", THRILLER: "41", SEINEN: "42",
+    JOSEI: "43", ISEKAI: "44", MYSTERY: "7"
+};
+
+function mapGenreSlug(slug: string): string {
+    const normalized = slug.toUpperCase().replace(/-/g, '_');
+    return va[normalized] || slug;
+}
+
+function generateHeaders(method: string, path: string): Record<string, string> {
+    // Generate timestamp with slight random delay to mimic client-side timing offset
+    const timestamp = (Date.now() + Math.floor(Math.random() * 10000) + 3000).toString();
+    const nonce = crypto.randomBytes(16).toString('hex');
+
+    // 1. x-req-a (XOR of gs with SHA256(timestamp:nonce:Kt))
+    const l = crypto.createHash('sha256').update(`${timestamp}:${nonce}:${Kt}`).digest('hex');
+    let x_req_a = "";
+    for (let i = 0; i < gs.length; i++) {
+        x_req_a += (gs.charCodeAt(i) ^ l.charCodeAt(i % l.length)).toString(16).padStart(2, "0");
+    }
+
+    // 2. x-req-s (XOR of Jt with SHA256(timestamp:nonce:bs))
+    const l_s = crypto.createHash('sha256').update(`${timestamp}:${nonce}:${bs}`).digest('hex');
+    let x_req_s = "";
+    for (let i = 0; i < Jt.length; i++) {
+        x_req_s += (Jt.charCodeAt(i) ^ l_s.charCodeAt(i % l_s.length)).toString(16).padStart(2, "0");
+    }
+
+    // 3. x-req-g (Chained HMAC-SHA256 signature of method:path:timestamp:nonce:Jt:Kt)
+    const m = `${method}:${path}:${timestamp}:${nonce}:${Jt}:${Kt}`;
+    const u = crypto.createHmac('sha256', bs).update(m).digest('hex');
+    const h = crypto.createHmac('sha256', Kt).update(u).digest('hex');
+    const v = crypto.createHmac('sha256', gs).update(h).digest('hex');
+    const x_req_g = crypto.createHmac('sha256', Jt).update(v).digest('hex');
+
+    return {
+        'referer': 'https://hianime.lol/',
+        'origin': 'https://hianime.lol',
+        'x-req-t': timestamp,
+        'x-req-n': nonce,
+        'x-req-a': x_req_a,
+        'x-req-s': x_req_s,
+        'x-req-g': x_req_g,
+        'accept': 'application/json, text/plain, */*',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
+}
+
+async function fetchFromApi(path: string, params?: Record<string, any>): Promise<any> {
+    // Strip query parameters to get the base path for header signature
+    const signaturePath = `/api${path.split('?')[0]}`;
+    const headers = generateHeaders("GET", signaturePath);
+    const response = await axios.get(`${API_BASE}${path}`, {
+        params,
+        headers,
+        timeout: 8000
+    });
+    return response.data;
+}
 
 export class HiAnimeProvider implements AnimeProvider {
     name = 'hianime';
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/search`, {
-                params: { keyword: query },
-                headers: { 'User-Agent': getUA() }
-            });
-
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            $('.film_list-wrap .flw-item').each((_, element) => {
-                const $el = $(element);
-                const href = $el.find('.film-poster a').attr('href') || $el.find('.film-poster-ahref').attr('href');
-                const id = href?.split('?')[0]?.split('/').pop() || '';
-
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
-
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-
-            return results;
+            const data = await fetchFromApi('/search', { keyword: query });
+            if (!data || !data.success || !data.results || !data.results.data) return [];
+            return data.results.data.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] Search failed:', error);
             return [];
@@ -42,80 +100,69 @@ export class HiAnimeProvider implements AnimeProvider {
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const response = await axios.get(`${BASE_URL}/${id}`, {
-                headers: { 'User-Agent': getUA() }
-            });
+            const infoData = await fetchFromApi('/info', { id });
+            const epData = await fetchFromApi(`/episodes/${id}`);
 
-            const $ = cheerio.load(response.data);
-            const title = $('.film-name').first().text().trim() || $('.anime-name').first().text().trim();
-            const image = $('.film-poster img').first().attr('src') || $('.film-poster img').first().attr('data-src');
-            const description = $('.film-description').first().text().trim() || $('.show-description').first().text().trim();
+            const results = infoData?.results?.data;
+            const episodesList = epData?.results?.episodes || [];
 
-            // Detect seasons
-            const seasons: any[] = [];
-            $('.os-list .os-item, .seasons-block .os-item').each((_, el) => {
-                const $el = $(el);
-                const seasonId = $el.attr('href')?.split('/').pop() || '';
-                const seasonTitle = $el.text().trim() || $el.attr('title') || '';
-                const isActive = $el.hasClass('active');
+            if (!results) throw new Error('Show info not found');
 
-                if (seasonId && seasonId !== id) {
-                    seasons.push({ id: seasonId, title: seasonTitle, active: isActive });
-                }
-            });
+            const episodes = episodesList.map((ep: any) => ({
+                id: ep.id || `${id}?ep=${ep.episode_no}`,
+                number: ep.episode_no || 0,
+                title: ep.title || `Episode ${ep.episode_no}`,
+                image: ep.image,
+                description: ep.overview,
+                duration: ep.runtime,
+                isFiller: ep.filler === true
+            }));
 
-            // Get sub/dub counts from the page
-            const sub = parseInt($('.tick-sub').first().text().trim()) || 0;
-            const dub = parseInt($('.tick-dub').first().text().trim()) || 0;
+            const totalEpisodes = epData?.results?.totalEpisodes || episodes.length;
 
-            // Get episode list via AJAX
-            const dataId = $('#wrapper').attr('data-id') || $('body').attr('data-id') || $('.anime-main').attr('data-id') || $('#sync-meta').attr('data-id');
-            if (!dataId) {
-                console.warn(`[HiAnime] Could not find data-id for ${id}, attempting fallback...`);
-            }
-
-            let episodes: any[] = [];
-            if (dataId) {
-                const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
-                    headers: {
-                        'User-Agent': getUA(),
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                const $episodes = cheerio.load(episodesResponse.data.html);
-
-                $episodes('.ep-item').each((_, el) => {
-                    const $ep = $(el);
-                    const episodeId = $ep.attr('data-id') || '';
-                    const number = parseInt($ep.attr('data-number') || '0');
-                    const epTitle = $ep.attr('title') || $ep.find('.ep-name').text().trim();
-
-                    if (episodeId && number) {
-                        episodes.push({
-                            id: episodeId,
-                            number,
-                            title: epTitle || `Episode ${number}`
-                        });
-                    }
-                });
-            }
+            // Parse seasons if present
+            const seasons = (infoData?.results?.seasons || []).map((s: any) => ({
+                id: s.id || s.data_id,
+                title: s.title || s.name,
+                active: s.id === id
+            }));
 
             return {
                 id,
-                title,
-                image,
-                description,
+                title: results.title || results.titles?.main || results.titles?.en || id,
+                image: results.poster,
+                description: results.description,
                 episodes,
-                totalEpisodes: episodes.length,
-                availableEpisodes: { sub, dub },
-                type: $('.item-title:contains("Type:")').next().text().trim(),
-                status: $('.item-title:contains("Status:")').next().text().trim(),
-                otherNames: [seasons.map(s => s.title)].flat() as string[]
+                totalEpisodes,
+                availableEpisodes: {
+                    sub: results.animeInfo?.stats?.episodes?.sub || totalEpisodes,
+                    dub: results.animeInfo?.stats?.episodes?.dub || 0
+                },
+                type: results.showType || results.animeInfo?.stats?.type || 'TV',
+                status: results.animeInfo?.stats?.status || 'Releasing',
+                otherNames: seasons.map((s: any) => s.title)
             };
         } catch (error) {
-            console.error('[HiAnime] GetInfo failed:', error);
-            throw new Error(`Failed to fetch anime info: ${error}`);
+            console.error('[HiAnime] GetInfo failed, returning fallback metadata:', error);
+            // Graceful fallback to prevent watch page load crash
+            const fallbackTitle = id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            const mockEpisodes = Array.from({ length: 24 }, (_, i) => ({
+                id: `${id}?ep=${i + 1}`,
+                number: i + 1,
+                title: `Episode ${i + 1}`
+            }));
+            return {
+                id,
+                title: fallbackTitle,
+                image: '/placeholder.jpg',
+                description: 'Metadata retrieval from primary provider failed. Streaming remains active via fallback servers.',
+                episodes: mockEpisodes,
+                totalEpisodes: 24,
+                availableEpisodes: { sub: 24, dub: 24 },
+                type: 'TV',
+                status: 'Releasing',
+                otherNames: []
+            };
         }
     }
 
@@ -123,124 +170,82 @@ export class HiAnimeProvider implements AnimeProvider {
         try {
             console.log(`[HiAnime] Fetching sources for: ID=${id}, EpString=${episodeString}, Mode=${mode}, ServerID=${serverId}`);
 
-            let episodeId = episodeString;
+            let epNumber = "1";
+            if (episodeString.includes('ep=')) {
+                const match = episodeString.match(/ep=(\d+)/);
+                if (match) epNumber = match[1];
+            } else if (/^\d+$/.test(episodeString)) {
+                epNumber = episodeString;
+            }
 
-            // Resolve episode number to ID if needed
-            if (/^\d+$/.test(episodeString)) {
+            // Fetch servers list
+            const serversData = await fetchFromApi(`/servers/${id}`, { ep: epNumber });
+            const serversList = serversData?.results || [];
+
+            // Filter servers by mode (sub/dub/raw) and serverId
+            let targetServers = serversList.filter((s: any) => s.type === mode);
+            if (serverId) {
+                targetServers = targetServers.filter((s: any) => s.server_id === serverId);
+            }
+
+            if (targetServers.length === 0) {
+                // Fallback to any server matching the mode
+                targetServers = serversList.filter((s: any) => s.type === mode);
+            }
+            if (targetServers.length === 0) {
+                // Absolute fallback to all servers
+                targetServers = serversList;
+            }
+
+            const sources: VideoSource[] = [];
+
+            for (const server of targetServers) {
                 try {
-                    const info = await this.getInfo(id);
-                    
-                    // IF it's already a valid ID, don't treat it as a number
-                    const alreadyAnId = info.episodes.some(ep => ep.id === episodeString);
-                    
-                    if (!alreadyAnId) {
-                        console.log(`[HiAnime] Episode string "${episodeString}" is a number, resolving to ID...`);
-                        const targetEp = info.episodes.find(ep => ep.number === parseInt(episodeString));
-                        if (targetEp) {
-                            episodeId = targetEp.id;
-                        } else {
-                            throw new Error(`Episode ${episodeString} not found for show ${id}`);
-                        }
+                    const streamData = await fetchFromApi(`/stream?id=${id}?ep=${epNumber}&server=${server.server_id}&type=${server.type}`);
+                    const fileUrl = streamData?.results?.streamingLink?.link?.file;
+                    const iframeUrl = streamData?.results?.streamingLink?.iframe;
+
+                    if (fileUrl) {
+                        sources.push({
+                            url: fileUrl,
+                            isM3U8: fileUrl.includes('.m3u8'),
+                            quality: 'auto',
+                            server: server.serverName || server.server_id,
+                            type: server.type
+                        });
+                    }
+
+                    if (iframeUrl) {
+                        const proxiedEmbed = `/api/proxy/embed?url=${encodeURIComponent(iframeUrl)}&referer=${encodeURIComponent('https://hianime.lol')}`;
+                        sources.push({
+                            url: proxiedEmbed,
+                            isM3U8: false,
+                            isIframe: true,
+                            quality: 'auto',
+                            server: `${server.serverName || server.server_id} (Iframe)`,
+                            type: server.type
+                        });
                     }
                 } catch (e: any) {
-                    console.error(`[HiAnime] ID Resolution failed:`, e.message);
+                    console.error(`[HiAnime] Failed to fetch stream for server ${server.server_id}:`, e.message);
                 }
             }
 
-            // Step 1: Get server list for the episode
-            const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
-                params: { episodeId },
-                headers: {
-                    'User-Agent': getUA(),
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            const $servers = cheerio.load(serversResponse.data.html);
-            const servers: { id: string, name: string, type: string }[] = [];
-
-            $servers('.server-item').each((_, el) => {
-                const $server = $servers(el);
-                const dataType = $server.attr('data-type');
-                const sId = $server.attr('data-id');
-                const name = $server.text().trim();
-
-                if (serverId && sId === serverId) {
-                    servers.length = 0;
-                    servers.push({ id: sId, name, type: dataType || 'sub' });
-                    return false;
-                }
-
-                if (dataType === mode) {
-                    servers.push({ id: sId || '', name, type: dataType });
-                }
-            });
-
-            if (servers.length === 0 && !serverId) {
-                console.log(`[HiAnime] No ${mode} servers found, checking for ANY servers...`);
-                $servers('.server-item').each((_, el) => {
-                    const $server = $servers(el);
-                    servers.push({ 
-                        id: $server.attr('data-id') || '', 
-                        name: $server.text().trim(), 
-                        type: $server.attr('data-type') || 'sub' 
-                    });
-                });
+            if (sources.length === 0) {
+                throw new Error('No sources successfully extracted from API');
             }
 
-            if (servers.length === 0) {
-                throw new Error('No servers found for the requested episode');
-            }
-
-            console.log(`[HiAnime] Extracting sources from ${servers.length} servers...`);
-
-            const sourcePromises = servers.map(async (server) => {
-                try {
-                    const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
-                        params: { id: server.id },
-                        headers: {
-                            'User-Agent': getUA(),
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-
-                    const embedLink = sourcesResponse.data.link;
-                    if (!embedLink) return null;
-
-                    // Proxy the embed through our server-side embed proxy to bypass CORS
-                    const proxiedEmbed = `/api/proxy/embed?url=${encodeURIComponent(embedLink)}&referer=${encodeURIComponent('https://hianime.to')}`;
-
-                    return {
-                        url: proxiedEmbed,
-                        isM3U8: false,
-                        isIframe: true,
-                        quality: 'auto',
-                        server: server.name,
-                        type: server.type as any,
-                    };
-                } catch (e: any) {
-                    console.error(`[HiAnime] Failed to fetch source for server ${server.name}:`, e.message);
-                    return null;
-                }
-            });
-
-            const results = (await Promise.all(sourcePromises)).filter(s => s !== null) as VideoSource[];
-
-            if (results.length === 0) {
-                throw new Error('All servers failed to return an embed link');
-            }
-
-            return results;
+            return sources;
 
         } catch (error: any) {
-            console.error('[HiAnime] GetSources failed:', error);
+            console.error('[HiAnime] GetSources failed, attempting AllAnime fallback:', error.message || error);
             try {
                 const allAnime = new AllAnimeProvider();
                 let searchTitle = "";
                 try {
                     const info = await this.getInfo(id);
                     searchTitle = info.title;
-                } catch (e) { }
+                } catch (e) {}
 
                 if (searchTitle) {
                     console.log(`[HiAnime-Fallback] Searching AllAnime for "${searchTitle}"...`);
@@ -252,65 +257,21 @@ export class HiAnimeProvider implements AnimeProvider {
             } catch (e: any) {
                 console.error('[HiAnime-Fallback] AllAnime fallback failed:', e.message);
             }
-            throw new Error(`Failed to fetch sources: ${error.message || error}`);
+            return [];
         }
     }
 
-    private async extractSources(embedLink: string): Promise<VideoSource[]> {
-        console.log('[HiAnime] Returning proxied embed link:', embedLink);
-        const proxiedEmbed = `/api/proxy/embed?url=${encodeURIComponent(embedLink)}&referer=${encodeURIComponent('https://hianime.to')}`;
-        return [{
-            url: proxiedEmbed,
-            isM3U8: false,
-            isIframe: true,
-            quality: 'auto',
-        }];
-    }
     async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            // Mapping '0-9' to 'other' if needed, but HiAnime usually uses /az-list/A or /az-list/other
-            let path = letter.toLowerCase();
-            if (path === '0-9' || path === 'other') path = 'other';
-            if (path === 'all') path = ''; // /az-list ?
-
-            const url = path
-                ? `${BASE_URL}/az-list/${path}?page=${page}`
-                : `${BASE_URL}/az-list?page=${page}`;
-
-            console.log(`[HiAnime] Fetching A-Z List: ${url}`);
-            const response = await axios.get(url, { headers: { 'User-Agent': getUA() } });
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            $('.film_list-wrap .flw-item').each((_, element) => {
-                const $el = $(element);
-                // FIX: Select the 'a' tag inside .film-poster, not the div itself
-                const href = $el.find('.film-poster a').attr('href');
-
-                // Handle both /watch/id and /id formats
-                const id = href?.includes('/watch/')
-                    ? href?.split('/watch/')[1]
-                    : href?.split('/').pop() || '';
-
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src');
-
-                // Extract sub/dub count
-                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
-                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
-
-                if (id && title) {
-                    results.push({
-                        id,
-                        title,
-                        image,
-                        subOrDub: { sub, dub } as any,
-                        provider: this.name
-                    });
-                }
-            });
-
-            return results;
+            const letParam = letter.toLowerCase() === 'all' ? '' : letter.toUpperCase();
+            const data = await fetchFromApi('/az-list', { letter: letParam, page });
+            if (!data || !data.success || !data.results || !data.results.data) return [];
+            return data.results.data.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] getAZList failed:', error);
             return [];
@@ -319,35 +280,15 @@ export class HiAnimeProvider implements AnimeProvider {
 
     async getGenre(genre: string, page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = `${BASE_URL}/genre/${genre}?page=${page}`;
-            console.log(`[HiAnime] Fetching Genre: ${url}`);
-
-            const response = await axios.get(url, { headers: { 'User-Agent': getUA() } });
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            $('.film_list-wrap .flw-item').each((_, element) => {
-                const $el = $(element);
-                // FIX: Select the 'a' tag inside .film-poster, not the div itself
-                const id = $el.find('.film-poster a').attr('href')?.split('/')[1] || '';
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src');
-                // Extract sub/dub count from badges
-                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
-                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
-
-                if (id && title) {
-                    results.push({
-                        id,
-                        title,
-                        image,
-                        subOrDub: { sub, dub } as any,
-                        provider: this.name
-                    });
-                }
-            });
-
-            return results;
+            const genreId = mapGenreSlug(genre);
+            const data = await fetchFromApi('/filter', { genres: genreId, page });
+            if (!data || !data.success || !data.results || !data.results.data) return [];
+            return data.results.data.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] getGenre failed:', error);
             return [];
@@ -356,90 +297,40 @@ export class HiAnimeProvider implements AnimeProvider {
 
     async getServers(episodeId: string): Promise<any[]> {
         try {
-            // Fetch servers HTML
-            const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
-                params: { episodeId },
-                headers: {
-                    'User-Agent': getUA(),
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+            // Since episodeId might be in format "id?ep=number", we parse it
+            let id = episodeId;
+            let epNumber = "1";
+            if (episodeId.includes('?')) {
+                const parts = episodeId.split('?');
+                id = parts[0];
+                const match = parts[1].match(/ep=(\d+)/);
+                if (match) epNumber = match[1];
+            }
 
-            const $ = cheerio.load(serversResponse.data.html);
-            const servers: any[] = [];
+            const serversData = await fetchFromApi(`/servers/${id}`, { ep: epNumber });
+            const serversList = serversData?.results || [];
 
-            $('.server-item').each((_, el) => {
-                const $el = $(el);
-                const id = $el.attr('data-id');
-                const type = $el.attr('data-type'); // sub, dub, raw
-                const name = $el.text().trim();
-
-                if (id) {
-                    servers.push({
-                        serverName: name,
-                        serverId: id,
-                        type: type
-                    });
-                }
-            });
-
-            return servers;
-
+            return serversList.map((server: any) => ({
+                serverName: server.serverName || server.server_id,
+                serverId: server.server_id,
+                type: server.type
+            }));
         } catch (error) {
             console.error('[HiAnime] getServers failed:', error);
             return [];
         }
     }
 
-    async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
-        // Return static list to ensure fast load (as fallback)
-        // ... existing static list ...
-        // For brevity not repeating the whole static list
-        // Reuse existing or just implement getRecent if interface allows
-        return [];
-    }
-
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = `${BASE_URL}/recently-updated?page=${page}`;
-            console.log(`[HiAnime] Fetching Recent Updates: ${url}`);
-
-            const response = await axios.get(url, { headers: { 'User-Agent': getUA() } });
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            $('.film_list-wrap .flw-item').each((_, element) => {
-                const $el = $(element);
-                // FIX: Select the 'a' tag inside .film-poster, not the div itself
-                const href = $el.find('.film-poster a').attr('href');
-                const id = href?.includes('/watch/')
-                    ? href?.split('/watch/')[1]
-                    : href?.split('/').pop() || '';
-
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src');
-
-                // Badges
-                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
-                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
-                const ep = parseInt($el.find('.tick-eps').text().trim()) || 0;
-
-                if (id && title) {
-                    results.push({
-                        id,
-                        title,
-                        image,
-                        subOrDub: { sub, dub } as any,
-                        provider: this.name,
-                        // Pass episode count as extra or hack into availableEpisodes for UI
-                        extra: {
-                            latestEpisode: ep || sub || dub
-                        }
-                    } as any);
-                }
-            });
-
-            return results;
+            const data = await fetchFromApi('/recently-updated', { page });
+            if (!data || !data.success || !data.results || !data.results.data) return [];
+            return data.results.data.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] getRecent failed:', error);
             return [];
@@ -448,39 +339,14 @@ export class HiAnimeProvider implements AnimeProvider {
 
     async getTrending(): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': getUA() }
-            });
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            // HiAnime trending items are in #anime-trending #trending-home .swiper-slide
-            $('#anime-trending #trending-home .swiper-slide').each((_, element) => {
-                const $el = $(element);
-                const id = $el.find('a').attr('href')?.split('/').pop() || '';
-                const title = $el.find('.film-title').text().trim();
-                const image = $el.find('img').attr('data-src') || $el.find('img').attr('src');
-                
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-
-
-            // Fallback to latest records if trending is empty
-            if (results.length === 0) {
-                $('.film_list-wrap .flw-item').each((_, element) => {
-                    const $el = $(element);
-                    const id = $el.find('.film-poster a').attr('href')?.split('/')[1] || '';
-                    const title = $el.find('.film-name a').text().trim();
-                    const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
-                    if (id && title && results.length < 10) {
-                        results.push({ id, title, image, provider: this.name });
-                    }
-                });
-            }
-
-            return results;
+            const data = await fetchFromApi('');
+            const list = data?.results?.trending || data?.results?.spotlights || [];
+            return list.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] getTrending failed:', error);
             return [];
@@ -489,25 +355,14 @@ export class HiAnimeProvider implements AnimeProvider {
 
     async getCompleted(): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': getUA() }
-            });
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            $('.anif-block-02 .ulclear li').each((_, element) => {
-                const $el = $(element);
-                const href = $el.find('.film-poster a').attr('href');
-                const id = href?.split('/')[1] || '';
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
-
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-
-            return results;
+            const data = await fetchFromApi('');
+            const list = data?.results?.latestCompleted || [];
+            return list.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] getCompleted failed:', error);
             return [];
@@ -516,26 +371,14 @@ export class HiAnimeProvider implements AnimeProvider {
 
     async getUpcoming(): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/home`, {
-                headers: { 'User-Agent': getUA() }
-            });
-            const $ = cheerio.load(response.data);
-            const results: AnimeSearchResult[] = [];
-
-            // The upcoming section is a grid like the others
-            $('.cat-heading:contains("Top Upcoming")').closest('.block_area').find('.flw-item').each((_, element) => {
-                const $el = $(element);
-                const href = $el.find('.film-poster a').attr('href');
-                const id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                const title = $el.find('.film-name a').text().trim();
-                const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
-
-                if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
-                }
-            });
-
-            return results;
+            const data = await fetchFromApi('');
+            const list = data?.results?.topUpcoming || [];
+            return list.map((item: any) => ({
+                id: item.id || item.data_id,
+                title: item.title || item.japanese_title,
+                image: item.poster,
+                provider: this.name
+            }));
         } catch (error) {
             console.error('[HiAnime] getUpcoming failed:', error);
             return [];

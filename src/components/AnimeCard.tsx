@@ -24,6 +24,14 @@ export interface Show {
     rank?: number;
 }
 
+/** Clean string utility to filter out invalid values */
+function cleanString(str: any): string | null {
+    if (!str) return null;
+    const s = String(str).trim();
+    if (/^(unknown|undefined|null|no image|no img|no_image|no_img|placeholder|none)$/i.test(s)) return null;
+    return s;
+}
+
 /** Gradient placeholder shown when image is missing or fails to load */
 function ImagePlaceholder({ title }: { title: string }) {
     return (
@@ -33,11 +41,23 @@ function ImagePlaceholder({ title }: { title: string }) {
     );
 }
 
-/** Resolves the best available image URL from a Show object */
+/** Resolves the best available image URL from a Show object using the requested fallback chain */
 function resolveImage(show: Show): string | null {
-    if (show.image) return show.image;
-    if (show.poster_path) return `https://image.tmdb.org/t/p/w342${show.poster_path}`;
-    if (show.backdrop_path) return `https://image.tmdb.org/t/p/w500${show.backdrop_path}`;
+    const banner = cleanString((show as any).banner);
+    if (banner) return banner;
+
+    const backdrop = cleanString(show.backdrop_path) || cleanString((show as any).backdrop);
+    if (backdrop) {
+        if (backdrop.startsWith('http') || backdrop.startsWith('/')) return backdrop;
+        return `https://image.tmdb.org/t/p/w500${backdrop}`;
+    }
+
+    const poster = cleanString(show.image) || cleanString(show.poster_path) || cleanString((show as any).poster);
+    if (poster) {
+        if (poster.startsWith('http') || poster.startsWith('/')) return poster;
+        return `https://image.tmdb.org/t/p/w342${poster}`;
+    }
+
     return null;
 }
 
@@ -75,17 +95,18 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
         return `/watch/anime/${showId}?provider=${provider}`;
     };
 
-    const title = show.title || show.name || "Unknown Title";
+    const title = cleanString(show.title) || cleanString(show.name) || "Anime Masterpiece";
     const imageSrc = resolveImage(show);
     const year = (show.release_date || show.first_air_date || "").split('-')[0];
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
+    const typeLabel = cleanString(show.type) || cleanString(show.media_type) || "ANIME";
 
     return (
         <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-[250ms] hover:z-30 w-full h-full`}>
             <Link href={getHref()} scroll={false} className="block w-full h-full">
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
-                    {(imageSrc && !imgError) ? (
+                    {(imageSrc && !imgError && isVisible) ? (
                         <div className="relative w-full h-full overflow-hidden">
                             <Image
                                 src={imageSrc}
@@ -95,7 +116,6 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                                 className="object-cover transition-transform duration-[250ms] ease-apple group-hover:scale-[1.02]" will-change-transform
                                 placeholder="blur"
                                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
-                                loading="lazy"
                                 onError={() => setImgError(true)}
                             />
                         </div>
@@ -127,7 +147,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                             </div>
 
                             <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/10 text-white/90 font-black uppercase tracking-wider w-fit block border border-white/5">
-                                {show.type || show.media_type || "ANIME"}
+                                {typeLabel}
                             </span>
                         </div>
                     </div>
@@ -149,7 +169,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                         )}
                         <span className="text-white/25">•</span>
                         <span className="text-accent uppercase font-bold text-[8px] tracking-wider">
-                            {show.type || show.media_type || "ANIME"}
+                            {typeLabel}
                         </span>
                     </div>
                 </div>
@@ -174,9 +194,10 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
         return `/watch/anime/${showId}?provider=${provider}`;
     };
 
-    const title = show.title || show.name || "Unknown Title";
+    const title = cleanString(show.title) || cleanString(show.name) || "Anime Masterpiece";
     const imageSrc = resolveImage(show);
     const rating = show.vote_average ? show.vote_average.toFixed(1) : null;
+    const typeLabel = cleanString(show.type) || cleanString(show.media_type) || "TV";
 
     return (
         <div key={`${showId}-${rank}`} className="card-reveal card-visible">
@@ -218,7 +239,7 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
                         <span className="text-[10px] font-bold text-accent/80 uppercase">
-                            {show.type || show.media_type || "TV"}
+                            {typeLabel}
                         </span>
                         {rating && (
                             <div className="flex items-center gap-1 text-[10px] text-accent-warm font-bold">

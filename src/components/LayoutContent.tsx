@@ -68,7 +68,12 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       ) {
         return;
       }
+      // If any modal is already open, ignore shortcut keys
+      if (isRandomizerOpen || isCommandPaletteOpen || isLoginOpen || isProfileOpen || isSettingsOpen) {
+        return;
+      }
       if (e.key.toLowerCase() === "r") {
+        e.preventDefault();
         setIsRandomizerOpen(true);
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -76,11 +81,35 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         setIsCommandPaletteOpen(true);
       }
     };
-    const handleEvent = () => setIsRandomizerOpen(true);
-    const handlePaletteEvent = () => setIsCommandPaletteOpen(true);
-    const handleLoginEvent = () => setIsLoginOpen(true);
-    const handleProfileEvent = () => setIsProfileOpen(true);
-    const handleSettingsEvent = () => setIsSettingsOpen(true);
+
+    const closeAllModals = () => {
+      setIsRandomizerOpen(false);
+      setIsCommandPaletteOpen(false);
+      setIsLoginOpen(false);
+      setIsProfileOpen(false);
+      setIsSettingsOpen(false);
+    };
+
+    const handleEvent = () => {
+      closeAllModals();
+      setIsRandomizerOpen(true);
+    };
+    const handlePaletteEvent = () => {
+      closeAllModals();
+      setIsCommandPaletteOpen(true);
+    };
+    const handleLoginEvent = () => {
+      closeAllModals();
+      setIsLoginOpen(true);
+    };
+    const handleProfileEvent = () => {
+      closeAllModals();
+      setIsProfileOpen(true);
+    };
+    const handleSettingsEvent = () => {
+      closeAllModals();
+      setIsSettingsOpen(true);
+    };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("openRandomizer", handleEvent);
@@ -96,7 +125,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       window.removeEventListener("openProfileModal", handleProfileEvent);
       window.removeEventListener("openSettingsModal", handleSettingsEvent);
     };
-  }, []);
+  }, [isRandomizerOpen, isCommandPaletteOpen, isLoginOpen, isProfileOpen, isSettingsOpen]);
 
 
   
@@ -118,7 +147,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${
           (isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-16'
-        } isolate bg-[#09090B]`}>
+        } isolate bg-[var(--bg-main)]`}>
           {/* Subtle global ambient glow */}
           <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-accent/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>

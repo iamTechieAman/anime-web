@@ -52,7 +52,7 @@ img {
   --bg-main: #050507;
   --bg-surface: #101119;
   --bg-elevated: #171923;
-  --bg-card: #1A1C25;
+  --bg-card: #101119;
   --bg-overlay: rgba(5, 5, 7, 0.96);
   
   --text-main: #ffffff;
@@ -133,18 +133,18 @@ img {
 .watch-page,
 footer,
 aside {
-  --bg-main: #09090B !important;
-  --bg-surface: #111113 !important;
-  --bg-elevated: #151518 !important;
-  --bg-card: #18181B !important;
-  --bg-overlay: rgba(9, 9, 11, 0.96) !important;
+  --bg-main: #050507 !important;
+  --bg-surface: #101119 !important;
+  --bg-elevated: #171923 !important;
+  --bg-card: #101119 !important;
+  --bg-overlay: rgba(5, 5, 7, 0.96) !important;
   
   --text-main: #ffffff !important;
   --text-secondary: #e4e4e7 !important;
   --text-muted: #a1a1aa !important;
   
-  --border-color: rgba(255, 255, 255, 0.08) !important;
-  --border-subtle: rgba(255, 255, 255, 0.04) !important;
+  --border-color: rgba(255, 255, 255, 0.06) !important;
+  --border-subtle: rgba(255, 255, 255, 0.03) !important;
   --glass-bg: rgba(255, 255, 255, 0.03) !important;
   --glass-border: rgba(255, 255, 255, 0.06) !important;
 }
@@ -156,7 +156,7 @@ aside * {
   --text-main: #ffffff;
   --text-secondary: #e4e4e7;
   --text-muted: #a1a1aa;
-  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color: rgba(255, 255, 255, 0.06);
 }
 
 :root {

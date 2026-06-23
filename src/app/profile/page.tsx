@@ -7,6 +7,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useWatch } from "@/context/WatchContext";
+import UserAvatar from "@/components/UserAvatar";
 
 export default function ProfilePage() {
     const { user, isLoaded } = useUser();
@@ -92,8 +93,8 @@ export default function ProfilePage() {
                 {/* Profile Header */}
                 <div className="flex items-center gap-6 mb-12 p-6 bg-bg-card rounded-2xl border border-border-color">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-accent to-accent-warm p-[3px]">
-                        <div className="w-full h-full bg-bg-card rounded-full overflow-hidden">
-                            <Image src={displayAvatar} alt="Avatar" fill sizes="80px" className="object-cover" />
+                        <div className="w-full h-full bg-bg-card rounded-full overflow-hidden relative">
+                            <UserAvatar src={displayAvatar} alt={displayName} initials={displayName[0]} size={80} className="w-full h-full rounded-full" />
                         </div>
                     </div>
                     <div>

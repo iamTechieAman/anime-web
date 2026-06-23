@@ -189,7 +189,7 @@ export default function Header() {
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-[250ms] ease-apple ${
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] md:pt-4 pb-0 h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-[250ms] ease-apple ${
       showSidebar ? "left-0 md:left-[80px]" : "left-0"
     } ${isScrolled
       ? "bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05]"
