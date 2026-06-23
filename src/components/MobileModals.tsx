@@ -13,7 +13,7 @@ const quickLinks = [
     { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-[var(--accent)] to-[var(--accent-secondary)]" },
     { name: "Trending Now", href: "/search?genre=Action", icon: TrendingUp, color: "from-rose-500 to-pink-600" },
     { name: "Browse Genres", href: "/genres", icon: LayoutGrid, color: "from-cyan-500 to-blue-600" },
-    { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "from-yellow-500 to-amber-600" },
+    { name: "Top Rated", href: "/search?status=Completed", icon: Star, color: "from-yellow-500 to-[var(--accent-warm)]" },
     { name: "New Releases", href: "/search?status=Ongoing", icon: Sparkles, color: "from-emerald-500 to-green-600" },
 ];
 
@@ -262,9 +262,9 @@ export default function MobileModals() {
                                         </div>
                                         <button
                                             onClick={toggleAutoPlay}
-                                            className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${autoPlay ? 'bg-blue-600' : 'bg-zinc-600'}`}
+                                            className={`relative w-11 h-6 rounded-full transition-colors duration-[250ms] ${autoPlay ? 'bg-blue-600' : 'bg-zinc-600'}`}
                                         >
-                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${autoPlay ? 'left-6' : 'left-1'}`}></div>
+                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-[250ms] ${autoPlay ? 'left-6' : 'left-1'}`}></div>
                                         </button>
                                     </div>
 
@@ -491,7 +491,7 @@ export default function MobileModals() {
                                                         <div className="flex-1 min-w-0">
                                                             <span className="text-xs font-black text-[var(--text-main)] block truncate mb-1">{item.title}</span>
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-[var(--accent)] text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
+                                                                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
                                                                 <span className="text-[10px] text-[var(--text-muted)] font-semibold">{item.format} • {item.year}</span>
                                                                 {item.rating && (
                                                                     <span className="flex items-center gap-0.5 text-[10px] text-amber-400 font-bold shrink-0">

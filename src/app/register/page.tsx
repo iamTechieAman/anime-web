@@ -82,7 +82,7 @@ export default function RegisterPage() {
 
           <button
             disabled={loading}
-            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-secondary)] py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent)]/20 text-white"
+            className="w-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:bg-[var(--accent-secondary)] py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent)]/20 text-white"
           >
             {loading ? "Creating Account..." : "Create Account"}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -384,7 +384,7 @@ export default function HeroCarousel() {
             {/* Slide progress row */}
             <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 z-30">
                 <div 
-                    className="h-full bg-gradient-to-r from-[var(--accent)] to-orange-500 transition-all duration-500 ease-out" 
+                    className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] transition-all duration-[250ms] ease-out" 
                     style={{ width: `${((current + 1) / slides.length) * 100}%` }}
                 />
             </div>

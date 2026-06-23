@@ -61,7 +61,7 @@ const ProviderBar = memo(function ProviderBar({
                                 title={isFailed ? `${server.name} — unavailable` : server.name}
                                 className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 sm:px-4 py-2 text-xs font-bold transition-all duration-200 snap-center whitespace-nowrap ${
                                     isActive
-                                        ? 'border-[var(--accent)] bg-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]'
+                                        ? 'border-[var(--accent)] bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_12px_var(--accent-glow)]'
                                         : isFailed
                                             ? 'cursor-not-allowed border-white/[0.05] bg-transparent text-zinc-600 opacity-40'
                                             : 'border-white/[0.07] bg-[#1E1B29] text-zinc-400 hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white'

@@ -10,9 +10,9 @@ import {
 
 const genres = [
     { name: "Action", icon: Sword, color: "from-rose-600/20 to-red-500/20", border: "group-hover:border-rose-500/50", iconBg: "bg-rose-500", desc: "Adrenaline-fueled adventures", size: "col-span-2 md:col-span-2 row-span-1" },
-    { name: "Adventure", icon: Map, color: "from-orange-600/20 to-amber-500/20", border: "group-hover:border-orange-500/50", iconBg: "bg-orange-500", desc: "Epic journeys and quests", size: "col-span-1 md:col-span-1 row-span-1" },
+    { name: "Adventure", icon: Map, color: "from-[var(--accent)]/20 to-[var(--accent-warm)]/20", border: "group-hover:border-[var(--accent-warm)]/50", iconBg: "bg-[var(--accent-warm)]", desc: "Epic journeys and quests", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "Animation", icon: Sparkles, color: "from-amber-500/20 to-yellow-400/20", border: "group-hover:border-amber-400/50", iconBg: "bg-amber-500", desc: "Animated worlds and stories", size: "col-span-1 md:col-span-1 row-span-2" },
-    { name: "Comedy", icon: Laugh, color: "from-yellow-500/20 to-orange-400/20", border: "group-hover:border-yellow-500/50", iconBg: "bg-yellow-500", desc: "Laughter and fun moments", size: "col-span-1 md:col-span-1 row-span-1" },
+    { name: "Comedy", icon: Laugh, color: "from-yellow-500/20 to-[var(--accent-warm)]/20", border: "group-hover:border-yellow-500/50", iconBg: "bg-yellow-500", desc: "Laughter and fun moments", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "Crime", icon: Shield, color: "from-zinc-700/20 to-slate-500/20", border: "group-hover:border-zinc-500/50", iconBg: "bg-zinc-500", desc: "Detectives and outlaws", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "Drama", icon: Heart, color: "from-pink-600/20 to-rose-500/20", border: "group-hover:border-pink-500/50", iconBg: "bg-pink-500", desc: "Emotional and powerful tales", size: "col-span-2 md:col-span-2 row-span-1" },
     { name: "Family", icon: Users, color: "from-emerald-600/20 to-teal-500/20", border: "group-hover:border-emerald-500/50", iconBg: "bg-emerald-500", desc: "Content for all ages", size: "col-span-1 md:col-span-1 row-span-1" },
@@ -25,7 +25,7 @@ const genres = [
     { name: "Sci-Fi", icon: Rocket, color: "from-sky-600/20 to-indigo-500/20", border: "group-hover:border-sky-500/50", iconBg: "bg-sky-500", desc: "Future tech and space travel", size: "col-span-2 md:col-span-2 row-span-1" },
     { name: "Thriller", icon: Skull, color: "from-red-700/20 to-rose-600/20", border: "group-hover:border-red-500/50", iconBg: "bg-red-600", desc: "Suspense and intense action", size: "col-span-1 md:col-span-1 row-span-1" },
     { name: "War", icon: Shield, color: "from-gray-800/20 to-slate-650/20", border: "group-hover:border-gray-650/50", iconBg: "bg-gray-700", desc: "Military conflicts and heroism", size: "col-span-1 md:col-span-1 row-span-1" },
-    { name: "Western", icon: Compass, color: "from-orange-900/20 to-amber-950/20", border: "group-hover:border-amber-800/50", iconBg: "bg-orange-800", desc: "The wild west and frontiers", size: "col-span-1 md:col-span-1 row-span-1" },
+    { name: "Western", icon: Compass, color: "from-[var(--accent)]/20 to-[var(--accent-warm)]/20", border: "group-hover:border-amber-800/50", iconBg: "bg-orange-800", desc: "The wild west and frontiers", size: "col-span-1 md:col-span-1 row-span-1" },
 ];
 
 export default function GenresPage() {
@@ -55,18 +55,18 @@ export default function GenresPage() {
                             >
                                 <Link scroll={false} 
                                     href={`/search?genre=${genre.name}`}
-                                    className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-500 ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
+                                    className={`group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl bg-[var(--bg-card)]/40 border border-[var(--border-color)] backdrop-blur-md transition-all duration-[250ms] ${genre.border} hover:shadow-[0_8px_32px_var(--accent-glow)]`}
                                 >
                                     {/* Ambient Glow */}
                                     <div className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent z-10" />
 
                                     {/* Glass reflection line */}
-                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:via-white/20 transition-all duration-500" />
+                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:via-white/20 transition-all duration-[250ms]" />
 
                                     {/* Content Layout */}
                                     <div className={`relative z-20 flex flex-col h-full justify-between p-5 md:p-6 ${isTall ? "items-start" : "items-start flex-row md:flex-col md:items-start"}`}>
-                                        <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white ${genre.iconBg} shadow-lg shadow-black/40 group-hover:scale-110 transition-transform duration-500 flex-shrink-0`}>
+                                        <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white ${genre.iconBg} shadow-lg shadow-black/40 group-hover:scale-110 transition-transform duration-[250ms] flex-shrink-0`}>
                                             <Icon className="w-5 h-5 md:w-6 md:h-6" />
                                         </div>
                                         

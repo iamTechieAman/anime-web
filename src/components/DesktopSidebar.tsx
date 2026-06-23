@@ -35,14 +35,14 @@ export default function DesktopSidebar() {
 
     return (
         <div className="peer/sidebar group fixed left-0 top-0 bottom-0 w-[80px] hidden md:block z-[60]">
-            <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-300 ease-out bg-[#08080B]/95 backdrop-blur-md border-r border-white/5 flex flex-col py-6 shadow-2xl">
+            <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-[250ms] ease-out bg-white/[0.03] backdrop-blur-[20px] border-r border-white/[0.05] flex flex-col py-6 shadow-2xl">
                 {/* Branded Logo */}
-                <div className="mb-8 shrink-0 flex items-center h-10 w-full px-3 transition-all duration-300 relative">
+                <div className="mb-8 shrink-0 flex items-center h-10 w-full px-3 transition-all duration-[250ms] relative">
                     <Link scroll={false} href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
                         <div className="w-11 h-11 flex items-center justify-center shrink-0 relative">
                             <Logo />
                         </div>
-                        <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent pointer-events-none group-hover:pointer-events-auto">
+                        <span className="text-sm font-black tracking-tight text-white uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms] whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent pointer-events-none group-hover:pointer-events-auto">
                             Toon<span className="text-[var(--accent)]">Player</span>
                         </span>
                     </Link>
@@ -65,7 +65,7 @@ export default function DesktopSidebar() {
                             {isActive && (
                                 <motion.div 
                                     layoutId="activeGlow"
-                                    className="absolute left-0 w-[3px] h-6 bg-[var(--accent)] rounded-r-full shadow-[0_0_15px_var(--accent-glow)]"
+                                    className="absolute left-0 w-[3px] h-6 bg-gradient-to-b from-[var(--accent)] to-[var(--accent-warm)] rounded-r-full shadow-[var(--shadow-glow-primary)]"
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 />
                             )}
@@ -73,7 +73,7 @@ export default function DesktopSidebar() {
                             {/* Icon Wrapper */}
                             <div className="flex items-center justify-center shrink-0 w-12 h-11">
                                 <Icon 
-                                    className={`w-[18px] h-[18px] transition-all duration-300 ${
+                                    className={`w-[18px] h-[18px] transition-all duration-[250ms] ${
                                         isActive 
                                             ? "text-[var(--accent)] drop-shadow-[0_0_8px_var(--accent-glow)] scale-110" 
                                             : "group-hover/item:scale-115 group-hover/item:text-white"
@@ -83,7 +83,7 @@ export default function DesktopSidebar() {
                             </div>
 
                             {/* Label */}
-                            <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms]">
                                 {item.name}
                             </span>
 
@@ -118,11 +118,11 @@ export default function DesktopSidebar() {
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
                         <Settings 
-                            className="w-[18px] h-[18px] transition-all duration-300 group-hover/item:scale-115 group-hover/item:text-white" 
+                            className="w-[18px] h-[18px] transition-all duration-[250ms] group-hover/item:scale-115 group-hover/item:text-white" 
                             strokeWidth={2.2}
                         />
                     </div>
-                    <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms]">
                         Settings
                     </span>
                     <div className="absolute left-[80px] px-3 py-1.5 bg-[#12131A] border border-white/10 rounded-lg text-white text-[10px] font-black tracking-wider uppercase whitespace-nowrap opacity-0 pointer-events-none transition-all duration-200 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:group-hover/item:opacity-0 z-50 shadow-2xl">
@@ -137,11 +137,11 @@ export default function DesktopSidebar() {
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
                         <HelpCircle 
-                            className="w-[18px] h-[18px] transition-all duration-300 group-hover/item:scale-115 group-hover/item:text-white" 
+                            className="w-[18px] h-[18px] transition-all duration-[250ms] group-hover/item:scale-115 group-hover/item:text-white" 
                             strokeWidth={2.2}
                         />
                     </div>
-                    <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms]">
                         Support
                     </span>
                     <div className="absolute left-[80px] px-3 py-1.5 bg-[#12131A] border border-white/10 rounded-lg text-white text-[10px] font-black tracking-wider uppercase whitespace-nowrap opacity-0 pointer-events-none transition-all duration-200 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:group-hover/item:opacity-0 z-50 shadow-2xl">
@@ -158,11 +158,11 @@ export default function DesktopSidebar() {
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
                         <Github 
-                            className="w-[18px] h-[18px] transition-all duration-300 group-hover/item:scale-115 group-hover/item:text-white" 
+                            className="w-[18px] h-[18px] transition-all duration-[250ms] group-hover/item:scale-115 group-hover/item:text-white" 
                             strokeWidth={2.2}
                         />
                     </div>
-                    <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="ml-2 text-xs font-semibold tracking-wide whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-[250ms]">
                         GitHub
                     </span>
                     <div className="absolute left-[80px] px-3 py-1.5 bg-[#12131A] border border-white/10 rounded-lg text-white text-[10px] font-black tracking-wider uppercase whitespace-nowrap opacity-0 pointer-events-none transition-all duration-200 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:group-hover/item:opacity-0 z-50 shadow-2xl">
@@ -173,7 +173,7 @@ export default function DesktopSidebar() {
 
             {/* Version Badge */}
             <div className="mt-6 px-5 py-2 pointer-events-none shrink-0 flex items-center justify-start h-8 overflow-hidden">
-                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest transition-opacity duration-300">
+                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest transition-opacity duration-[250ms]">
                     <span className="group-hover:hidden">V4.0</span>
                     <span className="hidden group-hover:inline">ToonPlayer V4.0</span>
                 </span>

@@ -142,7 +142,7 @@ export default function HealthPage() {
                         <span className="text-[10px] text-emerald-400 font-extrabold uppercase">Stable</span>
                     </div>
                     <div className="w-full bg-white/5 h-1.5 rounded-full mt-3 overflow-hidden">
-                        <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${systemUptime}%` }} />
+                        <div className="bg-emerald-500 h-full rounded-full transition-all duration-[250ms]" style={{ width: `${systemUptime}%` }} />
                     </div>
                 </div>
 
@@ -156,7 +156,7 @@ export default function HealthPage() {
                     </div>
                     <div className="w-full bg-white/5 h-1.5 rounded-full mt-3 overflow-hidden">
                         <div 
-                            className={`h-full rounded-full transition-all duration-500 ${avgLatency < 1000 ? 'bg-emerald-500' : 'bg-amber-500'}`} 
+                            className={`h-full rounded-full transition-all duration-[250ms] ${avgLatency < 1000 ? 'bg-emerald-500' : 'bg-amber-500'}`} 
                             style={{ width: `${Math.min(100, Math.max(10, 100 - (avgLatency / 30)))}%` }} 
                         />
                     </div>

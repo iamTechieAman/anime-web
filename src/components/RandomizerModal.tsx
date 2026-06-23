@@ -199,7 +199,7 @@ export default function RandomizerModal({ onClose }: RandomizerModalProps) {
                         onClick={() => handleRandomize("studio")}
                         className="flex items-center gap-3 p-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 text-left rounded-xl transition-all"
                     >
-                        <Building2 className="w-4 h-4 text-orange-400" />
+                        <Building2 className="w-4 h-4 text-[var(--accent-warm)]" />
                         <div>
                             <div className="text-xs font-bold text-white">Random Studio</div>
                             <div className="text-[10px] text-zinc-500">Marvel, MAPPA, etc</div>

@@ -29,6 +29,12 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ## 🏆 Changelog — v5.0 (Latest)
 
+### Phase 20 — Premium Cinematic Theme Polish (`June 2026`)
+- 🎨 **Cinematic Glassmorphism**: Overhauled global design tokens, migrating from legacy flat oranges to a premium Netflix/Apple TV+ inspired Purple/Pink gradient aesthetic (`#7C3AED` to `#EC4899`).
+- 💎 **Premium Overlays**: Upgraded Headers and Desktop Sidebars to use solid Glassmorphism (`rgba(8,8,12,0.72) backdrop-blur-[24px]`) and unified all active states with cinematic glowing indicators.
+- ⚡ **Motion Standardization**: Normalized all micro-animations globally to `250ms ease-out` per Apple TV+ design specs for cohesive, snappy visual feedback without layout thrashing.
+- 📏 **Depth & Hierarchy**: Increased primary card radii to `18px`, integrated cinematic drop shadows (`var(--shadow-glow-primary)`), and converted all primary CTA buttons to dynamic hover-scaling gradients.
+
 ### Phase 19 — Release QA & Functional Recovery (`June 2026`)
 - 🔓 **Universal Download Access**: Removed strict authentication gating on download capabilities, granting guests full uninterrupted access to offline media without triggering login barriers.
 - ✨ **Avatar Shimmer**: Integrated a pulse shimmer into `UserAvatar` during remote image resolution to prevent layout holes, coupled with graceful text initial fallbacks on error.

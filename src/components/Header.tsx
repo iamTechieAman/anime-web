@@ -189,11 +189,11 @@ export default function Header() {
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-300 ${
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-[250ms] ease-out ${
       showSidebar ? "left-0 md:left-[80px]" : "left-0"
     } ${isScrolled
-      ? "bg-[var(--bg-main)]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.04)]"
-      : "bg-gradient-to-b from-black/70 to-transparent border-b border-transparent"
+      ? "bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05]"
+      : "bg-gradient-to-b from-[rgba(5,5,7,0.9)] to-transparent border-b border-transparent"
     }`}>
 
       <AnimatePresence>
@@ -214,7 +214,7 @@ export default function Header() {
             </div>
             <span className="flex flex-col leading-none md:hidden lg:flex">
               <span className="text-[14px] sm:text-[15px] font-black tracking-tight text-white" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Toon</span>
-              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
+              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)]" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
             </span>
           </Link>
         </div>
@@ -233,14 +233,14 @@ export default function Header() {
           <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[500px] max-w-[900px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
-              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-xl hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-out text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
             >
-              <div className="flex-1 flex items-center min-w-0 pl-3 pr-2 h-full gap-2">
+              <div className="flex-1 flex items-center min-w-0 pl-4 pr-2 h-full gap-2">
                 <Search className="w-4 h-4 text-zinc-500 shrink-0" />
                 <span className="text-[13px] text-zinc-500 font-medium flex-1 truncate">
                   Search movies, anime, actors, genres...
                 </span>
-                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[10px] text-zinc-400 font-bold select-none">
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[10px] text-zinc-400 font-bold select-none">
                   <span>Ctrl</span><span>K</span>
                 </kbd>
               </div>

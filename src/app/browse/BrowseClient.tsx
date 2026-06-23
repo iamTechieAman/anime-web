@@ -451,7 +451,7 @@ export default function BrowseClient() {
                                                 onClick={() => setFilterParam("year", "")}
                                                 className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                                     selectedYear === ""
-                                                        ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                         : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                 }`}
                                             >
@@ -463,7 +463,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("year", selectedYear === yr ? "" : yr)}
                                                     className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                                         selectedYear === yr
-                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -483,7 +483,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("genre_id", selectedGenre === g.id ? "" : g.id)}
                                                     className={`px-3.5 py-2 border rounded-full text-xs font-bold transition-all cursor-pointer ${
                                                         selectedGenre === g.id
-                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -503,7 +503,7 @@ export default function BrowseClient() {
                                                 onClick={() => setFilterParam("language", "")}
                                                 className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                     selectedLanguage === ""
-                                                        ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                         : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                 }`}
                                             >
@@ -515,7 +515,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("language", selectedLanguage === lang.code ? "" : lang.code)}
                                                     className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                         selectedLanguage === lang.code
-                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -537,7 +537,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("country", selectedCountry === c.code ? "" : c.code)}
                                                     className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                         selectedCountry === c.code
-                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -559,7 +559,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("network_id", selectedNetwork === net.id ? "" : net.id)}
                                                     className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                                                         selectedNetwork === net.id
-                                                            ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -580,7 +580,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("letter", selectedLetter === letter ? "" : letter)}
                                                     className={`h-9 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
                                                         selectedLetter === letter
-                                                            ? "bg-[var(--accent)] text-white shadow-[0_0_10px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_10px_var(--accent-glow)]"
                                                             : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5 border border-white/5"
                                                     }`}
                                                 >

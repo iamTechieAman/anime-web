@@ -294,7 +294,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
             {/* Comment Post Form */}
             <form onSubmit={handlePostComment} className="space-y-3 relative">
                 {!canComment && (
-                    <div className="flex items-center gap-3 p-4 mb-2 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-400 text-xs font-semibold">
+                    <div className="flex items-center gap-3 p-4 mb-2 bg-[var(--accent-warm)]/10 border border-[var(--accent-warm)]/20 rounded-xl text-[var(--accent-warm)] text-xs font-semibold">
                         <AlertCircle className="w-4 h-4 shrink-0" />
                         <span>Registered members only. Please sign in or switch profiles to write comments.</span>
                     </div>
@@ -345,7 +345,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                             disabled={!canComment}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white/5 text-[var(--text-muted)] border-[var(--border-color)] hover:text-white hover:bg-white/10 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
+                            <ImageIcon className="w-3.5 h-3.5 text-[var(--accent-warm)]" />
                             <span>Add GIF</span>
                         </button>
                     </div>
@@ -353,7 +353,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                     <button
                         type="submit"
                         disabled={!canComment || (!newComment.trim() && !selectedGif)}
-                        className="flex items-center gap-2 px-5 py-2 bg-[var(--accent)] text-white font-bold rounded-xl text-sm transition-all hover:shadow-[0_0_12px_var(--accent-glow)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:opacity-95"
+                        className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white font-bold rounded-xl text-sm transition-all hover:shadow-[0_0_12px_var(--accent-glow)] active:scale-95 disabled:opacity-50 disabled:pointer-events-none hover:opacity-95"
                     >
                         <span>Comment</span>
                         <Send className="w-3.5 h-3.5" />

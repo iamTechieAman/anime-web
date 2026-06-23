@@ -244,7 +244,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <button
                   type="submit"
                   disabled={!guestName.trim()}
-                  className="flex-[2] flex items-center justify-center gap-1.5 px-5 py-3 bg-[var(--accent)] text-white rounded-xl text-xs font-bold shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex-[2] flex items-center justify-center gap-1.5 px-5 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-bold shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Start Watching
                 </button>

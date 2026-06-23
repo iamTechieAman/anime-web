@@ -127,8 +127,8 @@ export default function AboutPage() {
                             title: "Unified Search Engine", 
                             desc: "Scan catalog nodes across Movies, TV Series, and Anime simultaneously. Save folders and tracking state on the fly.",
                             icon: Sparkles,
-                            color: "text-orange-400",
-                            bg: "bg-orange-500/10"
+                            color: "text-[var(--accent-warm)]",
+                            bg: "bg-[var(--accent-warm)]/10"
                         },
                         { 
                             title: "Framer Motion Springs", 
@@ -144,7 +144,7 @@ export default function AboutPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.05 }}
-                            className="p-8 bg-[var(--bg-card)]/40 rounded-3xl border border-[var(--border-color)] relative group hover:border-[var(--accent)]/30 hover:shadow-[0_8px_30px_-8px_var(--accent-glow)] transition-all duration-300 overflow-hidden"
+                            className="p-8 bg-[var(--bg-card)]/40 rounded-3xl border border-[var(--border-color)] relative group hover:border-[var(--accent)]/30 hover:shadow-[0_8px_30px_-8px_var(--accent-glow)] transition-all duration-[250ms] overflow-hidden"
                         >
                             <div className={`${feature.bg} w-12 h-12 rounded-2xl flex items-center justify-center mb-6`}>
                                 <feature.icon className={`w-6 h-6 ${feature.color}`} />
@@ -174,7 +174,7 @@ export default function AboutPage() {
                                 className="relative pl-8 md:pl-12 group"
                             >
                                 {/* Timeline Dot */}
-                                <div className="absolute -left-2.5 top-1.5 w-5 h-5 rounded-full bg-[var(--bg-card)] border-2 border-[var(--border-color)] group-hover:border-[var(--accent)] group-hover:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300 flex items-center justify-center">
+                                <div className="absolute -left-2.5 top-1.5 w-5 h-5 rounded-full bg-[var(--bg-card)] border-2 border-[var(--border-color)] group-hover:border-[var(--accent)] group-hover:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-[250ms] flex items-center justify-center">
                                     <div className="w-1.5 h-1.5 rounded-full bg-[var(--border-color)] group-hover:bg-[var(--accent)] transition-all" />
                                 </div>
 

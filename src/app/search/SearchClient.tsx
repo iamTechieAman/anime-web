@@ -83,7 +83,7 @@ function MovieSearchContent() {
             >
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl md:text-4xl font-black text-[var(--text-main)]">
-                        <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-[var(--accent)] via-amber-400 to-yellow-400 bg-clip-text text-transparent">
                             {title}
                         </span>
                     </h1>
@@ -118,7 +118,7 @@ function MovieSearchContent() {
                                                 onClick={() => {
                                                     router.push(genre === g ? '/search' : `/search?genre=${g}`, { scroll: false });
                                                 }}
-                                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${genre === g ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-orange-500/50 hover:text-orange-400'}`}
+                                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${genre === g ? 'bg-[var(--accent-warm)] text-white shadow-lg shadow-[var(--accent-warm)]/20' : 'bg-[var(--bg-main)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[var(--accent-warm)]/50 hover:text-[var(--accent-warm)]'}`}
                                             >
                                                 {g}
                                             </button>

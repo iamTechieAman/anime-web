@@ -35,7 +35,7 @@ export default function UserAvatar({ src, alt = "Avatar", initials = "?", size =
         alt={alt}
         fill
         sizes={`${size}px`}
-        className={`object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`object-cover transition-opacity duration-[250ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />

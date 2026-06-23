@@ -117,14 +117,14 @@ export default function NetflixAuthGate() {
           </div>
           <span className="flex flex-col leading-none">
             <span className="text-base sm:text-xl font-black tracking-tight text-white" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Toon</span>
-            <span className="text-base sm:text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-orange-400" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Player</span>
+            <span className="text-base sm:text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)]" style={{ fontFamily: "var(--font-sora, 'Sora', sans-serif)", lineHeight: 1 }}>Player</span>
           </span>
         </div>
 
         {/* Sign In button */}
         <button 
           onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
-          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-secondary)] active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-[var(--accent)]/30 cursor-pointer min-h-[44px]"
+          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:bg-[var(--accent-secondary)] active:scale-95 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-lg shadow-[var(--accent)]/30 cursor-pointer min-h-[44px]"
         >
           Sign In
         </button>

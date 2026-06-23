@@ -68,21 +68,21 @@ export default function MobileNav() {
         {
             label: "History",
             icon: Clock,
-            color: "text-orange-500",
+            color: "text-[var(--accent-warm)]",
             active: pathname === '/history',
             onClick: () => { closeAll(); router.push('/history', { scroll: false }); },
         },
         {
             label: "Search",
             icon: Search,
-            color: "text-orange-400",
+            color: "text-[var(--accent-warm)]",
             active: isSearchOpen,
             onClick: toggleSearch,
         },
         {
             label: "Menu",
             icon: Menu,
-            color: "text-orange-400",
+            color: "text-[var(--accent-warm)]",
             active: isMenuOpen,
             badge: unreadCount > 0 ? unreadCount : undefined,
             onClick: toggleMenu,
@@ -94,7 +94,7 @@ export default function MobileNav() {
             className={`
                 fixed bottom-0 left-0 right-0 z-50 
                 bg-[var(--bg-overlay)] backdrop-blur-2xl border-t border-[var(--border-color)]
-                transition-all duration-300 md:hidden
+                transition-all duration-[250ms] md:hidden
                 ${isScrolledDown ? "translate-y-24 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}
                 shadow-[0_-8px_32px_rgba(0,0,0,0.4)]
             `}

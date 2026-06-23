@@ -164,7 +164,7 @@ export default function ProfileGate() {
                       className="relative group cursor-pointer flex flex-col items-center gap-4"
                       onClick={() => !selectedId && handleSelectProfile(p)}
                     >
-                      <div className={`relative w-[120px] h-[120px] rounded-xl overflow-hidden border-4 transition-all duration-300 ${isSelected ? selectGlowClass : `border-transparent bg-zinc-800 ${themeGlowClass}`}`}>
+                      <div className={`relative w-[120px] h-[120px] rounded-xl overflow-hidden border-4 transition-all duration-[250ms] ${isSelected ? selectGlowClass : `border-transparent bg-zinc-800 ${themeGlowClass}`}`}>
                         <ProfileAvatar src={p.avatar} alt={p.name} />
                       </div>
                       
@@ -205,7 +205,7 @@ export default function ProfileGate() {
             ) : (
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-md mx-auto">
                 <div className="group relative w-full">
-                  <div className="w-[120px] h-[120px] mx-auto rounded-xl bg-zinc-800 mb-6 shadow-2xl transition-transform duration-300 group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative">
+                  <div className="w-[120px] h-[120px] mx-auto rounded-xl bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative">
                     {profileName.trim() ? (
                       <ProfileAvatar src={getAvatarUrl(profileName.trim(), theme)} alt="Avatar preview" />
                     ) : (

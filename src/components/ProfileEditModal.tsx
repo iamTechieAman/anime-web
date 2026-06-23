@@ -164,7 +164,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                     >
                       {/* Avatar wrap */}
                       <div 
-                        className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 transition-all duration-300 ${
+                        className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 transition-all duration-[250ms] ${
                           isActive && !isManaging
                             ? 'border-white shadow-[0_0_24px_rgba(255,255,255,0.3)] bg-zinc-800' 
                             : 'border-transparent group-hover:scale-105'
@@ -317,7 +317,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                 <button
                   type="submit"
                   disabled={!profileName.trim()}
-                  className="flex-1 min-w-[120px] py-3 bg-[var(--accent)] text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex-1 min-w-[120px] py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-[0_0_20px_var(--accent-glow)] hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Save
                 </button>

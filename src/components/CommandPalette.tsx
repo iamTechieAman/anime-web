@@ -306,7 +306,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 onClick={() => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }}
                                                 onMouseEnter={() => setActiveIndex(actualIdx)}
                                                 className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-left transition-all ${
-                                                    isSelected ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent-glow)]" : "text-zinc-300 hover:bg-white/5"
+                                                    isSelected ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-[var(--accent-glow)]" : "text-zinc-300 hover:bg-white/5"
                                                 }`}
                                             >
                                                 <div className="w-8 h-10 relative overflow-hidden rounded bg-zinc-950/40 border border-white/10 shrink-0">
@@ -355,7 +355,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                         onClick={() => { router.push(`/search?query=${encodeURIComponent(term, { scroll: false })}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
                                                         className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer border transition-all ${
-                                                            isSelected ? "bg-[var(--accent)] border-transparent text-white" : "bg-white/5 border-white/5 hover:border-white/10 text-zinc-300"
+                                                            isSelected ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] border-transparent text-white" : "bg-white/5 border-white/5 hover:border-white/10 text-zinc-300"
                                                         }`}
                                                     >
                                                         <span className="text-xs font-bold truncate">{term}</span>
@@ -413,7 +413,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         onClick={() => { router.push("/browse?type=movie", { scroll: false }); onClose(); }}
                                         onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                                            activeIndex === (pinnedSearches.length + recentSearches.length) ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
+                                            activeIndex === (pinnedSearches.length + recentSearches.length) ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
                                         }`}
                                     >
                                         <Film className="w-4 h-4 shrink-0 text-blue-400" />
@@ -423,7 +423,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         onClick={() => { router.push("/browse?type=tv", { scroll: false }); onClose(); }}
                                         onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length + 1)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                                            activeIndex === (pinnedSearches.length + recentSearches.length + 1) ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
+                                            activeIndex === (pinnedSearches.length + recentSearches.length + 1) ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
                                         }`}
                                     >
                                         <Tv className="w-4 h-4 shrink-0 text-green-400" />
@@ -433,7 +433,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         onClick={() => { router.push("/discover", { scroll: false }); onClose(); }}
                                         onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length + 2)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
-                                            activeIndex === (pinnedSearches.length + recentSearches.length + 2) ? "bg-[var(--accent)] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
+                                            activeIndex === (pinnedSearches.length + recentSearches.length + 2) ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg" : "text-zinc-300 hover:bg-white/5"
                                         }`}
                                     >
                                         <Sparkles className="w-4 h-4 shrink-0 text-amber-400" />
@@ -454,7 +454,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         <button
                                             key={genre}
                                             onClick={() => { router.push(`/search?genre=${encodeURIComponent(genre, { scroll: false })}`, { scroll: false }); onClose(); }}
-                                            className="px-2.5 py-1 bg-white/5 hover:bg-[var(--accent)] hover:text-white border border-white/5 hover:border-transparent rounded-lg text-[11px] font-bold text-zinc-400 transition-all cursor-pointer"
+                                            className="px-2.5 py-1 bg-white/5 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:text-white border border-white/5 hover:border-transparent rounded-lg text-[11px] font-bold text-zinc-400 transition-all cursor-pointer"
                                         >
                                             {genre}
                                         </button>
@@ -476,7 +476,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                             onClick={() => { router.push(`/search?query=${encodeURIComponent(collection, { scroll: false })}`, { scroll: false }); onClose(); }}
                                             className="flex items-center gap-2 p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-xs font-bold text-zinc-300 transition-all text-left"
                                         >
-                                            <Compass className="w-3.5 h-3.5 text-orange-400" />
+                                            <Compass className="w-3.5 h-3.5 text-[var(--accent-warm)]" />
                                             <span>{collection}</span>
                                         </button>
                                     ))}

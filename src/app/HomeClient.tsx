@@ -437,7 +437,7 @@ export default function MoviesPage() {
     }, [paramsInUrl]);
 
     return (
-        <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-orange-500/25 transition-colors duration-300">
+        <div className="bg-[var(--bg-main)] text-[var(--text-main)] selection:bg-[var(--accent-warm)]/25 transition-colors duration-[250ms]">
             {/* Background Ambience */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[var(--accent)]/[0.03] to-transparent" />
@@ -456,7 +456,7 @@ export default function MoviesPage() {
 
                 {/* Genres & Categories Sub-Nav */}
                 {deviceMode !== "tv" && (
-                    <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 z-30 shadow-[0_4px_16px_rgba(0,0,0,0.25)] py-1 transition-all duration-300">
+                    <div className="bg-[var(--bg-overlay)]/95 backdrop-blur-3xl border-b border-white/5 z-30 shadow-[0_4px_16px_rgba(0,0,0,0.25)] py-1 transition-all duration-[250ms]">
                         <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between">
                             <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar z-50">
                                 {TABS.map((tab) => (
@@ -502,7 +502,7 @@ export default function MoviesPage() {
                                         <Link
                                             key={`${item.type}-${item.id}`}
                                             href={item.href}
-                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--accent)]/40 transition-all hover:scale-[1.02] duration-300 shadow-lg"
+                                            className="group relative bg-[var(--bg-card)] rounded-xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--accent)]/40 transition-all hover:scale-[1.02] duration-[250ms] shadow-lg"
                                         >
                                             <div className="aspect-[2/3] relative">
                                                 <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 33vw, 20vw" className="object-cover" />
@@ -549,7 +549,7 @@ export default function MoviesPage() {
                                             </div>
                                             <button
                                                 onClick={() => setActiveProvider("all")}
-                                                className="px-6 py-3 rounded-full bg-[var(--accent)] hover:opacity-90 text-white font-bold text-sm transition-all"
+                                                className="px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white font-bold text-sm transition-all"
                                             >
                                                 Browse All Content
                                             </button>
@@ -862,7 +862,7 @@ export default function MoviesPage() {
                                 {activeTab === "discover" && (
                                     <div className="space-y-2 md:space-y-3">
                                         {((loading && mjItems.length === 0) || mjItems.length > 0) && (
-                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-orange-900/20 to-amber-900/20 border border-[var(--accent)]/20 overflow-hidden">
+                                            <section className="relative p-8 rounded-3xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent-warm)]/20 border border-[var(--accent)]/20 overflow-hidden">
                                                 <div className="absolute -right-20 -top-20 w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
                                                 <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-[var(--accent-warm)]" isFeatured />
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
@@ -870,7 +870,7 @@ export default function MoviesPage() {
                                                         <div key={i} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-white/5 hover:border-[var(--accent)]/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
-                                                                    <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                                    <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-[250ms]" />
                                                                 ) : (
                                                                     <div className="text-zinc-600 font-bold text-lg">{item.title?.charAt(0)}</div>
                                                                 )}
@@ -1026,10 +1026,10 @@ export default function MoviesPage() {
                             { q: "What devices does ToonPlayer support?", a: "ToonPlayer works on all devices — smartphones, tablets, laptops, desktops, and smart TVs through any modern web browser." },
                             { q: "Does ToonPlayer have anime?", a: "Yes! ToonPlayer has a massive anime library with sub and dub options. Browse by genre or search for your favorites." },
                         ].map((faq, i) => (
-                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-[var(--accent)]/30 transition-all duration-300 shadow-lg">
+                            <details key={i} className="group bg-[var(--bg-card)] border border-white/5 rounded-2xl overflow-hidden hover:border-[var(--accent)]/30 transition-all duration-[250ms] shadow-lg">
                                 <summary className="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-bold text-white hover:text-[var(--accent)] transition-colors list-none">
                                     {faq.q}
-                                    <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-300" />
+                                    <ChevronDown className="w-5 h-5 text-[var(--text-muted)] group-open:rotate-180 transition-transform duration-[250ms]" />
                                 </summary>
                                 <div className="px-6 pb-6 text-body">{faq.a}</div>
                             </details>
@@ -1045,7 +1045,7 @@ export default function MoviesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)] hover:opacity-90 text-white rounded-full shadow-[0_0_20px_rgba(88,101,242,0.4)] backdrop-blur-sm transition-colors"
+                        className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-full shadow-[0_0_20px_rgba(88,101,242,0.4)] backdrop-blur-sm transition-colors"
                     >
                         <ChevronUp className="w-5 h-5" />
                     </motion.button>

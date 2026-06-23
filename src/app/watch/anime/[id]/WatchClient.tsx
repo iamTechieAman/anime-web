@@ -1041,7 +1041,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <div className="mt-8 flex flex-col gap-3">
                             <Link scroll={false} 
                                 href="/"
-                                className="w-full max-w-xs py-3 bg-[var(--accent)] hover:opacity-90 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                className="w-full max-w-xs py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                             >
                                 <ChevronLeft className="w-4 h-4" /> Return Home
                             </Link>
@@ -1091,7 +1091,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         manualServerRef.current = "peachify";
                                         setSelectedServer("peachify");
                                     }}
-                                    className="px-4 py-2 bg-[var(--accent)] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
+                                    className="px-4 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
                                 >
                                     <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
                                 </button>
@@ -1176,7 +1176,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             }}
                                             className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
                                         >
-                                            <div className="bg-[var(--accent)]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform">
+                                            <div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform">
                                                 <Play className="w-5 h-5 fill-current" />
                                                 Tap anywhere to enable audio
                                             </div>
@@ -1308,10 +1308,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         {dimLights && (
             <div 
                 onClick={() => setDimLights(false)}
-                className="fixed inset-0 bg-black/90 z-[45] transition-opacity duration-300 cursor-pointer"
+                className="fixed inset-0 bg-black/90 z-[45] transition-opacity duration-[250ms] cursor-pointer"
             />
         )}
-        <div className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-300">
+        <div className="bg-[var(--bg-main)] text-[var(--text-main)] font-sans selection:bg-[var(--accent)]/20 transition-colors duration-[250ms]">
             {/* No JavaScript Fallback */}
             <noscript>
                 <div className="fixed inset-0 z-[100] bg-[var(--bg-main)]/95 backdrop-blur-md flex items-center justify-center p-6">
@@ -1321,7 +1321,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <p className="text-[var(--text-muted)] mb-6">
                             Video streaming requires JavaScript to function. Please enable JavaScript in your browser to watch anime.
                         </p>
-                        <Link scroll={false} href="/" className="px-6 py-3 bg-[var(--accent)] hover:opacity-90 text-white rounded-lg font-bold inline-block">
+                        <Link scroll={false} href="/" className="px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-bold inline-block">
                             Return Home
                         </Link>
                     </div>
@@ -1491,13 +1491,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         <div className="flex bg-[var(--bg-main)] p-1 rounded-md border border-[var(--border-color)]">
                                             <button
                                                 onClick={() => setMode("sub")}
-                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
                                             >
                                                 SUB
                                             </button>
                                             <button
                                                 onClick={() => setMode("dub")}
-                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-[var(--accent)] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
+                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
                                             >
                                                 DUB
                                             </button>
@@ -1564,7 +1564,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                                 }}
                                                                 className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
                                                                     selectedServer === server.serverId
-                                                                        ? "bg-[var(--accent)]/10 text-white border border-[var(--accent)]/30 shadow-lg"
+                                                                        ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/10 text-white border border-[var(--accent)]/30 shadow-lg"
                                                                         : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
                                                                 }`}
                                                             >
@@ -1674,7 +1674,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                             <button 
                                                                 key={ep} 
                                                                 onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))} 
-                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-[var(--accent)] bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}
                                                             >
                                                                 {ep}
                                                             </button>

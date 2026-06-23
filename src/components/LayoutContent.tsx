@@ -113,19 +113,19 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       {/* Content area: adaptive padding based on sidebar visibility */}
       <div className={`flex flex-col min-h-dvh relative ${
         showSidebar ? "pl-0 md:pl-[80px]" : "pl-0"
-      } transition-[padding] duration-300 ease-in-out ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      } transition-[padding] duration-[250ms] ease-in-out ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${
           (isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-16'
         } isolate bg-[#09090B]`}>
           {/* Subtle global ambient glow */}
-          <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-orange-900/[0.04] to-transparent pointer-events-none z-0" />
+          <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-[var(--accent)]/[0.04] to-transparent pointer-events-none z-0" />
           <ErrorBoundary>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-[var(--accent-warm)] border-t-transparent rounded-full animate-spin" />
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold animate-pulse">Loading</p>
                 </div>
               </div>

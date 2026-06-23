@@ -38,9 +38,9 @@ img {
 :root {
   /* ToonPlayer V5.0 Final Release Candidate Dark Cinematic Theme */
   --bg-main: #050507;
-  --bg-surface: #11131C;
+  --bg-surface: #101119;
   --bg-elevated: #171923;
-  --bg-card: #0A0B12;
+  --bg-card: #1A1C25;
   --bg-overlay: rgba(5, 5, 7, 0.96);
   
   --text-main: #ffffff;
@@ -50,31 +50,34 @@ img {
   --border-color: rgba(255, 255, 255, 0.06);
   --border-subtle: rgba(255, 255, 255, 0.03);
   
-  --accent: #8B5CF6;
+  --accent: #7C3AED;
   --accent-secondary: #A855F7;
-  --accent-glow: rgba(139, 92, 246, 0.28);
+  --accent-glow: rgba(124, 58, 237, 0.28);
   --accent-warm: #EC4899;
 
-  --secondary: #22D3EE;
+  --secondary: #A855F7;
   --danger: #EF4444;
-  --success: #10B981;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --info: #22D3EE;
   
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-hover: rgba(168, 85, 247, 0.08);
 
   /* Gradient system */
-  --gradient-primary: linear-gradient(135deg, #7C3AED, #A855F7);
-  --gradient-hot: linear-gradient(135deg, #7C3AED, #22D3EE);
+  --gradient-primary: linear-gradient(135deg, #7C3AED, #EC4899);
+  --gradient-hot: linear-gradient(135deg, #7C3AED, #A855F7);
   --gradient-cool: linear-gradient(135deg, #22D3EE, #10B981);
-  --gradient-gold: linear-gradient(135deg, #A855F7, #22D3EE);
+  --gradient-gold: linear-gradient(135deg, #A855F7, #EC4899);
 
   /* Shadows */
   --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.85);
   --shadow-elevated: 0 12px 40px -6px rgba(0, 0, 0, 0.95);
-  --shadow-glow-orange: 0 0 24px rgba(124, 58, 237, 0.35);
-  --shadow-glow-blue: 0 0 24px rgba(34, 211, 238, 0.35);
+  --shadow-glow-primary: 0 0 24px rgba(124, 58, 237, 0.35);
+  --shadow-glow-warm: 0 0 24px rgba(236, 72, 153, 0.35);
 
   /* Spacing scale — 4px grid system */
   --space-xs: 4px;
@@ -95,16 +98,6 @@ img {
 }
 
 .dark {
-  --bg-main: #0A0A0B;
-  --bg-surface: #0f0f12;
-  --bg-elevated: #141419;
-  --bg-card: #1E1B29;
-  --bg-overlay: rgba(10, 10, 11, 0.96);
-  
-  --text-main: #ffffff;
-  --text-secondary: #e4e4e7;
-  --text-muted: #a1a1aa;
-  
   --border-color: rgba(255, 255, 255, 0.08);
   --border-subtle: rgba(255, 255, 255, 0.04);
   --glass-bg: rgba(255, 255, 255, 0.03);
@@ -1688,22 +1681,22 @@ main, .relative.z-10 {
   width: 100%;
   aspect-ratio: 2/3;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 18px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.58), 0 0 0 1px rgba(255, 255, 255, 0.015);
   transform: translate3d(0, 0, 0);
   will-change: transform, box-shadow;
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
-              box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
-              border-color 0.4s ease;
+  transition: transform 250ms cubic-bezier(0.25, 0.8, 0.25, 1), 
+              box-shadow 250ms cubic-bezier(0.25, 0.8, 0.25, 1),
+              border-color 250ms ease;
   z-index: 1;
 }
 
 .premium-card-container:hover {
   transform: translate3d(0, -6px, 0) scale3d(1.02, 1.02, 1.02);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.82), 0 0 28px rgba(249, 115, 22, 0.22);
-  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.82), var(--shadow-glow-primary);
+  border-color: rgba(124, 58, 237, 0.35);
   z-index: 10;
 }
 

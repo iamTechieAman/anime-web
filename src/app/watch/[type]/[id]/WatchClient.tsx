@@ -489,7 +489,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             ) : episodeLayoutMode === "grid" ? (
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-[var(--accent)] bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 text-[var(--accent)] shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-[var(--border-color)] bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
                                                     ))}
                                                 </div>
                                             ) : (
@@ -1335,7 +1335,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 </div>
                                 <h2 className="text-lg font-black text-white uppercase tracking-wide mb-2">Upcoming</h2>
                                 <p className="text-xs text-zinc-400 leading-relaxed mb-6">This episode hasn't aired yet. Check back soon.</p>
-                                <button onClick={() => router.back()} className="px-6 py-2.5 bg-[var(--accent)] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all">Go Back</button>
+                                <button onClick={() => router.back()} className="px-6 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all">Go Back</button>
                             </div>
                         </div>
                     )}
@@ -1350,7 +1350,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">Try a different server below</p>
                             <div className="flex gap-2 flex-wrap justify-center">
                                 <button onClick={() => { setSourceError(false); setIframeKey(prev => prev + 1); }}
-                                    className="px-4 py-2 bg-[var(--accent)] text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
+                                    className="px-4 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
                                     <RefreshCw className="w-3.5 h-3.5" /> Retry
                                 </button>
                                 <button onClick={handleAutoFallback}
@@ -1365,7 +1365,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <iframe
                         key={iframeKey}
                         src={getProxiedEmbedUrl(embedUrl)}
-                        className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-500 ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-[250ms] ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
                         allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
                         allowFullScreen
                         title={`${title} - ToonPlayer`}
@@ -1460,13 +1460,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </button>
                             <button onClick={() => { setIsTheatreMode(!isTheatreMode); if (isFocusMode) setIsFocusMode(false); }}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
-                                    isTheatreMode ? 'bg-[var(--accent)]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    isTheatreMode ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`} title="Theatre Mode">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
                             </button>
                             <button onClick={() => { setIsFocusMode(!isFocusMode); if (isTheatreMode) setIsTheatreMode(false); }}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
-                                    isFocusMode ? 'bg-[var(--accent)]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    isFocusMode ? 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/15 border-[var(--accent)]/40 text-[var(--accent)]' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`} title="Focus Mode">
                                 <Shield className="w-3.5 h-3.5" />
                             </button>
@@ -1692,7 +1692,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 </div>
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
                                                     {episodes.map((epNum: string) => (
-                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
+                                                        <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-[var(--accent)]/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
                                                     ))}
                                                 </div>
                                             </div>
@@ -1706,7 +1706,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 </div>
                                             </div>
                                             <div className="flex flex-col sm:flex-row gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
-                                                <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-[var(--accent)] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
+                                                <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[var(--accent)]/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
                                                 <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
                                                 <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-[var(--border-color)] transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
                                             </div>
@@ -1890,7 +1890,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             {!isFocusMode && renderComments()}
             <AnimatePresence>
                 {showScrollTop && !isFocusMode && (
-                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-[var(--accent)]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
+                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
                 )}
             </AnimatePresence>
         </div>

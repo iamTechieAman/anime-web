@@ -98,7 +98,7 @@ export default function ContinueWatchingRow() {
                                         alt={entry.title || "Continue watching"}
                                         fill
                                         sizes="(max-width: 768px) 80px, (max-width: 1024px) 90px, 100px"
-                                        className="object-cover transition-transform duration-500 group-hover/poster:scale-105"
+                                        className="object-cover transition-transform duration-[250ms] group-hover/poster:scale-105"
                                         onError={(e) => {
                                             const target = e.currentTarget as HTMLImageElement;
                                             if (target.src !== PLACEHOLDER) target.src = PLACEHOLDER;
@@ -106,7 +106,7 @@ export default function ContinueWatchingRow() {
                                         unoptimized
                                     />
                                     {/* Play Hover Overlay */}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/poster:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/poster:opacity-100 transition-opacity duration-[250ms] flex items-center justify-center pointer-events-none">
                                         <Play className="w-5 h-5 text-white fill-current drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
                                     </div>
                                     {/* Close button */}
@@ -144,7 +144,7 @@ export default function ContinueWatchingRow() {
                                     {/* Small Pill Resume */}
                                     <Link scroll={false} 
                                         href={getHistoryLink(entry)}
-                                        className="px-3 py-1 bg-white/5 hover:bg-[var(--accent)] text-white hover:text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
+                                        className="px-3 py-1 bg-white/5 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white hover:text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-[250ms] flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
                                     >
                                         <Play className="w-2.5 h-2.5 fill-current" />
                                         <span>Resume</span>

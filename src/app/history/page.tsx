@@ -99,7 +99,7 @@ function EmptyState() {
       </p>
       <Link
         href="/"
-        className="px-8 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-300 hover:scale-105 active:scale-95"
+        className="px-8 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-[250ms] hover:scale-105 active:scale-95"
       >
         Browse Catalog
       </Link>
@@ -170,7 +170,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8, scale: 0.98 }}
       transition={{ duration: 0.2, delay: index * 0.02 }}
-      className={`group flex items-stretch rounded-2xl bg-[var(--bg-card)] border transition-all duration-300 overflow-hidden ${
+      className={`group flex items-stretch rounded-2xl bg-[var(--bg-card)] border transition-all duration-[250ms] overflow-hidden ${
         isSelected
           ? "border-[var(--accent)] shadow-[0_0_20px_var(--accent-glow)]"
           : "border-[var(--border-color)] hover:border-[var(--accent)]/30 hover:shadow-[0_4px_30px_-8px_var(--accent-glow)] hover:-translate-y-0.5"
@@ -212,7 +212,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
             alt={entry.title || "Poster"}
             fill
             sizes="(max-width: 768px) 96px, 144px"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-[250ms] group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-700">
@@ -311,7 +311,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       <div className="flex flex-col items-center justify-center gap-2 px-3 md:px-4 py-3 shrink-0 border-l border-[var(--border-color)] select-none">
         <Link
           href={href}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-[var(--accent)]/80 hover:bg-[var(--accent)] text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/80 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
         >
           <Play className="w-3 h-3 fill-white" />
           <span className="hidden sm:inline">{isCompleted ? "Rewatch" : "Resume"}</span>
@@ -499,7 +499,7 @@ export default function HistoryPage() {
                   onClick={() => { setIsSelectMode(!isSelectMode); setSelectedIds([]); }}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                     isSelectMode
-                      ? "bg-[var(--accent)] text-white border-transparent"
+                      ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent"
                       : "text-zinc-400 hover:text-white bg-white/5 border-white/8 hover:bg-white/10"
                   }`}
                 >
@@ -557,7 +557,7 @@ export default function HistoryPage() {
                       onClick={() => setFilterType(t)}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
                         filterType === t
-                          ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                          ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                           : "bg-[var(--bg-card)] border-[var(--border-color)] text-zinc-400 hover:text-white hover:border-white/15"
                       }`}
                     >

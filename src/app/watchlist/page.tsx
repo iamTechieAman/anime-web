@@ -65,13 +65,13 @@ function EmptyState() {
       <div className="flex items-center gap-3">
         <Link
           href="/"
-          className="px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-300 hover:scale-105 active:scale-95"
+          className="px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-[250ms] hover:scale-105 active:scale-95"
         >
           Browse Catalog
         </Link>
         <Link
           href="/ai"
-          className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95"
+          className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl text-sm font-bold transition-all duration-[250ms] hover:scale-105 active:scale-95"
         >
           AI Discovery
         </Link>
@@ -198,11 +198,11 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2 }}
-      className="group relative rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)]/50 hover:shadow-[0_8px_40px_-8px_var(--accent-glow)] hover:-translate-y-1 transition-all duration-300 aspect-[2/3]"
+      className="group relative rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)]/50 hover:shadow-[0_8px_40px_-8px_var(--accent-glow)] hover:-translate-y-1 transition-all duration-[250ms] aspect-[2/3]"
     >
       <Link scroll={false} href={href} className="absolute inset-0 block w-full h-full select-none">
         {entry.poster ? (
-          <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+          <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 150px, 200px" className="object-cover transition-transform duration-[250ms] group-hover:scale-105" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--bg-card)] flex items-center justify-center">
             <Play className="w-10 h-10 text-white/10" />
@@ -211,7 +211,7 @@ function GridCard({ entry, collections, onRemove, onUpdateCollection, href }: Gr
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         {/* Play overlay */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-[var(--accent)] flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-[0_0_30px_var(--accent-glow)]">
+          <div className="w-14 h-14 rounded-full bg-[var(--accent)] flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-[250ms] shadow-[0_0_30px_var(--accent-glow)]">
             <Play className="w-6 h-6 text-white fill-white ml-1" />
           </div>
         </div>
@@ -311,7 +311,7 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
       dragListener={false}
       dragControls={dragControls}
       as="div"
-      className="group flex items-center gap-3 bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)]/30 hover:shadow-[0_4px_24px_-8px_var(--accent-glow)] rounded-2xl p-3.5 transition-all duration-300"
+      className="group flex items-center gap-3 bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)]/30 hover:shadow-[0_4px_24px_-8px_var(--accent-glow)] rounded-2xl p-3.5 transition-all duration-[250ms]"
     >
       {/* Drag handle */}
       {isDragEnabled && (
@@ -369,7 +369,7 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
 
         <Link
           href={href}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-[var(--accent)]/80 hover:bg-[var(--accent)] text-white text-xs font-black rounded-xl transition-all hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/80 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white text-xs font-black rounded-xl transition-all hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
         >
           <Play className="w-3 h-3 fill-white" />
           <span className="hidden sm:inline">Watch</span>
@@ -538,14 +538,14 @@ export default function WatchlistPage() {
               <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-0.5 rounded-xl flex shrink-0">
                 <button
                   onClick={() => { setViewMode("grid"); setIsDragMode(false); }}
-                  className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "grid" ? "bg-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]" : "text-zinc-500 hover:text-white"}`}
+                  className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "grid" ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_12px_var(--accent-glow)]" : "text-zinc-500 hover:text-white"}`}
                   title="Grid view"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "list" ? "bg-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)]" : "text-zinc-500 hover:text-white"}`}
+                  className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "list" ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_12px_var(--accent-glow)]" : "text-zinc-500 hover:text-white"}`}
                   title="List view"
                 >
                   <List className="w-4 h-4" />
@@ -569,7 +569,7 @@ export default function WatchlistPage() {
                   onClick={() => setIsDragMode(!isDragMode)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                     isDragMode
-                      ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                      ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                       : "bg-white/5 border-white/8 text-zinc-400 hover:text-white hover:bg-white/10"
                   }`}
                 >
@@ -581,7 +581,7 @@ export default function WatchlistPage() {
               {/* New Folder */}
               <button
                 onClick={() => setShowAddFolder(!showAddFolder)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[var(--accent)]/10 hover:bg-[var(--accent)] hover:text-white border border-[var(--accent)]/20 hover:border-transparent text-xs font-bold rounded-xl transition-all cursor-pointer text-[var(--accent)] whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02]/10 hover:bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:text-white border border-[var(--accent)]/20 hover:border-transparent text-xs font-bold rounded-xl transition-all cursor-pointer text-[var(--accent)] whitespace-nowrap"
               >
                 <FolderPlus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">New Folder</span>
@@ -611,7 +611,7 @@ export default function WatchlistPage() {
                     className="flex-1 bg-transparent text-xs text-white outline-none placeholder-zinc-600 font-bold"
                   />
                 </div>
-                <button type="submit" className="px-3 py-2 bg-[var(--accent)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black rounded-xl transition-all shrink-0">
+                <button type="submit" className="px-3 py-2 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] hover:bg-[var(--accent-secondary)] text-white text-xs font-black rounded-xl transition-all shrink-0">
                   Create
                 </button>
                 <button type="button" onClick={() => setShowAddFolder(false)} className="p-2 text-zinc-500 hover:text-white transition-colors">
@@ -628,7 +628,7 @@ export default function WatchlistPage() {
               onClick={() => setActiveCollection("All")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer border whitespace-nowrap ${
                 activeCollection === "All"
-                  ? "bg-[var(--accent)] text-white border-transparent"
+                  ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent"
                   : "bg-[var(--bg-card)] border-[var(--border-color)] text-zinc-400 hover:text-white"
               }`}
             >
@@ -643,7 +643,7 @@ export default function WatchlistPage() {
                   onClick={() => setActiveCollection(col)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer border whitespace-nowrap ${
                     activeCollection === col
-                      ? "bg-[var(--accent)] text-white border-transparent"
+                      ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent"
                       : "bg-[var(--bg-card)] border-[var(--border-color)] text-zinc-400 hover:text-white"
                   }`}
                 >
@@ -693,7 +693,7 @@ export default function WatchlistPage() {
                       onClick={() => setFilterType(t)}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
                         filterType === t
-                          ? "bg-[var(--accent)] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                          ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                           : "bg-[var(--bg-card)] border-[var(--border-color)] text-zinc-400 hover:text-white hover:border-white/15"
                       }`}
                     >

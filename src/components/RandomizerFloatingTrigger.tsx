@@ -20,10 +20,10 @@ export default function RandomizerFloatingTrigger() {
             <button
                 onClick={handleClick}
                 aria-label="Surprise Me (Randomizer)"
-                className="group relative flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-tr from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.45)] border border-pink-500/30 transition-all duration-300 cursor-pointer active:scale-90"
+                className="group relative flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-tr from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.45)] border border-pink-500/30 transition-all duration-[250ms] cursor-pointer active:scale-90"
             >
                 {/* Micro-animating Shuffle Icon */}
-                <Shuffle className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
+                <Shuffle className="w-5 h-5 transition-transform duration-[250ms] group-hover:rotate-12 group-hover:scale-110" />
 
                 {/* Pulse wave overlay */}
                 <span className="absolute -inset-0.5 rounded-full bg-pink-500/20 animate-ping opacity-75 pointer-events-none group-hover:animate-none" />

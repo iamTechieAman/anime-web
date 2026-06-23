@@ -82,11 +82,11 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     return (
         <div
             ref={cardRef}
-            className={`group relative w-full card-virtualized transition-all duration-300 ease-out will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'} ${isFeatured ? 'col-span-1' : ''}`}
+            className={`group relative w-full card-virtualized transition-all duration-[250ms] ease-out will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'} ${isFeatured ? 'col-span-1' : ''}`}
         >
-            <Link scroll={false} href={watchHref} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] rounded-2xl" draggable={false}>
+            <Link scroll={false} href={watchHref} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] rounded-[18px]" draggable={false}>
                 {/* === Poster Container === */}
-                <div className="relative w-full overflow-hidden rounded-2xl bg-[var(--bg-elevated)] shadow-md group-hover:shadow-2xl group-hover:shadow-black/60 transition-shadow duration-300" style={{ aspectRatio: '2/3' }}>
+                <div className="relative w-full overflow-hidden rounded-[18px] bg-[var(--bg-elevated)] shadow-md group-hover:shadow-[var(--shadow-glow-primary)] transition-shadow duration-[250ms]" style={{ aspectRatio: '2/3' }}>
                     
                     {/* Shimmer skeleton while image loads */}
                     <div className="absolute inset-0 shimmer-card" />
@@ -98,7 +98,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             alt={`${title} (${year})`}
                             fill
                             sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 20vw, 14vw"
-                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] relative z-[1]"
+                            className="object-cover transition-transform duration-[250ms] ease-out group-hover:scale-[1.02] relative z-[1]"
                             placeholder="blur"
                             blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                             onError={() => setImgError(true)}
@@ -130,7 +130,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                                 </span>
                             )}
                             {item.isMostViewed && (
-                                <span className="inline-flex items-center gap-1 bg-[var(--accent)] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
+                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-warm)] hover:-translate-y-[1px] hover:scale-[1.02] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
                                     <Flame className="w-2.5 h-2.5 fill-white" />HOT
                                 </span>
                             )}

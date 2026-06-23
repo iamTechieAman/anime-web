@@ -22,7 +22,7 @@ const SUGGESTIONS = [
     { text: "Sad anime", desc: "Emotional stories and beautiful tearjerkers", emoji: "🌧️", gradient: "from-rose-600/20 to-pink-600/5 hover:border-rose-500/50 hover:shadow-rose-500/5" },
     { text: "Studio Ghibli", desc: "Magical adventures & cozy comforting aesthetics", emoji: "🌳", gradient: "from-emerald-600/20 to-teal-600/5 hover:border-emerald-500/50 hover:shadow-emerald-500/5" },
     { text: "Mind bending", desc: "Psychological thrillers, plot twists & mystery", emoji: "🧠", gradient: "from-blue-600/20 to-cyan-600/5 hover:border-blue-500/50 hover:shadow-blue-500/5" },
-    { text: "Kdrama", desc: "Acclaimed Korean romances & comforting comedies", emoji: "🇰🇷", gradient: "from-amber-600/20 to-orange-600/5 hover:border-amber-500/50 hover:shadow-amber-500/5" },
+    { text: "Kdrama", desc: "Acclaimed Korean romances & comforting comedies", emoji: "🇰🇷", gradient: "from-amber-600/20 to-[var(--accent-warm)]/5 hover:border-amber-500/50 hover:shadow-amber-500/5" },
     { text: "Hidden gems", desc: "Acclaimed but obscure films & series to discover", emoji: "💎", gradient: "from-violet-600/20 to-fuchsia-600/5 hover:border-violet-500/50 hover:shadow-violet-500/5" },
 ];
 
@@ -353,7 +353,7 @@ export default function DiscoverClient() {
                             {/* Search bar console */}
                             <div className="max-w-2xl mx-auto w-full">
                                 <form onSubmit={handleSubmit} className="relative">
-                                    <div className="relative flex items-center bg-[#12131A] border border-white/5 focus-within:border-pink-500/40 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.15)] rounded-2xl p-2 transition-all duration-300 backdrop-blur-md">
+                                    <div className="relative flex items-center bg-[#12131A] border border-white/5 focus-within:border-pink-500/40 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.15)] rounded-2xl p-2 transition-all duration-[250ms] backdrop-blur-md">
                                         <input 
                                             type="text"
                                             value={input}
@@ -414,7 +414,7 @@ export default function DiscoverClient() {
                                         <button
                                             key={sug.text}
                                             onClick={() => handleSuggestionClick(sug.text)}
-                                            className={`group p-5 rounded-2xl border border-white/5 backdrop-blur-md text-left flex flex-col justify-between transition-all duration-300 bg-gradient-to-br ${sug.gradient} hover:shadow-lg hover:-translate-y-0.5 cursor-pointer`}
+                                            className={`group p-5 rounded-2xl border border-white/5 backdrop-blur-md text-left flex flex-col justify-between transition-all duration-[250ms] bg-gradient-to-br ${sug.gradient} hover:shadow-lg hover:-translate-y-0.5 cursor-pointer`}
                                         >
                                             <div className="flex items-center justify-between w-full mb-3">
                                                 <span className="text-2xl">{sug.emoji}</span>
@@ -495,7 +495,7 @@ export default function DiscoverClient() {
                                                     <div className="space-y-6">
                                                         <p className="text-sm text-zinc-300 font-semibold leading-relaxed">{msg.content}</p>
                                                         {msg.results && msg.results.length > 0 ? (
-                                                            <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                                            <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-[250ms]">
                                                                 <MovieGrid items={msg.results} />
                                                             </div>
                                                         ) : (
@@ -537,7 +537,7 @@ export default function DiscoverClient() {
 
                                     {/* Chat Form */}
                                     <form onSubmit={handleSubmit} className="relative">
-                                        <div className="relative flex items-center bg-[#12131A] border border-white/5 focus-within:border-pink-500/40 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.15)] rounded-2xl p-2 transition-all duration-300 backdrop-blur-md">
+                                        <div className="relative flex items-center bg-[#12131A] border border-white/5 focus-within:border-pink-500/40 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.15)] rounded-2xl p-2 transition-all duration-[250ms] backdrop-blur-md">
                                             <input 
                                                 type="text"
                                                 value={input}

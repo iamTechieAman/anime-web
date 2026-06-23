@@ -57,7 +57,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                         <ArrowLeft className="w-5 h-5 text-zinc-400" />
                     </Link>
                     <div>
-                        <h1 className="font-bold text-lg">Browse: <span className="text-orange-400">{displayLetter}</span></h1>
+                        <h1 className="font-bold text-lg">Browse: <span className="text-[var(--accent-warm)]">{displayLetter}</span></h1>
                         <p className="text-xs text-[var(--text-muted)]">
                             {!loading && `${shows.length} results`}
                         </p>
@@ -83,7 +83,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                 className={`
                                     flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap
                                     ${isActive
-                                        ? "bg-orange-500 text-white shadow-lg shadow-orange-900/30"
+                                        ? "bg-[var(--accent-warm)] text-white shadow-lg shadow-orange-900/30"
                                         : "bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--border-color)] hover:text-white"
                                     }
                                 `}
@@ -113,8 +113,8 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                             className="flex flex-col items-center justify-center py-4 md:py-6"
                         >
                             <div className="relative">
-                                <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                                <Loader2 className="w-12 h-12 animate-spin text-orange-500 relative z-10" />
+                                <div className="absolute inset-0 bg-[var(--accent-warm)]/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                                <Loader2 className="w-12 h-12 animate-spin text-[var(--accent-warm)] relative z-10" />
                             </div>
                             <p className="text-[var(--text-muted)] animate-pulse mt-4 text-sm">
                                 Loading {activeTab === "movies" ? "movies & TV" : activeTab === "anime" ? "anime" : "content"} starting with "{displayLetter}"...
@@ -132,7 +132,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                 <p className="text-red-400 font-medium mb-4">{error}</p>
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="px-6 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
+                                    className="px-6 py-2.5 bg-[var(--accent-warm)] text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
                                 >
                                     Retry
                                 </button>
@@ -179,7 +179,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                     onClick={() => {
                                         setPage(p => p + 1);
                                     }}
-                                    className="px-6 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
+                                    className="px-6 py-2.5 bg-[var(--accent-warm)] text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
                                 >
                                     Next →
                                 </button>

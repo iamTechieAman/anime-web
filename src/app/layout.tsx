@@ -159,7 +159,7 @@ export default async function RootLayout({
         <meta name="google-site-verification" content="google555e8d2c84c218f0" />
       </head>
       <body
-        className="font-inter antialiased bg-[#09090B] text-white transition-colors duration-300 selection:bg-violet-500/25"
+        className="font-inter antialiased bg-[#09090B] text-white transition-colors duration-[250ms] selection:bg-violet-500/25"
         suppressHydrationWarning
       >
         <ClerkProvider
