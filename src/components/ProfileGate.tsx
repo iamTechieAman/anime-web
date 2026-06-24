@@ -7,14 +7,6 @@ import { useUserStore, Profile, getAvatarUrl, getRandomBitmojiUrl, isDefaultAvat
 import { useUser } from "@clerk/nextjs";
 
 const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null }) => {
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setError(false);
-    setLoading(true);
-  }, [src]);
-
   const isInvalidSrc = !src || 
     src === "null" || 
     src === "undefined" || 
@@ -22,9 +14,27 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
     src.includes("undefined") ||
     src.includes("/undefined") ||
     src.includes("/null");
+
   const fallbackChar = (alt && typeof alt === 'string' && alt.trim().length > 0) 
     ? alt.trim().charAt(0).toUpperCase() 
     : "?";
+
+  // Detect if image is already in browser cache (instant load — no spinner needed)
+  const isCachedInitially = () => {
+    if (typeof window === "undefined" || isInvalidSrc) return false;
+    const img = new window.Image();
+    img.src = src!;
+    return img.complete && img.naturalWidth > 0;
+  };
+
+  const [loading, setLoading] = useState(() => !isCachedInitially());
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setError(false);
+    setLoading(!isCachedInitially());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
   
   if (error || isInvalidSrc) {
     return (
@@ -37,19 +47,17 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
   return (
     <div className="relative w-full h-full">
       {loading && (
-        <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-white/25 border-t-white rounded-full animate-spin" />
-        </div>
+        <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded-lg" />
       )}
       <img 
         src={src!} 
         alt={alt || "Avatar"} 
-        className={`w-full h-full object-cover transition-opacity duration-200 ${loading ? "opacity-0" : "opacity-100"}`} 
+        // @ts-ignore — fetchpriority is valid HTML but not yet in TS types
+        fetchpriority="high"
+        decoding="async"
+        className={`w-full h-full object-cover transition-opacity duration-[120ms] ease-out ${loading ? "opacity-0" : "opacity-100"}`} 
         onLoad={() => setLoading(false)}
-        onError={() => {
-          setError(true);
-          setLoading(false);
-        }} 
+        onError={() => { setError(true); setLoading(false); }} 
       />
     </div>
   );
@@ -147,7 +155,7 @@ export default function ProfileGate() {
   const handleSelectProfile = (profile: Profile) => {
     setSelectedId(profile.id);
     
-    // Netflix-style delay for the zoom effect before disappearing
+    // Snappy zoom-out then switch (500ms feels responsive, 800ms felt sluggish)
     setTimeout(() => {
       setActiveProfile(profile.id);
       if (typeof window !== "undefined") {
@@ -159,7 +167,7 @@ export default function ProfileGate() {
       setShowGate(false);
       setSelectedId(null);
       window.dispatchEvent(new Event("profileUpdated"));
-    }, 800);
+    }, 500);
   };
 
   const handleCreate = (e: React.FormEvent) => {

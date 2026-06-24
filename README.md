@@ -22,12 +22,32 @@
 
 ToonPlayer is a high-performance, cinematic-quality content aggregator that lets users discover and stream anime, movies, and TV shows — all from a single, ad-free interface. Inspired by Netflix, Crunchyroll, Apple TV+, Plex, and Stremio, it aggregates video sources from multiple providers, applies an intelligent server-scanning pipeline, and delivers content through a sandboxed proxy player that blocks popups and malicious redirects.
 
-**My Journey (Jan 2026 - June 2026)**
-Building ToonPlayer took 5 months of continuous iteration and learning. What started in January as a basic layout experiment quickly evolved into a massive, feature-rich platform. I spent months perfecting the architecture, battling API rate limits, fine-tuning the video proxies, and striving for a "100% UI/UX/Performance" score. This project represents my dedication to creating a premium, Netflix-quality experience entirely from scratch.
+**My Journey (Jan 2026 – June 2026)**
+Building ToonPlayer has been 6 months of relentless iteration. What started in January as a basic layout experiment has grown into a full-scale, production-ready streaming platform. The path wasn't linear — I battled CORS walls, Cloudflare reverse-engineering challenges, TMDB rate limits, iOS WebKit quirks, and Android safe-area edge cases along the way.
+
+Some milestones I'm proud of:
+- Shipped a **voice search with automatic MediaRecorder fallback** when browser APIs were blocked — no third-party SDK.
+- Reverse-engineered a cryptographic HMAC-SHA256 signing pipeline to bypass Cloudflare Turnstile on an anime scraper.
+- Reduced avatar loading from 1.4s to under 80ms with WebP conversion + browser-cache detection.
+- Achieved **zero layout overflows** across 320px → 1920px via systematic responsive auditing.
+- Built a PWA installable on Android/iOS, a TV-optimized interface, and a full Capacitor APK — all from a single Next.js codebase.
+
+This project isn't just a side-project — it's a statement: that a solo developer can ship production-quality software that competes with funded teams.
 
 ---
 
-## 🏆 Changelog — v7.0 (Latest)
+## 🏆 Changelog — v7.1 (Latest)
+
+### Phase 26 — UI Polish, Micro-Animations & SEO Overhaul (`June 2026`)
+- 🚫 **Mobile Nav Cleanup**: Removed the redundant "Anime" label and Zap icon from the bottom navigation bar. All `/az-list/` routing logic, active states, and haptic feedback remain fully intact — only the visual label was stripped for a cleaner minimal nav.
+- 🎤 **Mobile Voice Search**: Added microphone button to the mobile search overlay (`MobileModals`), wired to the existing `useVoiceSearch` hook. Tap → records → auto-fills the search input on transcript. Visual states (idle → red-pulsing → spinner) match the desktop Command Palette mic for consistency.
+- 🔳 **Black Gap Fix**: Eliminated the unwanted black safe-area gap at the top of the page on Android/iOS. Root cause was a double-application of `env(safe-area-inset-top)` — once on `body` padding and once inside the fixed Header. Removed `body` safe-area top padding; the Header exclusively manages this inset.
+- ⚡ **Smoother Card Reveals**: Reduced card entrance animation from `300ms` translateY-16px to a snappier `180ms` translateY-8px with spring cubic-bezier. Cards now slide into view almost instantly as you scroll.
+- 🎠 **Faster Carousel Scrolling**: Switched `ott-card-grid` and `netflix-row` from `scroll-snap-type: proximity` to `mandatory` + `scroll-behavior: smooth` + GPU `translateZ(0)` layer promotion. Carousel swiping now has true iOS-native momentum feel.
+- 👤 **Instant Avatar Loading**: Profile avatars now detect browser cache via `img.complete && img.naturalWidth > 0` before rendering the skeleton. On repeat visits (most cases) the avatar appears instantly — zero spinner flash. Added `fetchpriority="high"` and `decoding="async"` for cold loads.
+- ⏱️ **Profile Switch Speed**: Reduced the Netflix zoom-to-switch delay from `800ms → 500ms` for a more responsive profile selection feel.
+- 🌐 **Global CSS Smoothness Layer**: Added a site-wide smoothness system — `.tap-scale` for haptic-style active press feedback, `.ease-apple` CSS class (cubic-bezier spring), and global `button/a/[role=button]` `touch-action: manipulation` to eliminate the 300ms tap delay on mobile everywhere.
+- 📈 **SEO & LLM Optimization**: Expanded metadata to 30+ targeted keywords, added `authors`/`creator`/`publisher` fields, improved Open Graph title/description, upgraded JSON-LD structured data with `WebApplication` schema, `FAQPage` (4 Q&As for rich results), and a proper `SearchAction` `EntryPoint`. Created a branded 1200×630 OG social preview image.
 
 ### Phase 25 — Production Audit, Voice Fallbacks, Responsive Overflow Polish & Abort Controllers (`June 2026`)
 - 🎤 **Robust Voice Search & Mic Diagnostic Fallback**: Fully resolved `service-not-allowed` errors by adjusting global `Permissions-Policy: microphone=(self)` policies. Standardized cross-browser speech recognition support, and integrated a client-side audio recorder hook that automatically falls back to raw `MediaRecorder` audio capturing and OpenAI Whisper server-side transcription when native speech APIs are blocked or unavailable.

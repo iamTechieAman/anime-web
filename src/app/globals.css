@@ -37,6 +37,31 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Global Smoothness Layer ────────────────────────────────────────────────
+   Every interactive element gets hardware-accelerated transitions by default.
+   This gives the "premium app" feel without per-component work.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Apple-style spring easing used by .ease-apple Tailwind class */
+.ease-apple { transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important; }
+
+/* Tap feedback: used by MobileNav and interactive buttons */
+.tap-scale {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.tap-scale:active {
+  transform: scale(0.93) translateZ(0);
+  transition: transform 80ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Buttons and links get sub-pixel smooth transitions by default */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+
 img {
   user-select: none;
   /* pointer-events: none removed — was blocking interactive overlays on images */
@@ -233,8 +258,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   position: relative;
 
-  /* Mobile App Optimizations */
-  padding-top: var(--safe-top);
+  /* Mobile App Optimizations — safe-area is handled by the fixed Header, NOT body */
+  padding-top: 0;
   padding-bottom: var(--safe-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
@@ -242,8 +267,8 @@ body {
   -webkit-user-select: auto;
   user-select: auto;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  /* Fixed: Removed touch-action: pan-y to allow horizontal carousel scrolling */
+  transition: background-color 0.25s ease, color 0.25s ease;
+  /* touch-action: pan-y removed — allows horizontal carousel scrolling */
 }
 
 
@@ -681,12 +706,17 @@ p, .text-body {
 
 @layer utilities {
   .netflix-row {
-    @apply flex overflow-x-auto gap-3 pb-6 pt-2 px-4 md:px-12 snap-x snap-mandatory scroll-smooth;
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    @apply flex overflow-x-auto gap-3 pb-6 pt-2 px-4 md:px-12;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    transform: translateZ(0);
+    will-change: scroll-position;
   }
   .netflix-row::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
   }
   
   .netflix-card-snap {
@@ -785,18 +815,17 @@ p, .text-body {
               z-index 0s 0s;
 }
 
-/* Card reveal animation (CSS-only IntersectionObserver replacement) */
+/* Card reveal animation — snappy entrance with GPU acceleration */
 .card-reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transform: translateY(8px) scale(0.99);
+  transition: opacity 0.18s ease-out, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
-  /* Prevent layout shifts */
   contain-intrinsic-size: 180px 270px;
 }
 .card-reveal.card-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   will-change: auto;
 }
 
@@ -1635,12 +1664,11 @@ main, .relative.z-10 {
   display: none !important; /* Chrome, Safari, Opera */
 }
 
-/* Edge-to-edge OTT horizontal scroll carousel (onoflix-style) */
+/* Edge-to-edge OTT horizontal scroll carousel */
 .ott-card-grid {
   --ott-card-w: 126px;
   --ott-card-gap: clamp(8px, 1vw, 14px);
   display: grid;
-  /* Horizontal scroll: fixed column widths, auto-fill as many as fit then scroll */
   grid-auto-flow: column;
   grid-auto-columns: var(--ott-card-w);
   grid-template-rows: 1fr;
@@ -1648,12 +1676,17 @@ main, .relative.z-10 {
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
-  scroll-snap-type: x proximity;
+  /* mandatory gives crisp snapping without jitter on mobile */
+  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   scrollbar-width: none;
   padding: clamp(6px, 1vw, 10px) 2px clamp(18px, 1.8vw, 28px);
-  /* Prevent vertical clipping of hover scale effects */
   padding-left: 2px;
+  /* GPU layer for momentum scroll */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
 }
 .ott-card-grid::-webkit-scrollbar { display: none; }
 .ott-card-grid > * { scroll-snap-align: start; }
