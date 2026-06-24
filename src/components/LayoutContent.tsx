@@ -13,6 +13,7 @@ import { AnimatePresence } from "framer-motion";
 import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 import dynamic from "next/dynamic";
 import ProfileGate from "@/components/ProfileGate";
+import { useUserStore } from "@/store/userStore";
 
 
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
@@ -22,6 +23,13 @@ const ProfileEditModal = dynamic(() => import("@/components/ProfileEditModal"), 
 const SettingsModal = dynamic(() => import("@/components/SettingsModal"), { ssr: false });
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
+  const { activeProfileId } = useUserStore();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
   const pathname = usePathname();
   const isWatchPage = pathname?.startsWith('/watch');
@@ -129,6 +137,20 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
 
   
+  if (!mounted) {
+    return <div className="min-h-screen bg-[#141414]" />;
+  }
+
+  if (!activeProfileId) {
+    return (
+      <div className="min-h-screen bg-[#141414] relative">
+        <ProfileGate />
+        <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+        <ProfileEditModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      </div>
+    );
+  }
   const showSidebar = !isWatchPage;
 
   return (

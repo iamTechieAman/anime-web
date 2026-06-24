@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
 import Image from "next/image";
-import { useUserStore, Profile, getAvatarUrl } from "@/store/userStore";
+import { useUserStore, Profile, getAvatarUrl, getRandomBitmojiUrl } from "@/store/userStore";
 import { useUser } from "@clerk/nextjs";
 
 const ProfileAvatar = ({ src, alt, sizes = "120px" }: { src?: string | null, alt?: string | null, sizes?: string }) => {
@@ -131,7 +131,7 @@ export default function ProfileGate() {
     e.preventDefault();
     if (!profileName.trim()) return;
 
-    const newAvatar = getAvatarUrl(profileName.trim(), theme);
+    const newAvatar = getRandomBitmojiUrl(profileName.trim());
     addProfile({
       name: profileName.trim(),
       avatar: newAvatar,
@@ -247,7 +247,7 @@ export default function ProfileGate() {
                 <div className="group relative w-full">
                   <div className="w-[120px] h-[120px] mx-auto rounded-xl bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative" will-change-transform>
                     {profileName.trim() ? (
-                      <ProfileAvatar src={getAvatarUrl(profileName.trim(), theme)} alt="Avatar preview" />
+                      <ProfileAvatar src={getRandomBitmojiUrl(profileName.trim())} alt="Avatar preview" />
                     ) : (
                       <span className="text-5xl font-bold text-zinc-600 opacity-30">?</span>
                     )}

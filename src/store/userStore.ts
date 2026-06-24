@@ -62,6 +62,13 @@ export function getAvatarUrl(name: string, theme: string = 'orange'): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+const DICEBEAR_SEEDS = ["Totoro", "Ponyo", "Luffy", "Naruto", "Nezuko", "Goku", "Pikachu", "Chihiro", "Felix", "Aneka", "Milo", "Luna", "Oliver", "Shadow", "Midnight", "Frost"];
+
+export function getRandomBitmojiUrl(name?: string): string {
+  const seed = name && name.trim() ? name.trim() : DICEBEAR_SEEDS[Math.floor(Math.random() * DICEBEAR_SEEDS.length)];
+  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+}
+
 const defaultSettings: UserSettings = {
   autoplay: true,
   autoSkipIntro: false,
@@ -149,7 +156,7 @@ export const useUserStore = create<UserState>()(
       addProfile: (profile) => set((state) => {
         const avatar = profile.avatar
           ? profile.avatar 
-          : getAvatarUrl(profile.name, profile.theme || 'orange');
+          : getRandomBitmojiUrl(profile.name);
         return {
           profiles: [...state.profiles, { ...profile, avatar, id: `profile-${Date.now()}` } as Profile]
         };

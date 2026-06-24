@@ -37,11 +37,16 @@ export default function Player({
     const [countdown, setCountdown] = useState(5);
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isDestroyed = useRef(false);
+    const hasAutoSkipped = useRef(false);
     const [showSkipButton, setShowSkipButton] = useState(false);
     const [showSkipCreditsButton, setShowSkipCreditsButton] = useState(false);
     const [playerTime, setPlayerTime] = useState(0);
     const [resumeTime, setResumeTime] = useState(0);
     const [showResumePrompt, setShowResumePrompt] = useState(false);
+
+    useEffect(() => {
+        hasAutoSkipped.current = false;
+    }, [option.url]);
 
     // Audio/Quality persistence refs
     const lastAudioTrackName = useRef<string | null>(typeof window !== 'undefined' ? localStorage.getItem('artplayer_audio_track') : null);
@@ -167,10 +172,35 @@ export default function Player({
                             console.log('[ArtPlayer] Initializing HLS for URL:', url);
                             if (Hls.isSupported()) {
                                 if ((art as any).hls) (art as any).hls.destroy();
+                                // Load buffer size setting
+                                let bufferSetting = "Standard";
+                                try {
+                                    const s = localStorage.getItem("toonplayer_settings");
+                                    if (s) {
+                                        const parsed = JSON.parse(s);
+                                        if (parsed.bufferSize) bufferSetting = parsed.bufferSize;
+                                    }
+                                } catch {}
+
+                                // Map Small, Standard, Large
+                                let maxBufferLength = 30; // Standard
+                                let maxMaxBufferLength = 60;
+                                let maxBufferSize = 60 * 1000 * 1000;
+
+                                if (bufferSetting === "Small") {
+                                    maxBufferLength = 10;
+                                    maxMaxBufferLength = 20;
+                                    maxBufferSize = 20 * 1000 * 1000;
+                                } else if (bufferSetting === "Large") {
+                                    maxBufferLength = 60;
+                                    maxMaxBufferLength = 120;
+                                    maxBufferSize = 150 * 1000 * 1000;
+                                }
+
                                 const hls = new Hls({
-                                    maxBufferLength: 30,
-                                    maxMaxBufferLength: 60,
-                                    maxBufferSize: 60 * 1000 * 1000,
+                                    maxBufferLength: maxBufferLength,
+                                    maxMaxBufferLength: maxMaxBufferLength,
+                                    maxBufferSize: maxBufferSize,
                                     renderTextTracksNatively: false,
                                     initialLiveManifestSize: 1,
                                     nudgeMaxRetry: 10,
@@ -326,12 +356,49 @@ export default function Player({
                         art.currentTime = initialTime;
                         art.notice.show = `Resumed from ${Math.floor(initialTime / 60)}:${Math.floor(initialTime % 60).toString().padStart(2, '0')}`;
                     }
+
+                    // Apply playback rate setting on ready
+                    try {
+                        const s = localStorage.getItem("toonplayer_settings");
+                        if (s) {
+                            const parsed = JSON.parse(s);
+                            if (parsed.playbackSpeed) {
+                                const rate = parseFloat(parsed.playbackSpeed);
+                                if (!isNaN(rate) && rate > 0) {
+                                    art.playbackRate = rate;
+                                }
+                            }
+                        }
+                    } catch {}
                 });
 
                 art.on('video:timeupdate', () => {
                     if (!isDestroyed.current) {
-                        setPlayerTime(art.currentTime);
-                        if (onTimeUpdate) onTimeUpdate(art.currentTime, art.duration);
+                        const curTime = art.currentTime;
+                        setPlayerTime(curTime);
+                        if (onTimeUpdate) onTimeUpdate(curTime, art.duration);
+
+                        // Auto-skip intro logic
+                        let autoSkipIntro = false;
+                        try {
+                            const s = localStorage.getItem("toonplayer_settings");
+                            if (s) {
+                                const parsed = JSON.parse(s);
+                                if (parsed.autoSkip !== undefined) autoSkipIntro = parsed.autoSkip;
+                            }
+                        } catch {}
+
+                        if (autoSkipIntro && showSkipIntro && curTime >= 5 && curTime <= skipIntroDuration && !hasAutoSkipped.current) {
+                            hasAutoSkipped.current = true;
+                            setTimeout(() => {
+                                if (playerRef.current && !isDestroyed.current) {
+                                    const dur = playerRef.current.duration;
+                                    const targetTime = Math.min(skipIntroDuration, dur * 0.9);
+                                    playerRef.current.currentTime = targetTime;
+                                    playerRef.current.notice.show = `Auto-Skipped Intro to ${Math.floor(targetTime)}s`;
+                                }
+                            }, 50);
+                        }
                     }
                 });
 
@@ -375,6 +442,27 @@ export default function Player({
                 playerRef.current = null;
             }
         };
+    }, []);
+
+    // Live update settings listener
+    useEffect(() => {
+        const updatePlayerFromSettings = () => {
+            if (!playerRef.current || isDestroyed.current) return;
+            try {
+                const s = localStorage.getItem("toonplayer_settings");
+                if (s) {
+                    const parsed = JSON.parse(s);
+                    if (parsed.playbackSpeed) {
+                        const rate = parseFloat(parsed.playbackSpeed);
+                        if (!isNaN(rate) && rate > 0) {
+                            playerRef.current.playbackRate = rate;
+                        }
+                    }
+                }
+            } catch {}
+        };
+        window.addEventListener("profileUpdated", updatePlayerFromSettings);
+        return () => window.removeEventListener("profileUpdated", updatePlayerFromSettings);
     }, []);
 
     // Bound keyboard events that reactive-update with states

@@ -319,6 +319,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [isTheatreMode, setIsTheatreMode] = useState(false);
     const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
     const [iframeKey, setIframeKey] = useState(0);
+    const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
+    const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showEpisodesDrawer, setShowEpisodesDrawer] = useState(false);
 
@@ -468,11 +470,35 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }, []);
 
     useEffect(() => {
-        // null means first visit → default to true. Only disable if explicitly set to 'false'.
-        const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') !== 'false';
-        const savedAutoNext = localStorage.getItem('toonplayer_autonext') !== 'false';
-        setAutoPlay(savedAutoPlay);
-        setAutoNext(savedAutoNext);
+        const loadSettings = () => {
+            try {
+                const s = localStorage.getItem("toonplayer_settings");
+                if (s) {
+                    const parsed = JSON.parse(s);
+                    if (parsed.autoplay !== undefined) setAutoPlay(parsed.autoplay);
+                    if (parsed.autoplay !== undefined) setAutoNext(parsed.autoplay);
+                    if (parsed.aggressiveSandbox !== undefined) {
+                        setAggressiveSandbox(parsed.aggressiveSandbox);
+                    }
+                } else {
+                    const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') !== 'false';
+                    const savedAutoNext = localStorage.getItem('toonplayer_autonext') !== 'false';
+                    setAutoPlay(savedAutoPlay);
+                    setAutoNext(savedAutoNext);
+                }
+            } catch (e) {}
+        };
+        loadSettings();
+        window.addEventListener("profileUpdated", loadSettings);
+
+        const toggleVisibility = () => {
+            if (window.scrollY > 120) {
+                setIsHeaderScrolled(true);
+            } else {
+                setIsHeaderScrolled(false);
+            }
+        };
+        window.addEventListener("scroll", toggleVisibility);
 
         const handleMessage = (e: MessageEvent) => {
             const isEndEvent = e.data && (
@@ -498,10 +524,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         window.addEventListener("message", handleMessage);
         
         return () => {
+            window.removeEventListener("profileUpdated", loadSettings);
+            window.removeEventListener("scroll", toggleVisibility);
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener("message", handleMessage);
         };
-    }, [id, autoNext, currentEp, mode, show]);
+    }, []);
 
     // Override window.open globally to prevent popups bubbling from iframes
     useEffect(() => {
@@ -1008,7 +1036,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <main className="bg-bg-main text-[var(--text-main)]">
                 {/* Navbar */}
-                <nav className="fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)]">
+                <nav className={`fixed top-0 left-0 md:left-[72px] right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)] transition-transform ${isHeaderScrolled ? '-translate-y-full' : 'translate-y-0'}`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>
@@ -1028,6 +1056,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             className="absolute inset-0 w-full h-full border-0"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
+                            sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                             onLoad={(e: any) => {
                                 try {
                                     const iframe = e.target as HTMLIFrameElement;
@@ -1168,6 +1197,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     className="w-full h-full border-0 bg-black"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
                                     allowFullScreen
+                                    sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                                     onLoad={(e: any) => {
                                         setLoadingSource(false);
                                         try {
@@ -1404,7 +1434,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
             {/* Top Navigation Bar — Netflix-style compact fixed header */}
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3">
+                <div className={`fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform ${
+                    isHeaderScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+                }`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>

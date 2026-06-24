@@ -530,6 +530,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         [type, serversList]
     );
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
+    const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -817,7 +819,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
 
 
-    // Scroll-to-top visibility
+    // Scroll-to-top visibility & header scroll visibility
     useEffect(() => {
         const toggleVisibility = () => {
             if (window.scrollY > 300) {
@@ -825,9 +827,33 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             } else {
                 setShowScrollTop(false);
             }
+
+            if (window.scrollY > 120) {
+                setIsHeaderScrolled(true);
+            } else {
+                setIsHeaderScrolled(false);
+            }
         };
         window.addEventListener("scroll", toggleVisibility);
         return () => window.removeEventListener("scroll", toggleVisibility);
+    }, []);
+
+    // Load App Settings
+    useEffect(() => {
+        const loadSettings = () => {
+            try {
+                const s = localStorage.getItem("toonplayer_settings");
+                if (s) {
+                    const parsed = JSON.parse(s);
+                    if (parsed.aggressiveSandbox !== undefined) {
+                        setAggressiveSandbox(parsed.aggressiveSandbox);
+                    }
+                }
+            } catch (e) {}
+        };
+        loadSettings();
+        window.addEventListener("profileUpdated", loadSettings);
+        return () => window.removeEventListener("profileUpdated", loadSettings);
     }, []);
 
 
@@ -1266,6 +1292,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     className="absolute inset-0 w-full h-full border-0" 
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
+                                    sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                                 />
                             </div>
                         </div>
@@ -1376,6 +1403,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
                         allowFullScreen
                         title={`${title} - ToonPlayer`}
+                        sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                         onError={handleAutoFallback}
                         onLoad={(e) => {
                             setPlayerLoaded(true);
@@ -1619,7 +1647,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <>
         <div className="relative isolate min-h-dvh overflow-x-clip bg-bg-main text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className="fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform">
+                <div className={`fixed top-0 left-0 md:left-[80px] right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform ${
+                    isHeaderScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+                }`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
                     </Link>

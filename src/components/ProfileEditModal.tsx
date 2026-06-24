@@ -86,7 +86,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
 
   const handleCreateOpen = () => {
     setProfileName("");
-    setSelectedAvatar("");
+    setSelectedAvatar(AVATARS[0].url);
     setIsKids(false);
     setTheme(THEMES[Math.floor(Math.random() * THEMES.length)].name);
     setMode('create');
