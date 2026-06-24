@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Menu, Film, Zap, Shuffle, Clock } from "lucide-react";
+import { Search, Menu, Film, Shuffle, Clock } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useMobileUI } from "@/context/MobileUIContext";
@@ -49,13 +49,7 @@ export default function MobileNav() {
             active: pathname === '/' || pathname?.startsWith('//'),
             onClick: () => { closeAll(); router.push('/', { scroll: false }); },
         },
-        {
-            label: "Anime",
-            icon: Zap,
-            color: "text-amber-400",
-            active: pathname === '/az-list/all' || pathname?.startsWith('/az-list/'),
-            onClick: () => { closeAll(); router.push('/az-list/all', { scroll: false }); },
-        },
+
         {
             label: "Random",
             icon: Shuffle,

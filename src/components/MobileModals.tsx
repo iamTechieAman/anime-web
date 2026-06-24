@@ -1,4 +1,4 @@
-import { X, Search, TrendingUp, LayoutGrid, Star, Sparkles, Settings, Zap, Shield, Globe, ChevronRight, Compass, Play, Clock, Pin } from "lucide-react";
+import { X, Search, TrendingUp, LayoutGrid, Star, Sparkles, Settings, Zap, Shield, Globe, ChevronRight, Compass, Play, Clock, Pin, Mic, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMobileUI } from "@/context/MobileUIContext";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import Image from "next/image";
 import axios from "axios";
 import Fuse from "fuse.js";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 const quickLinks = [
     { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-accent to-accent-secondary" },
@@ -33,6 +34,20 @@ export default function MobileModals() {
     const [pinnedSearches, setPinnedSearches] = useState<string[]>([]);
     const [globalCatalog, setGlobalCatalog] = useState<any[]>([]);
     const [fuse, setFuse] = useState<Fuse<any> | null>(null);
+
+    const {
+        isListening,
+        isTranscribing,
+        startListening,
+        stopListening,
+    } = useVoiceSearch((text) => {
+        setSearchQuery(text);
+    });
+
+    const toggleVoice = () => {
+        if (isListening) stopListening();
+        else startListening();
+    };
 
     const isMovies = pathname?.startsWith('/');
     const searchPlaceholder = "Search movies, anime & shows...";
@@ -349,12 +364,32 @@ export default function MobileModals() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={isDiscoverMode ? "Describe what you want..." : searchPlaceholder}
-                                        className={`w-full text-[var(--text-main)] border rounded-xl pl-10 pr-[88px] py-3 ring-0 focus:ring-0 outline-none focus:outline-none transition-all text-sm shadow-none ${isDiscoverMode ? 'bg-accent/10 border-accent/50 focus:border-accent' : 'bg-bg-card border-border-color focus:border-accent/60'}`}
+                                        className={`w-full text-[var(--text-main)] border rounded-xl pl-10 pr-[130px] py-3 ring-0 focus:ring-0 outline-none focus:outline-none transition-all text-sm shadow-none ${isDiscoverMode ? 'bg-accent/10 border-accent/50 focus:border-accent' : 'bg-bg-card border-border-color focus:border-accent/60'}`}
                                     />
+                                    {/* Mic button */}
+                                    <button
+                                        type="button"
+                                        onClick={toggleVoice}
+                                        aria-label={isListening ? "Stop voice search" : "Start voice search"}
+                                        className={`absolute right-[60px] top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${
+                                            isListening
+                                                ? 'bg-red-500/20 text-red-400 animate-pulse'
+                                                : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                                        }`}
+                                    >
+                                        {isTranscribing ? (
+                                            <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                                        ) : isListening ? (
+                                            <Mic className="w-4 h-4 text-red-400" />
+                                        ) : (
+                                            <Mic className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                    {/* AI / Discover toggle */}
                                     <button 
                                         type="button"
                                         onClick={() => setIsDiscoverMode(!isDiscoverMode)}
-                                        className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg shadow-accent/30' : 'bg-bg-main text-[var(--text-muted)] hover:text-white border border-border-color'}`}
+                                        className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-black transition-all ${isDiscoverMode ? 'bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg shadow-accent/30' : 'bg-bg-main text-[var(--text-muted)] hover:text-white border border-border-color'}`}
                                     >
                                         <Sparkles className="w-3 h-3" />
                                         AI

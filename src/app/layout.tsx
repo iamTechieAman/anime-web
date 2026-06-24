@@ -30,49 +30,53 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://toonplayer.in'),
   title: {
-    default: "ToonPlayer - Watch Free Anime & Movies",
+    default: "ToonPlayer – Watch Free Anime, Movies & TV Shows Online",
     template: "%s | ToonPlayer",
   },
   alternates: { canonical: "https://toonplayer.in" },
 
-  description: "Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.",
+  description: "ToonPlayer is a free HD streaming platform to watch anime, movies, and TV shows online in 1080p. No ads, no subscription. Stream the latest anime episodes, blockbuster movies, and trending TV series on any device.",
   keywords: [
-    "toonplayer",
-    "toon player",
-    "watch anime online",
-    "free movies streaming",
-    "HD movies",
-    "anime streaming",
-    "watch movies online free",
-    "toonplayer online",
-    "toonplayer.in",
-    "watch tv shows online free",
-    "free anime streaming",
-    "watch bollywood movies online",
-    "watch hollywood movies free",
-    "streaming platform",
-    "toonplayer movies",
-    "toonplayer anime",
-    "watch series online",
-    "free HD streaming",
-    "anime watch free",
+    // Brand
+    "toonplayer", "toon player", "toonplayer.in",
+    // Core intent
+    "watch anime online free", "watch movies online free", "watch TV shows online free",
+    "free anime streaming site", "free HD movie streaming", "online streaming platform",
+    // Content types
+    "anime episodes", "dubbed anime", "subbed anime", "anime movies",
+    "Hollywood movies", "Bollywood movies", "Korean drama online",
+    "web series online", "OTT platform free",
+    // Quality
+    "1080p streaming", "HD quality anime", "no ads streaming",
+    // Alternatives (discovery)
+    "crunchyroll alternative free", "Netflix free alternative",
+    "gogoanime alternative", "animixplay alternative",
+    // Long-tail
+    "watch demon slayer online", "watch one piece online", "watch naruto online",
+    "latest anime 2025", "new anime season", "anime recommendation AI",
   ],
+  authors: [{ name: "ToonPlayer Team", url: "https://toonplayer.in" }],
+  creator: "ToonPlayer",
+  publisher: "ToonPlayer",
   openGraph: {
-    title: "ToonPlayer - Watch Free Anime & Movies",
-
-    description: "Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.",
+    title: "ToonPlayer – Watch Free Anime, Movies & TV Shows in HD",
+    description: "Stream anime, movies, and TV shows for free in HD quality. No ads, no registration required. ToonPlayer — your premium streaming experience.",
     url: 'https://toonplayer.in',
     siteName: 'ToonPlayer',
-    images: [{ url: '/icon.png', width: 512, height: 512, alt: 'ToonPlayer (Toon Player) - Watch Movies & Anime Online in HD' }],
+    images: [
+      { url: '/og-image.png', width: 1200, height: 630, alt: 'ToonPlayer – Free HD Anime & Movie Streaming' },
+      { url: '/icon.png', width: 512, height: 512, alt: 'ToonPlayer Logo' },
+    ],
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ToonPlayer - Watch Free Anime & Movies',
-    description: 'Watch free HD movies, TV shows, and anime online. ToonPlayer is the ultimate premium streaming platform for the latest entertainment with zero ads.',
-    images: ['/icon.png'],
+    title: 'ToonPlayer – Watch Free Anime & Movies Online',
+    description: 'Free HD streaming for anime, movies, and TV shows. No ads. Stream on any device at ToonPlayer.in',
+    images: ['/og-image.png'],
     creator: '@toonplayer',
+    site: '@toonplayer',
   },
   robots: {
     index: true,
@@ -109,11 +113,14 @@ export default async function RootLayout({
                    "@id": "https://toonplayer.in/#website",
                    "url": "https://toonplayer.in",
                    "name": "ToonPlayer",
-                   "alternateName": "Toon Player",
-                   "description": "Premium free streaming platform for HD movies and anime.",
+                   "alternateName": ["Toon Player", "ToonPlayer.in"],
+                   "description": "Free HD streaming platform for anime, movies, and TV shows. No ads, no subscription needed.",
                    "potentialAction": {
                      "@type": "SearchAction",
-                     "target": "https://toonplayer.in/search?query={search_term_string}",
+                     "target": {
+                       "@type": "EntryPoint",
+                       "urlTemplate": "https://toonplayer.in/search?query={search_term_string}"
+                     },
                      "query-input": "required name=search_term_string"
                    },
                    "inLanguage": "en-US"
@@ -130,9 +137,62 @@ export default async function RootLayout({
                      "width": 512,
                      "height": 512
                    },
+                   "description": "ToonPlayer is a free streaming platform providing anime, movies, and TV shows in HD quality with no ads.",
                    "sameAs": [
                      "https://twitter.com/toonplayer",
                      "https://github.com/iamTechieAman"
+                   ]
+                 },
+                 {
+                   "@type": "WebApplication",
+                   "@id": "https://toonplayer.in/#webapp",
+                   "name": "ToonPlayer",
+                   "url": "https://toonplayer.in",
+                   "applicationCategory": "EntertainmentApplication",
+                   "operatingSystem": "Web, Android, iOS",
+                   "offers": {
+                     "@type": "Offer",
+                     "price": "0",
+                     "priceCurrency": "USD"
+                   },
+                   "description": "Stream anime, movies, and TV shows for free. Watch on mobile, tablet, and desktop."
+                 },
+                 {
+                   "@type": "FAQPage",
+                   "@id": "https://toonplayer.in/#faq",
+                   "mainEntity": [
+                     {
+                       "@type": "Question",
+                       "name": "Is ToonPlayer free?",
+                       "acceptedAnswer": {
+                         "@type": "Answer",
+                         "text": "Yes, ToonPlayer is completely free. No subscription or registration required to watch anime, movies, and TV shows."
+                       }
+                     },
+                     {
+                       "@type": "Question",
+                       "name": "What can I watch on ToonPlayer?",
+                       "acceptedAnswer": {
+                         "@type": "Answer",
+                         "text": "ToonPlayer offers a large catalog of anime series, anime movies, Hollywood films, Bollywood movies, Korean dramas, and international TV shows in HD quality."
+                       }
+                     },
+                     {
+                       "@type": "Question",
+                       "name": "Does ToonPlayer have ads?",
+                       "acceptedAnswer": {
+                         "@type": "Answer",
+                         "text": "ToonPlayer includes a built-in AdBlock toggle that can eliminate ads for a clean, premium streaming experience."
+                       }
+                     },
+                     {
+                       "@type": "Question",
+                       "name": "Is ToonPlayer available on mobile?",
+                       "acceptedAnswer": {
+                         "@type": "Answer",
+                         "text": "Yes, ToonPlayer is fully optimized for Android and iOS devices and can be installed as a Progressive Web App (PWA) for an app-like experience."
+                       }
+                     }
                    ]
                  }
                ]
