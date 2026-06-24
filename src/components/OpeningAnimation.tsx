@@ -17,10 +17,10 @@ export default function OpeningAnimation() {
         // Save state immediately to prevent multiple runs in concurrent tabs
         sessionStorage.setItem("toonplayer-intro-played", "true");
         
-        // Duration: 1.8 seconds
+        // Duration: 1.4 seconds
         const timer = setTimeout(() => {
           setVisible(false);
-        }, 1800);
+        }, 1400);
         return () => clearTimeout(timer);
       }
     }
@@ -56,8 +56,8 @@ export default function OpeningAnimation() {
               {/* Background ambient glow */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: [0, 0.4, 0.6, 0], scale: [0.8, 1, 1.2, 1.8] }}
-                transition={{ duration: 1.8, ease: "easeInOut" }}
+                animate={{ opacity: [0, 0.4, 0.6, 0], scale: [0.8, 1, 1.2, 1.6] }}
+                transition={{ duration: 1.4, ease: "easeInOut" }}
                 className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-orange-500 to-cyan-400 blur-[60px] opacity-30 pointer-events-none"
               />
 
@@ -65,22 +65,16 @@ export default function OpeningAnimation() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0, y: 10 }}
                 animate={{ 
-                  scale: [0.8, 1, 1.02, 3.5], 
+                  scale: [0.8, 1, 1.02, 3.2], 
                   opacity: [0, 1, 1, 0], 
-                  y: [10, 0, 0, -20],
-                  filter: [
-                    "drop-shadow(0 0 10px rgba(249,115,22,0.2))",
-                    "drop-shadow(0 0 30px rgba(249,115,22,0.6))",
-                    "drop-shadow(0 0 40px rgba(249,115,22,0.8))",
-                    "drop-shadow(0 0 60px rgba(34,211,238,0.2))"
-                  ]
+                  y: [10, 0, 0, -20]
                 }}
                 transition={{ 
-                  duration: 1.8, 
+                  duration: 1.4, 
                   ease: [0.22, 1, 0.36, 1], 
-                  times: [0, 0.3, 0.75, 1] 
+                  times: [0, 0.25, 0.7, 1] 
                 }}
-                className="flex flex-col items-center justify-center"
+                className="flex flex-col items-center justify-center filter drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]"
               >
                 {/* SVG Stylized "T" line drawing logo */}
                 <svg className="w-24 h-24 text-orange-500" viewBox="0 0 100 100" fill="none">
@@ -91,8 +85,7 @@ export default function OpeningAnimation() {
                       <stop offset="100%" stopColor="#22D3EE" />
                     </linearGradient>
                   </defs>
-                  
-                  {/* Vertical bar of T */}
+                                    {/* Vertical bar of T */}
                   <motion.path
                     d="M50 25 L50 85"
                     stroke="url(#neonGrad)"
@@ -100,7 +93,7 @@ export default function OpeningAnimation() {
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+                    transition={{ duration: 0.5, ease: "easeOut", delay: 0.05 }}
                   />
 
                   {/* Horizontal bar of T */}
@@ -111,7 +104,7 @@ export default function OpeningAnimation() {
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+                    transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
                   />
                   
                   {/* Decorative neon dot */}
@@ -122,15 +115,15 @@ export default function OpeningAnimation() {
                     fill="#22D3EE"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.9, type: "spring", stiffness: 300, damping: 15 }}
+                    transition={{ duration: 0.25, delay: 0.5, type: "spring", stiffness: 300, damping: 15 }}
                   />
                 </svg>
 
                 {/* Text reveal */}
                 <motion.h2 
                   initial={{ opacity: 0, letterSpacing: "0.1em" }}
-                  animate={{ opacity: [0, 1, 1, 0], letterSpacing: ["0.1em", "0.2em", "0.2em", "0.4em"] }}
-                  transition={{ duration: 1.8, times: [0, 0.4, 0.75, 1], ease: "easeInOut" }}
+                  animate={{ opacity: [0, 1, 1, 0], letterSpacing: ["0.1em", "0.2em", "0.2em", "0.3em"] }}
+                  transition={{ duration: 1.4, times: [0, 0.25, 0.7, 1], ease: "easeInOut" }}
                   className="text-lg font-black tracking-widest text-white mt-4 uppercase font-sora"
                 >
                   ToonPlayer
