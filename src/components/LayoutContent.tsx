@@ -29,14 +29,25 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   
   useEffect(() => {
     setMounted(true);
-    setHasHydrated(useUserStore.persist.hasHydrated());
+    const hydrated = useUserStore.persist.hasHydrated();
+    setHasHydrated(hydrated);
+    
+    if (hydrated && typeof window !== "undefined" && window.sessionStorage.getItem("toonplayer-session-active") !== "true") {
+      setActiveProfile(null);
+    }
+
     const unsubHydrate = useUserStore.persist.onHydrate(() => setHasHydrated(false));
-    const unsubFinishHydration = useUserStore.persist.onFinishHydration(() => setHasHydrated(true));
+    const unsubFinishHydration = useUserStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+      if (typeof window !== "undefined" && window.sessionStorage.getItem("toonplayer-session-active") !== "true") {
+        setActiveProfile(null);
+      }
+    });
     return () => {
       unsubHydrate();
       unsubFinishHydration();
     };
-  }, []);
+  }, [setActiveProfile]);
 
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
   const pathname = usePathname();

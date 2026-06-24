@@ -263,7 +263,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'toonplayer-unified-store',
-      version: 3,
+      version: 4,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState as any;
         if (state && state.profiles) {
