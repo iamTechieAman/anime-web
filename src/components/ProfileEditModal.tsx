@@ -47,10 +47,10 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
   const [isKids, setIsKids] = useState(false);
   const [theme, setTheme] = useState("orange");
 
-  // Dynamically update initials/gradient preview on typing
+  // Dynamically update custom seed preview on typing
   useEffect(() => {
-    const isGenerated = !selectedAvatar || selectedAvatar.startsWith("data:image/");
-    if (isGenerated) {
+    const isPreset = AVATARS.some(a => a.url === selectedAvatar);
+    if (!isPreset) {
       setSelectedAvatar(getAvatarUrl(profileName, theme));
     }
   }, [profileName, theme]);
@@ -302,16 +302,16 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Select Avatar</label>
                 <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                  {/* Dynamic Initials Preset Option */}
+                  {/* Dynamic Seeded Bitmoji Option */}
                   <button
                     type="button"
                     onClick={() => setSelectedAvatar(getAvatarUrl(profileName, theme))}
                     className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-gradient-to-br from-accent to-accent-secondary p-1 transition-all ${
-                      selectedAvatar.startsWith("data:image/") ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
+                      selectedAvatar === getAvatarUrl(profileName, theme) ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
                     } cursor-pointer`}
                   >
-                    <div className="w-full h-full flex items-center justify-center text-white font-extrabold text-base select-none">
-                      {(profileName || "?").trim().substring(0, 2).toUpperCase() || "?"}
+                    <div className="relative w-full h-full">
+                      <Image src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" fill className="object-cover rounded-lg" sizes="60px" />
                     </div>
                   </button>
 

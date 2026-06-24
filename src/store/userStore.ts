@@ -49,17 +49,8 @@ interface UserState {
 }
 
 export function getAvatarUrl(name: string, theme: string = 'orange'): string {
-  const initials = (name || "?").trim().substring(0, 2).toUpperCase();
-  const themeColors: Record<string, string> = {
-    red: 'E50914',
-    blue: '00A8E1',
-    green: '1CE783',
-    purple: '9933FF',
-    orange: 'F97316'
-  };
-  const color = themeColors[theme] || themeColors['orange'];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="#${color}"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="38" font-weight="bold">${initials}</text></svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  const seed = (name || "Avatar").trim();
+  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
 }
 
 const DICEBEAR_SEEDS = ["Totoro", "Ponyo", "Luffy", "Naruto", "Nezuko", "Goku", "Pikachu", "Chihiro", "Felix", "Aneka", "Milo", "Luna", "Oliver", "Shadow", "Midnight", "Frost"];
