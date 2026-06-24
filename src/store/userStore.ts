@@ -263,13 +263,13 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'toonplayer-unified-store',
-      version: 4,
+      version: 5,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState as any;
         if (state && state.profiles) {
           state.profiles = state.profiles.map((p: any) => {
             let avatar = p.avatar || "";
-            if (!avatar || avatar.includes("undefined") || avatar.includes("null") || avatar.trim() === "" || avatar.includes("dicebear.com")) {
+            if (!avatar || avatar.includes("undefined") || avatar.includes("null") || avatar.trim() === "" || avatar.includes("dicebear.com") || avatar.includes("api.dicebear.com")) {
               avatar = getAvatarUrl(p.name || 'Avatar');
             }
             return { ...p, avatar };

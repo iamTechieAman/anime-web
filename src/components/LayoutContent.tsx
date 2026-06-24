@@ -13,8 +13,9 @@ import { AnimatePresence } from "framer-motion";
 import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 import dynamic from "next/dynamic";
 import ProfileGate from "@/components/ProfileGate";
-import { useUserStore } from "@/store/userStore";
+import { useUserStore, Profile, getAvatarUrl, isDefaultAvatar } from "@/store/userStore";
 import OpeningAnimation from "@/components/OpeningAnimation";
+import { useUser } from "@clerk/nextjs";
 
 
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
@@ -24,9 +25,95 @@ const ProfileEditModal = dynamic(() => import("@/components/ProfileEditModal"), 
 const SettingsModal = dynamic(() => import("@/components/SettingsModal"), { ssr: false });
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { activeProfileId, setActiveProfile } = useUserStore();
+  const { activeProfileId, setActiveProfile, profiles, syncProfile } = useUserStore();
   const [mounted, setMounted] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
+  const { user, isLoaded } = useUser();
+  const [synced, setSynced] = useState(false);
+
+  // Reset synced state on user changes (logout/login switch)
+  useEffect(() => {
+    if (isLoaded && !user && synced) {
+      setSynced(false);
+    }
+  }, [isLoaded, user, synced]);
+
+  // Sync external profiles (Clerk) on login/load
+  useEffect(() => {
+    if (isLoaded && user && !synced) {
+      const clerkProfiles = user.unsafeMetadata?.profiles as Profile[] | undefined;
+      const localProfiles = useUserStore.getState().profiles;
+      
+      let mergedProfiles = [...localProfiles];
+      if (clerkProfiles && Array.isArray(clerkProfiles)) {
+        clerkProfiles.forEach(cp => {
+          const existsIdx = mergedProfiles.findIndex(lp => lp.id === cp.id);
+          if (existsIdx >= 0) {
+            mergedProfiles[existsIdx] = { ...mergedProfiles[existsIdx], ...cp };
+          } else {
+            mergedProfiles.push(cp);
+          }
+        });
+      }
+      
+      const clerkProfileId = `profile-${user.id}`;
+      const hasClerkMain = mergedProfiles.some(p => p.id === clerkProfileId);
+      if (!hasClerkMain) {
+        const clerkName = user.firstName || user.username || "My Profile";
+        const clerkAvatar = (user.imageUrl && !isDefaultAvatar(user.imageUrl)) 
+          ? user.imageUrl 
+          : getAvatarUrl(clerkName, 'orange');
+        mergedProfiles.unshift({
+          id: clerkProfileId,
+          name: clerkName,
+          avatar: clerkAvatar,
+          type: 'adult',
+          isKids: false,
+          theme: 'orange'
+        });
+      }
+
+      // Sync into local Zustand store
+      mergedProfiles.forEach(p => {
+        syncProfile(p);
+      });
+
+      // Save merged profiles to Clerk metadata if different
+      const clerkProfilesStr = JSON.stringify(clerkProfiles || []);
+      const mergedProfilesStr = JSON.stringify(mergedProfiles);
+      if (clerkProfilesStr !== mergedProfilesStr) {
+        user.update({
+          unsafeMetadata: {
+            ...user.unsafeMetadata,
+            profiles: mergedProfiles
+          }
+        }).catch(err => console.error("Error updating Clerk metadata:", err));
+      }
+      
+      setSynced(true);
+    }
+  }, [isLoaded, user, synced, syncProfile]);
+
+  // Keep Clerk unsafeMetadata in sync with subsequent Zustand profile changes
+  useEffect(() => {
+    if (isLoaded && user && synced) {
+      const clerkProfiles = user.unsafeMetadata?.profiles as Profile[] | undefined;
+      const clerkProfilesStr = JSON.stringify(clerkProfiles || []);
+      const localProfilesStr = JSON.stringify(profiles);
+      
+      if (clerkProfilesStr !== localProfilesStr) {
+        const t = setTimeout(() => {
+          user.update({
+            unsafeMetadata: {
+              ...user.unsafeMetadata,
+              profiles: profiles
+            }
+          }).catch(err => console.error("Error syncing profiles to Clerk:", err));
+        }, 1000);
+        return () => clearTimeout(t);
+      }
+    }
+  }, [profiles, user, isLoaded, synced]);
   
   useEffect(() => {
     setMounted(true);

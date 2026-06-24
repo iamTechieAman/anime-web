@@ -30,12 +30,14 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
     ? initials.trim()
     : (alt && alt.trim().length > 0 ? alt.trim().charAt(0).toUpperCase() : "?");
 
+  const finalClassName = className.includes("rounded") ? className : `rounded-full ${className}`;
+
   // If no source or error occurred, show fallback
   if (isInvalidSrc || error) {
     return (
       <div 
-        className={`flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-extrabold select-none shrink-0 ${className}`}
-        style={{ width: size, height: size, borderRadius: "50%" }}
+        className={`flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-extrabold select-none shrink-0 ${finalClassName}`}
+        style={{ width: size, height: size }}
       >
         <span style={{ fontSize: size * 0.4 }}>{safeInitials}</span>
       </div>
@@ -44,8 +46,8 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
 
   return (
     <div 
-      className={`relative shrink-0 overflow-hidden ${!loaded ? 'bg-white/10 animate-pulse' : ''} ${className}`}
-      style={{ width: size, height: size, borderRadius: "50%" }}
+      className={`relative shrink-0 overflow-hidden ${!loaded ? 'bg-white/10 animate-pulse' : ''} ${finalClassName}`}
+      style={{ width: size, height: size }}
     >
       <img
         src={src}

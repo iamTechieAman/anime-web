@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
-import { useUserStore, Profile, getAvatarUrl, getRandomBitmojiUrl, isDefaultAvatar } from "@/store/userStore";
-import { useUser } from "@clerk/nextjs";
+import { useUserStore, Profile, getRandomBitmojiUrl } from "@/store/userStore";
 
 const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null }) => {
   const isInvalidSrc = !src || 
@@ -64,7 +63,7 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
 };
 
 export default function ProfileGate() {
-  const { profiles, activeProfileId, setActiveProfile, addProfile, removeProfile, syncProfile } = useUserStore();
+  const { profiles, activeProfileId, setActiveProfile, addProfile, removeProfile } = useUserStore();
   const [showGate, setShowGate] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -73,24 +72,17 @@ export default function ProfileGate() {
   const [theme, setTheme] = useState("orange");
   const [isClient, setIsClient] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  
-  const { user, isLoaded } = useUser();
-  const [synced, setSynced] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
-    
-    // Sync external profile (Clerk) if logged in
-    if (isLoaded && user && !synced) {
-      const clerkProfileId = `profile-${user.id}`;
-      const clerkName = user.firstName || user.username || "My Profile";
-      const clerkAvatar = (user.imageUrl && !isDefaultAvatar(user.imageUrl)) 
-        ? user.imageUrl 
-        : getAvatarUrl(clerkName, 'orange');
-      
-      syncProfile({ id: clerkProfileId, name: clerkName, avatar: clerkAvatar });
-      setSynced(true);
-    }
 
     const checkPersistedProfile = () => {
       let activeId = activeProfileId;
@@ -150,12 +142,12 @@ export default function ProfileGate() {
       window.removeEventListener("openProfileGate", handleOpen);
       window.removeEventListener("userLogout", handleLogout);
     };
-  }, [activeProfileId, setActiveProfile, isLoaded, user, synced, syncProfile, hasChecked]);
+  }, [activeProfileId, setActiveProfile, hasChecked]);
 
   const handleSelectProfile = (profile: Profile) => {
     setSelectedId(profile.id);
     
-    // Snappy zoom-out then switch (500ms feels responsive, 800ms felt sluggish)
+    const delay = isMobile ? 200 : 300;
     setTimeout(() => {
       setActiveProfile(profile.id);
       if (typeof window !== "undefined") {
@@ -167,7 +159,7 @@ export default function ProfileGate() {
       setShowGate(false);
       setSelectedId(null);
       window.dispatchEvent(new Event("profileUpdated"));
-    }, 500);
+    }, delay);
   };
 
   const handleCreate = (e: React.FormEvent) => {
@@ -203,15 +195,15 @@ export default function ProfileGate() {
           key="profile-gate"
           initial={{ opacity: 0, backgroundColor: "rgba(0,0,0,1)" }}
           animate={{ opacity: 1, backgroundColor: "var(--bg-main)" }}
-          exit={{ opacity: 0, filter: "blur(10px)" }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 bg-bg-main hide-scrollbar"
+          exit={{ opacity: 0, filter: isMobile ? "none" : "blur(10px)" }}
+          transition={{ duration: isMobile ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-start md:justify-center overflow-y-auto p-6 md:p-8 bg-bg-main hide-scrollbar"
         >
           <motion.div
             initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: selectedId ? 0 : 1, scale: selectedId ? 1.5 : 1 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="w-full max-w-4xl text-center hide-scrollbar"
+            animate={{ opacity: selectedId ? 0 : 1, scale: selectedId ? (isMobile ? 1.15 : 1.5) : 1 }}
+            transition={{ duration: isMobile ? 0.2 : 0.3, ease: "easeInOut" }}
+            className="w-full max-w-4xl text-center hide-scrollbar my-auto py-6 flex flex-col items-center justify-center"
           >
             <div role="heading" aria-level={1} className="text-2xl xs:text-3xl md:text-5xl font-black mb-10 tracking-tight font-sora text-white w-full max-w-full px-4 break-words leading-normal">
               Who's watching?
