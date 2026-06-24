@@ -208,6 +208,7 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
 // === MOVIE ROW — Onoflix carousel with prev/next arrows ===
 export const MovieRow = memo(function MovieRow({ items, type = "movie", title, isLarge = false }: { items: MovieItem[]; type?: string; title?: string; isLarge?: boolean }) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const scrollAnimationRef = useRef<number | null>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
 
@@ -234,7 +235,31 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
         const cardWidth = el.querySelector('[data-card]')?.clientWidth || 160;
         const visibleCards = Math.floor(el.clientWidth / cardWidth);
         const amount = cardWidth * Math.max(2, visibleCards - 1);
-        el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
+        const target = el.scrollLeft + (dir === 'right' ? amount : -amount);
+        const clampedTarget = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
+
+        if (scrollAnimationRef.current) {
+            cancelAnimationFrame(scrollAnimationRef.current);
+        }
+
+        const start = el.scrollLeft;
+        const change = clampedTarget - start;
+        const duration = 280; // Snappy 280ms scroll transition
+        const startTime = performance.now();
+
+        const animate = (time: number) => {
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = progress * (2 - progress); // Ease Out Quad
+            el.scrollLeft = start + change * ease;
+
+            if (progress < 1) {
+                scrollAnimationRef.current = requestAnimationFrame(animate);
+            } else {
+                scrollAnimationRef.current = null;
+            }
+        };
+        scrollAnimationRef.current = requestAnimationFrame(animate);
     };
 
     const { profiles, activeProfileId } = useUserStore();
