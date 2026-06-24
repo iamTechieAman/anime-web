@@ -236,7 +236,11 @@ export default function HeroCarousel() {
                     <div
                         key={slide.id}
                         className="absolute inset-0 transition-opacity duration-[250ms] ease-apple-out"
-                        style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
+                        style={{ 
+                            opacity: isActive ? 1 : 0, 
+                            zIndex: isActive ? 1 : 0,
+                            visibility: isActive ? 'visible' : 'hidden'
+                        }}
                     >
                         {isActive && activeTrailerKey ? (
                             <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">

@@ -1275,7 +1275,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             <main className="bg-bg-main text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-bg-main/90 backdrop-blur-md border-b border-border-color flex items-center justify-center pt-[env(safe-area-inset-top)]">
                     <Link href="/" scroll={false} className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
-                        <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" will-change-transform />
+                        <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform will-change-transform"  />
                     </Link>
                     <div className="flex flex-col items-center text-center max-w-[60%] px-4">
                         <h1 className="font-bold text-[clamp(24px,4vw,64px)] lg:text-[clamp(32px,4vw,72px)] leading-[0.95] text-[var(--text-main)] truncate w-full">
@@ -1649,7 +1649,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     isHeaderScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
                 }`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" will-change-transform />
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform will-change-transform"  />
                     </Link>
                     <div className="flex-1 min-w-0">
                         <h2 className="font-black text-sm md:text-base leading-tight text-white truncate tracking-tight">{type === 'cartoon' ? `Cartoon: ${title}` : title}</h2>
@@ -1748,7 +1748,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                         {details?.poster_path && (
                                             <div className="relative group aspect-[2/3] w-full">
-                                                <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-border-color transition-transform group-hover:scale-[1.02]" will-change-transform />
+                                                <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-border-color transition-transform group-hover:scale-[1.02] will-change-transform"  />
                                                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </div>
                                         )}

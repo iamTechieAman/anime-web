@@ -183,8 +183,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       {/* Content area: adaptive padding based on sidebar visibility */}
       <div className={`flex flex-col min-h-dvh relative ${
         showSidebar ? "pl-0 md:pl-[80px]" : "pl-0"
-      } transition-[padding,filter,opacity] duration-[250ms] ease-apple-out ${isWatchPage ? 'theme-dark watch-page' : ''} ${
-        isProfileGateActive ? 'select-none pointer-events-none filter blur-xl opacity-20' : ''
+      } transition-[padding,opacity] duration-[200ms] ease-out ${isWatchPage ? 'theme-dark watch-page' : ''} ${
+        isProfileGateActive ? 'select-none pointer-events-none opacity-0 invisible' : 'opacity-100'
       }`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}

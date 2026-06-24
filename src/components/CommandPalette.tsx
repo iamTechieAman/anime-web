@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
+import toast from "react-hot-toast";
 
 interface CommandPaletteProps {
     isOpen: boolean;
@@ -50,7 +51,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
     function toggleVoice() {
         if (!recognitionRef.current) {
-            alert("Speech recognition is not supported in this browser.");
+            toast.error("Speech recognition is not supported in this browser.");
             return;
         }
         if (isListening) {
@@ -183,7 +184,19 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     const transcript = e.results[0][0].transcript;
                     if (transcript) setQuery(transcript);
                 };
-                rec.onerror = () => setIsListening(false);
+                rec.onerror = (event: any) => {
+                    setIsListening(false);
+                    console.error("[SpeechRecognition Error]", event.error);
+                    if (event.error === 'not-allowed') {
+                        toast.error("Microphone permission denied. Please allow mic access in your browser settings.");
+                    } else if (event.error === 'no-speech') {
+                        toast.error("No speech detected. Please speak clearly into your mic.");
+                    } else if (event.error === 'network') {
+                        toast.error("Voice search network error.");
+                    } else {
+                        toast.error(`Voice error: ${event.error}`);
+                    }
+                };
                 recognitionRef.current = rec;
             }
         }
@@ -298,7 +311,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'hover:bg-white/5 text-zinc-400 hover:text-white'}`}
                             title="Voice Search"
                         >
-                            {isListening ? <Mic className="w-4 h-4 text-red-500" /> : <MicOff className="w-4 h-4" />}
+                            {isListening ? <Mic className="w-4 h-4 text-red-500 animate-pulse" /> : <Mic className="w-4 h-4" />}
                         </button>
                         <div className="flex items-center gap-1.5 shrink-0 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] text-zinc-400 font-bold">
                             <Command className="w-3 h-3" />

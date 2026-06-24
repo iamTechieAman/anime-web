@@ -208,7 +208,7 @@ export default function Header() {
         
         {/* Left Section - Logo */}
         <div className={`flex items-center shrink-0 ${showSidebar ? "md:hidden" : "md:w-[40px] overflow-visible"}`}>
-          <Link href="/" scroll={false} className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none" will-change-transform onClick={clearSearch} aria-label="ToonPlayer Home">
+          <Link href="/" scroll={false} className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none will-change-transform"  onClick={clearSearch} aria-label="ToonPlayer Home">
             <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
               <Logo />
             </div>

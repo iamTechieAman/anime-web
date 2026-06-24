@@ -98,7 +98,7 @@ export default function ContinueWatchingRow() {
                                         alt={entry.title || "Continue watching"}
                                         fill
                                         sizes="(max-width: 768px) 80px, (max-width: 1024px) 90px, 100px"
-                                        className="object-cover transition-transform duration-[250ms] group-hover/poster:scale-105" will-change-transform
+                                        className="object-cover transition-transform duration-[250ms] group-hover/poster:scale-105 will-change-transform" 
                                         onError={(e) => {
                                             const target = e.currentTarget as HTMLImageElement;
                                             if (target.src !== PLACEHOLDER) target.src = PLACEHOLDER;

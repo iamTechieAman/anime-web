@@ -27,7 +27,13 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ---
 
-## 🏆 Changelog — v5.0 (Latest)
+## 🏆 Changelog — v6.0 (Latest)
+
+### Phase 24 — Smooth Animations, Smart TV/Mobile Optimization & Voice Search Fixes (`June 2026`)
+- ⚡ **Zero-Lag Layout Optimization**: Replaced CPU-heavy background `filter blur-xl` and opacity transitions with hardware-accelerated `opacity-0` and `invisible` CSS rules when the `ProfileGate` is active. This eliminates rendering and painting overhead on mobile browsers, laptops, and smart TVs.
+- 📺 **Smart TV & Mobile Animation Speedups**: Added `visibility` rendering bounds to the home `HeroCarousel` slideshow, dynamically setting inactive slides to `visibility: hidden` to prevent off-screen layer paint and layout costs.
+- 📱 **Hardware-Accelerated GPU Rendering**: Fixed over 25 occurrences where `will-change-transform` was used incorrectly as a raw attribute in JSX. Moving it into the `className` string enables hardware acceleration for transitions on cards, search modals, and navigation links.
+- 🎤 **Voice Search & Speech Recognition Recovery**: Restored the missing `onstart`, `onend`, and `onresult` event handlers inside `DiscoverClient.tsx` to enable seamless voice/mic query input and auto-submission on the AI page. Replaced legacy alert warnings with modern `react-hot-toast` notifications.
 
 ### Phase 23 — Final Logic Recovery & Persistence Stabilization (`June 2026`)
 - 👥 **Bulletproof "Who's Watching" Gate**: Standardized active profile persistence across cookies, `localStorage`, and `sessionStorage`, completely resolving F5/reload flashes.

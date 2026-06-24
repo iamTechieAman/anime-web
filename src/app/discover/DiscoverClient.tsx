@@ -120,8 +120,12 @@ export default function DiscoverClient() {
                 rec.interimResults = false;
                 rec.lang = "en-US";
 
-                rec.onstart = () => setIsListening(true);
-                rec.onend = () => setIsListening(false);
+                rec.onstart = () => {
+                    setIsListening(true);
+                };
+                rec.onend = () => {
+                    setIsListening(false);
+                };
                 rec.onresult = (e: any) => {
                     const transcript = e.results[0][0].transcript;
                     if (transcript) {
@@ -129,7 +133,20 @@ export default function DiscoverClient() {
                         handleNewSearch(transcript);
                     }
                 };
-                rec.onerror = () => setIsListening(false);
+
+                rec.onerror = (event: any) => {
+                    setIsListening(false);
+                    console.error("[SpeechRecognition Error]", event.error);
+                    if (event.error === 'not-allowed') {
+                        toast.error("Microphone permission denied. Please allow mic access in your browser settings.");
+                    } else if (event.error === 'no-speech') {
+                        toast.error("No speech detected. Please speak clearly into your mic.");
+                    } else if (event.error === 'network') {
+                        toast.error("Voice search network error.");
+                    } else {
+                        toast.error(`Voice error: ${event.error}`);
+                    }
+                };
                 recognitionRef.current = rec;
             }
         }

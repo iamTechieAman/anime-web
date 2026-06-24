@@ -159,7 +159,7 @@ export default function NetflixAuthGate() {
             className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-secondary hover:to-accent active:scale-95 text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl shadow-accent/30 flex items-center justify-center gap-2 group cursor-pointer min-h-[52px]"
           >
             Get Started Free
-            <Play className="w-4 h-4 fill-white text-white group-hover:translate-x-1 transition-transform" will-change-transform />
+            <Play className="w-4 h-4 fill-white text-white group-hover:translate-x-1 transition-transform will-change-transform"  />
           </button>
 
           <button 

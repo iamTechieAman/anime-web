@@ -85,7 +85,7 @@ export default function RegisterPage() {
             className="w-full bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:bg-accent-secondary py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg shadow-accent/20 text-white"
           >
             {loading ? "Creating Account..." : "Create Account"}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" will-change-transform />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform will-change-transform"  />
           </button>
         </form>
 

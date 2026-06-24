@@ -213,7 +213,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
             alt={entry.title || "Poster"}
             fill
             sizes="(max-width: 768px) 96px, 144px"
-            className="object-cover transition-transform duration-[250ms] group-hover:scale-105" will-change-transform
+            className="object-cover transition-transform duration-[250ms] group-hover:scale-105 will-change-transform" 
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-700">
@@ -241,7 +241,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
           <Link
             href={href}
             scroll={false}
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform" will-change-transform
+            className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform will-change-transform" 
             aria-label="Resume"
           >
             <Play className="w-4 h-4 text-black fill-black ml-0.5" />

@@ -113,7 +113,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                                 alt={title}
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
-                                className="object-cover transition-transform duration-[250ms] ease-apple group-hover:scale-[1.02]" will-change-transform
+                                className="object-cover transition-transform duration-[250ms] ease-apple group-hover:scale-[1.02] will-change-transform" 
                                 placeholder="blur"
                                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                                 onError={() => setImgError(true)}
@@ -218,7 +218,7 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
                             alt={title}
                             fill
                             sizes="56px"
-                            className="object-cover transition-transform duration-[250ms] group-hover:scale-110" will-change-transform
+                            className="object-cover transition-transform duration-[250ms] group-hover:scale-110 will-change-transform" 
                             loading="lazy"
                             onError={() => setImgError(true)}
                         />
