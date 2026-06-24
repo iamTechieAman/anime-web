@@ -222,6 +222,12 @@ export default function MoviesPage() {
     const [recommendedItems, setRecommendedItems] = useState<MovieItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Tab lazy-loading tracking states
+    const [moviesDataLoaded, setMoviesDataLoaded] = useState(false);
+    const [tvDataLoaded, setTvDataLoaded] = useState(false);
+    const [animeDataLoaded, setAnimeDataLoaded] = useState(false);
+    const [premiumDataLoaded, setPremiumDataLoaded] = useState(false);
+
     // Premium Extra Categories
     const [podcasts, setPodcasts] = useState<any[]>([]);
     const [books, setBooks] = useState<any[]>([]);
@@ -290,100 +296,145 @@ export default function MoviesPage() {
         }
     }, [trending, popular]);
 
-    // Fetch main data sequentially (remaining axios calls)
+    // Switch loading state when changing tab if target data is not loaded yet
     useEffect(() => {
-        const loadOtherData = async () => {
-            // Fetch top rated movies, tv popular, tv top rated
-            try {
-                const [topRatedRes, tvPopRes, tvTopRes] = await Promise.all([
-                    axios.get("/api/prime?category=top_rated"),
-                    axios.get("/api/prime/tv?category=popular"),
-                    axios.get("/api/prime/tv?category=top_rated"),
-                ]);
-
-                setTopRated(Array.isArray(topRatedRes.data.results) ? topRatedRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
-                setTvPopular(Array.isArray(tvPopRes.data.results) ? tvPopRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
-                setTvTopRated(Array.isArray(tvTopRes.data.results) ? tvTopRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
-            } catch (err) {
-                console.error("Failed to fetch main data:", err);
-            }
-
-            // Fetch genres (since we only show these for movies now, it fits the movies tab)
-            try {
-                const promises = GENRE_ROWS.map((genre) =>
-                    axios.get(`/api/prime/discover?media_type=${genre.type}&genre_id=${genre.genreId}`)
-                );
-                const results = await Promise.allSettled(promises);
-                const newGenreData: Record<string, MovieItem[]> = {};
-                GENRE_ROWS.forEach((genre, i) => {
-                    const res = results[i];
-                    if (res.status === "fulfilled" && res.value.data.results?.length > 0) {
-                        newGenreData[genre.title] = res.value.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path));
-                    }
-                });
-                setGenreData(newGenreData);
-            } catch (err) {
-                console.error("Failed to fetch genres:", err);
-            }
-            
-            // Fetch networks
-            try {
-                const promises = NETWORK_ROWS.map((net) =>
-                    axios.get(`/api/prime/discover?media_type=tv&network_id=${net.networkId}`)
-                );
-                const results = await Promise.allSettled(promises);
-                const newNetworkData: Record<string, MovieItem[]> = {};
-                NETWORK_ROWS.forEach((net, i) => {
-                    const res = results[i];
-                    if (res.status === "fulfilled") {
-                        if (res.value.data.results && res.value.data.results.length > 0) {
-                            newNetworkData[net.title] = res.value.data.results;
-                        }
-                    }
-                });
-                setNetworkData(newNetworkData);
-            } catch (err) {
-                console.error("Failed to fetch network data:", err);
-            }
-
-            // Fetch Anime Home
-            try {
-                const animeRes = await axios.get("/api/anime/home");
-                if (Array.isArray(animeRes.data.latest)) setAnimeLatest(animeRes.data.latest.filter((i: any) => i && i.image));
-                if (Array.isArray(animeRes.data.trending)) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
-            } catch (err) {
-                console.error("Failed to fetch anime home:", err);
-            }
-
-
-            // Fetch Premium Extra Content
-            try {
-                const premiumRes = await axios.get("/data/premium_content.json");
-                const data = premiumRes.data;
-                setPodcasts(data.trending_podcasts || []);
-                setBooks(data.trending_books || []);
-                setSongs(data.trending_songs || []);
-                setVideos(data.trending_videos || []);
-                
-                // Group MJ items for theme alignment
-                const allMj = [
-                    ...(data.trending_movies || []),
-                    ...(data.trending_tv_shows || []),
-                    ...(data.trending_podcasts || []),
-                    ...(data.trending_books || []),
-                    ...(data.trending_songs || []),
-                    ...(data.trending_videos || [])
-                ].filter(item => item && (item.title?.toLowerCase().includes('michael jackson') || item.artist?.toLowerCase().includes('michael jackson') || item.author?.toLowerCase().includes('michael jackson') || item.title === "Michael" || item.title === "The Wiz" || item.title === "Moonwalker" || item.title === "This Is It"));
-                
-                setMjItems(allMj.slice(0, 8));
-            } catch (err) {
-                console.error("Failed to fetch premium content:", err);
-            }
+        if (activeTab === "movies" && !moviesDataLoaded) {
+            setLoading(true);
+        } else if (activeTab === "tv" && !tvDataLoaded) {
+            setLoading(true);
+        } else if (activeTab === "anime" && !animeDataLoaded) {
+            setLoading(true);
+        } else {
             setLoading(false);
-        };
+        }
+    }, [activeTab, moviesDataLoaded, tvDataLoaded, animeDataLoaded]);
 
-        loadOtherData();
-    }, []);
+    // Movies Data Loader
+    useEffect(() => {
+        if (activeTab === "movies" && !moviesDataLoaded) {
+            const loadMovies = async () => {
+                try {
+                    const topRatedRes = await axios.get("/api/prime?category=top_rated");
+                    setTopRated(Array.isArray(topRatedRes.data.results) ? topRatedRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
+                } catch (err) {
+                    console.error("Failed to fetch top rated movies:", err);
+                }
+
+                // Fetch genres
+                try {
+                    const promises = GENRE_ROWS.map((genre) =>
+                        axios.get(`/api/prime/discover?media_type=${genre.type}&genre_id=${genre.genreId}`)
+                    );
+                    const results = await Promise.allSettled(promises);
+                    const newGenreData: Record<string, MovieItem[]> = {};
+                    GENRE_ROWS.forEach((genre, i) => {
+                        const res = results[i];
+                        if (res.status === "fulfilled" && res.value.data.results?.length > 0) {
+                            newGenreData[genre.title] = res.value.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path));
+                        }
+                    });
+                    setGenreData(newGenreData);
+                } catch (err) {
+                    console.error("Failed to fetch genres:", err);
+                }
+
+                setMoviesDataLoaded(true);
+                setLoading(false);
+            };
+            loadMovies();
+        }
+    }, [activeTab, moviesDataLoaded]);
+
+    // TV Data Loader
+    useEffect(() => {
+        if (activeTab === "tv" && !tvDataLoaded) {
+            const loadTV = async () => {
+                try {
+                    const [tvPopRes, tvTopRes] = await Promise.all([
+                        axios.get("/api/prime/tv?category=popular"),
+                        axios.get("/api/prime/tv?category=top_rated"),
+                    ]);
+                    setTvPopular(Array.isArray(tvPopRes.data.results) ? tvPopRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
+                    setTvTopRated(Array.isArray(tvTopRes.data.results) ? tvTopRes.data.results.filter((i: any) => i && (i.poster_path || i.backdrop_path)) : []);
+                } catch (err) {
+                    console.error("Failed to fetch TV data:", err);
+                }
+
+                // Fetch networks
+                try {
+                    const promises = NETWORK_ROWS.map((net) =>
+                        axios.get(`/api/prime/discover?media_type=tv&network_id=${net.networkId}`)
+                    );
+                    const results = await Promise.allSettled(promises);
+                    const newNetworkData: Record<string, MovieItem[]> = {};
+                    NETWORK_ROWS.forEach((net, i) => {
+                        const res = results[i];
+                        if (res.status === "fulfilled") {
+                            if (res.value.data.results && res.value.data.results.length > 0) {
+                                newNetworkData[net.title] = res.value.data.results;
+                            }
+                        }
+                    });
+                    setNetworkData(newNetworkData);
+                } catch (err) {
+                    console.error("Failed to fetch network data:", err);
+                }
+
+                setTvDataLoaded(true);
+                setLoading(false);
+            };
+            loadTV();
+        }
+    }, [activeTab, tvDataLoaded]);
+
+    // Anime Data Loader
+    useEffect(() => {
+        if (activeTab === "anime" && !animeDataLoaded) {
+            const loadAnime = async () => {
+                try {
+                    const animeRes = await axios.get("/api/anime/home");
+                    if (Array.isArray(animeRes.data.latest)) setAnimeLatest(animeRes.data.latest.filter((i: any) => i && i.image));
+                    if (Array.isArray(animeRes.data.trending)) setAnimeTrending(animeRes.data.trending.filter((i: any) => i && i.image));
+                } catch (err) {
+                    console.error("Failed to fetch anime home:", err);
+                }
+                setAnimeDataLoaded(true);
+                setLoading(false);
+            };
+            loadAnime();
+        }
+    }, [activeTab, animeDataLoaded]);
+
+    // Premium Data Loader (Deferred 1.5s after load to prevent network congestion)
+    useEffect(() => {
+        if (!premiumDataLoaded) {
+            const timer = setTimeout(async () => {
+                try {
+                    const premiumRes = await axios.get("/data/premium_content.json");
+                    const data = premiumRes.data;
+                    setPodcasts(data.trending_podcasts || []);
+                    setBooks(data.trending_books || []);
+                    setSongs(data.trending_songs || []);
+                    setVideos(data.trending_videos || []);
+                    
+                    const allMj = [
+                        ...(data.trending_movies || []),
+                        ...(data.trending_tv_shows || []),
+                        ...(data.trending_podcasts || []),
+                        ...(data.trending_books || []),
+                        ...(data.trending_songs || []),
+                        ...(data.trending_videos || [])
+                    ].filter(item => item && (item.title?.toLowerCase().includes('michael jackson') || item.artist?.toLowerCase().includes('michael jackson') || item.author?.toLowerCase().includes('michael jackson') || item.title === "Michael" || item.title === "The Wiz" || item.title === "Moonwalker" || item.title === "This Is It"));
+                    
+                    setMjItems(allMj.slice(0, 8));
+                } catch (err) {
+                    console.error("Failed to fetch premium content:", err);
+                }
+                setPremiumDataLoaded(true);
+            }, 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [premiumDataLoaded]);
 
     // Provider switching: fetch from /api/provider when activeProvider changes
     useEffect(() => {

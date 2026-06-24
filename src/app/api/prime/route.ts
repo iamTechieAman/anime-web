@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
+import { fetchWithTimeout } from "@/utils/fetchWithTimeout";
 
 const TMDB_KEY = process.env.TMDB_API_KEY || "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
-
-async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-    return Promise.race([
-        promise,
-        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
-    ]);
-}
 
 export async function GET(request: Request) {
     try {
@@ -40,7 +36,7 @@ export async function GET(request: Request) {
             url = `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&page=${page}&language=en-US&with_genres=${genreId}&sort_by=popularity.desc`;
         }
 
-        const res = await withTimeout(fetch(url, { next: { revalidate: 3600 } }), 3000);
+        const res = await fetchWithTimeout(url, { next: { revalidate: 3600 } }, 3000);
         if (!res.ok) throw new Error(`TMDB API error: ${res.status}`);
 
         const data = await res.json();
@@ -81,19 +77,17 @@ export async function GET(request: Request) {
                 }
             }
             
-            const fallbackUrl = new URL(`/data/${fileName}`, request.url);
-            const fallbackRes = await fetch(fallbackUrl);
-            if (fallbackRes.ok) {
-                const data = await fallbackRes.json();
-                console.log(`[Prime API] Loaded fallback static file: ${fileName}`);
-                return NextResponse.json({
-                    results: data.results || [],
-                    page: 1,
-                    total_pages: 1,
-                    total_results: data.results?.length || 0,
-                    fromFallback: true
-                });
-            }
+            const filePath = path.join(process.cwd(), "public", "data", fileName);
+            const fileContent = await fs.readFile(filePath, "utf-8");
+            const data = JSON.parse(fileContent);
+            console.log(`[Prime API] Loaded fallback static file via FS: ${fileName}`);
+            return NextResponse.json({
+                results: data.results || [],
+                page: 1,
+                total_pages: 1,
+                total_results: data.results?.length || 0,
+                fromFallback: true
+            });
         } catch (fallbackErr: any) {
             console.error("Prime Root fallback error:", fallbackErr.message);
         }

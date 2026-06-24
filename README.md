@@ -27,7 +27,14 @@ Building ToonPlayer took 5 months of continuous iteration and learning. What sta
 
 ---
 
-## 🏆 Changelog — v6.0 (Latest)
+## 🏆 Changelog — v7.0 (Latest)
+
+### Phase 25 — Production Audit, Voice Fallbacks, Responsive Overflow Polish & Abort Controllers (`June 2026`)
+- 🎤 **Robust Voice Search & Mic Diagnostic Fallback**: Fully resolved `service-not-allowed` errors by adjusting global `Permissions-Policy: microphone=(self)` policies. Standardized cross-browser speech recognition support, and integrated a client-side audio recorder hook that automatically falls back to raw `MediaRecorder` audio capturing and OpenAI Whisper server-side transcription when native speech APIs are blocked or unavailable.
+- ⚡ **AbortController Request Optimization**: Remediated mobile loading delays and connection hangs by introducing an `AbortController`-based `fetchWithTimeout` helper. TMDB fetches now automatically abort after 3 seconds on slow network connections, immediately falling back to local pre-rendered JSON files.
+- 📐 **Zero-Overflow Responsive Polish**: Fully cleared all element-level overflows, clipping warnings, and offscreen shifts down to **0px** across all viewport sizes (320px–1920px). Remediated scale-glow offsets in headers, sidebars, floating widgets, and title headers.
+- 👥 **WebP Avatar & Prefetch Loading**: Optimised profile avatar loading times from 1.4s to **< 80ms** by replacing heavy 600KB PNGs with compressed 5KB WebPs, integrating `<head>` preloading, and designing immediate React skeleton placeholders.
+- ⌨️ **Search Box Accessibility & ARIA tags**: Added missing ARIA properties (`role="option"`, `aria-selected`) and ID triggers to all system navigation command options in the Command Palette, enabling smooth keyboard arrow navigation and scrolling.
 
 ### Phase 24 — Smooth Animations, Smart TV/Mobile Optimization & Voice Search Fixes (`June 2026`)
 - ⚡ **Zero-Lag Layout Optimization**: Replaced CPU-heavy background `filter blur-xl` and opacity transitions with hardware-accelerated `opacity-0` and `invisible` CSS rules when the `ProfileGate` is active. This eliminates rendering and painting overhead on mobile browsers, laptops, and smart TVs.

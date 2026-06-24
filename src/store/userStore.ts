@@ -55,7 +55,7 @@ export function getAvatarUrl(name: string, theme: string = 'orange'): string {
     hash = seed.charCodeAt(i) + ((hash << 5) - hash);
   }
   const idx = Math.abs(hash % 8) + 1; // Map to 1 of 8 local avatars
-  return `/avatars/avatar-${idx}.png`;
+  return `/avatars/avatar-${idx}.webp`;
 }
 
 export function isDefaultAvatar(url?: string | null): boolean {

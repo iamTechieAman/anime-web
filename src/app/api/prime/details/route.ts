@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-
-async function withTimeout<T>(promise: Promise<T>, ms: number = 3000): Promise<T> {
-    return Promise.race([
-        promise,
-        new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
-    ]);
-}
+import { fetchWithTimeout } from "@/utils/fetchWithTimeout";
 
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
@@ -27,8 +21,8 @@ async function resolveContentType(
 ): Promise<{ type: string; detailsData: any }> {
     // Step 1: Fetch both TV and Movie TMDB details in parallel
     const [tvRes, movieRes] = await Promise.all([
-        fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
-        fetch(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+        fetchWithTimeout(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
+        fetchWithTimeout(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
     ]);
 
     const tvData = tvRes.ok ? await tvRes.json() : null;
@@ -75,9 +69,9 @@ async function resolveContentType(
 async function tvmazeCrossValidate(title: string): Promise<boolean> {
     try {
         const encoded = encodeURIComponent(title);
-        const res = await fetch(`${TVMAZE_BASE}/singlesearch/shows?q=${encoded}`, {
+        const res = await fetchWithTimeout(`${TVMAZE_BASE}/singlesearch/shows?q=${encoded}`, {
             next: { revalidate: 7200 },
-        });
+        }, 3000);
 
         if (!res.ok) return false;
         const data = await res.json();
@@ -108,7 +102,7 @@ export async function GET(request: Request) {
             const isEpisodic = await tvmazeCrossValidate(details.title);
             if (isEpisodic) {
                 // Re-fetch as TV if TVMaze confirms it's a series
-                const tvRes = await withTimeout(fetch(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }), 3000);
+                const tvRes = await fetchWithTimeout(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000);
                 if (tvRes.ok) {
                     const tvData = await tvRes.json();
                     if (!tvData.status_message) {
@@ -121,12 +115,12 @@ export async function GET(request: Request) {
 
         // Fetch supplementary metadata in parallel for the resolved type
         const [creditsRes, videosRes, similarRes, recommendationsRes, keywordsRes, providersRes] = await Promise.all([
-            fetch(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }),
-            fetch(`${TMDB_BASE}/${type}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }),
+            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
         ]);
 
         const [credits, videos, similar, recommendations, keywordsData, providersData] = await Promise.all([

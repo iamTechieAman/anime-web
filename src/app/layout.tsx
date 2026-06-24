@@ -144,6 +144,14 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
         <link rel="preconnect" href="https://api.dicebear.com" />
+        <link rel="preload" href="/avatars/avatar-1.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-2.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-3.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-4.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-5.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-6.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-7.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/avatars/avatar-8.webp" as="image" type="image/webp" />
         <link rel="dns-prefetch" href="https://s4.anilist.co" />
         <link rel="dns-prefetch" href="https://graphql.anilist.co" />
         <link rel="dns-prefetch" href="https://vidlink.pro" />

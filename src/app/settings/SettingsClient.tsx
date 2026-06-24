@@ -13,14 +13,14 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 
 const AVATARS = [
-    "/avatars/avatar-1.png",
-    "/avatars/avatar-2.png",
-    "/avatars/avatar-3.png",
-    "/avatars/avatar-4.png",
-    "/avatars/avatar-5.png",
-    "/avatars/avatar-6.png",
-    "/avatars/avatar-7.png",
-    "/avatars/avatar-8.png",
+    "/avatars/avatar-1.webp",
+    "/avatars/avatar-2.webp",
+    "/avatars/avatar-3.webp",
+    "/avatars/avatar-4.webp",
+    "/avatars/avatar-5.webp",
+    "/avatars/avatar-6.webp",
+    "/avatars/avatar-7.webp",
+    "/avatars/avatar-8.webp",
 ];
 
 const ACCENT_COLORS = [

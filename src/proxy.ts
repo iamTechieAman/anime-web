@@ -52,7 +52,7 @@ export default clerkMiddleware(async (auth, request) => {
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('X-DNS-Prefetch-Control', 'on');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
     
     // Strict Transport Security (HSTS) - enforce HTTPS
     if (process.env.NODE_ENV === 'production') {

@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Film, Tv, Clock, Compass, X, Command, Mic, MicOff, Pin, PinOff, Sparkles, User, Tag, HelpCircle, Layers } from "lucide-react";
+import { Search, Film, Tv, Clock, Compass, X, Command, Mic, MicOff, Pin, PinOff, Sparkles, User, Tag, HelpCircle, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import axios from "axios";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -24,10 +25,31 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const [activeIndex, setActiveIndex] = useState(-1);
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [isListening, setIsListening] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [pinnedSearches, setPinnedSearches] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const {
+        isListening,
+        recordingFallbackActive,
+        isTranscribing,
+        errorMsg,
+        permissionStatus,
+        diagnostics,
+        startListening,
+        stopListening,
+        runDiagnostics
+    } = useVoiceSearch((text) => {
+        setQuery(text);
+    });
+
+    const toggleVoice = () => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
+    };
     const recognitionRef = useRef<any>(null);
 
     function saveSearch(q: string) {
@@ -49,17 +71,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         localStorage.setItem("toonplayer_pinned_searches", JSON.stringify(updated));
     }
 
-    function toggleVoice() {
-        if (!recognitionRef.current) {
-            toast.error("Speech recognition is not supported in this browser.");
-            return;
-        }
-        if (isListening) {
-            recognitionRef.current.stop();
-        } else {
-            recognitionRef.current.start();
-        }
-    }
+    // toggleVoice was moved to useVoiceSearch hook hook
 
     const getNavigableItems = () => {
         const list: any[] = [];
@@ -168,39 +180,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         setActiveIndex(-1);
     }, [query, results.length, recentSearches.length, pinnedSearches.length]);
 
-    // Speech recognition setup
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                const rec = new SpeechRecognition();
-                rec.continuous = false;
-                rec.interimResults = false;
-                rec.lang = "en-US";
-
-                rec.onstart = () => setIsListening(true);
-                rec.onend = () => setIsListening(false);
-                rec.onresult = (e: any) => {
-                    const transcript = e.results[0][0].transcript;
-                    if (transcript) setQuery(transcript);
-                };
-                rec.onerror = (event: any) => {
-                    setIsListening(false);
-                    console.error("[SpeechRecognition Error]", event.error);
-                    if (event.error === 'not-allowed') {
-                        toast.error("Microphone permission denied. Please allow mic access in your browser settings.");
-                    } else if (event.error === 'no-speech') {
-                        toast.error("No speech detected. Please speak clearly into your mic.");
-                    } else if (event.error === 'network') {
-                        toast.error("Voice search network error.");
-                    } else {
-                        toast.error(`Voice error: ${event.error}`);
-                    }
-                };
-                recognitionRef.current = rec;
-            }
-        }
-    }, []);
+    // Speech recognition setup was removed and replaced with useVoiceSearch hook
 
     // Fetch results on query change
     useEffect(() => {
@@ -279,6 +259,16 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, activeIndex, allItemsCount, query, router, onClose]);
 
+    // Scroll active item into view dynamically
+    useEffect(() => {
+        if (activeIndex >= 0) {
+            const activeEl = document.getElementById(`option-${activeIndex}`);
+            if (activeEl) {
+                activeEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
+        }
+    }, [activeIndex]);
+
     if (!isOpen) return null;
 
     return (
@@ -304,14 +294,32 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             onChange={e => { setQuery(e.target.value); setActiveIndex(0); }}
                             placeholder="Search anime, movies, actors, collections, genres..."
                             className="w-full bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none outline-none text-white placeholder-zinc-500 text-sm font-semibold"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded={isOpen}
+                            aria-haspopup="listbox"
+                            aria-controls="command-palette-results"
+                            aria-activedescendant={activeIndex >= 0 ? `option-${activeIndex}` : undefined}
                         />
                         <button 
                             type="button" 
                             onClick={toggleVoice} 
-                            className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'hover:bg-white/5 text-zinc-400 hover:text-white'}`}
+                            className={`p-2 rounded-xl transition-all ${
+                                isListening 
+                                    ? recordingFallbackActive
+                                        ? 'bg-blue-500/20 text-blue-500 animate-pulse'
+                                        : 'bg-red-500/20 text-red-500 animate-pulse' 
+                                    : 'hover:bg-white/5 text-zinc-400 hover:text-white'
+                            }`}
                             title="Voice Search"
                         >
-                            {isListening ? <Mic className="w-4 h-4 text-red-500 animate-pulse" /> : <Mic className="w-4 h-4" />}
+                            {isTranscribing ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                            ) : isListening ? (
+                                <Mic className="w-4 h-4 text-red-500 animate-pulse" />
+                            ) : (
+                                <Mic className="w-4 h-4" />
+                            )}
                         </button>
                         <div className="flex items-center gap-1.5 shrink-0 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] text-zinc-400 font-bold">
                             <Command className="w-3 h-3" />
@@ -322,8 +330,53 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         </button>
                     </div>
 
+                    {errorMsg && (
+                        <div className="p-3 mx-3 mb-2 rounded-xl bg-red-950/20 border border-red-500/20 text-left text-xs">
+                            <div className="flex items-start gap-2.5">
+                                <AlertTriangle className="w-4.5 h-4.5 text-red-400 shrink-0 mt-0.5" />
+                                <div className="flex-1 space-y-1.5">
+                                    <div className="font-bold text-white">Voice Search Diagnostics</div>
+                                    <div className="text-[11px] text-zinc-400 leading-normal">
+                                        {errorMsg === "not-allowed" && "Microphone permission is blocked. Please allow microphone access in your browser settings."}
+                                        {errorMsg === "transcription-key-missing" && "Voice recording completed! However, the translation service is currently offline. Please type to search."}
+                                        {errorMsg === "no-speech" && "No speech was detected. Please check your mic and try again."}
+                                        {errorMsg !== "not-allowed" && errorMsg !== "transcription-key-missing" && errorMsg !== "no-speech" && `Voice error details: ${errorMsg}`}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={startListening}
+                                            className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase text-white transition-all border border-white/5 cursor-pointer"
+                                        >
+                                            Retry
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                const rep = await runDiagnostics();
+                                                toast.success(`Diag: Mic=${rep.hasAudioInput ? 'Yes' : 'No'}, Secure=${rep.secureContext ? 'Yes' : 'No'}`);
+                                            }}
+                                            className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase text-zinc-400 hover:text-white transition-all border border-white/5 cursor-pointer"
+                                        >
+                                            Test Mic
+                                        </button>
+                                    </div>
+                                    {diagnostics && (
+                                        <div className="text-[9px] text-zinc-500 font-mono pt-1.5 border-t border-white/5 mt-1.5 space-y-0.5">
+                                            <div>Secure context: {diagnostics.secureContext ? "Yes" : "No"} | Input mic: {diagnostics.hasAudioInput ? "Yes" : "No"}</div>
+                                            <div>Permissions Policy: {diagnostics.permissionsPolicyOk ? "Allowed" : "Blocked"}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Results Container */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-4 max-h-[280px] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3">
+                    <div 
+                        id="command-palette-results"
+                        role="listbox"
+                        aria-label="Search suggestions"
+                        className="flex-1 overflow-y-auto p-3 space-y-4 max-h-[280px] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3"
+                    >
                         {loading && (
                             <div className="p-8 text-center text-zinc-500 text-xs font-bold animate-pulse">
                                 Loading matched titles...
@@ -340,6 +393,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         const isSelected = actualIdx === activeIndex;
                                         return (
                                             <div
+                                                id={`option-${actualIdx}`}
+                                                role="option"
+                                                aria-selected={isSelected}
                                                 key={item.id + item.type}
                                                 onClick={() => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }}
                                                 onMouseEnter={() => setActiveIndex(actualIdx)}
@@ -389,6 +445,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 const isSelected = actualIdx === activeIndex;
                                                 return (
                                                     <div
+                                                        id={`option-${actualIdx}`}
+                                                        role="option"
+                                                        aria-selected={isSelected}
                                                         key={term}
                                                         onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
@@ -418,6 +477,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 const isSelected = actualIdx === activeIndex;
                                                 return (
                                                     <div
+                                                        id={`option-${actualIdx}`}
+                                                        role="option"
+                                                        aria-selected={isSelected}
                                                         key={term}
                                                         onClick={() => { router.push(`/search?query=${encodeURIComponent(term)}`, { scroll: false }); saveSearch(term); onClose(); }}
                                                         onMouseEnter={() => setActiveIndex(actualIdx)}
@@ -448,6 +510,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                 <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase px-3 mb-2">System Commands</p>
                                 <div className="space-y-1">
                                     <button
+                                        id={`option-${pinnedSearches.length + recentSearches.length}`}
+                                        role="option"
+                                        aria-selected={activeIndex === (pinnedSearches.length + recentSearches.length)}
                                         onClick={() => { router.push("/browse?type=movie", { scroll: false }); onClose(); }}
                                         onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
@@ -458,6 +523,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         <span className="text-xs font-bold">Browse Movies</span>
                                     </button>
                                     <button
+                                        id={`option-${pinnedSearches.length + recentSearches.length + 1}`}
+                                        role="option"
+                                        aria-selected={activeIndex === (pinnedSearches.length + recentSearches.length + 1)}
                                         onClick={() => { router.push("/browse?type=tv", { scroll: false }); onClose(); }}
                                         onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length + 1)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
@@ -468,6 +536,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         <span className="text-xs font-bold">Browse TV Shows</span>
                                     </button>
                                     <button
+                                        id={`option-${pinnedSearches.length + recentSearches.length + 2}`}
+                                        role="option"
+                                        aria-selected={activeIndex === (pinnedSearches.length + recentSearches.length + 2)}
                                         onClick={() => { router.push("/discover", { scroll: false }); onClose(); }}
                                         onMouseEnter={() => setActiveIndex(pinnedSearches.length + recentSearches.length + 2)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${

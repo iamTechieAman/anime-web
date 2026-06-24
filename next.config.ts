@@ -81,7 +81,7 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'no-referrer-when-downgrade' },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), fullscreen=(self "https://vidlink.pro" "https://vidsrc.to" "https://vidsrc.pro" "https://vidsrc.me" "https://autoembed.co" "https://cineby.pro" "https://vidfast.pro" "https://peachify.top" "https://multiembed.mov" "https://embed.su" "https://megacloud.tv" "https://rapid-cloud.co")',
+            value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=(), fullscreen=(self "https://vidlink.pro" "https://vidsrc.to" "https://vidsrc.pro" "https://vidsrc.me" "https://autoembed.co" "https://cineby.pro" "https://vidfast.pro" "https://peachify.top" "https://multiembed.mov" "https://embed.su" "https://megacloud.tv" "https://rapid-cloud.co")',
           },
         ],
       },

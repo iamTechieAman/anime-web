@@ -8,9 +8,11 @@ import { useUser } from "@clerk/nextjs";
 
 const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null }) => {
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setError(false);
+    setLoading(true);
   }, [src]);
 
   const isInvalidSrc = !src || 
@@ -24,10 +26,32 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
     ? alt.trim().charAt(0).toUpperCase() 
     : "?";
   
-  return error || isInvalidSrc ? (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-black text-4xl select-none">{fallbackChar}</div>
-  ) : (
-    <img src={src!} alt={alt || "Avatar"} className="w-full h-full object-cover" onError={() => setError(true)} />
+  if (error || isInvalidSrc) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-black text-4xl select-none">
+        {fallbackChar}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full">
+      {loading && (
+        <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-white/25 border-t-white rounded-full animate-spin" />
+        </div>
+      )}
+      <img 
+        src={src!} 
+        alt={alt || "Avatar"} 
+        className={`w-full h-full object-cover transition-opacity duration-200 ${loading ? "opacity-0" : "opacity-100"}`} 
+        onLoad={() => setLoading(false)}
+        onError={() => {
+          setError(true);
+          setLoading(false);
+        }} 
+      />
+    </div>
   );
 };
 
@@ -173,17 +197,17 @@ export default function ProfileGate() {
           animate={{ opacity: 1, backgroundColor: "var(--bg-main)" }}
           exit={{ opacity: 0, filter: "blur(10px)" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 bg-bg-main"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center p-4 bg-bg-main hide-scrollbar"
         >
           <motion.div
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: selectedId ? 0 : 1, scale: selectedId ? 1.5 : 1 }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="w-full max-w-4xl text-center"
+            className="w-full max-w-4xl text-center hide-scrollbar"
           >
-            <h1 className="text-3xl md:text-5xl font-black mb-10 tracking-tight font-sora text-white">
+            <div role="heading" aria-level={1} className="text-2xl xs:text-3xl md:text-5xl font-black mb-10 tracking-tight font-sora text-white w-full max-w-full px-4 break-words leading-normal">
               Who's watching?
-            </h1>
+            </div>
             
             {!isCreating ? (
               <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 lg:gap-12">

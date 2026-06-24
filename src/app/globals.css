@@ -554,8 +554,8 @@ p, .text-body {
 }
 
 @keyframes progressBar {
-  from { width: 0%; }
-  to { width: 100%; }
+  from { transform: scaleX(0); transform-origin: left; }
+  to { transform: scaleX(1); transform-origin: left; }
 }
 
 @keyframes fadeSlideUp {

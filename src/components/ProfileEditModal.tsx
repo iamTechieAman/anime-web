@@ -14,14 +14,14 @@ interface ProfileEditModalProps {
 }
 
 const AVATARS = [
-  { name: "Totoro", url: "/avatars/avatar-1.png" },
-  { name: "Ponyo", url: "/avatars/avatar-2.png" },
-  { name: "Luffy", url: "/avatars/avatar-3.png" },
-  { name: "Naruto", url: "/avatars/avatar-4.png" },
-  { name: "Nezuko", url: "/avatars/avatar-5.png" },
-  { name: "Goku", url: "/avatars/avatar-6.png" },
-  { name: "Pikachu", url: "/avatars/avatar-7.png" },
-  { name: "Chihiro", url: "/avatars/avatar-8.png" }
+  { name: "Totoro", url: "/avatars/avatar-1.webp" },
+  { name: "Ponyo", url: "/avatars/avatar-2.webp" },
+  { name: "Luffy", url: "/avatars/avatar-3.webp" },
+  { name: "Naruto", url: "/avatars/avatar-4.webp" },
+  { name: "Nezuko", url: "/avatars/avatar-5.webp" },
+  { name: "Goku", url: "/avatars/avatar-6.webp" },
+  { name: "Pikachu", url: "/avatars/avatar-7.webp" },
+  { name: "Chihiro", url: "/avatars/avatar-8.webp" }
 ];
 
 const THEMES = [

@@ -14,6 +14,7 @@ import RandomizerFloatingTrigger from "@/components/RandomizerFloatingTrigger";
 import dynamic from "next/dynamic";
 import ProfileGate from "@/components/ProfileGate";
 import { useUserStore } from "@/store/userStore";
+import OpeningAnimation from "@/components/OpeningAnimation";
 
 
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
@@ -165,15 +166,13 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
 
   
-  if (!mounted) {
-    return <div className="min-h-screen bg-[#141414]" />;
-  }
-
   const showSidebar = !isWatchPage;
-  const isProfileGateActive = hasHydrated && !activeProfileId;
+  // During SSR/hydration, assume profile gate is active to hide content and prevent flash
+  const isProfileGateActive = mounted ? (hasHydrated && !activeProfileId) : true;
 
   return (
     <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative">
+      <OpeningAnimation />
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
@@ -181,7 +180,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       </Suspense>
 
       {/* Content area: adaptive padding based on sidebar visibility */}
-      <div className={`flex flex-col min-h-dvh relative ${
+      <div className={`flex flex-col min-h-dvh relative max-w-full overflow-x-hidden ${
         showSidebar ? "pl-0 md:pl-[80px]" : "pl-0"
       } transition-[padding,opacity] duration-[200ms] ease-out ${isWatchPage ? 'theme-dark watch-page' : ''} ${
         isProfileGateActive ? 'select-none pointer-events-none opacity-0 invisible' : 'opacity-100'
@@ -225,7 +224,12 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       />
       
       {/* Profile Gate overlay */}
-      {isProfileGateActive && <ProfileGate />}
+      {isProfileGateActive && mounted && <ProfileGate />}
+      {isProfileGateActive && !mounted && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-bg-main">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
       {/* Global Portal Modals */}
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />

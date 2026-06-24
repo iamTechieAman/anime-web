@@ -209,7 +209,7 @@ export default function Header() {
         {/* Left Section - Logo */}
         <div className={`flex items-center shrink-0 ${showSidebar ? "md:hidden" : "md:w-[40px] overflow-visible"}`}>
           <Link href="/" scroll={false} className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none will-change-transform"  onClick={clearSearch} aria-label="ToonPlayer Home">
-            <div className="w-8 h-8 shrink-0 relative" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
+            <div className="w-8 h-8 shrink-0 relative hide-scrollbar" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
               <Logo />
             </div>
             <span className="flex flex-col leading-none md:hidden lg:flex">
@@ -230,7 +230,7 @@ export default function Header() {
 
         {/* Center Section - PC Search Bar */}
         {deviceMode==="pc" && (
-          <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[500px] max-w-[900px]">
+          <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[280px] lg:min-w-[500px] max-w-[900px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
               className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-apple text-left outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -304,11 +304,11 @@ export default function Header() {
           )}
 
           {/* Notifications */}
-          <div ref={notifRef} className="relative hidden sm:block">
+          <div ref={notifRef} className="relative hidden sm:block hide-scrollbar">
             <button aria-label="Notifications"
               onClick={()=>{if(!showNotifications){setShowNotifications(true);markAllAsRead();}else setShowNotifications(false);setShowFilters(false);setShowProfileDropdown(false);}}
               className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${showNotifications?'bg-accent/10 border-accent/20 text-accent':'bg-white/[0.04] border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>
-              <div className="relative">
+              <div className="relative hide-scrollbar">
                 <Bell className="w-4 h-4"/>
                 {isMounted&&unreadCount>0&&<span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-overlay)] animate-pulse"/>}
               </div>

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Sparkles, Loader2, Search, ArrowLeft, Send, X, History } from "lucide-react";
+import { Sparkles, Loader2, Search, ArrowLeft, Send, X, History, Mic, AlertTriangle } from "lucide-react";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { MovieGrid } from "@/components/MovieCard";
@@ -61,10 +62,30 @@ export default function DiscoverClient() {
         };
     }, []);
 
-    const [isListening, setIsListening] = useState(false);
-    
-    const recognitionRef = useRef<any>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
+
+    const {
+        isListening,
+        recordingFallbackActive,
+        isTranscribing,
+        errorMsg,
+        permissionStatus,
+        diagnostics,
+        startListening,
+        stopListening,
+        runDiagnostics
+    } = useVoiceSearch((text) => {
+        setInput(text);
+        handleNewSearch(text);
+    });
+
+    const toggleVoice = () => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
+    };
     
     // Placeholder Typing Effect
     const [placeholderText, setPlaceholderText] = useState("");
@@ -110,59 +131,7 @@ export default function DiscoverClient() {
         }
     }, []);
 
-    // Speech recognition setup
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                const rec = new SpeechRecognition();
-                rec.continuous = false;
-                rec.interimResults = false;
-                rec.lang = "en-US";
-
-                rec.onstart = () => {
-                    setIsListening(true);
-                };
-                rec.onend = () => {
-                    setIsListening(false);
-                };
-                rec.onresult = (e: any) => {
-                    const transcript = e.results[0][0].transcript;
-                    if (transcript) {
-                        setInput(transcript);
-                        handleNewSearch(transcript);
-                    }
-                };
-
-                rec.onerror = (event: any) => {
-                    setIsListening(false);
-                    console.error("[SpeechRecognition Error]", event.error);
-                    if (event.error === 'not-allowed') {
-                        toast.error("Microphone permission denied. Please allow mic access in your browser settings.");
-                    } else if (event.error === 'no-speech') {
-                        toast.error("No speech detected. Please speak clearly into your mic.");
-                    } else if (event.error === 'network') {
-                        toast.error("Voice search network error.");
-                    } else {
-                        toast.error(`Voice error: ${event.error}`);
-                    }
-                };
-                recognitionRef.current = rec;
-            }
-        }
-    }, [messages]);
-
-    const toggleVoice = () => {
-        if (!recognitionRef.current) {
-            toast.error("Speech recognition is not supported in this browser.");
-            return;
-        }
-        if (isListening) {
-            recognitionRef.current.stop();
-        } else {
-            recognitionRef.current.start();
-        }
-    };
+    // Speech recognition was removed and replaced with useVoiceSearch hook
 
     const scrollToBottom = () => {
         if (chatEndRef.current) {
@@ -407,6 +376,52 @@ export default function DiscoverClient() {
                                         </div>
                                     </div>
                                 </form>
+
+                                {errorMsg && (
+                                    <div className="mt-4 p-4 rounded-xl bg-red-950/20 border border-red-500/20 text-left max-w-2xl mx-auto w-full transition-all">
+                                        <div className="flex items-start gap-3">
+                                            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                                            <div className="flex-1 space-y-2">
+                                                <h4 className="text-sm font-black text-white">Voice Search Diagnostics</h4>
+                                                <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
+                                                    {errorMsg === "not-allowed" && "Microphone permission is blocked. Please allow microphone access in your browser settings and try again."}
+                                                    {errorMsg === "transcription-key-missing" && "Voice recording completed! However, the translation service is currently offline. Please type your prompt."}
+                                                    {errorMsg === "no-speech" && "No speech was detected. Please make sure your mic is plugged in and speak clearly."}
+                                                    {errorMsg !== "not-allowed" && errorMsg !== "transcription-key-missing" && errorMsg !== "no-speech" && `Voice error details: ${errorMsg}. Swapping to standard search.`}
+                                                </p>
+                                                
+                                                <div className="flex flex-wrap gap-2 pt-1.5">
+                                                    <button
+                                                        type="button"
+                                                        onClick={startListening}
+                                                        className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-white transition-all cursor-pointer border border-white/5"
+                                                    >
+                                                        Retry Voice Search
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const rep = await runDiagnostics();
+                                                            toast.success(`Diag: Mic=${rep.hasAudioInput ? 'Yes' : 'No'}, Secure=${rep.secureContext ? 'Yes' : 'No'}`);
+                                                        }}
+                                                        className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-zinc-400 hover:text-white transition-all cursor-pointer border border-white/5"
+                                                    >
+                                                        Test Microphone
+                                                    </button>
+                                                </div>
+
+                                                {diagnostics && (
+                                                    <div className="text-[10px] text-zinc-500 font-mono pt-2 border-t border-white/5 mt-2 space-y-0.5">
+                                                        <div>Browser: {diagnostics.browserName}</div>
+                                                        <div>Secure context: {diagnostics.secureContext ? "Yes ✅" : "No ❌"}</div>
+                                                        <div>Input devices found: {diagnostics.hasAudioInput ? "Yes ✅" : "No ❌"}</div>
+                                                        <div>Permissions Policy: {diagnostics.permissionsPolicyOk ? "Allowed ✅" : "Blocked ❌"}</div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 
                                 {/* Mood tags horizontal selector */}
                                 <div className="mt-4 flex flex-wrap items-center gap-2 justify-center">
@@ -563,21 +578,25 @@ export default function DiscoverClient() {
                                                 className="w-full bg-transparent pl-4 pr-24 py-3 text-sm md:text-base text-white outline-none placeholder-white/20 font-bold"
                                             />
                                             <div className="absolute right-2 flex items-center gap-1.5">
-                                                {/* Voice search button */}
+                                                {/* Mic icon voice search */}
                                                 <button
                                                     type="button"
                                                     onClick={toggleVoice}
-                                                    className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                                                    className={`p-2.5 rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${
                                                         isListening 
-                                                            ? "bg-red-500/15 border-red-500/30 text-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.3)]" 
+                                                            ? recordingFallbackActive 
+                                                                ? "bg-blue-500/15 border-blue-500/30 text-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                                                                : "bg-red-500/15 border-red-500/30 text-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.3)]"
                                                             : "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
                                                     }`}
                                                     title="Voice Search"
+                                                    aria-label="Voice Search"
                                                 >
-                                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                                                        <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8" />
-                                                    </svg>
+                                                    {isTranscribing ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin text-pink-500" />
+                                                    ) : (
+                                                        <Mic className="w-4 h-4" />
+                                                    )}
                                                 </button>
                                                 <button 
                                                     type="submit"
@@ -589,6 +608,52 @@ export default function DiscoverClient() {
                                             </div>
                                         </div>
                                     </form>
+
+                                    {errorMsg && (
+                                        <div className="mt-3 p-4 rounded-xl bg-red-950/20 border border-red-500/20 text-left w-full transition-all">
+                                            <div className="flex items-start gap-3">
+                                                <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                                                <div className="flex-1 space-y-2">
+                                                    <h4 className="text-sm font-black text-white">Voice Search Diagnostics</h4>
+                                                    <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
+                                                        {errorMsg === "not-allowed" && "Microphone permission is blocked. Please allow microphone access in your browser settings and try again."}
+                                                        {errorMsg === "transcription-key-missing" && "Voice recording completed! However, the translation service is currently offline. Please type your prompt."}
+                                                        {errorMsg === "no-speech" && "No speech was detected. Please make sure your mic is plugged in and speak clearly."}
+                                                        {errorMsg !== "not-allowed" && errorMsg !== "transcription-key-missing" && errorMsg !== "no-speech" && `Voice error details: ${errorMsg}. Swapping to standard search.`}
+                                                    </p>
+                                                    
+                                                    <div className="flex flex-wrap gap-2 pt-1.5">
+                                                        <button
+                                                            type="button"
+                                                            onClick={startListening}
+                                                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-white transition-all cursor-pointer border border-white/5"
+                                                        >
+                                                            Retry Voice Search
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={async () => {
+                                                                const rep = await runDiagnostics();
+                                                                toast.success(`Diag: Mic=${rep.hasAudioInput ? 'Yes' : 'No'}, Secure=${rep.secureContext ? 'Yes' : 'No'}`);
+                                                            }}
+                                                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-zinc-400 hover:text-white transition-all cursor-pointer border border-white/5"
+                                                        >
+                                                            Test Microphone
+                                                        </button>
+                                                    </div>
+
+                                                    {diagnostics && (
+                                                        <div className="text-[10px] text-zinc-500 font-mono pt-2 border-t border-white/5 mt-2 space-y-0.5">
+                                                            <div>Browser: {diagnostics.browserName}</div>
+                                                            <div>Secure context: {diagnostics.secureContext ? "Yes ✅" : "No ❌"}</div>
+                                                            <div>Input devices found: {diagnostics.hasAudioInput ? "Yes ✅" : "No ❌"}</div>
+                                                            <div>Permissions Policy: {diagnostics.permissionsPolicyOk ? "Allowed ✅" : "Blocked ❌"}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                 </div>
                             </div>
