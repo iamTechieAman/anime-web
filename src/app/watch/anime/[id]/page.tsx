@@ -52,9 +52,66 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function WatchPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+
+    let metaTitle = "Anime Show";
+    let metaDesc = "Watch free HD anime on ToonPlayer";
+    let metaImage = "https://toonplayer.in/icon.png";
+
+    try {
+        const res = await fetchWithTimeout(fetch(`https://toonplayer.in/api/anime/episodes?id=${id}`), 3000);
+        const data = await res.json();
+        const show = data.show;
+        if (show) {
+            metaTitle = show.name || metaTitle;
+            metaDesc = show.description || metaDesc;
+            metaImage = show.thumbnail || metaImage;
+        }
+    } catch (e) {}
+
     return (
-        <Suspense fallback={<div className="min-h-dvh pt-24 text-center text-accent-warm font-bold bg-bg-main">Loading Player...</div>}>
-            <WatchClient id={id} />
-        </Suspense>
+        <>
+            {/* JSON-LD Structured Data for Video */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "VideoObject",
+                        "name": metaTitle,
+                        "description": metaDesc.slice(0, 160),
+                        "thumbnailUrl": [metaImage],
+                        "uploadDate": new Date().toISOString(),
+                        "contentUrl": `https://toonplayer.in/watch/anime/${id}`,
+                        "embedUrl": `https://toonplayer.in/watch/anime/${id}`,
+                        "publisher": {
+                            "@type": "Organization",
+                            "name": "ToonPlayer",
+                            "logo": {
+                                "@type": "ImageObject",
+                                "url": "https://toonplayer.in/icon.png"
+                            }
+                        }
+                    })
+                }}
+            />
+            {/* BreadcrumbList for navigation */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        "itemListElement": [
+                            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://toonplayer.in" },
+                            { "@type": "ListItem", "position": 2, "name": "Anime", "item": "https://toonplayer.in/az-list/all" },
+                            { "@type": "ListItem", "position": 3, "name": metaTitle, "item": `https://toonplayer.in/watch/anime/${id}` },
+                        ]
+                    })
+                }}
+            />
+            <Suspense fallback={<div className="min-h-dvh pt-24 text-center text-accent-warm font-bold bg-bg-main">Loading Player...</div>}>
+                <WatchClient id={id} />
+            </Suspense>
+        </>
     );
 }

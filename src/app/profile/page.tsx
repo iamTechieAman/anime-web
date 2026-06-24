@@ -84,7 +84,7 @@ export default function ProfilePage() {
 
     const displayName = user.fullName || user.username || user.primaryEmailAddress?.emailAddress.split('@')[0] || "ToonPlayer User";
     const displayEmail = user.primaryEmailAddress?.emailAddress || "clerk-auth-user@toonplayer.in";
-    const displayAvatar = user.imageUrl || `https://api.dicebear.com/9.x/avataaars/svg?seed=${displayName}`;
+    const displayAvatar = user.imageUrl || `https://api.dicebear.com/9.x/avataaars/png?seed=${displayName}`;
 
     return (
         <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pb-24 pt-6">

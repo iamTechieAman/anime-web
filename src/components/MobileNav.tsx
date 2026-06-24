@@ -112,8 +112,12 @@ export default function MobileNav() {
                             aria-label={item.label}
                             aria-current={item.active ? "page" : undefined}
                             onClick={(e) => {
-                                // Haptic feedback
-                                if (navigator.vibrate) navigator.vibrate(10);
+                                // Haptic feedback (run asynchronously to avoid blocking UI rendering)
+                                if (navigator.vibrate) {
+                                    setTimeout(() => {
+                                        try { navigator.vibrate(10); } catch (e) {}
+                                    }, 0);
+                                }
                                 item.onClick();
                             }}
                             className={`tap-scale flex flex-col items-center justify-center gap-0.5 flex-1 py-2 transition-all duration-200 relative ${

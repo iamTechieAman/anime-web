@@ -141,20 +141,11 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     return <div className="min-h-screen bg-[#141414]" />;
   }
 
-  if (!activeProfileId) {
-    return (
-      <div className="min-h-screen bg-[#141414] relative">
-        <ProfileGate />
-        <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-        <ProfileEditModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
-        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      </div>
-    );
-  }
   const showSidebar = !isWatchPage;
+  const isProfileGateActive = !activeProfileId;
 
   return (
-    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0">
+    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative">
       {showSidebar && <DesktopSidebar />}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
@@ -164,7 +155,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       {/* Content area: adaptive padding based on sidebar visibility */}
       <div className={`flex flex-col min-h-dvh relative ${
         showSidebar ? "pl-0 md:pl-[80px]" : "pl-0"
-      } transition-[padding] duration-[250ms] ease-apple-out ${isWatchPage ? 'theme-dark watch-page' : ''}`}>
+      } transition-[padding,filter,opacity] duration-[250ms] ease-apple-out ${isWatchPage ? 'theme-dark watch-page' : ''} ${
+        isProfileGateActive ? 'select-none pointer-events-none filter blur-xl opacity-20' : ''
+      }`}>
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${
@@ -202,7 +195,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         isOpen={isCommandPaletteOpen} 
         onClose={() => setIsCommandPaletteOpen(false)} 
       />
-      <ProfileGate />
+      
+      {/* Profile Gate overlay */}
+      {isProfileGateActive && <ProfileGate />}
 
       {/* Global Portal Modals */}
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />

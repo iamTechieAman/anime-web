@@ -57,7 +57,7 @@ export default function LoginPage() {
     if (existing) {
       setActiveProfile(existing.id);
     } else {
-      const avatar = `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+      const avatar = `https://api.dicebear.com/9.x/avataaars/png?seed=${encodeURIComponent(name)}`;
       addProfile({ name, avatar, type: 'guest', isKids: false, theme: 'purple' });
       
       setTimeout(() => {

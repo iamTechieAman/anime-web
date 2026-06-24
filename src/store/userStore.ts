@@ -50,7 +50,7 @@ interface UserState {
 
 export function getAvatarUrl(name: string, theme: string = 'orange'): string {
   const seed = (name || "Avatar").trim();
-  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  return `https://api.dicebear.com/9.x/avataaars/png?seed=${encodeURIComponent(seed)}`;
 }
 
 export function isDefaultAvatar(url?: string | null): boolean {
@@ -68,7 +68,7 @@ const DICEBEAR_SEEDS = ["Totoro", "Ponyo", "Luffy", "Naruto", "Nezuko", "Goku", 
 
 export function getRandomBitmojiUrl(name?: string): string {
   const seed = name && name.trim() ? name.trim() : DICEBEAR_SEEDS[Math.floor(Math.random() * DICEBEAR_SEEDS.length)];
-  return `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  return `https://api.dicebear.com/9.x/avataaars/png?seed=${encodeURIComponent(seed)}`;
 }
 
 const defaultSettings: UserSettings = {
@@ -250,6 +250,23 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'toonplayer-unified-store',
+      version: 3,
+      migrate: (persistedState: any, version: number) => {
+        const state = persistedState as any;
+        if (state && state.profiles) {
+          state.profiles = state.profiles.map((p: any) => {
+            let avatar = p.avatar || "";
+            if (avatar.includes("/svg?")) {
+              avatar = avatar.replace("/svg?", "/png?");
+            }
+            if (!avatar || avatar.includes("undefined") || avatar.includes("null") || avatar.trim() === "") {
+              avatar = `https://api.dicebear.com/9.x/avataaars/png?seed=${encodeURIComponent(p.name || 'Avatar')}`;
+            }
+            return { ...p, avatar };
+          });
+        }
+        return state;
+      },
       storage: createJSONStorage(() => {
         try {
           return window.localStorage;

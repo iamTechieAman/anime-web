@@ -12,14 +12,14 @@ import { useNotifications, type NotificationPreferences } from "@/context/Notifi
 import { useRouter } from "next/navigation";
 
 const AVATARS = [
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Felix",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Aneka",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Milo",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Luna",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Oliver",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Shadow",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Midnight",
-    "https://api.dicebear.com/9.x/avataaars/svg?seed=Frost",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Felix",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Aneka",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Milo",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Luna",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Oliver",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Shadow",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Midnight",
+    "https://api.dicebear.com/9.x/avataaars/png?seed=Frost",
 ];
 
 const ACCENT_COLORS = [
