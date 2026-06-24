@@ -204,7 +204,15 @@ export const useUserStore = create<UserState>()(
           isKids: false,
           theme: 'red',
           ...profile
-        };
+        } as Profile;
+
+        if (state.activeProfileId === profile.id && typeof window !== 'undefined') {
+          localStorage.setItem("toonplayer_profile", JSON.stringify(fullProfile));
+          setTimeout(() => {
+            window.dispatchEvent(new Event("profileUpdated"));
+          }, 0);
+        }
+
         const exists = state.profiles.find(p => p.id === profile.id);
         if (exists) {
             return {
