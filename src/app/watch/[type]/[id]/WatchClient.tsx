@@ -1292,7 +1292,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     className="absolute inset-0 w-full h-full border-0" 
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
-                                    sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                                 />
                             </div>
                         </div>
@@ -1403,7 +1402,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
                         allowFullScreen
                         title={`${title} - ToonPlayer`}
-                        sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                         onError={handleAutoFallback}
                         onLoad={(e) => {
                             setPlayerLoaded(true);

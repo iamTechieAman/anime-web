@@ -1056,7 +1056,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             className="absolute inset-0 w-full h-full border-0"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
-                            sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                             onLoad={(e: any) => {
                                 try {
                                     const iframe = e.target as HTMLIFrameElement;
@@ -1197,7 +1196,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     className="w-full h-full border-0 bg-black"
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
                                     allowFullScreen
-                                    sandbox={aggressiveSandbox ? "allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads" : undefined}
                                     onLoad={(e: any) => {
                                         setLoadingSource(false);
                                         try {
