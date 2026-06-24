@@ -3,12 +3,16 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X } from "lucide-react";
-import Image from "next/image";
-import { useUserStore, Profile, getAvatarUrl, getRandomBitmojiUrl } from "@/store/userStore";
+import { useUserStore, Profile, getAvatarUrl, getRandomBitmojiUrl, isDefaultAvatar } from "@/store/userStore";
 import { useUser } from "@clerk/nextjs";
 
-const ProfileAvatar = ({ src, alt, sizes = "120px" }: { src?: string | null, alt?: string | null, sizes?: string }) => {
+const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null }) => {
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setError(false);
+  }, [src]);
+
   const isInvalidSrc = !src || 
     src === "null" || 
     src === "undefined" || 
@@ -23,7 +27,7 @@ const ProfileAvatar = ({ src, alt, sizes = "120px" }: { src?: string | null, alt
   return error || isInvalidSrc ? (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-black text-4xl select-none">{fallbackChar}</div>
   ) : (
-    <Image src={src!} alt={alt || "Avatar"} fill sizes={sizes} className="object-cover" onError={() => setError(true)} />
+    <img src={src!} alt={alt || "Avatar"} className="w-full h-full object-cover" onError={() => setError(true)} />
   );
 };
 
@@ -48,7 +52,9 @@ export default function ProfileGate() {
     if (isLoaded && user && !synced) {
       const clerkProfileId = `profile-${user.id}`;
       const clerkName = user.firstName || user.username || "My Profile";
-      const clerkAvatar = user.imageUrl || getAvatarUrl(clerkName, 'orange');
+      const clerkAvatar = (user.imageUrl && !isDefaultAvatar(user.imageUrl)) 
+        ? user.imageUrl 
+        : getAvatarUrl(clerkName, 'orange');
       
       syncProfile({ id: clerkProfileId, name: clerkName, avatar: clerkAvatar });
       setSynced(true);

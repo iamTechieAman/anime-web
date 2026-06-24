@@ -7,7 +7,6 @@ import {
     Users, Brain, Palette, Accessibility as AccessIcon, Keyboard, 
     X, Sliders
 } from "lucide-react";
-import Image from "next/image";
 import toast from "react-hot-toast";
 import { useNotifications, type NotificationPreferences } from "@/context/NotificationContext";
 import ModalPortal from "./ModalPortal";
@@ -273,7 +272,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                                     : "border-transparent opacity-60 hover:opacity-100"
                                                             }`}
                                                         >
-                                                            <Image src={avatar} alt="DiceBear Avatar" fill sizes="56px" className="object-cover" />
+                                                            <img src={avatar} alt="DiceBear Avatar" className="w-full h-full object-cover" />
                                                             {selectedAvatar === avatar && (
                                                                 <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                                                                     <Check className="w-4 h-4 text-white" />

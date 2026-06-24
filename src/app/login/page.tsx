@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Play, Github } from "lucide-react";
+import { Play } from "lucide-react";
 import Image from "next/image";
 import { useSignIn, useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
@@ -118,22 +118,6 @@ export default function LoginPage() {
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 object-contain" />
               Continue with Google
-            </button>
-            <button
-              onClick={() => handleOAuth("oauth_github")}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-[#24292F] text-white rounded-xl font-bold hover:bg-[#2b3137] transition-all active:scale-95"
-            >
-              <Github className="w-5 h-5" />
-              Continue with Github
-            </button>
-            <button
-              onClick={() => handleOAuth("oauth_discord")}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-[#5865F2] text-white rounded-xl font-bold hover:bg-[#4752C4] transition-all active:scale-95"
-            >
-              <svg className="w-5 h-5 fill-current text-white shrink-0" viewBox="0 0 127.14 96.36">
-                <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,52.88,6.83,77.19,77.19,0,0,0,49.58,0,105.15,105.15,0,0,0,19.14,8.07C2.81,32.22-1.71,55.8,1.08,79a105.42,105.42,0,0,0,32.26,16.14,77.7,77.7,0,0,0,7.37-12,68.58,68.58,0,0,1-11.59-5.54c1-.71,1.93-1.47,2.83-2.25a74.77,74.77,0,0,0,58,0c.9,1.18,1.9,1.94,2.9,2.65a68.58,68.58,0,0,1-11.59,5.54,77.7,77.7,0,0,0,7.37,12,105.42,105.42,0,0,0,32.26-16.14C129.23,50.15,124.3,26.79,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
-              </svg>
-              Continue with Discord
             </button>
 
             <div className="relative py-4">

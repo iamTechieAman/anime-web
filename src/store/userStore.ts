@@ -53,6 +53,17 @@ export function getAvatarUrl(name: string, theme: string = 'orange'): string {
   return `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
 }
 
+export function isDefaultAvatar(url?: string | null): boolean {
+  if (!url) return true;
+  const lowerUrl = url.toLowerCase();
+  return (
+    lowerUrl.includes("default-user-image") ||
+    lowerUrl.includes("default-avatar") ||
+    lowerUrl.includes("placeholder") ||
+    lowerUrl.includes("gravatar.com")
+  );
+}
+
 const DICEBEAR_SEEDS = ["Totoro", "Ponyo", "Luffy", "Naruto", "Nezuko", "Goku", "Pikachu", "Chihiro", "Felix", "Aneka", "Milo", "Luna", "Oliver", "Shadow", "Midnight", "Frost"];
 
 export function getRandomBitmojiUrl(name?: string): string {

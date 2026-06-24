@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 interface UserAvatarProps {
   src?: string | null;
@@ -48,12 +47,10 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
       className={`relative shrink-0 overflow-hidden ${!loaded ? 'bg-white/10 animate-pulse' : ''} ${className}`}
       style={{ width: size, height: size, borderRadius: "50%" }}
     >
-      <Image
+      <img
         src={src}
         alt={alt}
-        fill
-        sizes={`${size}px`}
-        className={`object-cover transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-cover transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />

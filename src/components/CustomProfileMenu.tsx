@@ -171,8 +171,8 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
         className={`relative w-9 h-9 md:w-10 md:h-10 rounded-full ring-2 ring-accent/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
       >
         <UserAvatar 
-          src={user ? user.imageUrl : activeProfile?.avatar} 
-          alt={user ? (user.fullName || "User") : (activeProfile?.name || "Guest")} 
+          src={activeProfile?.avatar || user?.imageUrl} 
+          alt={activeProfile?.name || user?.fullName || "User"} 
           initials={initials} 
           size={40} 
           className="w-full h-full rounded-full" 
@@ -195,15 +195,15 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
               <div className="p-4 border-b border-white/5 flex items-center gap-3 bg-white/5">
                 <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
                   <UserAvatar 
-                    src={user ? user.imageUrl : activeProfile?.avatar} 
-                    alt={user ? (user.fullName || "User") : (activeProfile?.name || "Guest")} 
+                    src={activeProfile?.avatar || user?.imageUrl} 
+                    alt={activeProfile?.name || user?.fullName || "User"} 
                     initials={initials} 
                     size={40} 
                     className="w-full h-full" 
                   />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold text-white truncate">{user ? (user.fullName || "User") : (activeProfile?.name || "Guest")}</span>
+                  <span className="text-sm font-bold text-white truncate">{activeProfile?.name || user?.fullName || "User"}</span>
                   <span className="text-[10px] text-zinc-400 truncate">{user ? user.primaryEmailAddress?.emailAddress : "Guest Mode"}</span>
                 </div>
               </div>

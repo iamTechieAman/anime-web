@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Plus, X, Pencil, Check, Trash2 } from "lucide-react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
@@ -311,7 +310,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                     } cursor-pointer`}
                   >
                     <div className="relative w-full h-full">
-                      <Image src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" fill className="object-cover rounded-lg" sizes="60px" />
+                      <img src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" className="w-full h-full object-cover rounded-lg" />
                     </div>
                   </button>
 
@@ -327,7 +326,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                         } cursor-pointer`}
                       >
                         <div className="relative w-full h-full">
-                          <Image src={avatar.url} alt={avatar.name} fill className="object-cover rounded-lg" sizes="60px" />
+                          <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover rounded-lg" />
                         </div>
                       </button>
                     );

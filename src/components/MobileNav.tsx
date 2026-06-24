@@ -38,6 +38,9 @@ export default function MobileNav() {
 
     if (!isMounted) return null;
 
+    const isWatchPage = pathname?.startsWith('/watch');
+    if (isWatchPage) return null;
+
     const navItems = [
         {
             label: "Movies",
