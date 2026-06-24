@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
+    unoptimized: true,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     remotePatterns: [
