@@ -17,14 +17,14 @@ interface SettingsModalProps {
 }
 
 const AVATARS = [
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Felix",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Aneka",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Milo",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Luna",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Oliver",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Shadow",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Midnight",
-    "https://api.dicebear.com/9.x/avataaars/png?seed=Frost",
+    "/avatars/avatar-1.png",
+    "/avatars/avatar-2.png",
+    "/avatars/avatar-3.png",
+    "/avatars/avatar-4.png",
+    "/avatars/avatar-5.png",
+    "/avatars/avatar-6.png",
+    "/avatars/avatar-7.png",
+    "/avatars/avatar-8.png",
 ];
 
 const ACCENT_COLORS = [
@@ -172,7 +172,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         if (!name.trim()) { toast.error("Name cannot be empty"); return; }
         setIsSaving(true);
         setTimeout(() => {
-            const profile = { name: name.trim(), avatar: selectedAvatar };
+            let profile = { name: name.trim(), avatar: selectedAvatar };
             
             // Sync with Unified Zustand Store if active profile matches or to update it
             const activeProfileStr = localStorage.getItem("toonplayer_profile");
@@ -182,6 +182,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     if (parsed.id) {
                         const store = useUserStore.getState();
                         store.syncProfile({ id: parsed.id, name: name.trim(), avatar: selectedAvatar });
+                        profile = { ...parsed, name: name.trim(), avatar: selectedAvatar };
                     }
                 } catch {}
             }

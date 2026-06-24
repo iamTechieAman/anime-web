@@ -23,11 +23,19 @@ const ProfileEditModal = dynamic(() => import("@/components/ProfileEditModal"), 
 const SettingsModal = dynamic(() => import("@/components/SettingsModal"), { ssr: false });
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { activeProfileId } = useUserStore();
+  const { activeProfileId, setActiveProfile } = useUserStore();
   const [mounted, setMounted] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
   
   useEffect(() => {
     setMounted(true);
+    setHasHydrated(useUserStore.persist.hasHydrated());
+    const unsubHydrate = useUserStore.persist.onHydrate(() => setHasHydrated(false));
+    const unsubFinishHydration = useUserStore.persist.onFinishHydration(() => setHasHydrated(true));
+    return () => {
+      unsubHydrate();
+      unsubFinishHydration();
+    };
   }, []);
 
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
@@ -118,6 +126,13 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       closeAllModals();
       setIsSettingsOpen(true);
     };
+    const handleProfileGateEvent = () => {
+      closeAllModals();
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("toonplayer-explicit-switch", "true");
+      }
+      setActiveProfile(null);
+    };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("openRandomizer", handleEvent);
@@ -125,6 +140,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     window.addEventListener("openLoginModal", handleLoginEvent);
     window.addEventListener("openProfileModal", handleProfileEvent);
     window.addEventListener("openSettingsModal", handleSettingsEvent);
+    window.addEventListener("openProfileGate", handleProfileGateEvent);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("openRandomizer", handleEvent);
@@ -132,8 +148,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       window.removeEventListener("openLoginModal", handleLoginEvent);
       window.removeEventListener("openProfileModal", handleProfileEvent);
       window.removeEventListener("openSettingsModal", handleSettingsEvent);
+      window.removeEventListener("openProfileGate", handleProfileGateEvent);
     };
-  }, [isRandomizerOpen, isCommandPaletteOpen, isLoginOpen, isProfileOpen, isSettingsOpen]);
+  }, [isRandomizerOpen, isCommandPaletteOpen, isLoginOpen, isProfileOpen, isSettingsOpen, setActiveProfile]);
 
 
   
@@ -142,7 +159,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   }
 
   const showSidebar = !isWatchPage;
-  const isProfileGateActive = !activeProfileId;
+  const isProfileGateActive = hasHydrated && !activeProfileId;
 
   return (
     <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative">

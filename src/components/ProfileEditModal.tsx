@@ -14,14 +14,14 @@ interface ProfileEditModalProps {
 }
 
 const AVATARS = [
-  { name: "Totoro", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Totoro" },
-  { name: "Ponyo", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Ponyo" },
-  { name: "Luffy", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Luffy" },
-  { name: "Naruto", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Naruto" },
-  { name: "Nezuko", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Nezuko" },
-  { name: "Goku", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Goku" },
-  { name: "Pikachu", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Pikachu" },
-  { name: "Chihiro", url: "https://api.dicebear.com/9.x/avataaars/png?seed=Chihiro" }
+  { name: "Totoro", url: "/avatars/avatar-1.png" },
+  { name: "Ponyo", url: "/avatars/avatar-2.png" },
+  { name: "Luffy", url: "/avatars/avatar-3.png" },
+  { name: "Naruto", url: "/avatars/avatar-4.png" },
+  { name: "Nezuko", url: "/avatars/avatar-5.png" },
+  { name: "Goku", url: "/avatars/avatar-6.png" },
+  { name: "Pikachu", url: "/avatars/avatar-7.png" },
+  { name: "Chihiro", url: "/avatars/avatar-8.png" }
 ];
 
 const THEMES = [

@@ -63,20 +63,23 @@ export default function ProfileGate() {
     const checkPersistedProfile = () => {
       let activeId = activeProfileId;
       if (!activeId && typeof window !== "undefined") {
-        try {
-          const storeData = window.localStorage.getItem("toonplayer-unified-store");
-          if (storeData) {
-            const parsed = JSON.parse(storeData);
-            if (parsed && parsed.state && parsed.state.activeProfileId) {
-              activeId = parsed.state.activeProfileId;
+        const isExplicitSwitch = window.sessionStorage.getItem("toonplayer-explicit-switch") === "true";
+        if (!isExplicitSwitch) {
+          try {
+            const storeData = window.localStorage.getItem("toonplayer-unified-store");
+            if (storeData) {
+              const parsed = JSON.parse(storeData);
+              if (parsed && parsed.state && parsed.state.activeProfileId) {
+                activeId = parsed.state.activeProfileId;
+              }
             }
-          }
-        } catch (e) {}
+          } catch (e) {}
 
-        if (!activeId) {
-          const match = document.cookie.match(/(^|;)\s*toonplayer_active_profile_id\s*=\s*([^;]+)/);
-          if (match) {
-            activeId = match[2];
+          if (!activeId) {
+            const match = document.cookie.match(/(^|;)\s*toonplayer_active_profile_id\s*=\s*([^;]+)/);
+            if (match) {
+              activeId = match[2];
+            }
           }
         }
       }
@@ -102,6 +105,7 @@ export default function ProfileGate() {
       if (typeof window !== "undefined") {
         window.sessionStorage.removeItem("toonplayer-session-active");
         window.sessionStorage.removeItem("toonplayer_active_profile_id");
+        window.sessionStorage.setItem("toonplayer-explicit-switch", "true");
         document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
       setShowGate(true);
@@ -125,6 +129,7 @@ export default function ProfileGate() {
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem("toonplayer-session-active", "true");
         window.sessionStorage.setItem("toonplayer_active_profile_id", profile.id);
+        window.sessionStorage.removeItem("toonplayer-explicit-switch");
         document.cookie = `toonplayer_active_profile_id=${profile.id}; path=/; max-age=31536000; SameSite=Lax`;
       }
       setShowGate(false);
