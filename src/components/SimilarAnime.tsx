@@ -10,7 +10,6 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
     const [similar, setSimilar] = useState<Show[]>([]);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
-    const scrollAnimationRef = useRef<number | null>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
 
@@ -48,28 +47,10 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
         const target = el.scrollLeft + (dir === 'right' ? amount : -amount);
         const clampedTarget = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
 
-        if (scrollAnimationRef.current) {
-            cancelAnimationFrame(scrollAnimationRef.current);
-        }
-
-        const start = el.scrollLeft;
-        const change = clampedTarget - start;
-        const duration = 280; // Snappy 280ms scroll transition
-        const startTime = performance.now();
-
-        const animate = (time: number) => {
-            const elapsed = time - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const ease = progress * (2 - progress); // Ease Out Quad
-            el.scrollLeft = start + change * ease;
-
-            if (progress < 1) {
-                scrollAnimationRef.current = requestAnimationFrame(animate);
-            } else {
-                scrollAnimationRef.current = null;
-            }
-        };
-        scrollAnimationRef.current = requestAnimationFrame(animate);
+        el.scrollTo({
+            left: clampedTarget,
+            behavior: 'smooth'
+        });
     };
 
     useEffect(() => {

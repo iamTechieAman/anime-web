@@ -415,7 +415,7 @@ const CommentsSection = memo(function CommentsSection({ contentId, category = "a
                             {/* Avatar */}
                             {comment.avatar && (comment.avatar.startsWith('http') || comment.avatar.startsWith('data:')) ? (
                                 <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0">
-                                    <img src={comment.avatar} alt={comment.username} className="w-full h-full object-cover" />
+                                    <img src={comment.avatar} alt={comment.username} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                 </div>
                             ) : (
                                 <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xs select-none ${comment.avatar || 'bg-accent text-black font-black'}`}>

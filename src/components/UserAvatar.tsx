@@ -52,6 +52,7 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
       <img
         src={src}
         alt={alt}
+        decoding="async"
         className={`w-full h-full object-cover transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}

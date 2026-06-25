@@ -80,7 +80,7 @@ const EpisodeButton = React.memo(function EpisodeButton({
             <div className="flex gap-3 w-full items-center">
                 {thumbnail && (
                     <div className="w-20 h-12 flex-shrink-0 rounded bg-zinc-800 overflow-hidden relative border border-white/5">
-                        <img src={thumbnail} alt="thumbnail" className="w-full h-full object-cover" loading="lazy" />
+                        <img src={thumbnail} alt="thumbnail" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         <div className="absolute inset-0 bg-black/20" />
                     </div>
                 )}
@@ -1378,9 +1378,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         >
                             <div className="w-full aspect-video rounded-lg overflow-hidden bg-bg-main relative mb-2">
                                 {typeof ep === 'object' && ep.image ? (
-                                    <img src={ep.image} alt={ep.title || `Episode ${epNum}`} className="w-full h-full object-cover" loading="lazy" />
+                                    <img src={ep.image} alt={ep.title || `Episode ${epNum}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                 ) : show.thumbnail ? (
-                                    <img src={show.thumbnail} alt={`Episode ${epNum}`} className="w-full h-full object-cover" loading="lazy" />
+                                    <img src={show.thumbnail} alt={`Episode ${epNum}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                 ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />
                                 )}

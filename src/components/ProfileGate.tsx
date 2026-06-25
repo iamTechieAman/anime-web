@@ -195,7 +195,7 @@ export default function ProfileGate() {
           key="profile-gate"
           initial={{ opacity: 0, backgroundColor: "rgba(0,0,0,1)" }}
           animate={{ opacity: 1, backgroundColor: "var(--bg-main)" }}
-          exit={{ opacity: 0, filter: isMobile ? "none" : "blur(10px)" }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: isMobile ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-start md:justify-center overflow-y-auto p-6 md:p-8 bg-bg-main hide-scrollbar"
         >

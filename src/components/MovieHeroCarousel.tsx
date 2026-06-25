@@ -184,10 +184,13 @@ export default function MovieHeroCarousel({ items }: { items: HeroItem[] }) {
                     <button
                         key={i}
                         onClick={() => setCurrent(i)}
-                        className={`transition-all duration-[250ms] rounded-full ${i === current
-                            ? "w-8 h-2 bg-accent-warm shadow-glow-warm"
-                            : "w-2 h-2 bg-white/30 hover:bg-white/50"
-                            }`}
+                        className="h-2 rounded-full bg-white/30 hover:bg-white/50 transition-all duration-[250ms] ease-out will-change-transform origin-center"
+                        style={{
+                            width: '8px',
+                            transform: i === current ? 'scaleX(4)' : 'scaleX(1)',
+                            backgroundColor: i === current ? 'var(--accent-warm)' : undefined,
+                            boxShadow: i === current ? 'var(--shadow-glow-warm)' : undefined
+                        }}
                     />
                 ))}
             </div>

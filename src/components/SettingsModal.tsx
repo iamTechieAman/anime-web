@@ -273,7 +273,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                                     : "border-transparent opacity-60 hover:opacity-100"
                                                             }`}
                                                         >
-                                                            <img src={avatar} alt="DiceBear Avatar" className="w-full h-full object-cover" />
+                                                            <img src={avatar} alt="DiceBear Avatar" className="w-full h-full object-cover" decoding="async" />
                                                             {selectedAvatar === avatar && (
                                                                 <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                                                                     <Check className="w-4 h-4 text-white" />

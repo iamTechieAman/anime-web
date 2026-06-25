@@ -30,7 +30,7 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
   return error || isInvalidSrc ? (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-black text-2xl select-none rounded-lg">{fallbackChar}</div>
   ) : (
-    <img src={src!} alt={alt || "Avatar"} className="w-full h-full object-cover rounded-lg" onError={() => setError(true)} />
+    <img src={src!} alt={alt || "Avatar"} className="w-full h-full object-cover rounded-lg" onError={() => setError(true)} decoding="async" />
   );
 };
 
@@ -166,7 +166,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 onClick={() => handleOAuth("oauth_google")}
                 className="w-full flex items-center justify-center gap-3 px-5 py-3 bg-white text-black rounded-xl font-bold hover:bg-gray-100 transition-all active:scale-95 cursor-pointer text-sm"
               >
-                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-[18px] h-[18px] object-contain" />
+                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-[18px] h-[18px] object-contain" decoding="async" />
                 Continue with Google
               </button>
 

@@ -627,8 +627,8 @@ p, .text-body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; filter: blur(10px); }
-  50% { opacity: 0.7; filter: blur(15px); }
+  0%, 100% { opacity: 0.45; transform: scale(0.98) translateZ(0); }
+  50% { opacity: 0.7; transform: scale(1.02) translateZ(0); }
 }
 
 @keyframes countdownRing {
@@ -964,6 +964,8 @@ p, .text-body {
 .profile-glow { box-shadow: var(--shadow-glow-orange); }
 
 .pulse-glow {
+  filter: blur(12px);
+  will-change: transform, opacity;
   animation: pulse-glow 3.5s ease-in-out infinite;
 }
 
@@ -1101,12 +1103,14 @@ p, .text-body {
   height: 8px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s ease;
   cursor: pointer;
+  transform-origin: center;
+  will-change: transform;
 }
 
 .hero-dot.active {
-  width: 24px;
+  transform: scaleX(3);
   background: white;
 }
 
@@ -1128,7 +1132,7 @@ p, .text-body {
   font-size: 14px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   animation: fadeSlideUp 0.3s ease both;
 }
 
@@ -1337,7 +1341,7 @@ p, .text-body {
   letter-spacing: 0.02em;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text-muted);
   background: transparent;
   padding: 0 4px;
@@ -1462,24 +1466,44 @@ html, body {
 @media (hover: none) and (pointer: coarse) {
   /* Disable hover scale/translate transforms */
   .premium-card:hover,
+  .premium-card-container:hover,
+  .card-hover-expand:hover,
   .group:hover,
-  .group:hover * {
-    transform: none !important;
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3) !important;
-  }
-
-  .card-hover-expand:hover {
-    transform: none;
-    box-shadow: none;
-    z-index: auto;
-  }
-
-  /* Disable hover opacity overlays on touch screens (e.g. play overlays, cards slide-up metadata) */
+  .group:hover *,
   .group:hover .premium-card-overlay,
-  .group:hover .absolute.opacity-0,
-  .group:hover .opacity-0 {
+  .group:hover .premium-card-overlay-content {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border-color) !important;
+    z-index: 1 !important;
+  }
+
+  .premium-card-overlay,
+  .premium-card-overlay-content,
+  .group:hover .premium-card-overlay,
+  .group:hover .premium-card-overlay-content,
+  .premium-card-container:hover .premium-card-overlay,
+  .premium-card-container:hover .premium-card-overlay-content {
     opacity: 0 !important;
+    visibility: hidden !important;
     pointer-events: none !important;
+    transform: none !important;
+  }
+
+  /* Disable Tailwind hover transforms globally on touch screens */
+  [class*="hover:scale"]:hover,
+  [class*="group-hover:scale"]:hover,
+  [class*="hover:translate"]:hover,
+  [class*="group-hover:translate"]:hover,
+  [class*="hover:-translate"]:hover,
+  [class*="group-hover:-translate"]:hover,
+  [class*="hover:shadow"]:hover,
+  [class*="group-hover:shadow"]:hover,
+  [class*="hover:bg-"]:hover,
+  [class*="hover:border-"]:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: inherit !important;
   }
 
   /* Active feedback only */
@@ -1873,7 +1897,7 @@ main, .relative.z-10 {
   font-weight: 900 !important;
   border-radius: 12px !important;
   box-shadow: 0 14px 34px rgba(249, 115, 22, 0.28) !important;
-  transition: all 0.2s ease-in-out !important;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out !important;
 }
 
 .cl-formButtonPrimary:hover {

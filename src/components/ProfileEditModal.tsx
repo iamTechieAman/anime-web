@@ -310,7 +310,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                     } cursor-pointer`}
                   >
                     <div className="relative w-full h-full">
-                      <img src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" className="w-full h-full object-cover rounded-lg" />
+                      <img src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" className="w-full h-full object-cover rounded-lg" decoding="async" />
                     </div>
                   </button>
 
@@ -326,7 +326,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                         } cursor-pointer`}
                       >
                         <div className="relative w-full h-full">
-                          <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover rounded-lg" />
+                          <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover rounded-lg" decoding="async" />
                         </div>
                       </button>
                     );
