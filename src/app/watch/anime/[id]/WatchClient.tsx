@@ -1878,7 +1878,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 {!isFocusMode && (
                     <div className="mt-0 mb-[64px] w-full space-y-[48px]">
                         <SimilarAnime currentShowId={show._id} showName={show.name || 'this'} />
-                        <CommentsSection contentId={id} category="anime" />
+                        <CommentsSection 
+                            contentId={id} 
+                            category="anime" 
+                            episodeId={currentEp}
+                            slug={show?.name ? show.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : undefined}
+                        />
                     </div>
                 )}
 

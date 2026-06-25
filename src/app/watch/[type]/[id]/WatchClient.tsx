@@ -1634,9 +1634,18 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
 
     const renderComments = () => {
+        const slugStr = details?.title 
+            ? details.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') 
+            : undefined;
         return (
             <section className="relative z-10 mt-[48px] mb-[64px] bg-bg-main px-0 pt-6 pb-0 sm:px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto w-full">
-                <CommentsSection contentId={id} category={type === "movie" ? "movie" : "anime"} />
+                <CommentsSection 
+                    contentId={id} 
+                    category={type === "movie" ? "movie" : "anime"} 
+                    episodeId={type === "movie" ? undefined : selectedEpisode}
+                    seasonId={type === "movie" ? undefined : selectedSeason}
+                    slug={slugStr}
+                />
             </section>
         );
     };
