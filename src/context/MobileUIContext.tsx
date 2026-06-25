@@ -26,15 +26,17 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
 
     // Handle Android Back Button
     useEffect(() => {
-        let backListener: any = null;
+        let active = true;
+        let listenerInstance: any = null;
 
         const setupListener = async () => {
             try {
                 // Only import and use Capacitor if we are in a browser environment
                 if (typeof window !== 'undefined') {
                     const { App } = await import('@capacitor/app');
+                    if (!active) return;
                     
-                    backListener = await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+                    listenerInstance = await App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
                         if (isSearchOpen || isMenuOpen) {
                             setIsSearchOpen(false);
                             setIsMenuOpen(false);
@@ -47,6 +49,10 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
                             App.exitApp();
                         }
                     });
+
+                    if (!active && listenerInstance) {
+                        listenerInstance.remove();
+                    }
                 }
             } catch (error) {
                 console.warn("[MobileUIContext] Capacitor App plugin not available:", error);
@@ -56,9 +62,10 @@ export function MobileUIProvider({ children }: { children: ReactNode }) {
         setupListener();
 
         return () => {
-            if (backListener) {
+            active = false;
+            if (listenerInstance) {
                 try {
-                    backListener.remove();
+                    listenerInstance.remove();
                 } catch (e) {}
             }
         };

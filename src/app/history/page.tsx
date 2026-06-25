@@ -356,7 +356,7 @@ export default function HistoryPage() {
     const target = observerTarget.current;
     if (target) observer.observe(target);
     return () => { if (target) observer.unobserve(target); };
-  }, [isMounted, visibleCount]);
+  }, [isMounted]);
 
   // ── Filtering / Grouping ──────────────────────────────────────────────────
   const filtered = useMemo(() => {

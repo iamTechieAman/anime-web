@@ -144,12 +144,14 @@ const CommentsSection = memo(function CommentsSection({
     useEffect(() => {
         if (!isMounted) return;
 
+        let typingTimeout: NodeJS.Timeout | null = null;
+
         const interval = setInterval(() => {
             if (Math.random() > 0.4) return; // 40% chance of trigger
             const randomUser = USERNAME_POOL[Math.floor(Math.random() * USERNAME_POOL.length)];
             setTypingUser(randomUser);
 
-            setTimeout(() => {
+            typingTimeout = setTimeout(() => {
                 setTypingUser(null);
 
                 // 25% chance to post a simulated comment to keep discussion active
@@ -177,7 +179,10 @@ const CommentsSection = memo(function CommentsSection({
             }, 3000);
         }, 40000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            if (typingTimeout) clearTimeout(typingTimeout);
+        };
     }, [isMounted, contentId, episodeId, seasonId, slug]);
 
     // Fetch Tenor GIFs

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 export type NotificationCategory = 'episodes' | 'trending' | 'recommendations' | 'watchlist' | 'community' | 'system';
 
@@ -254,7 +254,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const addNotification = (notif: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+  const addNotification = useCallback((notif: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
     // Check preference before adding
     const catKey = notif.category as keyof NotificationPreferences;
     if (catKey in preferences && !preferences[catKey]) return;
@@ -265,33 +265,41 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       timestamp: Date.now(),
       read: false,
     };
-    const updated = [newNotif, ...notifications].slice(0, 50);
-    setNotifications(updated);
-    localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
-  };
+    setNotifications(prev => {
+      const updated = [newNotif, ...prev].slice(0, 50);
+      localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+      return updated;
+    });
+  }, [preferences]);
 
-  const markAsRead = (id: string) => {
-    const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
-    setNotifications(updated);
-    localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
-  };
+  const markAsRead = useCallback((id: string) => {
+    setNotifications(prev => {
+      const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
+      localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
-  const markAllAsRead = () => {
-    const updated = notifications.map(n => ({ ...n, read: true }));
-    setNotifications(updated);
-    localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
-  };
+  const markAllAsRead = useCallback(() => {
+    setNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, read: true }));
+      localStorage.setItem('toonplayer_notifications', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
-  const clearNotifications = () => {
+  const clearNotifications = useCallback(() => {
     setNotifications([]);
     localStorage.removeItem('toonplayer_notifications');
-  };
+  }, []);
 
-  const updatePreference = (key: keyof NotificationPreferences, value: boolean) => {
-    const updated = { ...preferences, [key]: value };
-    setPreferences(updated);
-    localStorage.setItem('toonplayer_notif_prefs', JSON.stringify(updated));
-  };
+  const updatePreference = useCallback((key: keyof NotificationPreferences, value: boolean) => {
+    setPreferences(prev => {
+      const updated = { ...prev, [key]: value };
+      localStorage.setItem('toonplayer_notif_prefs', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   return (
     <NotificationContext.Provider value={{

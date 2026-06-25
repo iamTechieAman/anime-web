@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { useUserStore, isKidsFriendly } from '@/store/userStore';
 
 export interface WatchHistoryItem {
     id: string;
@@ -66,6 +67,20 @@ const WatchContext = createContext<WatchContextType | undefined>(undefined);
 export function WatchProvider({ children }: { children: React.ReactNode }) {
     const [history, setHistory] = useState<WatchHistoryItem[]>([]);
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
+    
+    const isKidsMode = useUserStore(state => {
+        const activeId = state.activeProfileId;
+        return state.profiles.find(p => p.id === activeId)?.isKids || false;
+    });
+
+    const filteredHistory = useMemo(() => {
+        return isKidsMode ? history.filter(isKidsFriendly) : history;
+    }, [history, isKidsMode]);
+
+    const filteredWatchlist = useMemo(() => {
+        return isKidsMode ? watchlist.filter(isKidsFriendly) : watchlist;
+    }, [watchlist, isKidsMode]);
+
     const [customCollections, setCustomCollections] = useState<string[]>(DEFAULT_COLLECTIONS);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -289,8 +304,8 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <WatchContext.Provider value={{
-            history,
-            watchlist,
+            history: filteredHistory,
+            watchlist: filteredWatchlist,
             customCollections,
             addCollection,
             removeCollection,

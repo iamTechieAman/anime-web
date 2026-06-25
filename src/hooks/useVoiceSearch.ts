@@ -278,6 +278,11 @@ export function useVoiceSearch(onTranscriptReady: (text: string) => void) {
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
       stopAllMedia();
     };
   }, [stopAllMedia]);

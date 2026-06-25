@@ -29,6 +29,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const [pinnedSearches, setPinnedSearches] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const handleTranscriptReady = useCallback((text: string) => {
+        setQuery(text);
+    }, []);
+
     const {
         isListening,
         recordingFallbackActive,
@@ -39,9 +43,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         startListening,
         stopListening,
         runDiagnostics
-    } = useVoiceSearch((text) => {
-        setQuery(text);
-    });
+    } = useVoiceSearch(handleTranscriptReady);
 
     const toggleVoice = () => {
         if (isListening) {
