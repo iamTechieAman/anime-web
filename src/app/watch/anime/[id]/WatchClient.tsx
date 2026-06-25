@@ -475,16 +475,16 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const s = localStorage.getItem("toonplayer_settings");
                 if (s) {
                     const parsed = JSON.parse(s);
-                    if (parsed.autoplay !== undefined) setAutoPlay(parsed.autoplay);
-                    if (parsed.autoplay !== undefined) setAutoNext(parsed.autoplay);
+                    // Default to true if not explicitly set to false
+                    setAutoPlay(parsed.autoplay ?? true);
+                    setAutoNext(parsed.autoplay ?? true);
                     if (parsed.aggressiveSandbox !== undefined) {
                         setAggressiveSandbox(parsed.aggressiveSandbox);
                     }
                 } else {
-                    const savedAutoPlay = localStorage.getItem('toonplayer_autoplay') !== 'false';
-                    const savedAutoNext = localStorage.getItem('toonplayer_autonext') !== 'false';
-                    setAutoPlay(savedAutoPlay);
-                    setAutoNext(savedAutoNext);
+                    // No settings saved — both default to true
+                    setAutoPlay(localStorage.getItem('toonplayer_autoplay') !== 'false');
+                    setAutoNext(localStorage.getItem('toonplayer_autonext') !== 'false');
                 }
             } catch (e) {}
         };
