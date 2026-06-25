@@ -119,17 +119,38 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     setMounted(true);
     const hydrated = useUserStore.persist.hasHydrated();
     setHasHydrated(hydrated);
-    
-    if (hydrated && typeof window !== "undefined" && window.sessionStorage.getItem("toonplayer-session-active") !== "true") {
-      setActiveProfile(null);
-    }
 
+    // Sync active profile synchronously inside useEffect during mounting
+    if (typeof window !== "undefined") {
+      let activeId = useUserStore.getState().activeProfileId;
+      if (!activeId) {
+        try {
+          const storeData = window.localStorage.getItem("toonplayer-unified-store");
+          if (storeData) {
+            const parsed = JSON.parse(storeData);
+            if (parsed && parsed.state && parsed.state.activeProfileId) {
+              activeId = parsed.state.activeProfileId;
+            }
+          }
+        } catch (e) {}
+
+        if (!activeId) {
+          const match = document.cookie.match(/(^|;)\s*toonplayer_active_profile_id\s*=\s*([^;]+)/);
+          if (match) {
+            activeId = match[2];
+          }
+        }
+      }
+
+      if (activeId) {
+        setActiveProfile(activeId);
+      }
+    }
+    
     const unsubHydrate = useUserStore.persist.onHydrate(() => setHasHydrated(false));
     const unsubFinishHydration = useUserStore.persist.onFinishHydration(() => {
       setHasHydrated(true);
-      if (typeof window !== "undefined" && window.sessionStorage.getItem("toonplayer-session-active") !== "true") {
-        setActiveProfile(null);
-      }
+      // Active profile remains persistent across refreshes/tab close. No sessionStorage check.
     });
     return () => {
       unsubHydrate();

@@ -199,10 +199,12 @@ export const useUserStore = create<UserState>()(
       }),
 
       syncProfile: (profile) => set((state) => {
+        const exists = state.profiles.find(p => p.id === profile.id);
         const fullProfile = {
-          type: 'adult' as const,
-          isKids: false,
-          theme: 'red',
+          type: exists?.type || 'adult',
+          isKids: exists?.isKids || false,
+          theme: exists?.theme || 'red',
+          ...exists,
           ...profile
         } as Profile;
 
@@ -213,13 +215,12 @@ export const useUserStore = create<UserState>()(
           }, 0);
         }
 
-        const exists = state.profiles.find(p => p.id === profile.id);
         if (exists) {
             return {
-                profiles: state.profiles.map(p => p.id === profile.id ? { ...p, ...fullProfile } as Profile : p)
+                profiles: state.profiles.map(p => p.id === profile.id ? fullProfile : p)
             };
         }
-        return { profiles: [fullProfile as Profile, ...state.profiles] };
+        return { profiles: [fullProfile, ...state.profiles] };
       }),
 
       updateSettings: (profileId, newSettings) => set((state) => ({

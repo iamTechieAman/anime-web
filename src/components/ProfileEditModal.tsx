@@ -172,7 +172,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                     >
                       {/* Avatar wrap */}
                       <div 
-                        className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 transition-all duration-[250ms] ${
+                        className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 transition-all duration-[250ms] ${
                           isActive && !isManaging
                             ? 'border-white shadow-[0_0_24px_rgba(255,255,255,0.3)] bg-zinc-800' 
                             : 'border-transparent group-hover:scale-105'
@@ -182,7 +182,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                           boxShadow: !isManaging && isActive ? `0 0 20px ${themeColor}40` : 'none'
                         }}
                       >
-                        <UserAvatar src={p.avatar} alt={p.name} initials={p.name[0] || "?"} size={112} className="w-full h-full rounded-2xl" />
+                        <UserAvatar src={p.avatar} alt={p.name} initials={p.name[0] || "?"} size={112} className="w-full h-full rounded-full" />
                         
                         {/* Manage Overlay */}
                         {isManaging && (
@@ -204,7 +204,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                     onClick={handleCreateOpen}
                     className="group flex flex-col items-center gap-3 cursor-pointer"
                   >
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 border-dashed border-zinc-700 bg-transparent group-hover:border-white group-hover:bg-white/5 transition-all flex items-center justify-center">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed border-zinc-700 bg-transparent group-hover:border-white group-hover:bg-white/5 transition-all flex items-center justify-center">
                       <Plus className="w-8 h-8 text-zinc-500 group-hover:text-white transition-colors" />
                     </div>
                     <span className="text-sm font-bold text-zinc-500 group-hover:text-white transition-colors">
@@ -242,8 +242,8 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
 
               <div className="flex flex-col md:flex-row gap-6 items-center">
                 {/* Visual Preview */}
-                <div className="relative w-32 h-32 rounded-2xl overflow-hidden border-4 border-accent bg-zinc-800 shrink-0">
-                  <UserAvatar src={selectedAvatar} alt="Profile Avatar" initials={profileName[0] || "?"} size={128} className="w-full h-full rounded-2xl" />
+                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-accent bg-zinc-800 shrink-0">
+                  <UserAvatar src={selectedAvatar} alt="Profile Avatar" initials={profileName[0] || "?"} size={128} className="w-full h-full rounded-full" />
                 </div>
 
                 <div className="flex-1 w-full space-y-4">
@@ -305,12 +305,12 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                   <button
                     type="button"
                     onClick={() => setSelectedAvatar(getAvatarUrl(profileName, theme))}
-                    className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-gradient-to-br from-accent to-accent-secondary p-1 transition-all ${
+                    className={`relative aspect-square rounded-full overflow-hidden border-2 bg-gradient-to-br from-accent to-accent-secondary p-1 transition-all ${
                       selectedAvatar === getAvatarUrl(profileName, theme) ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
                     } cursor-pointer`}
                   >
                     <div className="relative w-full h-full">
-                      <img src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" className="w-full h-full object-cover rounded-lg" decoding="async" />
+                      <img src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" className="w-full h-full object-cover rounded-full" decoding="async" />
                     </div>
                   </button>
 
@@ -321,12 +321,12 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                         key={avatar.name}
                         type="button"
                         onClick={() => setSelectedAvatar(avatar.url)}
-                        className={`relative aspect-square rounded-xl overflow-hidden border-2 bg-white/5 p-1 transition-all ${
+                        className={`relative aspect-square rounded-full overflow-hidden border-2 bg-white/5 p-1 transition-all ${
                           isSelected ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
                         } cursor-pointer`}
                       >
                         <div className="relative w-full h-full">
-                          <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover rounded-lg" decoding="async" />
+                          <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover rounded-full" decoding="async" />
                         </div>
                       </button>
                     );

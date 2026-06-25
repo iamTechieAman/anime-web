@@ -421,6 +421,17 @@ Recent system updates have introduced key improvements to ToonPlayer's core aggr
 
 ---
 
+## Profile System
+
+- Circular avatars
+- Persistent profile settings
+- Reliable avatar uploads
+- Autoplay enabled by default
+- Fixed header avatar rendering
+- Improved state persistence
+
+---
+
 ## ⚠️ Disclaimer
 
 > ToonPlayer is a **content aggregator** built for **educational and research purposes only**. It does not host, store, or distribute any copyrighted media. All video streams are sourced from third-party providers and are displayed via publicly accessible embeds. The developers are not responsible for any content served by external sources.

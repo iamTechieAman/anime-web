@@ -46,7 +46,7 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
   return (
     <div className="relative w-full h-full">
       {loading && (
-        <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded-lg" />
+        <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded-full" />
       )}
       <img 
         src={src!} 
@@ -239,7 +239,7 @@ export default function ProfileGate() {
                       className="relative group cursor-pointer flex flex-col items-center gap-4"
                       onClick={() => !selectedId && handleSelectProfile(p)}
                     >
-                      <div className={`relative w-[120px] h-[120px] rounded-xl overflow-hidden border-4 transition-all duration-[250ms] ${isSelected ? selectGlowClass : `border-transparent bg-zinc-800 ${themeGlowClass}`}`}>
+                      <div className={`relative w-[120px] h-[120px] rounded-full overflow-hidden border-4 transition-all duration-[250ms] ${isSelected ? selectGlowClass : `border-transparent bg-zinc-800 ${themeGlowClass}`}`}>
                         <ProfileAvatar src={p.avatar} alt={p.name} />
                       </div>
                       
@@ -270,7 +270,7 @@ export default function ProfileGate() {
                     className="group cursor-pointer flex flex-col items-center gap-4"
                     onClick={() => setIsCreating(true)}
                   >
-                    <div className="w-[120px] h-[120px] rounded-xl border-4 border-dashed border-zinc-700 group-hover:border-white group-hover:bg-white/5 transition-all flex items-center justify-center bg-transparent">
+                    <div className="w-[120px] h-[120px] rounded-full border-4 border-dashed border-zinc-700 group-hover:border-white group-hover:bg-white/5 transition-all flex items-center justify-center bg-transparent">
                       <Plus className="w-10 h-10 text-zinc-500 group-hover:text-white transition-colors" />
                     </div>
                     <span className="text-base md:text-lg font-bold text-zinc-500 group-hover:text-white transition-colors">Add Profile</span>
@@ -280,7 +280,7 @@ export default function ProfileGate() {
             ) : (
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-md mx-auto">
                 <div className="group relative w-full">
-                  <div className="w-[120px] h-[120px] mx-auto rounded-xl bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative will-change-transform" >
+                  <div className="w-[120px] h-[120px] mx-auto rounded-full bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative will-change-transform" >
                     {profileName.trim() ? (
                       <ProfileAvatar src={getRandomBitmojiUrl(profileName.trim())} alt="Avatar preview" />
                     ) : (

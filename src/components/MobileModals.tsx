@@ -22,8 +22,8 @@ export default function MobileModals() {
     const { isMenuOpen, setMenuOpen, isSearchOpen, setSearchOpen } = useMobileUI();
     const pathname = usePathname();
     const router = useRouter();
-    const [autoPlay, setAutoPlay] = useState(false);
-    const [autoNext, setAutoNext] = useState(false);
+    const [autoPlay, setAutoPlay] = useState(true);
+    const [autoNext, setAutoNext] = useState(true);
     const [isDiscoverMode, setIsDiscoverMode] = useState(false);
     const [logoError, setLogoError] = useState(false);
 
@@ -53,8 +53,8 @@ export default function MobileModals() {
     const searchPlaceholder = "Search movies, anime & shows...";
 
     useEffect(() => {
-        setAutoPlay(localStorage.getItem('toonplayer_autoplay') === 'true');
-        setAutoNext(localStorage.getItem('toonplayer_autonext') === 'true');
+        setAutoPlay(localStorage.getItem('toonplayer_autoplay') !== 'false');
+        setAutoNext(localStorage.getItem('toonplayer_autonext') !== 'false');
     }, [isMenuOpen]);
 
     const toggleAutoPlay = () => {

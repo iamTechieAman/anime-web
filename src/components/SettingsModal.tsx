@@ -10,6 +10,7 @@ import {
 import toast from "react-hot-toast";
 import { useNotifications, type NotificationPreferences } from "@/context/NotificationContext";
 import ModalPortal from "./ModalPortal";
+import { useUserStore } from "@/store/userStore";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -134,12 +135,45 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }, [isOpen]);
 
     const updateSetting = (key: string, value: any) => {
-        const currentSettings = {
-            autoplay, autoSkip, quality, smartSwitch, multiAudio, dataSaver, aggressiveSandbox,
-            bufferSize, playbackSpeed, theme, accentColor, subtitleSize, subtitleFont
-        };
-        const newSettings = { ...currentSettings, [key]: value };
+        let currentSettingsObj: any = {};
+        try {
+            const saved = localStorage.getItem("toonplayer_settings");
+            if (saved) {
+                currentSettingsObj = JSON.parse(saved);
+            }
+        } catch {}
+
+        // Fallback to current state if localStorage has nothing
+        if (!currentSettingsObj || Object.keys(currentSettingsObj).length === 0) {
+            currentSettingsObj = {
+                autoplay, autoSkip, quality, smartSwitch, multiAudio, dataSaver, aggressiveSandbox,
+                bufferSize, playbackSpeed, theme, accentColor, subtitleSize, subtitleFont
+            };
+        }
+
+        const newSettings = { ...currentSettingsObj, [key]: value };
         localStorage.setItem("toonplayer_settings", JSON.stringify(newSettings));
+
+        // Sync with active profile settings in Zustand if possible
+        const activeProfileStr = localStorage.getItem("toonplayer_profile");
+        if (activeProfileStr) {
+            try {
+                const parsed = JSON.parse(activeProfileStr);
+                if (parsed.id) {
+                    const store = useUserStore.getState();
+                    store.updateSettings(parsed.id, { [key]: value });
+                }
+            } catch {}
+        }
+
+        // Also sync autoplay specifically to separate keys: toonplayer_autoplay & toonplayer_autonext
+        if (key === 'autoplay') {
+            localStorage.setItem("toonplayer_autoplay", value ? "true" : "false");
+        }
+        if (key === 'autoSkip') {
+            localStorage.setItem("toonplayer_autonext", value ? "true" : "false");
+        }
+
         window.dispatchEvent(new Event('profileUpdated'));
 
         // Handle live updates
@@ -172,22 +206,30 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         if (!name.trim()) { toast.error("Name cannot be empty"); return; }
         setIsSaving(true);
         setTimeout(() => {
-            let profile = { name: name.trim(), avatar: selectedAvatar };
-            
-            // Sync with Unified Zustand Store if active profile matches or to update it
+            let profileId = "";
             const activeProfileStr = localStorage.getItem("toonplayer_profile");
             if (activeProfileStr) {
                 try {
                     const parsed = JSON.parse(activeProfileStr);
                     if (parsed.id) {
-                        const store = useUserStore.getState();
-                        store.syncProfile({ id: parsed.id, name: name.trim(), avatar: selectedAvatar });
-                        profile = { ...parsed, name: name.trim(), avatar: selectedAvatar };
+                        profileId = parsed.id;
                     }
                 } catch {}
             }
 
-            localStorage.setItem("toonplayer_profile", JSON.stringify(profile));
+            if (profileId) {
+                const store = useUserStore.getState();
+                store.syncProfile({ id: profileId, name: name.trim(), avatar: selectedAvatar });
+                
+                // Get the updated profile from the store to write complete fields to localStorage
+                const updated = store.profiles.find(p => p.id === profileId);
+                if (updated) {
+                    localStorage.setItem("toonplayer_profile", JSON.stringify(updated));
+                }
+            } else {
+                localStorage.setItem("toonplayer_profile", JSON.stringify({ name: name.trim(), avatar: selectedAvatar }));
+            }
+
             window.dispatchEvent(new Event('profileUpdated'));
             toast.success("Profile saved successfully!");
             setIsSaving(false);

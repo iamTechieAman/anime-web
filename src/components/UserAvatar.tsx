@@ -30,14 +30,16 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
     ? initials.trim()
     : (alt && alt.trim().length > 0 ? alt.trim().charAt(0).toUpperCase() : "?");
 
-  const finalClassName = className.includes("rounded") ? className : `rounded-full ${className}`;
+  const finalClassName = className.includes("rounded") 
+    ? className.replace(/rounded-[a-z0-9]+/g, 'rounded-full') 
+    : `rounded-full ${className}`;
 
   // If no source or error occurred, show fallback
   if (isInvalidSrc || error) {
     return (
       <div 
         className={`flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-extrabold select-none shrink-0 ${finalClassName}`}
-        style={{ width: size, height: size }}
+        style={{ width: size, height: size, aspectRatio: '1/1', borderRadius: '9999px' }}
       >
         <span style={{ fontSize: size * 0.4 }}>{safeInitials}</span>
       </div>
@@ -47,13 +49,14 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
   return (
     <div 
       className={`relative shrink-0 overflow-hidden ${!loaded ? 'bg-white/10 animate-pulse' : ''} ${finalClassName}`}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, aspectRatio: '1/1', borderRadius: '9999px' }}
     >
       <img
         src={src}
         alt={alt}
         decoding="async"
         className={`w-full h-full object-cover transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        style={{ objectFit: 'cover', borderRadius: '9999px' }}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />
