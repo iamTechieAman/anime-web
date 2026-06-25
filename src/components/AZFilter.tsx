@@ -29,7 +29,7 @@ export default function AZFilter() {
                             className={`
                 px-3 py-1.5 rounded-lg text-sm font-bold transition-all duration-200
                 ${active === letter
-                                    ? "bg-accent-warm text-white shadow-lg shadow-orange-900/40 border border-accent-warm/50"
+                                    ? "bg-accent-warm text-white shadow-lg shadow-red-950/40 border border-accent-warm/50"
                                     : "bg-bg-card text-[var(--text-muted)] border border-border-color hover:bg-border-color hover:text-[var(--text-main)]"
                                 }
               `}

@@ -69,7 +69,7 @@ export default function ProfileGate() {
   const [isCreating, setIsCreating] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [isKids, setIsKids] = useState(false);
-  const [theme, setTheme] = useState("orange");
+  const [theme, setTheme] = useState("red");
   const [isClient, setIsClient] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -177,7 +177,7 @@ export default function ProfileGate() {
     setIsCreating(false);
     setProfileName("");
     setIsKids(false);
-    setTheme("orange");
+    setTheme("red");
   };
 
   const deleteProfile = (e: React.MouseEvent, id: string) => {
@@ -305,7 +305,7 @@ export default function ProfileGate() {
                       type="checkbox" 
                       checked={isKids} 
                       onChange={(e) => setIsKids(e.target.checked)}
-                      className="w-5 h-5 rounded border-zinc-700 bg-zinc-900 accent-orange-500 cursor-pointer"
+                      className="w-5 h-5 rounded border-zinc-700 bg-zinc-900 accent-accent cursor-pointer"
                     />
                     <span className="text-base font-semibold text-white">Kids Profile</span>
                   </label>

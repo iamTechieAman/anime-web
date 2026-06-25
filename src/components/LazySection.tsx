@@ -36,7 +36,7 @@ export default function LazySection({ children, height = "260px" }: LazySectionP
         <div ref={ref} style={{ minHeight: isVisible ? "auto" : height }} className="w-full">
             {isVisible ? children : (
                 <div className="w-full h-[200px] flex items-center justify-center bg-[#12131A]/10 rounded-2xl animate-pulse">
-                    <div className="w-12 h-12 rounded-full border-2 border-white/5 border-t-orange-500/40 animate-spin" />
+                    <div className="w-12 h-12 rounded-full border-2 border-white/5 border-t-accent/40 animate-spin" />
                 </div>
             )}
         </div>

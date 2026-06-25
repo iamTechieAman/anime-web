@@ -83,7 +83,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                 className={`
                                     flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap
                                     ${isActive
-                                        ? "bg-accent-warm text-white shadow-lg shadow-orange-900/30"
+                                        ? "bg-accent-warm text-white shadow-lg shadow-red-950/30"
                                         : "bg-bg-card text-[var(--text-muted)] border border-border-color hover:bg-border-color hover:text-white"
                                     }
                                 `}
@@ -132,7 +132,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                 <p className="text-red-400 font-medium mb-4">{error}</p>
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="px-6 py-2.5 bg-accent-warm text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
+                                    className="px-6 py-2.5 bg-accent-warm text-white rounded-xl hover:bg-red-600 transition-colors font-bold"
                                 >
                                     Retry
                                 </button>
@@ -179,7 +179,7 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                                     onClick={() => {
                                         setPage(p => p + 1);
                                     }}
-                                    className="px-6 py-2.5 bg-accent-warm text-white rounded-xl hover:bg-orange-600 transition-colors font-bold"
+                                    className="px-6 py-2.5 bg-accent-warm text-white rounded-xl hover:bg-red-600 transition-colors font-bold"
                                 >
                                     Next →
                                 </button>

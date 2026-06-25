@@ -25,7 +25,7 @@ const AVATARS = [
 
 const ACCENT_COLORS = [
     { name: "Orange", hex: "#F97316", glow: "rgba(249,115,22,0.4)" },
-    { name: "Red", hex: "#EF4444", glow: "rgba(239,68,68,0.4)" },
+    { name: "Red", hex: "#E50914", glow: "rgba(229,9,20,0.4)" },
     { name: "Purple", hex: "#A855F7", glow: "rgba(168,85,247,0.4)" },
     { name: "Green", hex: "#10B981", glow: "rgba(16,185,129,0.4)" },
     { name: "Blue", hex: "#3B82F6", glow: "rgba(59,130,246,0.4)" }
@@ -87,7 +87,7 @@ export default function SettingsClient() {
 
     // Appearance settings
     const [theme, setTheme] = useState("Midnight Purple");
-    const [accentColor, setAccentColor] = useState("Orange");
+    const [accentColor, setAccentColor] = useState("Red");
 
     // Accessibility settings
     const [subtitleSize, setSubtitleSize] = useState("Medium");

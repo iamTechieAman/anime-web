@@ -46,7 +46,7 @@ export default function OpeningAnimation() {
               transition={{ duration: 1.0 }}
               className="text-center"
             >
-              <h2 className="text-3xl font-black font-sora tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-cyan-400 drop-shadow-[0_0_12px_rgba(249,115,22,0.4)]">
+              <h2 className="text-3xl font-black font-sora tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-accent to-cyan-400 drop-shadow-[0_0_12px_rgba(229,9,20,0.4)]">
                 TOONPLAYER
               </h2>
             </motion.div>
@@ -58,7 +58,7 @@ export default function OpeningAnimation() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: [0, 0.4, 0.6, 0], scale: [0.8, 1, 1.2, 1.6] }}
                 transition={{ duration: 1.4, ease: "easeInOut" }}
-                className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-orange-500 to-cyan-400 blur-[60px] opacity-30 pointer-events-none"
+                className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-accent to-cyan-400 blur-[60px] opacity-30 pointer-events-none"
               />
 
               {/* Glowing animated logo symbol */}
@@ -74,14 +74,14 @@ export default function OpeningAnimation() {
                   ease: [0.22, 1, 0.36, 1], 
                   times: [0, 0.25, 0.7, 1] 
                 }}
-                className="flex flex-col items-center justify-center filter drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]"
+                className="flex flex-col items-center justify-center filter drop-shadow-[0_0_20px_rgba(229,9,20,0.6)]"
               >
                 {/* SVG Stylized "T" line drawing logo */}
-                <svg className="w-24 h-24 text-orange-500" viewBox="0 0 100 100" fill="none">
+                <svg className="w-24 h-24 text-accent" viewBox="0 0 100 100" fill="none">
                   {/* Neon Glow filters */}
                   <defs>
                     <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#F97316" />
+                      <stop offset="0%" stopColor="#E50914" />
                       <stop offset="100%" stopColor="#22D3EE" />
                     </linearGradient>
                   </defs>

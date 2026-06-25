@@ -48,7 +48,7 @@ interface UserState {
   removeFromWatchlist: (profileId: string, itemId: string) => void;
 }
 
-export function getAvatarUrl(name: string, theme: string = 'orange'): string {
+export function getAvatarUrl(name: string, theme: string = 'red'): string {
   const seed = (name || "Avatar").trim();
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {

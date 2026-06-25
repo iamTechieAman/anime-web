@@ -234,7 +234,7 @@ export default async function RootLayout({
           appearance={{
             variables: {
               /* Brand */
-              colorPrimary: '#f97316',
+              colorPrimary: '#E50914',
               /* Card / Modal surface — lifted from pitch-black so elements are visible */
               colorBackground: '#1c1c2a',
               /* Input field background — slightly lighter than card */

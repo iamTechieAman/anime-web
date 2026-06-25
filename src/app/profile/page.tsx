@@ -152,7 +152,7 @@ export default function ProfilePage() {
                             ) : (
                                 <button 
                                     onClick={enablePush}
-                                    className="w-full px-4 py-3 bg-accent-warm hover:bg-orange-600 text-white rounded-xl font-bold transition-colors cursor-pointer"
+                                    className="w-full px-4 py-3 bg-accent-warm hover:bg-red-600 text-white rounded-xl font-bold transition-colors cursor-pointer"
                                 >
                                     Enable Notifications
                                 </button>

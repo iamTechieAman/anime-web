@@ -136,7 +136,7 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
 
   return (
     <ModalPortal isOpen={isOpen} onClose={onClose} className="max-w-2xl">
-      <div className="relative p-6 sm:p-8 flex flex-col min-h-0 overflow-y-auto">
+      <div className="relative p-6 sm:p-8 flex flex-col min-h-0">
         {/* Close Button */}
         <button
           onClick={onClose}

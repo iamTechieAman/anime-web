@@ -136,7 +136,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   return (
     <ModalPortal isOpen={isOpen} onClose={onClose} className="max-w-[440px]">
-      <div className="relative p-6 sm:p-8 flex flex-col min-h-0 overflow-y-auto">
+      <div className="relative p-6 sm:p-8 flex flex-col min-h-0">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white cursor-pointer z-20"

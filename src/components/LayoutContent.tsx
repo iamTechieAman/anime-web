@@ -62,14 +62,14 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         const clerkName = user.firstName || user.username || "My Profile";
         const clerkAvatar = (user.imageUrl && !isDefaultAvatar(user.imageUrl)) 
           ? user.imageUrl 
-          : getAvatarUrl(clerkName, 'orange');
+          : getAvatarUrl(clerkName, 'red');
         mergedProfiles.unshift({
           id: clerkProfileId,
           name: clerkName,
           avatar: clerkAvatar,
           type: 'adult',
           isKids: false,
-          theme: 'orange'
+          theme: 'red'
         });
       }
 
