@@ -314,8 +314,15 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                                     ? "border-accent scale-110 shadow-lg" 
                                                                     : "border-transparent opacity-60 hover:opacity-100"
                                                             }`}
+                                                            style={{ borderRadius: '9999px', padding: 0, overflow: 'hidden' }}
                                                         >
-                                                            <img src={avatar} alt="DiceBear Avatar" className="w-full h-full object-cover" decoding="async" />
+                                                            <img 
+                                                                src={avatar} 
+                                                                alt="DiceBear Avatar" 
+                                                                className="w-full h-full object-cover" 
+                                                                decoding="async" 
+                                                                style={{ borderRadius: '9999px', objectFit: 'cover', width: '100%', height: '100%' }}
+                                                            />
                                                             {selectedAvatar === avatar && (
                                                                 <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                                                                     <Check className="w-4 h-4 text-white" />

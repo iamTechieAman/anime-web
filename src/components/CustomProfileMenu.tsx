@@ -168,14 +168,27 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className={`relative w-9 h-9 md:w-10 md:h-10 rounded-full ring-2 ring-accent/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
+        className={`relative rounded-full ring-2 ring-accent/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
+        style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '9999px',
+          padding: 0,
+          margin: 0,
+          border: 'none',
+          background: 'transparent',
+          boxShadow: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}
       >
         <UserAvatar 
           src={activeProfile?.avatar || user?.imageUrl} 
           alt={activeProfile?.name || user?.fullName || "User"} 
           initials={initials} 
           size={40} 
-          className="w-full h-full rounded-full" 
         />
       </button>
 
@@ -193,13 +206,24 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
             >
               {/* Header */}
               <div className="p-4 border-b border-white/5 flex items-center gap-3 bg-white/5">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
+                <div 
+                  className="shrink-0"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '9999px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}
+                >
                   <UserAvatar 
                     src={activeProfile?.avatar || user?.imageUrl} 
                     alt={activeProfile?.name || user?.fullName || "User"} 
                     initials={initials} 
                     size={40} 
-                    className="w-full h-full" 
                   />
                 </div>
                 <div className="flex flex-col min-w-0">

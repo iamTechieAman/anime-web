@@ -18,43 +18,74 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
     ? alt.trim().charAt(0).toUpperCase() 
     : "?";
 
-  // Detect if image is already in browser cache (instant load — no spinner needed)
-  const isCachedInitially = () => {
-    if (typeof window === "undefined" || isInvalidSrc) return false;
-    const img = new window.Image();
-    img.src = src!;
-    return img.complete && img.naturalWidth > 0;
-  };
-
-  const [loading, setLoading] = useState(() => !isCachedInitially());
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     setError(false);
-    setLoading(!isCachedInitially());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setLoading(true);
   }, [src]);
   
   if (error || isInvalidSrc) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-black text-4xl select-none">
-        {fallbackChar}
+      <div 
+        className="w-full h-full flex items-center justify-center select-none"
+        style={{ 
+          borderRadius: '9999px',
+          aspectRatio: '1/1',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 0,
+          margin: 0,
+          background: 'transparent',
+          boxShadow: 'none'
+        }}
+      >
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-accent to-accent-secondary" 
+          style={{ borderRadius: '9999px', width: '100%', height: '100%' }}
+        />
+        <span style={{ position: 'relative', zIndex: 1, color: '#ffffff', fontWeight: 900 }} className="text-4xl">
+          {fallbackChar}
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-full">
-      {loading && (
-        <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded-full" />
-      )}
+    <div 
+      className="relative w-full h-full"
+      style={{ 
+        borderRadius: '9999px',
+        aspectRatio: '1/1',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        margin: 0,
+        background: 'transparent',
+        boxShadow: 'none'
+      }}
+    >
       <img 
         src={src!} 
         alt={alt || "Avatar"} 
         // @ts-ignore — fetchpriority is valid HTML but not yet in TS types
         fetchpriority="high"
         decoding="async"
-        className={`w-full h-full object-cover transition-opacity duration-[120ms] ease-out ${loading ? "opacity-0" : "opacity-100"}`} 
+        className={`transition-opacity duration-[120ms] ease-out ${loading ? "opacity-0" : "opacity-100"}`} 
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center center',
+          borderRadius: '9999px'
+        }}
         onLoad={() => setLoading(false)}
         onError={() => { setError(true); setLoading(false); }} 
       />

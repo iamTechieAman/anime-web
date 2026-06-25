@@ -363,8 +363,8 @@ export default function Header() {
 
           {/* Auth */}
           <div className="flex items-center pl-2 border-l border-white/[0.07]">
-            {!isUserLoaded&&<div className="w-16 sm:w-20 h-9 rounded-xl bg-white/[0.05] animate-pulse"/>}
-            {isUserLoaded&&!activeProfileId&&(
+            {(!isUserLoaded || !isMounted) && <div className="w-16 sm:w-20 h-9 rounded-xl bg-white/[0.05] animate-pulse"/>}
+            {isUserLoaded && isMounted && !activeProfileId && (
               <button 
                 onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
                 className="h-9 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-accent to-accent-secondary text-white hover:opacity-90 active:scale-95 transition-all font-black text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap"
@@ -372,7 +372,7 @@ export default function Header() {
                 <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
               </button>
             )}
-            {isUserLoaded&&activeProfileId&&(
+            {isUserLoaded && isMounted && activeProfileId && (
               <CustomProfileMenu />
             )}
           </div>

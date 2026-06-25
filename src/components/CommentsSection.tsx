@@ -13,6 +13,7 @@ import remarkGfm from "remark-gfm";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
+import UserAvatar from "./UserAvatar";
 
 interface Reply {
     id: string;
@@ -775,15 +776,13 @@ const CommentsSection = memo(function CommentsSection({
                             {/* Comment Head */}
                             <div className="flex gap-3">
                                 {/* Avatar */}
-                                {comment.avatar && (comment.avatar.startsWith('http') || comment.avatar.startsWith('data:')) ? (
-                                    <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-white/5">
-                                        <img src={comment.avatar} alt={comment.username} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                                    </div>
-                                ) : (
-                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xs select-none ${comment.avatar || 'bg-accent text-black font-black'}`}>
-                                        {comment.username.slice(0, 2).toUpperCase()}
-                                    </div>
-                                )}
+                                <UserAvatar 
+                                    src={comment.avatar} 
+                                    alt={comment.username} 
+                                    initials={comment.username.slice(0, 2).toUpperCase()} 
+                                    size={36} 
+                                    className="border border-white/5"
+                                />
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2">
@@ -928,15 +927,13 @@ const CommentsSection = memo(function CommentsSection({
                                             <CornerDownRight className="w-3.5 h-3.5 text-zinc-600 shrink-0 mt-0.5" />
 
                                             {/* Avatar */}
-                                            {reply.avatar && (reply.avatar.startsWith('http') || reply.avatar.startsWith('data:')) ? (
-                                                <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 border border-white/5">
-                                                    <img src={reply.avatar} alt={reply.username} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                                                </div>
-                                            ) : (
-                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-[10px] select-none ${reply.avatar || 'bg-accent text-black font-black'}`}>
-                                                    {reply.username.slice(0, 2).toUpperCase()}
-                                                </div>
-                                            )}
+                                            <UserAvatar 
+                                                src={reply.avatar} 
+                                                alt={reply.username} 
+                                                initials={reply.username.slice(0, 2).toUpperCase()} 
+                                                size={28} 
+                                                className="border border-white/5"
+                                            />
 
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between gap-2">

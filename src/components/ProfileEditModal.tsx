@@ -174,15 +174,18 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                       <div 
                         className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 transition-all duration-[250ms] ${
                           isActive && !isManaging
-                            ? 'border-white shadow-[0_0_24px_rgba(255,255,255,0.3)] bg-zinc-800' 
+                            ? 'border-white shadow-[0_0_24px_rgba(255,255,255,0.3)]' 
                             : 'border-transparent group-hover:scale-105'
                         }`}
                         style={{
                           borderColor: isManaging ? '#ffffff30' : (isActive ? 'white' : 'transparent'),
-                          boxShadow: !isManaging && isActive ? `0 0 20px ${themeColor}40` : 'none'
+                          boxShadow: !isManaging && isActive ? `0 0 20px ${themeColor}40` : 'none',
+                          borderRadius: '9999px',
+                          padding: 0,
+                          overflow: 'hidden'
                         }}
                       >
-                        <UserAvatar src={p.avatar} alt={p.name} initials={p.name[0] || "?"} size={112} className="w-full h-full rounded-full" />
+                        <UserAvatar src={p.avatar} alt={p.name} initials={p.name[0] || "?"} size={112} />
                         
                         {/* Manage Overlay */}
                         {isManaging && (
@@ -242,8 +245,11 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
 
               <div className="flex flex-col md:flex-row gap-6 items-center">
                 {/* Visual Preview */}
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-accent bg-zinc-800 shrink-0">
-                  <UserAvatar src={selectedAvatar} alt="Profile Avatar" initials={profileName[0] || "?"} size={128} className="w-full h-full rounded-full" />
+                <div 
+                  className="relative w-32 h-32 rounded-full border-4 border-accent shrink-0"
+                  style={{ borderRadius: '9999px', overflow: 'hidden', padding: 0 }}
+                >
+                  <UserAvatar src={selectedAvatar} alt="Profile Avatar" initials={profileName[0] || "?"} size={128} />
                 </div>
 
                 <div className="flex-1 w-full space-y-4">
@@ -308,9 +314,16 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                     className={`relative aspect-square rounded-full overflow-hidden border-2 bg-gradient-to-br from-accent to-accent-secondary p-1 transition-all ${
                       selectedAvatar === getAvatarUrl(profileName, theme) ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
                     } cursor-pointer`}
+                    style={{ borderRadius: '9999px', padding: 0, overflow: 'hidden' }}
                   >
-                    <div className="relative w-full h-full">
-                      <img src={getAvatarUrl(profileName, theme)} alt="Custom Seeded" className="w-full h-full object-cover rounded-full" decoding="async" />
+                    <div className="relative w-full h-full" style={{ borderRadius: '9999px', overflow: 'hidden' }}>
+                      <img 
+                        src={getAvatarUrl(profileName, theme)} 
+                        alt="Custom Seeded" 
+                        className="w-full h-full object-cover" 
+                        decoding="async" 
+                        style={{ borderRadius: '9999px', objectFit: 'cover', width: '100%', height: '100%' }}
+                      />
                     </div>
                   </button>
 
@@ -324,9 +337,16 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
                         className={`relative aspect-square rounded-full overflow-hidden border-2 bg-white/5 p-1 transition-all ${
                           isSelected ? "border-accent bg-white/10" : "border-transparent hover:border-white/20"
                         } cursor-pointer`}
+                        style={{ borderRadius: '9999px', padding: 0, overflow: 'hidden' }}
                       >
-                        <div className="relative w-full h-full">
-                          <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover rounded-full" decoding="async" />
+                        <div className="relative w-full h-full" style={{ borderRadius: '9999px', overflow: 'hidden' }}>
+                          <img 
+                            src={avatar.url} 
+                            alt={avatar.name} 
+                            className="w-full h-full object-cover" 
+                            decoding="async" 
+                            style={{ borderRadius: '9999px', objectFit: 'cover', width: '100%', height: '100%' }}
+                          />
                         </div>
                       </button>
                     );

@@ -298,14 +298,22 @@ export default function SettingsClient() {
                                                 {AVATARS.map((avatar) => (
                                                     <button 
                                                         key={avatar} 
+                                                        type="button"
                                                         onClick={() => setSelectedAvatar(avatar)}
                                                         className={`relative aspect-square w-14 shrink-0 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${
                                                             selectedAvatar === avatar 
                                                                 ? "border-accent scale-110 shadow-lg" 
                                                                 : "border-transparent opacity-60 hover:opacity-100"
                                                         }`}
+                                                        style={{ borderRadius: '9999px', padding: 0, overflow: 'hidden' }}
                                                     >
-                                                        <img src={avatar} alt="DiceBear Avatar" className="w-full h-full object-cover" decoding="async" />
+                                                        <img 
+                                                            src={avatar} 
+                                                            alt="DiceBear Avatar" 
+                                                            className="w-full h-full object-cover" 
+                                                            decoding="async" 
+                                                            style={{ borderRadius: '9999px', objectFit: 'cover', width: '100%', height: '100%' }}
+                                                        />
                                                         {selectedAvatar === avatar && (
                                                             <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                                                                 <Check className="w-4 h-4 text-white" />

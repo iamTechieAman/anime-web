@@ -30,33 +30,69 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
     ? initials.trim()
     : (alt && alt.trim().length > 0 ? alt.trim().charAt(0).toUpperCase() : "?");
 
-  const finalClassName = className.includes("rounded") 
-    ? className.replace(/rounded-[a-z0-9]+/g, 'rounded-full') 
-    : `rounded-full ${className}`;
-
   // If no source or error occurred, show fallback
   if (isInvalidSrc || error) {
     return (
       <div 
-        className={`flex items-center justify-center bg-gradient-to-br from-accent to-accent-secondary text-white font-extrabold select-none shrink-0 ${finalClassName}`}
-        style={{ width: size, height: size, aspectRatio: '1/1', borderRadius: '9999px' }}
+        className={`shrink-0 select-none ${className}`}
+        style={{ 
+          width: size, 
+          height: size, 
+          aspectRatio: '1/1', 
+          borderRadius: '9999px',
+          padding: 0,
+          margin: 0,
+          background: 'transparent',
+          boxShadow: 'none',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
       >
-        <span style={{ fontSize: size * 0.4 }}>{safeInitials}</span>
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-accent to-accent-secondary"
+          style={{ borderRadius: '9999px', width: '100%', height: '100%' }}
+        />
+        <span style={{ fontSize: size * 0.4, position: 'relative', zIndex: 1, color: '#ffffff', fontWeight: 800 }}>
+          {safeInitials}
+        </span>
       </div>
     );
   }
 
   return (
     <div 
-      className={`relative shrink-0 overflow-hidden ${!loaded ? 'bg-white/10 animate-pulse' : ''} ${finalClassName}`}
-      style={{ width: size, height: size, aspectRatio: '1/1', borderRadius: '9999px' }}
+      className={`shrink-0 ${className}`}
+      style={{ 
+        width: size, 
+        height: size, 
+        aspectRatio: '1/1', 
+        borderRadius: '9999px',
+        padding: 0,
+        margin: 0,
+        background: 'transparent',
+        boxShadow: 'none',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
     >
       <img
         src={src}
         alt={alt}
         decoding="async"
-        className={`w-full h-full object-cover transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        style={{ objectFit: 'cover', borderRadius: '9999px' }}
+        className={`transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          objectFit: 'cover', 
+          objectPosition: 'center center',
+          borderRadius: '9999px'
+        }}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
       />
