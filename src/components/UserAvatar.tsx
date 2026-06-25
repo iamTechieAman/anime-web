@@ -12,7 +12,6 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // Reset states if src changes
   useEffect(() => {
     setError(false);
     setLoaded(false);
@@ -30,71 +29,56 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
     ? initials.trim()
     : (alt && alt.trim().length > 0 ? alt.trim().charAt(0).toUpperCase() : "?");
 
-  // If no source or error occurred, show fallback
+  // Shared container style — block layout, overflow hidden, perfect circle
+  const containerStyle: React.CSSProperties = {
+    width: size,
+    height: size,
+    borderRadius: '9999px',
+    overflow: 'hidden',
+    position: 'relative',
+    flexShrink: 0,
+    display: 'block', // CRITICAL: block, not flex — so children fill naturally
+  };
+
   if (isInvalidSrc || error) {
     return (
-      <div 
-        className={`shrink-0 select-none ${className}`}
-        style={{ 
-          width: size, 
-          height: size, 
-          aspectRatio: '1/1', 
-          borderRadius: '9999px',
-          padding: 0,
-          margin: 0,
-          background: 'transparent',
-          boxShadow: 'none',
-          position: 'relative',
-          overflow: 'hidden',
+      <div style={containerStyle} className={className}>
+        {/* Gradient fill that exactly matches the circle */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(135deg, var(--accent), var(--accent-secondary))',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-accent to-accent-secondary"
-          style={{ borderRadius: '9999px', width: '100%', height: '100%' }}
-        />
-        <span style={{ fontSize: size * 0.4, position: 'relative', zIndex: 1, color: '#ffffff', fontWeight: 800 }}>
-          {safeInitials}
-        </span>
+          justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: size * 0.38, color: '#fff', fontWeight: 800, lineHeight: 1, userSelect: 'none' }}>
+            {safeInitials}
+          </span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div 
-      className={`shrink-0 ${className}`}
-      style={{ 
-        width: size, 
-        height: size, 
-        aspectRatio: '1/1', 
-        borderRadius: '9999px',
-        padding: 0,
-        margin: 0,
-        background: 'transparent',
-        boxShadow: 'none',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
+    <div style={containerStyle} className={className}>
       <img
-        src={src}
+        src={src!}
         alt={alt}
         decoding="async"
-        className={`transition-opacity duration-[220ms] ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        style={{ 
-          width: '100%', 
-          height: '100%', 
-          objectFit: 'cover', 
-          objectPosition: 'center center',
-          borderRadius: '9999px'
-        }}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
+        style={{
+          // Fill the container completely — no flex tricks needed
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 200ms ease',
+        }}
       />
     </div>
   );

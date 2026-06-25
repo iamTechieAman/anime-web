@@ -18,37 +18,19 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
     ? alt.trim().charAt(0).toUpperCase() 
     : "?";
 
-  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     setError(false);
-    setLoading(true);
+    setLoaded(false);
   }, [src]);
   
   if (error || isInvalidSrc) {
+    // Fallback: gradient fill + initial letter. Uses absolute fill so it always matches the parent circle.
     return (
-      <div 
-        className="w-full h-full flex items-center justify-center select-none"
-        style={{ 
-          borderRadius: '9999px',
-          aspectRatio: '1/1',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 0,
-          margin: 0,
-          background: 'transparent',
-          boxShadow: 'none'
-        }}
-      >
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-accent to-accent-secondary" 
-          style={{ borderRadius: '9999px', width: '100%', height: '100%' }}
-        />
-        <span style={{ position: 'relative', zIndex: 1, color: '#ffffff', fontWeight: 900 }} className="text-4xl">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, var(--accent), var(--accent-secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ color: '#fff', fontWeight: 900, fontSize: '2rem', lineHeight: 1, userSelect: 'none' }}>
           {fallbackChar}
         </span>
       </div>
@@ -56,40 +38,27 @@ const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null 
   }
 
   return (
-    <div 
-      className="relative w-full h-full"
-      style={{ 
-        borderRadius: '9999px',
-        aspectRatio: '1/1',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 0,
-        margin: 0,
-        background: 'transparent',
-        boxShadow: 'none'
+    // CRITICAL: img uses position:absolute + inset:0 so it fills exactly the parent container.
+    // This is the correct pattern — no flex, no aspect-ratio conflicts.
+    <img 
+      src={src!} 
+      alt={alt || "Avatar"} 
+      // @ts-ignore
+      fetchpriority="high"
+      decoding="async"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        objectPosition: 'center',
+        opacity: loaded ? 1 : 0,
+        transition: 'opacity 150ms ease',
       }}
-    >
-      <img 
-        src={src!} 
-        alt={alt || "Avatar"} 
-        // @ts-ignore — fetchpriority is valid HTML but not yet in TS types
-        fetchpriority="high"
-        decoding="async"
-        className={`transition-opacity duration-[120ms] ease-out ${loading ? "opacity-0" : "opacity-100"}`} 
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center center',
-          borderRadius: '9999px'
-        }}
-        onLoad={() => setLoading(false)}
-        onError={() => { setError(true); setLoading(false); }} 
-      />
-    </div>
+      onLoad={() => setLoaded(true)}
+      onError={() => { setError(true); setLoaded(false); }} 
+    />
   );
 };
 
@@ -270,7 +239,7 @@ export default function ProfileGate() {
                       className="relative group cursor-pointer flex flex-col items-center gap-4"
                       onClick={() => !selectedId && handleSelectProfile(p)}
                     >
-                      <div className={`relative w-[120px] h-[120px] rounded-full overflow-hidden border-4 transition-all duration-[250ms] ${isSelected ? selectGlowClass : `border-transparent bg-zinc-800 ${themeGlowClass}`}`}>
+                      <div className={`relative w-[120px] h-[120px] rounded-full overflow-hidden border-4 transition-all duration-[250ms] ${isSelected ? selectGlowClass : `border-transparent ${themeGlowClass}`}`}>
                         <ProfileAvatar src={p.avatar} alt={p.name} />
                       </div>
                       
@@ -311,7 +280,7 @@ export default function ProfileGate() {
             ) : (
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-md mx-auto">
                 <div className="group relative w-full">
-                  <div className="w-[120px] h-[120px] mx-auto rounded-full bg-zinc-800 mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white flex items-center justify-center overflow-hidden relative will-change-transform" >
+                  <div className="w-[120px] h-[120px] mx-auto rounded-full mb-6 shadow-2xl transition-transform duration-[250ms] group-hover:scale-105 border-4 border-transparent group-hover:border-white overflow-hidden relative will-change-transform" >
                     {profileName.trim() ? (
                       <ProfileAvatar src={getRandomBitmojiUrl(profileName.trim())} alt="Avatar preview" />
                     ) : (
