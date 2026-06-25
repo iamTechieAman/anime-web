@@ -362,7 +362,7 @@ export default function Header() {
           </div>
 
           {/* Auth */}
-          <div className="flex items-center pl-2 border-l border-white/[0.07]">
+          <div className="flex items-center pl-2">
             {(!isUserLoaded || !isMounted) && <div className="w-16 sm:w-20 h-9 rounded-xl bg-white/[0.05] animate-pulse"/>}
             {isUserLoaded && isMounted && !activeProfileId && (
               <button 
