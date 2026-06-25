@@ -203,7 +203,6 @@ export default async function RootLayout({
         {/* DNS Prefetch & Preconnect for critical third-party domains */}
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
-        <link rel="preconnect" href="https://api.dicebear.com" />
         <link rel="preload" href="/avatars/avatar-1.webp" as="image" type="image/webp" />
         <link rel="preload" href="/avatars/avatar-2.webp" as="image" type="image/webp" />
         <link rel="preload" href="/avatars/avatar-3.webp" as="image" type="image/webp" />

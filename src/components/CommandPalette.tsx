@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Film, Tv, Clock, Compass, X, Command, Mic, MicOff, Pin, PinOff, Sparkles, User, Tag, HelpCircle, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
