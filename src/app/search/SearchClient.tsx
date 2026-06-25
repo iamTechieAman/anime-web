@@ -48,6 +48,9 @@ function MovieSearchContent() {
     const performSearch = useCallback(() => {
         setLoading(true);
         setError(null);
+        if (typeof window !== "undefined") {
+            window.scrollTo({ top: 0 });
+        }
         const params = new URLSearchParams();
         if (query) params.set("query", query);
         if (genre && !query) params.set("genre", genre);

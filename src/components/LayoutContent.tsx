@@ -139,6 +139,13 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
   const { showProfileSettings, setShowProfileSettings } = useMobileUI();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0 });
+    }
+  }, [pathname]);
+
   const isWatchPage = pathname?.startsWith('/watch');
   const isHomePage = pathname === '/';
   

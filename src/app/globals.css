@@ -981,35 +981,35 @@ p, .text-body {
 
 .responsive-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(132px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(132px, 100%), 1fr));
   gap: 12px;
   width: 100%;
 }
 
 @media (min-width: 640px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
     gap: 16px;
   }
 }
 
 @media (min-width: 1024px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
     gap: 24px;
   }
 }
 
 @media (min-width: 1440px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 24px;
   }
 }
 
 @media (min-width: 1920px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 24px;
   }
 }
@@ -1942,7 +1942,7 @@ main, .relative.z-10 {
   html { font-size: 14px; }
 
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(118px, 100%), 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(min(118px, 100%), 1fr)) !important;
     gap: 8px !important;
   }
 
@@ -1971,7 +1971,7 @@ main, .relative.z-10 {
   html { font-size: 15px; }
 
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(112px, 100%), 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(min(112px, 100%), 1fr)) !important;
     gap: 8px !important;
   }
 }
@@ -2075,7 +2075,7 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 481px) and (max-width: 1024px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
     gap: 14px !important;
   }
 
@@ -2100,7 +2100,7 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 1025px) and (max-width: 1440px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)) !important;
     gap: 18px !important;
   }
 
@@ -2126,7 +2126,7 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 1441px) and (max-width: 2560px) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)) !important;
     justify-content: stretch;
     gap: 22px !important;
   }
@@ -2150,7 +2150,7 @@ main, .relative.z-10 {
 
   /* Large grid columns with generous spacing */
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
     gap: 28px !important;
     justify-content: stretch;
   }
@@ -2254,7 +2254,7 @@ main, .relative.z-10 {
   html { font-size: 22px; }
 
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
     gap: 32px !important;
   }
 
@@ -2283,7 +2283,7 @@ main, .relative.z-10 {
    ────────────────────────────────────────────────────────── */
 @media (min-width: 568px) and (max-width: 820px) and (orientation: landscape) {
   .responsive-grid {
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
     gap: 10px !important;
   }
 
