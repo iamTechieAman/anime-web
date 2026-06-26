@@ -265,7 +265,8 @@ export function AnimeGrid({ shows }: { shows: Show[] }) {
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
     const isKidsMode = activeProfile?.isKids || false;
-    const filteredShows = isKidsMode ? shows.filter(show => isKidsFriendly(show as any)) : shows;
+    const showsList = Array.isArray(shows) ? shows : [];
+    const filteredShows = isKidsMode ? showsList.filter(show => show && isKidsFriendly(show as any)) : showsList;
 
     if (!filteredShows || filteredShows.length === 0) {
         return (

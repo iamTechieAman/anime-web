@@ -95,12 +95,36 @@ export async function fetchFromScraper(params: any) {
         }
 
         if (endpoint) {
-            const response = await axios.get(`${baseUrl}${endpoint}`, { params: queryParams });
+            let response;
+            let attempts = 0;
+            const maxAttempts = 3;
+            const timeout = 10000; // 10s timeout
+
+            while (attempts < maxAttempts) {
+                try {
+                    response = await axios.get(`${baseUrl}${endpoint}`, { 
+                        params: queryParams,
+                        timeout: timeout
+                    });
+                    break;
+                } catch (err: any) {
+                    attempts++;
+                    console.warn(`[Scraper Client] Attempt ${attempts} failed for ${endpoint}: ${err.message}`);
+                    if (attempts >= maxAttempts) {
+                        throw err;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            if (!response || !response.data) {
+                throw new Error("No data received from scraper API");
+            }
             
             // Wrap the response to match what the api routers expect
             const result: any = {};
             if (params.query) result.onoflix = response.data;
-            if (params.cartoon_query) result.watchanimeworld = response.data;
+            if (params.cartoon_query || params.cartoon_category) result.watchanimeworld = response.data;
             if (params.wa_info) result.wa_info = response.data;
             if (params.wa_source) result.wa_source = response.data;
             if (params.ja_query) result.justanime = response.data;
@@ -136,7 +160,25 @@ export async function fetchFromScraper(params: any) {
         }
     } catch (error: any) {
         console.error("[Scraper Client] Remote API failed:", error.message);
-        throw new Error("Scraper API Failed: " + error.message);
+        // Return safe fallback instead of throwing to prevent page/API crashes
+        const fallback: any = {};
+        if (params.query) fallback.onoflix = [];
+        if (params.cartoon_query || params.cartoon_category) fallback.watchanimeworld = [];
+        if (params.wa_info) fallback.wa_info = null;
+        if (params.wa_source) fallback.wa_source = null;
+        if (params.ja_query) fallback.justanime = [];
+        if (params.ja_info) fallback.ja_info = null;
+        if (params.ja_source) fallback.ja_source = null;
+        if (params.ax_query) fallback.animex = [];
+        if (params.ax_info) fallback.ax_info = null;
+        if (params.ax_source) fallback.ax_source = null;
+        if (params.wa_az_letter) fallback.watchanimeworld = [];
+        if (params.of_info) fallback.of_info = null;
+        if (params.of_source) fallback.of_source = null;
+        if (params.anw_query) fallback.aniwaves = [];
+        if (params.anw_info) fallback.anw_info = null;
+        if (params.anw_source) fallback.anw_source = null;
+        return fallback;
     }
 
     throw new Error("Invalid scraper params");

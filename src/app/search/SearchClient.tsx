@@ -60,7 +60,7 @@ function MovieSearchContent() {
             .then(res => {
                 let fetched = res.data.results || [];
                 if (isKidsMode) {
-                    fetched = fetched.filter(isKidsFriendly);
+                    fetched = fetched.filter(item => item && isKidsFriendly(item));
                 }
                 setResults(fetched);
                 setError(null);

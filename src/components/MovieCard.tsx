@@ -206,7 +206,8 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
     const isKidsMode = activeProfile?.isKids || false;
-    const filteredItems = isKidsMode ? items.filter(item => isKidsFriendly(item)) : items;
+    const itemsList = Array.isArray(items) ? items : [];
+    const filteredItems = isKidsMode ? itemsList.filter(item => item && isKidsFriendly(item)) : itemsList;
 
     const validItems = filteredItems.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
     return (
@@ -268,7 +269,8 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
         return null;
     }
 
-    const filteredItems = isKidsMode ? items.filter(item => isKidsFriendly(item)) : items;
+    const itemsList = Array.isArray(items) ? items : [];
+    const filteredItems = isKidsMode ? itemsList.filter(item => item && isKidsFriendly(item)) : itemsList;
     const validItems = filteredItems.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
 
     if (validItems.length === 0) return null;

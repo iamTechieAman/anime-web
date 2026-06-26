@@ -16,7 +16,8 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
     const isKidsMode = activeProfile?.isKids || false;
-    const displayedSimilar = isKidsMode ? similar.filter(show => isKidsFriendly(show as any)) : similar;
+    const similarList = Array.isArray(similar) ? similar : [];
+    const displayedSimilar = isKidsMode ? similarList.filter(show => show && isKidsFriendly(show as any)) : similarList;
 
     const checkScroll = useCallback(() => {
         const el = scrollRef.current;

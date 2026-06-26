@@ -92,58 +92,67 @@ const defaultProfiles: Profile[] = [
 export function isKidsFriendly(item: any): boolean {
   if (!item) return false;
   
-  const title = (item.title || item.name || "").toLowerCase();
-  const overview = (item.overview || "").toLowerCase();
+  const title = String(item.title || item.name || "").toLowerCase();
+  const overview = String(item.overview || "").toLowerCase();
   
-  // Hide: 18+, Horror, Erotic, Violence, Thriller, Crime
+  // 1. Hard Blocks (18+, Violence, Erotic, Horror, NSFW, Thriller, Crime)
+  if (item.adult) return false;
+  
   const blockedKeywords = [
-    "18+", "horror", "erotic", "violence", "gore", "bloody", "slasher", "sexy", "adult", 
-    "nsfw", "ecchi", "hentai", "thriller", "crime", "murder", "assassin", "gangster", 
+    "18+", "nsfw", "erotic", "violence", "horror", "gore", "bloody", "slasher", "sexy", "adult", 
+    "ecchi", "hentai", "thriller", "crime", "murder", "assassin", "gangster", 
     "mafia", "suicide", "dark", "satan", "demon slayer", "chainsaw man", "jujutsu kaisen",
     "attack on titan", "death note", "tokyo ghoul", "hellsing", "berserk", "goblin slayer"
   ];
-  
-  if (item.adult) return false;
   
   if (blockedKeywords.some(keyword => title.includes(keyword) || overview.includes(keyword))) {
     return false;
   }
   
   // Block via TMDB genre IDs (27 = Horror, 53 = Thriller, 80 = Crime)
-  const genreIds = item.genre_ids || [];
-  if (genreIds.some((id: number) => id === 27 || id === 53 || id === 80)) {
+  const genreIds = Array.isArray(item.genre_ids) ? item.genre_ids : [];
+  if (genreIds.some((id: any) => {
+    const numId = Number(id);
+    return numId === 27 || numId === 53 || numId === 80;
+  })) {
     return false;
   }
   
-  const genres = item.genres || [];
+  const genres = Array.isArray(item.genres) ? item.genres : [];
   if (genres.some((g: any) => {
+    if (!g) return false;
     const name = typeof g === 'string' ? g.toLowerCase() : (g.name || "").toLowerCase();
     return name.includes('horror') || name.includes('thriller') || name.includes('crime') || name.includes('adult') || name.includes('erotic') || name.includes('violence');
   })) {
     return false;
   }
   
-  // Only allow: Kids Movies, Kids Anime, Kids Shows, Disney, Pixar, Cartoons, Family
+  // 2. Allow list checks (Cartoons, Disney, Pixar, Family, Kids Anime, Educational, Animated Movies)
   const allowedKeywords = [
     "kids", "kid", "cartoon", "pixar", "disney", "dreamworks", "ghibli", "family", "toy story",
     "shrek", "frozen", "nemo", "lion king", "mickey", "donald", "doraemon", "shin chan", "ben 10",
     "powerpuff", "tom and jerry", "adventure time", "pokemon", "naruto", "one piece", "anime",
-    "animation", "cocomelon", "peppa", "barbie", "lego", "nickelodeon", "disney+", "pixar", "spongebob",
-    "looney tunes", "scooby", "avatar the last airbender", "phineas", "gravity falls"
+    "animation", "cocomelon", "peppa", "barbie", "lego", "nickelodeon", "disney+", "spongebob",
+    "looney tunes", "scooby", "avatar the last airbender", "phineas", "gravity falls", "educational",
+    "learn", "cocomelon", "dora the explorer", "peppa pig", "sesame street"
   ];
   
-  if (allowedKeywords.some(keyword => title.includes(keyword))) {
+  if (allowedKeywords.some(keyword => title.includes(keyword) || overview.includes(keyword))) {
     return true;
   }
   
   // TMDB Genres: 10751 = Family, 10762 = Kids, 16 = Animation
-  if (genreIds.some((id: number) => id === 10751 || id === 10762 || id === 16)) {
+  if (genreIds.some((id: any) => {
+    const numId = Number(id);
+    return numId === 10751 || numId === 10762 || numId === 16;
+  })) {
     return true;
   }
   
   if (genres.some((g: any) => {
+    if (!g) return false;
     const name = typeof g === 'string' ? g.toLowerCase() : (g.name || "").toLowerCase();
-    return name.includes('family') || name.includes('kids') || name.includes('animation') || name.includes('child') || name.includes('disney') || name.includes('pixar') || name.includes('cartoon');
+    return name.includes('family') || name.includes('kids') || name.includes('animation') || name.includes('child') || name.includes('disney') || name.includes('pixar') || name.includes('cartoon') || name.includes('educational');
   })) {
     return true;
   }

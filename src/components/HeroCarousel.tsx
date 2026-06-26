@@ -74,7 +74,7 @@ export default function HeroCarousel() {
             return;
         }
         try {
-            const filteredSlides = isKidsMode ? rawSlides.filter(s => isKidsFriendly(s)) : rawSlides;
+            const filteredSlides = isKidsMode ? rawSlides.filter(s => s && isKidsFriendly(s)) : rawSlides;
             const formattedSlides: Slide[] = filteredSlides.slice(0, 15).map((item: any) => {
                 const mediaType = detectMediaType(item);
                 const isTv = mediaType === 'tv';
