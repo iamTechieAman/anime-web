@@ -5,6 +5,9 @@
   --font-sora: "Manrope", sans-serif;
   --font-inter: "Inter", sans-serif;
 
+  /* Extra-small breakpoint for 375px phones (iPhone SE, small Android) */
+  --breakpoint-xs: 375px;
+
   /* Color Theme Mapping for Tailwind v4 */
   --color-bg-main: var(--bg-main);
   --color-bg-surface: var(--bg-surface);
@@ -33,7 +36,7 @@ body {
 
 * {
   box-sizing: border-box;
-  backface-visibility: hidden;
+  /* backface-visibility: hidden removed — caused subpixel text blur on mobile Safari/Chrome */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -2095,8 +2098,57 @@ main, .relative.z-10 {
 }
 
 /* ──────────────────────────────────────────────────────────
-   TABLET — 481px to 1024px
+   WATCH PAGE MOBILE MICRO-GLITCH FIXES
    ────────────────────────────────────────────────────────── */
+
+/* Prevent aspect-ratio jump during player iframe load on mobile */
+[data-testid="detail-hero"] {
+  contain: layout style paint;
+}
+
+/* Lock player aspect-ratio so no viewport jump occurs on load */
+@media (max-width: 639px) {
+  /* Player container: flush to edge (no radius on mobile) */
+  [data-watch-player] {
+    border-radius: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Control bar buttons: minimum 44px touch target (Apple HIG) */
+  [data-watch-controls] button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Episode list horizontal scroll: prevent momentum bounce from
+     causing layout shift when scrolling at the ends */
+  .snap-x {
+    overscroll-behavior-x: contain;
+  }
+
+  /* Poster: prevent stretch on 320px where flex layout compresses */
+  [data-watch-poster] {
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  /* Metadata section: remove double border-y on mobile (body already has bg color) */
+  [data-watch-metadata] {
+    border-left: none !important;
+    border-right: none !important;
+  }
+}
+
+/* Landscape phone: player should fill width, reduce vertical margins */
+@media (max-width: 820px) and (orientation: landscape) {
+  [data-testid="detail-hero"] {
+    height: 30vh !important;
+  }
+}
+
+/* ────────────────────────────────────────────────────────── */
+
 @media (min-width: 481px) and (max-width: 1024px) {
   .responsive-grid {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
@@ -2328,8 +2380,12 @@ main, .relative.z-10 {
    NOTCH / DYNAMIC ISLAND SAFE AREAS
    ────────────────────────────────────────────────────────── */
 @supports (padding-top: env(safe-area-inset-top)) {
+  /* NOTE: body padding-top intentionally NOT set here —
+     the watch page fixed header already accounts for safe-area-inset-top
+     in its own pt-[calc(60px+env(safe-area-inset-top)...)] calculation.
+     Adding it here would double-pad the watch page header offset. */
   body {
-    padding-top: env(safe-area-inset-top) !important;
+    /* Only apply horizontal/bottom safe area on body */
     padding-bottom: env(safe-area-inset-bottom) !important;
     padding-left: env(safe-area-inset-left) !important;
     padding-right: env(safe-area-inset-right) !important;
@@ -2351,9 +2407,9 @@ main, .relative.z-10 {
     image-rendering: crisp-edges;
   }
 
-  /* Sharper borders on high-DPI */
-  .border,
-  [class*="border"] {
+/* Sharper borders on high-DPI — scoped only to card/container elements, NOT player or iframe borders */
+  .premium-card,
+  .glass-panel {
     border-width: 0.5px;
   }
 }

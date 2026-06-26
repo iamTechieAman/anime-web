@@ -1427,7 +1427,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className={`relative w-full will-change-transform ${
+                    className={`relative w-full will-change-transform transform-gpu ${
                         isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-[24px]"
                     } bg-[#0a0a0a] overflow-hidden shadow-none sm:shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
                 >
@@ -1489,7 +1489,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         key={iframeKey}
                         src={getProxiedEmbedUrl(embedUrl)}
                         className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-[250ms] ${playerLoaded ? 'opacity-100' : 'opacity-0'} ${
-                            isFocusMode ? "rounded-none" : "rounded-none sm:rounded-[24px]"
+                            isFocusMode ? "rounded-none" : "rounded-none"
                         }`}
                         allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
                         allowFullScreen
@@ -1559,7 +1559,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                 {/* ── CONTROL BAR ── */}
                 {!isFocusMode && (
-                    <div className="flex items-center justify-between mt-2.5 px-1 gap-3 select-none">
+                    <div data-watch-controls className="flex items-center justify-between mt-2.5 px-3 sm:px-1 gap-3 select-none">
                         {/* Episode Nav */}
                         <div className="flex items-center gap-1.5">
                             <button onClick={handlePrevEpisode} disabled={!hasPrevEpisode()}
@@ -1647,7 +1647,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         return (
             <>
                 {/* Mobile View: Carousel (under max-md) */}
-                <div className="w-full md:hidden mb-6 block mt-4 px-4 sm:px-6">
+                <div className="w-full md:hidden mb-6 block mt-2 px-4 sm:px-6">
                     {renderEpisodesList('mobile')}
                 </div>
 
@@ -1746,7 +1746,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         <>
         <div className="relative isolate min-h-dvh overflow-x-clip bg-bg-main text-[var(--text-main)]">
             {!isFocusMode && (
-                <div className={`fixed top-0 left-0 right-0 z-[100] h-[calc(60px+env(safe-area-inset-top))] md:h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform ${
+                <div className={`fixed top-0 left-0 right-0 z-[100] min-h-[calc(60px+env(safe-area-inset-top))] md:min-h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform ${
                     isHeaderScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
                 }`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-9 h-9 bg-white/[0.06] hover:bg-white/[0.12] rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
@@ -1826,7 +1826,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     : 'grid grid-cols-1 lg:grid-cols-[74%_minmax(0,26%)] gap-6 items-start'
                             }`}>
                                 {/* Player Column */}
-                                <div className={`w-full min-w-0 bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden ${
+                                <div data-watch-player className={`w-full min-w-0 bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden ${
                                     (type === 'movie' || resolvedMediaType === 'movie') ? 'max-w-[1300px] mx-auto' : ''
                                 }`}>
                                     {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
@@ -1844,9 +1844,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             {renderMobileEpisodes()}
 
                             {/* Metadata Section (Providers -> Metadata = 20px, pb-0 to let description bottom margin control spacing) */}
-                            <div className="relative z-10 bg-bg-main p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1800px] mx-auto mt-[20px] flex flex-col gap-6 items-start pb-0 sm:pb-0 md:pb-0">
+                            <div data-watch-metadata className="relative z-10 bg-bg-main p-4 sm:p-6 md:p-8 rounded-none sm:rounded-[24px] border-y sm:border border-white/5 w-full max-w-[1800px] mx-auto mt-[20px] flex flex-col gap-6 items-start pb-0 sm:pb-0 md:pb-0">
                                 <div className="flex flex-col lg:flex-row gap-6 md:gap-8 items-start w-full">
-                                    <div className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
+                                    <div data-watch-poster className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                         {details?.poster_path && (
                                             <div className="relative group aspect-[2/3] w-full">
                                                 <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-border-color transition-transform group-hover:scale-[1.02] will-change-transform"  />
@@ -1895,10 +1895,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                         <p className="font-bold text-xs sm:text-sm">{type === "anime" ? `Episode ${selectedEpisode}` : type === "tv" ? `Season ${selectedSeason}, Episode ${selectedEpisode}` : "Full Movie"}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col sm:flex-row gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
-                                                    <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center ${inWatchlist ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-accent/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
-                                                    <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
-                                                    <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-bg-card border border-border-color text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-border-color transition-all active:scale-95 flex-1 md:flex-none justify-center"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
+                                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:ml-auto w-full md:w-auto mt-4 md:mt-0">
+                                                    <button onClick={toggleWatchlist} className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xl active:scale-95 flex-1 md:flex-none justify-center min-h-[44px] ${inWatchlist ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-accent/20 hover:scale-105" : "bg-white text-black shadow-white/5 hover:scale-105"}`}><Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${inWatchlist ? "fill-white" : ""}`} /> {inWatchlist ? "In Watchlist" : "Watchlist"}</button>
+                                                    <button onClick={() => setShowDownloadModal(true)} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex-1 md:flex-none justify-center min-h-[44px]"><Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Download</button>
+                                                    <button onClick={handleShare} className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 bg-bg-card border border-border-color text-white rounded-xl font-bold text-xs sm:text-sm hover:bg-border-color transition-all active:scale-95 flex-1 md:flex-none justify-center min-h-[44px]"><Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Share</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -2035,7 +2035,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             {!isFocusMode && renderComments()}
             <AnimatePresence>
                 {showScrollTop && !isFocusMode && (
-                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
+                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-6 z-40 p-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
                 )}
             </AnimatePresence>
         </div>

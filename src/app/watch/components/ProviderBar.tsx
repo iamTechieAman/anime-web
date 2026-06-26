@@ -48,8 +48,16 @@ const ProviderBar = memo(function ProviderBar({
                     <Server className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> {activeServer.name}
                 </span>
             </div>
-            <div className="overflow-x-auto scrollbar-none snap-x snap-mandatory px-3 py-3 w-full scroll-smooth">
-                <div className="flex items-center gap-2 min-w-max">
+            <div
+                className="overflow-x-auto scrollbar-none snap-x snap-mandatory w-full scroll-smooth"
+                style={{
+                    WebkitOverflowScrolling: 'touch',
+                    // Fade edges to indicate scrollability — avoids visual clipping of first/last buttons
+                    maskImage: 'linear-gradient(to right, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%)',
+                }}
+            >
+                <div className="flex items-center gap-2 min-w-max px-3 py-3">
                     {servers.map((server: any) => {
                         const isActive = activeServer.id === server.id;
                         const isFailed = failedServers.has(server.id);
