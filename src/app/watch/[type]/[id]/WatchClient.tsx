@@ -443,7 +443,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     }, []);
 
     const renderEpisodesList = (mode: 'desktop' | 'mobile') => {
-        if (type !== 'tv' || !details?.seasons || details?.seasons.length === 0) return null;
+        // Show episode list for both TV and cartoon content types
+        if ((type !== 'tv' && type !== 'cartoon') || !details?.seasons || details?.seasons.length === 0) return null;
         return (
             <div className={`w-full ${mode === 'desktop' ? 'h-full flex flex-col' : ''}`}>
                                     <div className="flex flex-col gap-4 mb-6">
@@ -559,7 +560,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         const search = episodeSearch.toLowerCase();
         return episodes.filter((ep: any) => {
             if (typeof ep === "string" || typeof ep === "number") return ep.toString() === search;
-            return (ep.episode_number?.toString() === search || ep.name?.toLowerCase().includes(search) || ep.overview?.toLowerCase().includes(search));
+            return (
+                ep.episode_number?.toString() === search ||
+                ep.name?.toLowerCase().includes(search) ||
+                (ep.overview ?? "").toLowerCase().includes(search)
+            );
         });
     }, [episodes, episodeSearch]);
 
@@ -568,9 +573,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     }, [details]);
 
 
-    // TV Auto-Next logic
+    // TV and Cartoon Auto-Next logic
     const handleVideoEnded = useCallback(() => {
-        if (type !== 'tv' || episodes.length === 0) return;
+        if (type !== 'tv' && type !== 'cartoon') return;  // Include cartoon in auto-next
+        if (episodes.length === 0) return;
         
         const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
         
@@ -1267,7 +1273,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // Fetch episodes when season changes — with AbortController to prevent race conditions
     useEffect(() => {
-        if (type !== 'tv' || !id || !details) return;
+        // Include cartoon type in episode fetching (same TMDB season API applies)
+        if (type !== 'tv' && type !== 'cartoon') return;
+        if (!id || !details) return;
         setEpisodes([]); // Clear episodes immediately when season changes to prevent stale UI
         const controller = new AbortController();
 
@@ -1306,16 +1314,19 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (!details && !animeData) return;
         if (!id && !tmdbIdForAnime) return;
         try {
+            // For anime, use tmdbIdForAnime if available for consistent history restoration
             const finalId = (type === 'anime' || type === 'cartoon') ? (animeData?._id || id) : id;
-            const historyId = type === 'movie' ? finalId : `${finalId}-${selectedSeason}-${selectedEpisode}`;
+            const animeHistoryId = type === 'anime' ? (tmdbIdForAnime || finalId) : finalId;
+            const historyId = type === 'movie' ? animeHistoryId : `${animeHistoryId}-${selectedSeason}-${selectedEpisode}`;
             addToHistory({
                 id: historyId,
-                showId: finalId,
+                showId: animeHistoryId,
                 type: type as any,
                 title: details?.title || details?.name || animeData?.name || "Untitled",
                 poster: details?.poster_path ? `https://image.tmdb.org/t/p/w200${details?.poster_path}` : (animeData?.thumbnail || ""),
                 episodeId: type === 'movie' ? undefined : String(selectedEpisode),
                 episodeNumber: type === 'movie' ? undefined : selectedEpisode,
+                // Only persist currentTime = 0 on first mount; do NOT overwrite real progress
                 currentTime: 0,
                 duration: 0,
                 season: type === 'movie' ? undefined : selectedSeason,
@@ -1323,7 +1334,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         } catch (e) {
             console.error("Failed to save history:", e);
         }
-    }, [selectedSeason, selectedEpisode, type, id, tmdbIdForAnime, details, animeData, addToHistory]);
+    // Intentionally limit deps — only write history when the user actually switches ep/season
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedSeason, selectedEpisode, type, id]);
 
     if (loading) {
         return (

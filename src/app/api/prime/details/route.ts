@@ -110,7 +110,8 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Missing or invalid id parameter" }, { status: 400 });
         }
 
-        const hintType = rawType === "tv" ? "tv" : "movie";
+        // Normalize hintType — TMDB does not have an 'anime' type; map it to 'tv'
+        const hintType = (rawType === "tv" || rawType === "anime") ? "tv" : "movie";
 
         // Resolve content type using Universal Content Resolver
         let { type, detailsData: details } = await resolveContentType(id, hintType);
@@ -131,14 +132,18 @@ export async function GET(request: Request) {
             }
         }
 
+        // Map resolved type to valid TMDB type for supplementary metadata calls
+        // TMDB only supports 'tv' and 'movie' — never 'anime', 'cartoon', etc.
+        const tmdbType = type === "movie" ? "movie" : "tv";
+
         // Fetch supplementary metadata in parallel for the resolved type
         const [creditsRes, videosRes, similarRes, recommendationsRes, keywordsRes, providersRes] = await Promise.all([
-            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${type}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
+            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
         ]);
 
         const [credits, videos, similar, recommendations, keywordsData, providersData] = await Promise.all([

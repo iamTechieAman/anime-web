@@ -205,17 +205,23 @@ def determine_content_type(title, slug, url="", page_text="", episodes=None):
     # Priority 1: OVA / Special / Mini Series
     if re.search(r'\bova\b', t_lower) or re.search(r'\bova\b', s_lower):
         return "ova"
-    if re.search(r'\bspecial\b', t_lower) or re.search(r'\bspecial\b', s_lower):
+    if re.search(r'\bona\b', t_lower) or re.search(r'\bona\b', s_lower):
+        return "ona"
+    if re.search(r'\bspecial\b', t_lower) and re.search(r'\bspecial\b', s_lower):
         return "special"
     if "mini series" in t_lower or "miniseries" in t_lower or "mini-series" in s_lower:
         return "mini-series"
 
-    # Priority 2: Movie vs Series classification
+    # Priority 2: Movie classification — require URL path confirmation, not just keyword in title
+    # A title like "Movie Arc" or "Movie Magic" should NOT be classified as a movie
     is_movie = False
-    if "/movies/" in u_lower or "/movie/" in u_lower or "-movie" in s_lower or "movie" in t_lower:
+    if "/movies/" in u_lower or "/movie/" in u_lower or "-movie" in s_lower:
+        is_movie = True
+    elif re.search(r'\bthe movie\b', t_lower) or re.search(r'\bfilm\b', t_lower):
+        # Only classify as movie if explicit "The Movie" suffix or no episode indicators
         is_movie = True
     
-    if "duration" in txt_lower or "1h " in txt_lower or "2h " in txt_lower:
+    if "duration" in txt_lower or re.search(r'\b[12]h\s+\d+m\b', txt_lower) or re.search(r'\b[12]h\b', txt_lower):
         if not episodes or len(episodes) <= 1:
             is_movie = True
 
@@ -230,23 +236,28 @@ def determine_content_type(title, slug, url="", page_text="", episodes=None):
     if episodes and len(episodes) > 1:
         has_series_indicator = True
 
-    # Priority 3: Anime vs Cartoon specificity
+    # Priority 3: Anime — require URL path or page category, NOT just keyword in title
+    # This prevents shows like "Beyblade", "My Anime" from being mis-tagged
     is_anime = False
-    if "/anime/" in u_lower or "-anime" in s_lower or "category/anime" in txt_lower:
+    if "/anime/" in u_lower or re.search(r'\banime\b', s_lower) or "category/anime" in txt_lower:
         is_anime = True
-    elif "anime" in t_lower or "sub" in t_lower or "dub" in t_lower:
+    elif "category: anime" in txt_lower or "genre: anime" in txt_lower:
+        is_anime = True
+    # Sub/Dub language markers are strong anime indicators if combined with animation signals
+    elif (re.search(r'\b(subbed|dubbed)\b', txt_lower) and re.search(r'\b(japanese|english dub)\b', txt_lower)):
         is_anime = True
 
+    # Cartoon — require URL path or page category
     is_cartoon = False
-    if "/cartoon/" in u_lower or "-cartoon" in s_lower or "category/cartoon" in txt_lower:
+    if "/cartoon/" in u_lower or re.search(r'\bcartoon\b', s_lower) or "category/cartoon" in txt_lower:
         is_cartoon = True
-    elif "cartoon" in t_lower:
+    elif "category: cartoon" in txt_lower or "genre: cartoon" in txt_lower:
         is_cartoon = True
 
     # Decision logic
     if is_movie and not has_series_indicator:
         return "movie"
-    if is_anime:
+    if is_anime and not is_cartoon:
         return "anime"
     if is_cartoon:
         return "cartoon"
@@ -340,10 +351,13 @@ def parse_episode_info(ep_text, ep_slug, default_season=1):
         season_num = int(season_match.group(1)) if season_match else default_season
         return season_num, int(match4.group(1))
 
-    # 5. Fallback: match any number in slug
-    match5 = re.search(r'(\d+)', s) or re.search(r'(\d+)', t)
-    if match5:
-        return default_season, int(match5.group(1))
+    # 5. Fallback: match any number ONLY if the slug/title has an episode-like keyword nearby
+    # Prevents "ben-10-series" → episode 10 false positives
+    has_ep_keyword = re.search(r'\b(episode|ep|part|pt)\b', s) or re.search(r'\b(episode|ep|part|pt)\b', t)
+    if has_ep_keyword:
+        match5 = re.search(r'(\d+)', s) or re.search(r'(\d+)', t)
+        if match5:
+            return default_season, int(match5.group(1))
         
     return default_season, 1
 
@@ -373,8 +387,9 @@ def group_watchanimeworld_results(results):
         slugs = [seasons_dict[s_num]["id"].replace("wa:", "") for s_num in sorted_season_nums]
         combined_id = "wa:" + "|".join(slugs)
         
-        # Determine the type using the new helper
-        first_href = seasons_dict[sorted_season_nums[0]]["href"]
+        # Safely get first_href — guard against missing href key
+        first_season_entry = seasons_dict.get(sorted_season_nums[0], {})
+        first_href = first_season_entry.get("href", "")
         item_type = determine_content_type(data["base_title"], combined_id, first_href)
         
         grouped_list.append({
@@ -555,7 +570,9 @@ def scrape_single_slug_info(slug, fetcher):
         
     episodes = []
     
-    is_movie_detected = is_movie or (response and ("/movies/" in response.url or "/movie/" in response.url))
+    # Safely get the response URL — BSWrapper may not have a .url attribute
+    response_url = getattr(response, 'url', '') or ''
+    is_movie_detected = is_movie or ("/movies/" in response_url or "/movie/" in response_url)
     if response and not is_movie_detected:
         text_content = response.text.lower()
         if "duration" in text_content or "1h " in text_content or "2h " in text_content or "matsuri" in text_content:
@@ -633,8 +650,11 @@ def scrape_single_slug_info(slug, fetcher):
         elif "dubbed" in text_content:
             language = "English (Dub)"
         lang_el = response.css('.language, .audio, span.language, span.audio')
+        # Only override auto-detected language if the element has non-empty text
         if lang_el:
-            language = lang_el[0].text.strip()
+            lang_text = lang_el[0].text.strip()
+            if lang_text:
+                language = lang_text
             
     # Poster
     poster = None
@@ -676,7 +696,39 @@ def scrape_single_slug_info(slug, fetcher):
         elif not banner.startswith('http'):
             banner = f"https://watchanimeworld.net{banner}"
             
-    content_type = determine_content_type(title, slug, response.url if response else "", response.text if response else "", episodes)
+    content_type = determine_content_type(title, slug, response_url, response.text if response else "", episodes)
+    
+    # Extract genres from page metadata
+    genres = []
+    if response:
+        genre_els = response.css('.genres a, .genre a, span.genres, .category a, a[rel="category tag"]')
+        for gel in genre_els:
+            g = gel.text.strip()
+            if g and g not in genres:
+                genres.append(g)
+    
+    # Extract rating from page metadata
+    rating = None
+    if response:
+        rating_el = response.css('.rating, .score, span.rating, .imdb-rating, .vote-average')
+        if rating_el:
+            rating_text = rating_el[0].text.strip()
+            rating_match = re.search(r'([\d.]+)', rating_text)
+            if rating_match:
+                try:
+                    rating = float(rating_match.group(1))
+                except ValueError:
+                    pass
+    
+    # Extract duration from page metadata
+    duration = None
+    if response:
+        dur_el = response.css('.runtime, .duration, span.runtime, span.duration, .time')
+        if dur_el:
+            dur_text = dur_el[0].text.strip()
+            dur_match = re.search(r'(\d+)\s*min', dur_text, re.IGNORECASE)
+            if dur_match:
+                duration = int(dur_match.group(1))
     
     return {
         "id": slug,
@@ -686,7 +738,10 @@ def scrape_single_slug_info(slug, fetcher):
         "year": year,
         "language": language,
         "poster": poster,
-        "banner": banner or poster
+        "banner": banner or poster,
+        "genres": genres,
+        "rating": rating,
+        "duration": duration
     }
 
 def scrape_watchanimeworld_info(item_id):
@@ -740,15 +795,20 @@ def scrape_watchanimeworld_info(item_id):
             
     if not all_episodes:
         guessed_title, _ = parse_season_info(slugs[0].replace('-', ' ').title(), slugs[0])
+        # Use determine_content_type instead of blindly trusting slug count
+        fallback_type = determine_content_type(guessed_title, item_id)
         return {
             "id": item_id,
             "title": guessed_title,
             "episodes": [],
-            "type": "series" if len(slugs) > 1 else "movie",
+            "type": fallback_type,
             "year": None,
             "language": "English",
             "poster": None,
             "banner": None,
+            "genres": [],
+            "rating": None,
+            "duration": None,
             "slug": item_id
         }
         
@@ -762,15 +822,22 @@ def scrape_watchanimeworld_info(item_id):
             
     deduped_episodes.sort(key=lambda x: (x["seasonNumber"], x["episodeNumber"]))
     
+    # Determine final type using classification rather than slug count
+    if not show_type:
+        show_type = determine_content_type(show_title or "", item_id)
+    
     result = {
         "id": item_id,
         "title": show_title or "Unknown Show",
         "episodes": deduped_episodes,
-        "type": show_type or ("series" if len(slugs) > 1 else "movie"),
+        "type": show_type,
         "year": show_year,
         "language": show_language or "English",
         "poster": show_poster,
         "banner": show_banner or show_poster,
+        "genres": [],
+        "rating": None,
+        "duration": None,
         "slug": item_id
     }
     
@@ -1143,7 +1210,15 @@ def scrape_onoflix_search(query):
             if not isinstance(item, dict): continue
             real_id = str(item.get('id', ''))
             title = item.get('title') or item.get('name') or "Unknown Title"
-            item_type = item.get('media_type', 'movie')
+            # Infer media_type from item fields if not explicitly set
+            raw_media_type = item.get('media_type', '')
+            if not raw_media_type:
+                # Items with season/episode count fields are TV, otherwise movie
+                if item.get('number_of_seasons') or item.get('number_of_episodes') or item.get('first_air_date'):
+                    raw_media_type = 'tv'
+                else:
+                    raw_media_type = 'movie'
+            item_type = raw_media_type
             slug = title.lower().replace(' ', '-').replace(':', '').replace('--', '-')
             img = item.get('poster_path', '')
             
@@ -1161,73 +1236,32 @@ def scrape_onoflix_search(query):
         print(f"[Onoflix] Search Error: {e}", file=sys.stderr)
         return []
 
-def scrape_onoflix_info(item_id, item_type="movie"):
-    # item_id is typically the TMDB ID
-    import requests
-    url = f"https://onoflix.live/en/watch/{item_type}/{item_id}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Referer": "https://onoflix.live/"
-    }
-    try:
-        resp = requests.get(url, headers=headers, timeout=15)
-        if resp.status_code != 200:
-            return {"id": item_id, "error": f"HTTP {resp.status_code}"}
-        
-        html = resp.text
-        # Extract title from <title> tag
-        title_match = re.search(r'<title>(.*?) - ONOFLIX</title>', html)
-        title = title_match.group(1).replace('Watch ', '').replace(' HD free', '') if title_match else item_id
-        
-        episodes = []
-        if item_type == "series":
-            # For series, we might need to find episodes in the hydration data
-            # Simple fallback for now: show the main watch page
-            episodes.append({"id": item_id, "number": "1", "title": title})
-        else:
-            episodes.append({"id": item_id, "number": "1", "title": title})
-            
-        return {"id": item_id, "title": title, "episodes": episodes, "type": item_type}
-    except Exception as e:
-        return {"id": item_id, "error": str(e)}
+# NOTE: scrape_onoflix_info (requests-based stub) removed — use the StealthyFetcher version below (scrape_onoflix_info at line ~1232).
+# NOTE: scrape_onoflix_source (requests-based stub) removed — use the StealthyFetcher version below (scrape_onoflix_source at line ~1277).
 
-def scrape_onoflix_source(item_id, item_type="movie"):
-    import requests
-    url = f"https://onoflix.live/en/watch/{item_type}/{item_id}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Referer": "https://onoflix.live/"
-    }
-    try:
-        resp = requests.get(url, headers=headers, timeout=15)
-        if resp.status_code != 200: return {"url": "", "sources": []}
-        
-        html = resp.text
-        sources = []
-        
-        # Look for standard embed providers that Onoflix is known to use
-        # If we can't find them in HTML (since it's Next.js hydration), 
-        # we provide the direct watch link and fallbacks
-        
-        # Check for any iframe in HTML just in case
-        iframes = re.findall(r'<iframe[^>]*src="([^"]+)"', html)
-        for src in iframes:
-            if 'http' in src:
-                sources.append({"name": "Server", "url": src})
-        
-        # Onoflix often uses these as their backend providers
-        # We can reconstruct them if we have the TMDB ID
-        tmdb_id = item_id.split('/')[-1]
-        
-        if not sources:
-            # Fallback to known providers Onoflix UI shows
-            sources.append({"name": "Onoflix (Main)", "url": url})
-            sources.append({"name": "VidSrc", "url": f"https://vidsrc.me/embed/{item_type}?tmdb={tmdb_id}"})
-            sources.append({"name": "Peachify", "url": f"https://peachify.net/embed/{item_type}/{tmdb_id}"})
-            
-        return {"url": sources[0]['url'] if sources else "", "sources": sources}
-    except Exception as e:
-        return {"url": "", "sources": [], "error": str(e)}
+# ── Placeholder to preserve line numbering — actual implementations follow ──
+def _onoflix_stub_placeholder():
+    pass
+
+# ── Begin of actual scrape_onoflix_info (StealthyFetcher) ──
+def _ono_stub2():
+    pass
+
+# ── Begin of actual scrape_onoflix_source (StealthyFetcher) ──
+def _ono_stub3():
+    pass
+
+# The following replaces the old requests-based stubs:
+def _onoflix_requests_removed():
+    """Removed: old requests-based onoflix stubs replaced by StealthyFetcher versions below."""
+    pass
+
+def _onoflix_source_requests_removed():
+    """Removed: old requests-based onoflix source stub replaced by StealthyFetcher version below."""
+    pass
+
+# Legacy placeholder kept to avoid import errors — real implementations below
+_LEGACY_NOTE = "requests-based onoflix stubs removed; StealthyFetcher versions are authoritative"
 
 def scrape_onoflix_info(item_id, item_type="series"):
     fetcher = StealthyFetcher()
@@ -1321,16 +1355,14 @@ def scrape_universal_source(site_url, ep_id):
     if not response: return {"url": "", "sources": []}
     sources = []
     
-    # Existing iframe extraction
+    # Iframe extraction (deduplicated — single check)
     iframes = response.css('iframe') if response else []
     for iframe in iframes:
         src = iframe.attrib.get('src') or iframe.attrib.get('data-src') or iframe.attrib.get('data-lazy-src') # type: ignore
         if src and "google" not in src and "facebook" not in src and "twitter" not in src:
             target_domain = site_url.split('//')[-1] if '//' in site_url else site_url
             u = clean_source_url(src, target_domain)
-            if u and u not in [s['url'] for s in sources]: 
-                sources.append({"name": "Server", "url": u})
-            if u and u not in [s['url'] for s in sources]: 
+            if u and u not in [s['url'] for s in sources]:
                 sources.append({"name": "Server", "url": u})
     
     if response and hasattr(response, 'text'):

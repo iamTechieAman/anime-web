@@ -79,16 +79,18 @@ export async function GET(request: Request) {
         if (tmdbRes.status === 'fulfilled') {
             const movies = tmdbRes.value.results || [];
             movies.slice(0, 10).forEach((item: any) => {
-                if (item.media_type === 'person') return;
+                // Skip persons and items with undefined media_type
+                if (!item.media_type || item.media_type === 'person') return;
                 
+                const mediaType = item.media_type === 'movie' ? 'movie' : 'tv';
                 results.push({
                     id: item.id,
                     title: item.title || item.name,
                     image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
-                    type: item.media_type === 'movie' ? 'movie' : 'tv',
+                    type: mediaType,
                     year: (item.release_date || item.first_air_date || '').split('-')[0],
                     format: item.media_type.toUpperCase(),
-                    href: `/watch/${item.media_type}/${item.id}`,
+                    href: `/watch/${mediaType}/${item.id}`,
                     rating: item.vote_average ? item.vote_average.toFixed(1) : null
                 });
             });
