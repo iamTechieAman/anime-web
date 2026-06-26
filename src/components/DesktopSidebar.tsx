@@ -37,7 +37,7 @@ export default function DesktopSidebar() {
         <div className="peer/sidebar group fixed left-0 top-0 bottom-0 w-[80px] hidden md:block z-[60] hide-scrollbar">
             <aside className="absolute left-0 top-0 bottom-0 w-[280px] [clip-path:inset(0_200px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] transition-all duration-[250ms] ease-apple bg-white/[0.03] backdrop-blur-[20px] border-r border-white/[0.05] flex flex-col py-6 shadow-2xl hide-scrollbar">
                 {/* Branded Logo */}
-                <div className="mb-8 shrink-0 flex items-center h-10 w-full px-3 transition-all duration-[250ms] relative hide-scrollbar">
+                <div className="mb-8 shrink-0 flex items-center h-10 w-full px-4 transition-all duration-[250ms] relative hide-scrollbar">
                     <Link scroll={false} href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0">
                         <div className="w-11 h-11 flex items-center justify-center shrink-0 relative hide-scrollbar">
                             <Logo />
@@ -49,11 +49,11 @@ export default function DesktopSidebar() {
                 </div>
 
             {/* Navigation Sections */}
-            <div className="flex-1 flex flex-col gap-1.5 px-3 hide-scrollbar">
+            <div className="flex-1 flex flex-col gap-1.5 px-4 hide-scrollbar">
                 {sections.map((item) => {
                     const isActive = item.href ? (pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))) : false;
                     const Icon = item.icon;
-                    const cssClass = `relative flex items-center h-11 px-3 rounded-xl transition-all duration-200 group/item w-full text-left cursor-pointer hide-scrollbar ${
+                    const cssClass = `relative flex items-center h-11 px-0 group-hover:px-3 rounded-xl transition-all duration-200 group/item w-full text-left cursor-pointer hide-scrollbar ${
                         isActive 
                             ? "bg-white/[0.04] text-white" 
                             : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
@@ -107,15 +107,15 @@ export default function DesktopSidebar() {
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-white/5 my-4 mx-3" />
+            <div className="h-px bg-white/5 my-4 mx-4" />
 
             {/* Bottom Section */}
-            <div className="flex flex-col gap-1.5 px-3 shrink-0 hide-scrollbar">
+            <div className="flex flex-col gap-1.5 px-4 shrink-0 hide-scrollbar">
                 {/* Settings Toggle */}
                 <Link
                     href="/settings"
                     scroll={false}
-                    className="relative flex items-center h-11 px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item w-full text-left hide-scrollbar"
+                    className="relative flex items-center h-11 px-0 group-hover:px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item w-full text-left hide-scrollbar"
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
                         <Settings 
@@ -135,7 +135,7 @@ export default function DesktopSidebar() {
                 <Link
                     href="/contact"
                     scroll={false}
-                    className="relative flex items-center h-11 px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item hide-scrollbar"
+                    className="relative flex items-center h-11 px-0 group-hover:px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item hide-scrollbar"
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
                         <HelpCircle 
@@ -156,7 +156,7 @@ export default function DesktopSidebar() {
                     href="https://github.com/iamTechieAman/anime-web"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative flex items-center h-11 px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item hide-scrollbar"
+                    className="relative flex items-center h-11 px-0 group-hover:px-3 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.02] transition-all duration-200 group/item hide-scrollbar"
                 >
                     <div className="flex items-center justify-center shrink-0 w-12 h-11">
                         <Github 

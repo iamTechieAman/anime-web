@@ -1053,7 +1053,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-border-color relative shadow-2xl">
                         <iframe
                             src={getProxiedEmbedUrl(fallbackEmbedUrl)}
-                            className="absolute inset-0 w-full h-full border-0"
+                            className="absolute inset-0 w-full h-full border-0 rounded-none md:rounded-lg"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
                             referrerPolicy="origin"
                             onLoad={(e: any) => {
@@ -1193,7 +1193,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     key={iframeKey}
                                     ref={iframeRef}
                                     src={getProxiedEmbedUrl(sourceUrl)}
-                                    className="w-full h-full border-0 bg-black"
+                                    className={`w-full h-full border-0 bg-black ${
+                                        isFocusMode ? "rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"
+                                    }`}
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
                                     allowFullScreen
                                     onLoad={(e: any) => {

@@ -286,7 +286,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isProfileGateActive = mounted ? (hasHydrated && !activeProfileId) : true;
 
   return (
-    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative">
+    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative max-w-full overflow-x-hidden">
       <OpeningAnimation />
       {showSidebar && <DesktopSidebar />}
       
@@ -303,7 +303,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
         {/* pt-[60px] = mobile header height, pt-[64px] = desktop header height */}
         <main className={`flex-1 flex flex-col min-w-0 relative ${
-          (isWatchPage || isHomePage) ? '' : 'pt-14 md:pt-16'
+          (isWatchPage || isHomePage) ? '' : 'pt-[72px]'
         } isolate bg-[var(--bg-main)]`}>
           {/* Subtle global ambient glow */}
           <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-accent/[0.04] to-transparent pointer-events-none z-0" />

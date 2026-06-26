@@ -1366,7 +1366,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             <div className="relative w-full aspect-video bg-bg-card rounded-b-xl overflow-hidden">
                                 <iframe 
                                     src={getProxiedEmbedUrl(embedUrl)} 
-                                    className="absolute inset-0 w-full h-full border-0" 
+                                    className="absolute inset-0 w-full h-full border-0 rounded-b-xl" 
                                     allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
                                     referrerPolicy="origin" 
                                 />
@@ -1475,7 +1475,9 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     <iframe
                         key={iframeKey}
                         src={getProxiedEmbedUrl(embedUrl)}
-                        className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-[250ms] ${playerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        className={`absolute inset-0 w-full h-full border-0 transition-opacity duration-[250ms] ${playerLoaded ? 'opacity-100' : 'opacity-0'} ${
+                            isFocusMode ? "rounded-none" : "rounded-none sm:rounded-[24px]"
+                        }`}
                         allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
                         allowFullScreen
                         title={`${title} - ToonPlayer`}
