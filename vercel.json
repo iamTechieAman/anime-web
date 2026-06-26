@@ -7,6 +7,33 @@
     },
     "headers": [
         {
+            "source": "/login",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex"
+                }
+            ]
+        },
+        {
+            "source": "/profile",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex"
+                }
+            ]
+        },
+        {
+            "source": "/settings",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex"
+                }
+            ]
+        },
+        {
             "source": "/(.*)",
             "headers": [
                 {

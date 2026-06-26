@@ -28,22 +28,40 @@ async function resolveContentType(
     const tvData = tvRes.ok ? await tvRes.json() : null;
     const movieData = movieRes.ok ? await movieRes.json() : null;
 
-    // Step 2: Apply episodic validation rules
+    // Step 2: Apply episodic & anime validation rules
+    // 1. Anime Detection (Animation + JP original language/country)
     if (tvData && !tvData.status_message) {
-        // TMDB TV data exists
-        const hasSeasons = (tvData.number_of_seasons || 0) > 0;
-        const hasEpisodes = (tvData.number_of_episodes || 0) > 1;
-        const hasEpisodeRuntime = Array.isArray(tvData.episode_run_time) && tvData.episode_run_time.length > 0;
+        const isJp = tvData.original_language === "ja" || (Array.isArray(tvData.origin_country) && tvData.origin_country.includes("JP")) || tvData.origin_country === "JP";
+        const genres = tvData.genres || [];
+        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
+        if (isJp && isAnimation) {
+            return { type: "anime", detailsData: tvData };
+        }
+    }
+    if (movieData && !movieData.status_message) {
+        const isJp = movieData.original_language === "ja" || (Array.isArray(movieData.origin_country) && movieData.origin_country.includes("JP")) || movieData.origin_country === "JP";
+        const genres = movieData.genres || [];
+        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
+        if (isJp && isAnimation) {
+            return { type: "anime", detailsData: movieData };
+        }
+    }
 
-        if (hasSeasons || hasEpisodes || hasEpisodeRuntime) {
+    // 2. TV Series (seasons present, episodes present)
+    if (tvData && !tvData.status_message) {
+        const hasSeasons = (tvData.number_of_seasons || 0) > 0 || (Array.isArray(tvData.seasons) && tvData.seasons.length > 0);
+        const hasEpisodes = (tvData.number_of_episodes || 0) > 0;
+        if (hasSeasons || hasEpisodes) {
             return { type: "tv", detailsData: tvData };
         }
     }
 
-    // Step 3: Movie fallback
+    // 3. Movie (runtime exists, episodes absent, seasons absent)
     if (movieData && !movieData.status_message) {
-        // Verify it's truly a movie (has runtime but no seasons)
-        if (movieData.runtime && !movieData.number_of_seasons) {
+        const hasRuntime = (movieData.runtime || 0) > 0;
+        const episodesAbsent = !movieData.number_of_episodes;
+        const seasonsAbsent = !movieData.number_of_seasons;
+        if (hasRuntime && episodesAbsent && seasonsAbsent) {
             return { type: "movie", detailsData: movieData };
         }
     }

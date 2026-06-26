@@ -305,6 +305,14 @@ const CommentsSection = memo(function CommentsSection({
             toast.error("Duplicate comment detected! Please post something else.");
             return;
         }
+        const isDuplicate = comments.some(c => 
+            c.content.trim() === trimmedText && 
+            (c.profileId === activeProfile?.id || c.username === (activeProfile?.name || "You"))
+        );
+        if (isDuplicate) {
+            toast.error("Duplicate comment detected! Please post something else.");
+            return;
+        }
 
         const comment: Comment = {
             id: `user-${Date.now()}`,
@@ -337,6 +345,16 @@ const CommentsSection = memo(function CommentsSection({
     const handlePostReply = (commentId: string) => {
         const trimmedText = newReplyText.trim();
         if (!trimmedText) return;
+
+        const targetComment = comments.find(c => c.id === commentId);
+        const isReplyDuplicate = targetComment?.replies?.some(r => 
+            r.content.trim() === trimmedText && 
+            (r.profileId === activeProfile?.id || r.username === (activeProfile?.name || "You"))
+        );
+        if (isReplyDuplicate) {
+            toast.error("Duplicate reply detected! Please post something else.");
+            return;
+        }
 
         const reply: Reply = {
             id: `reply-${Date.now()}`,

@@ -25,6 +25,12 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
     src.includes("/undefined") ||
     src.includes("/null");
 
+  const isCssClass = !!(src && (
+    src.startsWith('bg-') || 
+    src.includes(' ') || 
+    (!src.includes('/') && !src.startsWith('data:') && !src.includes('.'))
+  ));
+
   const safeInitials = (initials && initials.trim().length > 0)
     ? initials.trim()
     : (alt && alt.trim().length > 0 ? alt.trim().charAt(0).toUpperCase() : "?");
@@ -48,6 +54,24 @@ export default function UserAvatar({ src, alt = "Avatar", initials, size = 40, c
           position: 'absolute',
           inset: 0,
           background: 'linear-gradient(135deg, var(--accent), var(--accent-secondary))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: size * 0.38, color: '#fff', fontWeight: 800, lineHeight: 1, userSelect: 'none' }}>
+            {safeInitials}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isCssClass) {
+    return (
+      <div style={containerStyle} className={`${src} ${className}`}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

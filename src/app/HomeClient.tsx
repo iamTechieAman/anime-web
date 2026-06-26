@@ -11,6 +11,7 @@ import { MovieGrid, type MovieItem } from "@/components/MovieCard";
 import { AnimeGrid, type Show } from "@/components/AnimeCard";
 import useSWR from 'swr';
 import type { ProviderSlug } from "@/components/ProviderBar";
+import { detectMediaType } from "@/utils/mediaType";
 import dynamic from "next/dynamic";
 
 const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] bg-bg-elevated animate-pulse w-full" /> });
@@ -683,10 +684,10 @@ export default function MoviesPage() {
                                             </>
                                         ) : (
                                             <>
-                                                {((loading && trending.filter(m => (m as any).media_type === 'movie' || !m.name).length === 0) || trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0) && (
+                                                {((loading && trending.filter(m => detectMediaType(m) === 'movie').length === 0) || trending.filter(m => detectMediaType(m) === 'movie').length > 0) && (
                                                     <section>
                                                         <SectionHeader icon={Flame} title="Trending Movies" color="text-accent" isFeatured />
-                                                        {trending.filter(m => (m as any).media_type === 'movie' || !m.name).length > 0 ? <LazySection><MovieRow items={trending.filter(m => (m as any).media_type === 'movie' || !m.name)} title="movie-trending" isLarge /></LazySection> : <RowSkeleton />}
+                                                        {trending.filter(m => detectMediaType(m) === 'movie').length > 0 ? <LazySection><MovieRow items={trending.filter(m => detectMediaType(m) === 'movie')} title="movie-trending" isLarge /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && popular.length === 0) || popular.length > 0) && (
@@ -750,10 +751,10 @@ export default function MoviesPage() {
                                             </>
                                         ) : (
                                             <>
-                                                {((loading && trending.filter(m => (m as any).media_type === 'tv' || m.name).length === 0) || trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0) && (
+                                                {((loading && trending.filter(m => detectMediaType(m) === 'tv').length === 0) || trending.filter(m => detectMediaType(m) === 'tv').length > 0) && (
                                                     <section>
                                                         <SectionHeader icon={Flame} title="Trending TV Shows" color="text-accent" isFeatured />
-                                                        {trending.filter(m => (m as any).media_type === 'tv' || m.name).length > 0 ? <LazySection><MovieRow items={trending.filter(m => (m as any).media_type === 'tv' || m.name)} title="tv-trending" isLarge /></LazySection> : <RowSkeleton />}
+                                                        {trending.filter(m => detectMediaType(m) === 'tv').length > 0 ? <LazySection><MovieRow items={trending.filter(m => detectMediaType(m) === 'tv')} title="tv-trending" isLarge /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (

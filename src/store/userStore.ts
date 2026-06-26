@@ -208,11 +208,14 @@ export const useUserStore = create<UserState>()(
           ...profile
         } as Profile;
 
-        if (state.activeProfileId === profile.id && typeof window !== 'undefined') {
-          localStorage.setItem("toonplayer_profile", JSON.stringify(fullProfile));
-          setTimeout(() => {
-            window.dispatchEvent(new Event("profileUpdated"));
-          }, 0);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`kids-filter-${profile.id}`, fullProfile.isKids ? 'true' : 'false');
+          if (state.activeProfileId === profile.id) {
+            localStorage.setItem("toonplayer_profile", JSON.stringify(fullProfile));
+            setTimeout(() => {
+              window.dispatchEvent(new Event("profileUpdated"));
+            }, 0);
+          }
         }
 
         if (exists) {

@@ -5,6 +5,7 @@ import { useWatch } from "@/context/WatchContext";
 import { Play, Clock, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { detectMediaType } from "@/utils/mediaType";
 
 const PLACEHOLDER = "/tmdb_placeholder.webp";
 
@@ -41,10 +42,11 @@ export default function ContinueWatchingRow() {
     if (displayHistory.length === 0) return null;
 
     const getHistoryLink = (entry: any) => {
-        if (entry.type === 'movie') {
+        const type = detectMediaType(entry);
+        if (type === 'movie') {
             return `/watch/movie/${entry.showId}`;
         }
-        if (entry.type === 'tv') {
+        if (type === 'tv') {
             const season = entry.season || 1;
             const episode = entry.episodeId || entry.episodeNumber || 1;
             return `/watch/tv/${entry.showId}?s=${season}&e=${episode}`;
@@ -130,7 +132,7 @@ export default function ContinueWatchingRow() {
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                             {entry.episodeId && (
                                                 <span className="text-[9px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
-                                                    {entry.type === 'tv' ? `S1 · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
+                                                    {detectMediaType(entry) === 'tv' ? `S${entry.season || 1} · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
                                                 </span>
                                             )}
                                             {entry.duration > 0 && (

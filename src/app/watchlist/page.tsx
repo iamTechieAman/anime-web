@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { useWatch, WatchlistItem } from "@/context/WatchContext";
 import toast from "react-hot-toast";
+import { detectMediaType } from "@/utils/mediaType";
 import { motion, AnimatePresence, Reorder, useDragControls } from "framer-motion";
 import Image from "next/image";
 
@@ -506,8 +507,20 @@ export default function WatchlistPage() {
   }, []);
 
   const getLink = useCallback((entry: WatchlistItem) => {
-    if (entry.type === "movie" || entry.type === "tv")
-      return `/watch/${entry.type}/${entry.showId}`;
+    const type = detectMediaType(entry);
+    
+    let routeType = type;
+    if (type === "anime") {
+      const isPrefixed = typeof entry.showId === "string" && (entry.showId.includes(":") && !entry.showId.startsWith("tmdb:"));
+      const isAnilistNumeric = typeof entry.showId === "number" || (typeof entry.showId === "string" && /^\d+$/.test(entry.showId) && !entry.season);
+      
+      if (!isPrefixed && !isAnilistNumeric) {
+        routeType = entry.season ? "tv" : "movie";
+      }
+    }
+    
+    if (routeType === "movie" || routeType === "tv")
+      return `/watch/${routeType}/${entry.showId}`;
     return `/watch/anime/${entry.showId}`;
   }, []);
 

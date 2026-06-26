@@ -28,12 +28,12 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://toonplayer.in'),
+  metadataBase: new URL('https://www.toonplayer.in'),
   title: {
     default: "ToonPlayer – Watch Free Anime, Movies & TV Shows Online",
     template: "%s | ToonPlayer",
   },
-  alternates: { canonical: "https://toonplayer.in" },
+  alternates: { canonical: "https://www.toonplayer.in" },
 
   description: "ToonPlayer is a free HD streaming platform to watch anime, movies, and TV shows online in 1080p. No ads, no subscription. Stream the latest anime episodes, blockbuster movies, and trending TV series on any device.",
   keywords: [
@@ -55,13 +55,13 @@ export const metadata: Metadata = {
     "watch demon slayer online", "watch one piece online", "watch naruto online",
     "latest anime 2025", "new anime season", "anime recommendation AI",
   ],
-  authors: [{ name: "ToonPlayer Team", url: "https://toonplayer.in" }],
+  authors: [{ name: "ToonPlayer Team", url: "https://www.toonplayer.in" }],
   creator: "ToonPlayer",
   publisher: "ToonPlayer",
   openGraph: {
     title: "ToonPlayer – Watch Free Anime, Movies & TV Shows in HD",
     description: "Stream anime, movies, and TV shows for free in HD quality. No ads, no registration required. ToonPlayer — your premium streaming experience.",
-    url: 'https://toonplayer.in',
+    url: 'https://www.toonplayer.in',
     siteName: 'ToonPlayer',
     images: [
       { url: '/og-image.png', width: 1200, height: 630, alt: 'ToonPlayer – Free HD Anime & Movie Streaming' },
@@ -110,8 +110,8 @@ export default async function RootLayout({
                "@graph": [
                  {
                    "@type": "WebSite",
-                   "@id": "https://toonplayer.in/#website",
-                   "url": "https://toonplayer.in",
+                   "@id": "https://www.toonplayer.in/#website",
+                   "url": "https://www.toonplayer.in",
                    "name": "ToonPlayer",
                    "alternateName": ["Toon Player", "ToonPlayer.in"],
                    "description": "Free HD streaming platform for anime, movies, and TV shows. No ads, no subscription needed.",
@@ -119,7 +119,7 @@ export default async function RootLayout({
                      "@type": "SearchAction",
                      "target": {
                        "@type": "EntryPoint",
-                       "urlTemplate": "https://toonplayer.in/search?query={search_term_string}"
+                       "urlTemplate": "https://www.toonplayer.in/search?query={search_term_string}"
                      },
                      "query-input": "required name=search_term_string"
                    },
@@ -127,13 +127,13 @@ export default async function RootLayout({
                  },
                  {
                    "@type": "Organization",
-                   "@id": "https://toonplayer.in/#organization",
+                   "@id": "https://www.toonplayer.in/#organization",
                    "name": "ToonPlayer",
                    "alternateName": "Toon Player",
-                   "url": "https://toonplayer.in",
+                   "url": "https://www.toonplayer.in",
                    "logo": {
                      "@type": "ImageObject",
-                     "url": "https://toonplayer.in/icon.png",
+                     "url": "https://www.toonplayer.in/icon.png",
                      "width": 512,
                      "height": 512
                    },
@@ -145,9 +145,9 @@ export default async function RootLayout({
                  },
                  {
                    "@type": "WebApplication",
-                   "@id": "https://toonplayer.in/#webapp",
+                   "@id": "https://www.toonplayer.in/#webapp",
                    "name": "ToonPlayer",
-                   "url": "https://toonplayer.in",
+                   "url": "https://www.toonplayer.in",
                    "applicationCategory": "EntertainmentApplication",
                    "operatingSystem": "Web, Android, iOS",
                    "offers": {
@@ -159,7 +159,7 @@ export default async function RootLayout({
                  },
                  {
                    "@type": "FAQPage",
-                   "@id": "https://toonplayer.in/#faq",
+                   "@id": "https://www.toonplayer.in/#faq",
                    "mainEntity": [
                      {
                        "@type": "Question",
@@ -203,14 +203,6 @@ export default async function RootLayout({
         {/* DNS Prefetch & Preconnect for critical third-party domains */}
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
-        <link rel="preload" href="/avatars/avatar-1.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-2.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-3.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-4.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-5.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-6.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-7.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/avatars/avatar-8.webp" as="image" type="image/webp" />
         <link rel="dns-prefetch" href="https://s4.anilist.co" />
         <link rel="dns-prefetch" href="https://graphql.anilist.co" />
         <link rel="dns-prefetch" href="https://vidlink.pro" />

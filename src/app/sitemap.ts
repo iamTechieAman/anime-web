@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next'
 export const revalidate = 86400; // Cache for 24 hours to prevent 429 timeouts to TMDB
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://toonplayer.in';
+  const baseUrl = 'https://www.toonplayer.in';
   const now = new Date();
 
   // Static pages
@@ -12,28 +12,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: baseUrl,
       lastModified: now,
       changeFrequency: 'daily',
-      priority: 1,
+      priority: 1.0,
     },
     {
-      url: `${baseUrl}/about`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/search`,
+      url: `${baseUrl}/anime`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/discover`,
+      url: `${baseUrl}/movies`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/az-list/all`,
+      url: `${baseUrl}/tv`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/trending`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/top-rated`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
@@ -45,16 +51,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/randomize`,
+      url: `${baseUrl}/about`,
       lastModified: now,
-      changeFrequency: 'daily',
+      changeFrequency: 'monthly',
       priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/history`,
-      lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.5,
     },
     {
       url: `${baseUrl}/privacy`,

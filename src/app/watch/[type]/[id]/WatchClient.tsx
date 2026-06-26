@@ -863,6 +863,25 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     useEffect(() => { selectedEpisodeRef.current = selectedEpisode; }, [selectedEpisode]);
     useEffect(() => { selectedSeasonRef.current = selectedSeason; }, [selectedSeason]);
 
+    // Sync TV season and episode state with URL search parameters
+    useEffect(() => {
+        if (type !== 'tv' && type !== 'cartoon') return;
+        const params = new URLSearchParams(window.location.search);
+        let changed = false;
+        if (params.get('s') !== selectedSeason.toString()) {
+            params.set('s', selectedSeason.toString());
+            changed = true;
+        }
+        if (params.get('e') !== selectedEpisode.toString()) {
+            params.set('e', selectedEpisode.toString());
+            changed = true;
+        }
+        if (changed) {
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            router.replace(newUrl, { scroll: false });
+        }
+    }, [selectedSeason, selectedEpisode, type, router]);
+
     // Scroll to top exactly once when title (id/type), episode, or provider changes
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "instant" });
@@ -1134,11 +1153,39 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     }
                     if (res?.data) {
                         setDetails(res.data);
-                        if (res.data.resolvedType) {
-                            setType(res.data.resolvedType);
+                        let resolvedType = res.data.resolvedType || initialType;
+                        const isJp = res.data.original_language === "ja" || 
+                                     (Array.isArray(res.data.origin_country) && res.data.origin_country.includes("JP")) ||
+                                     res.data.origin_country === "JP";
+                        const genres = res.data.genres || [];
+                        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
+                        
+                        if (isJp && isAnimation) {
+                            resolvedType = "anime";
                         }
-                        const resolvedType = res.data.resolvedType || initialType;
-                        if ((resolvedType === "tv" || resolvedType === "cartoon" || resolvedType === "anime") && res.data.seasons?.length > 0) {
+                        setType(resolvedType);
+
+                        if (resolvedType === "anime") {
+                            try {
+                                const searchTitle = res.data.name || res.data.title;
+                                if (searchTitle) {
+                                    const animeSearch = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchTitle)}`, { signal: controller.signal });
+                                    const animeMatch = animeSearch.data.results?.find((item: any) => item.type === 'anime');
+                                    if (animeMatch) {
+                                        const animeRes = await axios.get(`/api/anime/episodes?id=${animeMatch.id}`, { signal: controller.signal });
+                                        if (animeRes.data?.show) {
+                                            setAnimeData(animeRes.data.show);
+                                            const eps = animeRes.data.show.availableEpisodesDetail?.[mode] || [];
+                                            setEpisodes(eps);
+                                            if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
+                                            setTmdbIdForAnime(id);
+                                        }
+                                    }
+                                }
+                            } catch (animeErr) {
+                                console.error("Failed to load anime mapping for TMDB show:", animeErr);
+                            }
+                        } else if ((resolvedType === "tv" || resolvedType === "cartoon") && res.data.seasons?.length > 0) {
                             setSelectedSeason(res.data.seasons[0].season_number || 1);
                         }
                     } else {
@@ -1153,10 +1200,39 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${initialType === 'movie' ? 'movie' : 'tv'}`, { signal: controller.signal });
                     if (fallbackRes.data) {
                         setDetails(fallbackRes.data);
-                        if (fallbackRes.data.resolvedType) {
-                            setType(fallbackRes.data.resolvedType);
+                        let resolvedType = fallbackRes.data.resolvedType || initialType;
+                        const isJp = fallbackRes.data.original_language === "ja" || 
+                                     (Array.isArray(fallbackRes.data.origin_country) && fallbackRes.data.origin_country.includes("JP")) ||
+                                     fallbackRes.data.origin_country === "JP";
+                        const genres = fallbackRes.data.genres || [];
+                        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
+                        
+                        if (isJp && isAnimation) {
+                            resolvedType = "anime";
                         }
-                        if (fallbackRes.data.seasons?.length > 0) {
+                        setType(resolvedType);
+
+                        if (resolvedType === "anime") {
+                            try {
+                                const searchTitle = fallbackRes.data.name || fallbackRes.data.title;
+                                if (searchTitle) {
+                                    const animeSearch = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchTitle)}`, { signal: controller.signal });
+                                    const animeMatch = animeSearch.data.results?.find((item: any) => item.type === 'anime');
+                                    if (animeMatch) {
+                                        const animeRes = await axios.get(`/api/anime/episodes?id=${animeMatch.id}`, { signal: controller.signal });
+                                        if (animeRes.data?.show) {
+                                            setAnimeData(animeRes.data.show);
+                                            const eps = animeRes.data.show.availableEpisodesDetail?.[mode] || [];
+                                            setEpisodes(eps);
+                                            if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
+                                            setTmdbIdForAnime(id);
+                                        }
+                                    }
+                                }
+                            } catch (animeErr) {
+                                console.error("Failed to load anime mapping for TMDB show in fallback:", animeErr);
+                            }
+                        } else if ((resolvedType === "tv" || resolvedType === "cartoon") && fallbackRes.data.seasons?.length > 0) {
                             setSelectedSeason(fallbackRes.data.seasons[0].season_number || 1);
                         }
                         return;
@@ -1192,6 +1268,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // Fetch episodes when season changes — with AbortController to prevent race conditions
     useEffect(() => {
         if (type !== 'tv' || !id || !details) return;
+        setEpisodes([]); // Clear episodes immediately when season changes to prevent stale UI
         const controller = new AbortController();
 
         const fetchEpisodes = async () => {

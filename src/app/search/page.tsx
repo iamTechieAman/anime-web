@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Search Movies, TV Shows & Anime",
   description: "Find your favorite movies, TV series, and anime to watch in HD.",
   alternates: {
-    canonical: 'https://toonplayer.in/search',
+    canonical: 'https://www.toonplayer.in/search',
   },
 };
 

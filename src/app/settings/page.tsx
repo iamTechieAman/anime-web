@@ -6,8 +6,9 @@ export const metadata: Metadata = {
     title: "App Settings - ToonPlayer",
     description: "Configure your playback, appearance, account profiles, notifications, and accessibility preferences.",
     alternates: {
-        canonical: "https://toonplayer.in/settings",
+        canonical: "https://www.toonplayer.in/settings",
     },
+    robots: { index: false, follow: false },
 };
 
 export default function SettingsPage() {

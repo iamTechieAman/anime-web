@@ -6,6 +6,7 @@ import { Play, Star, Flame, ChevronLeft, ChevronRight, Clock } from "lucide-reac
 import React from "react";
 import Image from "next/image";
 import { useUserStore, isKidsFriendly } from "@/store/userStore";
+import { detectMediaType } from "@/utils/mediaType";
 
 // Shared movie item type
 export interface MovieItem {
@@ -71,11 +72,25 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
     const year = (releaseDate || "").slice(0, 4);
     const rating = item.vote_average && item.vote_average > 0 ? item.vote_average.toFixed(1) : null;
-    const rawMediaType = item.media_type || type;
-    const mediaType = (rawMediaType && rawMediaType !== 'undefined')
-        ? rawMediaType
-        : (item.first_air_date || item.name ? 'tv' : 'movie');
-    const watchHref = mediaType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`;
+    // Enforce reliable media type detection preferring metadata
+    const mediaType = detectMediaType({ ...item, media_type: item.media_type || type });
+    
+    // For routing: TMDB items should go to /watch/movie or /watch/tv,
+    // so the TMDB watch client can resolve their AniList mapping.
+    let routeType = mediaType;
+    if (mediaType === "anime") {
+        const isPrefixed = typeof item.id === "string" && (item.id.includes(":") && !item.id.startsWith("tmdb:"));
+        // AniList search results are numeric and do not have release_date / first_air_date on TMDB schema
+        const isAnilistNumeric = typeof item.id === "number" || (typeof item.id === "string" && /^\d+$/.test(item.id) && !item.first_air_date && !item.release_date);
+        
+        if (!isPrefixed && !isAnilistNumeric) {
+            const hasSeasons = (item.number_of_seasons && item.number_of_seasons > 0) || 
+                               (Array.isArray(item.seasons) && item.seasons.length > 0) ||
+                               item.first_air_date || item.name;
+            routeType = hasSeasons ? "tv" : "movie";
+        }
+    }
+    const watchHref = routeType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${routeType}/${item.id}`;
 
     const posterSrc = item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image;
 

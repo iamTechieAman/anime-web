@@ -9,6 +9,7 @@ import axios from "axios";
 import { HeroSkeleton } from "@/components/SkeletonLoader";
 import { useWatch } from "@/context/WatchContext";
 import { useUserStore, isKidsFriendly } from "@/store/userStore";
+import { detectMediaType } from "@/utils/mediaType";
 
 interface Slide {
     id: number | string;
@@ -75,15 +76,17 @@ export default function HeroCarousel() {
         try {
             const filteredSlides = isKidsMode ? rawSlides.filter(s => isKidsFriendly(s)) : rawSlides;
             const formattedSlides: Slide[] = filteredSlides.slice(0, 15).map((item: any) => {
-                const isTv = item.media_type === 'tv' || !item.title;
+                const mediaType = detectMediaType(item);
+                const isTv = mediaType === 'tv';
+                const isAnime = mediaType === 'anime';
                 const title = item.title || item.name;
                 const description = item.overview || "No description available.";
                 const image = item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : '';
                 const cover = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
                 const rating = item.vote_average ? `${(item.vote_average * 10).toFixed(0)}%` : "?";
                 const release = (item.release_date || item.first_air_date || "2026").split('-')[0];
-                const type = isTv ? "TV" : "MOVIE";
-                const link = `/watch/${isTv ? 'tv' : 'movie'}/${item.id}`;
+                const type = isAnime ? "ANIME" : isTv ? "TV" : "MOVIE";
+                const link = isAnime ? `/watch/anime/${item.id}` : `/watch/${mediaType}/${item.id}`;
 
                 return { id: item.id, title, description, image, cover, tags: ["HD", "Trending"], rating, release, quality: "HD", type, link };
             });

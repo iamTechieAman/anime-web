@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     title: "Browse Content - Movies, Shows & Anime",
     description: "Browse the complete collection of movies, TV shows, and anime on ToonPlayer. Use advanced filters to discover your next watch.",
     alternates: {
-        canonical: "https://toonplayer.in/browse",
+        canonical: "https://www.toonplayer.in/browse",
     },
 };
 

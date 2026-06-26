@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Pencil, Check, Trash2 } from "lucide-react";
+import { Plus, X, Pencil, Check, Trash2, Upload } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
@@ -81,6 +81,25 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
       toast.success(`Switched to profile: ${profile.name}`);
       onClose();
     }
+  };
+
+  const handleCustomAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 500 * 1024) {
+      toast.error("Avatar size must be under 500KB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result && typeof event.target.result === 'string') {
+        setSelectedAvatar(event.target.result);
+        toast.success("Avatar uploaded successfully!");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCreateOpen = () => {
@@ -305,6 +324,37 @@ export default function ProfileEditModal({ isOpen, onClose }: ProfileEditModalPr
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Select Avatar</label>
                 <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  {/* Custom Upload Option */}
+                  <label
+                    className="relative aspect-square rounded-full overflow-hidden border-2 border-dashed border-zinc-700 hover:border-white/50 bg-white/5 cursor-pointer transition-all flex flex-col items-center justify-center p-1 group"
+                    style={{ borderRadius: '9999px' }}
+                  >
+                    <Upload className="w-5 h-5 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                    <span className="text-[8px] text-zinc-500 font-bold group-hover:text-zinc-300 transition-colors mt-0.5">Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCustomAvatarUpload}
+                    />
+                  </label>
+
+                  {/* Custom Uploaded Avatar preview (if active) */}
+                  {selectedAvatar.startsWith("data:") && (
+                    <button
+                      type="button"
+                      className="relative aspect-square rounded-full overflow-hidden border-2 border-accent p-1 bg-white/10 cursor-pointer"
+                      style={{ borderRadius: '9999px', padding: 0, overflow: 'hidden' }}
+                    >
+                      <img 
+                        src={selectedAvatar} 
+                        alt="Uploaded Avatar" 
+                        className="w-full h-full object-cover" 
+                        style={{ borderRadius: '9999px', objectFit: 'cover', width: '100%', height: '100%' }}
+                      />
+                    </button>
+                  )}
+
                   {/* Dynamic Seeded Bitmoji Option */}
                   <button
                     type="button"

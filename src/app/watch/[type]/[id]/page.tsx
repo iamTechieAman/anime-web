@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
             openGraph: {
                 title: `Watch ${title} - ToonPlayer`,
                 description: `Stream ${title} in HD for free. ${rating ? `${rating} match. ` : ''}No ads, no sign-up.`,
-                url: `https://toonplayer.in/watch/${type}/${id}`,
+                url: `https://www.toonplayer.in/watch/${type}/${id}`,
                 type: 'video.other',
                 images: [
                     { url: backdrop, width: 1920, height: 1080, alt: title },
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
                 images: [backdrop],
             },
             alternates: {
-                canonical: `https://toonplayer.in/watch/${type}/${id}`,
+                canonical: `https://www.toonplayer.in/watch/${type}/${id}`,
             },
             robots: {
                 index: true,
@@ -79,7 +79,7 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
 
     let metaTitle = "Video Content";
     let metaDesc = "Watch free HD content on ToonPlayer";
-    let metaImage = "https://toonplayer.in/icon.png";
+    let metaImage = "https://www.toonplayer.in/icon.png";
 
     try {
         const res = await fetchWithTimeout(fetch(`https://api.themoviedb.org/3/${type === 'anime' ? 'tv' : type}/${id}?api_key=${TMDB_KEY}`), 3000);
@@ -102,14 +102,14 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
                         "description": metaDesc.slice(0, 160),
                         "thumbnailUrl": [metaImage],
                         "uploadDate": new Date().toISOString(),
-                        "contentUrl": `https://toonplayer.in/watch/${type}/${id}`,
-                        "embedUrl": `https://toonplayer.in/watch/${type}/${id}`,
+                        "contentUrl": `https://www.toonplayer.in/watch/${type}/${id}`,
+                        "embedUrl": `https://www.toonplayer.in/watch/${type}/${id}`,
                         "publisher": {
                             "@type": "Organization",
                             "name": "ToonPlayer",
                             "logo": {
                                 "@type": "ImageObject",
-                                "url": "https://toonplayer.in/icon.png"
+                                "url": "https://www.toonplayer.in/icon.png"
                             }
                         }
                     })
@@ -123,15 +123,15 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
                         "@context": "https://schema.org",
                         "@type": "BreadcrumbList",
                         "itemListElement": [
-                            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://toonplayer.in" },
-                            { "@type": "ListItem", "position": 2, "name": type === 'tv' ? 'TV Shows' : type === 'anime' ? 'Anime' : 'Movies', "item": `https://toonplayer.in/${type === 'anime' ? 'az-list/all' : 'discover'}` },
-                            { "@type": "ListItem", "position": 3, "name": metaTitle, "item": `https://toonplayer.in/watch/${type}/${id}` },
+                            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.toonplayer.in" },
+                            { "@type": "ListItem", "position": 2, "name": type === 'tv' ? 'TV Shows' : type === 'anime' ? 'Anime' : 'Movies', "item": `https://www.toonplayer.in/${type === 'anime' ? 'az-list/all' : 'discover'}` },
+                            { "@type": "ListItem", "position": 3, "name": metaTitle, "item": `https://www.toonplayer.in/watch/${type}/${id}` },
                         ]
                     })
                 }}
             />
             <Suspense fallback={<DetailsSkeleton />}>
-                <WatchClient type={type} id={id} />
+                <WatchClient key={`${type}-${id}`} type={type} id={id} />
             </Suspense>
         </>
     );

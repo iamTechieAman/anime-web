@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useWatch } from "@/context/WatchContext";
 import toast from "react-hot-toast";
+import { detectMediaType } from "@/utils/mediaType";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -149,8 +150,20 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
   const isCompleted = progressPct >= 90;
 
   const href = useMemo(() => {
-    if (entry.type === "movie") return `/watch/movie/${entry.showId}`;
-    if (entry.type === "tv") {
+    const type = detectMediaType(entry);
+    
+    let routeType = type;
+    if (type === "anime") {
+      const isPrefixed = typeof entry.showId === "string" && (entry.showId.includes(":") && !entry.showId.startsWith("tmdb:"));
+      const isAnilistNumeric = typeof entry.showId === "number" || (typeof entry.showId === "string" && /^\d+$/.test(entry.showId) && !entry.season);
+      
+      if (!isPrefixed && !isAnilistNumeric) {
+        routeType = entry.season ? "tv" : "movie";
+      }
+    }
+    
+    if (routeType === "movie") return `/watch/movie/${entry.showId}`;
+    if (routeType === "tv") {
       const s = (entry as any).season || 1;
       const e = entry.episodeId || entry.episodeNumber || 1;
       return `/watch/tv/${entry.showId}?s=${s}&e=${e}`;
@@ -158,11 +171,14 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
     return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
   }, [entry]);
 
-  const typeStyle = entry.type === "anime"
-    ? "bg-accent/10 text-accent border-accent/25"
-    : entry.type === "movie"
-    ? "bg-blue-500/10 text-blue-400 border-blue-500/25"
-    : "bg-cyan-500/10 text-cyan-400 border-cyan-500/25";
+  const typeStyle = useMemo(() => {
+    const type = detectMediaType(entry);
+    return type === "anime"
+      ? "bg-accent/10 text-accent border-accent/25"
+      : type === "movie"
+      ? "bg-blue-500/10 text-blue-400 border-blue-500/25"
+      : "bg-cyan-500/10 text-cyan-400 border-cyan-500/25";
+  }, [entry]);
 
   return (
     <motion.div

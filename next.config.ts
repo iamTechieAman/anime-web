@@ -74,6 +74,12 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/login',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex' },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -120,6 +126,30 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: '*' },
         ],
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/anime',
+        destination: '/browse?type=tv&language=ja',
+      },
+      {
+        source: '/movies',
+        destination: '/browse?type=movie',
+      },
+      {
+        source: '/tv',
+        destination: '/browse?type=tv',
+      },
+      {
+        source: '/trending',
+        destination: '/discover',
+      },
+      {
+        source: '/top-rated',
+        destination: '/browse?sort_by=vote_average.desc',
       },
     ];
   }
