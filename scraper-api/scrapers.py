@@ -194,24 +194,218 @@ def scrape_aniwatch_tv_list(page=17):
             
     return results
 
+wa_mappings_cache = {}
+
+def determine_content_type(title, slug, url="", page_text="", episodes=None):
+    t_lower = title.lower() if title else ""
+    s_lower = slug.lower() if slug else ""
+    u_lower = url.lower() if url else ""
+    txt_lower = page_text.lower() if page_text else ""
+    
+    # Priority 1: OVA / Special / Mini Series
+    if re.search(r'\bova\b', t_lower) or re.search(r'\bova\b', s_lower):
+        return "ova"
+    if re.search(r'\bspecial\b', t_lower) or re.search(r'\bspecial\b', s_lower):
+        return "special"
+    if "mini series" in t_lower or "miniseries" in t_lower or "mini-series" in s_lower:
+        return "mini-series"
+
+    # Priority 2: Movie vs Series classification
+    is_movie = False
+    if "/movies/" in u_lower or "/movie/" in u_lower or "-movie" in s_lower or "movie" in t_lower:
+        is_movie = True
+    
+    if "duration" in txt_lower or "1h " in txt_lower or "2h " in txt_lower:
+        if not episodes or len(episodes) <= 1:
+            is_movie = True
+
+    # Series indicators
+    has_series_indicator = False
+    for indicator in ["season", "s01", "s02", "s03", "s04", "s05", "s06", "s07", "s08", "s09", "s10", "episode", "ep", "e01", "e02", "e03", "e04", "e05"]:
+        pattern = r'\b' + re.escape(indicator) + r'\b'
+        if re.search(pattern, t_lower) or re.search(pattern, s_lower):
+            has_series_indicator = True
+            break
+
+    if episodes and len(episodes) > 1:
+        has_series_indicator = True
+
+    # Priority 3: Anime vs Cartoon specificity
+    is_anime = False
+    if "/anime/" in u_lower or "-anime" in s_lower or "category/anime" in txt_lower:
+        is_anime = True
+    elif "anime" in t_lower or "sub" in t_lower or "dub" in t_lower:
+        is_anime = True
+
+    is_cartoon = False
+    if "/cartoon/" in u_lower or "-cartoon" in s_lower or "category/cartoon" in txt_lower:
+        is_cartoon = True
+    elif "cartoon" in t_lower:
+        is_cartoon = True
+
+    # Decision logic
+    if is_movie and not has_series_indicator:
+        return "movie"
+    if is_anime:
+        return "anime"
+    if is_cartoon:
+        return "cartoon"
+    if has_series_indicator:
+        return "series"
+    if is_movie:
+        return "movie"
+    return "series"
+
+def parse_season_info(title_str, slug_str=""):
+    title_lower = title_str.lower() if title_str else ""
+    slug_lower = slug_str.lower() if slug_str else ""
+    
+    number_words = {
+        "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+        "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+        "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+        "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+        "nineteen": 19, "twenty": 20
+    }
+    
+    # 1. Word representation of seasons
+    for word, num in number_words.items():
+        pattern = r'\bseason\s+' + word + r'\b'
+        if re.search(pattern, title_lower):
+            base = re.sub(pattern, '', title_lower).strip()
+            base = re.sub(r'[\s\-:]+$', '', base).strip()
+            return base.title(), num
+        if re.search(pattern, slug_lower):
+            base_t = re.sub(pattern, '', title_lower).strip()
+            base_t = re.sub(r'[\s\-:]+$', '', base_t).strip()
+            return base_t.title(), num
+
+    # 2. Numeric season representation
+    patterns = [
+        r'\bseason\s*[:\-]?\s*(\d+)\b',
+        r'\bs(\d+)\b',
+        r'\bseason(\d+)\b',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, title_lower)
+        if match:
+            num = int(match.group(1))
+            base = re.sub(pattern, '', title_lower).strip()
+            base = re.sub(r'[\s\-:]+$', '', base).strip()
+            return base.title(), num
+            
+        match_s = re.search(pattern, slug_lower)
+        if match_s:
+            num = int(match_s.group(1))
+            base_t = re.sub(pattern, '', title_lower).strip()
+            base_t = re.sub(r'[\s\-:]+$', '', base_t).strip()
+            return base_t.title(), num
+
+    # 3. Fallback for slug formats like "season-1" or "s1"
+    match_fallback = re.search(r'\bseason[-_]?(\d+)\b', slug_lower) or re.search(r'\bs(\d+)\b', slug_lower)
+    if match_fallback:
+        num = int(match_fallback.group(1))
+        clean_title = re.sub(r'\bseason\s*\d+\b', '', title_str, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\bs\d+\b', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'[\s\-:]+$', '', clean_title).strip()
+        return clean_title.title(), num
+            
+    return title_str.strip(), 1
+
+def parse_episode_info(ep_text, ep_slug, default_season=1):
+    t = ep_text.lower().strip() if ep_text else ""
+    s = ep_slug.lower().strip() if ep_slug else ""
+    
+    # 1. Match patterns like "1x12", "s01e12", "1.12"
+    match1 = re.search(r'\b(\d+)\s*x\s*(\d+)\b', t) or re.search(r'\b(\d+)\s*x\s*(\d+)\b', s) or re.search(r'\b(\d+)\.(\d+)\b', t) or re.search(r'\b(\d+)\.(\d+)\b', s)
+    if match1:
+        return int(match1.group(1)), int(match1.group(2))
+        
+    # 2. Match patterns like "s01e12", "s1e12"
+    match2 = re.search(r'\bs(\d+)\s*[-_]?\s*e(\d+)\b', t) or re.search(r'\bs(\d+)\s*[-_]?\s*e(\d+)\b', s)
+    if match2:
+        return int(match2.group(1)), int(match2.group(2))
+        
+    # 3. Match patterns like "episode 12", "ep12", "e12", "episode 012"
+    match3 = re.search(r'\b(?:episode|ep|e)\s*[-_]?\s*(\d+)\b', t) or re.search(r'\b(?:episode|ep|e)\s*[-_]?\s*(\d+)\b', s)
+    if match3:
+        season_match = re.search(r'\b(?:season|s)\s*[-_]?\s*(\d+)\b', s) or re.search(r'\b(?:season|s)\s*[-_]?\s*(\d+)\b', t)
+        season_num = int(season_match.group(1)) if season_match else default_season
+        return season_num, int(match3.group(1))
+        
+    # 4. Match trailing number in title/slug (e.g. "Ben 10 - 12")
+    match4 = re.search(r'\b(\d+)\b$', t) or re.search(r'\b(\d+)\b$', s)
+    if match4:
+        season_match = re.search(r'\b(?:season|s)\s*[-_]?\s*(\d+)\b', s) or re.search(r'\b(?:season|s)\s*[-_]?\s*(\d+)\b', t)
+        season_num = int(season_match.group(1)) if season_match else default_season
+        return season_num, int(match4.group(1))
+
+    # 5. Fallback: match any number in slug
+    match5 = re.search(r'(\d+)', s) or re.search(r'(\d+)', t)
+    if match5:
+        return default_season, int(match5.group(1))
+        
+    return default_season, 1
+
+def group_watchanimeworld_results(results):
+    grouped = {}
+    for res in results:
+        slug = res['id'].replace("wa:", "")
+        base_title, season_num = parse_season_info(res['title'], slug)
+        key = base_title.lower().strip()
+        key = re.sub(r'\s+', ' ', key)
+        if not key:
+            continue
+        if key not in grouped:
+            grouped[key] = {
+                "base_title": base_title,
+                "seasons": {},
+                "image": res['image'],
+                "type": res['type']
+            }
+        if season_num not in grouped[key]["seasons"]:
+            grouped[key]["seasons"][season_num] = res
+            
+    grouped_list = []
+    for key, data in grouped.items():
+        seasons_dict = data["seasons"]
+        sorted_season_nums = sorted(seasons_dict.keys())
+        slugs = [seasons_dict[s_num]["id"].replace("wa:", "") for s_num in sorted_season_nums]
+        combined_id = "wa:" + "|".join(slugs)
+        
+        # Determine the type using the new helper
+        first_href = seasons_dict[sorted_season_nums[0]]["href"]
+        item_type = determine_content_type(data["base_title"], combined_id, first_href)
+        
+        grouped_list.append({
+            "id": combined_id,
+            "title": data["base_title"],
+            "image": data["image"],
+            "type": item_type,
+            "is_series": item_type != "movie",
+            "href": first_href
+        })
+        
+    return grouped_list
+
+
 def scrape_watchanimeworld(query=None, category=None):
     fetcher = StealthyFetcher()
     url = "https://watchanimeworld.net/"
-    if query:
+    if query == "cartoon" or category == "cartoon":
+        url = "https://watchanimeworld.net/category/cartoon/"
+    elif query:
         url = f"https://watchanimeworld.net/?s={query}"
     elif category:
         url = f"https://watchanimeworld.net/category/{category}/"
     
-    # Force Chrome engine for better bypass and JS rendering
     response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=20000)
     results = []
     
     if not response: return []
-    # Hybrid selector for different page structures (Home, Search, A-Z)
     items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        # Try to find the link and detect type
         href = item.attrib.get('href', '')
         if not href or not href.startswith('http'):
             links = item.css('a.lnk-blk, .details a, a')
@@ -220,30 +414,11 @@ def scrape_watchanimeworld(query=None, category=None):
         
         if not href: continue
 
-        # Detect type from URL or labels
-        item_type = "series"
-        if "/movies/" in href:
-            item_type = "movie"
-        elif "/series/" in href:
-            item_type = "series"
-        else:
-            labels = item.css('.aa-lnk, .view-button')
-            for lbl in labels:
-                txt = lbl.text.strip()
-                if "Movie" in txt:
-                    item_type = "movie"
-                    break
-                if "Serie" in txt:
-                    item_type = "series"
-                    break
-
-        # Try multiple title patterns
         title = ""
         title_tag = item.css('h2.entry-title, h2, h3, .title, .details a')
         if title_tag:
             title = title_tag[0].text.strip()
         if not title:
-            # Fallback to link text
             links = item.css('a.lnk-blk, .details a, a')
             if links:
                 title = links[0].text.strip()
@@ -251,11 +426,11 @@ def scrape_watchanimeworld(query=None, category=None):
         imgs = item.css('.post-thumbnail img, img')
         img = ""
         if imgs:
-            # Check data-src first for lazy loading
             img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
         
         if title and href:
             item_id = href.rstrip('/').split('/')[-1]
+            item_type = determine_content_type(title, item_id, href)
             results.append({
                 "id": f"wa:{item_id}",
                 "title": title,
@@ -263,23 +438,19 @@ def scrape_watchanimeworld(query=None, category=None):
                 "type": item_type,
                 "href": href
             })
-    return results
+    return group_watchanimeworld_results(results)
 
 def scrape_watchanimeworld_az(letter, page=1):
     fetcher = StealthyFetcher()
-    # Pattern discovered: /letter/{LETTER}/page/{PAGE}/
     url = f"https://watchanimeworld.net/letter/{letter.upper()}/" if page == 1 else f"https://watchanimeworld.net/letter/{letter.upper()}/page/{page}/"
     
-    # Enforcement: Always use chrome for WA as it's heavily dynamic/protected
     response = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded')
     results = []
     
     if not response: return []
-    # Hybrid selector for different page structures
     items = response.css('.result-item, article.post, article.item, .movie-item, a.item__card.lnk-blk, .items article')
     
     for item in items:
-        # Try to find the link and detect type
         href = item.attrib.get('href', '')
         if not href or not href.startswith('http'):
             links = item.css('a.lnk-blk, .details a, a')
@@ -288,30 +459,11 @@ def scrape_watchanimeworld_az(letter, page=1):
         
         if not href: continue
 
-        # Detect type from URL or labels
-        item_type = "series"
-        if "/movies/" in href:
-            item_type = "movie"
-        elif "/series/" in href:
-            item_type = "series"
-        else:
-            labels = item.css('.aa-lnk, .view-button')
-            for lbl in labels:
-                txt = lbl.text.strip()
-                if "Movie" in txt:
-                    item_type = "movie"
-                    break
-                if "Serie" in txt:
-                    item_type = "series"
-                    break
-
-        # Try multiple title patterns
         title = ""
         title_tag = item.css('h2.entry-title, h2, h3, .title, .details a')
         if title_tag:
             title = title_tag[0].text.strip()
         if not title:
-            # Fallback to link text
             links = item.css('a.lnk-blk, .details a, a')
             if links:
                 title = links[0].text.strip()
@@ -319,11 +471,11 @@ def scrape_watchanimeworld_az(letter, page=1):
         imgs = item.css('.post-thumbnail img, img')
         img = ""
         if imgs:
-            # Check data-src first for lazy loading
             img = imgs[0].attrib.get('data-src') or imgs[0].attrib.get('src') or ""
         
         if title and href:
             item_id = href.rstrip('/').split('/')[-1]
+            item_type = determine_content_type(title, item_id, href)
             results.append({
                 "id": f"wa:{item_id}",
                 "title": title,
@@ -331,71 +483,56 @@ def scrape_watchanimeworld_az(letter, page=1):
                 "type": item_type,
                 "href": href
             })
-    return results
+    return group_watchanimeworld_results(results)
 
-def scrape_watchanimeworld_info(item_id):
-    fetcher = StealthyFetcher()
-    is_movie = "-movie" in item_id or "movies" in item_id
-    
-    # Research showed better patterns for direct links
+def scrape_single_slug_info(slug, fetcher):
+    is_movie = "-movie" in slug or "movies" in slug
     urls_to_try = [
-        f"https://watchanimeworld.net/series/{item_id}/",
-        f"https://watchanimeworld.net/movies/{item_id}/",
-        f"https://watchanimeworld.net/{item_id}/",
-        f"https://watchanimeworld.net/anime/{item_id}/",
-        f"https://watchanimeworld.net/cartoon/{item_id}/"
+        f"https://watchanimeworld.net/series/{slug}/",
+        f"https://watchanimeworld.net/movies/{slug}/",
+        f"https://watchanimeworld.net/{slug}/",
+        f"https://watchanimeworld.net/anime/{slug}/",
+        f"https://watchanimeworld.net/cartoon/{slug}/"
     ]
-    
     if is_movie:
         urls_to_try = [urls_to_try[1], urls_to_try[0], urls_to_try[2], urls_to_try[3], urls_to_try[4]]
         
     response = None
     for url in urls_to_try:
         try:
-            # Always use chrome for info and WAIT for DOM to ensure dynamic content loads
             temp_resp = fetcher.fetch(url, engine='chrome', wait_until='domcontentloaded', timeout=25000)
             status = getattr(temp_resp, 'status_code', getattr(temp_resp, 'status', 200))
             if temp_resp and status < 400:
-                # Basic validation that we are on a valid content page
                 if temp_resp.css('h1.entry-title, .title, .episodios, .aa-cnt, .item__card, .play-video'):
                     response = temp_resp
                     break
         except:
             continue
-    
-    episodes = []
-    
-    # Check status again after chrome fallback
+            
     current_status = getattr(response, 'status_code', getattr(response, 'status', 200)) if response else 404
-    
-    # SEARCH RECOVERY - If content still not found, search for it
     if (not response or current_status >= 400 or not response.css('h1.entry-title, .title')) and not is_movie:
-        clean_title = re.sub(r'-(series|classic|20\d\d|19\d\d|full|multi|hd|720p|1080p)', '', item_id.lower())
+        clean_title = re.sub(r'-(series|classic|20\d\d|19\d\d|full|multi|hd|720p|1080p)', '', slug.lower())
         guessed_title = clean_title.replace('-', ' ').title()
         
-        print(f"[Scraper] 404 or empty on direct lookup for {item_id}. Search recovery for '{guessed_title}'...", file=sys.stderr)
+        print(f"[Scraper] 404 or empty on direct lookup for {slug}. Search recovery for '{guessed_title}'...", file=sys.stderr)
         search_res = scrape_watchanimeworld(guessed_title)
         
         if not search_res:
             title_words = list(guessed_title.split())
             if len(title_words) > 2:
-                # Use a explicit slice to satisfy IDE type checkers
                 title_slice = list(title_words)[0:2] # type: ignore
                 search_res = scrape_watchanimeworld(" ".join(title_slice))
-
+                
         if search_res:
-            # Filter results to find the best match that isn't the broken ID
-            valid_results = [r for r in search_res if r['id'] != item_id]
-            if not valid_results: valid_results = search_res # fallback if only one result
-            
+            valid_results = [r for r in search_res if r['id'].replace('wa:', '') != slug]
+            if not valid_results: valid_results = search_res
             if valid_results:
                 best_match = valid_results[0]
-                # Try to find one that exactly matches the slug
                 for r in valid_results:
-                    if item_id in r['id'] or r['id'] in item_id:
+                    match_sub = r['id'].replace('wa:', '')
+                    if slug in match_sub or match_sub in slug:
                         best_match = r
                         break
-                
                 print(f"[Scraper] Recovery found match: {best_match['id']}", file=sys.stderr)
                 match_id = best_match['id'].replace('wa:', '')
                 refetch_urls = [
@@ -408,25 +545,26 @@ def scrape_watchanimeworld_info(item_id):
                         temp_resp = fetcher.fetch(url)
                         if temp_resp and getattr(temp_resp, 'status_code', 200) < 400 and temp_resp.css('h1.entry-title, .title'):
                             response = temp_resp
-                            item_id = match_id # Update item_id to the working one
+                            slug = match_id
                             break
-                    except: continue
-
+                    except:
+                        continue
+                        
     if not response or not response.css('h1.entry-title, .title'):
-        return {"id": item_id, "title": "Error: Content Not Found", "episodes": [], "type": "series", "error": "connectivity_issue"}
+        return {"id": slug, "title": "Error: Content Not Found", "episodes": [], "type": "series", "error": "connectivity_issue"}
         
+    episodes = []
+    
     is_movie_detected = is_movie or (response and ("/movies/" in response.url or "/movie/" in response.url))
     if response and not is_movie_detected:
-        # Check for duration text or other movie indicators (Torofilm usually shows duration for movies)
         text_content = response.text.lower()
         if "duration" in text_content or "1h " in text_content or "2h " in text_content or "matsuri" in text_content:
             if not response.css('.episodios, .aa-cnt, .se-q'):
                 is_movie_detected = True
-
+                
     if is_movie_detected:
-        episodes.append({"id": item_id, "number": "1", "href": response.url if response else ""})
+        episodes.append({"id": slug, "number": "1", "href": response.url if response else ""})
     else:
-        # Extract post_id and seasons for AJAX
         season_links = response.css('.aa-cnt a, .se-q') if response else []
         post_id = None
         seasons = []
@@ -435,7 +573,7 @@ def scrape_watchanimeworld_info(item_id):
             season_num = sl.attrib.get('data-season') or sl.text.strip()
             if post_id and season_num:
                 seasons.append(season_num)
-        
+                
         if post_id and seasons:
             for s_num in seasons:
                 ajax_url = f"https://watchanimeworld.net/wp-admin/admin-ajax.php?action=action_select_season&season={s_num}&post={post_id}"
@@ -444,34 +582,200 @@ def scrape_watchanimeworld_info(item_id):
                     ep_links = ajax_res.css('.lnk-blk, a[href*="/episode/"], a[href*="/watch/"]') if ajax_res else []
                     for link in ep_links:
                         href = link.attrib.get('href', '')
-                        if "/episode/" not in href and "/watch/" not in href: continue
+                        if "/episode/" not in href and "/watch/" not in href:
+                            continue
                         ep_id = href.rstrip('/').split('/')[-1]
                         num_el = link.css('.numerando, .ep, .num-ep')
                         text = num_el[0].text.strip() if num_el else ep_id.split('-')[-1]
                         if ep_id not in [e['id'] for e in episodes]:
                             episodes.append({"id": ep_id, "number": text, "href": href})
-                except: continue
-        # Fallback if AJAX failed or no seasons found
+                except:
+                    continue
+                    
         if not episodes and response:
             ep_links = response.css('.episodios a, .lnk-blk, a[href*="/episode/"], a[href*="/watch/"]')
             for link in ep_links:
                 href = link.attrib.get('href', '')
-                if not href or ("/episode/" not in href and "/watch/" not in href): continue
+                if not href or ("/episode/" not in href and "/watch/" not in href):
+                    continue
                 ep_id = href.rstrip('/').split('/')[-1]
                 num_el = link.css('.numerando, .ep, .num-ep')
                 text = num_el[0].text.strip() if num_el and num_el[0].text else ep_id.split('-')[-1].replace('x', '.')
                 if ep_id and ep_id not in [e['id'] for e in episodes]:
                     episodes.append({"id": ep_id, "number": text, "href": href})
-
+                    
     title_el = response.css('h1.entry-title, .title, .name h1') if response else []
-    title = title_el[0].text.strip() if title_el and title_el[0].text else item_id.replace('-', ' ').title()
-
+    title = title_el[0].text.strip() if title_el and title_el[0].text else slug.replace('-', ' ').title()
+    
+    # Year
+    year = None
+    year_el = response.css('.released, .date, .year, span.date, span.year, .meta-info a[href*="/release/"]') if response else []
+    if year_el:
+        year_text = year_el[0].text.strip()
+        year_match = re.search(r'\b(19\d\d|20\d\d)\b', year_text)
+        if year_match:
+            year = int(year_match.group(1))
+    if not year and response:
+        year_match = re.search(r'Released:\s*(19\d\d|20\d\d)', response.text, re.IGNORECASE) or re.search(r'\b(19\d\d|20\d\d)\b', title)
+        if year_match:
+            year = int(year_match.group(1))
+            
+    # Language
+    language = "English"
+    if response:
+        text_content = response.text.lower()
+        if "dual audio" in text_content or "dual-audio" in text_content:
+            language = "Dual Audio"
+        elif "hindi" in text_content:
+            language = "Hindi"
+        elif "japanese" in text_content or "subbed" in text_content:
+            language = "Japanese"
+        elif "dubbed" in text_content:
+            language = "English (Dub)"
+        lang_el = response.css('.language, .audio, span.language, span.audio')
+        if lang_el:
+            language = lang_el[0].text.strip()
+            
+    # Poster
+    poster = None
+    if response:
+        poster_el = response.css('.poster img, .post-thumbnail img, img[itemprop="image"]')
+        if poster_el:
+            poster = poster_el[0].attrib.get('data-src') or poster_el[0].attrib.get('src')
+        if not poster:
+            for img in response.css('img'):
+                src = img.attrib.get('src') or img.attrib.get('data-src') or ""
+                if src and "/uploads/" in src and "logo" not in src.lower():
+                    poster = src
+                    break
+    if poster:
+        if poster.startswith('//'):
+            poster = f"https:{poster}"
+        elif not poster.startswith('http'):
+            poster = f"https://watchanimeworld.net{poster}"
+            
+    # Banner
+    banner = None
+    if response:
+        banner_el = response.css('.banner img, .backdrop img, .background img, .backdrop-wrapper')
+        if banner_el:
+            style = banner_el[0].attrib.get('style') or ""
+            if "background" in style:
+                bg_match = re.search(r'url\([\'"]?(https?:[^\'"]+)', style)
+                if bg_match:
+                    banner = bg_match.group(1)
+            else:
+                banner = banner_el[0].attrib.get('data-src') or banner_el[0].attrib.get('src')
+        if not banner:
+            style_match = re.search(r'background(?:-image)?\s*:\s*url\([\'"]?([^\'"\)]+)', response.text)
+            if style_match:
+                banner = style_match.group(1)
+    if banner:
+        if banner.startswith('//'):
+            banner = f"https:{banner}"
+        elif not banner.startswith('http'):
+            banner = f"https://watchanimeworld.net{banner}"
+            
+    content_type = determine_content_type(title, slug, response.url if response else "", response.text if response else "", episodes)
+    
     return {
-        "id": item_id,
+        "id": slug,
         "title": title,
         "episodes": episodes,
-        "type": "movie" if is_movie_detected else "series"
+        "type": content_type,
+        "year": year,
+        "language": language,
+        "poster": poster,
+        "banner": banner or poster
     }
+
+def scrape_watchanimeworld_info(item_id):
+    if item_id in wa_mappings_cache:
+        return wa_mappings_cache[item_id]
+        
+    slugs = item_id.split('|')
+    all_episodes = []
+    show_title = None
+    show_type = None
+    show_poster = None
+    show_banner = None
+    show_year = None
+    show_language = None
+    
+    fetcher = StealthyFetcher()
+    
+    for slug in slugs:
+        try:
+            slug_info = scrape_single_slug_info(slug, fetcher)
+            if not slug_info or slug_info.get("error") == "connectivity_issue":
+                continue
+                
+            if not show_title:
+                parsed_title, _ = parse_season_info(slug_info["title"], slug)
+                show_title = parsed_title
+            if not show_type:
+                show_type = slug_info.get("type")
+            if not show_poster:
+                show_poster = slug_info.get("poster")
+            if not show_banner:
+                show_banner = slug_info.get("banner")
+            if not show_year:
+                show_year = slug_info.get("year")
+            if not show_language:
+                show_language = slug_info.get("language")
+                
+            _, season_num = parse_season_info(slug_info["title"], slug)
+            
+            for ep in slug_info.get("episodes", []):
+                ep_season_num, ep_num = parse_episode_info(ep.get("number"), ep.get("id"), default_season=season_num)
+                ep["seasonNumber"] = ep_season_num
+                ep["episodeNumber"] = ep_num
+                ep["season_number"] = ep_season_num
+                ep["episode_number"] = ep_num
+                ep["number"] = f"{ep_season_num}x{ep_num}"
+                all_episodes.append(ep)
+        except Exception as e:
+            print(f"[Scraper] Error scraping slug {slug}: {e}", file=sys.stderr)
+            continue
+            
+    if not all_episodes:
+        guessed_title, _ = parse_season_info(slugs[0].replace('-', ' ').title(), slugs[0])
+        return {
+            "id": item_id,
+            "title": guessed_title,
+            "episodes": [],
+            "type": "series" if len(slugs) > 1 else "movie",
+            "year": None,
+            "language": "English",
+            "poster": None,
+            "banner": None,
+            "slug": item_id
+        }
+        
+    seen = set()
+    deduped_episodes = []
+    for ep in all_episodes:
+        key = (ep["seasonNumber"], ep["episodeNumber"])
+        if key not in seen:
+            seen.add(key)
+            deduped_episodes.append(ep)
+            
+    deduped_episodes.sort(key=lambda x: (x["seasonNumber"], x["episodeNumber"]))
+    
+    result = {
+        "id": item_id,
+        "title": show_title or "Unknown Show",
+        "episodes": deduped_episodes,
+        "type": show_type or ("series" if len(slugs) > 1 else "movie"),
+        "year": show_year,
+        "language": show_language or "English",
+        "poster": show_poster,
+        "banner": show_banner or show_poster,
+        "slug": item_id
+    }
+    
+    wa_mappings_cache[item_id] = result
+    return result
 
 def scrape_watchanimeworld_source(episode_id):
     fetcher = StealthyFetcher()
