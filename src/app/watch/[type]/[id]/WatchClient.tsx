@@ -1082,12 +1082,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     useEffect(() => {
         const controller = new AbortController();
         activeRequestRef.current = String(id);
-        
-        // Reset states immediately to prevent bleeding between clicks
-        setDetails(null);
-        setEpisodes([]);
-        setServersList([]);
-        setActiveServer(null);
 
         const fetchData = async () => {
             setLoading(true);
@@ -1095,6 +1089,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 if (initialType === "anime" || initialType === "cartoon") {
                     // 1. Fetch Anime/Cartoon Episodes/Metadata
                     const animeRes = await axios.get(`/api/anime/episodes?id=${id}`, { signal: controller.signal });
+                    if (activeRequestRef.current !== String(id)) return;
                     const show = animeRes.data.show;
                     setAnimeData(show);
 
@@ -1202,6 +1197,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     const animeMatch = animeSearch.data.results?.find((item: any) => item.type === 'anime');
                                     if (animeMatch) {
                                         const animeRes = await axios.get(`/api/anime/episodes?id=${animeMatch.id}`, { signal: controller.signal });
+                                        if (activeRequestRef.current !== String(id)) return;
                                         if (animeRes.data?.show) {
                                             setAnimeData(animeRes.data.show);
                                             const eps = animeRes.data.show.availableEpisodesDetail?.[mode] || [];

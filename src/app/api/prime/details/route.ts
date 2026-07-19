@@ -208,8 +208,6 @@ export async function GET(request: Request) {
                 // If TMDB improperly returned 'runtime' for a TV show, treat it as episode runtime
                 details.episode_runtime = details.runtime;
             }
-            // Explicitly remove runtime so the UI doesn't format it as a movie length (e.g. 0h 45m)
-            delete details.runtime;
         }
 
         return NextResponse.json({
