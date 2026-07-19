@@ -61,7 +61,8 @@ export class AnimeProviderManager {
         episodeId: string, 
         mode: 'sub' | 'dub' | 'raw', 
         preferredProvider?: ProviderName,
-        serverId?: string
+        serverId?: string,
+        fallbackMalId?: number // Support passing malId directly if caller has it
     ): Promise<VideoSource[]> {
         const order = preferredProvider 
             ? [preferredProvider, ...FALLBACK_ORDER.filter(p => p !== preferredProvider)] 
@@ -81,7 +82,65 @@ export class AnimeProviderManager {
                 errors.push(`[${providerName}] ${err.message}`);
             }
         }
-        console.error(`[AnimeProviderManager] All providers failed for sources: ${id} ep ${episodeId}`, errors);
+        console.error(`[AnimeProviderManager] All scraping providers failed for sources: ${id} ep ${episodeId}`, errors);
+
+        // OPTION A: Instant Fallback to Generic Iframe Embeds
+        // If all scrapers fail (or are blocked by Cloudflare), try to return generic multi-embeds 
+        // to restore streaming immediately.
+        try {
+            console.log(`[AnimeProviderManager] Attempting Option A (Generic Embeds) for ${id}`);
+            // Get info to find malId
+            const info = await this.getInfo(id);
+            if (info?.malId || fallbackMalId) {
+                const finalMalId = info?.malId || fallbackMalId;
+                
+                // Parse episode number
+                let epNum = "1";
+                if (typeof episodeId === 'string' && episodeId.includes('episode-')) {
+                    const match = episodeId.match(/episode-(\d+)/);
+                    if (match) epNum = match[1];
+                } else if (/^\d+$/.test(episodeId)) {
+                    epNum = episodeId;
+                } else if (info) {
+                    const epObj = info.episodes.find(e => e.id === episodeId);
+                    if (epObj) epNum = epObj.number.toString();
+                }
+
+                return [
+                    {
+                        url: `https://vidsrc.me/embed/anime?mal=${finalMalId}&episode=${epNum}`,
+                        quality: 'VidSrc (Multi)',
+                        isM3U8: false,
+                        isIframe: true,
+                        server: 'vidsrc_me'
+                    },
+                    {
+                        url: `https://vidsrc.cc/v2/embed/anime/${finalMalId}/${epNum}`,
+                        quality: 'VidSrc.cc',
+                        isM3U8: false,
+                        isIframe: true,
+                        server: 'vidsrc_cc'
+                    },
+                    {
+                        url: `https://vidsrc.net/embed/anime/${finalMalId}/${epNum}`,
+                        quality: 'VidSrc.net',
+                        isM3U8: false,
+                        isIframe: true,
+                        server: 'vidsrc_net'
+                    },
+                    {
+                        url: `https://player.autoembed.cc/embed/anime/${finalMalId}/${epNum}`,
+                        quality: 'AutoEmbed',
+                        isM3U8: false,
+                        isIframe: true,
+                        server: 'autoembed'
+                    }
+                ];
+            }
+        } catch (fallbackErr) {
+            console.error(`[AnimeProviderManager] Option A fallback failed:`, fallbackErr);
+        }
+
         return [];
     }
 }

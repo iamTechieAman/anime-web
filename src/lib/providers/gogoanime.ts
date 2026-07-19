@@ -87,32 +87,29 @@ export class GogoanimeProvider implements AnimeProvider {
             // Resolve episode ID: Gogoanime uses slug-based episode IDs like "one-piece-episode-1"
             let episodeId = episodeString;
             if (/^\d+$/.test(episodeString)) {
-                // Need to find the actual episode slug
-                const info = await this.getInfo(id);
-                const ep = info.episodes.find((e: any) => e.number === parseInt(episodeString));
-                if (ep?.id) {
-                    episodeId = ep.id;
-                } else {
-                    // Construct slug format: {show-id}-episode-{number}
-                    episodeId = `${id}-episode-${episodeString}`;
-                }
+                // Construct slug format: {show-id}-episode-{number}
+                episodeId = `${id}-episode-${episodeString}`;
             }
 
-            const data = await consumetFetch(`/anime/gogoanime/watch/${episodeId}`);
-            if (!data?.sources?.length) throw new Error('No sources from Gogoanime');
-
-            // Prefer highest quality
-            const sorted = [...(data.sources || [])].sort((a: any, b: any) => {
-                const qA = parseInt(a.quality) || 0;
-                const qB = parseInt(b.quality) || 0;
-                return qB - qA;
-            });
-
-            return sorted.map((src: any) => ({
-                url: src.url,
-                quality: src.quality,
-                isM3U8: src.isM3U8 || src.url?.includes('.m3u8'),
-            }));
+            // OPTION B: Direct iframe embed via Gogoanime's native embedder (embtaku)
+            // By returning the native iframe, we bypass the need to decrypt the AES-256 ajax layer
+            // and skip the broken Consumet API completely.
+            return [
+                {
+                    url: `https://embtaku.pro/streaming.php?id=${episodeId}`,
+                    quality: 'Gogoanime (Native)',
+                    isM3U8: false,
+                    isIframe: true,
+                    server: 'embtaku'
+                },
+                {
+                    url: `https://gogoanime3.co/streaming.php?id=${episodeId}`,
+                    quality: 'Gogoanime (Mirror)',
+                    isM3U8: false,
+                    isIframe: true,
+                    server: 'gogo3'
+                }
+            ];
         } catch (err: any) {
             console.error('[Gogoanime] GetSources failed:', err.message);
             throw err;

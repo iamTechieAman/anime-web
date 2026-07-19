@@ -1446,12 +1446,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
         : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
     
-    // Use an effect to log stream generation only when it changes to avoid React render loop console spam
-    useEffect(() => {
-        if (embedUrl) {
-            console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (TMDB/Universal): ${activeId} -> ${embedUrl}`);
-        }
-    }, [embedUrl, activeId]);
+    // Removed conditionally called useEffect that was used for debugging
 
     const renderPlayer = () => {
         return (

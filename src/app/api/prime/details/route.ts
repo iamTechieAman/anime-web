@@ -160,8 +160,8 @@ export async function GET(request: Request) {
         const originalLanguage = details.original_language || "en";
         const primaryGenre = details.genres?.[0]?.id || "";
         const productionCompany = details.production_companies?.[0]?.id || "";
-        const keywords = keywordsData.keywords || keywordsData.results || [];
-        const topKeyword = keywords[0]?.id || "";
+        const parsedKeywords = keywordsData.keywords || keywordsData.results || [];
+        const topKeyword = parsedKeywords[0]?.id || "";
 
         // Smart Recommendations: Filter by language, genre, and franchise vibe
         let smartRecommendations = recommendations.results || [];
