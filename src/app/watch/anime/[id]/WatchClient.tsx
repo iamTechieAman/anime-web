@@ -16,6 +16,7 @@ import CommentsSection from "@/components/CommentsSection";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useWatch } from "@/context/WatchContext";
 import { useUserStore } from "@/store/userStore";
+import { ServerHealthManager } from "@/utils/ServerHealthManager";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -366,6 +367,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         setFailedServers(prev => {
             const next = new Set(prev);
             next.add(selectedServer);
+            ServerHealthManager.blacklistServer(selectedServer);
 
             // Find next server in the list that hasn't failed yet
             const nextServer = servers.find(s => !next.has(s.serverId) && s.serverId !== selectedServer);
@@ -692,6 +694,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     // Combined Fetch for Show and TMDB Metadata to parallelize networking
     useEffect(() => {
+        const controller = new AbortController();
         const fetchData = async () => {
             setLoadingShow(true);
             setShowError(null);
@@ -700,12 +703,24 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 // Kick off episodes fetch
                 const episodesPromise = axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`, {
                     timeout: 15000,
+                    signal: controller.signal
                 });
 
                 const res = await episodesPromise;
+                if (controller.signal.aborted) return;
+
                 const fetchedShow = res.data.show;
                 
                 if (!fetchedShow) throw new Error("No show data received");
+                
+                // Strict ID Validation
+                if (String(fetchedShow.id) !== String(id) && String(fetchedShow.showId) !== String(id) && !provider) {
+                    console.error('[WatchClient] ID Mismatch Detected!', { requested: id, received: fetchedShow.id });
+                    throw new Error("CONTENT_MISMATCH");
+                }
+                
+                console.log(`[GlobalClickDebugger] 🌐 API FETCHED ID (Anime): ${fetchedShow.id || fetchedShow.showId}`);
+                
                 setShow(fetchedShow);
 
                 // Determine initial mode and episode
@@ -736,36 +751,47 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 } else if (currentEps.length > 0) {
                     setCurrentEp(currentEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes("1") ? "1" : String((typeof currentEps[0] === 'object' ? String(currentEps[0].number||currentEps[0].id) : String(currentEps[0]))));
                 }
+                
+                if (historyItem?.serverId) {
+                    setSelectedServer(historyItem.serverId);
+                    manualServerRef.current = historyItem.serverId;
+                }
 
                 // Parallelly fetch TMDB ID if name is available
                 if (fetchedShow.name) {
                     let sanitizedName = fetchedShow.name.split('\n')[0].trim().substring(0, 50).replace(/[^a-zA-Z0-9 ':!,-]/g, '').trim();
-                    axios.get(`/api/prime/search?q=${encodeURIComponent(sanitizedName)}`)
+                    axios.get(`/api/prime/search?q=${encodeURIComponent(sanitizedName)}`, { signal: controller.signal })
                         .then(tmdbRes => {
+                            if (controller.signal.aborted) return;
                             const results = tmdbRes.data.results;
                             setTmdbId(results && results.length > 0 ? results[0].id.toString() : "0");
                         })
-                        .catch(() => setTmdbId("0"));
+                        .catch((err) => {
+                            if (!axios.isCancel(err)) setTmdbId("0");
+                        });
                 } else {
                     setTmdbId("0");
                 }
 
             } catch (err: any) {
-                console.error("Failed to fetch show", err);
-                setShowError(err.response?.data?.error || "Anime not found or streaming servers are unreachable.");
+                if (axios.isCancel(err)) return;
+                console.error("Failed to fetch show data", err);
+                setShowError(err.message === "CONTENT_MISMATCH" ? "Content ID mismatch. Please try searching again." : "Failed to load show. Please try again later.");
             } finally {
-                setLoadingShow(false);
+                if (!controller.signal.aborted) setLoadingShow(false);
             }
         };
 
         fetchData();
+        return () => controller.abort();
     }, [id, provider]);
 
     // Fetch Servers when Episode/Mode Changes
     useEffect(() => {
-        if (!show?._id) return;
+        if (!show) return;
 
-
+        const controller = new AbortController();
+        
         // ALWAYS include movie servers — they are the guaranteed fallback
         const movieServersList = dynamicMovieServers.map(ms => ({
             serverId: ms.id,
@@ -823,7 +849,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const epObj = availableEps.find((e: any) => typeof e === 'object' ? String(e.number || e.id) === String(currentEp) : String(e) === String(currentEp));
                 const episodeIdForApi = (typeof epObj === 'object' && epObj ? epObj.id : currentEp) || currentEp;
 
-                const res = await axios.get(`/api/anime/servers?episodeId=${episodeIdForApi}&provider=${provider || ''}`);
+                const res = await axios.get(`/api/anime/servers?episodeId=${episodeIdForApi}&provider=${provider || ''}`, {
+                    signal: controller.signal
+                });
+                if (controller.signal.aborted) return;
+                
                 let nativeServers = (res.data.servers || []).filter((s: any) => s.type === mode);
                 
                 // If no servers for specific mode (sub/dub), show all native servers as fallback
@@ -832,19 +862,23 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 }
                 
                 // ALWAYS include movie servers — they are the guaranteed fallback
-                const allServers = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
+                const allServersRaw = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
+                const allServers = ServerHealthManager.filterAndSortServers(allServersRaw, 'serverId');
                 setServers(allServers);
 
                 // Pick first available server immediately
                 if (allServers.length > 0) {
                     const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
                     if (!currentExists && manualServerRef.current !== selectedServer) {
-                        setSelectedServer(nativeServers[0]?.serverId || allServers[0].serverId);
+                        const newServer = nativeServers[0]?.serverId || allServers[0].serverId;
+                        console.log(`[GlobalClickDebugger] 🎬 PLAYER INITIALIZED ID (Anime): ${id} on Server: ${newServer}`);
+                        setSelectedServer(newServer);
                     }
                 } else {
                     setSelectedServer(null);
                 }
-            } catch (err) {
+            } catch (err: any) {
+                if (axios.isCancel(err)) return;
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
                 const fallbackList = [...movieServersList, ...emergencyEmbeds];
                 setServers(fallbackList);
@@ -852,25 +886,23 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     setSelectedServer(fallbackList[0].serverId);
                 }
             } finally {
-                setLoadingServers(false);
+                if (!controller.signal.aborted) setLoadingServers(false);
             }
         };
 
         fetchServers();
+        return () => controller.abort();
     }, [currentEp, mode, show, tmdbId]);
-
-
 
     // Fetch Source
     useEffect(() => {
         if (!show || !selectedServer || servers.length === 0) return;
 
-        const fetchSource = async () => {
-            // Include selectedServer in key to trigger re-fetch when it changes
-            const key = `${id}-${currentEp}-${mode}-${selectedServer}`;
-            if (processingRef.current === key) return;
-            processingRef.current = key;
+        const key = `${id}-${currentEp}-${mode}-${selectedServer}`;
+        if (processingRef.current === key) return;
+        processingRef.current = key;
 
+        const fetchSource = async () => {
             const selectedServerObj = servers.find(s => s.serverId === selectedServer);
             if (!selectedServerObj) return;
 
@@ -882,16 +914,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 const serverWithUrl = selectedServerObj as any;
                 
-                // If it's an emergency server, it has its own logic that doesn't need TMDB ID
                 if (serverWithUrl.isEmergency) {
                     setSourceUrl(serverWithUrl.getUrl());
                 } else {
-                    // Regular movie server requires TMDB ID
                     if (!tmdbId || tmdbId === "0") {
-                    console.warn('[WatchClient] No valid TMDB ID, skipping movie server');
-                    setError("TMDB Metadata missing for this title. Try a native server.");
-                    processingRef.current = null;
-                    return;
+                        setError("TMDB Metadata missing for this title. Try a native server.");
+                        processingRef.current = null;
+                        return;
                     }
                     const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
                     setSourceUrl(iframeUrl);
@@ -904,12 +933,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 return;
             }
 
-            // For native anime servers — check episode availability
+            // For native anime servers
             if (show.availableEpisodesDetail) {
                 const availableEps = show.availableEpisodesDetail[mode] || [];
                 if (!availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(currentEp)) {
-                    // Auto-switch to a movie server instead of showing error
-                    console.warn(`EP ${currentEp} not in ${mode}`);
                     setError(`Episode ${currentEp} is not available in ${mode.toUpperCase()} mode.`);
                     processingRef.current = null;
                     return;
@@ -920,9 +947,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             setSourceUrl(null);
             setError(null);
 
+            const controller = new AbortController();
+
             try {
                 console.log('[WatchPage] Fetching source from native server...');
                 const res = await axios.get(`/api/anime/source`, {
+                    signal: controller.signal,
                     params: {
                         id,
                         ep: currentEp,
@@ -934,6 +964,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     }
                 });
 
+                if (controller.signal.aborted) return;
                 if (processingRef.current !== key) return;
 
                 const links = res.data.links;
@@ -947,15 +978,16 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     const isM3U8 = selected.hls || absoluteUrl.includes('.m3u8') || selected.isM3U8;
                     
                     if (isM3U8 || absoluteUrl.includes('.mp4')) {
-                        // Use ArtPlayer natively via CORS Proxy
                         const proxiedUrl = `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`;
+                        console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (Anime MP4/M3U8): ${id} -> ${proxiedUrl}`);
+                        setRawVideoSource(proxiedUrl);
                         setSourceUrl(proxiedUrl);
                         setVideoType(isM3U8 ? "m3u8" : "mp4");
                     } else {
-                        // Fallback to iframe if it's a raw embed page
                         let referer = "";
                         try { referer = new URL(absoluteUrl).origin; } catch(_) {}
                         const proxiedUrl = `/api/proxy/embed?url=${encodeURIComponent(absoluteUrl)}&referer=${encodeURIComponent(referer)}`;
+                        console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (Anime IFrame): ${id} -> ${proxiedUrl}`);
                         setSourceUrl(proxiedUrl);
                         setVideoType("iframe");
                     }
@@ -1259,11 +1291,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         episodeId: currentEp,
                                         episodeNumber: Number(currentEp) || 1,
                                         currentTime,
-                                        duration
+                                        duration,
+                                        providerId: provider || undefined,
+                                        serverId: selectedServer || undefined,
+                                        audio: typeof window !== 'undefined' ? localStorage.getItem('artplayer_audio_track') || undefined : undefined,
+                                        quality: typeof window !== 'undefined' ? localStorage.getItem('artplayer_quality') || undefined : undefined
                                     });
                                 }}
                                 onEnded={handleVideoEnded}
-                                onError={() => setError("Player failed to load video.")}
+                                onError={() => {
+                                    console.warn('[ToonPlayer] ArtPlayer playback error. Triggering auto fallback...');
+                                    handleAutoFallback();
+                                }}
                                 autoPlay={autoPlay}
                                 autoNext={autoNext}
                                 className="w-full h-full"

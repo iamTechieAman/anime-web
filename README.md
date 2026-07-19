@@ -36,7 +36,41 @@ This project isn't just a side-project — it's a statement: that a solo develop
 
 ---
 
-## 🏆 Changelog — v7.1 (Latest)
+## 🏆 Changelog — v7.4 (Latest)
+
+### Phase 30 — Mobile Player Micro-Glitch Elimination (`June 2026`)
+- 📱 **Safe-Area Double-Pad Fix**: The `@supports (padding-top: env(safe-area-inset-top))` block was double-padding the watch page on iPhone (notch / Dynamic Island) — the fixed header already accounts for the inset. Removed the conflicting body `padding-top` rule so the player sits flush under the header on every iOS device.
+- 🖥️ **High-DPI Border Override Scoped**: A global `[class*="border"] { border-width: 0.5px }` retina rule was making the player container border invisible on phones. Scoped it only to `.premium-card` and `.glass-panel` where it belongs.
+- 🔤 **Subpixel Text Blur Eliminated**: `backface-visibility: hidden` was applied to `*` (every element) — causing text blur on mobile Safari and Chrome Android. Removed from the global rule; `transform-gpu` kept only on the player animation layer.
+- 📏 **Player iframe Radius Fix**: The `<iframe>` had its own `sm:rounded-[24px]` that conflicted with the parent's `overflow-hidden rounded-none`, creating iOS/Android subpixel clip differences. Made the iframe always `rounded-none`.
+- 🎯 **Control Bar Touch Alignment**: Control bar `px-1` (4px) was too narrow on 320px screens. Changed to `px-3 sm:px-1` so buttons align with the player edge on mobile.
+- 🏝️ **Dynamic Island Header Fix**: Fixed header used `h-` (hard height) which clips content on Dynamic Island phones where safe-area-inset-top is ~59px. Switched to `min-h-` so it expands past the Island.
+- 📐 **Hero Height Responsive**: Hero section was `h-[50vh]` on 320–360px phones, pushing the page into near-empty before the player loads. Changed to `h-[40vh] xs:h-[45vh] sm:h-[50vh]`. Added `--breakpoint-xs: 375px` to Tailwind v4 `@theme`.
+- 🔼 **Scroll-to-Top Safe Area**: The scroll-to-top FAB was positioned at `bottom-6` (24px), placing it behind the iPhone Home Indicator gesture zone. Fixed to `bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]`.
+- 🎞️ **ProviderBar Scroll Edge Fade**: Server selection scroll container clipped the first/last button against the container border on short phones. Added `mask-image` edge fade gradient + `WebkitOverflowScrolling: touch` for smooth iOS momentum scroll.
+- 👆 **Bottom Action Touch Targets**: Watchlist, Download, Share buttons now enforce `min-h-[44px]` (Apple HIG 44pt) on mobile. Gap tightened from `gap-3` to `gap-2` to prevent overflow on 320px screens.
+
+### Phase 29 — Global Content Mapping Audit & Validation (`June 2026`)
+- 🔍 **Type Detection Hardened**: `determine_content_type()` rewritten — anime now requires URL path (`/anime/`) not title keyword (fixes Beyblade, Ben 10 etc. falsely tagged). Movie detection requires `/movies/` URL path or explicit "The Movie" suffix. Added `ONA` type. "Special" type now requires both title AND slug match.
+- 🐛 **Episode Number Extraction Bug Fixed**: `parse_episode_info()` fallback was extracting any digit from slugs — `ben-10-series` was becoming episode 10. Now only extracts a digit fallback when an episode keyword is present in the slug/title.
+- 🛡️ **Null Safety Throughout Scraper**: Added `getattr(response, 'url', '')` safe access, `.get("href", "")` guard on grouping function, empty `lang_el` text guard, and null-safe defaults for `genres`/`rating`/`duration`.
+- 🗑️ **Dead Code Removed**: Deleted orphaned `requests`-based `scrape_onoflix_info` and `scrape_onoflix_source` stubs — StealthyFetcher versions are now authoritative.
+- 🌐 **TMDB Type Normalization**: `details/route.ts` now maps `anime` hint → `tv` before TMDB queries (TMDB has no anime type). Supplementary metadata (`credits`, `videos`, `similar`) now uses `tmdbType` variable — never passes `anime` to a TMDB endpoint.
+- 🔗 **Unified Search href Fix**: `unified/route.ts` null-guards `media_type` — items with `undefined` media_type no longer generate `/watch/undefined/{id}` hrefs.
+- 📺 **Cartoon Episode Support**: Cartoon content type now correctly fetches episodes from TMDB season API, renders the episode list panel, fires auto-next on episode end — all were previously TV-only.
+- 📖 **Anime Episode Search**: Fixed `ep.overview?.toLowerCase()` crash for anime episodes where overview is undefined. Changed to `(ep.overview ?? "").toLowerCase()`.
+- 🕓 **Watch History Consistency**: Anime history `showId` now prefers `tmdbIdForAnime` for consistent cross-session restore. History dep array narrowed to `[selectedSeason, selectedEpisode, type, id]` to prevent stale rewrites on every metadata change.
+
+### Phase 28 — WatchAnimeWorld Mapping Stabilization (`June 2026`)
+- 🗂️ **Content Classification Engine**: Built URL-path-first classification logic to correctly separate Movies, Series, Cartoons, Anime, OVA, ONA, and Specials — previously relied on loose title keyword matching.
+- 📦 **Episode Grouping Fixed**: `group_watchanimeworld_results()` now safely accesses `first_href` via `.get()`, preventing KeyError crashes on entries without a direct link.
+- 🌍 **Language Detection Fix**: Language override from page element only applies when the extracted text is non-empty — prevents accidentally wiping a correctly-detected language.
+- 📋 **Metadata Completeness**: `scrape_single_slug_info()` now returns `genres`, `rating`, and `duration` fields consistently across both return paths.
+
+### Phase 27 — Kids Section Recovery & Scraper Resilience (`June 2026`)
+- 👶 **Kids Page Error Boundary**: Kids section no longer shows white screen or System Error on malformed data. Every data access is null-guarded with graceful "No content available" fallback + Retry button.
+- 🔄 **Scraper Null Safety**: Added null-safe guards throughout the kids content pipeline — `undefined` posters, empty episode arrays, bad slugs, and failed fetches are all handled silently without crashing the page.
+- 🛡️ **Metadata Fallbacks**: Missing `title`, `poster`, `year`, `genres` now fall back to safe defaults instead of throwing runtime exceptions or causing hydration mismatches.
 
 ### Phase 26 — UI Polish, Micro-Animations & SEO Overhaul (`June 2026`)
 - 🚫 **Mobile Nav Cleanup**: Removed the redundant "Anime" label and Zap icon from the bottom navigation bar. All `/az-list/` routing logic, active states, and haptic feedback remain fully intact — only the visual label was stripped for a cleaner minimal nav.

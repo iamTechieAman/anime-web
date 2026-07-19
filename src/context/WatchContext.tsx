@@ -15,6 +15,11 @@ export interface WatchHistoryItem {
     currentTime: number;
     duration: number;
     updatedAt: number;
+    providerId?: string;
+    serverId?: string;
+    audio?: string;
+    subtitle?: string;
+    quality?: string;
 }
 
 export interface WatchlistItem {

@@ -73,9 +73,12 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
     }
 }
 
-export default async function WatchPage({ params }: { params: Promise<{ type: string; id: string }> }) {
+export default async function WatchPage({ params, searchParams }: { params: Promise<{ type: string; id: string }>, searchParams: Promise<{ s?: string, e?: string }> }) {
     const { type, id: rawId } = await params;
+    const { s, e } = await searchParams;
     const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
+
+    console.log(`[GlobalClickDebugger] 🛣️ ROUTE ID (TMDB): ${id} | TYPE: ${type} | S: ${s || 1} E: ${e || 1}`);
 
     let metaTitle = "Video Content";
     let metaDesc = "Watch free HD content on ToonPlayer";
@@ -131,7 +134,7 @@ export default async function WatchPage({ params }: { params: Promise<{ type: st
                 }}
             />
             <Suspense fallback={<DetailsSkeleton />}>
-                <WatchClient key={`${type}-${id}`} type={type} id={id} />
+                <WatchClient key={`${type}-${id}-s${s || '1'}-e${e || '1'}`} type={type} id={id} />
             </Suspense>
         </>
     );

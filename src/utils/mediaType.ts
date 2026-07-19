@@ -1,8 +1,13 @@
 export function detectMediaType(item: any): "movie" | "tv" | "anime" {
     if (!item) return "movie";
 
+    // 0. Use explicit type if available (Highest Priority)
+    const explicitType = item.media_type || item.type;
+    if (explicitType === "movie") return "movie";
+    if (explicitType === "tv" || explicitType === "series" || explicitType === "show") return "tv";
+    if (explicitType === "anime") return "anime";
+
     // 1. Anime Detection: check if anime metadata exists
-    // Fallback hierarchy: TMDB -> AniList -> MAL -> Local metadata
     const originalLanguage = item.original_language || item.originalLanguage;
     const originCountry = item.origin_country || item.originCountry;
     
@@ -68,12 +73,7 @@ export function detectMediaType(item: any): "movie" | "tv" | "anime" {
         return "movie";
     }
 
-    // Fallbacks based on explicit media_type or type
-    const explicitType = item.media_type || item.type;
-    if (explicitType === "movie") return "movie";
-    if (explicitType === "tv" || explicitType === "series" || explicitType === "show") return "tv";
-
-    // If still ambiguous, look for date indicators
+    // Fallbacks based on date indicators
     if (item.first_air_date || item.air_date) {
         return "tv";
     }

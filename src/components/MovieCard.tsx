@@ -99,7 +99,13 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
             ref={cardRef}
             className={`group relative w-full card-virtualized transition-all duration-[250ms] ease-apple will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'} ${isFeatured ? 'col-span-1' : ''}`}
         >
-            <Link href={watchHref} scroll={false} className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-[18px]" draggable={false}>
+            <Link 
+                href={watchHref} 
+                scroll={false} 
+                className="block w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-[18px]" 
+                draggable={false}
+                onClick={() => console.log(`[GlobalClickDebugger] 🖱️ CLICKED ID: ${item.id} - Type: ${routeType}`)}
+            >
                 {/* === Poster Container === */}
                 <div className="relative w-full overflow-hidden rounded-[18px] bg-bg-elevated shadow-md group-hover:shadow-[var(--shadow-glow-primary)] transition-shadow duration-[250ms]" style={{ aspectRatio: '2/3' }}>
                     

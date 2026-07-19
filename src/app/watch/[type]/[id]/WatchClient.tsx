@@ -6,6 +6,7 @@ import Script from "next/script";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ServerHealthManager } from "@/utils/ServerHealthManager";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search, Film, Tag, Trophy, Tv, MonitorPlay, Info, Layers, ChevronUp as ChevronUpIcon, Volume2, VolumeX } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
@@ -520,16 +521,16 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // User Settings Support
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [serversList, setServersList] = useState<any[]>(SERVERS);
-    const currentMediaTypeServers = useMemo(() =>
-        typeof type === "string"
+    const currentMediaTypeServers = useMemo(() => {
+        const filtered = typeof type === "string"
             ? serversList.filter(s => {
                 if (!s.type) return true;
                 const targetType = (type === "cartoon") ? "tv" : type;
                 return s.type === targetType;
             })
-            : serversList,
-        [type, serversList]
-    );
+            : serversList;
+        return ServerHealthManager.filterAndSortServers(filtered, 'id');
+    }, [type, serversList]);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
     const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
@@ -1003,11 +1004,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             );
             if (matchingServer) {
                 console.log(`[ToonPlayer] Switching active server from ${activeServer.id} to ${matchingServer.id} due to media type resolution to ${type}`);
+                console.log(`[GlobalClickDebugger] 🎬 PLAYER INITIALIZED ID (TMDB - Matching): ${id} on Server: ${matchingServer.id}`);
                 setActiveServer(matchingServer);
             } else {
                 // Fallback to first server of the new type
                 const firstOfNewType = serversList.find(s => s.type === type);
                 if (firstOfNewType) {
+                    console.log(`[GlobalClickDebugger] 🎬 PLAYER INITIALIZED ID (TMDB - FirstType): ${id} on Server: ${firstOfNewType.id}`);
                     setActiveServer(firstOfNewType);
                 }
             }
@@ -1023,6 +1026,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setFailedServers(prev => {
             const next = new Set(prev);
             next.add(activeServer.id);
+            ServerHealthManager.blacklistServer(activeServer.id);
             
             // Find next server in the list that hasn't failed yet
             const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
@@ -1158,6 +1162,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         }
                     }
                     if (res?.data) {
+                        // Strict ID Validation
+                        if (String(res.data.id) !== String(id)) {
+                            console.error('[WatchClient] ID Mismatch Detected!', { requested: id, received: res.data.id });
+                            throw new Error("CONTENT_MISMATCH");
+                        }
+                        
+                        console.log(`[GlobalClickDebugger] 🌐 API FETCHED ID (TMDB): ${res.data.id}`);
+                        
                         setDetails(res.data);
                         let resolvedType = res.data.resolvedType || initialType;
                         const isJp = res.data.original_language === "ja" || 
@@ -1192,7 +1204,21 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 console.error("Failed to load anime mapping for TMDB show:", animeErr);
                             }
                         } else if ((resolvedType === "tv" || resolvedType === "cartoon") && res.data.seasons?.length > 0) {
-                            setSelectedSeason(res.data.seasons[0].season_number || 1);
+                            const historyItem = history.find((i: any) => i.showId === String(id));
+                            if (historyItem && historyItem.season) {
+                                setSelectedSeason(historyItem.season);
+                                if (historyItem.episodeNumber) setSelectedEpisode(historyItem.episodeNumber);
+                            } else {
+                                setSelectedSeason(res.data.seasons[0].season_number || 1);
+                            }
+                            if (historyItem?.serverId && serversList.find(s => s.id === historyItem.serverId)) {
+                                setActiveServer(serversList.find(s => s.id === historyItem.serverId)!);
+                            }
+                        } else if (resolvedType === "movie") {
+                            const historyItem = history.find((i: any) => i.showId === String(id));
+                            if (historyItem?.serverId && serversList.find(s => s.id === historyItem.serverId)) {
+                                setActiveServer(serversList.find(s => s.id === historyItem.serverId)!);
+                            }
                         }
                     } else {
                         throw new Error('No data returned from TMDB');
@@ -1419,6 +1445,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const embedUrl = isAnimeServer 
         ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
         : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
+    
+    // Use an effect to log stream generation only when it changes to avoid React render loop console spam
+    useEffect(() => {
+        if (embedUrl) {
+            console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (TMDB/Universal): ${activeId} -> ${embedUrl}`);
+        }
+    }, [embedUrl, activeId]);
+
     const renderPlayer = () => {
         return (
             <div className="relative w-full z-20">

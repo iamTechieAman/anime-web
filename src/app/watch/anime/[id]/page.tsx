@@ -50,8 +50,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
 }
 
-export default async function WatchPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function WatchPage({ params, searchParams }: { params: any, searchParams: any }) {
     const { id } = await params;
+    const { ep } = await searchParams;
+
+    console.log(`[GlobalClickDebugger] 🛣️ ROUTE ID (Anime): ${id} | EP: ${ep || 1}`);
 
     let metaTitle = "Anime Show";
     let metaDesc = "Watch free HD anime on ToonPlayer";
@@ -110,7 +113,7 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
                 }}
             />
             <Suspense fallback={<div className="min-h-dvh pt-24 text-center text-accent-warm font-bold bg-bg-main">Loading Player...</div>}>
-                <WatchClient key={id} id={id} />
+                <WatchClient key={`anime-${id}-ep${ep || '1'}`} id={id} />
             </Suspense>
         </>
     );
