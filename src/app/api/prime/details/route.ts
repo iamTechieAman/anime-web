@@ -199,6 +199,19 @@ export async function GET(request: Request) {
             ...(usProviders.ads || []),
         ].slice(0, 8);
 
+        // Normalize TV Show Runtime vs Movie Runtime
+        if (type === "tv" || type === "anime") {
+            // TV Shows should not have a total movie-like runtime
+            if (details.episode_run_time && details.episode_run_time.length > 0) {
+                details.episode_runtime = details.episode_run_time[0];
+            } else if (details.runtime) {
+                // If TMDB improperly returned 'runtime' for a TV show, treat it as episode runtime
+                details.episode_runtime = details.runtime;
+            }
+            // Explicitly remove runtime so the UI doesn't format it as a movie length (e.g. 0h 45m)
+            delete details.runtime;
+        }
+
         return NextResponse.json({
             ...details,
             resolvedType: type,

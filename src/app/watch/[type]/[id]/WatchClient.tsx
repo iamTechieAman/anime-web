@@ -433,6 +433,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [nextCountdown, setNextCountdown] = useState(5);
     const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const manualServerRef = useRef<string | null>(null);
+    const activeRequestRef = useRef<string | null>(null);
 
     // Cleanup countdown timer on unmount
     const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1080,6 +1081,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     useEffect(() => {
         const controller = new AbortController();
+        activeRequestRef.current = String(id);
+        
+        // Reset states immediately to prevent bleeding between clicks
+        setDetails(null);
+        setEpisodes([]);
+        setServersList([]);
+        setActiveServer(null);
 
         const fetchData = async () => {
             setLoading(true);
@@ -1114,6 +1122,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         // Normalize media_type — TMDB multi-search can omit it
                         const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
                         const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`, { signal: controller.signal });
+                        if (activeRequestRef.current !== String(id)) return;
                         setDetails(detailsRes.data);
                         // DO NOT OVERWRITE initialType = anime with movie/tv just because TMDB resolved it as such.
                         // This prevents the UI from suddenly breaking out of the Anime player layout.
@@ -1171,6 +1180,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         
                         console.log(`[GlobalClickDebugger] 🌐 API FETCHED ID (TMDB): ${res.data.id}`);
                         
+                        if (activeRequestRef.current !== String(id)) return;
                         setDetails(res.data);
                         let resolvedType = res.data.resolvedType || initialType;
                         const isJp = res.data.original_language === "ja" || 
@@ -1890,8 +1900,15 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 <div className="flex flex-wrap items-center gap-y-2 gap-x-3 sm:gap-x-4 text-xs sm:text-sm font-medium text-[var(--text-muted)]">
                                                     <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
                                                     <span>{year}</span>
-                                                    {details?.runtime ? <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span> : <span>{type === "tv" ? `${details?.number_of_seasons || 0} Seasons` : type === "anime" ? "Anime" : ""}</span>}
-                                                    <span className="px-2 py-0.5 rounded border border-border-color text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || "Released"}</span>
+                                                    {(type === "tv" || type === "anime") ? (
+                                                        <>
+                                                            <span>{details?.number_of_seasons || 0} Seasons</span>
+                                                            {details?.episode_runtime && <span>~{details.episode_runtime}m / ep</span>}
+                                                        </>
+                                                    ) : (
+                                                        <span>{details?.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : ""}</span>
+                                                    )}
+                                                    <span className="px-2 py-0.5 rounded border border-border-color text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || (type === 'movie' ? "Released" : "Ongoing")}</span>
                                                 </div>
                                             </div>
                                         </div>
