@@ -1095,12 +1095,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     if (activeRequestRef.current !== String(id)) return;
                     const show = animeRes.data.show;
                     if (process.env.NODE_ENV !== 'production') {
-                        console.log(`[GlobalContentDebugger] 🎬 ANIME REQUESTED: ID=${id}, Title="${show.name}", Type=${initialType}`);
+                        console.log(`[GlobalContentDebugger] 🎬 ANIME REQUESTED: ID=${id}, Title="${show.name}", Type=${initialType}, Provider=${show.provider || 'unknown'}`);
                     }
                     setAnimeData(show);
 
                     // 2. Optimized TMDB Metadata Resolution
-                    // Try to find a TMDB match using multiple title variants if available
+                    // External IDs (AniList, MAL) mapping can be implemented here as Priority 1 if provider supports it.
+                    // Fallback to title matching:
                     const searchQueries = [show.name, show.englishName, show.romajiName].filter(Boolean);
                     let tmdbMatch = null;
                     const expectedMediaType = (show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1) ? 'movie' : 'tv';
@@ -1122,7 +1123,22 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     const cleanRTitle = clean(rTitle);
                                     const cleanQLower = clean(qLower);
 
-                                    // Priority 1: Exact Normalized Title Match (+50)
+                                    // Hard Rule 1: Media Type MUST match
+                                    if (r.media_type !== expectedMediaType && r.media_type) {
+                                        continue; // Reject immediately
+                                    }
+
+                                    // Hard Rule 2: Release Year MUST match within ±1 year (if provider specifies it)
+                                    const rYear = parseInt((r.release_date || r.first_air_date || "").substring(0, 4));
+                                    const pYear = parseInt(String(show.year));
+                                    if (!isNaN(pYear) && !isNaN(rYear)) {
+                                        if (Math.abs(rYear - pYear) > 1) {
+                                            continue; // Reject immediately
+                                        }
+                                    }
+
+                                    // Score calculation (only reaches here if hard rules pass)
+                                    // Priority 4: Exact Normalized Title Match (+50)
                                     if (cleanRTitle === cleanQLower || cleanRTitle.includes(cleanQLower) || cleanQLower.includes(cleanRTitle)) {
                                         score += 50;
                                     } else {
@@ -1133,14 +1149,12 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                         }
                                     }
 
-                                    // Priority 2: Release Year (+30)
-                                    // Not all anime providers send year reliably, but if they do, it's highly indicative
-                                    const rYear = (r.release_date || r.first_air_date || "").substring(0, 4);
-                                    if (show.year && rYear === String(show.year)) {
+                                    // Add points for matching year (+30)
+                                    if (!isNaN(pYear) && !isNaN(rYear) && rYear === pYear) {
                                         score += 30;
                                     }
 
-                                    // Priority 3: Media Type (+20)
+                                    // Add points for exact media type match (+20)
                                     if (r.media_type === expectedMediaType) {
                                         score += 20;
                                     }
@@ -1151,8 +1165,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                     }
                                 }
                                 
-                                // Threshold validation (minimum 50 required)
-                                if (bestMatch && highestScore >= 50) {
+                                // Threshold validation (minimum 70 required)
+                                if (bestMatch && highestScore >= 70) {
                                     tmdbMatch = bestMatch;
                                     if (process.env.NODE_ENV !== 'production') {
                                         console.log(`[GlobalContentDebugger] 🟢 TMDB MATCHED: Score=${highestScore}, ID=${tmdbMatch.id}, Title="${tmdbMatch.name || tmdbMatch.title}"`);
