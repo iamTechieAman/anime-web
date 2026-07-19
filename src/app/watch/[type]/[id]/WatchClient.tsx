@@ -1094,12 +1094,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     // Try to find a TMDB match using multiple title variants if available
                     const searchQueries = [show.name, show.englishName, show.romajiName].filter(Boolean);
                     let tmdbMatch = null;
+                    const expectedMediaType = (show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1) ? 'movie' : 'tv';
                     
                     for (const q of searchQueries) {
                         try {
                             const tmdbSearch = await axios.get(`/api/prime/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
                             if (tmdbSearch.data.results?.length > 0) {
-                                tmdbMatch = tmdbSearch.data.results[0];
+                                // Try to find an exact match for the expected media type (tv vs movie)
+                                tmdbMatch = tmdbSearch.data.results.find((r: any) => r.media_type === expectedMediaType) || tmdbSearch.data.results[0];
                                 break;
                             }
                         } catch (e) {
@@ -1113,9 +1115,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
                         const detailsRes = await axios.get(`/api/prime/details?id=${tmdbMatch.id}&type=${mediaType}`, { signal: controller.signal });
                         setDetails(detailsRes.data);
-                        if (detailsRes.data.resolvedType && initialType !== "anime" && initialType !== "cartoon") {
-                            setType(detailsRes.data.resolvedType);
-                        }
+                        // DO NOT OVERWRITE initialType = anime with movie/tv just because TMDB resolved it as such.
+                        // This prevents the UI from suddenly breaking out of the Anime player layout.
                     } else {
                         setSourceError(true);
                         // Minimal details if TMDB match fails

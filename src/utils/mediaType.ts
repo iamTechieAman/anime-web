@@ -25,9 +25,9 @@ export function detectMediaType(item: any): "movie" | "tv" | "anime" {
         return g === 16 || String(g).toLowerCase() === "animation";
     });
 
-    if (isJp && isAnimation) {
-        return "anime";
-    }
+    // We no longer blindly coerce Japanese Animation into "anime" 
+    // because TMDB IDs must be routed as TV/Movie to preserve ID validity.
+    // TMDB anime can still be detected as tv/movie further down.
 
     // Check if AniList metadata exists
     if (item.anilistId || item.anilist_id || item.aniListId) {
