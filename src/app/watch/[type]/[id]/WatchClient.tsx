@@ -1054,7 +1054,8 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setLoadingStatus(`Connecting to ${server.name}...`);
         manualServerRef.current = server.id;
         setActiveServer(server);
-    }, []);
+        console.log(`[GlobalContentDebugger] 📡 STREAMING: Server="${server.name}", ContentID=${id}`);
+    }, [id]);
 
 
 
@@ -1091,6 +1092,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     const animeRes = await axios.get(`/api/anime/episodes?id=${id}`, { signal: controller.signal });
                     if (activeRequestRef.current !== String(id)) return;
                     const show = animeRes.data.show;
+                    console.log(`[GlobalContentDebugger] 🎬 ANIME REQUESTED: ID=${id}, Title="${show.name}"`);
                     setAnimeData(show);
 
                     // 2. Optimized TMDB Metadata Resolution
@@ -1103,9 +1105,20 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         try {
                             const tmdbSearch = await axios.get(`/api/prime/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
                             if (tmdbSearch.data.results?.length > 0) {
-                                // Try to find an exact match for the expected media type (tv vs movie)
-                                tmdbMatch = tmdbSearch.data.results.find((r: any) => r.media_type === expectedMediaType) || tmdbSearch.data.results[0];
-                                break;
+                                // Validate title match to prevent incorrect matches (e.g., "Avatar" opening "Mit Herz und Robe")
+                                const validMatches = tmdbSearch.data.results.filter((r: any) => {
+                                    const rTitle = (r.name || r.title || r.original_name || "").toLowerCase();
+                                    const qLower = q.toLowerCase();
+                                    const qWords = qLower.split(' ').filter((w: string) => w.length > 2);
+                                    if (qWords.length === 0) return rTitle.includes(qLower);
+                                    return qWords.some((w: string) => rTitle.includes(w));
+                                });
+                                
+                                if (validMatches.length > 0) {
+                                    // Try to find an exact match for the expected media type (tv vs movie)
+                                    tmdbMatch = validMatches.find((r: any) => r.media_type === expectedMediaType) || validMatches[0];
+                                    break;
+                                }
                             }
                         } catch (e) {
                             if (axios.isCancel(e)) throw e;
@@ -1113,6 +1126,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     }
 
                     if (tmdbMatch) {
+                        console.log(`[GlobalContentDebugger] 🟢 TMDB MATCHED: ID=${tmdbMatch.id}, Title="${tmdbMatch.name || tmdbMatch.title}"`);
                         setTmdbIdForAnime(tmdbMatch.id.toString());
                         // Normalize media_type — TMDB multi-search can omit it
                         const mediaType = tmdbMatch.media_type === 'tv' ? 'tv' : 'movie';
@@ -1155,6 +1169,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         return;
                     }
                     
+                    console.log(`[GlobalContentDebugger] 🎬 TMDB REQUESTED: ID=${id}, Type=${initialType}`);
                     let res = null;
                     for (let attempt = 0; attempt < 2; attempt++) {
                         try {
