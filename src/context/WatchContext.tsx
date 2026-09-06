@@ -335,7 +335,7 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
 
         const pKey = getActiveProfileKey();
         setHistory(prev => {
-            const filtered = prev.filter(i => i.id !== sanitizedItem.id);
+            const filtered = prev.filter(i => i.id !== sanitizedItem.id && (!sanitizedItem.showId || i.showId !== sanitizedItem.showId));
             const nextHistory = [sanitizedItem, ...filtered].slice(0, 200);
             try {
                 localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(nextHistory));
@@ -357,7 +357,7 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
     const removeFromHistory = useCallback(async (id: string) => {
         const pKey = getActiveProfileKey();
         setHistory(prev => {
-            const next = prev.filter(i => i.id !== id);
+            const next = prev.filter(i => i.id !== id && i.showId !== id);
             try {
                 localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(next));
             } catch (_) {}
@@ -371,7 +371,7 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
     const bulkRemoveFromHistory = useCallback((ids: string[]) => {
         const pKey = getActiveProfileKey();
         setHistory(prev => {
-            const next = prev.filter(i => !ids.includes(i.id));
+            const next = prev.filter(i => !ids.includes(i.id) && !ids.includes(i.showId));
             try {
                 localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(next));
             } catch (_) {}
@@ -384,7 +384,7 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
         }
     }, [isLoggedIn, getActiveProfileKey]);
 
-    const getHistoryItem = useCallback((id: string) => history.find(i => i.id === id), [history]);
+    const getHistoryItem = useCallback((id: string) => history.find(i => i.id === id || i.showId === id), [history]);
 
     const clearHistory = useCallback(async () => {
         const pKey = getActiveProfileKey();
