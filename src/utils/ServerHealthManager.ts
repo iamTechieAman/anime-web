@@ -3,7 +3,7 @@
 class ServerHealthManagerClass {
     private healthCache: Record<string, number> = {};
     private failureCooldowns: Record<string, number> = {};
-    private pendingChecks: Record<string, Promise<number>> = {};
+    private pendingChecks: Record<string, Promise<number> | undefined> = {};
 
     constructor() {}
 

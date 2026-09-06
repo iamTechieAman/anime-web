@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { 
-    Activity, CheckCircle, AlertTriangle, XCircle, 
+    Zap, CheckCircle, AlertTriangle, CircleX, 
     RefreshCw, Clock, ArrowRight, ShieldAlert, 
-    ChevronDown, ChevronUp, Zap, HelpCircle 
+    ChevronDown, ChevronUp, HelpCircle 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -102,7 +102,7 @@ export default function HealthPage() {
             case 'temporary_failure': return <Clock className="w-4 h-4 text-yellow-400 shrink-0" />;
             case 'unsupported': return <HelpCircle className="w-4 h-4 text-blue-400 shrink-0" />;
             case 'unavailable':
-            case 'offline': return <XCircle className="w-4 h-4 text-rose-400 shrink-0" />;
+            case 'offline': return <CircleX className="w-4 h-4 text-rose-400 shrink-0" />;
             default: return <HelpCircle className="w-4 h-4 text-zinc-400 shrink-0" />;
         }
     };
@@ -122,7 +122,7 @@ export default function HealthPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 border-b border-white/5 pb-8">
                 <div>
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent flex items-center gap-3">
-                        <Activity className="w-8 h-8 text-accent animate-pulse" />
+                        <Zap className="w-8 h-8 text-accent animate-pulse" />
                         OTT System Health Dashboard
                     </h1>
                     <p className="text-zinc-400 text-xs md:text-sm mt-2 font-medium">
@@ -130,6 +130,7 @@ export default function HealthPage() {
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+
                     <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 bg-white/[0.03] px-3 py-2 rounded-xl border border-white/5 flex items-center gap-2">
                         <Clock className="w-3.5 h-3.5" />
                         Last Check: {updatedAt ? new Date(updatedAt).toLocaleTimeString() : 'Never'}
