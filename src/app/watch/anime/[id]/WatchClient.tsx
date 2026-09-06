@@ -986,14 +986,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         processingRef.current = null;
                         return;
                     }
-                    const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                    const isMovie = show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1 || details?.resolvedType === 'movie';
+                    const iframeUrl = isMovie 
+                        ? serverWithUrl.getUrl("movie", tmdbId)
+                        : serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
                     if (currentSeq !== sourceSeqRef.current) return;
                     setSourceUrl(iframeUrl);
                 }
 
                 setVideoType("iframe");
                 setLoadingSource(false);
-                toast.success(`EP ${currentEp} loaded on ${selectedServerObj.serverName}`);
+                toast.success(`${show.type?.toLowerCase() === 'movie' ? 'Movie' : `EP ${currentEp}`} loaded on ${selectedServerObj.serverName}`);
                 processingRef.current = null;
                 return;
             }
@@ -1029,6 +1032,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 });
 
                 if (controller.signal.aborted || currentSeq !== sourceSeqRef.current) return;
+
+                // Validate returned response identity matches requested content
+                if (res.data?.animeId && res.data.animeId !== id) {
+                    console.warn(`[WatchPage] ⚠️ Discarding mismatched response: requested ${id}, received ${res.data.animeId}`);
+                    return;
+                }
 
                 const links = res.data.sources || res.data.links;
                 if (links && Array.isArray(links) && links.length > 0) {
@@ -1179,16 +1188,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         
                         <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Try Other Servers</h3>
                         <div className="flex flex-wrap gap-2">
-                            {[
-                                { name: "VidSrc Me", url: fallbackEmbedUrl },
-                                { name: "VidSrc.to", url: fallbackEmbedUrl2 },
-                                { name: "Peachify", url: `https://peachify.top/?type=tv&id=${id}&s=1&e=1` },
-                                { name: "VidLink", url: `https://vidlink.pro/tv/${id}/1/1?autoplay=true` },
-                            ].map(server => (
-                                <a key={server.name} href={server.url} target="_blank" rel="noopener" className="px-4 py-2 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">
-                                    {server.name}
-                                </a>
-                            ))}
+                            {(() => {
+                                const isMovieShow = show?.type?.toLowerCase() === 'movie' || show?.totalEpisodes === 1 || details?.resolvedType === 'movie';
+                                return [
+                                    { name: "VidSrc Me", url: fallbackEmbedUrl },
+                                    { name: "VidSrc.to", url: fallbackEmbedUrl2 },
+                                    { name: "Peachify", url: isMovieShow ? `https://peachify.top/?type=movie&id=${id}` : `https://peachify.top/?type=tv&id=${id}&s=1&e=1` },
+                                    { name: "VidLink", url: isMovieShow ? `https://vidlink.pro/movie/${id}?autoplay=true` : `https://vidlink.pro/tv/${id}/1/1?autoplay=true` },
+                                ].map(server => (
+                                    <a key={server.name} href={server.url} target="_blank" rel="noopener" className="px-4 py-2 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">
+                                        {server.name}
+                                    </a>
+                                ));
+                            })()}
                         </div>
 
                         <div className="mt-8 flex flex-col gap-3">
