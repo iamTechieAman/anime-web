@@ -1038,6 +1038,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     console.warn(`[WatchPage] ⚠️ Discarding mismatched response: requested ${id}, received ${res.data.animeId}`);
                     return;
                 }
+                if (res.data?.episode && String(res.data.episode) !== String(currentEp)) {
+                    console.warn(`[WatchPage] ⚠️ Discarding mismatched episode response: requested ${currentEp}, received ${res.data.episode}`);
+                    return;
+                }
 
                 const links = res.data.sources || res.data.links;
                 if (links && Array.isArray(links) && links.length > 0) {

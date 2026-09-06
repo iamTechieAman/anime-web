@@ -176,6 +176,86 @@ export function getCanonicalWatchHref(item: any, seasonNum?: number, episodeNum?
 }
 
 /**
+ * Validates canonical playback parameters to prevent Movie vs Series state mixing.
+ */
+export interface PlaybackValidationResult {
+    isValid: boolean;
+    error?: string;
+    code?: string;
+    sanitized: {
+        contentType: CanonicalMediaType;
+        contentId: string;
+        season?: number;
+        episodeId?: string;
+    };
+}
+
+export function validateCanonicalPlaybackContext(
+    item: any,
+    options?: { season?: number | string; episodeId?: number | string; sourceProvider?: string }
+): PlaybackValidationResult {
+    const rawId = String(item?.id || item?.showId || item?._id || "").trim();
+    if (!rawId || rawId === "undefined" || rawId === "null") {
+        return {
+            isValid: false,
+            error: "Invalid or missing content ID",
+            code: "INVALID_CONTENT_ID",
+            sanitized: { contentType: "movie", contentId: "" }
+        };
+    }
+
+    const detectedType = detectMediaType(item);
+    const ep = options?.episodeId !== undefined && options?.episodeId !== null && options?.episodeId !== "" 
+        ? String(options.episodeId) 
+        : undefined;
+    const season = options?.season ? parseInt(String(options.season), 10) : undefined;
+
+    // RULE 1: MOVIE Validation
+    if (detectedType === "movie") {
+        if (process.env.NODE_ENV !== "production" && ep && ep !== "1" && ep !== "0") {
+            console.warn(`[CanonicalValidation] ⚠️ Warning: Movie "${rawId}" supplied with non-standard episodeId "${ep}". Stripping episode context for movie.`);
+        }
+        return {
+            isValid: true,
+            sanitized: {
+                contentType: "movie",
+                contentId: rawId,
+                // Movies do not require episodeId or season
+                episodeId: undefined,
+                season: undefined
+            }
+        };
+    }
+
+    // RULE 2: SERIES / TV Validation
+    if (detectedType === "tv") {
+        const s = season || 1;
+        const e = ep || "1";
+        return {
+            isValid: true,
+            sanitized: {
+                contentType: "tv",
+                contentId: rawId,
+                season: s,
+                episodeId: e
+            }
+        };
+    }
+
+    // RULE 3: ANIME Validation
+    const isAnimeMovie = isMovieContent(item);
+    return {
+        isValid: true,
+        sanitized: {
+            contentType: "anime",
+            contentId: rawId,
+            episodeId: ep || "1",
+            season: isAnimeMovie ? undefined : (season || 1)
+        }
+    };
+}
+
+/**
  * Canonical Content Normalizer
  */
 export function normalizeContent(raw: any): CanonicalContent {
@@ -208,3 +288,5 @@ export function normalizeContent(raw: any): CanonicalContent {
         watchHref: getCanonicalWatchHref(raw, raw.season, raw.episodeNumber || raw.episodeId)
     };
 }
+
+

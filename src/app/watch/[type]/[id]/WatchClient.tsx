@@ -1290,39 +1290,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                     const fallbackRes = await axios.get(`/api/prime/details?id=${id}&type=${initialType === 'movie' ? 'movie' : 'tv'}`, { signal: controller.signal });
                     if (fallbackRes.data) {
                         setDetails(fallbackRes.data);
-                        let resolvedType = fallbackRes.data.resolvedType || initialType;
-                        const isJp = fallbackRes.data.original_language === "ja" || 
-                                     (Array.isArray(fallbackRes.data.origin_country) && fallbackRes.data.origin_country.includes("JP")) ||
-                                     fallbackRes.data.origin_country === "JP";
-                        const genres = fallbackRes.data.genres || [];
-                        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
-                        
-                        if (isJp && isAnimation) {
-                            resolvedType = "anime";
-                        }
+                        let resolvedType = (fallbackRes.data.resolvedType || initialType) as "movie" | "tv" | "anime";
                         setType(resolvedType);
 
-                        if (resolvedType === "anime") {
-                            try {
-                                const searchTitle = fallbackRes.data.name || fallbackRes.data.title;
-                                if (searchTitle) {
-                                    const animeSearch = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchTitle)}`, { signal: controller.signal });
-                                    const animeMatch = animeSearch.data.results?.find((item: any) => item.type === 'anime');
-                                    if (animeMatch) {
-                                        const animeRes = await axios.get(`/api/anime/episodes?id=${animeMatch.id}`, { signal: controller.signal });
-                                        if (animeRes.data?.show) {
-                                            setAnimeData(animeRes.data.show);
-                                            const eps = animeRes.data.show.availableEpisodesDetail?.[mode] || [];
-                                            setEpisodes(eps);
-                                            if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
-                                            setTmdbIdForAnime(id);
-                                        }
-                                    }
-                                }
-                            } catch (animeErr) {
-                                console.error("Failed to load anime mapping for TMDB show in fallback:", animeErr);
-                            }
-                        } else if ((resolvedType === "tv" || resolvedType === "cartoon") && fallbackRes.data.seasons?.length > 0) {
+                        if (resolvedType === "tv" && fallbackRes.data.seasons?.length > 0) {
                             setSelectedSeason(fallbackRes.data.seasons[0].season_number || 1);
                         }
                         return;
