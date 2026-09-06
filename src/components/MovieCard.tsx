@@ -138,7 +138,7 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                                 </span>
                             )}
                             {item.isMostViewed && (
-                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
+                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-accent to-accent-warm text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
                                     <Flame className="w-2.5 h-2.5 fill-white" />HOT
                                 </span>
                             )}

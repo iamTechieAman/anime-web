@@ -1350,7 +1350,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             }}
                                             className="absolute inset-0 z-[55] flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer group"
                                         >
-                                            <div className="bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform will-change-transform" >
+                                            <div className="bg-gradient-to-r from-accent to-accent-warm hover:opacity-90 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 group-hover:scale-105 transition-transform will-change-transform" >
                                                 <Play className="w-5 h-5 fill-current" />
                                                 Tap anywhere to enable audio
                                             </div>
@@ -1831,7 +1831,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                                 }}
                                                                 className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all ${
                                                                     selectedServer === server.serverId
-                                                                        ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/10 text-white border border-accent/30 shadow-lg"
+                                                                        ? "bg-accent/20 text-white border border-accent/30 shadow-lg"
                                                                         : "hover:bg-white/5 text-[var(--text-muted)] hover:text-white border border-transparent"
                                                                 }`}
                                                             >
@@ -1967,7 +1967,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             />
                                         </div>
                                     </div>
-
                                     <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
                                         {(() => {
                                             const filteredEpisodes = epFilter
@@ -1981,7 +1980,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                             <button 
                                                                 key={ep} 
                                                                 onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))} 
-                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
                                                             >
                                                                 {ep}
                                                             </button>
@@ -2088,7 +2087,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                         setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
                                                         setShowEpisodesDrawer(false);
                                                     }} 
-                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
                                                 >
                                                     {typeof ep === 'object' ? (ep.number||ep.id) : ep}
                                                 </button>

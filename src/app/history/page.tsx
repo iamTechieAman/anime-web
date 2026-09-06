@@ -331,7 +331,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
         <Link
           href={href}
           scroll={false}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/80 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl text-xs font-black transition-all duration-200 hover:shadow-[0_0_20px_var(--accent-glow)] whitespace-nowrap"
         >
           <Play className="w-3 h-3 fill-white" />
           <span className="hidden sm:inline">{isCompleted ? "Rewatch" : "Resume"}</span>

@@ -149,7 +149,7 @@ export default function ContinueWatchingRow() {
                                     <Link 
                                         href={getHistoryLink(entry)}
                                         scroll={false}
-                                        className="px-3 py-1 bg-white/5 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white hover:text-black rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-[250ms] flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
+                                        className="px-3 py-1 bg-white/5 hover:bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all duration-[250ms] flex items-center justify-center gap-1 w-max border border-white/5 hover:border-transparent active:scale-95 shadow-sm hover:shadow-[0_0_12px_var(--accent-glow)]"
                                     >
                                         <Play className="w-2.5 h-2.5 fill-current" />
                                         <span>Resume</span>

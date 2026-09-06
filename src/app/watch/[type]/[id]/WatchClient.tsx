@@ -494,7 +494,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                             ) : episodeLayoutMode === "grid" ? (
                                                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
                                                     {activeFilteredEpisodes.map((ep) => (
-                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
+                                                        <button key={ep.id} onClick={() => { setSelectedEpisode(ep.episode_number); }} className={`py-3 rounded-lg text-xs font-bold transition-all border text-center ${selectedEpisode === ep.episode_number ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}>{ep.episode_number}</button>
                                                     ))}
                                                 </div>
                                             ) : (
@@ -1651,13 +1651,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                             </button>
                             <button onClick={() => { setIsTheatreMode(!isTheatreMode); if (isFocusMode) setIsFocusMode(false); }}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
-                                    isTheatreMode ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 border-accent/40 text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    isTheatreMode ? 'bg-accent/20 border-accent text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`} title="Theatre Mode">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
                             </button>
                             <button onClick={() => { setIsFocusMode(!isFocusMode); if (isTheatreMode) setIsTheatreMode(false); }}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
-                                    isFocusMode ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/15 border-accent/40 text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    isFocusMode ? 'bg-accent/20 border-accent text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`} title="Focus Mode">
                                 <Shield className="w-3.5 h-3.5" />
                             </button>
@@ -2108,7 +2108,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             {!isFocusMode && renderComments()}
             <AnimatePresence>
                 {showScrollTop && !isFocusMode && (
-                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-6 z-40 p-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/90 hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-colors"><ChevronUp className="w-5 h-5" /></motion.button>
+                    <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-6 z-40 p-3 bg-gradient-to-r from-accent to-accent-warm hover:opacity-90 text-white rounded-full shadow-[0_0_20px_var(--accent-glow)] backdrop-blur-sm transition-opacity cursor-pointer"><ChevronUp className="w-5 h-5" /></motion.button>
                 )}
             </AnimatePresence>
         </div>

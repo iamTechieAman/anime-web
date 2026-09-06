@@ -533,7 +533,7 @@ export default function MobileModals() {
                                                         <div className="flex-1 min-w-0">
                                                             <span className="text-xs font-black text-[var(--text-main)] block truncate mb-1">{item.title}</span>
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
+                                                                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${item.type === 'anime' ? 'bg-gradient-to-r from-accent to-accent-warm text-white shadow-inner' : 'bg-blue-500 text-white shadow-inner'}`}>{item.type}</span>
                                                                 <span className="text-[10px] text-[var(--text-muted)] font-semibold">{item.format} • {item.year}</span>
                                                                 {item.rating && (
                                                                     <span className="flex items-center gap-0.5 text-[10px] text-amber-400 font-bold shrink-0">

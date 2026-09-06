@@ -261,7 +261,7 @@ export default function SettingsClient() {
                                 onClick={() => setActiveTab(tab)}
                                 className={`flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer whitespace-nowrap w-full text-left border ${
                                     isActive 
-                                        ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02]/10 border-accent/20 text-white shadow-sm' 
+                                        ? 'bg-gradient-to-r from-accent to-accent-warm border-accent/20 text-white shadow-sm' 
                                         : 'border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
                                 }`}
                             >
