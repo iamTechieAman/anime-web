@@ -207,7 +207,6 @@ declare module 'lucide-react' {
     export const FolderPlus: LucideIcon;
     export const GripVertical: LucideIcon;
     export const Move: LucideIcon;
-    [key: string]: any;
 }
 
 declare module 'date-fns' {
