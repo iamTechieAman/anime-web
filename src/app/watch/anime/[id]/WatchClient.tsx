@@ -2116,12 +2116,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         </AnimatePresence>
 
         {/* Floating Button for Tablet Episodes Drawer */}
-        <button 
-            onClick={() => setShowEpisodesDrawer(true)}
-            className="fixed bottom-20 right-6 z-[99] md:max-xl:flex hidden items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm text-white rounded-full font-bold shadow-2xl active:scale-95 transition-all hover:scale-105 cursor-pointer"
-        >
-            <List className="w-4 h-4" /> View Episodes
-        </button>
+        {episodes.length > 1 && (
+            <button 
+                onClick={() => setShowEpisodesDrawer(true)}
+                className="fixed bottom-20 right-6 z-[99] md:max-xl:flex hidden items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm text-white rounded-full font-bold shadow-2xl active:scale-95 transition-all hover:scale-105 cursor-pointer"
+            >
+                <List className="w-4 h-4" /> View Episodes
+            </button>
+        )}
         <Script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" strategy="afterInteractive" />
         </>
     );

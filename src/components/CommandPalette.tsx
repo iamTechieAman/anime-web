@@ -385,7 +385,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         id="command-palette-results"
                         role="listbox"
                         aria-label="Search suggestions"
-                        className="flex-1 overflow-y-auto p-3 space-y-4 min-h-[260px] max-h-[280px] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3 scrollbar-thin"
+                        className="flex-1 overflow-y-auto p-3 space-y-4 min-h-[260px] max-h-[60vh] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3 scrollbar-thin"
                     >
                         {loading && results.length === 0 && (
                             <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-500 text-xs font-bold">

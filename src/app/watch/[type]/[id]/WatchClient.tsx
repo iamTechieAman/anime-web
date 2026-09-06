@@ -2179,12 +2179,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         </AnimatePresence>
 
         {/* Floating Button for Tablet Episodes Drawer */}
-        <button 
-            onClick={() => setShowEpisodesDrawer(true)}
-            className="fixed bottom-20 right-6 z-[99] md:max-lg:flex hidden items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm text-white rounded-full font-bold shadow-2xl active:scale-95 transition-all hover:scale-105 cursor-pointer"
-        >
-            <List className="w-4 h-4" /> View Episodes
-        </button>
+        {(type !== 'movie' && resolvedMediaType !== 'movie') && (
+            <button 
+                onClick={() => setShowEpisodesDrawer(true)}
+                className="fixed bottom-20 right-6 z-[99] md:max-lg:flex hidden items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent to-accent-warm text-white rounded-full font-bold shadow-2xl active:scale-95 transition-all hover:scale-105 cursor-pointer"
+            >
+                <List className="w-4 h-4" /> View Episodes
+            </button>
+        )}
         </>
     );
 }
