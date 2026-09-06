@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { 
-    Zap, CheckCircle, AlertTriangle, CircleX, 
+    Zap, CheckCircle, AlertTriangle, 
     RefreshCw, Clock, ArrowRight, ShieldAlert, 
     ChevronDown, ChevronUp, HelpCircle 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const CircleXIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="m15 9-6 6" />
+        <path d="m9 9 6 6" />
+    </svg>
+);
 
 interface ErrorLog {
     timestamp: string;
@@ -102,7 +110,7 @@ export default function HealthPage() {
             case 'temporary_failure': return <Clock className="w-4 h-4 text-yellow-400 shrink-0" />;
             case 'unsupported': return <HelpCircle className="w-4 h-4 text-blue-400 shrink-0" />;
             case 'unavailable':
-            case 'offline': return <CircleX className="w-4 h-4 text-rose-400 shrink-0" />;
+            case 'offline': return <CircleXIcon className="w-4 h-4 text-rose-400 shrink-0" />;
             default: return <HelpCircle className="w-4 h-4 text-zinc-400 shrink-0" />;
         }
     };
