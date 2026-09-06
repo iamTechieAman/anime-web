@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useWatch } from "@/context/WatchContext";
 import { useUserStore } from "@/store/userStore";
 import { ServerHealthManager } from "@/utils/ServerHealthManager";
+import { isMovieContent } from "@/utils/mediaType";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -986,7 +987,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         processingRef.current = null;
                         return;
                     }
-                    const isMovie = show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1 || details?.resolvedType === 'movie';
+                    const isMovie = show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1 || isMovieContent(show);
                     const iframeUrl = isMovie 
                         ? serverWithUrl.getUrl("movie", tmdbId)
                         : serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
@@ -1193,7 +1194,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Try Other Servers</h3>
                         <div className="flex flex-wrap gap-2">
                             {(() => {
-                                const isMovieShow = show?.type?.toLowerCase() === 'movie' || show?.totalEpisodes === 1 || details?.resolvedType === 'movie';
+                                const isMovieShow = show?.type?.toLowerCase() === 'movie' || show?.totalEpisodes === 1 || isMovieContent(show);
                                 return [
                                     { name: "VidSrc Me", url: fallbackEmbedUrl },
                                     { name: "VidSrc.to", url: fallbackEmbedUrl2 },
