@@ -5,6 +5,16 @@ interface RequestInit {
     };
 }
 
+declare module 'next' {
+    export type Metadata = any;
+    export type Viewport = any;
+}
+
+declare module 'next/headers' {
+    export function cookies(): Promise<any>;
+    export function headers(): Promise<any>;
+}
+
 declare module 'next/link' {
     import React from 'react';
     export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -64,6 +74,7 @@ declare module 'next/server' {
         static redirect(url: string | URL, status?: number): NextResponse;
         static rewrite(destination: string | URL): NextResponse;
         static next(): NextResponse;
+        cookies: any;
     }
     export class NextRequest extends Request {
         nextUrl: URL;
@@ -213,6 +224,13 @@ declare module 'lucide-react' {
     export const Accessibility: LucideIcon;
     export const Keyboard: LucideIcon;
     export const Sliders: LucideIcon;
+    export const ThumbsUp: LucideIcon;
+    export const ThumbsDown: LucideIcon;
+    export const EyeOff: LucideIcon;
+    export const Image: LucideIcon;
+    export const Smile: LucideIcon;
+    export const Edit2: LucideIcon;
+    export const CornerDownRight: LucideIcon;
 }
 
 declare module 'date-fns' {
@@ -221,4 +239,5 @@ declare module 'date-fns' {
     export function parseISO(argument: string, options?: any): Date;
     export function isValid(date: any): boolean;
 }
+
 

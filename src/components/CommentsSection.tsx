@@ -855,10 +855,9 @@ const CommentsSection = memo(function CommentsSection({
                                                     <span className="flex items-center gap-2"><EyeOff className="w-3.5 h-3.5 text-red-400" /> Contains spoilers. Click to reveal.</span>
                                                 </button>
                                             ) : (
-                                                <div className="text-[var(--text-main)] text-sm font-inter leading-relaxed break-words relative space-y-2">
+                                                <div className="text-[var(--text-main)] text-sm font-inter leading-relaxed break-words relative space-y-2 prose prose-invert max-w-none">
                                                     <ReactMarkdown 
                                                         remarkPlugins={[remarkGfm]} 
-                                                        className="prose prose-invert max-w-none text-sm leading-relaxed"
                                                         components={{
                                                             a: ({ href, children, ...props }) => {
                                                                 if (!isSafeLinkUrl(href || '')) return <span>{children}</span>;
@@ -1004,10 +1003,9 @@ const CommentsSection = memo(function CommentsSection({
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="mt-0.5 text-zinc-300 text-xs font-inter leading-relaxed break-words">
+                                                    <div className="mt-0.5 text-zinc-300 text-xs font-inter leading-relaxed break-words prose prose-invert max-w-none">
                                                         <ReactMarkdown 
                                                             remarkPlugins={[remarkGfm]} 
-                                                            className="prose prose-invert max-w-none text-xs leading-relaxed"
                                                             components={{
                                                                 a: ({ href, children, ...props }) => {
                                                                     if (!isSafeLinkUrl(href || '')) return <span>{children}</span>;
