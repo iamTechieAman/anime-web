@@ -43,15 +43,16 @@ export default function ContinueWatchingRow() {
 
     const getHistoryLink = (entry: any) => {
         const type = detectMediaType(entry);
+        const targetId = entry.showId || entry.id;
         if (type === 'movie') {
-            return `/watch/movie/${entry.showId}`;
+            return `/watch/movie/${targetId}`;
         }
         if (type === 'tv') {
             const season = entry.season || 1;
-            const episode = entry.episodeId || entry.episodeNumber || 1;
-            return `/watch/tv/${entry.showId}?s=${season}&e=${episode}`;
+            const episode = entry.episodeNumber || entry.episodeId || 1;
+            return `/watch/tv/${targetId}?s=${season}&e=${episode}`;
         }
-        return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
+        return `/watch/anime/${targetId}?ep=${entry.episodeNumber || entry.episodeId || 1}`;
     };
 
     const formatTimeLeft = (current: number, total: number) => {

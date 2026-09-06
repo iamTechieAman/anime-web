@@ -151,24 +151,25 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
 
   const href = useMemo(() => {
     const type = detectMediaType(entry);
+    const targetId = entry.showId || entry.id;
     
     let routeType = type;
     if (type === "anime") {
-      const isPrefixed = typeof entry.showId === "string" && (entry.showId.includes(":") && !entry.showId.startsWith("tmdb:"));
-      const isAnilistNumeric = typeof entry.showId === "number" || (typeof entry.showId === "string" && /^\d+$/.test(entry.showId) && !entry.season);
+      const isPrefixed = typeof targetId === "string" && (targetId.includes(":") && !targetId.startsWith("tmdb:"));
+      const isAnilistNumeric = typeof targetId === "number" || (typeof targetId === "string" && /^\d+$/.test(targetId) && !entry.season);
       
       if (!isPrefixed && !isAnilistNumeric) {
         routeType = entry.season ? "tv" : "movie";
       }
     }
     
-    if (routeType === "movie") return `/watch/movie/${entry.showId}`;
+    if (routeType === "movie") return `/watch/movie/${targetId}`;
     if (routeType === "tv") {
       const s = (entry as any).season || 1;
-      const e = entry.episodeId || entry.episodeNumber || 1;
-      return `/watch/tv/${entry.showId}?s=${s}&e=${e}`;
+      const e = entry.episodeNumber || entry.episodeId || 1;
+      return `/watch/tv/${targetId}?s=${s}&e=${e}`;
     }
-    return `/watch/anime/${entry.showId}?ep=${entry.episodeId || 1}`;
+    return `/watch/anime/${targetId}?ep=${entry.episodeNumber || entry.episodeId || 1}`;
   }, [entry]);
 
   const typeStyle = useMemo(() => {

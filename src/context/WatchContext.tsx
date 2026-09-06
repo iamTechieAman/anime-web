@@ -57,13 +57,95 @@ interface WatchContextType {
 
 const DEFAULT_COLLECTIONS = ['Favorites', 'To Watch', 'Completed'];
 
-function normalizeWatchlistItem(item: Partial<WatchlistItem>, idx: number): WatchlistItem {
-    const base = item as WatchlistItem;
+export function normalizeLegacyHistoryItem(raw: any): WatchHistoryItem | null {
+    if (!raw || typeof raw !== 'object') return null;
+
+    const rawId = String(raw.id || raw.showId || raw._id || '').trim();
+    if (!rawId || rawId === 'undefined' || rawId === 'null') return null;
+
+    let type: 'anime' | 'movie' | 'tv' = 'movie';
+    if (raw.type === 'anime' || raw.media_type === 'anime' || rawId.startsWith('hi:') || rawId.startsWith('aw:') || rawId.startsWith('anikai:')) {
+        type = 'anime';
+    } else if (raw.type === 'tv' || raw.media_type === 'tv' || raw.type === 'series' || raw.media_type === 'series') {
+        type = 'tv';
+    } else if (raw.type === 'movie' || raw.media_type === 'movie' || raw.type === 'film') {
+        type = 'movie';
+    } else if (raw.season !== undefined || raw.episodeId !== undefined || raw.episodeNumber !== undefined || raw.episode !== undefined) {
+        type = 'tv';
+    }
+
+    const showId = String(raw.showId || raw.id || rawId).trim();
+    const title = String(raw.title || raw.name || 'Untitled').trim();
+    const poster = String(raw.poster || raw.poster_path || raw.image || '').trim();
+
+    const isMovie = type === 'movie';
+    const season = isMovie ? undefined : (raw.season != null ? Number(raw.season) : undefined);
+    const episodeNumber = isMovie ? undefined : (raw.episodeNumber != null ? Number(raw.episodeNumber) : (raw.episode != null ? Number(raw.episode) : undefined));
+    const episodeId = isMovie ? undefined : (raw.episodeId ? String(raw.episodeId) : undefined);
+
+    const currentTime = typeof raw.currentTime === 'number' && !isNaN(raw.currentTime) && raw.currentTime >= 0 
+        ? raw.currentTime 
+        : (typeof raw.progress === 'number' && !isNaN(raw.progress) ? raw.progress : 0);
+    const duration = typeof raw.duration === 'number' && !isNaN(raw.duration) && raw.duration >= 0 
+        ? raw.duration 
+        : 0;
+    const updatedAt = typeof raw.updatedAt === 'number' && !isNaN(raw.updatedAt) 
+        ? raw.updatedAt 
+        : (typeof raw.timestamp === 'number' && !isNaN(raw.timestamp) ? raw.timestamp : Date.now());
+
     return {
-        ...base,
-        collection: base.collection || 'To Watch',
-        tags: base.tags || [],
-        order: base.order != null ? base.order : idx,
+        id: rawId,
+        showId: showId || rawId,
+        type,
+        title,
+        poster,
+        season,
+        episodeNumber,
+        episodeId,
+        currentTime,
+        duration,
+        updatedAt,
+        providerId: raw.providerId || raw.provider,
+        serverId: raw.serverId,
+        audio: raw.audio,
+        subtitle: raw.subtitle,
+        quality: raw.quality
+    };
+}
+
+export function normalizeLegacyWatchlistItem(raw: any, idx: number): WatchlistItem | null {
+    if (!raw || typeof raw !== 'object') return null;
+
+    const rawId = String(raw.id || raw.showId || raw._id || '').trim();
+    if (!rawId || rawId === 'undefined' || rawId === 'null') return null;
+
+    let type: 'anime' | 'movie' | 'tv' = 'movie';
+    if (raw.type === 'anime' || raw.media_type === 'anime' || rawId.startsWith('hi:') || rawId.startsWith('aw:') || rawId.startsWith('anikai:')) {
+        type = 'anime';
+    } else if (raw.type === 'tv' || raw.media_type === 'tv' || raw.type === 'series') {
+        type = 'tv';
+    } else if (raw.type === 'movie' || raw.media_type === 'movie' || raw.type === 'film') {
+        type = 'movie';
+    }
+
+    const showId = String(raw.showId || raw.id || rawId).trim();
+    const title = String(raw.title || raw.name || 'Untitled').trim();
+    const poster = String(raw.poster || raw.poster_path || raw.image || '').trim();
+    const addedAt = typeof raw.addedAt === 'number' && !isNaN(raw.addedAt) ? raw.addedAt : Date.now();
+    const collection = String(raw.collection || 'To Watch').trim();
+    const tags = Array.isArray(raw.tags) ? raw.tags : [];
+    const order = typeof raw.order === 'number' && !isNaN(raw.order) ? raw.order : idx;
+
+    return {
+        id: rawId,
+        showId: showId || rawId,
+        type,
+        title,
+        poster,
+        addedAt,
+        collection,
+        tags,
+        order
     };
 }
 
@@ -108,12 +190,12 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
         return 'default';
     }, [activeProfileId]);
 
-    // ── Load Per-Profile Data Synchronously + Sequence Protection ──
+    // ── Load Per-Profile Data Synchronously + Migration + Sequence Protection ──
     useEffect(() => {
         const currentSeq = ++profileSeqRef.current;
         const pKey = getActiveProfileKey();
 
-        // 1. Synchronously load profile-isolated data
+        // 1. Synchronously load and normalize profile-isolated data
         let localHistory: WatchHistoryItem[] = [];
         let localWatchlist: WatchlistItem[] = [];
         let localCollections: string[] = DEFAULT_COLLECTIONS;
@@ -121,15 +203,26 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
         try {
             const h = localStorage.getItem(`toonplayer_history_${pKey}`) || 
                       (pKey === 'default' ? localStorage.getItem('toonplayer_history') : null);
-            if (h) localHistory = JSON.parse(h);
+            if (h) {
+                const parsed = JSON.parse(h);
+                if (Array.isArray(parsed)) {
+                    localHistory = parsed
+                        .map(normalizeLegacyHistoryItem)
+                        .filter((item): item is WatchHistoryItem => item !== null);
+                }
+            }
         } catch (_) {}
 
         try {
             const w = localStorage.getItem(`toonplayer_watchlist_${pKey}`) || 
                       (pKey === 'default' ? localStorage.getItem('toonplayer_watchlist') : null);
             if (w) {
-                const parsed = JSON.parse(w) as Partial<WatchlistItem>[];
-                localWatchlist = parsed.map((item, idx) => normalizeWatchlistItem(item, idx));
+                const parsed = JSON.parse(w);
+                if (Array.isArray(parsed)) {
+                    localWatchlist = parsed
+                        .map((item, idx) => normalizeLegacyWatchlistItem(item, idx))
+                        .filter((item): item is WatchlistItem => item !== null);
+                }
             }
         } catch (_) {}
 
@@ -158,16 +251,21 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
                         // Only merge backend data if this is the primary account profile
                         if (pKey === `profile-${data.user.id}` || pKey === 'default') {
                             if (Array.isArray(data.user.history) && data.user.history.length > 0) {
-                                setHistory(data.user.history);
+                                const normalizedHistory = data.user.history
+                                    .map(normalizeLegacyHistoryItem)
+                                    .filter((item: any): item is WatchHistoryItem => item !== null);
+                                setHistory(normalizedHistory);
                                 try {
-                                    localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(data.user.history));
+                                    localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(normalizedHistory));
                                 } catch (_) {}
                             }
                             if (Array.isArray(data.user.watchlist) && data.user.watchlist.length > 0) {
-                                const wl = data.user.watchlist.map((item: WatchlistItem, idx: number) => normalizeWatchlistItem(item, idx));
-                                setWatchlist(wl);
+                                const normalizedWatchlist = data.user.watchlist
+                                    .map((item: any, idx: number) => normalizeLegacyWatchlistItem(item, idx))
+                                    .filter((item: any): item is WatchlistItem => item !== null);
+                                setWatchlist(normalizedWatchlist);
                                 try {
-                                    localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(wl));
+                                    localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(normalizedWatchlist));
                                 } catch (_) {}
                             }
                         }

@@ -508,11 +508,12 @@ export default function WatchlistPage() {
 
   const getLink = useCallback((entry: WatchlistItem) => {
     const type = detectMediaType(entry);
+    const targetId = entry.showId || entry.id;
     
     let routeType = type;
     if (type === "anime") {
-      const isPrefixed = typeof entry.showId === "string" && (entry.showId.includes(":") && !entry.showId.startsWith("tmdb:"));
-      const isAnilistNumeric = typeof entry.showId === "number" || (typeof entry.showId === "string" && /^\d+$/.test(entry.showId) && !entry.season);
+      const isPrefixed = typeof targetId === "string" && (targetId.includes(":") && !targetId.startsWith("tmdb:"));
+      const isAnilistNumeric = typeof targetId === "number" || (typeof targetId === "string" && /^\d+$/.test(targetId) && !entry.season);
       
       if (!isPrefixed && !isAnilistNumeric) {
         routeType = entry.season ? "tv" : "movie";
@@ -520,8 +521,8 @@ export default function WatchlistPage() {
     }
     
     if (routeType === "movie" || routeType === "tv")
-      return `/watch/${routeType}/${entry.showId}`;
-    return `/watch/anime/${entry.showId}`;
+      return `/watch/${routeType}/${targetId}`;
+    return `/watch/anime/${targetId}`;
   }, []);
 
   if (!isMounted) return null;
