@@ -1256,40 +1256,10 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         
                         if (activeRequestRef.current !== String(id)) return;
                         setDetails(res.data);
-                        let resolvedType = res.data.resolvedType || initialType;
-                        const isJp = res.data.original_language === "ja" || 
-                                     (Array.isArray(res.data.origin_country) && res.data.origin_country.includes("JP")) ||
-                                     res.data.origin_country === "JP";
-                        const genres = res.data.genres || [];
-                        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
-                        
-                        if (isJp && isAnimation) {
-                            resolvedType = "anime";
-                        }
+                        const resolvedType = (res.data.resolvedType || initialType) as "movie" | "tv" | "anime";
                         setType(resolvedType);
 
-                        if (resolvedType === "anime") {
-                            try {
-                                const searchTitle = res.data.name || res.data.title;
-                                if (searchTitle) {
-                                    const animeSearch = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchTitle)}`, { signal: controller.signal });
-                                    const animeMatch = animeSearch.data.results?.find((item: any) => item.type === 'anime');
-                                    if (animeMatch) {
-                                        const animeRes = await axios.get(`/api/anime/episodes?id=${animeMatch.id}`, { signal: controller.signal });
-                                        if (activeRequestRef.current !== String(id)) return;
-                                        if (animeRes.data?.show) {
-                                            setAnimeData(animeRes.data.show);
-                                            const eps = animeRes.data.show.availableEpisodesDetail?.[mode] || [];
-                                            setEpisodes(eps);
-                                            if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
-                                            setTmdbIdForAnime(id);
-                                        }
-                                    }
-                                }
-                            } catch (animeErr) {
-                                console.error("Failed to load anime mapping for TMDB show:", animeErr);
-                            }
-                        } else if ((resolvedType === "tv" || resolvedType === "cartoon") && res.data.seasons?.length > 0) {
+                        if (resolvedType === "tv" && res.data.seasons?.length > 0) {
                             const historyItem = history.find((i: any) => i.showId === String(id));
                             if (historyItem && historyItem.season) {
                                 setSelectedSeason(historyItem.season);

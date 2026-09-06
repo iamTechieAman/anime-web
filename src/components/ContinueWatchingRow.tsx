@@ -130,9 +130,9 @@ export default function ContinueWatchingRow() {
                                             </h3>
                                         </Link>
                                         <div className="flex items-center gap-1.5 flex-wrap">
-                                            {entry.episodeId && (
+                                            {detectMediaType(entry) !== 'movie' && (entry.episodeId || entry.episodeNumber) && (
                                                 <span className="text-[9px] font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
-                                                    {detectMediaType(entry) === 'tv' ? `S${entry.season || 1} · E${entry.episodeId}` : `EP ${entry.episodeNumber || entry.episodeId}`}
+                                                    {detectMediaType(entry) === 'tv' ? `S${entry.season || 1} · E${entry.episodeId || entry.episodeNumber}` : `EP ${entry.episodeNumber || entry.episodeId}`}
                                                 </span>
                                             )}
                                             {entry.duration > 0 && (

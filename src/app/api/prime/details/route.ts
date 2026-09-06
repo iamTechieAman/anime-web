@@ -7,133 +7,63 @@ const TVMAZE_BASE = "https://api.tvmaze.com";
 
 /**
  * Universal Content Resolver (UCR)
- * Priority: TMDB (primary) → TVMaze (cross-validation)
+ * Priority: Requested hint endpoint -> Alternate endpoint fallback
  * Rules:
- *   - If TMDB returns seasons > 0 or number_of_episodes > 1 → type=tv
- *   - If only runtime is available → type=movie
- *   - Query TV and Movie in parallel when type is ambiguous
- *   - Cross-validate with TVMaze for episodic content detection
- *   - Never trust the raw `type` param blindly
+ *   - If requested as 'movie' and /movie/{id} returns valid data -> type=movie
+ *   - If requested as 'tv' and /tv/{id} returns valid data -> type=tv
+ *   - If primary endpoint 404s, try fallback endpoint
+ *   - Never infer type from title text or language flags
  */
 async function resolveContentType(
     id: string,
-    hintType: string
-): Promise<{ type: string; detailsData: any }> {
-    // Step 1: Fetch both TV and Movie TMDB details in parallel
-    const [tvRes, movieRes] = await Promise.all([
-        fetchWithTimeout(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
-        fetchWithTimeout(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
-    ]);
+    hintType: "movie" | "tv"
+): Promise<{ type: "movie" | "tv"; detailsData: any }> {
+    const primaryUrl = `${TMDB_BASE}/${hintType}/${id}?api_key=${TMDB_KEY}&language=en-US`;
+    const alternateType: "movie" | "tv" = hintType === "movie" ? "tv" : "movie";
+    const alternateUrl = `${TMDB_BASE}/${alternateType}/${id}?api_key=${TMDB_KEY}&language=en-US`;
 
-    const tvData = tvRes.ok ? await tvRes.json() : null;
-    const movieData = movieRes.ok ? await movieRes.json() : null;
-
-    // Step 2: Apply episodic & anime validation rules
-    // 1. Anime Detection (Animation + JP original language/country)
-    if (tvData && !tvData.status_message) {
-        const isJp = tvData.original_language === "ja" || (Array.isArray(tvData.origin_country) && tvData.origin_country.includes("JP")) || tvData.origin_country === "JP";
-        const genres = tvData.genres || [];
-        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
-        if (isJp && isAnimation) {
-            return { type: "anime", detailsData: tvData };
-        }
-    }
-    if (movieData && !movieData.status_message) {
-        const isJp = movieData.original_language === "ja" || (Array.isArray(movieData.origin_country) && movieData.origin_country.includes("JP")) || movieData.origin_country === "JP";
-        const genres = movieData.genres || [];
-        const isAnimation = Array.isArray(genres) && genres.some((g: any) => g.id === 16 || g.name === "Animation");
-        if (isJp && isAnimation) {
-            return { type: "anime", detailsData: movieData };
-        }
-    }
-
-    // 2. TV Series (seasons present, episodes present)
-    if (tvData && !tvData.status_message) {
-        const hasSeasons = (tvData.number_of_seasons || 0) > 0 || (Array.isArray(tvData.seasons) && tvData.seasons.length > 0);
-        const hasEpisodes = (tvData.number_of_episodes || 0) > 0;
-        if (hasSeasons || hasEpisodes) {
-            return { type: "tv", detailsData: tvData };
-        }
-    }
-
-    // 3. Movie (runtime exists, episodes absent, seasons absent)
-    if (movieData && !movieData.status_message) {
-        const hasRuntime = (movieData.runtime || 0) > 0;
-        const episodesAbsent = !movieData.number_of_episodes;
-        const seasonsAbsent = !movieData.number_of_seasons;
-        if (hasRuntime && episodesAbsent && seasonsAbsent) {
-            return { type: "movie", detailsData: movieData };
-        }
-    }
-
-    // Step 4: Honor the hint if both endpoints returned valid data
-    if (hintType === "tv" && tvData && !tvData.status_message) {
-        return { type: "tv", detailsData: tvData };
-    }
-    if (movieData && !movieData.status_message) {
-        return { type: "movie", detailsData: movieData };
-    }
-    if (tvData && !tvData.status_message) {
-        return { type: "tv", detailsData: tvData };
-    }
-
-    throw new Error("Content not found on TMDB for either tv or movie type.");
-}
-
-/**
- * TVMaze cross-validation: confirms if content is episodic via title search.
- * Returns true if TVMaze finds a series match, false otherwise.
- */
-async function tvmazeCrossValidate(title: string): Promise<boolean> {
+    // Try primary requested type first
     try {
-        const encoded = encodeURIComponent(title);
-        const res = await fetchWithTimeout(`${TVMAZE_BASE}/singlesearch/shows?q=${encoded}`, {
-            next: { revalidate: 7200 },
-        }, 3000);
+        const res = await fetchWithTimeout(primaryUrl, { next: { revalidate: 3600 } }, 3000);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && !data.status_message && data.id) {
+                return { type: hintType, detailsData: data };
+            }
+        }
+    } catch (e) {}
 
-        if (!res.ok) return false;
-        const data = await res.json();
-        // If TVMaze found a show, it's episodic TV
-        return !!(data && data.id);
-    } catch {
-        return false;
-    }
+    // Fallback to alternate type only if primary failed
+    try {
+        const altRes = await fetchWithTimeout(alternateUrl, { next: { revalidate: 3600 } }, 3000);
+        if (altRes.ok) {
+            const altData = await altRes.json();
+            if (altData && !altData.status_message && altData.id) {
+                return { type: alternateType, detailsData: altData };
+            }
+        }
+    } catch (e) {}
+
+    throw new Error(`Content not found on TMDB for ID ${id}`);
 }
 
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
-        const rawType = searchParams.get("type") || "movie";
+        const rawType = (searchParams.get("type") || "movie").toLowerCase();
 
         if (!id || id === "undefined" || id === "null" || isNaN(Number(id))) {
             return NextResponse.json({ error: "Missing or invalid id parameter" }, { status: 400 });
         }
 
-        // Normalize hintType — TMDB does not have an 'anime' type; map it to 'tv'
-        const hintType = (rawType === "tv" || rawType === "anime") ? "tv" : "movie";
+        // Normalize hintType: strictly 'movie' or 'tv'
+        const hintType: "movie" | "tv" = (rawType === "tv" || rawType === "series" || rawType === "show") ? "tv" : "movie";
 
-        // Resolve content type using Universal Content Resolver
+        // Resolve content type
         let { type, detailsData: details } = await resolveContentType(id, hintType);
 
-        // TVMaze cross-validation for movies that might actually be series
-        if (type === "movie" && details?.title) {
-            const isEpisodic = await tvmazeCrossValidate(details.title);
-            if (isEpisodic) {
-                // Re-fetch as TV if TVMaze confirms it's a series
-                const tvRes = await fetchWithTimeout(`${TMDB_BASE}/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000);
-                if (tvRes.ok) {
-                    const tvData = await tvRes.json();
-                    if (!tvData.status_message) {
-                        type = "tv";
-                        details = tvData;
-                    }
-                }
-            }
-        }
-
         // Map resolved type to valid TMDB type for supplementary metadata calls
-        // TMDB only supports 'tv' and 'movie' — never 'anime', 'cartoon', etc.
         const tmdbType = type === "movie" ? "movie" : "tv";
 
         // Fetch supplementary metadata in parallel for the resolved type

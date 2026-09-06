@@ -1,79 +1,115 @@
-export function detectMediaType(item: any): "movie" | "tv" | "anime" {
+/**
+ * Canonical Content Classification & Normalization System for ToonPlayer
+ * 
+ * Strictly distinguishes MOVIE, SERIES (TV), and ANIME across the entire application.
+ * Ensures movie playback never uses episode logic and series playback never uses movie logic.
+ */
+
+export type CanonicalMediaType = "movie" | "tv" | "anime";
+
+export interface CanonicalContent {
+    id: string;
+    showId: string;
+    title: string;
+    mediaType: CanonicalMediaType;
+    isMovie: boolean;
+    isSeries: boolean;
+    isAnime: boolean;
+    poster: string | null;
+    backdrop: string | null;
+    year: string | null;
+    rating: number | null;
+    duration?: number;
+    season?: number;
+    episode?: number | string;
+    watchHref: string;
+}
+
+/**
+ * Normalizes provider or external raw type strings into canonical "movie" | "tv" | "anime"
+ */
+export function normalizeContentType(rawType: any): CanonicalMediaType {
+    if (!rawType || typeof rawType !== "string") return "movie";
+    const clean = rawType.toLowerCase().trim();
+
+    // Movie aliases
+    if (clean === "movie" || clean === "film" || clean === "movie film" || clean === "feature" || clean === "cinema") {
+        return "movie";
+    }
+
+    // TV / Series aliases
+    if (clean === "tv" || clean === "tv series" || clean === "tv_series" || clean === "series" || clean === "tvshow" || clean === "show" || clean === "drama" || clean === "serial") {
+        return "tv";
+    }
+
+    // Anime aliases
+    if (clean === "anime" || clean === "ova" || clean === "ona" || clean === "special") {
+        return "anime";
+    }
+
+    return "movie";
+}
+
+/**
+ * Canonical media type detector.
+ * Strictly uses verified metadata signals instead of guessing or title string matching.
+ */
+export function detectMediaType(item: any): CanonicalMediaType {
     if (!item) return "movie";
 
-    // 0. Use explicit type if available (Highest Priority)
-    const explicitType = item.media_type || item.type;
-    if (explicitType === "movie") return "movie";
-    if (explicitType === "tv" || explicitType === "series" || explicitType === "show") return "tv";
-    if (explicitType === "anime") return "anime";
+    // 0. Explicit prefix checks on ID (Highest Reliability)
+    const rawId = String(item.id || item._id || item.showId || "");
+    if (rawId.startsWith("tmdb:movie:")) return "movie";
+    if (rawId.startsWith("tmdb:tv:")) return "tv";
+    if (rawId.startsWith("hi:") || rawId.startsWith("aw:") || rawId.startsWith("anikai:") || rawId.startsWith("anilist:")) {
+        return "anime";
+    }
 
-    // 1. Anime Detection: check if anime metadata exists
-    const originalLanguage = item.original_language || item.originalLanguage;
-    const originCountry = item.origin_country || item.originCountry;
-    
-    // Check JP origin / original language Japanese on TMDB
-    const isJp = originalLanguage === "ja" || 
-                 (Array.isArray(originCountry) && originCountry.includes("JP")) ||
-                 originCountry === "JP" ||
-                 originCountry === "ja";
-                 
-    const genres = item.genres || item.genre_ids || item.genreIds || [];
-    const isAnimation = Array.isArray(genres) && genres.some((g: any) => {
-        if (typeof g === "object" && g !== null) {
-            return g.id === 16 || (g.name && String(g.name).toLowerCase() === "animation");
+    // 1. Explicit normalized media type
+    const explicitType = item.media_type || item.type || item.contentType;
+    if (explicitType) {
+        const normalized = normalizeContentType(explicitType);
+        // If explicit type is "anime", check if it's an AniList/provider item
+        if (normalized === "anime" || item.anilistId || item.malId) {
+            return "anime";
         }
-        return g === 16 || String(g).toLowerCase() === "animation";
-    });
-
-    // We no longer blindly coerce Japanese Animation into "anime" 
-    // because TMDB IDs must be routed as TV/Movie to preserve ID validity.
-    // TMDB anime can still be detected as tv/movie further down.
-
-    // Check if AniList metadata exists
-    if (item.anilistId || item.anilist_id || item.aniListId) {
-        return "anime";
+        if (normalized === "tv" || normalized === "movie") {
+            return normalized;
+        }
     }
 
-    // Check if MAL metadata exists
-    if (item.malId || item.mal_id) {
-        return "anime";
-    }
-
-    // Check local metadata / explicit type / provider
-    if (item.type === "anime" || item.media_type === "anime") {
-        return "anime";
-    }
-    const provider = (item.provider || item.showId?.split(":")?.[0] || "").toLowerCase();
+    // 2. Anime Provider check
+    const provider = (item.provider || rawId.split(":")?.[0] || "").toLowerCase();
     if (provider && ["hianime", "aniwatch", "allanime", "hianime_fallback", "anikai", "aniwave", "aniwatchtv", "cinevo", "consumet", "gogoanime", "animepahe", "jikan", "hi", "aw"].includes(provider)) {
         return "anime";
     }
 
-    // 2. TV Series Detection: seasons present, episodes present
-    const hasSeasons = (item.number_of_seasons && item.number_of_seasons > 0) || 
+    // 3. AniList / MAL metadata presence
+    if (item.anilistId || item.anilist_id || item.aniListId || item.malId || item.mal_id) {
+        return "anime";
+    }
+
+    // 4. TV Series structural signals (seasons/episodes present)
+    const hasSeasons = (typeof item.number_of_seasons === "number" && item.number_of_seasons > 0) ||
                        (Array.isArray(item.seasons) && item.seasons.length > 0) ||
-                       item.season !== undefined ||
-                       (item.availableEpisodes && typeof item.availableEpisodes === "object");
+                       item.season !== undefined;
                        
-    const hasEpisodes = (item.number_of_episodes && item.number_of_episodes > 0) || 
+    const hasEpisodes = (typeof item.number_of_episodes === "number" && item.number_of_episodes > 0) ||
                         (Array.isArray(item.episodes) && item.episodes.length > 0) ||
-                        item.episodeId !== undefined ||
+                        (item.availableEpisodes && typeof item.availableEpisodes === "object") ||
                         item.episodeNumber !== undefined;
 
-    if (hasSeasons && hasEpisodes) {
+    if (hasSeasons || (hasEpisodes && !item.runtime)) {
         return "tv";
     }
 
-    // 3. Movie Detection: runtime exists, episodes absent, seasons absent
-    const hasRuntime = (item.runtime !== undefined && item.runtime !== null && item.runtime > 0) || 
-                       (item.episode_run_time && Array.isArray(item.episode_run_time) && item.episode_run_time.length > 0);
-    const episodesAbsent = !hasEpisodes;
-    const seasonsAbsent = !hasSeasons;
-
-    if (hasRuntime && episodesAbsent && seasonsAbsent) {
+    // 5. Movie structural signals (runtime exists, release_date without seasons)
+    const hasRuntime = typeof item.runtime === "number" && item.runtime > 0;
+    if (hasRuntime && !hasSeasons && !hasEpisodes) {
         return "movie";
     }
 
-    // Fallbacks based on date indicators
+    // 6. Date indicators
     if (item.first_air_date || item.air_date) {
         return "tv";
     }
@@ -81,10 +117,94 @@ export function detectMediaType(item: any): "movie" | "tv" | "anime" {
         return "movie";
     }
 
-    // Structural properties
+    // 7. Structural naming convention (TMDB uses 'name' for TV and 'title' for Movies)
     if (item.name && !item.title) {
         return "tv";
     }
 
-    return "movie"; // Default fallback
+    return "movie"; // Safe canonical default
+}
+
+/**
+ * Checks if the content item is a Movie.
+ */
+export function isMovieContent(item: any): boolean {
+    const type = detectMediaType(item);
+    if (type === "movie") return true;
+    if (type === "anime") {
+        const format = String(item.format || item.type || "").toLowerCase();
+        return format === "movie" || item.totalEpisodes === 1;
+    }
+    return false;
+}
+
+/**
+ * Checks if the content item is a Series / Episodic TV show.
+ */
+export function isSeriesContent(item: any): boolean {
+    return !isMovieContent(item);
+}
+
+/**
+ * Returns the exact canonical watch URL for any media item.
+ */
+export function getCanonicalWatchHref(item: any, seasonNum?: number, episodeNum?: number | string): string {
+    const mediaType = detectMediaType(item);
+    let finalId = String(item.id || item._id || item.showId || "");
+
+    if (finalId.startsWith("tmdb:")) {
+        const parts = finalId.split(":");
+        finalId = parts[2] || parts[1];
+    }
+
+    if (mediaType === "movie") {
+        return `/watch/movie/${encodeURIComponent(finalId)}`;
+    }
+
+    if (mediaType === "tv") {
+        const s = seasonNum || item.season || 1;
+        const e = episodeNum || item.episodeNumber || item.episodeId || 1;
+        return `/watch/tv/${encodeURIComponent(finalId)}?s=${s}&e=${e}`;
+    }
+
+    // Anime
+    const ep = episodeNum || item.episodeId || item.episodeNumber || 1;
+    const provider = item.provider;
+    return provider
+        ? `/watch/anime/${encodeURIComponent(finalId)}?ep=${encodeURIComponent(String(ep))}&provider=${encodeURIComponent(provider)}`
+        : `/watch/anime/${encodeURIComponent(finalId)}?ep=${encodeURIComponent(String(ep))}`;
+}
+
+/**
+ * Canonical Content Normalizer
+ */
+export function normalizeContent(raw: any): CanonicalContent {
+    const mediaType = detectMediaType(raw);
+    const id = String(raw.id || raw._id || raw.showId || "");
+    const title = String(raw.title || raw.name || "Untitled");
+    const poster = raw.poster || raw.poster_path || raw.image || raw.thumbnail || null;
+    const backdrop = raw.backdrop || raw.backdrop_path || null;
+    const year = (raw.release_date || raw.first_air_date || raw.year || "").slice(0, 4) || null;
+    const rating = typeof raw.vote_average === "number" ? raw.vote_average : null;
+    const isMovie = isMovieContent(raw);
+    const isSeries = !isMovie;
+    const isAnime = mediaType === "anime";
+
+    return {
+        id,
+        showId: id,
+        title,
+        mediaType,
+        isMovie,
+        isSeries,
+        isAnime,
+        poster,
+        backdrop,
+        year,
+        rating,
+        duration: raw.duration || raw.runtime,
+        season: raw.season,
+        episode: raw.episodeNumber || raw.episodeId,
+        watchHref: getCanonicalWatchHref(raw, raw.season, raw.episodeNumber || raw.episodeId)
+    };
 }
