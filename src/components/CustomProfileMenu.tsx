@@ -36,11 +36,23 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     setIsMounted(true);
   }, []);
 
-  const initials = user 
-    ? ((user.firstName?.[0] || "") + (user.lastName?.[0] || "")).toUpperCase() || "U" 
-    : (activeProfile?.name?.[0] || "G").toUpperCase();
+  const initials = (activeProfile?.name?.[0] || user?.firstName?.[0] || "G").toUpperCase();
 
   const showFullMenu = !!activeProfile;
+
+  const handleSignOut = () => {
+    signOut(() => {
+      useUserStore.getState().setActiveProfile(null);
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem("toonplayer-session-active");
+        window.sessionStorage.removeItem("toonplayer_active_profile_id");
+        window.sessionStorage.setItem("toonplayer-explicit-switch", "true");
+        document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        window.dispatchEvent(new Event("userLogout"));
+      }
+      router.push("/", { scroll: false });
+    });
+  };
 
   const menuItems = showFullMenu ? [
     { label: "Watchlist", icon: Bookmark, href: "/watchlist", color: "text-pink-400" },
@@ -48,7 +60,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     { label: "Profile Settings", icon: Settings, action: () => window.dispatchEvent(new Event("openSettingsModal")), color: "text-blue-400" },
     { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
     user 
-      ? { label: "Sign Out", icon: LogOut, action: () => signOut(() => router.push("/", { scroll: false })), color: "text-red-400" }
+      ? { label: "Sign Out", icon: LogOut, action: handleSignOut, color: "text-red-400" }
       : { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
   ] : [
     { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
@@ -168,6 +180,9 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
       <button
         ref={buttonRef}
         onClick={toggleMenu}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        aria-label="Profile and account menu"
         className={`relative rounded-full ring-2 ring-accent/40 shadow-[0_0_12px_var(--accent-glow)] overflow-hidden transition-transform active:scale-95 ${buttonClassName}`}
         style={{
           width: '40px',
@@ -197,6 +212,8 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
           {isOpen && (
             <motion.div
               ref={menuRef}
+              role="menu"
+              aria-orientation="vertical"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -257,6 +274,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
                         key={item.label}
                         href={item.href}
                         scroll={false}
+                        role="menuitem"
                         className={className}
                         onClick={() => setIsOpen(false)}
                         onMouseEnter={() => setFocusedIndex(index)}
@@ -269,6 +287,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
                   return (
                     <button
                       key={item.label}
+                      role="menuitem"
                       className={className}
                       onClick={() => {
                         if (item.action) item.action();

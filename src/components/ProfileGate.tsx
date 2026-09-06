@@ -226,6 +226,15 @@ export default function ProfileGate() {
                   return (
                     <motion.div 
                       key={p.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Select profile ${p.name}`}
+                      onKeyDown={(e) => {
+                        if ((e.key === "Enter" || e.key === " ") && !selectedId) {
+                          e.preventDefault();
+                          handleSelectProfile(p);
+                        }
+                      }}
                       animate={
                         isSelected 
                           ? { scale: 1.15, zIndex: 50, opacity: 1 } 
@@ -236,7 +245,7 @@ export default function ProfileGate() {
                       whileHover={!selectedId ? { scale: 1.05 } : {}}
                       whileTap={!selectedId ? { scale: 0.95 } : {}}
                       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                      className="relative group cursor-pointer flex flex-col items-center gap-4"
+                      className="relative group cursor-pointer flex flex-col items-center gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-2"
                       onClick={() => !selectedId && handleSelectProfile(p)}
                     >
                       <div className={`relative w-[120px] h-[120px] rounded-full overflow-hidden border-4 transition-all duration-[250ms] ${isSelected ? selectGlowClass : `border-transparent ${themeGlowClass}`}`}>
@@ -245,7 +254,7 @@ export default function ProfileGate() {
                       
                       <motion.span 
                         animate={{ opacity: isSelected ? 0 : 1 }}
-                        className="text-base md:text-lg font-bold text-zinc-400 group-hover:text-white transition-colors"
+                        className="text-base md:text-lg font-bold text-zinc-400 group-hover:text-white group-focus-visible:text-white transition-colors"
                       >
                         {p.name}
                       </motion.span>
@@ -253,7 +262,8 @@ export default function ProfileGate() {
                       {!selectedId && p.id !== 'profile-guest' && p.id !== 'profile-adult' && p.id !== 'profile-teen' && p.id !== 'profile-kids' && (
                         <button 
                           onClick={(e) => deleteProfile(e, p.id)}
-                          className="absolute -top-2 -right-2 p-1.5 bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-700 z-10"
+                          aria-label={`Delete profile ${p.name}`}
+                          className="absolute -top-2 -right-2 p-1.5 bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity shadow-lg hover:bg-red-700 z-10 focus:opacity-100"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -264,16 +274,25 @@ export default function ProfileGate() {
                 
                 {!selectedId && (
                   <motion.div 
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Add new profile"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setIsCreating(true);
+                      }
+                    }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="group cursor-pointer flex flex-col items-center gap-4"
+                    className="group cursor-pointer flex flex-col items-center gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full p-2"
                     onClick={() => setIsCreating(true)}
                   >
-                    <div className="w-[120px] h-[120px] rounded-full border-4 border-dashed border-zinc-700 group-hover:border-white group-hover:bg-white/5 transition-all flex items-center justify-center bg-transparent">
-                      <Plus className="w-10 h-10 text-zinc-500 group-hover:text-white transition-colors" />
+                    <div className="w-[120px] h-[120px] rounded-full border-4 border-dashed border-zinc-700 group-hover:border-white group-focus-visible:border-white group-hover:bg-white/5 transition-all flex items-center justify-center bg-transparent">
+                      <Plus className="w-10 h-10 text-zinc-500 group-hover:text-white group-focus-visible:text-white transition-colors" />
                     </div>
-                    <span className="text-base md:text-lg font-bold text-zinc-500 group-hover:text-white transition-colors">Add Profile</span>
+                    <span className="text-base md:text-lg font-bold text-zinc-500 group-hover:text-white group-focus-visible:text-white transition-colors">Add Profile</span>
                   </motion.div>
                 )}
               </div>

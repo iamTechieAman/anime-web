@@ -184,8 +184,10 @@ export const useUserStore = create<UserState>()(
         const avatar = profile.avatar
           ? profile.avatar 
           : getRandomBitmojiUrl(profile.name);
+        const newId = `profile-${Date.now()}`;
+        const newProfile: Profile = { ...profile, avatar, id: newId };
         return {
-          profiles: [...state.profiles, { ...profile, avatar, id: `profile-${Date.now()}` } as Profile]
+          profiles: [...state.profiles.filter(p => p.id !== newId), newProfile]
         };
       }),
 
@@ -209,10 +211,38 @@ export const useUserStore = create<UserState>()(
         return { profiles: updatedProfiles };
       }),
 
-      removeProfile: (id) => set((state) => ({
-        profiles: state.profiles.filter(p => p.id !== id),
-        activeProfileId: state.activeProfileId === id ? null : state.activeProfileId
-      })),
+      removeProfile: (id) => set((state) => {
+        const remainingProfiles = state.profiles.filter(p => p.id !== id);
+        const wasActive = state.activeProfileId === id;
+        const nextActiveId = wasActive ? (remainingProfiles[0]?.id || null) : state.activeProfileId;
+        
+        if (typeof window !== 'undefined') {
+          if (wasActive) {
+            if (nextActiveId) {
+              const nextProfile = remainingProfiles.find(p => p.id === nextActiveId);
+              if (nextProfile) {
+                localStorage.setItem("toonplayer_profile", JSON.stringify(nextProfile));
+                localStorage.setItem(`kids-filter-${nextActiveId}`, nextProfile.isKids ? 'true' : 'false');
+                window.sessionStorage.setItem("toonplayer_active_profile_id", nextActiveId);
+                document.cookie = `toonplayer_active_profile_id=${nextActiveId}; path=/; max-age=31536000; SameSite=Lax`;
+              }
+            } else {
+              localStorage.removeItem("toonplayer_profile");
+              window.sessionStorage.removeItem("toonplayer-session-active");
+              window.sessionStorage.removeItem("toonplayer_active_profile_id");
+              document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            }
+            setTimeout(() => {
+              window.dispatchEvent(new Event("profileUpdated"));
+            }, 0);
+          }
+        }
+
+        return {
+          profiles: remainingProfiles,
+          activeProfileId: nextActiveId
+        };
+      }),
 
       setActiveProfile: (id) => set((state) => {
         if (typeof window !== 'undefined') {
@@ -223,6 +253,7 @@ export const useUserStore = create<UserState>()(
               localStorage.setItem(`kids-filter-${id}`, profile.isKids ? 'true' : 'false');
               window.sessionStorage.setItem("toonplayer-session-active", "true");
               window.sessionStorage.setItem("toonplayer_active_profile_id", id);
+              window.sessionStorage.removeItem("toonplayer-explicit-switch");
               document.cookie = `toonplayer_active_profile_id=${id}; path=/; max-age=31536000; SameSite=Lax`;
             }
           } else {
@@ -263,7 +294,7 @@ export const useUserStore = create<UserState>()(
                 profiles: state.profiles.map(p => p.id === profile.id ? fullProfile : p)
             };
         }
-        return { profiles: [fullProfile, ...state.profiles] };
+        return { profiles: [fullProfile, ...state.profiles.filter(p => p.id !== profile.id)] };
       }),
 
       updateSettings: (profileId, newSettings) => set((state) => ({
@@ -311,7 +342,12 @@ export const useUserStore = create<UserState>()(
       migrate: (persistedState: any, version: number) => {
         const state = persistedState as any;
         if (state && state.profiles) {
-          state.profiles = state.profiles.map((p: any) => {
+          const seen = new Set();
+          state.profiles = (state.profiles || []).filter((p: any) => {
+            if (!p || !p.id || seen.has(p.id)) return false;
+            seen.add(p.id);
+            return true;
+          }).map((p: any) => {
             let avatar = p.avatar || "";
             if (!avatar || avatar.includes("undefined") || avatar.includes("null") || avatar.trim() === "" || avatar.includes("dicebear.com") || avatar.includes("api.dicebear.com")) {
               avatar = getAvatarUrl(p.name || 'Avatar');
