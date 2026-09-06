@@ -1619,21 +1619,29 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 {!isFocusMode && (
                     <div data-watch-controls className="flex items-center justify-between mt-2.5 px-3 sm:px-1 gap-3 select-none">
                         {/* Episode Nav */}
-                        <div className="flex items-center gap-1.5">
-                            <button onClick={handlePrevEpisode} disabled={!hasPrevEpisode()}
-                                className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all"
-                                title="Previous Episode">
-                                <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <span className="text-xs font-bold text-zinc-400 px-2 min-w-[56px] text-center">
-                                {type === 'movie' ? 'Movie' : `S${selectedSeason}E${selectedEpisode}`}
-                            </span>
-                            <button onClick={handleNextEpisode} disabled={!hasNextEpisode()}
-                                className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all"
-                                title="Next Episode">
-                                <ChevronRight className="w-4 h-4" />
-                            </button>
-                        </div>
+                        {(type !== 'movie' && resolvedMediaType !== 'movie') ? (
+                            <div className="flex items-center gap-1.5">
+                                <button onClick={handlePrevEpisode} disabled={!hasPrevEpisode()}
+                                    className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all cursor-pointer"
+                                    title="Previous Episode">
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <span className="text-xs font-bold text-zinc-400 px-2 min-w-[56px] text-center">
+                                    {`S${selectedSeason}E${selectedEpisode}`}
+                                </span>
+                                <button onClick={handleNextEpisode} disabled={!hasNextEpisode()}
+                                    className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all cursor-pointer"
+                                    title="Next Episode">
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-1.5">
+                                <span className="px-2.5 py-1 rounded-md bg-white/[0.06] border border-white/[0.08] text-[11px] font-black text-accent uppercase tracking-wider">
+                                    Feature Film
+                                </span>
+                            </div>
+                        )}
                         {/* View Controls */}
                         <div className="flex items-center gap-1.5">
                             <button onClick={() => setIframeKey(prev => prev + 1)}
@@ -1682,7 +1690,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
 
     const renderEpisodesSidebar = () => {
-        if (type === 'movie') return null;
+        if (type === 'movie' || resolvedMediaType === 'movie') return null;
         if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
@@ -1698,7 +1706,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const renderDesktopEpisodes = renderEpisodesSidebar;
 
     const renderMobileEpisodes = () => {
-        if (type === 'movie') return null;
+        if (type === 'movie' || resolvedMediaType === 'movie') return null;
         if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
         if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
@@ -1918,7 +1926,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                 <div className="flex flex-wrap items-center gap-y-2 gap-x-3 sm:gap-x-4 text-xs sm:text-sm font-medium text-[var(--text-muted)]">
                                                     <span className="flex items-center gap-1 sm:gap-1.5 font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md"><Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> {matchPercent}% Match</span>
                                                     <span>{year}</span>
-                                                    {(type === "tv" || type === "anime") ? (
+                                                    {(type === "tv" || (type === "anime" && resolvedMediaType !== "movie")) ? (
                                                         <>
                                                             <span>{details?.number_of_seasons || 0} Seasons</span>
                                                             {details?.episode_runtime && <span>~{details.episode_runtime}m / ep</span>}
@@ -1926,7 +1934,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                                     ) : (
                                                         <span>{details?.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : ""}</span>
                                                     )}
-                                                    <span className="px-2 py-0.5 rounded border border-border-color text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || (type === 'movie' ? "Released" : "Ongoing")}</span>
+                                                    <span className="px-2 py-0.5 rounded border border-border-color text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">{details?.status || (type === 'movie' || resolvedMediaType === 'movie' ? "Released" : "Ongoing")}</span>
                                                 </div>
                                             </div>
                                         </div>

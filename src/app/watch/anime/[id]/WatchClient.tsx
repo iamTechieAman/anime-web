@@ -1631,21 +1631,29 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
                             <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md mb-4">
                                 <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handlePrevEpisode}
-                                        disabled={!hasPrevEpisode()}
-                                        className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
-                                        title="Previous Episode"
-                                    ><ChevronLeft className="w-4 h-4" /></button>
-                                    <span className="text-xs font-semibold text-zinc-400 min-w-[70px] text-center">
-                                        EP {currentEp}
-                                    </span>
-                                    <button
-                                        onClick={handleNextEpisode}
-                                        disabled={!hasNextEpisode()}
-                                        className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200"
-                                        title="Next Episode"
-                                    ><ChevronRight className="w-4 h-4" /></button>
+                                    {episodes.length > 1 ? (
+                                        <>
+                                            <button
+                                                onClick={handlePrevEpisode}
+                                                disabled={!hasPrevEpisode()}
+                                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200 cursor-pointer"
+                                                title="Previous Episode"
+                                            ><ChevronLeft className="w-4 h-4" /></button>
+                                            <span className="text-xs font-semibold text-zinc-400 min-w-[70px] text-center">
+                                                EP {currentEp}
+                                            </span>
+                                            <button
+                                                onClick={handleNextEpisode}
+                                                disabled={!hasNextEpisode()}
+                                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200 cursor-pointer"
+                                                title="Next Episode"
+                                            ><ChevronRight className="w-4 h-4" /></button>
+                                        </>
+                                    ) : (
+                                        <span className="px-2.5 py-1 rounded-md bg-white/[0.06] border border-white/[0.08] text-[11px] font-black text-accent uppercase tracking-wider">
+                                            Anime Movie
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
