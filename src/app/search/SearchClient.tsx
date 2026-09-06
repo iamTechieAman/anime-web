@@ -60,6 +60,7 @@ function MovieSearchContent() {
 
         axios.get(`/api/prime/search?${params.toString()}`, { signal: controller.signal })
             .then(res => {
+                if (controller.signal.aborted) return;
                 let fetched = res.data.results || [];
                 if (isKidsMode) {
                     fetched = fetched.filter((item: MovieItem) => item && isKidsFriendly(item));

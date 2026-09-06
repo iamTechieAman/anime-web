@@ -55,26 +55,40 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
     };
 
     useEffect(() => {
+        let isCurrent = true;
+        const controller = new AbortController();
+        setLoading(true);
+
         const fetchSimilar = async () => {
             try {
                 // Fetch random popular page for pseudo-similar randomness
                 const page = Math.floor(Math.random() * 3) + 1;
-                const { data } = await axios.get(`/api/anime/popular?page=${page}`);
+                const { data } = await axios.get(`/api/anime/popular?page=${page}`, {
+                    signal: controller.signal
+                });
                 
-                if (data?.shows?.length > 0) {
+                if (isCurrent && !controller.signal.aborted && data?.shows?.length > 0) {
                     // Filter out current show & shuffle
-                    let filtered = data.shows.filter((s: Show) => s._id !== currentShowId);
+                    let filtered = data.shows.filter((s: Show) => s && s._id !== currentShowId);
                     filtered = filtered.sort(() => 0.5 - Math.random());
                     setSimilar(filtered.slice(0, 10)); // Top 10 similar
                 }
-            } catch (err) {
-                console.error("Failed to fetch similar anime:", err);
+            } catch (err: any) {
+                if (!axios.isCancel(err) && !controller.signal.aborted) {
+                    console.error("Failed to fetch similar anime:", err);
+                }
             } finally {
-                setLoading(false);
+                if (isCurrent && !controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchSimilar();
+        return () => {
+            isCurrent = false;
+            controller.abort();
+        };
     }, [currentShowId]);
 
     if (!loading && displayedSimilar.length === 0) return null;

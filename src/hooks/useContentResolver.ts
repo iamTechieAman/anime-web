@@ -45,22 +45,26 @@ export function useContentResolver(rawId: string, providedType?: string, provide
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [detectedType, setDetectedType] = useState<"movie" | "tv" | "anime" | null>(null);
-    const processingId = useRef<string | null>(null);
+    const seqRef = useRef(0);
 
     useEffect(() => {
         if (!rawId || rawId === "undefined" || rawId === "null") {
+            setContent(null);
+            setDetectedType(null);
             setError("Invalid ID provided.");
             setLoading(false);
             return;
         }
 
         const controller = new AbortController();
+        const currentSeq = ++seqRef.current;
+
+        setContent(null);
+        setDetectedType(null);
+        setLoading(true);
+        setError(null);
+
         const resolve = async () => {
-            if (processingId.current === rawId) return;
-            processingId.current = rawId;
-            setLoading(true);
-            setError(null);
-            
             try {
                 const id = rawId.includes(':') ? rawId.split(':').pop()! : rawId;
                 
@@ -80,7 +84,7 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                         timeout: 15000
                     });
 
-                    if (controller.signal.aborted) return;
+                    if (controller.signal.aborted || currentSeq !== seqRef.current) return;
                     const show = res.data.show;
                     if (!show) throw new Error("No show data received");
 
@@ -113,7 +117,7 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                 } else {
                     // Fetch TMDB Metadata
                     const res = await axios.get(`/api/prime/details?id=${encodeURIComponent(id)}&type=${encodeURIComponent(typeToFetch)}`, { signal: controller.signal });
-                    if (controller.signal.aborted) return;
+                    if (controller.signal.aborted || currentSeq !== seqRef.current) return;
                     
                     const data = res.data;
                     if (!data) throw new Error("No TMDB data received");
@@ -145,24 +149,27 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                     };
                 }
 
+                if (controller.signal.aborted || currentSeq !== seqRef.current) return;
+
                 console.log(`[GlobalClickDebugger] ✅ RESOLVER SUCCESS ID: ${id} | UnifiedType: ${unified.type}`);
                 
                 setContent(unified as UnifiedContent);
                 setDetectedType(unified.type as "movie" | "tv" | "anime");
             } catch (err: any) {
-                if (axios.isCancel(err)) return;
+                if (axios.isCancel(err) || controller.signal.aborted || currentSeq !== seqRef.current) return;
                 console.error("[UniversalResolver] Error:", err);
                 setError(err.message === "CONTENT_MISMATCH" ? "Content ID mismatch" : "Failed to resolve content");
             } finally {
-                if (!controller.signal.aborted) {
+                if (!controller.signal.aborted && currentSeq === seqRef.current) {
                     setLoading(false);
-                    processingId.current = null;
                 }
             }
         };
 
         resolve();
-        return () => controller.abort();
+        return () => {
+            controller.abort();
+        };
     }, [rawId, providedType, provider]);
 
     return { content, loading, error, detectedType };
