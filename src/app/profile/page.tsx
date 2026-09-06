@@ -74,6 +74,9 @@ export default function ProfilePage() {
     };
 
     const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (_) {}
         await signOut();
         localStorage.clear();
         window.location.href = "/";

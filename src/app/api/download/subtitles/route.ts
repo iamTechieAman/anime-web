@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isSafeExternalUrl } from '@/lib/sanitizer';
 
 /**
  * GET /api/download/subtitles
@@ -65,6 +66,10 @@ export async function GET(request: NextRequest) {
     }
 
     const targetUrl = decodeURIComponent(rawUrl);
+
+    if (!isSafeExternalUrl(targetUrl)) {
+        return NextResponse.json({ error: 'Invalid or forbidden target URL' }, { status: 400 });
+    }
     const ext = targetUrl.split('?')[0].split('.').pop()?.toLowerCase();
     const outputExt = format === 'raw' ? (ext || 'vtt') : 'vtt';
     const filename = safeFilename(rawFilename, targetUrl, outputExt);
@@ -110,7 +115,7 @@ export async function GET(request: NextRequest) {
 
     } catch (err: any) {
         console.error('[DownloadProxy/subtitles] Error:', err.message);
-        return NextResponse.json({ error: err.message }, { status: 502 });
+        return NextResponse.json({ error: 'Subtitle proxy error' }, { status: 502 });
     }
 }
 

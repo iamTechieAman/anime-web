@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import WatchClient from "./WatchClient";
 import { fetchWithTimeout } from "@/lib/utils/fetch";
+import { safeJsonLd } from "@/lib/sanitizer";
 
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.toonplayer.in';
@@ -79,7 +80,7 @@ export default async function WatchPage({ params, searchParams }: { params: any,
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
+                    __html: safeJsonLd({
                         "@context": "https://schema.org",
                         "@type": "VideoObject",
                         "name": metaTitle,
@@ -103,7 +104,7 @@ export default async function WatchPage({ params, searchParams }: { params: any,
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
+                    __html: safeJsonLd({
                         "@context": "https://schema.org",
                         "@type": "BreadcrumbList",
                         "itemListElement": [

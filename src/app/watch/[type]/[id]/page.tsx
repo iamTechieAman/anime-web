@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import WatchClient from "./WatchClient";
 import { DetailsSkeleton } from "@/components/SkeletonLoader";
+import { safeJsonLd } from "@/lib/sanitizer";
 
 const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
 
@@ -98,7 +99,7 @@ export default async function WatchPage({ params, searchParams }: { params: Prom
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
+                    __html: safeJsonLd({
                         "@context": "https://schema.org",
                         "@type": "VideoObject",
                         "name": metaTitle,
@@ -122,7 +123,7 @@ export default async function WatchPage({ params, searchParams }: { params: Prom
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
+                    __html: safeJsonLd({
                         "@context": "https://schema.org",
                         "@type": "BreadcrumbList",
                         "itemListElement": [

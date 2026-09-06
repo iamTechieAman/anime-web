@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
 import UserAvatar from "./UserAvatar";
+import { isSafeLinkUrl } from "@/lib/sanitizer";
 
 interface Reply {
     id: string;
@@ -855,7 +856,20 @@ const CommentsSection = memo(function CommentsSection({
                                                 </button>
                                             ) : (
                                                 <div className="text-[var(--text-main)] text-sm font-inter leading-relaxed break-words relative space-y-2">
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert max-w-none text-sm leading-relaxed">
+                                                    <ReactMarkdown 
+                                                        remarkPlugins={[remarkGfm]} 
+                                                        className="prose prose-invert max-w-none text-sm leading-relaxed"
+                                                        components={{
+                                                            a: ({ href, children, ...props }) => {
+                                                                if (!isSafeLinkUrl(href || '')) return <span>{children}</span>;
+                                                                return (
+                                                                    <a href={href} target="_blank" rel="noopener noreferrer nofollow" {...props} className="text-accent underline hover:opacity-80">
+                                                                        {children}
+                                                                    </a>
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
                                                         {comment.content}
                                                     </ReactMarkdown>
                                                     {comment.gifUrl && (
@@ -991,7 +1005,20 @@ const CommentsSection = memo(function CommentsSection({
                                                     </div>
                                                 ) : (
                                                     <div className="mt-0.5 text-zinc-300 text-xs font-inter leading-relaxed break-words">
-                                                        <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert max-w-none text-xs leading-relaxed">
+                                                        <ReactMarkdown 
+                                                            remarkPlugins={[remarkGfm]} 
+                                                            className="prose prose-invert max-w-none text-xs leading-relaxed"
+                                                            components={{
+                                                                a: ({ href, children, ...props }) => {
+                                                                    if (!isSafeLinkUrl(href || '')) return <span>{children}</span>;
+                                                                    return (
+                                                                        <a href={href} target="_blank" rel="noopener noreferrer nofollow" {...props} className="text-accent underline hover:opacity-80">
+                                                                            {children}
+                                                                        </a>
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
                                                             {reply.content}
                                                         </ReactMarkdown>
                                                     </div>

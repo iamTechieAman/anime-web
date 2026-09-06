@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { isSafeExternalUrl } from '@/lib/sanitizer';
 
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -18,10 +19,8 @@ export async function GET(req: Request) {
         }
 
         // Validate URL
-        try {
-            new URL(targetUrl);
-        } catch {
-            return new NextResponse('Invalid URL', { status: 400 });
+        if (!isSafeExternalUrl(targetUrl)) {
+            return new NextResponse('Invalid or forbidden URL', { status: 400 });
         }
 
         // Try to fetch the page to extract raw streams

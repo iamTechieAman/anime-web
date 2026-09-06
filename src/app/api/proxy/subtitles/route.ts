@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isSafeExternalUrl } from '@/lib/sanitizer';
 
 /**
  * /api/proxy/subtitles
@@ -117,6 +118,10 @@ export async function GET(request: NextRequest) {
 
     const decoded = decodeURIComponent(targetUrl);
 
+    if (!isSafeExternalUrl(decoded)) {
+        return new NextResponse('Invalid or forbidden subtitle URL', { status: 400 });
+    }
+
     // For non-whitelisted origins, try anyway (some providers use unusual CDNs)
     // but log a warning
     if (!isAllowed(decoded)) {
@@ -172,7 +177,7 @@ export async function GET(request: NextRequest) {
 
     } catch (err: any) {
         console.error('[SubtitleProxy] Error:', err.message);
-        return new NextResponse(`Subtitle proxy error: ${err.message}`, { status: 500 });
+        return new NextResponse('Subtitle proxy error', { status: 500 });
     }
 }
 

@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import HomeClient from "./HomeClient";
+import { safeJsonLd } from "@/lib/sanitizer";
 
 export const metadata: Metadata = {
   title: "Watch Free Anime, Movies & TV Shows | ToonPlayer",
@@ -57,7 +58,7 @@ export default function Page() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <HomeClient />
     </>

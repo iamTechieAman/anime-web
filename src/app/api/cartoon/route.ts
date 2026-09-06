@@ -27,7 +27,7 @@ export async function GET(request: Request) {
         console.error("[Cartoon API] Full Error:", error);
         return NextResponse.json({ 
             error: "Internal server error", 
-            detail: error.message,
+            detail: process.env.NODE_ENV === 'development' ? error.message : undefined,
             stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         }, { status: 500 });
     }

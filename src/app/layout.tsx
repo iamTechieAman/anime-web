@@ -12,6 +12,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
 import { ClerkProvider } from "@clerk/nextjs";
+import { safeJsonLd } from "@/lib/sanitizer";
 
 
 export const viewport = {
@@ -105,7 +106,7 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-             __html: JSON.stringify({
+             __html: safeJsonLd({
                "@context": "https://schema.org",
                "@graph": [
                  {

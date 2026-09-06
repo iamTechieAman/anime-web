@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { scrampleHeaders } from '@/lib/request-scrambler';
+import { isSafeExternalUrl } from '@/lib/sanitizer';
 
 /**
  * GET /api/download/video
@@ -73,6 +74,10 @@ export async function GET(request: NextRequest) {
     }
 
     const targetUrl = decodeURIComponent(rawUrl);
+
+    if (!isSafeExternalUrl(targetUrl)) {
+        return NextResponse.json({ error: 'Invalid or forbidden target URL' }, { status: 400 });
+    }
 
     // Reject HLS streams immediately — can't direct-download without ffmpeg
     if (isHLS(targetUrl)) {
@@ -151,7 +156,7 @@ export async function GET(request: NextRequest) {
     } catch (err: any) {
         console.error('[DownloadProxy/video] Error:', err.message);
         return NextResponse.json(
-            { error: 'Download proxy error', message: err.message },
+            { error: 'Download proxy error', message: 'Failed to proxy video stream' },
             { status: 502 }
         );
     }

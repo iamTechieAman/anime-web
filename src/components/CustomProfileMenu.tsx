@@ -41,6 +41,7 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
   const showFullMenu = !!activeProfile;
 
   const handleSignOut = () => {
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     signOut(() => {
       useUserStore.getState().setActiveProfile(null);
       if (typeof window !== "undefined") {

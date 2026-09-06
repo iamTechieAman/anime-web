@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { isSafeExternalUrl } from '@/lib/sanitizer';
 
 
 /**
@@ -219,8 +220,8 @@ export async function GET(request: NextRequest) {
 
     const decodedUrl = decodeURIComponent(targetUrl);
 
-    if (!isAllowedEmbed(decodedUrl)) {
-        return new NextResponse('Embed origin not whitelisted', { status: 403 });
+    if (!isSafeExternalUrl(decodedUrl) || !isAllowedEmbed(decodedUrl)) {
+        return new NextResponse('Invalid or forbidden embed URL', { status: 403 });
     }
 
     const referer = getRefererForUrl(decodedUrl, refererOverride || undefined);

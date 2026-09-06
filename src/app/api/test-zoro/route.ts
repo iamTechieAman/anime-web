@@ -34,6 +34,10 @@ export async function GET(request: Request) {
         });
 
     } catch (e: any) {
-        return NextResponse.json({ error: e.message, stack: e.stack }, { status: 500 });
+        return NextResponse.json({ 
+            error: "Failed to test provider", 
+            detail: process.env.NODE_ENV === 'development' ? e.message : undefined,
+            stack: process.env.NODE_ENV === 'development' ? e.stack : undefined 
+        }, { status: 500 });
     }
 }

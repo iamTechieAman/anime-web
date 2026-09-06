@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUA } from "@/lib/user-agents";
+import { isSafeExternalUrl } from "@/lib/sanitizer";
 
 // Domain-to-Referer lookup for anime CDNs
 const CDN_REFERERS: Record<string, string> = {
@@ -51,6 +52,10 @@ export async function GET(request: NextRequest) {
         return new NextResponse("Missing url parameter", { status: 400 });
     }
 
+    if (!isSafeExternalUrl(targetUrl)) {
+        return new NextResponse("Invalid or forbidden target URL", { status: 400 });
+    }
+
     try {
         let response = null;
         let lastError = null;
@@ -83,7 +88,8 @@ export async function GET(request: NextRequest) {
         }
 
         if (!response || !response.ok) {
-            return new NextResponse(`Proxy Error: ${response?.statusText || lastError?.message || "Failed"}`, { status: response?.status || 502 });
+            const statusText = response?.statusText || "Upstream Error";
+            return new NextResponse(`Proxy Error: ${statusText}`, { status: response?.status || 502 });
         }
 
         const contentType = response.headers.get("Content-Type") || "";
@@ -221,7 +227,7 @@ export async function GET(request: NextRequest) {
 
     } catch (error: any) {
         console.error("[Proxy] Error:", error);
-        return new NextResponse("Proxy Error: " + error.message, { status: 500 });
+        return new NextResponse("Proxy Error: Failed to fetch requested resource", { status: 500 });
     }
 }
 
