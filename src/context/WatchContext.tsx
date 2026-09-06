@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useUserStore, isKidsFriendly } from '@/store/userStore';
 
 export interface WatchHistoryItem {
@@ -70,13 +70,19 @@ function normalizeWatchlistItem(item: Partial<WatchlistItem>, idx: number): Watc
 const WatchContext = createContext<WatchContextType | undefined>(undefined);
 
 export function WatchProvider({ children }: { children: React.ReactNode }) {
+    const activeProfileId = useUserStore(state => state.activeProfileId);
+    const profiles = useUserStore(state => state.profiles);
     const [history, setHistory] = useState<WatchHistoryItem[]>([]);
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-    
-    const isKidsMode = useUserStore(state => {
-        const activeId = state.activeProfileId;
-        return state.profiles.find(p => p.id === activeId)?.isKids || false;
-    });
+    const [customCollections, setCustomCollections] = useState<string[]>(DEFAULT_COLLECTIONS);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const profileSeqRef = useRef(0);
+
+    const isKidsMode = useMemo(() => {
+        if (!activeProfileId) return false;
+        return profiles.find(p => p.id === activeProfileId)?.isKids || false;
+    }, [profiles, activeProfileId]);
 
     const filteredHistory = useMemo(() => {
         return isKidsMode ? history.filter(isKidsFriendly) : history;
@@ -86,128 +92,117 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
         return isKidsMode ? watchlist.filter(isKidsFriendly) : watchlist;
     }, [watchlist, isKidsMode]);
 
-    const [customCollections, setCustomCollections] = useState<string[]>(DEFAULT_COLLECTIONS);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [activeProfile, setActiveProfile] = useState<string>('');
-
-    const getProfileName = useCallback((): string => {
-        if (typeof window === 'undefined') return '';
-        try {
+    const getActiveProfileKey = useCallback((): string => {
+        if (activeProfileId) return activeProfileId;
+        if (typeof window !== 'undefined') {
+            const cookieMatch = document.cookie.match(/(^|;)\s*toonplayer_active_profile_id\s*=\s*([^;]+)/);
+            if (cookieMatch) return cookieMatch[2];
             const stored = localStorage.getItem('toonplayer_profile');
             if (stored) {
-                const parsed = JSON.parse(stored);
-                return parsed.name || '';
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.id) return parsed.id;
+                } catch (_) {}
+            }
+        }
+        return 'default';
+    }, [activeProfileId]);
+
+    // ── Load Per-Profile Data Synchronously + Sequence Protection ──
+    useEffect(() => {
+        const currentSeq = ++profileSeqRef.current;
+        const pKey = getActiveProfileKey();
+
+        // 1. Synchronously load profile-isolated data
+        let localHistory: WatchHistoryItem[] = [];
+        let localWatchlist: WatchlistItem[] = [];
+        let localCollections: string[] = DEFAULT_COLLECTIONS;
+
+        try {
+            const h = localStorage.getItem(`toonplayer_history_${pKey}`) || 
+                      (pKey === 'default' ? localStorage.getItem('toonplayer_history') : null);
+            if (h) localHistory = JSON.parse(h);
+        } catch (_) {}
+
+        try {
+            const w = localStorage.getItem(`toonplayer_watchlist_${pKey}`) || 
+                      (pKey === 'default' ? localStorage.getItem('toonplayer_watchlist') : null);
+            if (w) {
+                const parsed = JSON.parse(w) as Partial<WatchlistItem>[];
+                localWatchlist = parsed.map((item, idx) => normalizeWatchlistItem(item, idx));
             }
         } catch (_) {}
-        return '';
-    }, []);
 
-    const getProfileSuffix = useCallback((): string => {
-        const name = getProfileName();
-        return name ? `_${name.toLowerCase()}` : '';
-    }, [getProfileName]);
-
-    // Listen to profile updates
-    useEffect(() => {
-        const updateProfile = () => {
-            const name = getProfileName();
-            setActiveProfile(name);
-        };
-        updateProfile();
-        window.addEventListener('profileUpdated', updateProfile);
-        return () => window.removeEventListener('profileUpdated', updateProfile);
-    }, [getProfileName]);
-
-    // ── Initial Load ──────────────────────────────────────────────
-    useEffect(() => {
-        const loadInitialData = async () => {
-            // Always load custom collections from localStorage first
-            try {
-                const suffix = getProfileSuffix();
-                const storedCols = localStorage.getItem(`toonplayer_collections${suffix}`);
-                if (storedCols) {
-                    const parsed = JSON.parse(storedCols) as string[];
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        setCustomCollections(parsed);
-                    } else {
-                        setCustomCollections(DEFAULT_COLLECTIONS);
-                    }
-                } else {
-                    setCustomCollections(DEFAULT_COLLECTIONS);
-                }
-            } catch (_) {
-                setCustomCollections(DEFAULT_COLLECTIONS);
+        try {
+            const c = localStorage.getItem(`toonplayer_collections_${pKey}`);
+            if (c) {
+                const parsed = JSON.parse(c) as string[];
+                if (Array.isArray(parsed) && parsed.length > 0) localCollections = parsed;
             }
+        } catch (_) {}
 
+        setHistory(localHistory);
+        setWatchlist(localWatchlist);
+        setCustomCollections(localCollections);
+        setIsLoaded(true);
+
+        // 2. Asynchronous user authentication and server sync (main profile only)
+        const syncBackend = async () => {
             try {
                 const res = await fetch('/api/user/me');
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.user) {
-                        setHistory(data.user.history || []);
-                        const wl = (data.user.watchlist || []).map((item: WatchlistItem, idx: number) =>
-                            normalizeWatchlistItem(item, idx)
-                        );
-                        setWatchlist(wl);
+                    if (currentSeq !== profileSeqRef.current) return; // Discard stale response
+                    if (data?.user) {
                         setIsLoggedIn(true);
-                    } else {
-                        loadFromLocalStorage();
+                        // Only merge backend data if this is the primary account profile
+                        if (pKey === `profile-${data.user.id}` || pKey === 'default') {
+                            if (Array.isArray(data.user.history) && data.user.history.length > 0) {
+                                setHistory(data.user.history);
+                                try {
+                                    localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(data.user.history));
+                                } catch (_) {}
+                            }
+                            if (Array.isArray(data.user.watchlist) && data.user.watchlist.length > 0) {
+                                const wl = data.user.watchlist.map((item: WatchlistItem, idx: number) => normalizeWatchlistItem(item, idx));
+                                setWatchlist(wl);
+                                try {
+                                    localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(wl));
+                                } catch (_) {}
+                            }
+                        }
                     }
-                } else {
-                    loadFromLocalStorage();
                 }
-            } catch (_) {
-                loadFromLocalStorage();
-            }
-            setIsLoaded(true);
+            } catch (_) {}
         };
 
-        const loadFromLocalStorage = () => {
-            try {
-                const suffix = getProfileSuffix();
-                const storedHistory = localStorage.getItem(`toonplayer_history${suffix}`);
-                const storedWatchlist = localStorage.getItem(`toonplayer_watchlist${suffix}`);
-                if (storedHistory) {
-                    setHistory(JSON.parse(storedHistory));
-                } else {
-                    setHistory([]);
-                }
-                if (storedWatchlist) {
-                    const wl = (JSON.parse(storedWatchlist) as Partial<WatchlistItem>[]).map(
-                        (item, idx) => normalizeWatchlistItem(item, idx)
-                    );
-                    setWatchlist(wl);
-                } else {
-                    setWatchlist([]);
-                }
-            } catch (_) {
-                setHistory([]);
-                setWatchlist([]);
-            }
-        };
-
-        loadInitialData();
-    }, [activeProfile, getProfileSuffix]);
+        syncBackend();
+    }, [activeProfileId, getActiveProfileKey]);
 
     // ── Persistence ───────────────────────────────────────────────
     useEffect(() => {
-        if (!isLoaded || isLoggedIn) return;
-        const suffix = getProfileSuffix();
-        localStorage.setItem(`toonplayer_history${suffix}`, JSON.stringify(history));
-    }, [history, isLoaded, isLoggedIn, activeProfile, getProfileSuffix]);
-
-    useEffect(() => {
-        if (!isLoaded || isLoggedIn) return;
-        const suffix = getProfileSuffix();
-        localStorage.setItem(`toonplayer_watchlist${suffix}`, JSON.stringify(watchlist));
-    }, [watchlist, isLoaded, isLoggedIn, activeProfile, getProfileSuffix]);
+        if (!isLoaded) return;
+        const pKey = getActiveProfileKey();
+        try {
+            localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(history));
+        } catch (_) {}
+    }, [history, isLoaded, getActiveProfileKey]);
 
     useEffect(() => {
         if (!isLoaded) return;
-        const suffix = getProfileSuffix();
-        localStorage.setItem(`toonplayer_collections${suffix}`, JSON.stringify(customCollections));
-    }, [customCollections, isLoaded, activeProfile, getProfileSuffix]);
+        const pKey = getActiveProfileKey();
+        try {
+            localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(watchlist));
+        } catch (_) {}
+    }, [watchlist, isLoaded, getActiveProfileKey]);
+
+    useEffect(() => {
+        if (!isLoaded) return;
+        const pKey = getActiveProfileKey();
+        try {
+            localStorage.setItem(`toonplayer_collections_${pKey}`, JSON.stringify(customCollections));
+        } catch (_) {}
+    }, [customCollections, isLoaded, getActiveProfileKey]);
 
     // ── Collections ───────────────────────────────────────────────
     const addCollection = useCallback((name: string): boolean => {
@@ -221,7 +216,6 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
     const removeCollection = useCallback((name: string) => {
         if (DEFAULT_COLLECTIONS.includes(name)) return;
         setCustomCollections(prev => prev.filter(c => c !== name));
-        // Move items from deleted collection to "To Watch"
         setWatchlist(prev => prev.map(item =>
             item.collection === name ? { ...item, collection: 'To Watch' } : item
         ));
@@ -229,49 +223,84 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
 
     // ── History ───────────────────────────────────────────────────
     const addToHistory = useCallback(async (item: Omit<WatchHistoryItem, 'updatedAt'>) => {
-        const fullItem = { ...item, updatedAt: Date.now() };
+        const isMovie = item.type === 'movie';
+        const sanitizedItem: WatchHistoryItem = {
+            ...item,
+            episodeId: isMovie ? undefined : item.episodeId,
+            episodeNumber: isMovie ? undefined : item.episodeNumber,
+            season: isMovie ? undefined : item.season,
+            updatedAt: Date.now()
+        };
+
+        const pKey = getActiveProfileKey();
         setHistory(prev => {
-            const filtered = prev.filter(i => i.id !== item.id);
-            return [fullItem, ...filtered].slice(0, 200);
+            const filtered = prev.filter(i => i.id !== sanitizedItem.id);
+            const nextHistory = [sanitizedItem, ...filtered].slice(0, 200);
+            try {
+                localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(nextHistory));
+            } catch (_) {}
+            return nextHistory;
         });
-        if (isLoggedIn) {
+
+        useUserStore.getState().addToHistory(pKey, sanitizedItem);
+
+        if (isLoggedIn && (pKey.startsWith('profile-') || pKey === 'default')) {
             fetch('/api/user/history', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fullItem)
+                body: JSON.stringify(sanitizedItem)
             }).catch(() => {});
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, getActiveProfileKey]);
 
     const removeFromHistory = useCallback(async (id: string) => {
-        setHistory(prev => prev.filter(i => i.id !== id));
-        if (isLoggedIn) {
+        const pKey = getActiveProfileKey();
+        setHistory(prev => {
+            const next = prev.filter(i => i.id !== id);
+            try {
+                localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(next));
+            } catch (_) {}
+            return next;
+        });
+        if (isLoggedIn && (pKey.startsWith('profile-') || pKey === 'default')) {
             fetch(`/api/user/history?id=${id}`, { method: 'DELETE' }).catch(() => {});
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, getActiveProfileKey]);
 
     const bulkRemoveFromHistory = useCallback((ids: string[]) => {
-        setHistory(prev => prev.filter(i => !ids.includes(i.id)));
-        if (isLoggedIn) {
+        const pKey = getActiveProfileKey();
+        setHistory(prev => {
+            const next = prev.filter(i => !ids.includes(i.id));
+            try {
+                localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify(next));
+            } catch (_) {}
+            return next;
+        });
+        if (isLoggedIn && (pKey.startsWith('profile-') || pKey === 'default')) {
             ids.forEach(id =>
                 fetch(`/api/user/history?id=${id}`, { method: 'DELETE' }).catch(() => {})
             );
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, getActiveProfileKey]);
 
     const getHistoryItem = useCallback((id: string) => history.find(i => i.id === id), [history]);
 
     const clearHistory = useCallback(async () => {
+        const pKey = getActiveProfileKey();
         setHistory([]);
-        if (isLoggedIn) {
+        try {
+            localStorage.setItem(`toonplayer_history_${pKey}`, JSON.stringify([]));
+        } catch (_) {}
+        if (isLoggedIn && (pKey.startsWith('profile-') || pKey === 'default')) {
             fetch(`/api/user/history?id=all`, { method: 'DELETE' }).catch(() => {});
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, getActiveProfileKey]);
 
     // ── Watchlist ─────────────────────────────────────────────────
     const isInWatchlist = useCallback((id: string) => watchlist.some(i => i.id === id), [watchlist]);
 
     const addToWatchlist = useCallback(async (item: Omit<WatchlistItem, 'addedAt' | 'collection' | 'tags' | 'order'>) => {
+        const pKey = getActiveProfileKey();
         if (watchlist.some(i => i.id === item.id)) return;
         const fullItem: WatchlistItem = {
             ...item,
@@ -280,32 +309,60 @@ export function WatchProvider({ children }: { children: React.ReactNode }) {
             tags: [],
             order: 0,
         };
-        setWatchlist(prev => [fullItem, ...prev.map(i => ({ ...i, order: i.order + 1 }))]);
-        if (isLoggedIn) {
+        setWatchlist(prev => {
+            const nextWl = [fullItem, ...prev.map(i => ({ ...i, order: i.order + 1 }))];
+            try {
+                localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(nextWl));
+            } catch (_) {}
+            return nextWl;
+        });
+
+        useUserStore.getState().addToWatchlist(pKey, fullItem);
+
+        if (isLoggedIn && (pKey.startsWith('profile-') || pKey === 'default')) {
             fetch('/api/user/favorites', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(fullItem)
             }).catch(() => {});
         }
-    }, [watchlist, isLoggedIn]);
+    }, [watchlist, isLoggedIn, getActiveProfileKey]);
 
     const removeFromWatchlist = useCallback(async (id: string) => {
-        setWatchlist(prev => prev.filter(i => i.id !== id));
-        if (isLoggedIn) {
+        const pKey = getActiveProfileKey();
+        setWatchlist(prev => {
+            const nextWl = prev.filter(i => i.id !== id);
+            try {
+                localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(nextWl));
+            } catch (_) {}
+            return nextWl;
+        });
+        useUserStore.getState().removeFromWatchlist(pKey, id);
+
+        if (isLoggedIn && (pKey.startsWith('profile-') || pKey === 'default')) {
             fetch(`/api/user/favorites?id=${id}`, { method: 'DELETE' }).catch(() => {});
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, getActiveProfileKey]);
 
     const updateWatchlistItem = useCallback((id: string, patch: Partial<Pick<WatchlistItem, 'collection' | 'tags'>>) => {
-        setWatchlist(prev => prev.map(item =>
-            item.id === id ? { ...item, ...patch } : item
-        ));
-    }, []);
+        const pKey = getActiveProfileKey();
+        setWatchlist(prev => {
+            const nextWl = prev.map(item => item.id === id ? { ...item, ...patch } : item);
+            try {
+                localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(nextWl));
+            } catch (_) {}
+            return nextWl;
+        });
+    }, [getActiveProfileKey]);
 
     const reorderWatchlist = useCallback((newOrder: WatchlistItem[]) => {
-        setWatchlist(newOrder.map((item, idx) => ({ ...item, order: idx })));
-    }, []);
+        const pKey = getActiveProfileKey();
+        const nextWl = newOrder.map((item, idx) => ({ ...item, order: idx }));
+        setWatchlist(nextWl);
+        try {
+            localStorage.setItem(`toonplayer_watchlist_${pKey}`, JSON.stringify(nextWl));
+        } catch (_) {}
+    }, [getActiveProfileKey]);
 
     return (
         <WatchContext.Provider value={{
@@ -337,3 +394,4 @@ export const useWatch = () => {
     }
     return context;
 };
+

@@ -39,6 +39,7 @@ interface UserState {
   
   // Actions
   addProfile: (profile: Omit<Profile, 'id'>) => void;
+  updateProfile: (id: string, updates: Partial<Profile>) => void;
   removeProfile: (id: string) => void;
   setActiveProfile: (id: string | null) => void;
   syncProfile: (profile: Partial<Profile> & { id: string; name: string; avatar: string }) => void; // Sync external profile (e.g. Clerk)
@@ -176,6 +177,26 @@ export const useUserStore = create<UserState>()(
         return {
           profiles: [...state.profiles, { ...profile, avatar, id: `profile-${Date.now()}` } as Profile]
         };
+      }),
+
+      updateProfile: (id, updates) => set((state) => {
+        const updatedProfiles = state.profiles.map(p => {
+          if (p.id === id) {
+            const full = { ...p, ...updates };
+            if (typeof window !== 'undefined') {
+              if (updates.isKids !== undefined) {
+                localStorage.setItem(`kids-filter-${id}`, full.isKids ? 'true' : 'false');
+              }
+              if (state.activeProfileId === id) {
+                localStorage.setItem("toonplayer_profile", JSON.stringify(full));
+                setTimeout(() => window.dispatchEvent(new Event("profileUpdated")), 0);
+              }
+            }
+            return full;
+          }
+          return p;
+        });
+        return { profiles: updatedProfiles };
       }),
 
       removeProfile: (id) => set((state) => ({
