@@ -12,14 +12,24 @@ export interface Profile {
 
 export interface WatchHistoryItem {
   id: string;
+  showId?: string;
   type: string;
   title: string;
   poster: string;
-  progress: number;
+  progress?: number;
+  currentTime?: number;
   duration: number;
   episode?: number;
+  episodeId?: string;
+  episodeNumber?: number;
   season?: number;
-  timestamp: number;
+  timestamp?: number;
+  updatedAt?: number;
+  providerId?: string;
+  serverId?: string;
+  audio?: string;
+  subtitle?: string;
+  quality?: string;
 }
 
 export interface UserSettings {
