@@ -130,7 +130,7 @@ export async function GET(request: Request) {
         ].slice(0, 8);
 
         // Normalize TV Show Runtime vs Movie Runtime
-        if (type === "tv" || type === "anime") {
+        if (type === "tv") {
             // TV Shows should not have a total movie-like runtime
             if (details.episode_run_time && details.episode_run_time.length > 0) {
                 details.episode_runtime = details.episode_run_time[0];
