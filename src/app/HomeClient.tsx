@@ -923,7 +923,6 @@ export default function MoviesPage() {
                                         )}
                                     </div>
                                 )}
-
                                 {activeTab === "discover" && (
                                     <div className="space-y-2 md:space-y-3">
                                         {((loading && mjItems.length === 0) || mjItems.length > 0) && (
@@ -932,7 +931,7 @@ export default function MoviesPage() {
                                                 <SectionHeader icon={Star} title="Michael Jackson: Beyond the Music" color="text-accent-warm" isFeatured />
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
                                                     {mjItems.map((item, i) => (
-                                                        <div key={i} className="bg-bg-card p-4 rounded-2xl border border-white/5 hover:border-accent/30 transition-all cursor-pointer group">
+                                                        <div key={`${item.id || item.title}-${i}`} className="bg-bg-card p-4 rounded-2xl border border-white/5 hover:border-accent/30 transition-all cursor-pointer group">
                                                             <div className="aspect-square rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 overflow-hidden flex items-center justify-center">
                                                                 {item.poster ? (
                                                                     <Image src={`https://image.tmdb.org/t/p/w200${item.poster}`} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-[250ms] will-change-transform"  />
@@ -952,7 +951,7 @@ export default function MoviesPage() {
                                                 <SectionHeader icon={Zap} title="Trending Podcasts" color="text-accent-secondary" />
                                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                     {podcasts.map((pod, i) => (
-                                                        <div key={i} className="flex items-center gap-4 bg-bg-card p-4 rounded-2xl border border-white/5 hover:border-accent-secondary/30 transition-all cursor-pointer group">
+                                                        <div key={`${pod.id || pod.title}-${i}`} className="flex items-center gap-4 bg-bg-card p-4 rounded-2xl border border-white/5 hover:border-accent-secondary/30 transition-all cursor-pointer group">
                                                             <div className="w-16 h-16 rounded-xl bg-accent-secondary/10 flex items-center justify-center border border-accent-secondary/20 flex-shrink-0 group-hover:bg-accent-secondary/20">
                                                                 <Play className="w-6 h-6 text-accent-secondary" />
                                                             </div>
@@ -970,7 +969,7 @@ export default function MoviesPage() {
                                                 <SectionHeader icon={Popcorn} title="Trending Books" color="text-accent" />
                                                 <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
                                                     {books.map((book, i) => (
-                                                        <div key={i} className="flex-shrink-0 w-[160px] group cursor-pointer">
+                                                        <div key={`${book.id || book.title}-${i}`} className="flex-shrink-0 w-[160px] group cursor-pointer">
                                                             <div className="aspect-[2/3] rounded-xl bg-zinc-800 border border-white/10 mb-3 shadow-lg group-hover:border-accent/40 transition-all flex flex-col items-center justify-center p-4 text-center">
                                                                 <div className="w-10 h-1 bg-accent mb-4" />
                                                                 <h3 className="text-xs font-bold text-white leading-tight mb-2">{book.title}</h3>
@@ -987,7 +986,7 @@ export default function MoviesPage() {
                                                 <SectionHeader icon={Flame} title="Trending Songs" color="text-accent" />
                                                 <div className="space-y-2">
                                                     {songs.map((song, i) => (
-                                                        <div key={i} className="flex items-center gap-4 bg-bg-card/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
+                                                        <div key={`${song.id || song.title}-${i}`} className="flex items-center gap-4 bg-bg-card/50 p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
                                                             <span className="text-xs font-bold text-zinc-600 w-4">{i + 1}</span>
                                                             <div className="flex-1 min-w-0">
                                                                 <h3 className="text-sm font-bold text-white truncate">{song.title}</h3>
@@ -1005,7 +1004,7 @@ export default function MoviesPage() {
                                                 <SectionHeader icon={Film} title="Trending Videos" color="text-accent" />
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     {videos.map((vid, i) => (
-                                                        <div key={i} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
+                                                        <div key={`${vid.id || vid.title}-${i}`} className="relative aspect-video rounded-2xl bg-zinc-800 overflow-hidden group cursor-pointer border border-white/5">
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
                                                             <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">

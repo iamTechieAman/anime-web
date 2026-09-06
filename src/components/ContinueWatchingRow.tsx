@@ -83,13 +83,14 @@ export default function ContinueWatchingRow() {
             
             <div className="w-full">
                 <div className="flex items-center gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2">
-                    {displayHistory.slice(0, 5).map((entry) => {
+                    {displayHistory.slice(0, 5).map((entry, idx) => {
                         const timeLeft = formatTimeLeft(entry.currentTime, entry.duration);
                         const isRemoving = removingId === entry.id;
+                        const uniqueKey = `${entry.id || entry.showId}-${entry.episodeId || entry.episodeNumber || idx}`;
                         
                         return (
                             <div
-                                key={entry.id}
+                                key={uniqueKey}
                                 className={`snap-start shrink-0 flex items-stretch rounded-2xl bg-bg-card/40 backdrop-blur-md border border-white/5 overflow-hidden transition-all duration-350 hover:border-accent/30 hover:shadow-2xl hover:scale-[1.02] relative ${
                                     isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                                 } h-[120px] md:h-[140px] lg:h-[160px] w-[220px] md:w-[250px] lg:w-[280px]`}
