@@ -278,6 +278,49 @@ export function logProviderDiagnostic(diag: {
     } catch (_) {}
 }
 
+export function isRetryableError(error?: ProviderError): boolean {
+    if (!error) return false;
+    // Transient network errors and timeouts are retryable
+    if (error.code === 'NETWORK_ERROR' || error.code === 'TIMEOUT' || error.code === 'RATE_LIMITED') {
+        return true;
+    }
+    // Transient server errors (500, 502, 503, 504) are retryable
+    if (error.code === 'HTTP_ERROR' && error.statusCode) {
+        return [429, 500, 502, 503, 504].includes(error.statusCode);
+    }
+    // PARSER_ERROR, EMPTY_RESPONSE, INVALID_RESPONSE, NO_SOURCE, UNSUPPORTED, 400, 404 are deterministic & non-retryable
+    return false;
+}
+
+export function getRetryDelay(attempt: number, baseMs = 300, maxMs = 1000): number {
+    const exponential = baseMs * Math.pow(1.5, attempt);
+    const jitter = Math.floor(Math.random() * 100);
+    return Math.min(maxMs, exponential) + jitter;
+}
+
+class RequestCoalescer {
+    private inFlight = new Map<string, Promise<any>>();
+
+    async execute<T>(key: string, fn: () => Promise<T>): Promise<T> {
+        if (this.inFlight.has(key)) {
+            return this.inFlight.get(key) as Promise<T>;
+        }
+
+        const promise = fn().finally(() => {
+            this.inFlight.delete(key);
+        });
+
+        this.inFlight.set(key, promise);
+        return promise;
+    }
+
+    clear() {
+        this.inFlight.clear();
+    }
+}
+
+export const requestCoalescer = new RequestCoalescer();
+
 export async function executeWithTimeout<T>(
     fn: () => Promise<T>,
     timeoutMs: number,
@@ -307,6 +350,48 @@ export async function executeWithTimeout<T>(
             durationMs,
         };
     }
+}
+
+export async function executeWithRetry<T>(
+    fn: () => Promise<T>,
+    timeoutMs: number,
+    providerId: string,
+    maxAttempts: number = 2
+): Promise<ProviderResult<T>> {
+    let lastError: ProviderError | undefined;
+    let totalDurationMs = 0;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const singleResult = await executeWithTimeout<T>(fn, timeoutMs, providerId);
+        totalDurationMs += singleResult.durationMs;
+
+        if (singleResult.success && singleResult.data) {
+            return {
+                ...singleResult,
+                durationMs: totalDurationMs,
+            };
+        }
+
+        lastError = singleResult.error;
+
+        // Classify first: if non-retryable (parser error, unsupported, invalid id), abort immediately
+        if (lastError && !isRetryableError(lastError)) {
+            break;
+        }
+
+        // Only retry if attempts remain and failure is transient
+        if (attempt < maxAttempts) {
+            const delay = getRetryDelay(attempt, 250, 750);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+
+    return {
+        success: false,
+        error: lastError || categorizeError(new Error('Operation failed'), providerId, totalDurationMs),
+        providerId,
+        durationMs: totalDurationMs,
+    };
 }
 
 export function isValidVideoSource(source: any): boolean {
@@ -386,86 +471,89 @@ export class AnimeProviderManager {
         const cleanQuery = (query || '').trim();
         if (!cleanQuery) return [];
 
-        const errors: ProviderError[] = [];
-        for (const providerName of FALLBACK_ORDER) {
-            const caps = getProviderCapabilities(providerName);
-            if (!caps.supportsSearch) {
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'search',
-                    status: 'FAILURE',
-                    validationResult: 'UNSUPPORTED',
-                    parserResult: 'SKIPPED',
-                    sourceCount: 0,
-                    finalClassification: 'UNSUPPORTED',
-                    durationMs: 0,
-                    details: 'Search endpoint not supported',
-                });
-                continue;
-            }
-
-            const provider = safeGetProvider(providerName);
-            if (!provider) continue;
-
-            const result = await executeWithTimeout<AnimeSearchResult[]>(
-                () => provider.search(cleanQuery),
-                7000,
-                providerName
-            );
-
-            if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
-                const validResults = result.data
-                    .filter(r => r && r.id && r.title)
-                    .map(r => ({
-                        ...r,
-                        canonicalId: r.canonicalId || r.id,
-                        providerId: r.providerId || providerName,
-                    }));
-
-                if (validResults.length > 0) {
+        return requestCoalescer.execute(`search:${cleanQuery.toLowerCase()}`, async () => {
+            const errors: ProviderError[] = [];
+            for (const providerName of FALLBACK_ORDER) {
+                const caps = getProviderCapabilities(providerName);
+                if (!caps.supportsSearch) {
                     logProviderDiagnostic({
                         provider: providerName,
                         requestType: 'search',
-                        status: 'SUCCESS',
-                        httpStatus: 200,
-                        validationResult: 'VALID',
-                        parserResult: 'SUCCESS',
-                        sourceCount: validResults.length,
-                        finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
-                        durationMs: result.durationMs,
+                        status: 'FAILURE',
+                        validationResult: 'UNSUPPORTED',
+                        parserResult: 'SKIPPED',
+                        sourceCount: 0,
+                        finalClassification: 'UNSUPPORTED',
+                        durationMs: 0,
+                        details: 'Search endpoint not supported',
                     });
-                    return validResults;
+                    continue;
                 }
-            } else if (!result.success && result.error) {
-                const err = result.error;
-                errors.push(err);
-                const classification: ProviderHealthStatus =
-                    err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE'
-                        ? 'SCRAPER_ERROR'
-                        : err.code === 'TIMEOUT'
-                        ? 'TEMPORARY_FAILURE'
-                        : err.code === 'RATE_LIMITED'
-                        ? 'DEGRADED'
-                        : err.code === 'NETWORK_ERROR'
-                        ? 'UNAVAILABLE'
-                        : 'TEMPORARY_FAILURE';
 
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'search',
-                    status: 'FAILURE',
-                    httpStatus: err.statusCode,
-                    validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
-                    parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
-                    sourceCount: 0,
-                    finalClassification: classification,
-                    durationMs: result.durationMs,
-                    details: err.message,
-                });
+                const provider = safeGetProvider(providerName);
+                if (!provider) continue;
+
+                const result = await executeWithRetry<AnimeSearchResult[]>(
+                    () => provider.search(cleanQuery),
+                    6000,
+                    providerName,
+                    2
+                );
+
+                if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
+                    const validResults = result.data
+                        .filter(r => r && r.id && r.title)
+                        .map(r => ({
+                            ...r,
+                            canonicalId: r.canonicalId || r.id,
+                            providerId: r.providerId || providerName,
+                        }));
+
+                    if (validResults.length > 0) {
+                        logProviderDiagnostic({
+                            provider: providerName,
+                            requestType: 'search',
+                            status: 'SUCCESS',
+                            httpStatus: 200,
+                            validationResult: 'VALID',
+                            parserResult: 'SUCCESS',
+                            sourceCount: validResults.length,
+                            finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
+                            durationMs: result.durationMs,
+                        });
+                        return validResults;
+                    }
+                } else if (!result.success && result.error) {
+                    const err = result.error;
+                    errors.push(err);
+                    const classification: ProviderHealthStatus =
+                        err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE'
+                            ? 'SCRAPER_ERROR'
+                            : err.code === 'TIMEOUT'
+                            ? 'TEMPORARY_FAILURE'
+                            : err.code === 'RATE_LIMITED'
+                            ? 'DEGRADED'
+                            : err.code === 'NETWORK_ERROR'
+                            ? 'UNAVAILABLE'
+                            : 'TEMPORARY_FAILURE';
+
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'search',
+                        status: 'FAILURE',
+                        httpStatus: err.statusCode,
+                        validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
+                        parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
+                        sourceCount: 0,
+                        finalClassification: classification,
+                        durationMs: result.durationMs,
+                        details: err.message,
+                    });
+                }
             }
-        }
-        console.warn(`[AnimeProviderManager] All eligible providers failed for search: "${cleanQuery}". Errors:`, errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`));
-        return [];
+            console.warn(`[AnimeProviderManager] All eligible providers failed for search: "${cleanQuery}". Errors:`, errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`));
+            return [];
+        });
     }
 
     static async getInfo(id: string, preferredProvider?: ProviderName): Promise<AnimeDetails | null> {
@@ -473,84 +561,89 @@ export class AnimeProviderManager {
         if (!cleanId) return null;
 
         const normalizedPref = preferredProvider ? normalizeProvider(preferredProvider) : undefined;
-        const order = normalizedPref
-            ? [normalizedPref, ...FALLBACK_ORDER.filter(p => p !== normalizedPref)]
-            : FALLBACK_ORDER;
+        const coalescerKey = `info:${normalizedPref || 'auto'}:${cleanId}`;
 
-        const errors: ProviderError[] = [];
-        for (const providerName of order) {
-            const caps = getProviderCapabilities(providerName);
-            if (!caps.supportsDetails) {
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'details',
-                    status: 'FAILURE',
-                    validationResult: 'UNSUPPORTED',
-                    parserResult: 'SKIPPED',
-                    sourceCount: 0,
-                    finalClassification: 'UNSUPPORTED',
-                    durationMs: 0,
-                    details: 'Details endpoint not supported',
-                });
-                continue;
+        return requestCoalescer.execute(coalescerKey, async () => {
+            const order = normalizedPref
+                ? [normalizedPref, ...FALLBACK_ORDER.filter(p => p !== normalizedPref)]
+                : FALLBACK_ORDER;
+
+            const errors: ProviderError[] = [];
+            for (const providerName of order) {
+                const caps = getProviderCapabilities(providerName);
+                if (!caps.supportsDetails) {
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'details',
+                        status: 'FAILURE',
+                        validationResult: 'UNSUPPORTED',
+                        parserResult: 'SKIPPED',
+                        sourceCount: 0,
+                        finalClassification: 'UNSUPPORTED',
+                        durationMs: 0,
+                        details: 'Details endpoint not supported',
+                    });
+                    continue;
+                }
+
+                const provider = safeGetProvider(providerName);
+                if (!provider) continue;
+
+                const result = await executeWithRetry<AnimeDetails>(
+                    () => provider.getInfo(cleanId),
+                    7000,
+                    providerName,
+                    2
+                );
+
+                if (result.success && result.data && result.data.id && Array.isArray(result.data.episodes)) {
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'details',
+                        status: 'SUCCESS',
+                        httpStatus: 200,
+                        validationResult: 'VALID',
+                        parserResult: 'SUCCESS',
+                        sourceCount: result.data.episodes.length,
+                        finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
+                        durationMs: result.durationMs,
+                    });
+                    return {
+                        ...result.data,
+                        canonicalId: result.data.canonicalId || result.data.id,
+                        providerId: result.data.providerId || providerName,
+                    };
+                } else if (!result.success && result.error) {
+                    const err = result.error;
+                    errors.push(err);
+                    const classification: ProviderHealthStatus =
+                        err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE'
+                            ? 'SCRAPER_ERROR'
+                            : err.code === 'TIMEOUT'
+                            ? 'TEMPORARY_FAILURE'
+                            : err.code === 'RATE_LIMITED'
+                            ? 'DEGRADED'
+                            : err.code === 'NETWORK_ERROR'
+                            ? 'UNAVAILABLE'
+                            : 'TEMPORARY_FAILURE';
+
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'details',
+                        status: 'FAILURE',
+                        httpStatus: err.statusCode,
+                        validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
+                        parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
+                        sourceCount: 0,
+                        finalClassification: classification,
+                        durationMs: result.durationMs,
+                        details: err.message,
+                    });
+                }
             }
-
-            const provider = safeGetProvider(providerName);
-            if (!provider) continue;
-
-            const result = await executeWithTimeout<AnimeDetails>(
-                () => provider.getInfo(cleanId),
-                8000,
-                providerName
-            );
-
-            if (result.success && result.data && result.data.id && Array.isArray(result.data.episodes)) {
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'details',
-                    status: 'SUCCESS',
-                    httpStatus: 200,
-                    validationResult: 'VALID',
-                    parserResult: 'SUCCESS',
-                    sourceCount: result.data.episodes.length,
-                    finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
-                    durationMs: result.durationMs,
-                });
-                return {
-                    ...result.data,
-                    canonicalId: result.data.canonicalId || result.data.id,
-                    providerId: result.data.providerId || providerName,
-                };
-            } else if (!result.success && result.error) {
-                const err = result.error;
-                errors.push(err);
-                const classification: ProviderHealthStatus =
-                    err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE'
-                        ? 'SCRAPER_ERROR'
-                        : err.code === 'TIMEOUT'
-                        ? 'TEMPORARY_FAILURE'
-                        : err.code === 'RATE_LIMITED'
-                        ? 'DEGRADED'
-                        : err.code === 'NETWORK_ERROR'
-                        ? 'UNAVAILABLE'
-                        : 'TEMPORARY_FAILURE';
-
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'details',
-                    status: 'FAILURE',
-                    httpStatus: err.statusCode,
-                    validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
-                    parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
-                    sourceCount: 0,
-                    finalClassification: classification,
-                    durationMs: result.durationMs,
-                    details: err.message,
-                });
-            }
-        }
-        console.warn(`[AnimeProviderManager] All eligible providers failed for info: "${cleanId}". Errors:`, errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`));
-        return null;
+            console.warn(`[AnimeProviderManager] All eligible providers failed for info: "${cleanId}". Errors:`, errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`));
+            return null;
+        });
     }
 
     static async getSources(
@@ -566,182 +659,188 @@ export class AnimeProviderManager {
         if (!cleanId || !cleanEp) return [];
 
         const normalizedPref = preferredProvider ? normalizeProvider(preferredProvider) : undefined;
-        const order = normalizedPref
-            ? [normalizedPref, ...FALLBACK_ORDER.filter(p => p !== normalizedPref)]
-            : FALLBACK_ORDER;
+        const coalescerKey = `sources:${normalizedPref || 'auto'}:${cleanId}:${cleanEp}:${mode}:${serverId || 'auto'}`;
 
-        const errors: ProviderError[] = [];
-        const seenUrls = new Set<string>();
-        const validSources: VideoSource[] = [];
+        return requestCoalescer.execute(coalescerKey, async () => {
+            const order = normalizedPref
+                ? [normalizedPref, ...FALLBACK_ORDER.filter(p => p !== normalizedPref)]
+                : FALLBACK_ORDER;
 
-        console.log(`[AnimeProviderManager] 🚀 Fetching sources: id=${cleanId} ep=${cleanEp} mode=${mode} pref=${normalizedPref || 'none'}`);
+            const errors: ProviderError[] = [];
+            const seenUrls = new Set<string>();
+            const validSources: VideoSource[] = [];
 
-        for (const providerName of order) {
-            const caps = getProviderCapabilities(providerName);
-            if (!caps.supportsSources) {
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'sources',
-                    status: 'FAILURE',
-                    validationResult: 'UNSUPPORTED',
-                    parserResult: 'SKIPPED',
-                    sourceCount: 0,
-                    finalClassification: 'UNSUPPORTED',
-                    durationMs: 0,
-                    details: 'Sources endpoint not supported',
-                });
-                continue;
-            }
+            console.log(`[AnimeProviderManager] 🚀 Fetching sources: id=${cleanId} ep=${cleanEp} mode=${mode} pref=${normalizedPref || 'none'}`);
 
-            // Check sub/dub capability if specified
-            if (mode === 'dub' && caps.supportsDub === false) continue;
-            if (mode === 'raw' && caps.supportsRaw === false) continue;
-
-            const provider = safeGetProvider(providerName);
-            if (!provider) continue;
-
-            const result = await executeWithTimeout<VideoSource[]>(
-                () => provider.getSources(cleanId, cleanEp, mode, serverId),
-                7000,
-                providerName
-            );
-
-            if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
-                for (const s of result.data) {
-                    if (isValidVideoSource(s)) {
-                        const url = s.url || (s as any).link;
-                        if (!seenUrls.has(url)) {
-                            seenUrls.add(url);
-                            validSources.push({
-                                ...s,
-                                url,
-                                server: s.server || providerName,
-                                providerId: s.providerId || providerName,
-                                type: s.type || mode,
-                            });
-                        }
-                    }
-                }
-
-                if (validSources.length > 0) {
+            for (const providerName of order) {
+                const caps = getProviderCapabilities(providerName);
+                if (!caps.supportsSources) {
                     logProviderDiagnostic({
                         provider: providerName,
                         requestType: 'sources',
-                        status: 'SUCCESS',
-                        httpStatus: 200,
-                        validationResult: 'VALID',
-                        parserResult: 'SUCCESS',
-                        sourceCount: validSources.length,
-                        finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
-                        durationMs: result.durationMs,
+                        status: 'FAILURE',
+                        validationResult: 'UNSUPPORTED',
+                        parserResult: 'SKIPPED',
+                        sourceCount: 0,
+                        finalClassification: 'UNSUPPORTED',
+                        durationMs: 0,
+                        details: 'Sources endpoint not supported',
                     });
-                    console.log(`[AnimeProviderManager] ⚡ ${providerName} resolved ${validSources.length} sources in ${result.durationMs}ms`);
-                    return rankVideoSources(validSources);
-                }
-            } else if (!result.success && result.error) {
-                const err = result.error;
-                errors.push(err);
-                const classification: ProviderHealthStatus =
-                    err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE' || err.code === 'NO_SOURCE'
-                        ? 'SCRAPER_ERROR'
-                        : err.code === 'TIMEOUT'
-                        ? 'TEMPORARY_FAILURE'
-                        : err.code === 'RATE_LIMITED'
-                        ? 'DEGRADED'
-                        : err.code === 'NETWORK_ERROR'
-                        ? 'UNAVAILABLE'
-                        : 'TEMPORARY_FAILURE';
-
-                logProviderDiagnostic({
-                    provider: providerName,
-                    requestType: 'sources',
-                    status: 'FAILURE',
-                    httpStatus: err.statusCode,
-                    validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
-                    parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
-                    sourceCount: 0,
-                    finalClassification: classification,
-                    durationMs: result.durationMs,
-                    details: err.message,
-                });
-            }
-        }
-
-        console.warn(
-            `[AnimeProviderManager] All primary scrapers failed for ${cleanId} ep ${cleanEp}. Attempting multi-embed fallbacks. Errors:`,
-            errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`)
-        );
-
-        // Multi-Embed Fallbacks using MAL ID
-        try {
-            let finalMalId = fallbackMalId;
-            if (!finalMalId && /^\d+$/.test(cleanId)) {
-                finalMalId = parseInt(cleanId, 10);
-            }
-            if (!finalMalId) {
-                const info = await this.getInfo(cleanId);
-                if (info?.malId) finalMalId = info.malId;
-            }
-
-            if (finalMalId) {
-                // Parse episode number
-                let epNum = '1';
-                if (cleanEp.includes('episode-')) {
-                    const match = cleanEp.match(/episode-(\d+)/);
-                    if (match) epNum = match[1];
-                } else if (/^\d+$/.test(cleanEp)) {
-                    epNum = cleanEp;
+                    continue;
                 }
 
-                const fallbackEmbeds: VideoSource[] = [
-                    {
-                        url: `https://vidsrc.me/embed/anime?mal=${finalMalId}&episode=${epNum}`,
-                        quality: 'VidSrc (Multi)',
-                        isM3U8: false,
-                        isIframe: true,
-                        server: 'vidsrc_me',
-                        providerId: 'vidsrc',
-                        type: mode,
-                    },
-                    {
-                        url: `https://vidsrc.cc/v2/embed/anime/${finalMalId}/${epNum}`,
-                        quality: 'VidSrc.cc',
-                        isM3U8: false,
-                        isIframe: true,
-                        server: 'vidsrc_cc',
-                        providerId: 'vidsrc',
-                        type: mode,
-                    },
-                    {
-                        url: `https://vidsrc.net/embed/anime/${finalMalId}/${epNum}`,
-                        quality: 'VidSrc.net',
-                        isM3U8: false,
-                        isIframe: true,
-                        server: 'vidsrc_net',
-                        providerId: 'vidsrc',
-                        type: mode,
-                    },
-                    {
-                        url: `https://player.autoembed.cc/embed/anime/${finalMalId}/${epNum}`,
-                        quality: 'AutoEmbed',
-                        isM3U8: false,
-                        isIframe: true,
-                        server: 'autoembed',
-                        providerId: 'vidsrc',
-                        type: mode,
-                    },
-                ];
+                // Check sub/dub capability if specified
+                if (mode === 'dub' && caps.supportsDub === false) continue;
+                if (mode === 'raw' && caps.supportsRaw === false) continue;
 
-                return rankVideoSources(fallbackEmbeds);
+                const provider = safeGetProvider(providerName);
+                if (!provider) continue;
+
+                const result = await executeWithRetry<VideoSource[]>(
+                    () => provider.getSources(cleanId, cleanEp, mode, serverId),
+                    6500,
+                    providerName,
+                    2
+                );
+
+                if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
+                    for (const s of result.data) {
+                        if (isValidVideoSource(s)) {
+                            const url = s.url || (s as any).link;
+                            if (!seenUrls.has(url)) {
+                                seenUrls.add(url);
+                                validSources.push({
+                                    ...s,
+                                    url,
+                                    server: s.server || providerName,
+                                    providerId: s.providerId || providerName,
+                                    type: s.type || mode,
+                                });
+                            }
+                        }
+                    }
+
+                    if (validSources.length > 0) {
+                        logProviderDiagnostic({
+                            provider: providerName,
+                            requestType: 'sources',
+                            status: 'SUCCESS',
+                            httpStatus: 200,
+                            validationResult: 'VALID',
+                            parserResult: 'SUCCESS',
+                            sourceCount: validSources.length,
+                            finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
+                            durationMs: result.durationMs,
+                        });
+                        console.log(`[AnimeProviderManager] ⚡ ${providerName} resolved ${validSources.length} sources in ${result.durationMs}ms`);
+                        return rankVideoSources(validSources);
+                    }
+                } else if (!result.success && result.error) {
+                    const err = result.error;
+                    errors.push(err);
+                    const classification: ProviderHealthStatus =
+                        err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE' || err.code === 'NO_SOURCE'
+                            ? 'SCRAPER_ERROR'
+                            : err.code === 'TIMEOUT'
+                            ? 'TEMPORARY_FAILURE'
+                            : err.code === 'RATE_LIMITED'
+                            ? 'DEGRADED'
+                            : err.code === 'NETWORK_ERROR'
+                            ? 'UNAVAILABLE'
+                            : 'TEMPORARY_FAILURE';
+
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'sources',
+                        status: 'FAILURE',
+                        httpStatus: err.statusCode,
+                        validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
+                        parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
+                        sourceCount: 0,
+                        finalClassification: classification,
+                        durationMs: result.durationMs,
+                        details: err.message,
+                    });
+                }
             }
-        } catch (fallbackErr: any) {
-            console.error(`[AnimeProviderManager] Fallback embed resolution failed:`, fallbackErr.message);
-        }
 
-        return [];
+            console.warn(
+                `[AnimeProviderManager] All primary scrapers failed for ${cleanId} ep ${cleanEp}. Attempting multi-embed fallbacks. Errors:`,
+                errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`)
+            );
+
+            // Multi-Embed Fallbacks using MAL ID
+            try {
+                let finalMalId = fallbackMalId;
+                if (!finalMalId && /^\d+$/.test(cleanId)) {
+                    finalMalId = parseInt(cleanId, 10);
+                }
+                if (!finalMalId) {
+                    const info = await this.getInfo(cleanId);
+                    if (info?.malId) finalMalId = info.malId;
+                }
+
+                if (finalMalId) {
+                    // Parse episode number
+                    let epNum = '1';
+                    if (cleanEp.includes('episode-')) {
+                        const match = cleanEp.match(/episode-(\d+)/);
+                        if (match) epNum = match[1];
+                    } else if (/^\d+$/.test(cleanEp)) {
+                        epNum = cleanEp;
+                    }
+
+                    const fallbackEmbeds: VideoSource[] = [
+                        {
+                            url: `https://vidsrc.me/embed/anime?mal=${finalMalId}&episode=${epNum}`,
+                            quality: 'VidSrc (Multi)',
+                            isM3U8: false,
+                            isIframe: true,
+                            server: 'vidsrc_me',
+                            providerId: 'vidsrc',
+                            type: mode,
+                        },
+                        {
+                            url: `https://vidsrc.cc/v2/embed/anime/${finalMalId}/${epNum}`,
+                            quality: 'VidSrc.cc',
+                            isM3U8: false,
+                            isIframe: true,
+                            server: 'vidsrc_cc',
+                            providerId: 'vidsrc',
+                            type: mode,
+                        },
+                        {
+                            url: `https://vidsrc.net/embed/anime/${finalMalId}/${epNum}`,
+                            quality: 'VidSrc.net',
+                            isM3U8: false,
+                            isIframe: true,
+                            server: 'vidsrc_net',
+                            providerId: 'vidsrc',
+                            type: mode,
+                        },
+                        {
+                            url: `https://player.autoembed.cc/embed/anime/${finalMalId}/${epNum}`,
+                            quality: 'AutoEmbed',
+                            isM3U8: false,
+                            isIframe: true,
+                            server: 'autoembed',
+                            providerId: 'vidsrc',
+                            type: mode,
+                        },
+                    ];
+
+                    return rankVideoSources(fallbackEmbeds);
+                }
+            } catch (fallbackErr: any) {
+                console.error(`[AnimeProviderManager] Fallback embed resolution failed:`, fallbackErr.message);
+            }
+
+            return [];
+        });
     }
 }
 
 export default AnimeProviderManager;
+
 
 
