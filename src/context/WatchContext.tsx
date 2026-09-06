@@ -32,6 +32,9 @@ export interface WatchlistItem {
     collection: string;
     tags: string[];
     order: number;
+    season?: number;
+    episodeNumber?: number;
+    episodeId?: string;
 }
 
 interface WatchContextType {

@@ -194,6 +194,20 @@ declare module 'lucide-react' {
     export const Swords: LucideIcon;
     export const Ghost: LucideIcon;
     export const History: LucideIcon;
+    export const CheckSquare: LucideIcon;
+    export const Square: LucideIcon;
+    export const RotateCcw: LucideIcon;
+    export const RotateCw: LucideIcon;
+    export const Tv2: LucideIcon;
+    export const Clock3: LucideIcon;
+    export const Clock4: LucideIcon;
+    export const CheckCheck: LucideIcon;
+    export const CheckCircle2: LucideIcon;
+    export const Folder: LucideIcon;
+    export const FolderPlus: LucideIcon;
+    export const GripVertical: LucideIcon;
+    export const Move: LucideIcon;
+    [key: string]: any;
 }
 
 declare module 'date-fns' {
