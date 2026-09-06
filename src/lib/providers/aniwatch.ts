@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
+import { ParserError, safeString, safeInt, isValidUrl, sanitizeUrl } from './parser-utils';
 
 const BASE_URL = 'https://aniwatchtv.to';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0';
@@ -16,6 +17,8 @@ export class AniWatchProvider implements AnimeProvider {
                 headers: { 'User-Agent': USER_AGENT }
             });
 
+            if (!response.data || typeof response.data !== 'string') return [];
+
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
@@ -28,7 +31,7 @@ export class AniWatchProvider implements AnimeProvider {
                 const image = $el.find('.film-poster img').attr('data-src') || $el.find('.film-poster img').attr('src');
 
                 if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
+                    results.push({ id, title, image: sanitizeUrl(image), provider: this.name });
                 }
             });
 
@@ -44,6 +47,10 @@ export class AniWatchProvider implements AnimeProvider {
             const response = await axios.get(`${BASE_URL}/${id}`, {
                 headers: { 'User-Agent': USER_AGENT }
             });
+
+            if (!response.data || typeof response.data !== 'string') {
+                throw new ParserError(this.name, 'getInfo', id, 'Received empty or invalid HTML response');
+            }
 
             const $ = cheerio.load(response.data);
             const title = $('.film-name').first().text().trim() || $('.anime-name').first().text().trim();
@@ -64,8 +71,8 @@ export class AniWatchProvider implements AnimeProvider {
             });
 
             // Get sub/dub counts from the page
-            const sub = parseInt($('.tick-sub').first().text().trim()) || 0;
-            const dub = parseInt($('.tick-dub').first().text().trim()) || 0;
+            const sub = safeInt($('.tick-sub').first().text().trim(), 0);
+            const dub = safeInt($('.tick-dub').first().text().trim(), 0);
 
             // Get episode list via AJAX
             const dataId = $('#wrapper').attr('data-id') || $('body').attr('data-id') || $('.anime-main').attr('data-id') || $('#sync-meta').attr('data-id');
@@ -75,46 +82,52 @@ export class AniWatchProvider implements AnimeProvider {
 
             let episodes: any[] = [];
             if (dataId) {
-                const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
-                    headers: {
-                        'User-Agent': USER_AGENT,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+                try {
+                    const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
+                        headers: {
+                            'User-Agent': USER_AGENT,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
 
-                const $episodes = cheerio.load(episodesResponse.data.html);
+                    if (episodesResponse?.data?.html) {
+                        const $episodes = cheerio.load(episodesResponse.data.html);
 
-                $episodes('.ep-item').each((_, el) => {
-                    const $ep = $(el);
-                    const episodeId = $ep.attr('data-id') || '';
-                    const number = parseInt($ep.attr('data-number') || '0');
-                    const epTitle = $ep.attr('title') || $ep.find('.ep-name').text().trim();
+                        $episodes('.ep-item').each((_, el) => {
+                            const $ep = $episodes(el);
+                            const episodeId = $ep.attr('data-id') || '';
+                            const number = safeInt($ep.attr('data-number'), 0);
+                            const epTitle = $ep.attr('title') || $ep.find('.ep-name').text().trim();
 
-                    if (episodeId && number) {
-                        episodes.push({
-                            id: episodeId,
-                            number,
-                            title: epTitle || `Episode ${number}`
+                            if (episodeId && number > 0) {
+                                episodes.push({
+                                    id: episodeId,
+                                    number,
+                                    title: epTitle || `Episode ${number}`
+                                });
+                            }
                         });
                     }
-                });
+                } catch (e: any) {
+                    console.warn(`[AniWatch] Episode list fetch failed for ${id}:`, e.message);
+                }
             }
 
             return {
                 id,
-                title,
-                image,
+                title: title || id,
+                image: sanitizeUrl(image),
                 description,
                 episodes,
                 totalEpisodes: episodes.length,
                 availableEpisodes: { sub, dub },
-                type: $('.item-title:contains("Type:")').next().text().trim(),
-                status: $('.item-title:contains("Status:")').next().text().trim(),
-                otherNames: [seasons.map(s => s.title)].flat() as string[] // Hacky way to pass season info for now or we could extend the interface
+                type: $('.item-title:contains("Type:")').next().text().trim() || 'TV',
+                status: $('.item-title:contains("Status:")').next().text().trim() || 'Completed',
+                otherNames: [seasons.map(s => s.title)].flat() as string[]
             };
         } catch (error) {
             console.error('[AniWatch] GetInfo failed:', error);
-            throw new Error(`Failed to fetch anime info: ${error}`);
+            throw error;
         }
     }
 

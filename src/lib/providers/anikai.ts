@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
 import { HiAnimeProvider } from './hianime';
+import { ParserError, safeString, safeInt, isValidUrl, sanitizeUrl } from './parser-utils';
 
 const BASE_URL = 'https://anikai.to';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0';
@@ -22,6 +23,8 @@ export class AnikaiProvider implements AnimeProvider {
                 }
             });
 
+            if (!response.data || typeof response.data !== 'string') return [];
+
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
@@ -38,7 +41,7 @@ export class AnikaiProvider implements AnimeProvider {
                 const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
 
                 if (id && title) {
-                    results.push({ id, title, image, provider: this.name });
+                    results.push({ id, title, image: sanitizeUrl(image), provider: this.name });
                 }
             });
 
@@ -55,6 +58,8 @@ export class AnikaiProvider implements AnimeProvider {
             console.log(`[Anikai] Fetching Recent from Home: ${url}`);
 
             const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
+            if (!response.data || typeof response.data !== 'string') return [];
+
             const $ = cheerio.load(response.data);
             const results: AnimeSearchResult[] = [];
 
@@ -76,7 +81,7 @@ export class AnikaiProvider implements AnimeProvider {
                     results.push({
                         id,
                         title,
-                        image,
+                        image: sanitizeUrl(image),
                         provider: this.name,
                         extra: {
                             latestEpisode: epText
@@ -102,6 +107,10 @@ export class AnikaiProvider implements AnimeProvider {
                     'Referer': BASE_URL
                 }
             });
+
+            if (!response.data || typeof response.data !== 'string') {
+                throw new ParserError(this.name, 'getInfo', id, 'Received empty or invalid HTML response');
+            }
 
             const $ = cheerio.load(response.data);
             const title = $('h1.title').text().trim() || $('.film-name').text().trim();
@@ -138,27 +147,27 @@ export class AnikaiProvider implements AnimeProvider {
                         }
                     });
 
-                    const $episodes = cheerio.load(episodesResponse.data.html);
-                    $episodes('.ep-item').each((_, el) => {
-                        const $ep = $(el);
-                        const episodeId = $ep.attr('data-id') || '';
-                        const number = parseInt($ep.attr('data-number') || '0');
-                        const title = $ep.attr('title');
+                    if (episodesResponse?.data?.html) {
+                        const $episodes = cheerio.load(episodesResponse.data.html);
+                        $episodes('.ep-item').each((_, el) => {
+                            const $ep = $episodes(el);
+                            const episodeId = $ep.attr('data-id') || '';
+                            const number = safeInt($ep.attr('data-number'), 0);
+                            const epTitle = $ep.attr('title') || `Episode ${number}`;
 
-                        if (episodeId && number) {
-                            episodes.push({
-                                id: episodeId,
-                                number,
-                                title
-                            });
-                        }
-                    });
+                            if (episodeId && number > 0) {
+                                episodes.push({
+                                    id: episodeId,
+                                    number,
+                                    title: epTitle
+                                });
+                            }
+                        });
+                    }
                 } catch (e) {
                     console.warn('[Anikai] Episode fetch failed:', e);
                 }
             } else {
-                // Try fallback to AllAnime/HiAnime if no data-id found (implies 404/broken page on Anikai)
-                // Or we could return what we have (title/desc) but no episodes.
                 console.warn('[Anikai] No data-id found for episodes.');
             }
 
@@ -317,25 +326,32 @@ export class AnikaiProvider implements AnimeProvider {
         );
 
         const sourcesData = finalSourcesResponse.data;
+        if (!sourcesData || typeof sourcesData !== 'object') {
+            return [];
+        }
 
-        if (sourcesData.sources) {
-            return sourcesData.sources.map((source: any) => ({
-                url: source.file || source.url,
-                isM3U8: source.type === 'hls' || source.file?.includes('.m3u8'),
-                quality: source.label || source.quality || 'auto',
-                headers: { Referer: embedLink }
-            }));
-        } else if (sourcesData.source) {
+        if (Array.isArray(sourcesData.sources)) {
+            const list: VideoSource[] = [];
+            for (const source of sourcesData.sources) {
+                const sUrl = source?.file || source?.url;
+                if (isValidUrl(sUrl)) {
+                    list.push({
+                        url: sanitizeUrl(sUrl),
+                        isM3U8: source.type === 'hls' || sUrl.includes('.m3u8'),
+                        quality: source.label || source.quality || 'auto',
+                        headers: { Referer: embedLink }
+                    });
+                }
+            }
+            return list;
+        } else if (isValidUrl(sourcesData.source)) {
+            const sUrl = sanitizeUrl(sourcesData.source);
             return [{
-                url: sourcesData.source,
-                isM3U8: sourcesData.source.includes('.m3u8'),
+                url: sUrl,
+                isM3U8: sUrl.includes('.m3u8'),
                 quality: 'auto'
             }];
         }
-
-        // Sometimes encrypted, would need decryption (RabbitStream/MegaCloud often encrypt)
-        // If sourcesData.encrypted is true, we might fail here. 
-        // For now, assume unencrypted or basic structure.
 
         return [];
     }

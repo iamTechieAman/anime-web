@@ -10,6 +10,7 @@
 import axios from 'axios';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { getUA } from '@/lib/user-agents';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl } from './parser-utils';
 
 const CONSUMET_INSTANCES = [
     'https://consumet-api.onrender.com',
@@ -39,16 +40,17 @@ export class GogoanimeProvider implements AnimeProvider {
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
             const data = await consumetFetch(`/anime/gogoanime/${encodeURIComponent(query)}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title,
-                image: item.image,
+            const results = safeArray(data?.results);
+            return results.map((item: any) => ({
+                id: safeString(item?.id),
+                title: safeString(item?.title, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
                 extra: {
-                    url: item.url,
-                    subOrDub: item.subOrDub,
+                    url: item?.url,
+                    subOrDub: item?.subOrDub,
                 },
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (err) {
             console.error('[Gogoanime] Search failed:', err);
             return [];
@@ -58,19 +60,24 @@ export class GogoanimeProvider implements AnimeProvider {
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
             const data = await consumetFetch(`/anime/gogoanime/info/${id}`);
-            const episodes = (data?.episodes || []).map((ep: any) => ({
-                id: ep.id,
-                number: ep.number,
-                title: `Episode ${ep.number}`,
-            }));
+            if (!data || typeof data !== 'object') {
+                throw new ParserError(this.name, 'getInfo', id, 'Invalid response shape from Gogoanime');
+            }
+
+            const rawEpisodes = safeArray(data.episodes);
+            const episodes = rawEpisodes.map((ep: any) => ({
+                id: safeString(ep?.id),
+                number: safeInt(ep?.number, 0),
+                title: safeString(ep?.title) || `Episode ${safeInt(ep?.number, 0)}`,
+            })).filter(ep => Boolean(ep.id) && ep.number > 0);
 
             return {
-                id: data.id,
-                title: data.title,
-                image: data.image,
-                description: data.description,
+                id: safeString(data.id, id),
+                title: safeString(data.title, id),
+                image: sanitizeUrl(data.image),
+                description: safeString(data.description),
                 episodes,
-                totalEpisodes: data.totalEpisodes || episodes.length,
+                totalEpisodes: safeInt(data.totalEpisodes, episodes.length),
                 availableEpisodes: {
                     sub: data.subOrDub === 'sub' || data.subOrDub === 'both' ? episodes.length : 0,
                     dub: data.subOrDub === 'dub' || data.subOrDub === 'both' ? episodes.length : 0,
@@ -78,7 +85,7 @@ export class GogoanimeProvider implements AnimeProvider {
             };
         } catch (err) {
             console.error('[Gogoanime] GetInfo failed:', err);
-            throw new Error(`Gogoanime getInfo failed: ${err}`);
+            throw err;
         }
     }
 
@@ -91,9 +98,6 @@ export class GogoanimeProvider implements AnimeProvider {
                 episodeId = `${id}-episode-${episodeString}`;
             }
 
-            // OPTION B: Direct iframe embed via Gogoanime's native embedder (embtaku)
-            // By returning the native iframe, we bypass the need to decrypt the AES-256 ajax layer
-            // and skip the broken Consumet API completely.
             return [
                 {
                     url: `https://embtaku.pro/streaming.php?id=${episodeId}`,
@@ -122,25 +126,25 @@ export class GogoanimeProvider implements AnimeProvider {
     async getRecent(page = 1): Promise<AnimeSearchResult[]> {
         try {
             const data = await consumetFetch(`/anime/gogoanime/recent-episodes?page=${page}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title,
-                image: item.image,
+            return safeArray(data?.results).map((item: any) => ({
+                id: safeString(item?.id),
+                title: safeString(item?.title, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-                extra: { episodeId: item.episodeId, episodeNumber: item.episodeNumber },
-            }));
+                extra: { episodeId: item?.episodeId, episodeNumber: item?.episodeNumber },
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch { return []; }
     }
 
     async getTop(page = 1): Promise<AnimeSearchResult[]> {
         try {
             const data = await consumetFetch(`/anime/gogoanime/top-airing?page=${page}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title,
-                image: item.image,
+            return safeArray(data?.results).map((item: any) => ({
+                id: safeString(item?.id),
+                title: safeString(item?.title, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch { return []; }
     }
 

@@ -2,6 +2,7 @@ import axios from 'axios';
 import crypto from 'crypto';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl } from './parser-utils';
 
 const Kt = "0b39a7c3f3cd6622c1371e75e14a47b8";
 const gs = "61e6b121ac2177d3bb40c53ae8b74e6e";
@@ -85,13 +86,13 @@ export class HiAnimeProvider implements AnimeProvider {
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromApi('/search', { keyword: query });
-            if (!data || !data.success || !data.results || !data.results.data) return [];
-            return data.results.data.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+            const list = safeArray(data?.results?.data);
+            return list.map((item: any) => ({
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] Search failed:', error);
             return [];
@@ -104,34 +105,36 @@ export class HiAnimeProvider implements AnimeProvider {
             const epData = await fetchFromApi(`/episodes/${id}`);
 
             const results = infoData?.results?.data;
-            const episodesList = epData?.results?.episodes || [];
+            const episodesList = safeArray(epData?.results?.episodes);
 
-            if (!results) throw new Error('Show info not found');
+            if (!results || typeof results !== 'object') {
+                throw new ParserError(this.name, 'getInfo', id, 'Show info not found in API response');
+            }
 
             const episodes = episodesList.map((ep: any) => ({
-                id: ep.id || `${id}?ep=${ep.episode_no}`,
-                number: ep.episode_no || 0,
-                title: ep.title || `Episode ${ep.episode_no}`,
-                image: ep.image,
-                description: ep.overview,
-                duration: ep.runtime,
-                isFiller: ep.filler === true
-            }));
+                id: ep?.id || `${id}?ep=${ep?.episode_no || 1}`,
+                number: safeInt(ep?.episode_no, 0),
+                title: ep?.title || `Episode ${ep?.episode_no || 1}`,
+                image: sanitizeUrl(ep?.image),
+                description: ep?.overview || '',
+                duration: safeInt(ep?.runtime, 0),
+                isFiller: ep?.filler === true
+            })).filter(ep => ep.number > 0);
 
-            const totalEpisodes = epData?.results?.totalEpisodes || episodes.length;
+            const totalEpisodes = safeInt(epData?.results?.totalEpisodes, episodes.length);
 
             // Parse seasons if present
-            const seasons = (infoData?.results?.seasons || []).map((s: any) => ({
-                id: s.id || s.data_id,
-                title: s.title || s.name,
-                active: s.id === id
+            const seasons = safeArray(infoData?.results?.seasons).map((s: any) => ({
+                id: s?.id || s?.data_id,
+                title: s?.title || s?.name,
+                active: s?.id === id
             }));
 
             return {
                 id,
                 title: results.title || results.titles?.main || results.titles?.en || id,
-                image: results.poster,
-                description: results.description,
+                image: sanitizeUrl(results.poster),
+                description: results.description || '',
                 episodes,
                 totalEpisodes,
                 availableEpisodes: {
@@ -140,7 +143,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 },
                 type: results.showType || results.animeInfo?.stats?.type || 'TV',
                 status: results.animeInfo?.stats?.status || 'Releasing',
-                otherNames: seasons.map((s: any) => s.title)
+                otherNames: seasons.map((s: any) => s.title).filter(Boolean)
             };
         } catch (error) {
             console.error('[HiAnime] GetInfo failed, returning fallback metadata:', error);
@@ -265,13 +268,13 @@ export class HiAnimeProvider implements AnimeProvider {
         try {
             const letParam = letter.toLowerCase() === 'all' ? '' : letter.toUpperCase();
             const data = await fetchFromApi('/az-list', { letter: letParam, page });
-            if (!data || !data.success || !data.results || !data.results.data) return [];
-            return data.results.data.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+            const list = safeArray(data?.results?.data);
+            return list.map((item: any) => ({
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] getAZList failed:', error);
             return [];
@@ -282,13 +285,13 @@ export class HiAnimeProvider implements AnimeProvider {
         try {
             const genreId = mapGenreSlug(genre);
             const data = await fetchFromApi('/filter', { genres: genreId, page });
-            if (!data || !data.success || !data.results || !data.results.data) return [];
-            return data.results.data.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+            const list = safeArray(data?.results?.data);
+            return list.map((item: any) => ({
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] getGenre failed:', error);
             return [];
@@ -308,13 +311,13 @@ export class HiAnimeProvider implements AnimeProvider {
             }
 
             const serversData = await fetchFromApi(`/servers/${id}`, { ep: epNumber });
-            const serversList = serversData?.results || [];
+            const serversList = safeArray(serversData?.results);
 
             return serversList.map((server: any) => ({
-                serverName: server.serverName || server.server_id,
-                serverId: server.server_id,
-                type: server.type
-            }));
+                serverName: server?.serverName || server?.server_id || 'Unknown',
+                serverId: server?.server_id || '',
+                type: server?.type || 'sub'
+            })).filter(s => Boolean(s.serverId));
         } catch (error) {
             console.error('[HiAnime] getServers failed:', error);
             return [];
@@ -324,13 +327,13 @@ export class HiAnimeProvider implements AnimeProvider {
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromApi('/recently-updated', { page });
-            if (!data || !data.success || !data.results || !data.results.data) return [];
-            return data.results.data.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+            const list = safeArray(data?.results?.data);
+            return list.map((item: any) => ({
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] getRecent failed:', error);
             return [];
@@ -340,13 +343,13 @@ export class HiAnimeProvider implements AnimeProvider {
     async getTrending(): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromApi('');
-            const list = data?.results?.trending || data?.results?.spotlights || [];
+            const list = safeArray(data?.results?.trending || data?.results?.spotlights);
             return list.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] getTrending failed:', error);
             return [];
@@ -356,13 +359,13 @@ export class HiAnimeProvider implements AnimeProvider {
     async getCompleted(): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromApi('');
-            const list = data?.results?.latestCompleted || [];
+            const list = safeArray(data?.results?.latestCompleted);
             return list.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] getCompleted failed:', error);
             return [];
@@ -372,13 +375,13 @@ export class HiAnimeProvider implements AnimeProvider {
     async getUpcoming(): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromApi('');
-            const list = data?.results?.topUpcoming || [];
+            const list = safeArray(data?.results?.topUpcoming);
             return list.map((item: any) => ({
-                id: item.id || item.data_id,
-                title: item.title || item.japanese_title,
-                image: item.poster,
+                id: item?.id || item?.data_id || '',
+                title: item?.title || item?.japanese_title || 'Unknown',
+                image: sanitizeUrl(item?.poster),
                 provider: this.name
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[HiAnime] getUpcoming failed:', error);
             return [];

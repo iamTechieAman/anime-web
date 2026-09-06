@@ -1,5 +1,5 @@
-import axios from 'axios';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
+import { safeString } from './parser-utils';
 
 export class VidSrcProvider implements AnimeProvider {
     name = 'vidsrc';
@@ -15,38 +15,40 @@ export class VidSrcProvider implements AnimeProvider {
     }
 
     async getSources(id: string, episodeString: string, mode: 'sub' | 'dub' | 'raw' = 'sub', serverId?: string): Promise<VideoSource[]> {
-        console.log(`[VidSrc] Generating embed links for: ID=${id}, Ep=${episodeString}`);
+        const safeId = safeString(id);
+        const ep = safeString(episodeString, '1');
 
-        // We assume ID is a AniList or MAL ID (usually numeric for seasonal anime)
-        // Many aggregators also support TMDB IDs for anime.
-
-        const ep = episodeString;
+        if (!safeId) return [];
 
         // Return multiple embed options as "Sources"
         return [
             {
-                url: `https://vidsrc.me/embed/anime?mal=${id}&episode=${ep}`,
+                url: `https://vidsrc.me/embed/anime?mal=${safeId}&episode=${ep}`,
                 quality: 'Vidsrc (Multi)',
                 isM3U8: false,
-                isIframe: true
+                isIframe: true,
+                server: 'vidsrc_me'
             },
             {
-                url: `https://vidsrc.to/embed/anime/${id}/${ep}`,
+                url: `https://vidsrc.to/embed/anime/${safeId}/${ep}`,
                 quality: 'Vidsrc.to',
                 isM3U8: false,
-                isIframe: true
+                isIframe: true,
+                server: 'vidsrc_to'
             },
             {
-                url: `https://vidsrc.cc/v2/embed/anime/${id}/${ep}`,
+                url: `https://vidsrc.cc/v2/embed/anime/${safeId}/${ep}`,
                 quality: 'Vidsrc.cc',
                 isM3U8: false,
-                isIframe: true
+                isIframe: true,
+                server: 'vidsrc_cc'
             },
             {
-                url: `https://vidsrc.vip/embed/anime/${id}/${ep}`,
+                url: `https://vidsrc.vip/embed/anime/${safeId}/${ep}`,
                 quality: 'Vidsrc.vip',
                 isM3U8: false,
-                isIframe: true
+                isIframe: true,
+                server: 'vidsrc_vip'
             }
         ];
     }

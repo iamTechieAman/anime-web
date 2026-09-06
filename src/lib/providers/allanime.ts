@@ -3,6 +3,7 @@ import { decryptSource } from '@/lib/cipher';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { getUA } from '@/lib/user-agents';
 import { scrampleApiHeaders, scrampleHeaders, withRetry } from '@/lib/request-scrambler';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl } from './parser-utils';
 
 const ALLANIME_API = "https://api.allanime.day/api";
 const ALLANIME_BASE = "https://allanime.day";
@@ -85,21 +86,22 @@ export class AllAnimeProvider implements AnimeProvider {
                 timeout: 8000
             }), 3, 400);
 
-            const shows = response.data?.data?.shows?.edges || [];
+            const shows = safeArray(response.data?.data?.shows?.edges);
             return shows.map((show: any) => {
+                if (!show || typeof show !== 'object') return null;
                 // Prioritize English name, fallback to original name
                 const displayName = show.englishName && show.englishName.trim() !== ''
                     ? show.englishName
-                    : show.name;
+                    : show.name || 'Unknown';
 
                 return {
-                    id: show._id,
+                    id: show._id || '',
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            });
+            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
         } catch (error) {
             console.error('[AllAnime] Search failed:', error);
             return [];
@@ -118,25 +120,25 @@ export class AllAnimeProvider implements AnimeProvider {
             });
 
             const show = response.data?.data?.show;
-            if (!show) {
-                throw new Error('Show not found');
+            if (!show || typeof show !== 'object') {
+                throw new ParserError(this.name, 'getInfo', id, 'Show object not found in GraphQL response');
             }
 
             // Convert availableEpisodesDetail to episodes array
-            const episodesSub = show.availableEpisodesDetail?.sub || [];
-            const episodesDub = show.availableEpisodesDetail?.dub || [];
+            const episodesSub: string[] = safeArray(show.availableEpisodesDetail?.sub);
+            const episodesDub: string[] = safeArray(show.availableEpisodesDetail?.dub);
 
             const episodes = episodesSub.map((ep: string) => ({
-                id: ep,
-                number: parseInt(ep)
-            }));
+                id: String(ep),
+                number: safeInt(ep, 0)
+            })).filter(ep => ep.number > 0);
 
             return {
-                id: show._id,
-                title: show.name,
+                id: show._id || id,
+                title: show.name || 'Unknown',
                 image: getThumbnailUrl(show.thumbnail),
-                malId: show.malId ? parseInt(show.malId) : undefined,
-                anilistId: show.aniListId ? parseInt(show.aniListId) : undefined,
+                malId: show.malId ? safeInt(show.malId, undefined) : undefined,
+                anilistId: show.aniListId ? safeInt(show.aniListId, undefined) : undefined,
                 episodes,
                 availableEpisodes: {
                     sub: episodesSub.length,
@@ -146,11 +148,11 @@ export class AllAnimeProvider implements AnimeProvider {
                     sub: episodesSub,
                     dub: episodesDub
                 },
-                totalEpisodes: Math.max(episodesSub.length, episodesDub.length)
+                totalEpisodes: Math.max(episodesSub.length, episodesDub.length, episodes.length)
             };
         } catch (error) {
             console.error('[AllAnime] GetInfo failed:', error);
-            throw new Error(`Failed to fetch anime info: ${error}`);
+            throw error;
         }
     }
 
@@ -312,20 +314,21 @@ export class AllAnimeProvider implements AnimeProvider {
                 timeout: 10000
             });
 
-            const shows = response.data?.data?.shows?.edges || [];
+            const shows = safeArray(response.data?.data?.shows?.edges);
             return shows.map((show: any) => {
+                if (!show || typeof show !== 'object') return null;
                 const displayName = show.englishName && show.englishName.trim() !== ''
                     ? show.englishName
-                    : show.name;
+                    : show.name || 'Unknown';
 
                 return {
-                    id: show._id,
+                    id: show._id || '',
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            });
+            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
         } catch (error) {
             console.error('[AllAnime] GetPopular failed:', error);
             return [];
@@ -347,25 +350,27 @@ export class AllAnimeProvider implements AnimeProvider {
                 timeout: 10000
             });
 
-            const shows = response.data?.data?.shows?.edges || [];
+            const shows = safeArray(response.data?.data?.shows?.edges);
             return shows.map((show: any) => {
+                if (!show || typeof show !== 'object') return null;
                 const displayName = show.englishName && show.englishName.trim() !== ''
                     ? show.englishName
-                    : show.name;
+                    : show.name || 'Unknown';
 
                 return {
-                    id: show._id,
+                    id: show._id || '',
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            });
+            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
         } catch (error) {
             console.error('[AllAnime] GetRecent failed:', error);
             return [];
         }
     }
+
     async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
             const response = await axios.get(ALLANIME_API, {
@@ -381,20 +386,21 @@ export class AllAnimeProvider implements AnimeProvider {
                 timeout: 10000
             });
 
-            const shows = response.data?.data?.shows?.edges || [];
+            const shows = safeArray(response.data?.data?.shows?.edges);
             return shows.map((show: any) => {
+                if (!show || typeof show !== 'object') return null;
                 const displayName = show.englishName && show.englishName.trim() !== ''
                     ? show.englishName
-                    : show.name;
+                    : show.name || 'Unknown';
 
                 return {
-                    id: show._id,
+                    id: show._id || '',
                     title: displayName,
                     image: getThumbnailUrl(show.thumbnail),
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            });
+            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
         } catch (error) {
             console.error('[AllAnime] GetTop failed:', error);
             return [];

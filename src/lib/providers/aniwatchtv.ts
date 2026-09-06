@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl } from './parser-utils';
 
 // aniwatchtv.com.ro - WordPress-based anime site with Sub & Dub content
 // Uses the "animestream-4" WordPress theme
@@ -15,28 +16,6 @@ const HEADERS = {
     'Cache-Control': 'no-cache',
 };
 
-/**
- * Parse anime cards from aniwatchtv.com.ro (WordPress animestream-4 theme)
- * HTML structure:
- * <article class="bs">
- *   <div class="bsx">
- *     <a href="/anime-title-episode-N/" class="tip" rel="{post_id}">
- *       <div class="limit">
- *         <div class="typez TV">TV</div>
- *         <div class="bt">
- *           <span class="epx">Ep N</span>
- *           <span class="sb Sub">Sub</span>  <!-- or Dub -->
- *         </div>
- *         <img data-src="..." alt="..." />
- *       </div>
- *       <div class="tt">
- *         {Series Title}
- *         <h2>Episode Title</h2>
- *       </div>
- *     </a>
- *   </div>
- * </article>
- */
 function parseCards($: ReturnType<typeof cheerio.load>, selector: string): AnimeSearchResult[] {
     const results: AnimeSearchResult[] = [];
     $(selector).each((_, el) => {
@@ -70,15 +49,11 @@ function parseCards($: ReturnType<typeof cheerio.load>, selector: string): Anime
         const subDubBadge = $el.find('.sb').text().trim().toLowerCase();
         const subOrDub = subDubBadge === 'dub' ? 'dub' : 'sub';
 
-        // Episode number
-        const epText = $el.find('.epx').text().trim();
-        const latestEp = parseInt(epText.replace(/[^\d]/g, '') || '0');
-
         if (id && title) {
             results.push({
                 id,
                 title,
-                image: image.startsWith('data:') ? '' : image, // filter base64 placeholders
+                image: image.startsWith('data:') ? '' : sanitizeUrl(image),
                 provider: 'aniwatchtv',
                 subOrDub,
             });
@@ -97,8 +72,8 @@ export class AniwatchTVProvider implements AnimeProvider {
                 headers: HEADERS,
                 timeout: 12000,
             });
+            if (!response.data || typeof response.data !== 'string') return [];
             const $ = cheerio.load(response.data);
-            // WordPress search results use the same article.bs structure
             return parseCards($, 'article.bs, .listupd article.bs');
         } catch (error) {
             console.error('[AniwatchTV] Search failed:', error);
@@ -110,8 +85,8 @@ export class AniwatchTVProvider implements AnimeProvider {
         try {
             const url = page > 1 ? `${BASE_URL}/page/${page}/` : `${BASE_URL}/`;
             const response = await axios.get(url, { headers: HEADERS, timeout: 12000 });
+            if (!response.data || typeof response.data !== 'string') return [];
             const $ = cheerio.load(response.data);
-            // "Latest Update" or "Recently Added" section
             let results = parseCards($, '.releases.latesthome article.bs, .listupd article.bs');
             if (results.length === 0) {
                 results = parseCards($, 'article.bs');
@@ -126,8 +101,8 @@ export class AniwatchTVProvider implements AnimeProvider {
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
             const response = await axios.get(`${BASE_URL}/`, { headers: HEADERS, timeout: 12000 });
+            if (!response.data || typeof response.data !== 'string') return [];
             const $ = cheerio.load(response.data);
-            // "Popular Today" section
             let results = parseCards($, '.bixbox.bbnofrm article.bs, .releases.hothome ~ .listupd article.bs');
             if (results.length === 0) {
                 results = parseCards($, 'article.bs');
@@ -147,6 +122,9 @@ export class AniwatchTVProvider implements AnimeProvider {
         try {
             const url = id.startsWith('http') ? id : `${BASE_URL}/anime/${id}/`;
             const response = await axios.get(url, { headers: HEADERS, timeout: 12000 });
+            if (!response.data || typeof response.data !== 'string') {
+                throw new ParserError(this.name, 'getInfo', id, 'Received empty HTML response');
+            }
             const $ = cheerio.load(response.data);
 
             const title = $('.entry-title, h1.entry-title, .bigcontent .infox h1').first().text().trim()
@@ -161,10 +139,10 @@ export class AniwatchTVProvider implements AnimeProvider {
                 const $ep = $(el);
                 const href = $ep.attr('href') || $ep.closest('a').attr('href') || '';
                 const epText = $ep.find('.epl-num').text() || $ep.text();
-                const epNum = parseInt(epText.replace(/[^\d]/g, '') || '0');
+                const epNum = safeInt(epText.replace(/[^\d]/g, ''), 0);
                 const epTitle = $ep.find('.epl-title').text().trim() || `Episode ${epNum}`;
                 const subDub = $ep.find('.epl-sub').text().trim().toLowerCase() || 'sub';
-                if (href && epNum) {
+                if (href && epNum > 0) {
                     episodes.push({
                         id: href,
                         number: epNum,
@@ -174,7 +152,7 @@ export class AniwatchTVProvider implements AnimeProvider {
                 }
             });
 
-            return { id, title, image, description, episodes: episodes.reverse() };
+            return { id, title: title || id, image: sanitizeUrl(image), description, episodes: episodes.reverse() };
         } catch (error) {
             console.error('[AniwatchTV] GetInfo failed:', error);
             throw error;
@@ -190,25 +168,32 @@ export class AniwatchTVProvider implements AnimeProvider {
 
     async getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw' = 'sub'): Promise<VideoSource[]> {
         try {
-            // episodeId is typically the full episode URL for WP-based sites
             const episodeUrl = episodeId.startsWith('http')
                 ? episodeId
                 : `${BASE_URL}/${id}-episode-${episodeId}/`;
 
             const response = await axios.get(episodeUrl, { headers: HEADERS, timeout: 12000 });
+            if (!response.data || typeof response.data !== 'string') {
+                return [{
+                    url: episodeUrl,
+                    isM3U8: false,
+                    quality: 'auto',
+                    isIframe: true,
+                    server: 'AniwatchTV',
+                    headers: { Referer: BASE_URL }
+                }];
+            }
             const $ = cheerio.load(response.data);
 
             const sources: VideoSource[] = [];
 
-            // Extract embed sources from server list
-            // aniwatchtv uses .ps__-list .server-item .btn with data-src or data-video
             $('.ps__-list .server-item .btn, .serverlist .server a, .player-server a').each((_, el) => {
                 const $el = $(el);
                 const src = $el.attr('data-src') || $el.attr('data-video') || $el.attr('href') || '';
                 const serverName = $el.text().trim() || $el.attr('data-name') || 'Server';
-                if (src && src.startsWith('http')) {
+                if (isValidUrl(src)) {
                     sources.push({
-                        url: src,
+                        url: sanitizeUrl(src),
                         isM3U8: src.includes('.m3u8'),
                         quality: 'auto',
                         isIframe: true,
@@ -218,7 +203,6 @@ export class AniwatchTVProvider implements AnimeProvider {
                 }
             });
 
-            // Fallback: use the episode URL itself as an iframe
             if (sources.length === 0) {
                 sources.push({
                     url: episodeUrl,

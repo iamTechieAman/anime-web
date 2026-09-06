@@ -8,6 +8,7 @@
 import axios from 'axios';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { getUA } from '@/lib/user-agents';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl, normalizeQuality } from './parser-utils';
 
 const CONSUMET_INSTANCES = [
     'https://consumet-api.onrender.com',
@@ -37,13 +38,14 @@ export class AnimePaheProvider implements AnimeProvider {
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
             const data = await consumetFetch(`/anime/animepahe/${encodeURIComponent(query)}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title,
-                image: item.image,
+            const results = safeArray(data?.results);
+            return results.map((item: any) => ({
+                id: safeString(item?.id),
+                title: safeString(item?.title, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-                extra: { year: item.year, status: item.status },
-            }));
+                extra: { year: item?.year, status: item?.status },
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (err) {
             console.error('[AnimePahe] Search failed:', err);
             return [];
@@ -53,24 +55,30 @@ export class AnimePaheProvider implements AnimeProvider {
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
             const data = await consumetFetch(`/anime/animepahe/info/${id}`);
-            const episodes = (data?.episodes || []).map((ep: any) => ({
-                id: ep.id,
-                number: ep.number,
-                title: ep.title || `Episode ${ep.number}`,
-                image: ep.image,
-            }));
+            if (!data || typeof data !== 'object') {
+                throw new ParserError(this.name, 'getInfo', id, 'Invalid response shape from AnimePahe');
+            }
+
+            const rawEpisodes = safeArray(data.episodes);
+            const episodes = rawEpisodes.map((ep: any) => ({
+                id: safeString(ep?.id),
+                number: safeInt(ep?.number, 0),
+                title: safeString(ep?.title) || `Episode ${safeInt(ep?.number, 0)}`,
+                image: sanitizeUrl(ep?.image),
+            })).filter(ep => Boolean(ep.id) && ep.number > 0);
+
             return {
-                id: data.id,
-                title: data.title,
-                image: data.image,
-                description: data.description,
+                id: safeString(data.id, id),
+                title: safeString(data.title, id),
+                image: sanitizeUrl(data.image),
+                description: safeString(data.description),
                 episodes,
-                totalEpisodes: data.totalEpisodes || episodes.length,
+                totalEpisodes: safeInt(data.totalEpisodes, episodes.length),
                 availableEpisodes: { sub: episodes.length, dub: 0 },
             };
         } catch (err) {
             console.error('[AnimePahe] GetInfo failed:', err);
-            throw new Error(`AnimePahe getInfo failed: ${err}`);
+            throw err;
         }
     }
 
@@ -85,13 +93,22 @@ export class AnimePaheProvider implements AnimeProvider {
             }
 
             const data = await consumetFetch(`/anime/animepahe/watch/${episodeId}`);
-            if (!data?.sources?.length) throw new Error('No sources from AnimePahe');
+            const sourcesList = safeArray(data?.sources);
+            if (sourcesList.length === 0) throw new Error('No sources from AnimePahe');
 
-            return data.sources.map((src: any) => ({
-                url: src.url,
-                quality: src.quality,
-                isM3U8: src.isM3U8 || src.url?.includes('.m3u8'),
-            }));
+            const validSources: VideoSource[] = [];
+            for (const src of sourcesList) {
+                if (isValidUrl(src?.url)) {
+                    validSources.push({
+                        url: sanitizeUrl(src.url),
+                        quality: normalizeQuality(src.quality),
+                        isM3U8: src.isM3U8 === true || String(src.url).includes('.m3u8'),
+                    });
+                }
+            }
+
+            if (validSources.length === 0) throw new Error('All AnimePahe sources were invalid');
+            return validSources;
         } catch (err: any) {
             console.error('[AnimePahe] GetSources failed:', err.message);
             throw err;

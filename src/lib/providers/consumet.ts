@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl, normalizeQuality } from './parser-utils';
 
 /**
  * Consumet Provider
@@ -31,18 +32,31 @@ async function fetchFromInstances(path: string): Promise<any> {
     throw new Error(`All Consumet instances failed: ${errors.join(' | ')}`);
 }
 
+function extractTitle(titleObj: any): string {
+    if (!titleObj) return '';
+    if (typeof titleObj === 'string') return titleObj;
+    return (
+        titleObj.english ||
+        titleObj.romaji ||
+        titleObj.userPreferred ||
+        titleObj.native ||
+        ''
+    );
+}
+
 export class ConsumetProvider implements AnimeProvider {
     name = 'consumet';
 
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromInstances(`/meta/anilist/${encodeURIComponent(query)}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title?.english || item.title?.romaji || item.title?.native,
-                image: item.image,
+            const results = safeArray(data?.results);
+            return results.map((item: any) => ({
+                id: safeString(item?.id),
+                title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch (error) {
             console.error('[Consumet] Search failed:', error);
             return [];
@@ -52,26 +66,32 @@ export class ConsumetProvider implements AnimeProvider {
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
             const data = await fetchFromInstances(`/meta/anilist/info/${id}?provider=gogoanime`);
-            const episodes = (data.episodes || []).map((ep: any) => ({
-                id: ep.id,
-                number: ep.number,
-                title: ep.title || `Episode ${ep.number}`,
-                image: ep.image,
-                description: ep.description,
-                isFiller: ep.isFiller,
-                hasDub: ep.hasDub,
-            }));
+            if (!data || typeof data !== 'object') {
+                throw new ParserError(this.name, 'getInfo', id, 'Invalid or empty show data returned');
+            }
+
+            const rawEpisodes = safeArray(data.episodes);
+            const episodes = rawEpisodes.map((ep: any) => ({
+                id: safeString(ep?.id),
+                number: safeInt(ep?.number, 0),
+                title: safeString(ep?.title) || `Episode ${safeInt(ep?.number, 0)}`,
+                image: sanitizeUrl(ep?.image),
+                description: safeString(ep?.description),
+                isFiller: ep?.isFiller === true,
+                hasDub: ep?.hasDub === true,
+            })).filter(ep => Boolean(ep.id) && ep.number > 0);
+
             return {
-                id: data.id,
-                title: data.title?.english || data.title?.romaji || data.title?.native,
-                image: data.image,
-                description: data.description,
+                id: safeString(data.id, id),
+                title: extractTitle(data.title) || safeString(data.id, id),
+                image: sanitizeUrl(data.image),
+                description: safeString(data.description),
                 episodes,
-                totalEpisodes: data.totalEpisodes || episodes.length,
+                totalEpisodes: safeInt(data.totalEpisodes, episodes.length),
             };
         } catch (error) {
             console.error('[Consumet] GetInfo failed:', error);
-            throw new Error(`Consumet getInfo failed: ${error}`);
+            throw error;
         }
     }
 
@@ -93,12 +113,19 @@ export class ConsumetProvider implements AnimeProvider {
             }
 
             const data = await fetchFromInstances(`/meta/anilist/watch/${watchId}`);
-            if (data?.sources?.length) {
-                return data.sources.map((src: any) => ({
-                    url: src.url,
-                    quality: src.quality,
-                    isM3U8: src.isM3U8 || src.url?.includes('.m3u8'),
-                }));
+            const sourcesList = safeArray(data?.sources);
+            if (sourcesList.length > 0) {
+                const validSources: VideoSource[] = [];
+                for (const src of sourcesList) {
+                    if (isValidUrl(src?.url)) {
+                        validSources.push({
+                            url: sanitizeUrl(src.url),
+                            quality: normalizeQuality(src.quality),
+                            isM3U8: src.isM3U8 === true || String(src.url).includes('.m3u8'),
+                        });
+                    }
+                }
+                if (validSources.length > 0) return validSources;
             }
             throw new Error('No sources in Consumet response');
 
@@ -110,21 +137,29 @@ export class ConsumetProvider implements AnimeProvider {
                 const info = await this.getInfo(id);
                 const title = info.title;
                 const gogoData = await fetchFromInstances(`/anime/gogoanime/${encodeURIComponent(title)}`);
-                if (gogoData?.results?.length) {
+                const gogoResults = safeArray(gogoData?.results);
+                if (gogoResults.length > 0) {
                     const gogoId = mode === 'dub'
-                        ? (gogoData.results.find((r: any) => r.id?.includes('-dub'))?.id || gogoData.results[0].id)
-                        : gogoData.results[0].id;
+                        ? (gogoResults.find((r: any) => r.id?.includes('-dub'))?.id || gogoResults[0].id)
+                        : gogoResults[0].id;
 
                     const gogoInfo = await fetchFromInstances(`/anime/gogoanime/info/${gogoId}`);
-                    const targetEp = (gogoInfo?.episodes || []).find((ep: any) => ep.number === parseInt(episodeString));
+                    const targetEp = safeArray(gogoInfo?.episodes).find((ep: any) => ep.number === parseInt(episodeString));
                     if (targetEp?.id) {
                         const gogoWatch = await fetchFromInstances(`/anime/gogoanime/watch/${targetEp.id}`);
-                        if (gogoWatch?.sources?.length) {
-                            return gogoWatch.sources.map((src: any) => ({
-                                url: src.url,
-                                quality: src.quality,
-                                isM3U8: src.isM3U8 || src.url?.includes('.m3u8'),
-                            }));
+                        const gogoSources = safeArray(gogoWatch?.sources);
+                        if (gogoSources.length > 0) {
+                            const validSources: VideoSource[] = [];
+                            for (const src of gogoSources) {
+                                if (isValidUrl(src?.url)) {
+                                    validSources.push({
+                                        url: sanitizeUrl(src.url),
+                                        quality: normalizeQuality(src.quality),
+                                        isM3U8: src.isM3U8 === true || String(src.url).includes('.m3u8'),
+                                    });
+                                }
+                            }
+                            if (validSources.length > 0) return validSources;
                         }
                     }
                 }
@@ -150,36 +185,36 @@ export class ConsumetProvider implements AnimeProvider {
     async getRecent(page = 1): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromInstances(`/meta/anilist/recent-episodes?page=${page}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title?.english || item.title?.romaji || item.title?.native,
-                image: item.image,
+            return safeArray(data?.results).map((item: any) => ({
+                id: safeString(item?.id),
+                title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch { return []; }
     }
 
     async getTop(page = 1): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromInstances(`/meta/anilist/popular?page=${page}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title?.english || item.title?.romaji || item.title?.native,
-                image: item.image,
+            return safeArray(data?.results).map((item: any) => ({
+                id: safeString(item?.id),
+                title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch { return []; }
     }
 
     async getTrending(page = 1): Promise<AnimeSearchResult[]> {
         try {
             const data = await fetchFromInstances(`/meta/anilist/trending?page=${page}`);
-            return (data?.results || []).map((item: any) => ({
-                id: item.id,
-                title: item.title?.english || item.title?.romaji || item.title?.native,
-                image: item.image,
+            return safeArray(data?.results).map((item: any) => ({
+                id: safeString(item?.id),
+                title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
+                image: sanitizeUrl(item?.image),
                 provider: this.name,
-            }));
+            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
         } catch { return []; }
     }
 }

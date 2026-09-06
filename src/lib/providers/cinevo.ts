@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
+import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl } from './parser-utils';
 
 const TMDB_KEY = 'a46c50a0ccb1bafe2b15665df7fad7e1';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
@@ -24,14 +25,15 @@ export class CinEvoProvider implements AnimeProvider {
                 }
             });
 
-            return (res.data.results || [])
-                .filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv')
+            const results = safeArray(res.data?.results);
+            return results
+                .filter((item: any) => item && (item.media_type === 'movie' || item.media_type === 'tv'))
                 .slice(0, 20)
                 .map((item: any) => ({
                     id: `cinevo:${item.media_type}:${item.id}`,
-                    title: item.title || item.name || 'Unknown',
-                    image: item.poster_path ? `${IMG_BASE}/w500${item.poster_path}` : '',
-                    releaseDate: item.release_date || item.first_air_date || '',
+                    title: safeString(item.title || item.name, 'Unknown'),
+                    image: item.poster_path ? sanitizeUrl(`${IMG_BASE}/w500${item.poster_path}`) : '',
+                    releaseDate: safeString(item.release_date || item.first_air_date),
                     provider: 'cinevo',
                     subOrDub: item.media_type === 'tv' ? 'TV Show' : 'Movie'
                 }));
@@ -58,14 +60,19 @@ export class CinEvoProvider implements AnimeProvider {
             ]);
 
             const data = detailsRes.data;
+            if (!data || typeof data !== 'object') {
+                throw new ParserError(this.name, 'getInfo', id, 'Invalid TMDB details response');
+            }
+
             const episodes: any[] = [];
 
             if (type === 'tv') {
                 // For TV shows, get seasons/episodes from TMDB
-                const seasons = data.seasons || [];
+                const seasons = safeArray(data.seasons);
                 for (const season of seasons) {
-                    if (season.season_number === 0) continue; // Skip specials
-                    for (let ep = 1; ep <= season.episode_count; ep++) {
+                    if (!season || season.season_number === 0) continue; // Skip specials
+                    const epCount = safeInt(season.episode_count, 0);
+                    for (let ep = 1; ep <= epCount; ep++) {
                         episodes.push({
                             id: `${tmdbId}:${season.season_number}:${ep}`,
                             number: ep,
@@ -78,20 +85,20 @@ export class CinEvoProvider implements AnimeProvider {
                 episodes.push({
                     id: `${tmdbId}:movie`,
                     number: 1,
-                    title: data.title || 'Full Movie'
+                    title: safeString(data.title, 'Full Movie')
                 });
             }
 
             return {
                 id,
-                title: data.title || data.name || 'Unknown',
-                image: data.poster_path ? `${IMG_BASE}/w500${data.poster_path}` : '',
-                description: data.overview || '',
-                genres: data.genres?.map((g: any) => g.name) || [],
+                title: safeString(data.title || data.name, 'Unknown'),
+                image: data.poster_path ? sanitizeUrl(`${IMG_BASE}/w500${data.poster_path}`) : '',
+                description: safeString(data.overview),
+                genres: safeArray(data.genres).map((g: any) => safeString(g?.name)).filter(Boolean),
                 totalEpisodes: episodes.length,
                 episodes,
                 type: type === 'tv' ? 'series' : 'movie',
-                status: data.status
+                status: safeString(data.status)
             };
         } catch (error) {
             console.error('[CinEvo] GetInfo failed:', error);
@@ -107,8 +114,8 @@ export class CinEvoProvider implements AnimeProvider {
 
         // Parse episode info: tmdbId:season:episode or tmdbId:movie
         const epParts = episodeId.split(':');
-        const season = epParts.length >= 3 ? parseInt(epParts[1]) : 1;
-        const episode = epParts.length >= 3 ? parseInt(epParts[2]) : 1;
+        const season = epParts.length >= 3 ? safeInt(epParts[1], 1) : 1;
+        const episode = epParts.length >= 3 ? safeInt(epParts[2], 1) : 1;
         const isMovie = type === 'movie' || episodeId.includes(':movie');
 
         // Generate embed URLs for all cinevo-style servers
@@ -169,15 +176,6 @@ export class CinEvoProvider implements AnimeProvider {
             },
             {
                 url: isMovie
-                    ? `https://www.2embed.cc/embed/${tmdbId}`
-                    : `https://www.2embed.cc/embedtv/${tmdbId}&s=${season}&e=${episode}`,
-                quality: '2Embed',
-                isM3U8: false,
-                isIframe: true,
-                server: '2embed'
-            },
-            {
-                url: isMovie
                     ? `https://vidsrc.net/embed/movie/${tmdbId}`
                     : `https://vidsrc.net/embed/tv/${tmdbId}/${season}/${episode}`,
                 quality: 'VidSrc.net',
@@ -205,13 +203,14 @@ export class CinEvoProvider implements AnimeProvider {
                 params: { api_key: TMDB_KEY, page }
             });
 
-            return (res.data.results || [])
-                .filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv')
+            const results = safeArray(res.data?.results);
+            return results
+                .filter((item: any) => item && (item.media_type === 'movie' || item.media_type === 'tv'))
                 .map((item: any) => ({
                     id: `cinevo:${item.media_type}:${item.id}`,
-                    title: item.title || item.name || 'Unknown',
-                    image: item.poster_path ? `${IMG_BASE}/w500${item.poster_path}` : '',
-                    releaseDate: item.release_date || item.first_air_date || '',
+                    title: safeString(item.title || item.name, 'Unknown'),
+                    image: item.poster_path ? sanitizeUrl(`${IMG_BASE}/w500${item.poster_path}`) : '',
+                    releaseDate: safeString(item.release_date || item.first_air_date),
                     provider: 'cinevo'
                 }));
         } catch (error) {
@@ -226,13 +225,14 @@ export class CinEvoProvider implements AnimeProvider {
                 params: { api_key: TMDB_KEY, page }
             });
 
-            return (res.data.results || [])
-                .filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv')
+            const results = safeArray(res.data?.results);
+            return results
+                .filter((item: any) => item && (item.media_type === 'movie' || item.media_type === 'tv'))
                 .map((item: any) => ({
                     id: `cinevo:${item.media_type}:${item.id}`,
-                    title: item.title || item.name || 'Unknown',
-                    image: item.poster_path ? `${IMG_BASE}/w500${item.poster_path}` : '',
-                    releaseDate: item.release_date || item.first_air_date || '',
+                    title: safeString(item.title || item.name, 'Unknown'),
+                    image: item.poster_path ? sanitizeUrl(`${IMG_BASE}/w500${item.poster_path}`) : '',
+                    releaseDate: safeString(item.release_date || item.first_air_date),
                     provider: 'cinevo'
                 }));
         } catch (error) {
@@ -253,11 +253,12 @@ export class CinEvoProvider implements AnimeProvider {
                 }
             });
 
-            return (res.data.results || []).map((item: any) => ({
+            const results = safeArray(res.data?.results);
+            return results.map((item: any) => ({
                 id: `cinevo:movie:${item.id}`,
-                title: item.title || 'Unknown',
-                image: item.poster_path ? `${IMG_BASE}/w500${item.poster_path}` : '',
-                releaseDate: item.release_date || '',
+                title: safeString(item.title, 'Unknown'),
+                image: item.poster_path ? sanitizeUrl(`${IMG_BASE}/w500${item.poster_path}`) : '',
+                releaseDate: safeString(item.release_date),
                 provider: 'cinevo'
             }));
         } catch (error) {

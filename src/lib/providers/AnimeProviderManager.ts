@@ -194,7 +194,9 @@ export function categorizeError(err: any, providerId: string, durationMs?: numbe
 
     let code: ProviderErrorCode = 'UNKNOWN_ERROR';
 
-    if (status === 429 || lower.includes('rate limit') || lower.includes('too many requests')) {
+    if (err?.isParserError || err?.code === 'PARSER_ERROR' || lower.includes('parsererror')) {
+        code = 'PARSER_ERROR';
+    } else if (status === 429 || lower.includes('rate limit') || lower.includes('too many requests')) {
         code = 'RATE_LIMITED';
     } else if (
         lower.includes('timeout') ||
@@ -237,12 +239,22 @@ export function categorizeError(err: any, providerId: string, durationMs?: numbe
         code = 'NO_SOURCE';
     }
 
+    const details = err?.isParserError
+        ? {
+              provider: err.provider,
+              operation: err.operation,
+              contentId: err.contentId,
+              reason: err.reason,
+              stack: err?.stack,
+          }
+        : err?.stack || undefined;
+
     return {
         code,
         message,
-        providerId,
+        providerId: err?.provider || providerId,
         statusCode: status,
-        details: err?.stack || undefined,
+        details,
         durationMs,
     };
 }
