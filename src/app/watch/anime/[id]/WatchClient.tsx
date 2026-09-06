@@ -229,17 +229,26 @@ const MOVIE_SERVERS = [
 
 interface ShowData {
     _id: string;
+    id?: string;
+    showId?: string;
     name?: string;
+    title?: string;
+    englishName?: string;
     malId?: string;
     anilistId?: string;
     tmdbId?: string;
     provider?: string;
     thumbnail?: string;
+    image?: string;
+    rating?: string | number;
+    description?: string;
+    synopsis?: string;
     availableEpisodesDetail: {
         sub: any[];
         dub: any[];
         raw: any[];
     };
+    [key: string]: any;
 }
 
 export default function WatchClient({ id: fullId }: { id: string }) {
@@ -247,22 +256,32 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const searchParams = useSearchParams();
     const { isAdBlockEnabled } = useAdBlock();
 
-    // Parse ID for provider prefix (e.g., tmdb:123, aw:naruto)
+    // Parse ID for provider prefix (e.g., tmdb:123, aw:naruto, hi:naruto)
     const { provider: idProvider, actualId: id } = (() => {
-        if (fullId.includes(':')) {
-            const parts = fullId.split(':');
-            return { provider: parts[0], actualId: parts.slice(1).join(':') };
+        const decoded = decodeURIComponent(fullId || '');
+        if (decoded.includes(':')) {
+            const parts = decoded.split(':');
+            let p = parts[0];
+            if (p === 'hi') p = 'hianime';
+            if (p === 'aw') p = 'aniwatch';
+            return { provider: p, actualId: parts.slice(1).join(':') };
         }
-        return { provider: null, actualId: fullId };
+        return { provider: null, actualId: decoded };
     })();
     
     // Priority: Prefix > URL Parameter
-    const provider = idProvider || searchParams.get('provider');
+    const rawParamProvider = searchParams?.get('provider');
+    const paramProvider = rawParamProvider === 'hi' ? 'hianime' : rawParamProvider === 'aw' ? 'aniwatch' : rawParamProvider;
+    const provider = idProvider || paramProvider || undefined;
 
     const [show, setShow] = useState<ShowData | null>(null);
 
-    const [currentEp, setCurrentEp] = useState<string>("1");
-    const [mode, setMode] = useState<"sub" | "dub">("sub");
+    const initialEp = searchParams?.get('ep') || "1";
+    const initialModeParam = searchParams?.get('mode') as "sub" | "dub" | null;
+    const initialMode: "sub" | "dub" = (initialModeParam && ["sub", "dub"].includes(initialModeParam)) ? initialModeParam : "sub";
+
+    const [currentEp, setCurrentEp] = useState<string>(initialEp);
+    const [mode, setMode] = useState<"sub" | "dub">(initialMode);
     const [epFilter, setEpFilter] = useState("");
 
     const availableEps = show?.availableEpisodesDetail?.[mode] || [];
@@ -280,6 +299,45 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [nextCountdown, setNextCountdown] = useState(5);
     const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const manualServerRef = useRef<string | null>(null);
+    const sourceSeqRef = useRef<number>(0);
+
+    // Sync URL when episode or mode changes without triggering page reload
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            const url = new URL(window.location.href);
+            let changed = false;
+            if (currentEp && url.searchParams.get('ep') !== currentEp) {
+                url.searchParams.set('ep', currentEp);
+                changed = true;
+            }
+            if (mode && url.searchParams.get('mode') !== mode) {
+                url.searchParams.set('mode', mode);
+                changed = true;
+            }
+            if (changed) {
+                window.history.replaceState(window.history.state, '', url.toString());
+            }
+        } catch (_) {}
+    }, [currentEp, mode]);
+
+    // Handle Browser Back / Forward buttons (popstate)
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const epFromUrl = params.get('ep');
+            const modeFromUrl = params.get('mode') as 'sub' | 'dub' | null;
+            if (epFromUrl && epFromUrl !== currentEp) {
+                setCurrentEp(epFromUrl);
+            }
+            if (modeFromUrl && ['sub', 'dub'].includes(modeFromUrl) && modeFromUrl !== mode) {
+                setMode(modeFromUrl);
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [currentEp, mode]);
 
     // Cleanup countdown timer on unmount
     useEffect(() => {
@@ -308,7 +366,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [loadingStatus, setLoadingStatus] = useState("Connecting to server...");
     const [healthScores, setHealthScores] = useState<Record<string, number>>({});
     const [dynamicMovieServers, setDynamicMovieServers] = useState<any[]>(MOVIE_SERVERS);
-
     const processingRef = useRef<string | null>(null);
 
     const [isSafeStream, setIsSafeStream] = useState(true);
@@ -338,8 +395,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const handleNextEpisode = () => {
         const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         if (currentIdx !== -1 && currentIdx + 1 < availableEps.length) {
-            const nextEp = availableEps[currentIdx + 1];
-            setCurrentEp(String(nextEp));
+            const nextItem = availableEps[currentIdx + 1];
+            const nextEp = typeof nextItem === 'object' ? String(nextItem.number || nextItem.id) : String(nextItem);
+            setCurrentEp(nextEp);
             toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
         }
     };
@@ -347,8 +405,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const handlePrevEpisode = () => {
         const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         if (currentIdx > 0) {
-            const prevEp = availableEps[currentIdx - 1];
-            setCurrentEp(String(prevEp));
+            const prevItem = availableEps[currentIdx - 1];
+            const prevEp = typeof prevItem === 'object' ? String(prevItem.number || prevItem.id) : String(prevItem);
+            setCurrentEp(prevEp);
             toast.success(`Now playing Episode ${prevEp}`, { icon: '▶️' });
         }
     };
@@ -701,7 +760,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             
             try {
                 // Kick off episodes fetch
-                const episodesPromise = axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`, {
+                const episodesPromise = axios.get(`/api/anime/episodes?id=${encodeURIComponent(id)}&provider=${encodeURIComponent(provider || '')}`, {
                     timeout: 15000,
                     signal: controller.signal
                 });
@@ -714,12 +773,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 if (!fetchedShow) throw new Error("No show data received");
                 
                 // Strict ID Validation
-                if (String(fetchedShow.id) !== String(id) && String(fetchedShow.showId) !== String(id) && !provider) {
-                    console.error('[WatchClient] ID Mismatch Detected!', { requested: id, received: fetchedShow.id });
+                const fetchedShowId = String(fetchedShow.id || fetchedShow.showId || fetchedShow._id || '');
+                if (fetchedShowId && fetchedShowId !== String(id) && !provider) {
+                    console.error('[WatchClient] ID Mismatch Detected!', { requested: id, received: fetchedShowId });
                     throw new Error("CONTENT_MISMATCH");
                 }
                 
-                console.log(`[GlobalClickDebugger] 🌐 API FETCHED ID (Anime): ${fetchedShow.id || fetchedShow.showId}`);
+                console.log(`[GlobalClickDebugger] 🌐 API FETCHED ID (Anime): ${fetchedShow.id || fetchedShow.showId || fetchedShow._id}`);
                 
                 setShow(fetchedShow);
 
@@ -793,7 +853,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const controller = new AbortController();
         
         // ALWAYS include movie servers — they are the guaranteed fallback
-        const movieServersList = dynamicMovieServers.map(ms => ({
+        const movieServersList = dynamicMovieServers.map((ms: any) => ({
             serverId: ms.id,
             serverName: ms.name,
             type: mode,
@@ -849,7 +909,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const epObj = availableEps.find((e: any) => typeof e === 'object' ? String(e.number || e.id) === String(currentEp) : String(e) === String(currentEp));
                 const episodeIdForApi = (typeof epObj === 'object' && epObj ? epObj.id : currentEp) || currentEp;
 
-                const res = await axios.get(`/api/anime/servers?episodeId=${episodeIdForApi}&provider=${provider || ''}`, {
+                const res = await axios.get(`/api/anime/servers?episodeId=${encodeURIComponent(episodeIdForApi)}&provider=${encodeURIComponent(provider || '')}`, {
                     signal: controller.signal
                 });
                 if (controller.signal.aborted) return;
@@ -901,6 +961,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const key = `${id}-${currentEp}-${mode}-${selectedServer}`;
         if (processingRef.current === key) return;
         processingRef.current = key;
+        const currentSeq = ++sourceSeqRef.current;
+        const controller = new AbortController();
 
         const fetchSource = async () => {
             const selectedServerObj = servers.find(s => s.serverId === selectedServer);
@@ -915,14 +977,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const serverWithUrl = selectedServerObj as any;
                 
                 if (serverWithUrl.isEmergency) {
+                    if (currentSeq !== sourceSeqRef.current) return;
                     setSourceUrl(serverWithUrl.getUrl());
                 } else {
                     if (!tmdbId || tmdbId === "0") {
+                        if (currentSeq !== sourceSeqRef.current) return;
                         setError("TMDB Metadata missing for this title. Try a native server.");
                         processingRef.current = null;
                         return;
                     }
                     const iframeUrl = serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                    if (currentSeq !== sourceSeqRef.current) return;
                     setSourceUrl(iframeUrl);
                 }
 
@@ -937,6 +1002,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             if (show.availableEpisodesDetail) {
                 const availableEps = show.availableEpisodesDetail[mode] || [];
                 if (!availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(currentEp)) {
+                    if (currentSeq !== sourceSeqRef.current) return;
                     setError(`Episode ${currentEp} is not available in ${mode.toUpperCase()} mode.`);
                     processingRef.current = null;
                     return;
@@ -946,8 +1012,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             setLoadingSource(true);
             setSourceUrl(null);
             setError(null);
-
-            const controller = new AbortController();
 
             try {
                 console.log('[WatchPage] Fetching source from native server...');
@@ -964,22 +1028,26 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     }
                 });
 
-                if (controller.signal.aborted) return;
-                if (processingRef.current !== key) return;
+                if (controller.signal.aborted || currentSeq !== sourceSeqRef.current) return;
 
-                const links = res.data.links;
-                if (links && links.length > 0) {
-                    const hlsIndex = links.findIndex((l: any) => l.hls);
+                const links = res.data.sources || res.data.links;
+                if (links && Array.isArray(links) && links.length > 0) {
+                    const hlsIndex = links.findIndex((l: any) => l.hls || l.isM3U8 || l.type === 'hls');
                     const selected = hlsIndex !== -1 ? links[hlsIndex] : links[0];
-                    const absoluteUrl = selected.link.startsWith('http')
-                        ? selected.link
-                        : `${window.location.origin}${selected.link}`;
+                    const rawUrl = selected.url || selected.link;
+                    if (!rawUrl || typeof rawUrl !== 'string') {
+                        throw new Error('Invalid source URL received');
+                    }
+                    const absoluteUrl = rawUrl.startsWith('http')
+                        ? rawUrl
+                        : `${window.location.origin}${rawUrl}`;
 
-                    const isM3U8 = selected.hls || absoluteUrl.includes('.m3u8') || selected.isM3U8;
+                    const isM3U8 = selected.hls || selected.isM3U8 || selected.type === 'hls' || absoluteUrl.includes('.m3u8');
                     
                     if (isM3U8 || absoluteUrl.includes('.mp4')) {
                         const proxiedUrl = `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`;
                         console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (Anime MP4/M3U8): ${id} -> ${proxiedUrl}`);
+                        if (currentSeq !== sourceSeqRef.current) return;
                         setRawVideoSource(proxiedUrl);
                         setSourceUrl(proxiedUrl);
                         setVideoType(isM3U8 ? "m3u8" : "mp4");
@@ -988,31 +1056,31 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         try { referer = new URL(absoluteUrl).origin; } catch(_) {}
                         const proxiedUrl = `/api/proxy/embed?url=${encodeURIComponent(absoluteUrl)}&referer=${encodeURIComponent(referer)}`;
                         console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (Anime IFrame): ${id} -> ${proxiedUrl}`);
+                        if (currentSeq !== sourceSeqRef.current) return;
                         setSourceUrl(proxiedUrl);
                         setVideoType("iframe");
                     }
-
-
                 } else {
                     // No links found — auto-switch to next server
                     console.warn('[WatchPage] No links from native server. Rotating...');
+                    if (currentSeq !== sourceSeqRef.current) return;
                     handleAutoFallback();
                 }
             } catch (err: any) {
-                if (processingRef.current !== key) return;
+                if (axios.isCancel(err) || controller.signal.aborted) return;
+                if (currentSeq !== sourceSeqRef.current) return;
                 console.error('[WatchPage] Native server failed:', err.message);
                 handleAutoFallback();
             } finally {
-                if (processingRef.current === key) {
+                if (currentSeq === sourceSeqRef.current) {
                     setLoadingSource(false);
                     processingRef.current = null;
                 }
             }
         };
 
-
         fetchSource();
-
+        return () => controller.abort();
     }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
 
     const handleVideoEnded = () => {
@@ -1281,7 +1349,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     type: videoType,
                                 }}
                                 initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
-                                onTimeUpdate={(currentTime, duration) => {
+                                onTimeUpdate={(currentTime: number, duration: number) => {
                                     addToHistory({
                                         id: `${fullId}-${currentEp}`,
                                         showId: fullId,

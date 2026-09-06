@@ -15,21 +15,30 @@ export default function GenrePage() {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     useEffect(() => {
+        if (!genre) return;
+        const controller = new AbortController();
         const fetchGenreData = async () => {
-            if (!genre) return;
             setIsLoading(true);
             try {
-                // We use our existing API endpoint
-                const res = await axios.get(`/api/anime/genre?name=${genre}&provider=hianime`);
-                setShows(res.data.shows || []);
-            } catch (error) {
-                console.error("Failed to fetch genre shows:", error);
+                const res = await axios.get(`/api/anime/genre?name=${encodeURIComponent(genre)}&provider=hianime`, {
+                    signal: controller.signal
+                });
+                if (!controller.signal.aborted) {
+                    setShows(res.data.shows || []);
+                }
+            } catch (error: any) {
+                if (!axios.isCancel(error) && !controller.signal.aborted) {
+                    console.error("Failed to fetch genre shows:", error);
+                }
             } finally {
-                setIsLoading(false);
+                if (!controller.signal.aborted) {
+                    setIsLoading(false);
+                }
             }
         };
 
         fetchGenreData();
+        return () => controller.abort();
     }, [genre]);
 
     const capitalizedGenre = genre ? genre.charAt(0).toUpperCase() + genre.slice(1) : "";

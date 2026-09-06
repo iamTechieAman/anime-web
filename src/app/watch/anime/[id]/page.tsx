@@ -3,13 +3,15 @@ import WatchClient from "./WatchClient";
 import { fetchWithTimeout } from "@/lib/utils/fetch";
 
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.toonplayer.in';
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
     try {
         // Fetch show data for metadata
         // Note: In a real app, you might want to cache this or use a shared fetch utility
-        const res = await fetchWithTimeout(fetch(`https://www.toonplayer.in/api/anime/episodes?id=${id}`), 3000);
+        const res = await fetchWithTimeout(fetch(`${SITE_URL}/api/anime/episodes?id=${encodeURIComponent(id)}`), 3000);
         const data = await res.json();
         const show = data.show;
 
@@ -61,7 +63,7 @@ export default async function WatchPage({ params, searchParams }: { params: any,
     let metaImage = "https://www.toonplayer.in/icon.png";
 
     try {
-        const res = await fetchWithTimeout(fetch(`https://www.toonplayer.in/api/anime/episodes?id=${id}`), 3000);
+        const res = await fetchWithTimeout(fetch(`${SITE_URL}/api/anime/episodes?id=${encodeURIComponent(id)}`), 3000);
         const data = await res.json();
         const show = data.show;
         if (show) {

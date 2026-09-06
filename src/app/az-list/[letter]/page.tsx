@@ -27,25 +27,34 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
     const [movieCount, setMovieCount] = useState(0);
 
     useEffect(() => {
+        const controller = new AbortController();
         const fetchShows = async () => {
             setLoading(true);
             setError(null);
             try {
-                const res = await axios.get(`/api/anime/az?letter=${letter}&page=${page}&tab=${activeTab}`, {
+                const res = await axios.get(`/api/anime/az?letter=${encodeURIComponent(letter)}&page=${page}&tab=${encodeURIComponent(activeTab)}`, {
+                    signal: controller.signal,
                     timeout: 20000,
                 });
-                setShows(res.data.shows || []);
-                setAnimeCount(res.data.animeCount || 0);
-                setMovieCount(res.data.movieCount || 0);
+                if (!controller.signal.aborted) {
+                    setShows(res.data.shows || []);
+                    setAnimeCount(res.data.animeCount || 0);
+                    setMovieCount(res.data.movieCount || 0);
+                }
             } catch (err: any) {
-                console.error("Failed to fetch A-Z list", err);
-                setError(err.response?.data?.error || err.message || "Failed to load content. Please try again.");
+                if (!axios.isCancel(err) && !controller.signal.aborted) {
+                    console.error("Failed to fetch A-Z list", err);
+                    setError(err.response?.data?.error || err.message || "Failed to load content. Please try again.");
+                }
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchShows();
+        return () => controller.abort();
     }, [letter, page, activeTab]);
 
     return (

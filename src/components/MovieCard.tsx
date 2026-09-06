@@ -20,6 +20,11 @@ export interface MovieItem {
     release_date?: string;
     first_air_date?: string;
     media_type?: string;
+    type?: string;
+    anilistId?: string | number;
+    aniListId?: string | number;
+    malId?: string | number;
+    provider?: string;
     overview?: string;
     rank?: number;
     liveViewers?: number;
@@ -31,6 +36,7 @@ export interface MovieItem {
         dub?: number;
         raw?: number;
     };
+    [key: string]: any;
 }
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
@@ -39,20 +45,6 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatured = false }: { item: MovieItem; type?: string; isFeatured?: boolean }) {
     const [imgError, setImgError] = useState(false);
     const [liveViewers, setLiveViewers] = useState(item.liveViewers);
-    const [isVisible, setIsVisible] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
-
-    // Intersection Observer for lazy reveal
-    useEffect(() => {
-        const el = cardRef.current;
-        if (!el) return;
-        const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
-            { rootMargin: "0px", threshold: 0.05 }
-        );
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, []);
 
     // Fluctuating live viewer count
     useEffect(() => {
@@ -72,36 +64,27 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
     const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
     const year = (releaseDate || "").slice(0, 4);
     const rating = item.vote_average && item.vote_average > 0 ? item.vote_average.toFixed(1) : null;
-    // Enforce reliable media type detection preferring metadata
-    const mediaType = detectMediaType({ ...item, media_type: item.media_type || type });
+    const isExplicitAnime = type === "anime" || item.type === "anime" || item.media_type === "anime" || !!item.anilistId || String(item.id).startsWith("hi:") || String(item.id).startsWith("aw:") || String(item.id).startsWith("anikai:");
     
-    // For routing: TMDB items should go to /watch/movie or /watch/tv
-    // Anime items (Anilist/HiAnime) should go to /watch/anime
-    let routeType = mediaType;
-    
-    // Explicit Anime Provider overrides
-    if (type === "anime" || item.type === "anime" || item.anilistId) {
-        routeType = "anime";
+    // Enforce reliable media type detection
+    let routeType: "movie" | "tv" | "anime" = isExplicitAnime ? "anime" : detectMediaType({ ...item, media_type: item.media_type || type });
+
+    let finalId = String(item.id);
+    if (finalId.startsWith('tmdb:')) {
+        const parts = finalId.split(':');
+        routeType = (parts[1] === 'tv' ? 'tv' : 'movie') as any;
+        finalId = parts[2] || parts[1];
     }
 
-    // Force TMDB items to stay on TMDB routes
-    const isFromTmdb = !!(item.vote_average || item.media_type || item.first_air_date || item.release_date);
-    if (isFromTmdb && routeType === "anime") {
-        // Safe fallback for TMDB Anime (routes them to standard TV/Movie players)
-        const hasSeasons = (item.number_of_seasons && item.number_of_seasons > 0) || 
-                           (Array.isArray(item.seasons) && item.seasons.length > 0) ||
-                           item.first_air_date || item.name;
-        routeType = hasSeasons ? "tv" : "movie";
-    }
-
-    const watchHref = routeType === 'anime' ? `/watch/anime/${item.id}` : `/watch/${routeType}/${item.id}`;
+    const watchHref = routeType === 'anime' 
+        ? `/watch/anime/${encodeURIComponent(finalId)}` 
+        : `/watch/${routeType}/${encodeURIComponent(finalId)}`;
 
     const posterSrc = item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image;
 
     return (
         <div
-            ref={cardRef}
-            className={`group relative w-full card-virtualized transition-all duration-[250ms] ease-apple will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'} ${isFeatured ? 'col-span-1' : ''}`}
+            className={`group relative w-full card-virtualized transition-all duration-[250ms] ease-apple will-change-transform opacity-100 translate-y-0 ${isFeatured ? 'col-span-1' : ''}`}
         >
             <Link 
                 href={watchHref} 

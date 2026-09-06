@@ -51,17 +51,41 @@ function cleanSearchTitle(title: string): string {
         .trim();
 }
 
+import { ProviderName } from "@/lib/providers";
+
+function normalizeProvider(name?: string | null): ProviderName | undefined {
+    if (!name) return undefined;
+    const lower = name.toLowerCase().trim();
+    if (lower === 'hi' || lower === 'hianime' || lower === 'hianime_fallback') return 'hianime';
+    if (lower === 'aw' || lower === 'aniwatch') return 'aniwatch';
+    if (lower === 'anikai') return 'anikai';
+    if (lower === 'allanime') return 'allanime';
+    if (lower === 'aniwave') return 'aniwave';
+    if (lower === 'aniwatchtv') return 'aniwatchtv';
+    if (lower === 'consumet' || lower === 'anilist') return 'consumet';
+    if (lower === 'gogoanime') return 'gogoanime';
+    if (lower === 'animepahe') return 'animepahe';
+    if (lower === 'cinevo') return 'cinevo';
+    if (lower === 'vidsrc') return 'vidsrc';
+    if (lower === 'jikan') return 'jikan';
+    return undefined;
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const fullId = searchParams.get("id");
+    const rawProvider = searchParams.get("provider");
 
     if (!fullId) {
         return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
 
-    // Strip provider prefix if any (e.g., "anilist:123" -> "123")
-    const id = fullId.includes(':') ? fullId.split(':').slice(1).join(':') : fullId;
+    // Strip provider prefix if any (e.g., "hi:naruto-355" -> "naruto-355")
+    const hasPrefix = fullId.includes(':');
+    const prefixProvider = hasPrefix ? fullId.split(':')[0] : null;
+    const id = hasPrefix ? fullId.split(':').slice(1).join(':') : fullId;
     const isNumeric = /^\d+$/.test(id);
+    const preferredProvider = normalizeProvider(rawProvider) || normalizeProvider(prefixProvider);
 
     let info: any = null;
     let fallbackUsed = false;
@@ -71,7 +95,7 @@ export async function GET(request: Request) {
         if (isNumeric) {
             // 1. Try Consumet first for AniList IDs
             try {
-                info = await AnimeProviderManager.getInfo(id, 'consumet');
+                info = await AnimeProviderManager.getInfo(id, preferredProvider || 'consumet');
             } catch (err: any) {
                 console.warn(`[Episodes] Consumet failed for AniList ID ${id}: ${err.message}. Trying HiAnime mapping fallback...`);
             }
@@ -103,8 +127,8 @@ export async function GET(request: Request) {
                 }
             }
         } else {
-            // Non-numeric ID: Directly query HiAnime provider
-            info = await AnimeProviderManager.getInfo(id, 'hianime');
+            // Non-numeric ID: Query preferred provider or default to hianime
+            info = await AnimeProviderManager.getInfo(id, preferredProvider || 'hianime');
         }
 
         if (!info) {
@@ -118,6 +142,8 @@ export async function GET(request: Request) {
                     description: `Episode ${i + 1} of ${aniListMeta.title.english || aniListMeta.title.userPreferred}`,
                 }));
                 const show = {
+                    id: id,
+                    showId: id,
                     _id: id,
                     name: aniListMeta.title.english || aniListMeta.title.userPreferred || 'Unknown',
                     englishName: aniListMeta.title.english || null,
@@ -130,7 +156,7 @@ export async function GET(request: Request) {
                         sub: mockEpisodes, 
                         dub: mockEpisodes 
                     },
-                    provider: 'hianime_fallback',
+                    provider: preferredProvider || 'hianime_fallback',
                 };
                 return NextResponse.json({ show });
             }
@@ -149,7 +175,9 @@ export async function GET(request: Request) {
         }));
 
         const show = {
-            _id: id, // Stay consistent with route parameter ID
+            id: id,
+            showId: id,
+            _id: id, // Stay consistent across all consumers
             name: info.title || aniListMeta?.title?.english || aniListMeta?.title?.userPreferred || 'Unknown',
             englishName: aniListMeta?.title?.english || info.title || null,
             romajiName: aniListMeta?.title?.romaji || info.romajiName || null,
@@ -162,7 +190,7 @@ export async function GET(request: Request) {
                 // Pass same list to dub
                 dub: episodesList
             },
-            provider: fallbackUsed ? 'hianime' : (info.provider || 'consumet'),
+            provider: fallbackUsed ? 'hianime' : (preferredProvider || info.provider || 'consumet'),
         };
 
         return NextResponse.json({ show });

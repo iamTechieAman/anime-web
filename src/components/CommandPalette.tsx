@@ -293,7 +293,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             ref={inputRef}
                             type="text"
                             value={query}
-                            onChange={e => { setQuery(e.target.value); setActiveIndex(0); }}
+                            onChange={e => { 
+                                const val = e.target.value;
+                                setQuery(val); 
+                                if (!val.trim()) {
+                                    setResults([]);
+                                    setLoading(false);
+                                }
+                                setActiveIndex(0); 
+                            }}
                             placeholder="Search anime, movies, actors, collections, genres..."
                             className="w-full bg-transparent border-0 ring-0 focus:ring-0 focus:outline-none outline-none text-white placeholder-zinc-500 text-sm font-semibold"
                             role="combobox"
@@ -377,18 +385,22 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         id="command-palette-results"
                         role="listbox"
                         aria-label="Search suggestions"
-                        className="flex-1 overflow-y-auto p-3 space-y-4 max-h-[280px] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3"
+                        className="flex-1 overflow-y-auto p-3 space-y-4 min-h-[260px] max-h-[280px] md:max-h-[420px] rounded-xl backdrop-blur-xl bg-black/40 border border-white/5 mx-3 mb-3 scrollbar-thin"
                     >
-                        {loading && (
-                            <div className="p-8 text-center text-zinc-500 text-xs font-bold animate-pulse">
-                                Loading matched titles...
+                        {loading && results.length === 0 && (
+                            <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-500 text-xs font-bold">
+                                <Loader2 className="w-5 h-5 animate-spin text-accent" />
+                                <span>Loading matched titles...</span>
                             </div>
                         )}
 
                         {/* Search Results */}
-                        {!loading && results.length > 0 && (
-                            <div>
-                                <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase px-3 mb-2">Search Results</p>
+                        {results.length > 0 && (
+                            <div className={loading ? "opacity-70 transition-opacity duration-150" : "transition-opacity duration-150"}>
+                                <div className="flex items-center justify-between px-3 mb-2">
+                                    <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase">Search Results</p>
+                                    {loading && <Loader2 className="w-3 h-3 animate-spin text-accent" />}
+                                </div>
                                 <div className="space-y-1">
                                     {results.map((item, idx) => {
                                         const actualIdx = idx;
@@ -398,14 +410,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 id={`option-${actualIdx}`}
                                                 role="option"
                                                 aria-selected={isSelected}
-                                                key={item.id + item.type}
+                                                key={`${item.id}-${item.type}-${idx}`}
                                                 onClick={() => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }}
                                                 onMouseEnter={() => setActiveIndex(actualIdx)}
                                                 className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-left transition-all ${
                                                     isSelected ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-[var(--accent-glow)]" : "text-zinc-300 hover:bg-white/5"
                                                 }`}
                                             >
-                                                <div className="w-8 h-10 relative overflow-hidden rounded bg-zinc-950/40 border border-white/10 shrink-0">
+                                                <div className="w-8 h-10 aspect-[4/5] relative overflow-hidden rounded bg-zinc-950/40 border border-white/10 shrink-0">
                                                     {item.image ? <Image src={item.image} alt="" fill sizes="32px" className="object-cover" /> : <Film className="w-4 h-4 m-auto text-zinc-500" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -430,6 +442,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                         );
                                     })}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Empty search results state */}
+                        {!loading && query.trim().length >= 2 && results.length === 0 && (
+                            <div className="py-12 text-center text-zinc-500 text-xs font-medium">
+                                No results found for &ldquo;<span className="text-white font-bold">{query}</span>&rdquo;
                             </div>
                         )}
 

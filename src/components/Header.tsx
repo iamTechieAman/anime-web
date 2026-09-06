@@ -109,32 +109,45 @@ export default function Header() {
 
   useEffect(() => {
     const q = searchQuery.trim().replace(/\s+/g,' ');
-    if (!q) { setSuggestions([]); return; }
+    if (!q) { 
+      setSuggestions([]); 
+      return; 
+    }
     if (fuseRef.current) {
       const local = fuseRef.current.search(q).map(r => r.item);
       if (local.length > 0) setSuggestions(local.slice(0,10));
     }
+    const controller = new AbortController();
     const t = setTimeout(async () => {
       if (q.length < 2) return;
       try {
-        const res = await axios.get(UNIFIED_SEARCH_URL, { params:{ q } });
+        const res = await axios.get(UNIFIED_SEARCH_URL, { 
+          params:{ q },
+          signal: controller.signal 
+        });
+        if (controller.signal.aborted) return;
         const net = res.data.results || [];
         if (net.length > 0) {
           const nf = new Fuse(net, { keys:[{name:'title',weight:2},{name:'altTitles',weight:1.8},{name:'format',weight:1}], threshold:0.3, distance:100, shouldSort:true });
           const ranked = nf.search(q).map(r => r.item);
           const final = ranked.length > 0 ? ranked : net;
-          setSuggestions(prev => {
-            const combined = [...prev, ...final];
-            const seen = new Set();
-            return combined.filter(item => {
-              const k = `${item.id}-${(item.title||"").toLowerCase().trim()}`;
-              if (seen.has(k)) return false; seen.add(k); return true;
-            }).slice(0,10);
-          });
+          const seen = new Set();
+          const deduped = final.filter((item: any) => {
+            const k = `${item.id}-${(item.title||"").toLowerCase().trim()}`;
+            if (seen.has(k)) return false; 
+            seen.add(k); 
+            return true;
+          }).slice(0,10);
+          setSuggestions(deduped);
         }
-      } catch(e) {}
+      } catch(e) {
+        if (axios.isCancel(e)) return;
+      }
     }, 200);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [searchQuery]);
 
   const saveRecent = (q: string) => {
@@ -266,7 +279,7 @@ export default function Header() {
                   {suggestions.length>0?suggestions.map((item:any,i:number)=>(
                     <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} scroll={false} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
                       className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-accent':''}`}>
-                      <div className="w-12 h-16 overflow-hidden rounded-xl bg-bg-elevated shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
+                      <div className="w-12 h-16 relative overflow-hidden rounded-xl bg-bg-elevated shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
                       <div className="flex-1 min-w-0">
                         <span className="text-base font-bold text-white block truncate">{item.title}</span>
                         <span className="text-xs text-zinc-400 font-semibold uppercase">{item.type} · {item.year}</span>

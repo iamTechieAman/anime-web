@@ -6,6 +6,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, X, TrendingUp, Sparkles, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { MovieGrid, type MovieItem } from "@/components/MovieCard";
+import { GridSkeleton } from "@/components/SkeletonLoader";
 import { useUserStore, isKidsFriendly } from "@/store/userStore";
 
 const GENRE_MAP: Record<string, number> = {
@@ -46,6 +47,7 @@ function MovieSearchContent() {
     const [showFilters, setShowFilters] = useState(false);
 
     const performSearch = useCallback(() => {
+        const controller = new AbortController();
         setLoading(true);
         setError(null);
         if (typeof window !== "undefined") {
@@ -56,25 +58,35 @@ function MovieSearchContent() {
         if (genre && !query) params.set("genre", genre);
         if (status && !query) params.set("status", status);
 
-        axios.get(`/api/prime/search?${params.toString()}`)
+        axios.get(`/api/prime/search?${params.toString()}`, { signal: controller.signal })
             .then(res => {
                 let fetched = res.data.results || [];
                 if (isKidsMode) {
-                    fetched = fetched.filter(item => item && isKidsFriendly(item));
+                    fetched = fetched.filter((item: MovieItem) => item && isKidsFriendly(item));
                 }
                 setResults(fetched);
                 setError(null);
             })
             .catch(err => {
+                if (axios.isCancel(err) || err.name === 'CanceledError') return;
                 console.error("Search failed:", err);
                 setError("Failed to connect to the database. Please try again.");
                 setResults([]);
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            });
+
+        return () => controller.abort();
     }, [query, genre, status, isKidsMode]);
 
     useEffect(() => {
-        performSearch();
+        const cleanup = performSearch();
+        return () => {
+            if (typeof cleanup === 'function') cleanup();
+        };
     }, [performSearch]);
 
     const title = query 
@@ -163,18 +175,10 @@ function MovieSearchContent() {
 
             {/* Results */}
             {loading ? (
-                <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    className="flex flex-col justify-center items-center py-32 gap-6"
-                >
-                    <div className="relative flex items-center justify-center">
-                        <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse rounded-full" />
-                        <div className="w-16 h-16 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin relative z-10" />
-                        <Search className="absolute inset-0 m-auto w-6 h-6 text-blue-400 z-10" />
-                    </div>
-                    <p className="text-sm font-medium tracking-widest uppercase text-blue-400/80 animate-pulse">Searching Database</p>
-                </motion.div>
+                <div className="pb-12 space-y-4">
+                    <div className="h-5 w-32 bg-white/5 rounded skeleton-shine" />
+                    <GridSkeleton count={12} />
+                </div>
             ) : error ? (
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}

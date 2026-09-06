@@ -120,10 +120,13 @@ export default function MobileModals() {
 
         if (cleanQuery.length < 2) return;
 
+        const controller = new AbortController();
         // 2. Network search
         axios.get('/api/search/unified', {
-            params: { q: cleanQuery }
+            params: { q: cleanQuery },
+            signal: controller.signal
         }).then(response => {
+            if (controller.signal.aborted) return;
             const networkItems = response.data.results || [];
             if (networkItems.length > 0) {
                 const netFuse = new Fuse(networkItems, {
@@ -138,18 +141,20 @@ export default function MobileModals() {
                 const ranked = netFuse.search(cleanQuery).map(r => r.item);
                 const finalNetwork = ranked.length > 0 ? ranked : networkItems;
 
-                setSuggestions(prev => {
-                    const combined = [...prev, ...finalNetwork];
-                    const seen = new Set();
-                    return combined.filter(item => {
-                        const key = `${item.id}-${(item.title || "").toLowerCase().trim()}`;
-                        if (seen.has(key)) return false;
-                        seen.add(key);
-                        return true;
-                    }).slice(0, 10);
-                });
+                const seen = new Set();
+                const deduped = finalNetwork.filter((item: any) => {
+                    const key = `${item.id}-${(item.title || "").toLowerCase().trim()}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                }).slice(0, 10);
+                setSuggestions(deduped);
             }
-        }).catch(() => {});
+        }).catch((err) => {
+            if (axios.isCancel(err)) return;
+        });
+
+        return () => controller.abort();
     }, [debouncedQuery, fuse]);
 
     // Close search overlay on Escape

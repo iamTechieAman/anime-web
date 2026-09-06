@@ -32,17 +32,27 @@ export async function GET(request: Request) {
 
             if (results && results.length > 0) {
                 console.log(`[Popular] Successfully fetched ${results.length} items from ${providerName}`);
-                // Convert to old format for backward compatibility
+                // Convert to standard format with consistent identity fields
                 const shows = results.map((result: any) => ({
-                    _id: result.id,
+                    _id: String(result.id),
+                    id: String(result.id),
+                    showId: String(result.id),
                     name: result.title,
+                    title: result.title,
                     thumbnail: result.image,
+                    image: result.image,
                     availableEpisodes: result.subOrDub,
                     provider: result.provider || providerName,
+                    type: "anime",
+                    media_type: "anime",
                     __typename: "Show"
                 }));
 
-                return NextResponse.json({ shows });
+                return NextResponse.json({ shows }, {
+                    headers: {
+                        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+                    }
+                });
             } else {
                 console.warn(`[Popular] Provider ${providerName} returned 0 results.`);
                 errors.push({ provider: providerName, error: "No results found" });

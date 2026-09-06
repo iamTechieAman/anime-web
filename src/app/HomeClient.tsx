@@ -467,17 +467,29 @@ export default function MoviesPage() {
             return;
         }
         setIsSearching(true);
+        const controller = new AbortController();
         const timer = setTimeout(async () => {
             try {
-                const res = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchQuery)}`);
-                setSearchResults(res.data.results || []);
-            } catch (err) {
-                console.error("Search failed:", err);
+                const res = await axios.get(`/api/search/unified?q=${encodeURIComponent(searchQuery)}`, {
+                    signal: controller.signal
+                });
+                if (!controller.signal.aborted) {
+                    setSearchResults(res.data.results || []);
+                }
+            } catch (err: any) {
+                if (!axios.isCancel(err) && !controller.signal.aborted) {
+                    console.error("Search failed:", err);
+                }
             } finally {
-                setIsSearching(false);
+                if (!controller.signal.aborted) {
+                    setIsSearching(false);
+                }
             }
         }, 400);
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
     }, [searchQuery]);
 
     // Check for search query in URL

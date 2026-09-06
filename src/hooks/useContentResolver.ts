@@ -75,7 +75,7 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                 if (isExplicitAnime) {
                     typeToFetch = "anime";
                     // Fetch Anime Metadata
-                    const res = await axios.get(`/api/anime/episodes?id=${id}&provider=${provider || ''}`, {
+                    const res = await axios.get(`/api/anime/episodes?id=${encodeURIComponent(id)}&provider=${encodeURIComponent(provider || '')}`, {
                         signal: controller.signal,
                         timeout: 15000
                     });
@@ -85,8 +85,9 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                     if (!show) throw new Error("No show data received");
 
                     // Validate ID
-                    if (String(show.id) !== String(id) && String(show.showId) !== String(id) && !provider) {
-                        console.error('[UniversalResolver] ID Mismatch', { requested: id, received: show.id });
+                    const fetchedShowId = String(show.id || show.showId || show._id || '');
+                    if (fetchedShowId && fetchedShowId !== String(id) && !provider) {
+                        console.error('[UniversalResolver] ID Mismatch', { requested: id, received: fetchedShowId });
                         throw new Error("CONTENT_MISMATCH");
                     }
 
@@ -111,7 +112,7 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                     };
                 } else {
                     // Fetch TMDB Metadata
-                    const res = await axios.get(`/api/prime/details?id=${id}&type=${typeToFetch}`, { signal: controller.signal });
+                    const res = await axios.get(`/api/prime/details?id=${encodeURIComponent(id)}&type=${encodeURIComponent(typeToFetch)}`, { signal: controller.signal });
                     if (controller.signal.aborted) return;
                     
                     const data = res.data;

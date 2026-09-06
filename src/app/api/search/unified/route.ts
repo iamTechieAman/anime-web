@@ -46,7 +46,7 @@ export async function GET(request: Request) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: ANILIST_QUERY, variables: { search: query } }),
                     next: { revalidate: 3600 }
-                }),
+                } as RequestInit),
                 3000
             ).then(res => res.json()),
             withTimeout(

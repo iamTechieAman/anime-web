@@ -6,7 +6,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
     Compass, Film, Tv, X, SlidersHorizontal, 
-    ArrowUpDown, Globe, Calendar, RefreshCw, Loader2 
+    ArrowUpDown, Globe, Calendar, RefreshCw, Loader2, Sparkles 
 } from "lucide-react";
 import { MovieCard, type MovieItem } from "@/components/MovieCard";
 import { GridSkeleton } from "@/components/SkeletonLoader";
@@ -78,7 +78,8 @@ export default function BrowseClient() {
     const router = useRouter();
 
     // Read filters directly from searchParams (single source of truth)
-    const mediaType = (searchParams.get("type") as "movie" | "tv") || "movie";
+    const rawType = searchParams.get("type");
+    const mediaType: "movie" | "tv" | "anime" = rawType === "anime" ? "anime" : (rawType === "tv" ? "tv" : "movie");
     const selectedGenre = searchParams.get("genre_id") || "";
     const selectedNetwork = searchParams.get("network_id") || "";
     const selectedYear = searchParams.get("year") || "";
@@ -181,17 +182,23 @@ export default function BrowseClient() {
             const maxAttempts = 5; // Guard against infinite looping
 
             while (attempts < maxAttempts) {
+                const isAnime = mediaType === "anime";
                 const params = new URLSearchParams({
-                    media_type: mediaType,
+                    media_type: isAnime ? "tv" : mediaType,
                     sort_by: selectedSort,
                     page: String(currentPageNum),
                     watch_region: selectedCountry
                 });
 
-                if (selectedGenre) params.set("genre_id", selectedGenre);
+                if (isAnime) {
+                    params.set("genre_id", selectedGenre || "16");
+                    if (!selectedLanguage) params.set("with_original_language", "ja");
+                } else if (selectedGenre) {
+                    params.set("genre_id", selectedGenre);
+                }
                 if (selectedNetwork) params.set("network_id", selectedNetwork);
                 if (selectedYear) params.set("year", selectedYear);
-                if (selectedLanguage) params.set("with_original_language", selectedLanguage);
+                if (selectedLanguage && !isAnime) params.set("with_original_language", selectedLanguage);
 
                 const res = await axios.get(`/api/prime/discover?${params.toString()}`);
                 let fetchedResults = res.data.results || [];
@@ -313,25 +320,36 @@ export default function BrowseClient() {
                             <div className="bg-[#12131A] border border-white/5 p-1 rounded-xl flex gap-1">
                                 <button
                                     onClick={() => setFilterParam("type", "movie")}
-                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+                                    className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "movie" 
                                             ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
-                                    <Film className="w-3.5 h-3.5 inline mr-2" />
+                                    <Film className="w-3.5 h-3.5 inline mr-1.5" />
                                     Movies
                                 </button>
                                 <button
                                     onClick={() => setFilterParam("type", "tv")}
-                                    className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+                                    className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "tv" 
                                             ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
-                                    <Tv className="w-3.5 h-3.5 inline mr-2" />
+                                    <Tv className="w-3.5 h-3.5 inline mr-1.5" />
                                     TV Series
+                                </button>
+                                <button
+                                    onClick={() => setFilterParam("type", "anime")}
+                                    className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+                                        mediaType === "anime" 
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
+                                            : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
+                                    }`}
+                                >
+                                    <Sparkles className="w-3.5 h-3.5 inline mr-1.5" />
+                                    Anime
                                 </button>
                             </div>
 

@@ -38,7 +38,7 @@ export async function GET() {
             },
             body: JSON.stringify({ query }),
             next: { revalidate: 3600 }
-        }), 3000);
+        } as RequestInit), 3000);
 
         const data = await res.json();
         
@@ -50,9 +50,14 @@ export async function GET() {
             const anilistImage = item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium;
             return {
                 id: String(item.id),
+                _id: String(item.id),
+                showId: String(item.id),
                 title: item.title.english || item.title.romaji,
+                name: item.title.english || item.title.romaji,
                 image: anilistImage || '/placeholder.jpg',
-                type: "anime"
+                poster_path: anilistImage || null,
+                type: "anime",
+                media_type: "anime"
             };
         };
 

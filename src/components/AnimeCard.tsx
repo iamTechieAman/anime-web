@@ -62,24 +62,7 @@ function resolveImage(show: Show): string | null {
 }
 
 const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
-    const [isVisible, setIsVisible] = useState(false);
     const [imgError, setImgError] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    observer.unobserve(entry.target);
-                }
-            },
-            { threshold: 0.05, rootMargin: "100px" }
-        );
-
-        if (cardRef.current) observer.observe(cardRef.current);
-        return () => observer.disconnect();
-    }, []);
 
     const showId = show._id || show.id;
     const isTmdbContent = showId?.startsWith('tmdb:');
@@ -89,10 +72,12 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
             const parts = showId.split(':');
             const type = parts[1] || 'movie';
             const tmdbId = parts[2] || parts[1];
-            return `/watch/${type}/${tmdbId}`;
+            return `/watch/${type}/${encodeURIComponent(tmdbId)}`;
         }
-        const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : 'allanime');
-        return `/watch/anime/${showId}?provider=${provider}`;
+        const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : undefined);
+        return provider 
+            ? `/watch/anime/${encodeURIComponent(showId)}?provider=${encodeURIComponent(provider)}`
+            : `/watch/anime/${encodeURIComponent(showId)}`;
     };
 
     const title = cleanString(show.title) || cleanString(show.name) || "Anime Masterpiece";
@@ -102,11 +87,11 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
     const typeLabel = cleanString(show.type) || cleanString(show.media_type) || "ANIME";
 
     return (
-        <div ref={cardRef} className={`card-reveal ${isVisible ? 'card-visible' : ''} group relative transition-all duration-[250ms] hover:z-30 w-full h-full`}>
+        <div className="card-reveal card-visible group relative transition-all duration-[250ms] hover:z-30 w-full h-full">
             <Link href={getHref()} scroll={false} className="block w-full h-full">
                 <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
                     {/* Poster */}
-                    {(imageSrc && !imgError && isVisible) ? (
+                    {(imageSrc && !imgError) ? (
                         <div className="relative w-full h-full overflow-hidden">
                             <Image
                                 src={imageSrc}
@@ -116,6 +101,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                                 className="object-cover transition-transform duration-[250ms] ease-apple group-hover:scale-[1.02] will-change-transform" 
                                 placeholder="blur"
                                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
+                                loading="lazy"
                                 onError={() => setImgError(true)}
                             />
                         </div>
@@ -188,10 +174,12 @@ export const AnimeCardHorizontal = memo(function AnimeCardHorizontal({ show, ran
             const parts = showId.split(':');
             const type = parts[1] || 'movie';
             const tmdbId = parts[2] || parts[1];
-            return `/watch/${type}/${tmdbId}`;
+            return `/watch/${type}/${encodeURIComponent(tmdbId)}`;
         }
-        const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : 'allanime');
-        return `/watch/anime/${showId}?provider=${provider}`;
+        const provider = show.provider || (showId?.startsWith('hi:') ? 'hianime' : showId?.startsWith('aw:') ? 'aniwatch' : undefined);
+        return provider 
+            ? `/watch/anime/${encodeURIComponent(showId)}?provider=${encodeURIComponent(provider)}`
+            : `/watch/anime/${encodeURIComponent(showId)}`;
     };
 
     const title = cleanString(show.title) || cleanString(show.name) || "Anime Masterpiece";

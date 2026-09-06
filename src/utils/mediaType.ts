@@ -43,8 +43,8 @@ export function detectMediaType(item: any): "movie" | "tv" | "anime" {
     if (item.type === "anime" || item.media_type === "anime") {
         return "anime";
     }
-    const provider = item.provider || item.showId?.split(":")?.[0];
-    if (provider && ["hianime", "aniwatch", "allanime", "hianime_fallback"].includes(provider)) {
+    const provider = (item.provider || item.showId?.split(":")?.[0] || "").toLowerCase();
+    if (provider && ["hianime", "aniwatch", "allanime", "hianime_fallback", "anikai", "aniwave", "aniwatchtv", "cinevo", "consumet", "gogoanime", "animepahe", "jikan", "hi", "aw"].includes(provider)) {
         return "anime";
     }
 
