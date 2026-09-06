@@ -2,48 +2,51 @@
 
 class ServerHealthManagerClass {
     private healthCache: Record<string, number> = {};
-    private blacklist: Set<string> = new Set();
+    private failureCooldowns: Record<string, number> = {};
     private pendingChecks: Record<string, Promise<number>> = {};
 
-    constructor() {
-        if (typeof window !== "undefined") {
-            try {
-                const storedBlacklist = sessionStorage.getItem("toonplayer_dead_servers");
-                if (storedBlacklist) {
-                    this.blacklist = new Set(JSON.parse(storedBlacklist));
-                }
-            } catch (_) {}
-        }
+    constructor() {}
+
+    /**
+     * Mark a server with a temporary failure cooldown (e.g., rotation on current title)
+     */
+    public markTemporaryFailure(serverId: string, cooldownMs: number = 30000) {
+        if (!serverId) return;
+        this.failureCooldowns[serverId] = Date.now() + cooldownMs;
+        this.healthCache[serverId] = 9000 + Math.min(999, cooldownMs / 100);
+        console.warn(`[ServerHealthManager] ⚠️ Server marked with temporary failure cooldown (${cooldownMs}ms): ${serverId}`);
     }
 
     /**
-     * Mark a server as dead globally
+     * Backward compatible alias for temporary failure handling
      */
     public blacklistServer(serverId: string) {
-        if (!serverId) return;
-        this.blacklist.add(serverId);
-        this.healthCache[serverId] = Infinity; // Infinity latency
-        console.warn(`[ServerHealthManager] 🚨 Server Blacklisted: ${serverId}`);
-        
-        if (typeof window !== "undefined") {
-            sessionStorage.setItem("toonplayer_dead_servers", JSON.stringify(Array.from(this.blacklist)));
-        }
+        this.markTemporaryFailure(serverId, 45000);
     }
 
     /**
-     * Check if a server is blacklisted
+     * Check if a server is currently in active failure cooldown
      */
     public isBlacklisted(serverId: string): boolean {
-        return this.blacklist.has(serverId);
+        if (!serverId) return false;
+        const cooldownUntil = this.failureCooldowns[serverId];
+        if (cooldownUntil && Date.now() < cooldownUntil) {
+            return true;
+        }
+        // Cooldown expired
+        if (cooldownUntil) {
+            delete this.failureCooldowns[serverId];
+        }
+        return false;
     }
 
     /**
      * Ping a server and cache its health latency
      */
     public async checkHealth(serverId: string, testUrl: string, timeoutMs: number = 3000): Promise<number> {
-        if (this.isBlacklisted(serverId)) return Infinity;
-        if (this.healthCache[serverId]) return this.healthCache[serverId];
-        
+        if (this.isBlacklisted(serverId)) return 9999;
+        if (this.healthCache[serverId] && this.healthCache[serverId] < 5000) return this.healthCache[serverId];
+
         // Prevent concurrent identical checks
         if (this.pendingChecks[serverId]) {
             return this.pendingChecks[serverId];
@@ -54,8 +57,8 @@ class ServerHealthManagerClass {
             const controller = new AbortController();
             const timeout = setTimeout(() => {
                 controller.abort();
-                this.blacklistServer(serverId);
-                resolve(Infinity);
+                this.markTemporaryFailure(serverId, 20000);
+                resolve(9999);
             }, timeoutMs);
 
             fetch(testUrl, { method: "HEAD", signal: controller.signal, mode: "no-cors" })
@@ -63,12 +66,13 @@ class ServerHealthManagerClass {
                     clearTimeout(timeout);
                     const latency = Date.now() - start;
                     this.healthCache[serverId] = latency;
+                    delete this.failureCooldowns[serverId];
                     resolve(latency);
                 })
                 .catch(() => {
                     clearTimeout(timeout);
-                    this.blacklistServer(serverId);
-                    resolve(Infinity);
+                    this.markTemporaryFailure(serverId, 20000);
+                    resolve(9999);
                 });
         });
 
@@ -79,31 +83,33 @@ class ServerHealthManagerClass {
     }
 
     /**
-     * Sorts and filters an array of servers, prioritizing healthy ones and dropping blacklisted ones.
+     * Sorts and filters an array of servers, prioritizing healthy ones over degraded ones.
      */
     public filterAndSortServers(servers: any[], idKey: string = 'serverId'): any[] {
-        return servers
-            .filter(s => !this.isBlacklisted(s[idKey]))
-            .sort((a, b) => {
-                const healthA = this.healthCache[a[idKey]] ?? 9999;
-                const healthB = this.healthCache[b[idKey]] ?? 9999;
-                return healthA - healthB;
-            });
+        if (!Array.isArray(servers)) return [];
+        return [...servers].sort((a, b) => {
+            const isBlockedA = this.isBlacklisted(a[idKey]);
+            const isBlockedB = this.isBlacklisted(b[idKey]);
+            if (isBlockedA !== isBlockedB) {
+                return isBlockedA ? 1 : -1;
+            }
+            const healthA = this.healthCache[a[idKey]] ?? 500;
+            const healthB = this.healthCache[b[idKey]] ?? 500;
+            return healthA - healthB;
+        });
     }
 
     /**
-     * Clear all caches (e.g. on forced refresh)
+     * Clear all caches (e.g. on user navigation or refresh)
      */
     public clearCache() {
         this.healthCache = {};
-        this.blacklist.clear();
+        this.failureCooldowns = {};
         this.pendingChecks = {};
-        if (typeof window !== "undefined") {
-            sessionStorage.removeItem("toonplayer_dead_servers");
-        }
-        console.log(`[ServerHealthManager] 🧹 Cache cleared.`);
+        console.log(`[ServerHealthManager] 🧹 Health cache reset.`);
     }
 }
 
 // Export singleton instance
 export const ServerHealthManager = new ServerHealthManagerClass();
+

@@ -77,19 +77,31 @@ export default function HealthPage() {
         return () => clearInterval(timer);
     }, []);
 
-    const getStatusColor = (status: ProviderHealth['status']) => {
-        switch (status) {
+    const getStatusColor = (status: string) => {
+        const s = String(status || '').toLowerCase();
+        switch (s) {
             case 'healthy': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+            case 'degraded':
             case 'slow': return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+            case 'scraper_error': return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+            case 'temporary_failure': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
+            case 'unsupported': return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+            case 'unavailable':
             case 'offline': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
             default: return 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20';
         }
     };
 
-    const getStatusIcon = (status: ProviderHealth['status']) => {
-        switch (status) {
+    const getStatusIcon = (status: string) => {
+        const s = String(status || '').toLowerCase();
+        switch (s) {
             case 'healthy': return <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />;
+            case 'degraded':
             case 'slow': return <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />;
+            case 'scraper_error': return <AlertTriangle className="w-4 h-4 text-purple-400 shrink-0" />;
+            case 'temporary_failure': return <Clock className="w-4 h-4 text-yellow-400 shrink-0" />;
+            case 'unsupported': return <HelpCircle className="w-4 h-4 text-blue-400 shrink-0" />;
+            case 'unavailable':
             case 'offline': return <XCircle className="w-4 h-4 text-rose-400 shrink-0" />;
             default: return <HelpCircle className="w-4 h-4 text-zinc-400 shrink-0" />;
         }

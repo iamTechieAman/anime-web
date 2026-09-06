@@ -1,5 +1,6 @@
 import { AnimeProvider, ProviderName, AnimeSearchResult, AnimeDetails, VideoSource, ProviderCapabilities, ProviderResult, ProviderError, ProviderErrorCode } from './types';
 import { getProvider } from './index';
+import { providerHealth, ProviderHealthStatus } from '../provider-health';
 
 // Capability configuration for all known providers
 export const PROVIDER_CAPABILITIES: Record<ProviderName, ProviderCapabilities> = {
@@ -246,6 +247,37 @@ export function categorizeError(err: any, providerId: string, durationMs?: numbe
     };
 }
 
+export function logProviderDiagnostic(diag: {
+    provider: string;
+    requestType: 'search' | 'details' | 'episodes' | 'sources';
+    status: 'SUCCESS' | 'FAILURE';
+    httpStatus?: number;
+    validationResult: 'VALID' | 'EMPTY' | 'MALFORMED' | 'UNSUPPORTED';
+    parserResult: 'SUCCESS' | 'PARSER_FAILURE' | 'NO_MATCH' | 'SKIPPED';
+    sourceCount: number;
+    finalClassification: ProviderHealthStatus;
+    durationMs: number;
+    details?: string;
+}) {
+    console.log(
+        `[ProviderDiagnostics] [${diag.provider}] reqType=${diag.requestType} | status=${diag.status} | HTTP=${diag.httpStatus ?? 'N/A'} | validation=${diag.validationResult} | parser=${diag.parserResult} | count=${diag.sourceCount} | class=${diag.finalClassification} (${diag.durationMs}ms)${diag.details ? ' - ' + diag.details : ''}`
+    );
+
+    try {
+        providerHealth.reportDiagnostic({
+            provider: diag.provider,
+            requestType: diag.requestType,
+            httpStatus: diag.httpStatus,
+            validationResult: diag.validationResult,
+            parserResult: diag.parserResult,
+            sourceCount: diag.sourceCount,
+            finalClassification: diag.finalClassification,
+            durationMs: diag.durationMs,
+            message: diag.details,
+        });
+    } catch (_) {}
+}
+
 export async function executeWithTimeout<T>(
     fn: () => Promise<T>,
     timeoutMs: number,
@@ -357,7 +389,20 @@ export class AnimeProviderManager {
         const errors: ProviderError[] = [];
         for (const providerName of FALLBACK_ORDER) {
             const caps = getProviderCapabilities(providerName);
-            if (!caps.supportsSearch) continue;
+            if (!caps.supportsSearch) {
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'search',
+                    status: 'FAILURE',
+                    validationResult: 'UNSUPPORTED',
+                    parserResult: 'SKIPPED',
+                    sourceCount: 0,
+                    finalClassification: 'UNSUPPORTED',
+                    durationMs: 0,
+                    details: 'Search endpoint not supported',
+                });
+                continue;
+            }
 
             const provider = safeGetProvider(providerName);
             if (!provider) continue;
@@ -376,9 +421,47 @@ export class AnimeProviderManager {
                         canonicalId: r.canonicalId || r.id,
                         providerId: r.providerId || providerName,
                     }));
-                if (validResults.length > 0) return validResults;
+
+                if (validResults.length > 0) {
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'search',
+                        status: 'SUCCESS',
+                        httpStatus: 200,
+                        validationResult: 'VALID',
+                        parserResult: 'SUCCESS',
+                        sourceCount: validResults.length,
+                        finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
+                        durationMs: result.durationMs,
+                    });
+                    return validResults;
+                }
             } else if (!result.success && result.error) {
-                errors.push(result.error);
+                const err = result.error;
+                errors.push(err);
+                const classification: ProviderHealthStatus =
+                    err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE'
+                        ? 'SCRAPER_ERROR'
+                        : err.code === 'TIMEOUT'
+                        ? 'TEMPORARY_FAILURE'
+                        : err.code === 'RATE_LIMITED'
+                        ? 'DEGRADED'
+                        : err.code === 'NETWORK_ERROR'
+                        ? 'UNAVAILABLE'
+                        : 'TEMPORARY_FAILURE';
+
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'search',
+                    status: 'FAILURE',
+                    httpStatus: err.statusCode,
+                    validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
+                    parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
+                    sourceCount: 0,
+                    finalClassification: classification,
+                    durationMs: result.durationMs,
+                    details: err.message,
+                });
             }
         }
         console.warn(`[AnimeProviderManager] All eligible providers failed for search: "${cleanQuery}". Errors:`, errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`));
@@ -397,7 +480,20 @@ export class AnimeProviderManager {
         const errors: ProviderError[] = [];
         for (const providerName of order) {
             const caps = getProviderCapabilities(providerName);
-            if (!caps.supportsDetails) continue;
+            if (!caps.supportsDetails) {
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'details',
+                    status: 'FAILURE',
+                    validationResult: 'UNSUPPORTED',
+                    parserResult: 'SKIPPED',
+                    sourceCount: 0,
+                    finalClassification: 'UNSUPPORTED',
+                    durationMs: 0,
+                    details: 'Details endpoint not supported',
+                });
+                continue;
+            }
 
             const provider = safeGetProvider(providerName);
             if (!provider) continue;
@@ -409,13 +505,48 @@ export class AnimeProviderManager {
             );
 
             if (result.success && result.data && result.data.id && Array.isArray(result.data.episodes)) {
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'details',
+                    status: 'SUCCESS',
+                    httpStatus: 200,
+                    validationResult: 'VALID',
+                    parserResult: 'SUCCESS',
+                    sourceCount: result.data.episodes.length,
+                    finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
+                    durationMs: result.durationMs,
+                });
                 return {
                     ...result.data,
                     canonicalId: result.data.canonicalId || result.data.id,
                     providerId: result.data.providerId || providerName,
                 };
             } else if (!result.success && result.error) {
-                errors.push(result.error);
+                const err = result.error;
+                errors.push(err);
+                const classification: ProviderHealthStatus =
+                    err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE'
+                        ? 'SCRAPER_ERROR'
+                        : err.code === 'TIMEOUT'
+                        ? 'TEMPORARY_FAILURE'
+                        : err.code === 'RATE_LIMITED'
+                        ? 'DEGRADED'
+                        : err.code === 'NETWORK_ERROR'
+                        ? 'UNAVAILABLE'
+                        : 'TEMPORARY_FAILURE';
+
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'details',
+                    status: 'FAILURE',
+                    httpStatus: err.statusCode,
+                    validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
+                    parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
+                    sourceCount: 0,
+                    finalClassification: classification,
+                    durationMs: result.durationMs,
+                    details: err.message,
+                });
             }
         }
         console.warn(`[AnimeProviderManager] All eligible providers failed for info: "${cleanId}". Errors:`, errors.map(e => `[${e.providerId}:${e.code}] ${e.message}`));
@@ -447,7 +578,20 @@ export class AnimeProviderManager {
 
         for (const providerName of order) {
             const caps = getProviderCapabilities(providerName);
-            if (!caps.supportsSources) continue;
+            if (!caps.supportsSources) {
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'sources',
+                    status: 'FAILURE',
+                    validationResult: 'UNSUPPORTED',
+                    parserResult: 'SKIPPED',
+                    sourceCount: 0,
+                    finalClassification: 'UNSUPPORTED',
+                    durationMs: 0,
+                    details: 'Sources endpoint not supported',
+                });
+                continue;
+            }
 
             // Check sub/dub capability if specified
             if (mode === 'dub' && caps.supportsDub === false) continue;
@@ -480,11 +624,46 @@ export class AnimeProviderManager {
                 }
 
                 if (validSources.length > 0) {
+                    logProviderDiagnostic({
+                        provider: providerName,
+                        requestType: 'sources',
+                        status: 'SUCCESS',
+                        httpStatus: 200,
+                        validationResult: 'VALID',
+                        parserResult: 'SUCCESS',
+                        sourceCount: validSources.length,
+                        finalClassification: result.durationMs > 2500 ? 'DEGRADED' : 'HEALTHY',
+                        durationMs: result.durationMs,
+                    });
                     console.log(`[AnimeProviderManager] ⚡ ${providerName} resolved ${validSources.length} sources in ${result.durationMs}ms`);
                     return rankVideoSources(validSources);
                 }
             } else if (!result.success && result.error) {
-                errors.push(result.error);
+                const err = result.error;
+                errors.push(err);
+                const classification: ProviderHealthStatus =
+                    err.code === 'PARSER_ERROR' || err.code === 'EMPTY_RESPONSE' || err.code === 'INVALID_RESPONSE' || err.code === 'NO_SOURCE'
+                        ? 'SCRAPER_ERROR'
+                        : err.code === 'TIMEOUT'
+                        ? 'TEMPORARY_FAILURE'
+                        : err.code === 'RATE_LIMITED'
+                        ? 'DEGRADED'
+                        : err.code === 'NETWORK_ERROR'
+                        ? 'UNAVAILABLE'
+                        : 'TEMPORARY_FAILURE';
+
+                logProviderDiagnostic({
+                    provider: providerName,
+                    requestType: 'sources',
+                    status: 'FAILURE',
+                    httpStatus: err.statusCode,
+                    validationResult: err.code === 'INVALID_RESPONSE' ? 'MALFORMED' : err.code === 'EMPTY_RESPONSE' ? 'EMPTY' : 'VALID',
+                    parserResult: err.code === 'PARSER_ERROR' ? 'PARSER_FAILURE' : 'SKIPPED',
+                    sourceCount: 0,
+                    finalClassification: classification,
+                    durationMs: result.durationMs,
+                    details: err.message,
+                });
             }
         }
 
@@ -564,4 +743,5 @@ export class AnimeProviderManager {
 }
 
 export default AnimeProviderManager;
+
 
