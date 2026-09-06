@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AnimeProviderManager, isValidVideoSource, normalizeProvider } from "@/lib/providers/AnimeProviderManager";
+import { AnimeProviderManager, isValidVideoSource, normalizeProvider, rankVideoSources } from "@/lib/providers/AnimeProviderManager";
 import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
 import type { VideoSource } from "@/lib/providers/types";
 
@@ -118,6 +118,7 @@ export async function GET(request: Request) {
                             quality: 'Auto (AMVSTR)',
                             isIframe: false,
                             server: 'amvstr',
+                            providerId: 'amvstr',
                             type: mode
                         });
                     }
@@ -160,6 +161,7 @@ export async function GET(request: Request) {
                     isM3U8: false,
                     isIframe: true,
                     server: 'vidsrc_cc',
+                    providerId: 'vidsrc',
                     type: mode
                 },
                 {
@@ -168,6 +170,7 @@ export async function GET(request: Request) {
                     isM3U8: false,
                     isIframe: true,
                     server: 'vidsrc_to',
+                    providerId: 'vidsrc',
                     type: mode
                 },
                 {
@@ -176,6 +179,7 @@ export async function GET(request: Request) {
                     isM3U8: false,
                     isIframe: true,
                     server: 'vidsrc_me',
+                    providerId: 'vidsrc',
                     type: mode
                 },
                 {
@@ -184,6 +188,7 @@ export async function GET(request: Request) {
                     isM3U8: false,
                     isIframe: true,
                     server: 'animeplayer',
+                    providerId: 'animeplayer',
                     type: mode
                 }
             ];
@@ -197,18 +202,23 @@ export async function GET(request: Request) {
         }
     }
 
+    // Rank sources: HLS > MP4 > Dedicated Embeds > Fallback embeds
+    const rankedSources = rankVideoSources(collectedSources);
+
     // STEP 6: SOURCE NORMALIZATION
-    const normalizedSources = collectedSources.map((s, idx) => {
+    const normalizedSources = rankedSources.map((s, idx) => {
         const url = s.url || (s as any).link;
         const isM3U8 = Boolean(s.isM3U8 || (s as any).hls || url.includes('.m3u8'));
         const isIframe = Boolean(s.isIframe);
         const type = isIframe ? 'iframe' : isM3U8 ? 'hls' : 'mp4';
         const quality = s.quality || (s as any).resolutionStr || 'Auto';
         const serverName = s.server || (s as any).provider || 'anime';
+        const providerId = s.providerId || serverName;
 
         return {
             id: `${serverName}-${idx}`,
             provider: serverName,
+            providerId,
             url,
             type,
             quality,
@@ -259,3 +269,4 @@ export async function GET(request: Request) {
         links: []
     });
 }
+

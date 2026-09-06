@@ -1,14 +1,61 @@
+export type ProviderErrorCode =
+    | 'NETWORK_ERROR'
+    | 'TIMEOUT'
+    | 'HTTP_ERROR'
+    | 'EMPTY_RESPONSE'
+    | 'INVALID_RESPONSE'
+    | 'PARSER_ERROR'
+    | 'NO_SOURCE'
+    | 'UNSUPPORTED'
+    | 'RATE_LIMITED'
+    | 'UNKNOWN_ERROR';
+
+export interface ProviderError {
+    code: ProviderErrorCode;
+    message: string;
+    providerId: string;
+    statusCode?: number;
+    details?: any;
+    durationMs?: number;
+}
+
+export interface ProviderResult<T> {
+    success: boolean;
+    data?: T;
+    error?: ProviderError;
+    providerId: string;
+    durationMs: number;
+}
+
+export interface ProviderCapabilities {
+    supportsSearch: boolean;
+    supportsDetails: boolean;
+    supportsEpisodes: boolean;
+    supportsSources: boolean;
+    supportsMovies: boolean;
+    supportsSeries: boolean;
+    supportsSub?: boolean;
+    supportsDub?: boolean;
+    supportsRaw?: boolean;
+}
+
 export interface AnimeSearchResult {
     id: string;
+    canonicalId?: string;
     title: string;
     image?: string;
     releaseDate?: string;
     subOrDub?: string;
     provider?: string;
+    providerId?: string;
+    type?: string;
+    extra?: any;
 }
 
 export interface AnimeEpisode {
     id: string;
+    canonicalEpisodeId?: string;
+    animeId?: string;
     number: number;
     title?: string;
 }
@@ -25,6 +72,8 @@ export interface RichAnimeEpisode extends AnimeEpisode {
 
 export interface AnimeDetails {
     id: string;
+    canonicalId?: string;
+    providerId?: string;
     title: string;
     otherNames?: string[];
     image?: string;
@@ -105,6 +154,12 @@ export interface VideoSource {
     server?: string;
     type?: 'sub' | 'dub' | 'raw';
     headers?: Record<string, string>;
+    providerId?: string;
+    subtitles?: Array<{
+        url: string;
+        lang: string;
+        label?: string;
+    }>;
 }
 
 export type ProviderName =
@@ -114,6 +169,7 @@ export type ProviderName =
 
 export interface AnimeProvider {
     name: string;
+    capabilities?: ProviderCapabilities;
 
     /**
      * Search for anime by title
@@ -194,3 +250,4 @@ export interface AnimeProvider {
      */
     getCompleted?(): Promise<AnimeSearchResult[]>;
 }
+
