@@ -1769,8 +1769,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     <div className="w-full px-4 py-8 text-center">
                         <p className="text-[var(--text-muted)]">Detailed metadata is unavailable. Try switching servers if the content doesn&apos;t play.</p>
                         <div className="flex flex-wrap gap-2 justify-center mt-4">
-                            {SERVERS.slice(0, 6).map((server) => (
-                                <a key={server.id} href={server.getUrl(type === "anime" ? "tv" : type, fallbackId, 1, 1)} target="_blank" rel="noopener" className="px-3 py-1.5 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">{server.name}</a>
+                            {(SERVERS || []).slice(0, 6).map((server) => (
+                                <a key={server.id} href={server.getUrl?.(type === "anime" ? "tv" : type, fallbackId, 1, 1) || '#'} target="_blank" rel="noopener" className="px-3 py-1.5 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">{server.name}</a>
                             ))}
                         </div>
                     </div>
@@ -2111,7 +2111,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     )}
                 </div>
                 <div className={`flex flex-wrap gap-y-4 gap-x-2 w-full ${!showAllCast ? 'overflow-x-auto hide-scrollbar flex-nowrap pb-2' : 'justify-start'}`}>
-                    {(showAllCast ? details?.cast : details?.cast?.slice(0, 15)).map((person: any) => (
+                    {(showAllCast ? (details?.cast || []) : (details?.cast || []).slice(0, 15)).map((person: any) => (
                         <button 
                             key={person.id} 
                             onClick={() => handleActorClick(person)}
@@ -2320,7 +2320,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-                                            {details?.genres?.map((genre: any) => (
+                                            {(details?.genres || []).map((genre: any) => (
                                                 <span key={genre.id} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-full text-[10px] sm:text-xs font-bold tracking-wide text-zinc-300 hover:text-white hover:bg-white/10 transition-all">{genre.name}</span>
                                             ))}
                                         </div>
@@ -2335,7 +2335,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                                         </div>
                                                     </div>
                                                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
-                                                        {episodes.map((epNum: string) => (
+                                                        {(episodes || []).map((epNum: string) => (
                                                             <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-accent/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
                                                         ))}
                                                     </div>
