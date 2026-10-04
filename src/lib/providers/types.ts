@@ -25,6 +25,7 @@ export interface ProviderResult<T> {
     error?: ProviderError;
     providerId: string;
     durationMs: number;
+    retryCount?: number;
 }
 
 export interface ProviderCapabilities {
@@ -165,7 +166,8 @@ export interface VideoSource {
 export type ProviderName =
     | 'allanime' | 'hianime' | 'anikai' | 'aniwatch'
     | 'consumet' | 'vidsrc' | 'cinevo' | 'aniwave'
-    | 'aniwatchtv' | 'jikan' | 'animepahe' | 'gogoanime';
+    | 'aniwatchtv' | 'jikan' | 'animepahe' | 'gogoanime'
+    | 'kartoons';
 
 export interface AnimeProvider {
     name: string;
@@ -251,3 +253,29 @@ export interface AnimeProvider {
     getCompleted?(): Promise<AnimeSearchResult[]>;
 }
 
+export type ProviderSourceStatus =
+    | 'SUCCESS'
+    | 'NO_SOURCE'
+    | 'TIMEOUT'
+    | 'SCRAPER_ERROR'
+    | 'TEMPORARY_FAILURE'
+    | 'UNSUPPORTED'
+    | 'UNAVAILABLE';
+
+export interface ProviderSourceResult {
+    provider: ProviderName;
+    status: ProviderSourceStatus;
+    sources: VideoSource[];
+    error?: ProviderError;
+    durationMs: number;
+}
+
+export interface SourceResolution {
+    success: boolean;
+    sources: VideoSource[];
+    providerResults: ProviderSourceResult[];
+    resolvedBy: ProviderName[];
+    totalDurationMs: number;
+    tier: 1 | 2 | 3 | 4;
+    errorSummary?: string;
+}

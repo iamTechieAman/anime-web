@@ -68,7 +68,7 @@ export class CinEvoProvider implements AnimeProvider {
 
             if (type === 'tv') {
                 // For TV shows, get seasons/episodes from TMDB
-                const seasons = safeArray(data.seasons);
+                const seasons = safeArray<any>(data.seasons);
                 for (const season of seasons) {
                     if (!season || season.season_number === 0) continue; // Skip specials
                     const epCount = safeInt(season.episode_count, 0);

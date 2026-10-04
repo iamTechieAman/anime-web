@@ -38,7 +38,7 @@ export class JikanProvider implements AnimeProvider {
                     score: item?.score,
                     airing: item?.airing,
                 },
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
 
             animeCache.set(cacheKey.search(query, 'jikan'), results, TTL.JIKAN_META);
             return results;

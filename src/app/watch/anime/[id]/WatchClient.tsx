@@ -18,6 +18,7 @@ import { useWatch } from "@/context/WatchContext";
 import { useUserStore } from "@/store/userStore";
 import { ServerHealthManager } from "@/utils/ServerHealthManager";
 import { isMovieContent } from "@/utils/mediaType";
+import { DetailsSkeleton, EpisodeListSkeleton } from "@/components/SkeletonLoader";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -48,7 +49,42 @@ const getProxiedEmbedUrl = (rawUrl: string | null) => {
     return rawUrl;
 };
 
+interface VideoIframeProps {
+    src: string;
+    mediaKey: string;
+    playerLoaded?: boolean;
+    isFocusMode?: boolean;
+    onLoad: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
+    onError: () => void;
+    iframeRef?: React.RefObject<HTMLIFrameElement | null>;
+}
 
+const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
+    src,
+    mediaKey,
+    playerLoaded = true,
+    isFocusMode = false,
+    onLoad,
+    onError,
+    iframeRef,
+}: VideoIframeProps) {
+    return (
+        <iframe
+            key={mediaKey}
+            ref={iframeRef}
+            src={src}
+            className={`w-full h-full border-0 bg-black ${
+                isFocusMode ? "rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"
+            }`}
+            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
+            referrerPolicy="origin"
+            onLoad={onLoad}
+            onError={onError}
+        />
+    );
+});
 
 function cleanString(str: any): string | null {
     if (!str) return null;
@@ -64,41 +100,75 @@ const EpisodeButton = React.memo(function EpisodeButton({
     const epNum = typeof ep === 'object' ? String(ep.number || ep.id) : String(ep);
     const title = typeof ep === 'object' ? ep.title : null;
     const isFiller = typeof ep === 'object' ? ep.isFiller : false;
+    const duration = typeof ep === 'object' ? ep.duration : null;
     const thumbnail = typeof ep === 'object' ? cleanString(ep.image) : null;
+    const isDub = typeof ep === 'object' ? ep.isDub : false;
     const isActive = String(currentEp) === epNum;
     
     const ref = React.useRef<HTMLButtonElement>(null);
-
-    // Auto-scroll disabled to prevent page jumping
 
     return (
         <button
             ref={ref}
             onClick={onClick}
-            className={`flex items-center justify-between w-full px-4 py-3 rounded-md text-left transition-all duration-[250ms] ease-out hover:-translate-y-[2px] hover:shadow-lg group ${
-                isActive ? "bg-accent/15 border border-accent/30" : "hover:bg-white/5 border border-transparent"
+            className={`group relative flex items-center justify-between w-full p-2.5 sm:p-3 rounded-2xl text-left transition-all duration-200 cursor-pointer border ${
+                isActive 
+                    ? "bg-accent/15 border-accent/80 shadow-[0_4px_20px_var(--accent-glow)] ring-1 ring-accent/40" 
+                    : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.06] hover:border-white/15"
             }`}
         >
-            <div className="flex gap-3 w-full items-center">
-                {thumbnail && (
-                    <div className="w-20 h-12 flex-shrink-0 rounded bg-zinc-800 overflow-hidden relative border border-white/5">
-                        <img src={thumbnail} alt="thumbnail" className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                        <div className="absolute inset-0 bg-black/20" />
+            <div className="flex gap-3 w-full items-center min-w-0">
+                {thumbnail ? (
+                    <div className="w-20 sm:w-24 h-14 flex-shrink-0 rounded-xl bg-zinc-900 overflow-hidden relative border border-white/10">
+                        <img src={thumbnail} alt={`Episode ${epNum}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
+                        <div className="absolute inset-0 bg-black/25" />
+                        {duration && (
+                            <span className="absolute bottom-1 right-1 px-1 py-0.2 rounded bg-black/80 backdrop-blur-sm text-[8px] font-bold text-zinc-300">
+                                {duration}m
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
+                        <span className="text-xs font-black text-zinc-500">EP {epNum}</span>
                     </div>
                 )}
-                <div className="flex flex-col items-start min-w-0">
-                    <span className={`text-sm font-bold truncate transition-colors ${isActive ? 'text-accent' : 'text-zinc-300 group-hover:text-white'}`}>
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isActive ? 'text-accent' : 'text-zinc-400'}`}>
+                            EP {epNum}
+                        </span>
+                        {isActive && (
+                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-accent/20 border border-accent/40 text-[8px] font-black tracking-wider text-accent uppercase">
+                                <span className="flex items-end gap-[1.5px] h-2">
+                                    <span className="w-[1.5px] h-1.5 bg-accent rounded-full animate-soundwave-1" />
+                                    <span className="w-[1.5px] h-2 bg-accent rounded-full animate-soundwave-2" />
+                                    <span className="w-[1.5px] h-1 bg-accent rounded-full animate-soundwave-3" />
+                                </span>
+                                Playing
+                            </span>
+                        )}
+                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.2 rounded bg-white/[0.06] text-zinc-400">
+                            {isDub ? 'DUB' : 'SUB'}
+                        </span>
+                        {isFiller && (
+                            <span className="text-[8px] bg-amber-500/15 text-amber-400 px-1.5 py-0.2 rounded uppercase font-black border border-amber-500/30">
+                                Filler
+                            </span>
+                        )}
+                    </div>
+                    <span className={`text-xs sm:text-sm font-bold truncate w-full mt-0.5 transition-colors ${isActive ? 'text-white font-extrabold' : 'text-zinc-200 group-hover:text-white'}`}>
                         {title && title.toLowerCase() !== `episode ${epNum}` ? title : `Episode ${epNum}`}
                     </span>
-                    <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-zinc-500 font-semibold tracking-wider">EP {epNum}</span>
-                        {isFiller && <span className="text-[8px] bg-amber-500/10 text-amber-500 px-1.5 py-[1px] rounded uppercase font-black border border-amber-500/20">Filler</span>}
-                    </div>
                 </div>
             </div>
-            {isActive && (
-                <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shadow-[0_0_10px_var(--accent-glow)]">
-                    <Play className="w-3 h-3 text-white fill-white ml-0.5" />
+            {isActive ? (
+                <div className="w-7 h-7 shrink-0 rounded-full bg-accent flex items-center justify-center shadow-[0_0_12px_var(--accent-glow)] ml-2">
+                    <Play className="w-3.5 h-3.5 text-white fill-white ml-0.5 animate-pulse" />
+                </div>
+            ) : (
+                <div className="w-7 h-7 shrink-0 rounded-full bg-white/[0.03] group-hover:bg-white/[0.1] flex items-center justify-center transition-colors ml-2">
+                    <Play className="w-3 h-3 text-zinc-500 group-hover:text-white ml-0.5 transition-colors" />
                 </div>
             )}
         </button>
@@ -284,6 +354,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [currentEp, setCurrentEp] = useState<string>(initialEp);
     const [mode, setMode] = useState<"sub" | "dub">(initialMode);
     const [epFilter, setEpFilter] = useState("");
+    const [reloadCount, setReloadCount] = useState(0);
+
+    const handleSelectEpisode = useCallback((ep: string) => {
+        setCurrentEp(ep);
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            params.set('ep', ep);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            router.replace(newUrl, { scroll: false });
+        }
+    }, [router]);
 
     const availableEps = show?.availableEpisodesDetail?.[mode] || [];
 
@@ -322,7 +403,18 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         } catch (_) {}
     }, [currentEp, mode]);
 
-    // Handle Browser Back / Forward buttons (popstate)
+    // Handle Browser Back / Forward buttons (popstate) and searchParams sync
+    useEffect(() => {
+        const epFromUrl = searchParams?.get('ep');
+        const modeFromUrl = searchParams?.get('mode') as 'sub' | 'dub' | null;
+        if (epFromUrl && epFromUrl !== currentEp) {
+            setCurrentEp(epFromUrl);
+        }
+        if (modeFromUrl && ['sub', 'dub'].includes(modeFromUrl) && modeFromUrl !== mode) {
+            setMode(modeFromUrl);
+        }
+    }, [searchParams]);
+
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const handlePopState = () => {
@@ -354,6 +446,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [audioUnlocked, setAudioUnlocked] = useState(false);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [loadingServers, setLoadingServers] = useState(false);
+    const [serversKey, setServersKey] = useState<string>("");
 
     // Cast & Auto-Next state
     const [rawVideoSource, setRawVideoSource] = useState<string | null>(null);
@@ -417,12 +510,22 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const { profiles, activeProfileId } = useUserStore();
     const activeProfile = profiles.find(p => p.id === activeProfileId);
     const isGuestProfile = activeProfile?.type === 'guest';
+    const fallbackCountRef = useRef<number>(0);
+    const previousValidSourceRef = useRef<any>(null);
     
     // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
     const handleAutoFallback = useCallback(() => {
         if (!selectedServer || servers.length === 0) return;
 
-        console.warn(`[ToonPlayer Fallback] Server ${selectedServer} timed out or failed. Initiating rotation...`);
+        // Prevent infinite fallback rotation loops (max 3 auto rotations per episode/mode)
+        if (fallbackCountRef.current >= 3) {
+            console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (3). Stopping auto-switch.`);
+            setError("All attempted streaming servers failed for this episode. Please try selecting a mirror below.");
+            return;
+        }
+
+        fallbackCountRef.current += 1;
+        console.warn(`[ToonPlayer Fallback] Server ${selectedServer} timed out or failed (Attempt ${fallbackCountRef.current}). Initiating rotation...`);
 
         setFailedServers(prev => {
             const next = new Set(prev);
@@ -620,15 +723,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
     }, [currentEp, mode, provider, show]);
 
-    // Scroll to top exactly once when title (id), episode, or provider changes
+    // Scroll to top only on initial mount when media ID changes
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "instant" });
-    }, [id, currentEp, selectedServer]);
+    }, [id]);
 
-    // Reset player state and captured stream links when rotating sources
+    // Reset captured stream links when rotating sources
     useEffect(() => {
         setRawVideoSource(null);
-        setIframeKey(prev => prev + 1);
     }, [selectedServer, currentEp, mode]);
 
     const isBookmarked = isInWatchlist(fullId);
@@ -904,6 +1006,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
 
         const fetchServers = async () => {
+            fallbackCountRef.current = 0;
             setLoadingServers(true);
             try {
                 const availableEps = show?.availableEpisodesDetail?.[mode] || [];
@@ -926,6 +1029,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const allServersRaw = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
                 const allServers = ServerHealthManager.filterAndSortServers(allServersRaw, 'serverId');
                 setServers(allServers);
+                setServersKey(`${currentEp}-${mode}`);
 
                 // Pick first available server immediately
                 if (allServers.length > 0) {
@@ -943,6 +1047,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
                 const fallbackList = [...movieServersList, ...emergencyEmbeds];
                 setServers(fallbackList);
+                setServersKey(`${currentEp}-${mode}`);
                 if (fallbackList.length > 0 && !selectedServer) {
                     setSelectedServer(fallbackList[0].serverId);
                 }
@@ -957,7 +1062,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     // Fetch Source
     useEffect(() => {
-        if (!show || !selectedServer || servers.length === 0) return;
+        if (!show || !selectedServer || servers.length === 0 || serversKey !== `${currentEp}-${mode}`) return;
 
         const key = `${id}-${currentEp}-${mode}-${selectedServer}`;
         if (processingRef.current === key) return;
@@ -1005,8 +1110,16 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             // For native anime servers
             if (show.availableEpisodesDetail) {
                 const availableEps = show.availableEpisodesDetail[mode] || [];
-                if (!availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).includes(currentEp)) {
+                const formattedAvailable = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e));
+                if (formattedAvailable.length > 0 && !formattedAvailable.includes(String(currentEp))) {
                     if (currentSeq !== sourceSeqRef.current) return;
+                    if (mode === "dub" && (show.availableEpisodesDetail.sub || []).length > 0) {
+                        console.warn(`[WatchPage] Episode ${currentEp} not available in DUB. Reverting to SUB mode.`);
+                        toast.error(`Episode ${currentEp} unavailable in DUB audio. Reverting to SUB audio...`, { icon: "🔄" });
+                        setMode("sub");
+                        processingRef.current = null;
+                        return;
+                    }
                     setError(`Episode ${currentEp} is not available in ${mode.toUpperCase()} mode.`);
                     processingRef.current = null;
                     return;
@@ -1095,7 +1208,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
         fetchSource();
         return () => controller.abort();
-    }, [id, currentEp, mode, show, selectedServer, provider, servers, tmdbId]);
+    }, [id, currentEp, mode, show, selectedServer, provider, servers, serversKey, tmdbId]);
 
     const handleVideoEnded = () => {
         if (!autoNext) return;
@@ -1133,12 +1246,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
 
     if (loadingShow) {
-        return (
-            <div className="min-h-dvh bg-bg-main flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-12 h-12 animate-spin text-accent" />
-                <p className="text-[var(--text-muted)] animate-pulse tracking-widest uppercase font-semibold">Initializing Experience</p>
-            </div>
-        );
+        return <DetailsSkeleton />;
     }
 
     if (showError) {
@@ -1167,8 +1275,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-border-color relative shadow-2xl">
                         <iframe
                             src={getProxiedEmbedUrl(fallbackEmbedUrl)}
-                            className="absolute inset-0 w-full h-full border-0 rounded-none md:rounded-lg"
+                            className="absolute inset-0 w-full h-full border-0 bg-black rounded-none md:rounded-lg"
                             allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
                             referrerPolicy="origin"
                             onLoad={(e: any) => {
                                 try {
@@ -1231,7 +1340,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
     const renderPlayer = () => {
         return (
-            <div className={`w-full ${isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video rounded-none sm:rounded-xl md:rounded-2xl"} bg-black overflow-hidden border-0 sm:border border-border-color relative shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+            <div className={`w-full ${isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video min-h-[220px] sm:min-h-[360px] md:min-h-[480px] rounded-none sm:rounded-xl md:rounded-2xl"} bg-black overflow-hidden border-0 sm:border border-border-color relative shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">
@@ -1306,15 +1415,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     <div className="relative w-full h-full">
                         {videoType === "iframe" ? (
                             <>
-                                <iframe
-                                    key={iframeKey}
-                                    ref={iframeRef}
+                                <VideoIframeEmbed
+                                    mediaKey={`${selectedServer || 'server'}-${id}-ep${currentEp}-${mode}-${reloadCount}`}
+                                    iframeRef={iframeRef}
                                     src={getProxiedEmbedUrl(sourceUrl)}
-                                    className={`w-full h-full border-0 bg-black ${
-                                        isFocusMode ? "rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"
-                                    }`}
-                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
-                                    allowFullScreen
+                                    isFocusMode={isFocusMode}
                                     onLoad={(e: any) => {
                                         setLoadingSource(false);
                                         try {
@@ -1333,7 +1438,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         setError("Iframe failed to load.");
                                         handleAutoFallback();
                                     }}
-                                ></iframe>
+                                />
                                 
                                 {/* Global Audio Unlocker Overlay */}
                                 <AnimatePresence>
@@ -1479,7 +1584,19 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         );
     };
 
-    if (!show) return null;
+    if (!show) {
+        return (
+            <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-[calc(60px+env(safe-area-inset-top)+16px)] md:pt-[calc(72px+env(safe-area-inset-top)+16px)] w-full max-w-[1800px] mx-auto pb-8 px-4 sm:px-6 md:px-8">
+                <div className="w-64 h-8 bg-zinc-800/60 rounded-xl animate-pulse mb-4" />
+                <div className="grid grid-cols-1 xl:grid-cols-[74%_minmax(0,26%)] gap-6 items-start">
+                    <div className="w-full aspect-video min-h-[220px] sm:min-h-[360px] md:min-h-[480px] bg-zinc-900/80 rounded-2xl animate-pulse flex items-center justify-center border border-white/5">
+                        <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                    </div>
+                    <div className="hidden xl:block w-full h-[600px] bg-zinc-900/40 rounded-2xl animate-pulse border border-white/5" />
+                </div>
+            </main>
+        );
+    }
 
     const episodes = show.availableEpisodesDetail?.[mode] || [];
 
@@ -1495,8 +1612,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     return (
                         <button
                             key={epNum}
-                            onClick={() => setCurrentEp(epNum)}
-                            className={`flex-shrink-0 w-[180px] snap-center p-3 rounded-xl border text-left transition-all duration-[250ms] ease-out hover:-translate-y-[2px] hover:shadow-lg ${
+                            onClick={() => handleSelectEpisode(epNum)}
+                            className={`flex-shrink-0 w-[180px] snap-center p-3 rounded-xl border text-left transition-all duration-[250ms] ease-out hover:-translate-y-[2px] hover:shadow-lg cursor-pointer ${
                                 isActive
                                     ? 'border-accent bg-accent/15 border-accent/40 shadow-[0_0_12px_var(--accent-glow)]'
                                     : 'border-white/5 bg-[#12131A] hover:border-accent/30'
@@ -1752,46 +1869,98 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             {/* Server & Meta Controls - JustAnime Style */}
                             <div className="mt-4 bg-bg-card p-4 rounded-lg border border-border-color flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-                                    {/* Type Selection (SUB/DUB) */}
+                                    {/* Type Selection (SUB/DUB) with Capability Detection */}
                                     <div className="flex items-center gap-3">
                                         <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Source:</span>
-                                        <div className="flex bg-bg-main p-1 rounded-md border border-border-color">
-                                            <button
-                                                onClick={() => setMode("sub")}
-                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'sub' ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
-                                            >
-                                                SUB
-                                            </button>
-                                            <button
-                                                onClick={() => setMode("dub")}
-                                                className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${mode === 'dub' ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-white'}`}
-                                            >
-                                                DUB
-                                            </button>
-                                        </div>
+                                        {(() => {
+                                            const subEps = (show?.availableEpisodesDetail?.sub || []).map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e));
+                                            const dubEps = (show?.availableEpisodesDetail?.dub || []).map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e));
+                                            
+                                            const isSubAvailable = subEps.length > 0 && (subEps.includes(String(currentEp)) || subEps.includes("1"));
+                                            const isDubAvailable = dubEps.length > 0 && (dubEps.includes(String(currentEp)) || dubEps.includes("1"));
+
+                                            const handleSubClick = () => {
+                                                if (mode === "sub") return;
+                                                if (!isSubAvailable) {
+                                                    toast.error(`SUB audio is unavailable for Episode ${currentEp}.`, { icon: "⚠️" });
+                                                    return;
+                                                }
+                                                setMode("sub");
+                                            };
+
+                                            const handleDubClick = () => {
+                                                if (mode === "dub") return;
+                                                if (!isDubAvailable) {
+                                                    toast.error(`DUB audio is unavailable for Episode ${currentEp}. Remaining on SUB.`, { icon: "⚠️" });
+                                                    return;
+                                                }
+                                                setMode("dub");
+                                            };
+
+                                            return (
+                                                <div className="flex bg-bg-main p-1 rounded-md border border-border-color">
+                                                    <button
+                                                        onClick={handleSubClick}
+                                                        disabled={!isSubAvailable}
+                                                        title={isSubAvailable ? "Switch to SUB" : "SUB unavailable for this episode"}
+                                                        className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${
+                                                            mode === 'sub' 
+                                                                ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' 
+                                                                : isSubAvailable
+                                                                    ? 'text-[var(--text-muted)] hover:text-white cursor-pointer'
+                                                                    : 'text-white/20 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        SUB
+                                                    </button>
+                                                    <button
+                                                        onClick={handleDubClick}
+                                                        disabled={!isDubAvailable}
+                                                        title={isDubAvailable ? "Switch to DUB" : "DUB unavailable for this episode"}
+                                                        className={`px-4 py-1.5 rounded-sm text-xs font-bold transition-all ${
+                                                            mode === 'dub' 
+                                                                ? 'bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-sm' 
+                                                                : isDubAvailable
+                                                                    ? 'text-[var(--text-muted)] hover:text-white cursor-pointer'
+                                                                    : 'text-white/20 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        DUB {!isDubAvailable && "(N/A)"}
+                                                    </button>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
-                                    {/* Multi-Audio Quick Select */}
-                                    <button
-                                        onClick={() => {
-                                            const peachify = servers.find(s => s.serverId === "peachify");
-                                            if (peachify) {
-                                                manualServerRef.current = "peachify";
-                                                setSelectedServer("peachify");
-                                                toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
-                                            } else {
-                                                toast.error("Multi-Audio server not available for this title");
-                                            }
-                                        }}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                            selectedServer === "peachify" 
-                                            ? "bg-accent/10 border-accent/40 text-accent shadow-[0_0_15px_var(--accent-glow)]" 
-                                            : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
-                                        }`}
-                                    >
-                                        <Sparkles className={`w-4 h-4 ${selectedServer === "peachify" ? "animate-pulse" : ""}`} />
-                                        <span className="text-xs font-black uppercase tracking-wider">Multi-Audio</span>
-                                    </button>
+                                    {/* Multi-Audio Quick Select with Capability Detection */}
+                                    {(() => {
+                                        const peachifyAvailable = servers.some(s => s.serverId === "peachify");
+                                        return (
+                                            <button
+                                                disabled={!peachifyAvailable}
+                                                onClick={() => {
+                                                    const peachify = servers.find(s => s.serverId === "peachify");
+                                                    if (peachify) {
+                                                        manualServerRef.current = "peachify";
+                                                        setSelectedServer("peachify");
+                                                        toast.success("Switched to Multi-Audio Server", { icon: "🎧" });
+                                                    } else {
+                                                        toast.error("Multi-Audio server not available for this title");
+                                                    }
+                                                }}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                                                    selectedServer === "peachify" 
+                                                    ? "bg-accent/10 border-accent/40 text-accent shadow-[0_0_15px_var(--accent-glow)]" 
+                                                    : peachifyAvailable
+                                                        ? "bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white cursor-pointer"
+                                                        : "bg-white/5 border-white/5 text-white/20 cursor-not-allowed"
+                                                }`}
+                                            >
+                                                <Sparkles className={`w-4 h-4 ${selectedServer === "peachify" ? "animate-pulse" : ""}`} />
+                                                <span className="text-xs font-black uppercase tracking-wider">Multi-Audio {!peachifyAvailable && "(N/A)"}</span>
+                                            </button>
+                                        );
+                                    })()}
 
                                     {/* Server Selection Dropdown */}
                                     <div className="flex items-center gap-3 relative" ref={serverRef}>
@@ -1957,7 +2126,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             </div>
                                         </div>
                                         <div className="relative">
-                                            <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                                            <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                             <input 
                                                 type="number"
                                                 placeholder="Search episode..."
@@ -1967,34 +2136,59 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1">
-                                        {(() => {
+                                    <div className="flex-1 overflow-y-auto p-2 custom-scrollbar flex flex-col gap-1.5">
+                                        {episodes.length === 0 ? (
+                                            <EpisodeListSkeleton mode={episodeLayoutMode} count={episodeLayoutMode === 'grid' ? 24 : 6} />
+                                        ) : (() => {
                                             const filteredEpisodes = epFilter
                                                 ? episodes.filter(ep => String(typeof ep === 'object' ? (ep.number||ep.id) : ep).includes(epFilter))
                                                 : episodes;
                                             
+                                            if (filteredEpisodes.length === 0) {
+                                                return (
+                                                    <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                                                        <List className="w-8 h-8 text-zinc-600 mb-2" />
+                                                        <p className="text-xs font-bold text-zinc-300">No episodes match &ldquo;{epFilter}&rdquo;</p>
+                                                    </div>
+                                                );
+                                            }
+
                                             if (episodeLayoutMode === "grid") {
                                                 return (
-                                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-1.5 p-1">
-                                                        {filteredEpisodes.map((ep) => (
-                                                            <button 
-                                                                key={ep} 
-                                                                onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))} 
-                                                                className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
-                                                            >
-                                                                {ep}
-                                                            </button>
-                                                        ))}
+                                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-2 p-1">
+                                                        {filteredEpisodes.map((ep) => {
+                                                            const epVal = String(typeof ep === 'object' ? (ep.number || ep.id) : ep);
+                                                            const isCur = String(currentEp) === epVal;
+                                                            return (
+                                                                <button 
+                                                                    key={epVal} 
+                                                                    onClick={() => handleSelectEpisode(epVal)} 
+                                                                    className={`group relative flex flex-col items-center justify-center py-2.5 px-1 rounded-xl text-xs font-bold transition-all duration-200 border cursor-pointer ${
+                                                                        isCur 
+                                                                            ? 'border-accent bg-gradient-to-b from-accent/25 to-accent-warm/15 text-white shadow-[0_0_16px_var(--accent-glow)] ring-1 ring-accent scale-[1.02]' 
+                                                                            : 'border-white/[0.06] bg-white/[0.02] text-zinc-400 hover:border-white/20 hover:bg-white/[0.06] hover:text-white'
+                                                                    }`}
+                                                                >
+                                                                    <div className="flex items-center gap-1">
+                                                                        {isCur && <Play className="w-2.5 h-2.5 fill-current text-accent animate-pulse" />}
+                                                                        <span className="tracking-tight">{epVal}</span>
+                                                                    </div>
+                                                                    <span className={`text-[8px] font-black uppercase mt-0.5 tracking-wider ${isCur ? 'text-accent' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
+                                                                        SUB
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        })}
                                                     </div>
                                                 );
                                             }
 
                                             return filteredEpisodes.map((ep) => (
                                                 <EpisodeButton
-                                                    key={ep}
+                                                    key={typeof ep === 'object' ? (ep.number || ep.id) : ep}
                                                     ep={ep}
                                                     currentEp={currentEp}
-                                                    onClick={() => setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))}
+                                                    onClick={() => handleSelectEpisode(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))}
                                                 />
                                             ));
                                         })()
@@ -2084,10 +2278,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 <button 
                                                     key={ep} 
                                                     onClick={() => {
-                                                        setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
+                                                        handleSelectEpisode(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
                                                         setShowEpisodesDrawer(false);
                                                     }} 
-                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border text-center ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
                                                 >
                                                     {typeof ep === 'object' ? (ep.number||ep.id) : ep}
                                                 </button>
@@ -2102,7 +2296,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         ep={ep}
                                         currentEp={currentEp}
                                         onClick={() => {
-                                            setCurrentEp(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
+                                            handleSelectEpisode(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
                                             setShowEpisodesDrawer(false);
                                         }}
                                     />

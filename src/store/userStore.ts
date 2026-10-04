@@ -358,15 +358,14 @@ export const useUserStore = create<UserState>()(
         return state;
       },
       storage: createJSONStorage(() => {
-        try {
+        if (typeof window !== 'undefined') {
           return window.localStorage;
-        } catch {
-          return {
-            getItem: () => null,
-            setItem: () => {},
-            removeItem: () => {}
-          };
         }
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
       })
     }
   )

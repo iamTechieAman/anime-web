@@ -56,7 +56,7 @@ export class ConsumetProvider implements AnimeProvider {
                 title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[Consumet] Search failed:', error);
             return [];
@@ -113,7 +113,7 @@ export class ConsumetProvider implements AnimeProvider {
             }
 
             const data = await fetchFromInstances(`/meta/anilist/watch/${watchId}`);
-            const sourcesList = safeArray(data?.sources);
+            const sourcesList = safeArray<any>(data?.sources);
             if (sourcesList.length > 0) {
                 const validSources: VideoSource[] = [];
                 for (const src of sourcesList) {
@@ -137,17 +137,17 @@ export class ConsumetProvider implements AnimeProvider {
                 const info = await this.getInfo(id);
                 const title = info.title;
                 const gogoData = await fetchFromInstances(`/anime/gogoanime/${encodeURIComponent(title)}`);
-                const gogoResults = safeArray(gogoData?.results);
+                const gogoResults = safeArray<any>(gogoData?.results);
                 if (gogoResults.length > 0) {
                     const gogoId = mode === 'dub'
-                        ? (gogoResults.find((r: any) => r.id?.includes('-dub'))?.id || gogoResults[0].id)
-                        : gogoResults[0].id;
+                        ? (gogoResults.find((r: any) => r.id?.includes('-dub'))?.id || (gogoResults[0] as any).id)
+                        : (gogoResults[0] as any).id;
 
                     const gogoInfo = await fetchFromInstances(`/anime/gogoanime/info/${gogoId}`);
-                    const targetEp = safeArray(gogoInfo?.episodes).find((ep: any) => ep.number === parseInt(episodeString));
+                    const targetEp = safeArray<any>(gogoInfo?.episodes).find((ep: any) => ep.number === parseInt(episodeString));
                     if (targetEp?.id) {
                         const gogoWatch = await fetchFromInstances(`/anime/gogoanime/watch/${targetEp.id}`);
-                        const gogoSources = safeArray(gogoWatch?.sources);
+                        const gogoSources = safeArray<any>(gogoWatch?.sources);
                         if (gogoSources.length > 0) {
                             const validSources: VideoSource[] = [];
                             for (const src of gogoSources) {
@@ -190,7 +190,7 @@ export class ConsumetProvider implements AnimeProvider {
                 title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch { return []; }
     }
 
@@ -202,7 +202,7 @@ export class ConsumetProvider implements AnimeProvider {
                 title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch { return []; }
     }
 
@@ -214,7 +214,7 @@ export class ConsumetProvider implements AnimeProvider {
                 title: extractTitle(item?.title) || safeString(item?.id, 'Unknown'),
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch { return []; }
     }
 }

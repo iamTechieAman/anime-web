@@ -1,3 +1,4 @@
+// @ts-ignore
 import type { NextConfig } from "next";
 import withPWAInit from "@ducanh2912/next-pwa";
 
@@ -115,6 +116,15 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'fullscreen=*, autoplay=*, encrypted-media=*, picture-in-picture=*',
           },
+        ],
+      },
+      {
+        // Universal API CORS headers for internal & SSR fetches
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, X-Requested-With, X-Nextjs-Data, Accept' },
         ],
       },
       {

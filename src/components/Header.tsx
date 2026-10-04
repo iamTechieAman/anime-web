@@ -22,6 +22,13 @@ const FORMATS = ["TV","Movie","OVA","ONA","Special"];
 const STATUSES = ["Ongoing","Completed","Upcoming"];
 const UNIFIED_SEARCH_URL = '/api/search/unified';
 
+const CATEGORY_ITEMS = [
+  { name: "Anime", href: "/browse?type=anime", key: "anime" },
+  { name: "Cartoons", href: "/browse?type=tv&genre_id=16", key: "cartoons" },
+  { name: "Movies", href: "/browse?type=movie", key: "movies" },
+  { name: "Trending", href: "/browse?sort_by=popularity.desc", key: "trending" },
+];
+
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,6 +36,20 @@ export default function Header() {
   const [deviceMode, setDeviceMode] = useState<"mobile"|"pc"|"tv">("pc");
   const [isTvSearchOpen, setIsTvSearchOpen] = useState(false);
   const { activeProfileId } = useUserStore();
+
+  const isCurrentCategory = (item: typeof CATEGORY_ITEMS[0]) => {
+    if (!pathname) return false;
+    const type = searchParams?.get("type");
+    const genreId = searchParams?.get("genre_id");
+    const sortBy = searchParams?.get("sort_by");
+
+    if (item.key === "anime") return pathname === "/browse" && type === "anime";
+    if (item.key === "cartoons") return pathname === "/browse" && (genreId === "16" || type === "cartoon");
+    if (item.key === "movies") return pathname === "/browse" && type === "movie";
+    if (item.key === "trending") return pathname === "/browse" && Boolean(sortBy?.includes("popularity"));
+    return false;
+  };
+
 
   useEffect(() => {
     const detect = () => {
@@ -143,7 +164,7 @@ export default function Header() {
       } catch(e) {
         if (axios.isCancel(e)) return;
       }
-    }, 200);
+    }, 350);
     return () => {
       clearTimeout(t);
       controller.abort();
@@ -232,6 +253,27 @@ export default function Header() {
           </Link>
         </div>
 
+        {/* Quick Category Navigation Tabs (Anime, Cartoons, Movies, Trending) */}
+        <nav className="hidden md:flex items-center gap-1 shrink-0 bg-white/[0.03] border border-white/[0.07] rounded-full p-1 backdrop-blur-md ml-2">
+          {CATEGORY_ITEMS.map((cat) => {
+            const isActive = isCurrentCategory(cat);
+            return (
+              <Link
+                key={cat.key}
+                href={cat.href}
+                scroll={false}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 select-none whitespace-nowrap ${
+                  isActive
+                    ? "bg-gradient-to-r from-accent to-accent-warm text-white shadow-[0_0_12px_var(--accent-glow)] scale-[1.02]"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                }`}
+              >
+                {cat.name}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* TV Nav */}
         {deviceMode==="tv" && (
           <div className="flex items-center gap-3 ml-4 mr-auto text-xs font-black uppercase tracking-wider text-zinc-400">
@@ -240,6 +282,7 @@ export default function Header() {
             <Link href="/watchlist" scroll={false} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:text-white hover:bg-white/5 transition-colors"><Bookmark className="w-4 h-4 text-pink-400"/>My List</Link>
           </div>
         )}
+
 
         {/* Center Section - PC Search Bar */}
         {deviceMode==="pc" && (

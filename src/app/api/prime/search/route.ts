@@ -39,7 +39,7 @@ export async function GET(request: Request) {
             }
         }
 
-        const res = await fetchWithTimeout(url, { next: { revalidate: 3600 } }, 3000);
+        const res = await fetchWithTimeout(url, { next: { revalidate: 3600 } }, 8000);
         if (!res.ok) throw new Error(`TMDB API error: ${res.status}`);
 
         const data = await res.json();

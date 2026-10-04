@@ -101,7 +101,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
+            }).filter((item) => item !== null && Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[AllAnime] Search failed:', error);
             return [];
@@ -328,7 +328,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
+            }).filter((item) => item !== null && Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[AllAnime] GetPopular failed:', error);
             return [];
@@ -364,7 +364,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
+            }).filter((item) => item !== null && Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[AllAnime] GetRecent failed:', error);
             return [];
@@ -400,7 +400,7 @@ export class AllAnimeProvider implements AnimeProvider {
                     subOrDub: show.availableEpisodes,
                     provider: this.name
                 };
-            }).filter((item): item is AnimeSearchResult => item !== null && Boolean(item.id));
+            }).filter((item) => item !== null && Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[AllAnime] GetTop failed:', error);
             return [];

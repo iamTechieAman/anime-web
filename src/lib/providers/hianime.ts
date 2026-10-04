@@ -92,7 +92,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] Search failed:', error);
             return [];
@@ -274,7 +274,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] getAZList failed:', error);
             return [];
@@ -291,7 +291,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] getGenre failed:', error);
             return [];
@@ -333,7 +333,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] getRecent failed:', error);
             return [];
@@ -349,7 +349,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] getTrending failed:', error);
             return [];
@@ -365,7 +365,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] getCompleted failed:', error);
             return [];
@@ -381,7 +381,7 @@ export class HiAnimeProvider implements AnimeProvider {
                 title: item?.title || item?.japanese_title || 'Unknown',
                 image: sanitizeUrl(item?.poster),
                 provider: this.name
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (error) {
             console.error('[HiAnime] getUpcoming failed:', error);
             return [];

@@ -1,4 +1,5 @@
-import { MetadataRoute } from 'next'
+// @ts-ignore
+import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {

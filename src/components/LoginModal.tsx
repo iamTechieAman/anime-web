@@ -219,7 +219,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         } cursor-pointer`}
                       >
                         <div className="relative w-full h-full">
-                          <ProfileAvatar src={avatar.url} alt={avatar.name} sizes="80px" />
+                          <ProfileAvatar src={avatar.url} alt={avatar.name} />
                         </div>
                         {isSelected && (
                           <div className="absolute top-1 right-1 bg-accent rounded-full p-0.5 shadow-md">

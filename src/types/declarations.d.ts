@@ -84,7 +84,7 @@ declare module 'next/server' {
 
 declare module 'next/dynamic' {
     import React from 'react';
-    export default function dynamic<P = {}>(
+    export default function dynamic<P = Record<string, unknown>>(
         loader: () => Promise<React.ComponentType<P> | { default: React.ComponentType<P> }>,
         options?: {
             ssr?: boolean;
@@ -231,6 +231,11 @@ declare module 'lucide-react' {
     export const Smile: LucideIcon;
     export const Edit2: LucideIcon;
     export const CornerDownRight: LucideIcon;
+    export const Sword: LucideIcon;
+    export const Music: LucideIcon;
+    export const Target: LucideIcon;
+    export const Rocket: LucideIcon;
+    export const Map: LucideIcon;
 }
 
 declare module 'date-fns' {

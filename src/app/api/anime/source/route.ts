@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { AnimeProviderManager, isValidVideoSource, normalizeProvider, rankVideoSources } from "@/lib/providers/AnimeProviderManager";
+import { AnimeProviderManager, normalizeProvider } from "@/lib/providers/AnimeProviderManager";
 import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
-import type { VideoSource } from "@/lib/providers/types";
+
+const isDev = process.env.NODE_ENV === 'development';
 
 export async function GET(request: Request) {
     const startTime = Date.now();
@@ -12,7 +13,6 @@ export async function GET(request: Request) {
     const rawProvider = searchParams.get("provider");
     const serverId = searchParams.get("serverId") || undefined;
     const rawMalId = searchParams.get("malId");
-    const title = searchParams.get("title") || undefined;
 
     // STEP 1: NORMALIZE INPUT
     if (!rawId || !rawEp) {
@@ -45,13 +45,13 @@ export async function GET(request: Request) {
     const normalizedProvider = rawProvider ? normalizeProvider(rawProvider) : undefined;
     const parsedMalId = rawMalId && /^\d+$/.test(rawMalId) ? parseInt(rawMalId, 10) : undefined;
 
-    console.log(`[SourceResolver] 🚀 [START] animeId=${cleanId} ep=${cleanEp} mode=${mode} provider=${normalizedProvider || 'auto'} server=${serverId || 'auto'}`);
+    console.log(`[SourceRoute] 🚀 [START] animeId=${cleanId} ep=${cleanEp} mode=${mode} provider=${normalizedProvider || 'auto'} server=${serverId || 'auto'}`);
 
-    // STEP 7: CACHING
+    // STEP 2: CACHE CHECK
     const cacheKeyStr = `${cacheKey.sources(cleanId, cleanEp, mode)}:${normalizedProvider || 'auto'}:${serverId || 'auto'}`;
     const cachedSources = animeCache.get<any[]>(cacheKeyStr);
     if (cachedSources && Array.isArray(cachedSources) && cachedSources.length > 0) {
-        console.log(`[SourceResolver] ⚡ [CACHE_HIT] Resolved ${cachedSources.length} sources from in-memory cache for ${cleanId} ep ${cleanEp}`);
+        console.log(`[SourceRoute] ⚡ [CACHE_HIT] Resolved ${cachedSources.length} sources from cache for ${cleanId} ep ${cleanEp}`);
         return NextResponse.json({
             success: true,
             cached: true,
@@ -64,149 +64,18 @@ export async function GET(request: Request) {
         });
     }
 
-    const collectedSources: VideoSource[] = [];
-    const seenUrls = new Set<string>();
+    // STEP 3: RESOLVE SOURCES VIA PROVIDER MANAGER
+    const resolution = await AnimeProviderManager.resolveSourcesWithDiagnostics(
+        cleanId,
+        cleanEp,
+        mode,
+        normalizedProvider,
+        serverId,
+        parsedMalId
+    );
 
-    // STEP 9: MULTI-TIER FALLBACK PIPELINE
-
-    // TIER 1: Dedicated Scrapers via AnimeProviderManager
-    try {
-        const managerSources = await AnimeProviderManager.getSources(
-            cleanId,
-            cleanEp,
-            mode,
-            normalizedProvider,
-            serverId,
-            parsedMalId
-        );
-
-        if (managerSources && managerSources.length > 0) {
-            for (const s of managerSources) {
-                if (isValidVideoSource(s)) {
-                    const url = s.url || (s as any).link;
-                    if (!seenUrls.has(url)) {
-                        seenUrls.add(url);
-                        collectedSources.push(s);
-                    }
-                }
-            }
-        }
-    } catch (err: any) {
-        console.warn(`[SourceResolver] ⚠️ Tier 1 (ProviderManager) failed for ${cleanId} ep ${cleanEp}:`, err.message);
-    }
-
-    // TIER 2: AMVSTR Direct Stream API (if no scraper sources found)
-    if (collectedSources.length === 0 && /^\d+$/.test(cleanId)) {
-        try {
-            const amvstrRes = await Promise.race([
-                fetch(`https://api.amvstr.me/api/v2/stream/${cleanId}/${cleanEp}`, {
-                    headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
-                    signal: AbortSignal.timeout(4000)
-                }),
-                new Promise<Response>((_, reject) => setTimeout(() => reject(new Error('AMVSTR Timeout')), 4000))
-            ]);
-
-            if (amvstrRes.ok) {
-                const amvstrData = await amvstrRes.json();
-                const streamUrl = amvstrData?.stream?.multi?.main?.url || amvstrData?.stream?.nspl?.main?.url;
-                if (streamUrl && isValidVideoSource({ url: streamUrl })) {
-                    if (!seenUrls.has(streamUrl)) {
-                        seenUrls.add(streamUrl);
-                        collectedSources.push({
-                            url: streamUrl,
-                            isM3U8: true,
-                            quality: 'Auto (AMVSTR)',
-                            isIframe: false,
-                            server: 'amvstr',
-                            providerId: 'amvstr',
-                            type: mode
-                        });
-                    }
-                }
-            }
-        } catch (amvstrErr: any) {
-            console.warn(`[SourceResolver] ⚠️ Tier 2 (AMVSTR) failed:`, amvstrErr.message);
-        }
-    }
-
-    // TIER 3: Multi-Embed Fallbacks using MAL / AniList ID
-    if (collectedSources.length === 0) {
-        let finalMalId = parsedMalId;
-        if (!finalMalId && /^\d+$/.test(cleanId)) {
-            try {
-                const query = `query ($id: Int) { Media (id: $id, type: ANIME) { idMal } }`;
-                const res = await Promise.race([
-                    fetch('https://graphql.anilist.co', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query, variables: { id: parseInt(cleanId, 10) } }),
-                        signal: AbortSignal.timeout(3000)
-                    }),
-                    new Promise<Response>((_, reject) => setTimeout(() => reject(new Error('AniList GraphQL Timeout')), 3000))
-                ]);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data?.data?.Media?.idMal) {
-                        finalMalId = data.data.Media.idMal;
-                    }
-                }
-            } catch (_) {}
-        }
-
-        if (finalMalId) {
-            const embedSources: VideoSource[] = [
-                {
-                    url: `https://vidsrc.cc/v2/embed/anime/${finalMalId}/${cleanEp}`,
-                    quality: 'VidSrc.cc',
-                    isM3U8: false,
-                    isIframe: true,
-                    server: 'vidsrc_cc',
-                    providerId: 'vidsrc',
-                    type: mode
-                },
-                {
-                    url: `https://vidsrc.to/embed/anime/${finalMalId}/${cleanEp}`,
-                    quality: 'VidSrc.to',
-                    isM3U8: false,
-                    isIframe: true,
-                    server: 'vidsrc_to',
-                    providerId: 'vidsrc',
-                    type: mode
-                },
-                {
-                    url: `https://vidsrc.me/embed/anime?mal=${finalMalId}&episode=${cleanEp}`,
-                    quality: 'VidSrc.me',
-                    isM3U8: false,
-                    isIframe: true,
-                    server: 'vidsrc_me',
-                    providerId: 'vidsrc',
-                    type: mode
-                },
-                {
-                    url: `https://animeplayer.pt/api/embed?id=${finalMalId}&episode=${cleanEp}`,
-                    quality: 'AnimePlayer',
-                    isM3U8: false,
-                    isIframe: true,
-                    server: 'animeplayer',
-                    providerId: 'animeplayer',
-                    type: mode
-                }
-            ];
-
-            for (const s of embedSources) {
-                if (!seenUrls.has(s.url)) {
-                    seenUrls.add(s.url);
-                    collectedSources.push(s);
-                }
-            }
-        }
-    }
-
-    // Rank sources: HLS > MP4 > Dedicated Embeds > Fallback embeds
-    const rankedSources = rankVideoSources(collectedSources);
-
-    // STEP 6: SOURCE NORMALIZATION
-    const normalizedSources = rankedSources.map((s, idx) => {
+    // STEP 4: NORMALIZE SOURCES FOR CLIENT
+    const normalizedSources = resolution.sources.map((s, idx) => {
         const url = s.url || (s as any).link;
         const isM3U8 = Boolean(s.isM3U8 || (s as any).hls || url.includes('.m3u8'));
         const isIframe = Boolean(s.isIframe);
@@ -237,11 +106,11 @@ export async function GET(request: Request) {
     const duration = Date.now() - startTime;
 
     if (normalizedSources.length > 0) {
-        // Cache successful response for 5 minutes
+        // Cache successful response
         animeCache.set(cacheKeyStr, normalizedSources, TTL.SOURCES);
-        console.log(`[SourceResolver] 🏁 [COMPLETE] Successfully resolved ${normalizedSources.length} sources for ${cleanId} ep ${cleanEp} in ${duration}ms`);
+        console.log(`[SourceRoute] 🏁 [COMPLETE] Resolved ${normalizedSources.length} sources for ${cleanId} ep ${cleanEp} via tier ${resolution.tier} [${resolution.resolvedBy.join(', ')}] in ${duration}ms`);
 
-        return NextResponse.json({
+        const response: Record<string, any> = {
             success: true,
             cached: false,
             animeId: cleanId,
@@ -249,14 +118,30 @@ export async function GET(request: Request) {
             mode,
             durationMs: duration,
             count: normalizedSources.length,
+            resolvedBy: resolution.resolvedBy,
+            tier: resolution.tier,
             sources: normalizedSources,
-            links: normalizedSources
-        });
+            links: normalizedSources,
+        };
+
+        // Include per-provider diagnostics in dev mode
+        if (isDev) {
+            response.diagnostics = resolution.providerResults.map(pr => ({
+                provider: pr.provider,
+                status: pr.status,
+                sourceCount: pr.sources.length,
+                durationMs: pr.durationMs,
+                error: pr.error ? { code: pr.error.code, message: pr.error.message } : undefined,
+            }));
+        }
+
+        return NextResponse.json(response);
     }
 
-    console.warn(`[SourceResolver] ❌ [NO_SOURCES] Failed to resolve any valid sources for ${cleanId} ep ${cleanEp} after ${duration}ms`);
+    // ALL PROVIDERS FAILED
+    console.warn(`[SourceRoute] ❌ [NO_SOURCES] Failed to resolve sources for ${cleanId} ep ${cleanEp} after ${duration}ms`);
 
-    return NextResponse.json({
+    const failureResponse: Record<string, any> = {
         success: false,
         error: `No playable sources found for episode ${cleanEp}`,
         code: "NO_SOURCES_AVAILABLE",
@@ -266,7 +151,20 @@ export async function GET(request: Request) {
         durationMs: duration,
         count: 0,
         sources: [],
-        links: []
-    });
-}
+        links: [],
+    };
 
+    // Include diagnostics in dev mode for debugging
+    if (isDev) {
+        failureResponse.diagnostics = resolution.providerResults.map(pr => ({
+            provider: pr.provider,
+            status: pr.status,
+            sourceCount: pr.sources.length,
+            durationMs: pr.durationMs,
+            error: pr.error ? { code: pr.error.code, message: pr.error.message } : undefined,
+        }));
+        failureResponse.errorSummary = resolution.errorSummary;
+    }
+
+    return NextResponse.json(failureResponse);
+}

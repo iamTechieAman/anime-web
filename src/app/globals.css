@@ -28,6 +28,7 @@
 html,
 body {
   overflow-x: hidden;
+  scrollbar-gutter: stable;
   background: var(--bg-main);
   /* iPhone notch / Dynamic Island safe area */
   padding-left: env(safe-area-inset-left);
@@ -72,52 +73,53 @@ img {
 }
 
 /* ══════════════════════════════════════════════════
-   TOONPLAYER V5.0 — PREMIUM CINEMATIC DARK DESIGN SYSTEM
+   TOONPLAYER STUDIO-GRADE CINEMATIC DARK DESIGN SYSTEM
    ══════════════════════════════════════════════════ */
 
 :root {
-  /* ToonPlayer V5.0 Final Release Candidate Dark Cinematic Theme */
-  --bg-main: #141414;
-  --bg-surface: #181818;
-  --bg-elevated: #242424;
-  --bg-card: #181818;
-  --bg-overlay: rgba(20, 20, 20, 0.98);
+  /* Studio-Grade Deep Obsidian & Slate Palette */
+  --bg-main: #0b0c10;
+  --bg-surface: #12141d;
+  --bg-elevated: #1f2833;
+  --bg-card: #141824;
+  --bg-overlay: rgba(11, 12, 16, 0.96);
   
   --text-main: #ffffff;
-  --text-secondary: #e4e4e7;
-  --text-muted: #a1a1aa;
+  --text-secondary: #c5c6c7;
+  --text-muted: #8b92a0;
   
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
   
   --accent: #E50914;
   --accent-secondary: #C11119;
-  --accent-glow: rgba(229, 9, 20, 0.25);
+  --accent-glow: rgba(229, 9, 20, 0.35);
   --accent-warm: #E50914;
 
-  --secondary: #C11119;
+  --secondary: #66fcf1;
+  --secondary-glow: rgba(102, 252, 241, 0.25);
   --danger: #EF4444;
-  --success: #22C55E;
-  --warning: var(--accent-secondary);
-  --info: #22D3EE;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --info: #38BDF8;
   
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-hover: rgba(229, 9, 20, 0.08);
+  --glass-bg: rgba(18, 20, 29, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(229, 9, 20, 0.12);
 
   /* Gradient system */
   --gradient-primary: linear-gradient(135deg, #E50914, #B91C1C);
   --gradient-hot: linear-gradient(135deg, #E50914, #991B1B);
-  --gradient-cool: linear-gradient(135deg, #E50914, #C11119);
-  --gradient-gold: linear-gradient(135deg, #C11119, #E50914);
+  --gradient-cool: linear-gradient(135deg, #1f2833, #0b0c10);
+  --gradient-gold: linear-gradient(135deg, #F59E0B, #E50914);
 
   /* Shadows */
-  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.85);
-  --shadow-elevated: 0 12px 40px -6px rgba(0, 0, 0, 0.95);
-  --shadow-glow-primary: 0 0 24px rgba(229, 9, 20, 0.35);
-  --shadow-glow-warm: 0 0 24px rgba(229, 9, 20, 0.35);
+  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.85);
+  --shadow-elevated: 0 16px 48px -8px rgba(0, 0, 0, 0.95);
+  --shadow-glow-primary: 0 0 28px rgba(229, 9, 20, 0.35);
+  --shadow-glow-warm: 0 0 28px rgba(229, 9, 20, 0.35);
 
   /* Spacing scale — 4px grid system */
   --space-xs: 4px;
@@ -129,52 +131,52 @@ img {
   --space-3xl: 32px;
 
   /* Border radius scale */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
 }
 
 .dark {
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.09);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(18, 20, 29, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
   
   --accent: #E50914;
   --accent-secondary: #C11119;
-  --accent-glow: rgba(229, 9, 20, 0.25);
+  --accent-glow: rgba(229, 9, 20, 0.35);
   --accent-warm: #E50914;
   
-  --secondary: #C11119;
+  --secondary: #66fcf1;
   --danger: #EF4444;
   --success: #10B981;
 
-  --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.85);
-  --shadow-elevated: 0 12px 40px -6px rgba(0, 0, 0, 0.95);
+  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.85);
+  --shadow-elevated: 0 16px 48px -8px rgba(0, 0, 0, 0.95);
 }
 
-/* 🌙 Anime dark surface overrides */
+/* 🌙 Obsidian dark surface overrides */
 .theme-dark,
 .watch-page,
 footer,
 aside {
-  --bg-main: #141414 !important;
-  --bg-surface: #181818 !important;
-  --bg-elevated: #242424 !important;
-  --bg-card: #181818 !important;
-  --bg-overlay: rgba(20, 20, 20, 0.98) !important;
+  --bg-main: #0b0c10 !important;
+  --bg-surface: #12141d !important;
+  --bg-elevated: #1f2833 !important;
+  --bg-card: #141824 !important;
+  --bg-overlay: rgba(11, 12, 16, 0.96) !important;
   
   --text-main: #ffffff !important;
-  --text-secondary: #e4e4e7 !important;
-  --text-muted: #a1a1aa !important;
+  --text-secondary: #c5c6c7 !important;
+  --text-muted: #8b92a0 !important;
   
-  --border-color: rgba(255, 255, 255, 0.06) !important;
-  --border-subtle: rgba(255, 255, 255, 0.03) !important;
-  --glass-bg: rgba(255, 255, 255, 0.03) !important;
-  --glass-border: rgba(255, 255, 255, 0.06) !important;
+  --border-color: rgba(255, 255, 255, 0.08) !important;
+  --border-subtle: rgba(255, 255, 255, 0.04) !important;
+  --glass-bg: rgba(18, 20, 29, 0.8) !important;
+  --glass-border: rgba(255, 255, 255, 0.08) !important;
 }
 
 .theme-dark *,
@@ -680,20 +682,21 @@ p, .text-body {
   animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   :root {
-    --bg-main: #09090b; /* Very dark near-black */
-    --bg-card: #141416;
+    --bg-main: #0b0c10; /* Deep obsidian */
+    --bg-surface: #12141d;
+    --bg-card: #141824;
+    --bg-elevated: #1f2833;
     --border-color: rgba(255, 255, 255, 0.08);
-    --text-main: #fcfcfc;
-    --text-muted: #9ca3af;
-    --accent: #e50914; /* Netflix/OnoFlix red */
-    --accent-glow: rgba(229, 9, 20, 0.4);
-    --accent-secondary: #ff3b3b;
+    --border-glow: rgba(99, 102, 241, 0.25);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #6366f1;
+    --accent-glow: rgba(99, 102, 241, 0.45);
+    --accent-secondary: #818cf8;
+    --accent-warm: #ec4899;
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
   }

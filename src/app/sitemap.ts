@@ -1,21 +1,36 @@
-import { MetadataRoute } from 'next'
- 
-export const revalidate = 86400; // Cache for 24 hours to prevent 429 timeouts to TMDB
+// @ts-ignore
+import type { MetadataRoute } from 'next';
+import connectToDatabase from '@/lib/db';
+import { CartoonCatalogModel } from '@/models/CartoonCatalog';
+
+export const revalidate = 86400; // Cache sitemap for 24 hours to balance fresh catalog indexation with API rate limits
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.toonplayer.in';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.toonplayer.in';
   const now = new Date();
 
-  // Static pages
+  // 1. Static Core Landing Pages
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: now,
-      changeFrequency: 'daily',
+      changeFrequency: 'always',
       priority: 1.0,
     },
     {
       url: `${baseUrl}/anime`,
+      lastModified: now,
+      changeFrequency: 'hourly',
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/browse?type=anime`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/browse?type=tv&genre_id=16`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
@@ -35,14 +50,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${baseUrl}/trending`,
       lastModified: now,
-      changeFrequency: 'daily',
+      changeFrequency: 'hourly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/top-rated`,
       lastModified: now,
       changeFrequency: 'daily',
-      priority: 0.9,
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/genres`,
@@ -54,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/about`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/privacy`,
@@ -76,11 +91,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Genre pages
+  // 2. High-intent Category & Genre Pages
   const genres = [
-    "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
-    "Drama", "Family", "Fantasy", "History", "Horror", "Music",
-    "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
+    "Action", "Adventure", "Animation", "Anime", "Cartoon", "Comedy", "Crime",
+    "Documentary", "Drama", "Family", "Fantasy", "History", "Horror",
+    "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"
   ];
 
   const genrePages: MetadataRoute.Sitemap = genres.map(genre => ({
@@ -90,76 +105,181 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // A-Z List pages
+  // 3. A-Z Catalog Index Pages
   const azLetters = ['all', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), '0-9'];
   const azPages: MetadataRoute.Sitemap = azLetters.map(letter => ({
     url: `${baseUrl}/az-list/${letter.toLowerCase()}`,
     lastModified: now,
     changeFrequency: 'daily' as const,
-    priority: 0.6,
+    priority: 0.65,
   }));
 
-  // Dynamic trending content — fetch top movies/shows for indexing
-  let dynamicPages: MetadataRoute.Sitemap = [];
+  // 4. Dynamic Scraped Cartoons from MongoDB Catalog
+  let cartoonPages: MetadataRoute.Sitemap = [];
   try {
-    const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
-    
-    // Fetch trending all (Movies + TV)
-    const trendingRes = await fetch(
-      `https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_KEY}`,
-      { next: { revalidate: 3600 } }
-    );
-    const trendingData = await trendingRes.json();
+    await connectToDatabase();
+    const cartoons = await CartoonCatalogModel.find({}, 'externalId slug title seasons updatedAt')
+      .sort({ updatedAt: -1 })
+      .limit(100)
+      .lean();
 
-    if (trendingData?.results) {
-      dynamicPages = trendingData.results
-        .slice(0, 50) // Scale to top 50
-        .filter((item: any) => item.media_type !== 'person')
-        .map((item: any) => ({
-          url: `${baseUrl}/watch/${item.media_type}/${item.id}`,
-          lastModified: now,
+    if (cartoons && cartoons.length > 0) {
+      for (const cartoon of cartoons) {
+        const lastMod = cartoon.updatedAt ? new Date(cartoon.updatedAt) : now;
+        
+        // Show landing URLs
+        cartoonPages.push({
+          url: `${baseUrl}/cartoon/${cartoon.externalId}`,
+          lastModified: lastMod,
           changeFrequency: 'daily' as const,
-          priority: 0.8,
-        }));
-    }
+          priority: 0.85,
+        });
+        cartoonPages.push({
+          url: `${baseUrl}/watch/cartoon/${cartoon.externalId}`,
+          lastModified: lastMod,
+          changeFrequency: 'daily' as const,
+          priority: 0.85,
+        });
 
-    // Additional popular buckets
-    const [popMovies, popTv] = await Promise.all([
-      fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}&page=1`, { next: { revalidate: 3600 } }).then(r => r.json()),
-      fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_KEY}&page=1`, { next: { revalidate: 3600 } }).then(r => r.json()),
-    ]);
-
-    if (popMovies?.results) {
-      const pPages = popMovies.results.slice(0, 30).map((item: any) => ({
-        url: `${baseUrl}/watch/movie/${item.id}`,
-        lastModified: now,
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      }));
-      dynamicPages = [...dynamicPages, ...pPages];
-    }
-
-    if (popTv?.results) {
-      const tPages = popTv.results.slice(0, 30).map((item: any) => ({
-        url: `${baseUrl}/watch/tv/${item.id}`,
-        lastModified: now,
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      }));
-      dynamicPages = [...dynamicPages, ...tPages];
+        // Episode-level URLs for high-ranking search queries ("Watch {title} Episode {ep}")
+        if (cartoon.seasons && cartoon.seasons.length > 0) {
+          const season1 = cartoon.seasons.find((s: any) => s.seasonNumber === 1) || cartoon.seasons[0];
+          if (season1 && season1.episodes) {
+            // Index the first 10 episodes of each cartoon
+            for (const ep of season1.episodes.slice(0, 10)) {
+              cartoonPages.push({
+                url: `${baseUrl}/watch/cartoon/${cartoon.externalId}?s=${season1.seasonNumber || 1}&e=${ep.episodeNumber}`,
+                lastModified: lastMod,
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+              });
+            }
+          }
+        }
+      }
     }
   } catch (e) {
-    console.error('[Sitemap] Failed to fetch dynamic content:', e);
+    console.warn('[Sitemap] MongoDB cartoon catalog query skipped:', e);
   }
 
-  // Deduplicate by URL
-  const allPages = [...staticPages, ...genrePages, ...azPages, ...dynamicPages];
+  // 5. Dynamic Movies, Anime & TV from TMDB API
+  let dynamicMediaPages: MetadataRoute.Sitemap = [];
+  try {
+    const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
+
+    const [trendingRes, popAnimeRes, popMoviesRes, popTvRes] = await Promise.all([
+      // Trending weekly media
+      fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${TMDB_KEY}`, { next: { revalidate: 3600 } })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+
+      // Top Animation/Anime shows (Genre 16)
+      fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_KEY}&with_genres=16&sort_by=popularity.desc&page=1`, { next: { revalidate: 3600 } })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+
+      // Popular Movies
+      fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}&page=1`, { next: { revalidate: 3600 } })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+
+      // Popular TV
+      fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_KEY}&page=1`, { next: { revalidate: 3600 } })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+    ]);
+
+    // Trending titles
+    if (trendingRes?.results) {
+      for (const item of trendingRes.results.slice(0, 40)) {
+        if (item.media_type === 'person') continue;
+        const mediaType = item.media_type === 'tv' ? 'tv' : 'movie';
+        
+        dynamicMediaPages.push({
+          url: `${baseUrl}/watch/${mediaType}/${item.id}`,
+          lastModified: now,
+          changeFrequency: 'daily' as const,
+          priority: 0.9,
+        });
+
+        // Add episode deep links for top trending TV series
+        if (mediaType === 'tv') {
+          for (let ep = 1; ep <= 3; ep++) {
+            dynamicMediaPages.push({
+              url: `${baseUrl}/watch/tv/${item.id}?s=1&e=${ep}`,
+              lastModified: now,
+              changeFrequency: 'weekly' as const,
+              priority: 0.8,
+            });
+          }
+        }
+      }
+    }
+
+    // Popular Anime & Animation
+    if (popAnimeRes?.results) {
+      for (const anime of popAnimeRes.results.slice(0, 30)) {
+        dynamicMediaPages.push({
+          url: `${baseUrl}/watch/anime/${anime.id}`,
+          lastModified: now,
+          changeFrequency: 'daily' as const,
+          priority: 0.9,
+        });
+
+        // Index first 5 episodes for search keywords
+        for (let ep = 1; ep <= 5; ep++) {
+          dynamicMediaPages.push({
+            url: `${baseUrl}/watch/anime/${anime.id}?ep=${ep}`,
+            lastModified: now,
+            changeFrequency: 'weekly' as const,
+            priority: 0.82,
+          });
+        }
+      }
+    }
+
+    // Popular Movies
+    if (popMoviesRes?.results) {
+      for (const item of popMoviesRes.results.slice(0, 25)) {
+        dynamicMediaPages.push({
+          url: `${baseUrl}/watch/movie/${item.id}`,
+          lastModified: now,
+          changeFrequency: 'weekly' as const,
+          priority: 0.85,
+        });
+      }
+    }
+
+    // Popular TV shows
+    if (popTvRes?.results) {
+      for (const item of popTvRes.results.slice(0, 25)) {
+        dynamicMediaPages.push({
+          url: `${baseUrl}/watch/tv/${item.id}`,
+          lastModified: now,
+          changeFrequency: 'weekly' as const,
+          priority: 0.85,
+        });
+      }
+    }
+  } catch (e) {
+    console.error('[Sitemap] Failed to fetch dynamic TMDB catalog:', e);
+  }
+
+  // 6. Deduplicate by URL to ensure clean, valid sitemap.xml
+  const allPages = [
+    ...staticPages,
+    ...genrePages,
+    ...azPages,
+    ...cartoonPages,
+    ...dynamicMediaPages,
+  ];
+
   const seen = new Set<string>();
-  const deduped = allPages.filter(page => {
-    if (seen.has(page.url)) return false;
+  const dedupedSitemap = allPages.filter(page => {
+    if (!page.url || seen.has(page.url)) return false;
     seen.add(page.url);
     return true;
   });
 
-  return deduped;
+  return dedupedSitemap;
 }

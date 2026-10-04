@@ -45,7 +45,7 @@ export class AnimePaheProvider implements AnimeProvider {
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
                 extra: { year: item?.year, status: item?.status },
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (err) {
             console.error('[AnimePahe] Search failed:', err);
             return [];
@@ -93,7 +93,7 @@ export class AnimePaheProvider implements AnimeProvider {
             }
 
             const data = await consumetFetch(`/anime/animepahe/watch/${episodeId}`);
-            const sourcesList = safeArray(data?.sources);
+            const sourcesList = safeArray<any>(data?.sources);
             if (sourcesList.length === 0) throw new Error('No sources from AnimePahe');
 
             const validSources: VideoSource[] = [];

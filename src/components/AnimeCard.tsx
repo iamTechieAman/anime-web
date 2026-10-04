@@ -87,9 +87,9 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
     const typeLabel = cleanString(show.type) || cleanString(show.media_type) || "ANIME";
 
     return (
-        <div className="card-reveal card-visible group relative transition-all duration-[250ms] hover:z-30 w-full h-full">
+        <div className="card-reveal card-visible group relative transition-all duration-300 hover:z-30 w-full h-full">
             <Link href={getHref()} scroll={false} className="block w-full h-full">
-                <div className={`premium-card-container w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'}`}>
+                <div className={`relative w-full ${isBanner ? 'aspect-[16/9] !h-auto' : 'aspect-[2/3]'} rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-white/20 group-hover:shadow-[0_16px_36px_rgba(0,0,0,0.8)]`}>
                     {/* Poster */}
                     {(imageSrc && !imgError) ? (
                         <div className="relative w-full h-full overflow-hidden">
@@ -98,7 +98,7 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                                 alt={title}
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
-                                className="object-cover transition-transform duration-[250ms] ease-apple group-hover:scale-[1.02] will-change-transform" 
+                                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform" 
                                 placeholder="blur"
                                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                                 loading="lazy"
@@ -109,52 +109,42 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                         <ImagePlaceholder title={title} />
                     )}
 
-                    {/* Rating badge */}
-                    {rating && (
-                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/70 z-10 text-[10px] font-bold text-accent-warm">
-                            <Star className="w-2.5 h-2.5 fill-current" />
-                            {rating}
+                    {/* Top Badges */}
+                    <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none z-10">
+                        {rating ? (
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-md text-[10px] font-black text-amber-300 border border-white/10 shadow-sm">
+                                <Star className="w-2.5 h-2.5 fill-current" />
+                                {rating}
+                            </div>
+                        ) : <span />}
+
+                        <span className="px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-md text-[9px] font-black uppercase tracking-wider text-accent border border-accent/20 shadow-sm">
+                            {typeLabel}
+                        </span>
+                    </div>
+
+                    {/* Hover Overlay with Quick Play Button */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3.5 z-10">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-accent to-accent-warm flex items-center justify-center shadow-[0_0_16px_var(--accent-glow)] mb-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                         </div>
-                    )}
-
-                    {/* Premium Slide-Up Netflix-Style Overlay */}
-                    <div className="premium-card-overlay">
-                        <div className="premium-card-overlay-content space-y-2">
-                            {/* Play CTA Indicator */}
-                            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-lg mb-1">
-                                <Play className="w-4 h-4 text-white fill-white ml-0.5" />
-                            </div>
-                            
-                            <h4 className="text-xs font-black text-white line-clamp-2 leading-tight tracking-tight">{title}</h4>
-                            
-                            <div className="flex items-center gap-2 text-[9px] text-white/90 font-bold">
-                                <span className="text-green-400 font-black">98% Match</span>
-                                {year && <span>• {year}</span>}
-                            </div>
-
-                            <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/10 text-white/90 font-black uppercase tracking-wider w-fit block border border-white/5">
-                                {typeLabel}
-                            </span>
+                        <h4 className="text-xs font-black text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
+                        <div className="flex items-center gap-2 mt-1 text-[10px] text-zinc-300 font-bold">
+                            <span className="text-emerald-400 font-black">HD</span>
+                            {year && <span>• {year}</span>}
                         </div>
                     </div>
                 </div>
-                {/* Always-visible Title Metadata Block */}
-                <div className="mt-2 px-0.5 pb-1">
-                    <h4 className="text-[11px] md:text-xs font-extrabold text-white line-clamp-1 leading-tight tracking-tight">{title}</h4>
-                    <div className="flex items-center gap-1.5 mt-1 text-[9px] md:text-[10px] text-[var(--text-muted)] font-bold">
-                        {rating && (
-                            <span className="text-accent-warm font-extrabold flex items-center gap-0.5">
-                                ★{rating}
-                            </span>
-                        )}
-                        {year && (
-                            <>
-                                <span className="text-white/25">•</span>
-                                <span>{year}</span>
-                            </>
-                        )}
-                        <span className="text-white/25">•</span>
-                        <span className="text-accent uppercase font-bold text-[8px] tracking-wider">
+
+                {/* Bottom Metadata Block */}
+                <div className="mt-2.5 px-1 pb-1">
+                    <h4 className="text-xs font-black text-white line-clamp-1 leading-tight tracking-tight group-hover:text-accent transition-colors">
+                        {title}
+                    </h4>
+                    <div className="flex items-center gap-1.5 mt-1 text-[10px] text-zinc-400 font-semibold">
+                        {year && <span>{year}</span>}
+                        {year && <span className="text-zinc-600">•</span>}
+                        <span className="text-accent uppercase font-black text-[9px] tracking-wider">
                             {typeLabel}
                         </span>
                     </div>

@@ -153,3 +153,61 @@ export const TrendingStarsSkeleton = memo(function TrendingStarsSkeleton() {
         </div>
     );
 });
+
+// --- Episode List & Grid Shimmer Skeleton (Zero layout shift) ---
+export const EpisodeListSkeleton = memo(function EpisodeListSkeleton({
+    mode = "list",
+    count = 12,
+}: {
+    mode?: "list" | "grid";
+    count?: number;
+}) {
+    if (mode === "grid") {
+        return (
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1">
+                {Array.from({ length: count }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="h-10 rounded-xl shimmer-card bg-zinc-900 border border-white/5"
+                    />
+                ))}
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-2.5">
+            {Array.from({ length: count }).map((_, i) => (
+                <div
+                    key={i}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[#12131A]/60"
+                >
+                    <div className="w-24 h-14 rounded-lg shimmer-card bg-zinc-900 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                        <div className="h-3.5 rounded w-3/4 shimmer-card bg-zinc-900" />
+                        <div className="flex items-center gap-2">
+                            <div className="h-2.5 rounded w-16 shimmer-card bg-zinc-900" />
+                            <div className="h-2.5 rounded w-12 shimmer-card bg-zinc-900" />
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+});
+
+// --- Player Container Skeleton (Zero layout shift) ---
+export const PlayerContainerSkeleton = memo(function PlayerContainerSkeleton() {
+    return (
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0a0a0f] border border-white/[0.06] shadow-2xl">
+            <div className="absolute inset-0 shimmer-card bg-zinc-950/80" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
+                <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm">
+                    <div className="w-0 h-0 border-y-[8px] border-y-transparent border-l-[14px] border-l-white/20 ml-1" />
+                </div>
+                <div className="h-3 w-32 rounded-full shimmer-card bg-zinc-800" />
+            </div>
+        </div>
+    );
+});
+

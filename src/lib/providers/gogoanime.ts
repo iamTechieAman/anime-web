@@ -50,7 +50,7 @@ export class GogoanimeProvider implements AnimeProvider {
                     url: item?.url,
                     subOrDub: item?.subOrDub,
                 },
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch (err) {
             console.error('[Gogoanime] Search failed:', err);
             return [];
@@ -132,7 +132,7 @@ export class GogoanimeProvider implements AnimeProvider {
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
                 extra: { episodeId: item?.episodeId, episodeNumber: item?.episodeNumber },
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch { return []; }
     }
 
@@ -144,7 +144,7 @@ export class GogoanimeProvider implements AnimeProvider {
                 title: safeString(item?.title, 'Unknown'),
                 image: sanitizeUrl(item?.image),
                 provider: this.name,
-            })).filter((item): item is AnimeSearchResult => Boolean(item.id));
+            })).filter((item) => Boolean(item.id)) as AnimeSearchResult[];
         } catch { return []; }
     }
 

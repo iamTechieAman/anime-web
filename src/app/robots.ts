@@ -1,6 +1,9 @@
-import { MetadataRoute } from 'next'
- 
+// @ts-ignore
+import type { MetadataRoute } from 'next';
+
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.toonplayer.in';
+
   return {
     rules: [
       {
@@ -14,10 +17,13 @@ export default function robots(): MetadataRoute.Robots {
           '/top-rated',
           '/genres',
           '/watch/*',
+          '/cartoon/*',
+          '/az-list/*',
+          '/search',
           '/about',
           '/privacy',
           '/terms',
-          '/contact'
+          '/contact',
         ],
         disallow: [
           '/login',
@@ -29,14 +35,14 @@ export default function robots(): MetadataRoute.Robots {
           '/watch-history',
           '/private',
           '/history',
-          '/watchlist'
+          '/watchlist',
         ],
       },
       ...['GPTBot', 'ChatGPT-User', 'Google-Extended', 'CCBot', 'anthropic-ai', 'Claude-Web', 'PerplexityBot'].map(agent => ({
         userAgent: agent,
         allow: '/',
-      }))
+      })),
     ],
-    sitemap: 'https://www.toonplayer.in/sitemap.xml',
-  }
+    sitemap: `${baseUrl}/sitemap.xml`,
+  };
 }

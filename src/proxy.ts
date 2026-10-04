@@ -1,4 +1,4 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 // Allowlisted search engine bots — NEVER block these
@@ -19,7 +19,46 @@ const BLOCKED_UAS = [
     'harvest', 'emailcollector', 'linkextractor',
 ];
 
-export default clerkMiddleware(async (auth, request) => {
+// Explicit public routes that must NEVER trigger auth redirects or 401 challenges
+const isPublicRoute = createRouteMatcher([
+    '/',
+    '/search(.*)',
+    '/watch(.*)',
+    '/anime(.*)',
+    '/cartoon(.*)',
+    '/movies(.*)',
+    '/tv(.*)',
+    '/trending(.*)',
+    '/top-rated(.*)',
+    '/genres(.*)',
+    '/az-list(.*)',
+    '/discover(.*)',
+    '/login(.*)',
+    '/register(.*)',
+    '/sign-in(.*)',
+    '/sign-up(.*)',
+    '/about(.*)',
+    '/privacy(.*)',
+    '/terms(.*)',
+    '/contact(.*)',
+    '/manifest(.*)',
+    '/robots.txt',
+    '/sitemap.xml',
+    // Public APIs — search, content catalogs, scrapers, proxies, etc.
+    '/api/search(.*)',
+    '/api/prime(.*)',
+    '/api/anime(.*)',
+    '/api/cartoon(.*)',
+    '/api/proxy(.*)',
+    '/api/discover(.*)',
+    '/api/trending(.*)',
+    '/api/random(.*)',
+    '/api/health(.*)',
+    '/api/download(.*)',
+    '/api/auth(.*)',
+]);
+
+export default clerkMiddleware(async (auth, request: any) => {
     const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
     // Allow requests with empty user agents from internal Next.js prefetching
@@ -42,6 +81,24 @@ export default clerkMiddleware(async (auth, request) => {
                 headers: { 'content-type': 'application/json' } 
             }
         );
+    }
+
+    // Route Guard Audit:
+    // If the route is public, strictly bypass route guards (never redirect or 401)
+    if (!isPublicRoute(request)) {
+        // Protected API routes: return JSON 401 instead of redirecting to login page
+        if (request.nextUrl.pathname.startsWith('/api/')) {
+            const { userId } = await auth();
+            if (!userId) {
+                return new NextResponse(
+                    JSON.stringify({ error: 'Unauthorized', message: 'Authentication required' }),
+                    { status: 401, headers: { 'content-type': 'application/json' } }
+                );
+            }
+        } else {
+            // Protected Web Pages: apply Clerk auth protection
+            await auth.protect();
+        }
     }
 
     const response = NextResponse.next();

@@ -282,8 +282,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
   
   const showSidebar = !isWatchPage;
-  // During SSR/hydration, assume profile gate is active to hide content and prevent flash
-  const isProfileGateActive = mounted ? (hasHydrated && !activeProfileId) : true;
+  // Only activate profile gate after client has mounted and store has hydrated with no active profile
+  const isProfileGateActive = mounted && hasHydrated && !activeProfileId;
 
   return (
     <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative max-w-full overflow-x-hidden">
@@ -320,7 +320,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
             </Suspense>
           </ErrorBoundary>
         </main>
-        <MobileNav />
+        <Suspense fallback={null}>
+          <MobileNav />
+        </Suspense>
         <Footer />
       </div>
       <MobileModals />
@@ -338,13 +340,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         onClose={() => setIsCommandPaletteOpen(false)} 
       />
       
-      {/* Profile Gate overlay */}
-      {isProfileGateActive && mounted && <ProfileGate />}
-      {isProfileGateActive && !mounted && (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-bg-main">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
+      {/* Profile Gate overlay (only once mounted and actively needed) */}
+      {isProfileGateActive && <ProfileGate />}
 
       {/* Global Portal Modals */}
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />

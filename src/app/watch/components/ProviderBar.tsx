@@ -1,5 +1,15 @@
 import React, { memo, useMemo } from 'react';
-import { Server } from 'lucide-react';
+import {
+    Server,
+    Sparkles,
+    CheckCircle2,
+    AlertCircle,
+    MonitorPlay,
+    Eye,
+    RotateCcw,
+    Zap,
+    Check,
+} from 'lucide-react';
 
 interface ProviderBarProps {
     title: string;
@@ -12,6 +22,13 @@ interface ProviderBarProps {
     serversList: any[];
     animeServers: any[];
     onSelectServer: (server: any) => void;
+    isTheatreMode?: boolean;
+    onToggleTheatre?: () => void;
+    isFocusMode?: boolean;
+    onToggleFocus?: () => void;
+    autoPlayNext?: boolean;
+    onToggleAutoPlayNext?: (val: boolean) => void;
+    onReloadPlayer?: () => void;
 }
 
 const ProviderBar = memo(function ProviderBar({
@@ -25,40 +42,145 @@ const ProviderBar = memo(function ProviderBar({
     serversList,
     animeServers,
     onSelectServer,
+    isTheatreMode = false,
+    onToggleTheatre,
+    isFocusMode = false,
+    onToggleFocus,
+    autoPlayNext = true,
+    onToggleAutoPlayNext,
+    onReloadPlayer,
 }: ProviderBarProps) {
     const servers = useMemo(() => {
         const base = type === "anime"
             ? [...animeServers, ...serversList.filter((s: any) => !s.type || s.type === 'tv')]
             : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
         const seen = new Set<string>();
-        return base.filter((s: any) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+        return base.filter((s: any) => {
+            if (seen.has(s.id)) return false;
+            seen.add(s.id);
+            return true;
+        });
     }, [type, animeServers, serversList]);
 
     if (!activeServer) return null;
 
     return (
-        <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#141419]/50 shadow-xl w-full">
-            <div className="flex items-center gap-2 border-b border-white/[0.04] bg-accent/10 px-4 py-3">
-                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
-                <p className="truncate text-xs sm:text-sm font-semibold text-zinc-400">
-                    Watching <span className="font-bold text-white">{title}</span>
-                    {resolvedMediaType !== 'movie' && <span className="text-zinc-500"> · S{selectedSeason}E{selectedEpisode}</span>}
-                </p>
-                <span className="ml-auto flex shrink-0 items-center gap-1.5 text-[10px] sm:text-xs font-black uppercase tracking-widest text-accent">
-                    <Server className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> {activeServer.name}
-                </span>
+        <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c0d14]/95 backdrop-blur-2xl shadow-[0_16px_48px_rgba(0,0,0,0.65)] w-full transition-all">
+            {/* Top Bar: Stream Info & Active Status + Quick Player Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
+                    </span>
+                    <p className="truncate text-xs sm:text-sm font-medium text-zinc-300">
+                        <span className="text-zinc-500 font-normal hidden sm:inline">Streaming: </span>
+                        <span className="font-bold text-white tracking-tight">{title}</span>
+                        {resolvedMediaType !== 'movie' && (
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-white/[0.06] text-accent border border-white/[0.08]">
+                                S{selectedSeason} · E{selectedEpisode}
+                            </span>
+                        )}
+                    </p>
+                </div>
+
+                {/* Video Experience Controls: Theater Mode, Focus Mode, Auto-Play Switch */}
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    {/* Auto-Play Next Episode Switch */}
+                    {resolvedMediaType !== 'movie' && onToggleAutoPlayNext && (
+                        <button
+                            type="button"
+                            onClick={() => onToggleAutoPlayNext(!autoPlayNext)}
+                            title={autoPlayNext ? "Auto-Play Next Episode is ON" : "Auto-Play Next Episode is OFF"}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none ${
+                                autoPlayNext
+                                    ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
+                                    : "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-zinc-200"
+                            }`}
+                        >
+                            <Zap className={`w-3.5 h-3.5 ${autoPlayNext ? "fill-current text-emerald-400" : ""}`} />
+                            <span className="hidden md:inline">Auto-Next</span>
+                            <div className={`w-6 h-3.5 rounded-full transition-colors relative flex items-center px-0.5 ${autoPlayNext ? "bg-emerald-500" : "bg-zinc-700"}`}>
+                                <div className={`w-2.5 h-2.5 rounded-full bg-white transition-transform ${autoPlayNext ? "translate-x-2.5" : "translate-x-0"}`} />
+                            </div>
+                        </button>
+                    )}
+
+                    {/* Cinema Theater Mode Toggle */}
+                    {onToggleTheatre && (
+                        <button
+                            type="button"
+                            onClick={onToggleTheatre}
+                            title={isTheatreMode ? "Exit Theater Mode" : "Cinema Theater Mode"}
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none ${
+                                isTheatreMode
+                                    ? "bg-accent/20 border-accent/40 text-white shadow-[0_0_12px_var(--accent-glow)]"
+                                    : "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                            }`}
+                        >
+                            <MonitorPlay className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">{isTheatreMode ? "Normal View" : "Theater Mode"}</span>
+                        </button>
+                    )}
+
+                    {/* Focus Mode Toggle */}
+                    {onToggleFocus && (
+                        <button
+                            type="button"
+                            onClick={onToggleFocus}
+                            title="Distraction-Free Focus Mode"
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none ${
+                                isFocusMode
+                                    ? "bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
+                                    : "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                            }`}
+                        >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Focus</span>
+                        </button>
+                    )}
+
+                    {/* Reload Player Button */}
+                    {onReloadPlayer && (
+                        <button
+                            type="button"
+                            onClick={onReloadPlayer}
+                            title="Reload Stream / Refresh Player"
+                            className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-400 hover:text-white transition-all cursor-pointer"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                    )}
+
+                    {/* Active Server Badge */}
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/15 border border-accent/30 text-accent shadow-[0_0_12px_var(--accent-glow)]">
+                        <Server className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                            {activeServer.name.replace(/Toon Player\s*/i, '')}
+                        </span>
+                        {activeServer.badge && (
+                            <span className="text-[9px] font-black uppercase tracking-widest bg-accent text-white px-1.5 py-0.2 rounded">
+                                {activeServer.badge}
+                            </span>
+                        )}
+                    </div>
+                </div>
             </div>
+
+            {/* Server Selector Tabs (Sleek Pills) */}
             <div
                 className="overflow-x-auto scrollbar-none snap-x snap-mandatory w-full scroll-smooth"
                 style={{
                     WebkitOverflowScrolling: 'touch',
-                    // Fade edges to indicate scrollability — avoids visual clipping of first/last buttons
-                    maskImage: 'linear-gradient(to right, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%)',
+                    maskImage: 'linear-gradient(to right, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%)',
                 }}
             >
-                <div className="flex items-center gap-2 min-w-max px-3 py-3">
-                    {servers.map((server: any) => {
+                <div className="flex items-center gap-2.5 min-w-max px-4 py-3">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-zinc-500 mr-1 hidden sm:inline-flex items-center gap-1 select-none">
+                        <Sparkles className="w-3 h-3 text-accent" /> Servers:
+                    </span>
+                    {servers.map((server: any, idx: number) => {
                         const isActive = activeServer.id === server.id;
                         const isFailed = failedServers.has(server.id);
                         return (
@@ -66,20 +188,46 @@ const ProviderBar = memo(function ProviderBar({
                                 key={server.id}
                                 onClick={() => onSelectServer(server)}
                                 disabled={isFailed && !isActive}
-                                title={isFailed ? `${server.name} — unavailable` : server.name}
-                                className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 sm:px-4 py-2 text-xs font-bold transition-all duration-200 snap-center whitespace-nowrap ${
+                                title={isFailed ? `${server.name} — unavailable` : `Switch to ${server.name}`}
+                                className={`group relative flex shrink-0 items-center gap-2 rounded-xl border px-3.5 sm:px-4 py-2 text-xs font-bold transition-all duration-200 snap-center cursor-pointer select-none active:scale-95 ${
                                     isActive
-                                        ? 'border-accent bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_12px_var(--accent-glow)]'
+                                        ? 'border-accent bg-gradient-to-r from-accent to-accent-warm text-white shadow-[0_0_16px_var(--accent-glow)] scale-[1.02]'
                                         : isFailed
-                                            ? 'cursor-not-allowed border-white/[0.05] bg-transparent text-zinc-600 opacity-40'
-                                            : 'border-white/[0.07] bg-[#1E1B29] text-zinc-400 hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white'
+                                            ? 'cursor-not-allowed border-rose-500/20 bg-rose-500/5 text-rose-300/40 line-through'
+                                            : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
                                 }`}
                             >
-                                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActive ? 'animate-pulse bg-white' : isFailed ? 'bg-red-500' : 'bg-zinc-600'}`} />
-                                {server.name}
+                                <span className="flex items-center">
+                                    {isActive ? (
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-white animate-pulse" />
+                                    ) : isFailed ? (
+                                        <AlertCircle className="h-3.5 w-3.5 text-rose-400" />
+                                    ) : (
+                                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-500 group-hover:bg-zinc-300 transition-colors" />
+                                    )}
+                                </span>
+                                
+                                <span className="tracking-tight">
+                                    {server.name.replace(/Toon Player\s*/i, '') || server.name}
+                                </span>
+
                                 {server.badge && (
-                                    <span className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest ${isActive ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-zinc-500'}`}>
+                                    <span
+                                        className={`rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                                            isActive
+                                                ? 'bg-black/30 text-white border border-white/20'
+                                                : isFailed
+                                                    ? 'bg-transparent text-rose-400/40'
+                                                    : 'bg-white/[0.06] text-zinc-400 border border-white/[0.06] group-hover:text-zinc-200'
+                                        }`}
+                                    >
                                         {server.badge}
+                                    </span>
+                                )}
+
+                                {idx === 0 && !server.badge && (
+                                    <span className="rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-white/[0.06] text-emerald-400">
+                                        Primary
                                     </span>
                                 )}
                             </button>

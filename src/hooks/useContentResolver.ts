@@ -40,11 +40,16 @@ export interface ResolverResult {
  * 3. Fetch Metadata
  * 4. Return Unified Object
  */
+const resolverCache = new Map<string, UnifiedContent>();
+
 export function useContentResolver(rawId: string, providedType?: string, provider?: string): ResolverResult {
-    const [content, setContent] = useState<UnifiedContent | null>(null);
-    const [loading, setLoading] = useState(true);
+    const cacheKey = `${rawId}-${providedType || ''}-${provider || ''}`;
+    const initialCached = (rawId && rawId !== "undefined" && rawId !== "null") ? (resolverCache.get(cacheKey) || null) : null;
+
+    const [content, setContent] = useState<UnifiedContent | null>(initialCached);
+    const [loading, setLoading] = useState(!initialCached && Boolean(rawId && rawId !== "undefined" && rawId !== "null"));
     const [error, setError] = useState<string | null>(null);
-    const [detectedType, setDetectedType] = useState<"movie" | "tv" | "anime" | null>(null);
+    const [detectedType, setDetectedType] = useState<"movie" | "tv" | "anime" | null>(initialCached ? initialCached.type : null);
     const seqRef = useRef(0);
 
     useEffect(() => {
@@ -56,11 +61,18 @@ export function useContentResolver(rawId: string, providedType?: string, provide
             return;
         }
 
+        if (resolverCache.has(cacheKey)) {
+            const cached = resolverCache.get(cacheKey)!;
+            setContent(cached);
+            setDetectedType(cached.type);
+            setLoading(false);
+            setError(null);
+            return;
+        }
+
         const controller = new AbortController();
         const currentSeq = ++seqRef.current;
 
-        setContent(null);
-        setDetectedType(null);
         setLoading(true);
         setError(null);
 
@@ -153,6 +165,7 @@ export function useContentResolver(rawId: string, providedType?: string, provide
 
                 console.log(`[GlobalClickDebugger] ✅ RESOLVER SUCCESS ID: ${id} | UnifiedType: ${unified.type}`);
                 
+                resolverCache.set(cacheKey, unified as UnifiedContent);
                 setContent(unified as UnifiedContent);
                 setDetectedType(unified.type as "movie" | "tv" | "anime");
             } catch (err: any) {
