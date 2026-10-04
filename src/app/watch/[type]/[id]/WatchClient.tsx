@@ -339,10 +339,10 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             className={`absolute inset-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
                 playerLoaded ? "opacity-100" : "opacity-0"
             }`}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation allow-top-navigation-by-user-activation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen={true}
-            referrerPolicy="origin"
+            referrerPolicy="no-referrer-when-downgrade"
             title={title}
             onError={onError}
             onLoad={onLoad}
@@ -1799,12 +1799,21 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
         : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
 
-    // Automatically fall back if selected server returns an empty embed URL
+    // Automatically fall back if selected server returns an empty embed URL.
+    // Guard with playerLoaded guard — only trigger AFTER the server has had time to produce a URL.
+    const emptyUrlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     useEffect(() => {
+        if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current);
         if (activeServer && (!embedUrl || embedUrl.trim() === "") && !sourceError) {
-            console.warn(`[ToonPlayer] Server ${activeServer.name} produced empty embed URL. Auto-switching to next server...`);
-            handleAutoFallback();
+            // Debounce 800 ms — let the server URL compute before switching
+            emptyUrlTimerRef.current = setTimeout(() => {
+                if (!embedUrl || embedUrl.trim() === "") {
+                    console.warn(`[ToonPlayer] Server ${activeServer.name} still produced empty embed URL after debounce. Auto-switching...`);
+                    handleAutoFallback();
+                }
+            }, 800);
         }
+        return () => { if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current); };
     }, [activeServer, embedUrl, sourceError, handleAutoFallback]);
 
     const renderPlayer = () => {
@@ -1872,7 +1881,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         </div>
                     )}
 
-                    {/* IFRAME */}
+                    {/* IFRAME — only render when we have a confirmed non-empty URL */}
                     {embedUrl && embedUrl.trim() !== "" ? (
                         <VideoIframeEmbed
                             mediaKey={`${activeServer?.id || 'server'}-${type}-${activeId}-s${selectedSeason}-e${selectedEpisode}-${mode}-${reloadCount}`}
@@ -1896,16 +1905,28 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                 } catch (_) {}
                             }}
                         />
-                    ) : (
+                    ) : sourceError ? (
+                        // Only show the hard error UI after ALL servers have been exhausted
                         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 text-center">
                             <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
                                 <X className="w-6 h-6 text-red-400" />
                             </div>
-                            <h3 className="text-base font-bold mb-1 text-white">Source Unavailable</h3>
-                            <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">The selected server could not construct a stream URL for this content.</p>
-                            <button onClick={handleAutoFallback} className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm text-white rounded-lg font-bold text-xs">
-                                Try Backup Server
+                            <h3 className="text-base font-bold mb-1 text-white">All Sources Exhausted</h3>
+                            <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">No servers could produce a stream for this content. Try again later.</p>
+                            <button onClick={() => { setSourceError(false); setReloadCount(prev => prev + 1); }} className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm text-white rounded-lg font-bold text-xs flex items-center gap-1.5">
+                                <RefreshCw className="w-3.5 h-3.5" /> Retry
                             </button>
+                        </div>
+                    ) : (
+                        // URL is being resolved — show a spinner, NOT an error
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black gap-4">
+                            <div className="relative flex items-center justify-center">
+                                <div className="absolute w-20 h-20 rounded-full border border-accent/20 animate-ping" />
+                                <div className="w-14 h-14 rounded-full border-[3px] border-accent/20 border-t-accent animate-spin" />
+                                <Play className="absolute w-5 h-5 text-accent" />
+                            </div>
+                            <p className="text-white text-xs font-black uppercase tracking-[0.2em] animate-pulse">Connecting to server…</p>
+                            <p className="text-zinc-600 text-[10px] font-medium uppercase tracking-wider">{activeServer?.name || 'Loading'}</p>
                         </div>
                     )}
 

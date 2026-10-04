@@ -74,10 +74,10 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             ref={iframeRef}
             src={src}
             className="absolute inset-0 w-full h-full border-0 bg-black"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation allow-top-navigation-by-user-activation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen={true}
-            referrerPolicy="origin"
+            referrerPolicy="no-referrer-when-downgrade"
             onLoad={onLoad}
             onError={onError}
         />
