@@ -1,18 +1,21 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { ParserError, safeString, safeInt, safeArray, isValidUrl, sanitizeUrl } from './parser-utils';
 
-// aniwaves.ru is the current live mirror of the original Aniwave (9anime successor)
-const BASE_URL = 'https://aniwaves.ru';
+export const ANIWAVE_MIRRORS = [
+    'https://aniwaves.ru',
+    'https://aniwave.to',
+    'https://aniwave.se',
+    'https://lite.aniwave.to',
+];
+
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 const HEADERS = {
     'User-Agent': USER_AGENT,
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.5',
-    'Referer': BASE_URL,
-    'Origin': BASE_URL,
     'DNT': '1',
     'Connection': 'keep-alive',
     'Upgrade-Insecure-Requests': '1',
@@ -22,23 +25,21 @@ function parseAnimeCards($: ReturnType<typeof cheerio.load>, selector: string): 
     const results: AnimeSearchResult[] = [];
     $(selector).each((_, el) => {
         const $el = $(el);
-        // aniwaves.ru uses flw-item structure (same as 9anime/Zoro)
-        const $link = $el.find('.film-poster, .poster');
+        const $link = $el.find('.film-poster, .poster, .film-poster-ahref, a').first();
         const href = $link.attr('href') || $el.find('a').first().attr('href') || '';
-        // ID is the slug after /watch/ or the last URL segment
+
         const id = href.includes('/watch/')
             ? href.split('/watch/')[1]?.split('?')[0]
-            : href.split('/').filter(Boolean).pop() || '';
+            : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
 
-        const title = $el.find('.film-name a, .film-name, .dynamic-name').first().text().trim()
-            || $el.find('a').first().attr('title') || '';
+        const title = $el.find('.film-name a, .film-name, .dynamic-name, .title').first().text().trim()
+            || $link.attr('title') || '';
 
-        // Images use data-src (lazy-loaded)
-        const $img = $el.find('img');
+        const $img = $el.find('img').first();
         const image = $img.attr('data-src') || $img.attr('src') || '';
 
-        // Sub/Dub counts
         const dubCount = $el.find('.tick-dub, .dub').text().trim();
+        const subCount = $el.find('.tick-sub, .sub').text().trim();
 
         if (id && title) {
             results.push({
@@ -46,7 +47,7 @@ function parseAnimeCards($: ReturnType<typeof cheerio.load>, selector: string): 
                 title,
                 image: sanitizeUrl(image),
                 provider: 'aniwave',
-                subOrDub: dubCount ? 'both' : 'sub',
+                subOrDub: (subCount && dubCount) ? 'both' : (dubCount ? 'dub' : 'sub'),
             });
         }
     });
@@ -56,60 +57,89 @@ function parseAnimeCards($: ReturnType<typeof cheerio.load>, selector: string): 
 export class AniwaveProvider implements AnimeProvider {
     name = 'aniwave';
 
+    /**
+     * Executes requests with dynamic mirror auto-switching and strict 10-second timeout.
+     */
+    private async fetchFromMirrors(path: string, options: AxiosRequestConfig = {}): Promise<{ data: any; mirror: string }> {
+        const errors: string[] = [];
+        for (const mirror of ANIWAVE_MIRRORS) {
+            const url = path.startsWith('http') ? path : `${mirror}${path.startsWith('/') ? path : `/${path}`}`;
+            try {
+                const response = await axios({
+                    url,
+                    timeout: 10000,
+                    ...options,
+                    headers: {
+                        ...HEADERS,
+                        'Referer': `${mirror}/`,
+                        'Origin': mirror,
+                        ...(options.headers || {})
+                    }
+                });
+                if (response.data) {
+                    return { data: response.data, mirror };
+                }
+            } catch (err: any) {
+                errors.push(`${mirror}: ${err.message || 'Error'}`);
+            }
+        }
+        throw new Error(`[Aniwave] All mirrors failed for path "${path}": ${errors.join(' | ')}`);
+    }
+
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/filter`, {
-                params: { keyword: query },
-                headers: HEADERS,
-                timeout: 10000,
-            });
-            if (!response.data || typeof response.data !== 'string') return [];
-            const $ = cheerio.load(response.data);
-            return parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
-        } catch (error) {
-            console.error('[Aniwave] Search failed:', error);
+            const cleanQuery = query.trim();
+            if (!cleanQuery) return [];
+
+            const { data } = await this.fetchFromMirrors(`/filter?keyword=${encodeURIComponent(cleanQuery)}`);
+            if (!data || typeof data !== 'string') return [];
+            const $ = cheerio.load(data);
+            return parseAnimeCards($, '.film_list-wrap .flw-item, .film_list-wrap .item, .aitem, .item');
+        } catch (error: any) {
+            console.error('[Aniwave] Search failed:', error.message);
             return [];
         }
     }
 
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = page > 1 ? `${BASE_URL}/updated?page=${page}` : `${BASE_URL}/updated`;
-            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
-            if (!response.data || typeof response.data !== 'string') return [];
-            const $ = cheerio.load(response.data);
-            const results = parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
+            const path = page > 1 ? `/updated?page=${page}` : '/updated';
+            const { data } = await this.fetchFromMirrors(path);
+            if (!data || typeof data !== 'string') return [];
+            const $ = cheerio.load(data);
+            const results = parseAnimeCards($, '.film_list-wrap .flw-item, .film_list-wrap .item, .aitem');
             if (results.length > 0) return results;
             return await this.getNewest(page);
-        } catch (e) {
-            console.error('[Aniwave] getRecent failed:', e);
+        } catch (e: any) {
+            console.error('[Aniwave] getRecent failed:', e.message);
             return [];
         }
     }
 
     async getNewest(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = page > 1 ? `${BASE_URL}/newest?page=${page}` : `${BASE_URL}/newest`;
-            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
-            if (!response.data || typeof response.data !== 'string') return [];
-            const $ = cheerio.load(response.data);
-            return parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
-        } catch (e) {
+            const path = page > 1 ? `/newest?page=${page}` : '/newest';
+            const { data } = await this.fetchFromMirrors(path);
+            if (!data || typeof data !== 'string') return [];
+            const $ = cheerio.load(data);
+            return parseAnimeCards($, '.film_list-wrap .flw-item, .film_list-wrap .item, .aitem');
+        } catch (e: any) {
+            console.error('[Aniwave] getNewest failed:', e.message);
             return [];
         }
     }
 
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = page > 1 ? `${BASE_URL}/trending?page=${page}` : `${BASE_URL}/trending`;
-            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
-            if (!response.data || typeof response.data !== 'string') return [];
-            const $ = cheerio.load(response.data);
-            const results = parseAnimeCards($, '.film_list-wrap .flw-item, .aitem');
+            const path = page > 1 ? `/trending?page=${page}` : '/trending';
+            const { data } = await this.fetchFromMirrors(path);
+            if (!data || typeof data !== 'string') return [];
+            const $ = cheerio.load(data);
+            const results = parseAnimeCards($, '.film_list-wrap .flw-item, .film_list-wrap .item, .aitem');
             if (results.length > 0) return results;
             return await this.getRecent(page);
-        } catch (e) {
-            console.error('[Aniwave] getTrending failed:', e);
+        } catch (e: any) {
+            console.error('[Aniwave] getTrending failed:', e.message);
             return [];
         }
     }
@@ -120,24 +150,26 @@ export class AniwaveProvider implements AnimeProvider {
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            let url = id.includes('/') ? `${BASE_URL}/${id}` : `${BASE_URL}/watch/${id}`;
-            const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
-            if (!response.data || typeof response.data !== 'string') {
+            const cleanId = id.replace(/^\//, '').split('?')[0];
+            const path = cleanId.includes('/') ? `/${cleanId}` : `/watch/${cleanId}`;
+            const { data } = await this.fetchFromMirrors(path);
+
+            if (!data || typeof data !== 'string') {
                 throw new ParserError(this.name, 'getInfo', id, 'Received empty HTML response');
             }
-            const $ = cheerio.load(response.data);
+            const $ = cheerio.load(data);
 
-            const title = $('.film-name, h1.film-name, .dynamic-name').first().text().trim();
-            const image = $('.film-poster img, .detail-infor-content img').attr('data-src')
-                || $('.film-poster img').attr('src') || '';
-            const description = $('.film-description, .description').first().text().trim();
+            const title = $('.film-name, h1.film-name, .anime-name, .dynamic-name, h1').first().text().trim();
+            const $img = $('.film-poster img, .detail-infor-content img, .poster img').first();
+            const image = $img.attr('data-src') || $img.attr('src') || '';
+            const description = $('.film-description, .description, .detail-infor-content .shorting').first().text().trim();
 
             const episodes: any[] = [];
-            $('.ep-item, .server-item a, a[href*="ep="]').each((_, el) => {
+            $('.ep-item, .server-item a, a[href*="ep="], .episodes-list a, .range-item a').each((_, el) => {
                 const $ep = $(el);
                 const href = $ep.attr('href') || '';
-                const epNum = safeInt($ep.attr('data-number') || $ep.text().trim(), 0);
-                const epId = href.split('?')[0].split('/').filter(Boolean).pop() || href;
+                const epNum = safeInt($ep.attr('data-number') || $ep.text().replace(/[^\d]/g, ''), 0);
+                const epId = $ep.attr('data-id') || href.split('?')[0].split('/').filter(Boolean).pop() || href;
                 if (epId && epNum > 0) {
                     episodes.push({ id: epId, number: epNum, title: `Episode ${epNum}` });
                 }
@@ -151,8 +183,8 @@ export class AniwaveProvider implements AnimeProvider {
                 episodes,
                 totalEpisodes: episodes.length,
             };
-        } catch (error) {
-            console.error('[Aniwave] GetInfo failed:', error);
+        } catch (error: any) {
+            console.error('[Aniwave] GetInfo failed:', error.message);
             throw error;
         }
     }
@@ -166,13 +198,14 @@ export class AniwaveProvider implements AnimeProvider {
 
     async getSources(id: string, episodeId: string, mode: 'sub' | 'dub' | 'raw' = 'sub'): Promise<VideoSource[]> {
         try {
+            const primaryMirror = ANIWAVE_MIRRORS[0];
             let episodeUrl: string;
             if (episodeId.startsWith('http')) {
                 episodeUrl = episodeId;
             } else if (episodeId.includes(id)) {
-                episodeUrl = `${BASE_URL}/watch/${episodeId}`;
+                episodeUrl = `${primaryMirror}/watch/${episodeId}`;
             } else {
-                episodeUrl = `${BASE_URL}/watch/${id}?ep=${episodeId}`;
+                episodeUrl = `${primaryMirror}/watch/${id}?ep=${episodeId}`;
             }
 
             return [{
@@ -182,12 +215,12 @@ export class AniwaveProvider implements AnimeProvider {
                 isIframe: true,
                 server: 'Aniwave',
                 headers: {
-                    Referer: BASE_URL,
-                    Origin: BASE_URL,
+                    Referer: `${primaryMirror}/`,
+                    Origin: primaryMirror,
                 }
             }];
-        } catch (error) {
-            console.error('[Aniwave] getSources failed:', error);
+        } catch (error: any) {
+            console.error('[Aniwave] getSources failed:', error.message);
             return [];
         }
     }

@@ -338,15 +338,23 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             src={src}
             className={`absolute inset-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
                 playerLoaded ? "opacity-100" : "opacity-0"
-            } ${isFocusMode ? "rounded-none" : "rounded-none"}`}
-            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; gyroscope; accelerometer; web-share; clipboard-write"
-            allowFullScreen
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
+            }`}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen={true}
             referrerPolicy="origin"
             title={title}
             onError={onError}
             onLoad={onLoad}
         />
+    );
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.mediaKey === nextProps.mediaKey &&
+        prevProps.src === nextProps.src &&
+        prevProps.playerLoaded === nextProps.playerLoaded &&
+        prevProps.isFocusMode === nextProps.isFocusMode &&
+        prevProps.title === nextProps.title
     );
 });
 
@@ -1271,35 +1279,53 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const handleAutoFallback = useCallback(() => {
         if (!activeServer) return;
         
-        // Prevent infinite fallback rotation loops (max 3 auto rotations per selection)
-        if (fallbackCountRef.current >= 3) {
-            console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (3). Stopping auto-switch.`);
+        const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
+        
+        // Prevent infinite fallback rotation loops once all servers in list have been tried
+        if (fallbackCountRef.current >= listToUse.length) {
+            console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted. Stopping auto-switch.`);
             setSourceError(true);
             return;
         }
 
         fallbackCountRef.current += 1;
-        console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) timed out or failed (Attempt ${fallbackCountRef.current}). Initiating rotation...`);
+        console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) timed out or failed (Attempt ${fallbackCountRef.current}/${listToUse.length}). Initiating rotation...`);
         
         setFailedServers(prev => {
             const next = new Set(prev);
             next.add(activeServer.id);
             ServerHealthManager.blacklistServer(activeServer.id);
             
-            // Find next server in the list that hasn't failed yet
-            const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
-            const nextServer = listToUse.find(s => !next.has(s.id) && s.id !== activeServer.id);
+            // Find next server in the list that hasn't failed yet, advancing forward from current index
+            const currentIndex = listToUse.findIndex(s => s.id === activeServer.id);
+            let nextServer = null;
+
+            for (let i = currentIndex + 1; i < listToUse.length; i++) {
+                if (!next.has(listToUse[i].id) && listToUse[i].id !== activeServer.id) {
+                    nextServer = listToUse[i];
+                    break;
+                }
+            }
+            if (!nextServer) {
+                for (let i = 0; i < currentIndex; i++) {
+                    if (!next.has(listToUse[i].id) && listToUse[i].id !== activeServer.id) {
+                        nextServer = listToUse[i];
+                        break;
+                    }
+                }
+            }
 
             if (nextServer) {
                 setLoadingStatus(`Switching to backup server: ${nextServer.name}...`);
                 if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
-                fallbackTimeoutRef.current = setTimeout(() => setActiveServer(nextServer), 50);
+                manualServerRef.current = nextServer.id;
+                setActiveServer(nextServer);
             } else {
                 setSourceError(true);
             }
             return next;
         });
-    }, [activeServer, serversList, isAnimeServer]);
+    }, [activeServer, currentMediaTypeServers, isAnimeServer]);
 
     // Automatic background health checks and timeout rotations have been removed for improved stability and UX.
 
@@ -1728,12 +1754,13 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                 <div className="pt-[90px] md:pt-[110px] lg:pt-[140px]">
                     <div className="relative w-full bg-black">
                         <div className="w-full">
-                            <div className="relative w-full aspect-video bg-black rounded-b-xl overflow-hidden">
+                            <div className="relative w-full aspect-video bg-black overflow-hidden">
                                 <iframe 
                                     src={getProxiedEmbedUrl(embedUrl)} 
                                     className="absolute inset-0 w-full h-full border-0 bg-black rounded-b-xl" 
-                                    allow="fullscreen; autoplay; encrypted-media; picture-in-picture" 
-                                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
+                                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                    allowFullScreen={true}
                                     referrerPolicy="origin" 
                                 />
                             </div>
@@ -1772,6 +1799,14 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
         : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
 
+    // Automatically fall back if selected server returns an empty embed URL
+    useEffect(() => {
+        if (activeServer && (!embedUrl || embedUrl.trim() === "") && !sourceError) {
+            console.warn(`[ToonPlayer] Server ${activeServer.name} produced empty embed URL. Auto-switching to next server...`);
+            handleAutoFallback();
+        }
+    }, [activeServer, embedUrl, sourceError, handleAutoFallback]);
+
     const renderPlayer = () => {
         return (
             <div className="relative w-full z-20">
@@ -1780,9 +1815,9 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className={`relative w-full will-change-transform transform-gpu ${
-                        isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video min-h-[220px] sm:min-h-[360px] md:min-h-[480px] rounded-none sm:rounded-[24px]"
-                    } bg-black overflow-hidden shadow-none sm:shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
+                    className={`relative w-full aspect-video bg-black overflow-hidden ${
+                        isFocusMode ? "!h-[100dvh] !aspect-auto rounded-none" : "rounded-none sm:rounded-[24px]"
+                    } shadow-none sm:shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
                 >
                     {/* Loading State */}
                     {!playerLoaded && (
@@ -1853,7 +1888,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                     const doc = iframe.contentDocument || iframe.contentWindow?.document;
                                     if (doc) {
                                         const text = doc.body?.innerText || '';
-                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('⚠️')) {
+                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway') || text.includes('Server Not Responding') || text.includes('⚠️')) {
+                                            console.warn('[ToonPlayer] Proxy/404 error detected inside iframe. Triggering auto fallback...');
                                             handleAutoFallback();
                                         }
                                     }

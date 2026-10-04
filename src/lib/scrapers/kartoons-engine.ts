@@ -19,15 +19,28 @@ import {
  * End-to-end scraper for https://kartoons.to:
  * - Scrapes complete catalog, all seasons, and full episode trees.
  * - Resolves multi-server playback targets (Server 1, Server 2, VIP, Direct HLS).
- * - Implements anti-bot evasion: rotating realistic User-Agents, strict Referer,
- *   Proof-of-Work (PoW) SHA-256 solver, AES-256-CBC stream decryptor.
+ * - Implements anti-bot evasion: dynamic mirror switching, rotating realistic User-Agents,
+ *   strict Referer, Proof-of-Work (PoW) SHA-256 solver, AES-256-CBC stream decryptor.
  * - Handles connection retries with exponential backoff and jitter.
+ * - Enforces strict 10s network timeout on all upstream calls.
  * - Provides upsert pipeline directly into MongoDB.
  * ============================================================================
  */
 
-export const KARTOONS_BASE_URL = 'https://kartoons.to';
-export const KARTOONS_API_BASE = 'https://api.kartoons.to/api';
+export const KARTOONS_MIRRORS = [
+  'https://kartoons.to',
+  'https://kartoons.co',
+  'https://kartoons.net',
+];
+
+export const KARTOONS_API_MIRRORS = [
+  'https://api.kartoons.to/api',
+  'https://api.kartoons.co/api',
+  'https://api.kartoons.net/api',
+];
+
+export const KARTOONS_BASE_URL = KARTOONS_MIRRORS[0];
+export const KARTOONS_API_BASE = KARTOONS_API_MIRRORS[0];
 const AES_SECRET_KEY = 'bca9e0df1a5abb32906ca3f63ac04cef';
 
 export interface ScrapedShowItem {
@@ -80,7 +93,7 @@ export class KartoonsScraperEngine {
       'User-Agent': getUA(),
       'Referer': customReferer || `${KARTOONS_BASE_URL}/`,
       'Origin': KARTOONS_BASE_URL,
-      'Accept': 'application/json, text/plain, */*',
+      'Accept': 'application/json, text/plain, text/html, */*',
       'Accept-Language': 'en-US,en;q=0.9',
       'Sec-Fetch-Dest': 'empty',
       'Sec-Fetch-Mode': 'cors',
@@ -90,23 +103,39 @@ export class KartoonsScraperEngine {
   }
 
   /**
-   * Executes HTTP requests with exponential backoff, jitter, and rotating User-Agents
+   * Executes HTTP requests with mirror auto-switching, exponential backoff, jitter, and strict 10s timeout
    */
   private async executeWithRetry<T>(
-    url: string,
+    endpointOrUrl: string,
     options: AxiosRequestConfig = {},
     retries = this.maxRetries
   ): Promise<T> {
+    const isApi = endpointOrUrl.includes('/api') || KARTOONS_API_MIRRORS.some(m => endpointOrUrl.startsWith(m));
+    const mirrors = isApi ? KARTOONS_API_MIRRORS : KARTOONS_MIRRORS;
+
+    let path = endpointOrUrl;
+    for (const m of mirrors) {
+      if (path.startsWith(m)) {
+        path = path.slice(m.length);
+        break;
+      }
+    }
+    if (!path.startsWith('/')) path = `/${path}`;
+
     let lastError: any;
 
     for (let attempt = 0; attempt <= retries; attempt++) {
+      const mirror = mirrors[attempt % mirrors.length];
+      const fullUrl = `${mirror}${path}`;
+
       try {
         const response = await axios({
-          url,
-          timeout: 20000,
+          url: fullUrl,
+          timeout: 10000, // strict 10s timeout
           ...options,
           headers: {
-            ...this.getHeaders(options.headers?.Referer as string),
+            ...this.getHeaders(options.headers?.Referer as string || `${mirror}/`),
+            'Origin': mirror,
             ...(options.headers || {}),
           },
         });
@@ -121,11 +150,10 @@ export class KartoonsScraperEngine {
         }
 
         if (attempt < retries) {
-          // Exponential backoff: base * 2^attempt + random jitter (0-500ms)
           const jitter = Math.floor(Math.random() * 500);
           const backoffDelay = this.baseDelayMs * Math.pow(2, attempt) + jitter;
           console.warn(
-            `[KartoonsScraper] Request failed (${status || err.message}). Retrying ${attempt + 1}/${retries} in ${backoffDelay}ms...`
+            `[KartoonsScraper] Request to ${mirror} failed (${status || err.message}). Switching mirror ${attempt + 1}/${retries} in ${backoffDelay}ms...`
           );
           await new Promise((resolve) => setTimeout(resolve, backoffDelay));
         }
@@ -247,8 +275,11 @@ export class KartoonsScraperEngine {
         categories: Array.from(categoriesSet),
       };
 
-      await scraperCache.set(cacheKey, result, SCRAPER_TTL.HOME_CATALOG);
-      return result;
+      if (result.featuredShows.length > 0 || result.featuredMovies.length > 0) {
+        await scraperCache.set(cacheKey, result, SCRAPER_TTL.HOME_CATALOG);
+        return result;
+      }
+      return this.scrapeFeaturedFromHtml();
     } catch (err: any) {
       console.error('[KartoonsScraper] Error fetching featured catalog:', err.message);
       // Cheerio HTML Fallback
@@ -264,42 +295,50 @@ export class KartoonsScraperEngine {
     featuredMovies: ScrapedShowItem[];
     categories: string[];
   }> {
-    const html = await this.executeWithRetry<string>(`${KARTOONS_BASE_URL}/home`, {
-      headers: { Accept: 'text/html,application/xhtml+xml' },
-    });
-    const $ = cheerio.load(html);
-    const shows: ScrapedShowItem[] = [];
+    try {
+      const html = await this.executeWithRetry<string>(`${KARTOONS_BASE_URL}/home`, {
+        headers: { Accept: 'text/html,application/xhtml+xml' },
+      });
+      const $ = cheerio.load(html);
+      const shows: ScrapedShowItem[] = [];
 
-    $('a[href*="/show/"]').each((_, el) => {
-      const href = $(el).attr('href') || '';
-      const title = $(el).find('h3, h2, .title, p').first().text().trim() || $(el).attr('title') || '';
-      const img = $(el).find('img').attr('src') || $(el).find('img').attr('data-src') || '';
-      const idMatch = href.match(/\/show\/([a-zA-Z0-9_-]+)/);
+      $('a[href*="/show/"], a[href*="/movie/"], .cartoon-card, .film-item, .card').each((_, el) => {
+        const href = $(el).attr('href') || $(el).find('a').first().attr('href') || '';
+        const title = $(el).find('h3, h2, .title, p, .name').first().text().trim() || $(el).attr('title') || '';
+        const img = $(el).find('img').attr('data-src') || $(el).find('img').attr('src') || '';
+        const idMatch = href.match(/\/(show|movie)\/([a-zA-Z0-9_-]+)/);
 
-      if (idMatch && title) {
-        shows.push({
-          id: idMatch[1],
-          slug: this.slugify(title),
-          title,
-          description: '',
-          poster: img,
-          banner: img,
-          status: 'Completed',
-          type: 'show',
-          genres: ['Animation', 'Action'],
-          totalSeasons: 1,
-          totalEpisodes: 0,
-          seasons: [],
-          sourceUrl: href.startsWith('http') ? href : `${KARTOONS_BASE_URL}${href}`,
-        });
-      }
-    });
+        if (idMatch && title) {
+          shows.push({
+            id: idMatch[2],
+            slug: this.slugify(title),
+            title,
+            description: '',
+            poster: img,
+            banner: img,
+            status: 'Completed',
+            type: idMatch[1] === 'movie' ? 'movie' : 'show',
+            genres: ['Animation', 'Action'],
+            totalSeasons: 1,
+            totalEpisodes: 0,
+            seasons: [],
+            sourceUrl: href.startsWith('http') ? href : `${KARTOONS_BASE_URL}${href}`,
+          });
+        }
+      });
 
-    return {
-      featuredShows: shows,
-      featuredMovies: [],
-      categories: ['Animation', 'Action', 'Adventure', 'Comedy'],
-    };
+      return {
+        featuredShows: shows,
+        featuredMovies: [],
+        categories: ['Animation', 'Action', 'Adventure', 'Comedy'],
+      };
+    } catch {
+      return {
+        featuredShows: [],
+        featuredMovies: [],
+        categories: ['Animation', 'Action', 'Adventure', 'Comedy'],
+      };
+    }
   }
 
   /**
@@ -311,7 +350,7 @@ export class KartoonsScraperEngine {
     if (cached) return cached;
 
     try {
-      // 1. Try API latest episodes endpoint
+      // 1. Try API latest episodes endpoint across mirrors
       const res = await this.executeWithRetry<{ success: boolean; data: any[] }>(
         `${KARTOONS_API_BASE}/shows/latest-episodes`
       );
@@ -343,11 +382,11 @@ export class KartoonsScraperEngine {
       const $ = cheerio.load(html);
       const updates: LatestEpisodeUpdate[] = [];
 
-      $('.latest-episode, [class*="latest"], .episode-card').each((_, el) => {
+      $('.latest-episode, [class*="latest"], .episode-card, .ep-item, .item').each((_, el) => {
         const href = $(el).find('a').attr('href') || $(el).attr('href') || '';
-        const title = $(el).find('.title, h4, h3').text().trim();
-        const epText = $(el).find('.ep, .badge, .number').text().trim();
-        const img = $(el).find('img').attr('src') || '';
+        const title = $(el).find('.title, h4, h3, .name').first().text().trim();
+        const epText = $(el).find('.ep, .badge, .number, .ep-status').first().text().trim();
+        const img = $(el).find('img').attr('data-src') || $(el).find('img').attr('src') || '';
 
         // Pattern: /watch/show/{showId}/season/{season}/episode/{ep}
         const match = href.match(/\/show\/([a-zA-Z0-9_-]+)\/season\/(\d+)\/episode\/(\d+)/);
@@ -384,100 +423,135 @@ export class KartoonsScraperEngine {
     const cached = await scraperCache.get<ScrapedShowItem>(cacheKey);
     if (cached) return cached;
 
-    const showRes = await this.executeWithRetry<{ success: boolean; data: any }>(
-      `${KARTOONS_API_BASE}/shows/${cleanId}`
-    );
+    try {
+      const showRes = await this.executeWithRetry<{ success: boolean; data: any }>(
+        `${KARTOONS_API_BASE}/shows/${cleanId}`
+      );
 
-    if (!showRes?.success || !showRes.data) {
-      throw new Error(`Kartoons show not found: ${cleanId}`);
+      if (!showRes?.success || !showRes.data) {
+        throw new Error(`Kartoons show not found: ${cleanId}`);
+      }
+
+      const show = showRes.data;
+      const rawSeasons: any[] = show.seasons || [];
+
+      // Concurrently fetch all episodes for each season
+      const seasons: ICartoonSeason[] = await Promise.all(
+        rawSeasons.map(async (season, index) => {
+          const seasonId = season._id || season.id || `season_${index + 1}`;
+          const seasonNumber = season.seasonNumber ?? index + 1;
+          let episodes: ICartoonEpisode[] = [];
+
+          try {
+            const epRes = await this.executeWithRetry<{ success: boolean; data: any[] }>(
+              `${KARTOONS_API_BASE}/shows/${cleanId}/season/${seasonId}/all-episodes`
+            );
+
+            if (epRes?.success && Array.isArray(epRes.data)) {
+              episodes = epRes.data.map((ep, epIndex) => {
+                const epId = ep._id || ep.id;
+                const epNum = ep.episodeNumber ?? epIndex + 1;
+
+                // Pre-populate multi-server embed options
+                const servers = this.buildInitialServerOptions(cleanId, seasonNumber, epNum, epId);
+
+                return {
+                  episodeId: epId,
+                  episodeNumber: epNum,
+                  title: ep.title || `Episode ${epNum}`,
+                  duration: ep.duration ? `${ep.duration} min` : undefined,
+                  thumbnail: ep.image || show.image || '',
+                  detailUrl: `${KARTOONS_BASE_URL}/watch/show/${cleanId}/season/${seasonNumber}/episode/${epNum}`,
+                  servers,
+                };
+              });
+            }
+          } catch {
+            // If all-episodes endpoint is rate-limited, read embedded episodes if present
+            if (Array.isArray(season.episodes)) {
+              episodes = season.episodes.map((ep: any, epIndex: number) => {
+                const epId = ep._id || ep.id || `${cleanId}_${seasonNumber}_${epIndex + 1}`;
+                const epNum = ep.episodeNumber ?? epIndex + 1;
+                const servers = this.buildInitialServerOptions(cleanId, seasonNumber, epNum, epId);
+
+                return {
+                  episodeId: epId,
+                  episodeNumber: epNum,
+                  title: ep.title || `Episode ${epNum}`,
+                  duration: ep.duration ? `${ep.duration} min` : undefined,
+                  thumbnail: ep.image || show.image || '',
+                  detailUrl: `${KARTOONS_BASE_URL}/watch/show/${cleanId}/season/${seasonNumber}/episode/${epNum}`,
+                  servers,
+                };
+              });
+            }
+          }
+
+          return {
+            seasonId,
+            seasonNumber,
+            title: season.title || `Season ${seasonNumber}`,
+            episodes,
+          };
+        })
+      );
+
+      const totalEpisodes = seasons.reduce((acc, s) => acc + s.episodes.length, 0);
+
+      const fullShow: ScrapedShowItem = {
+        id: show._id || cleanId,
+        slug: this.slugify(show.title || cleanId),
+        title: show.title || 'Untitled Cartoon',
+        description: show.description || '',
+        poster: show.image || '',
+        banner: show.coverImage || show.image || '',
+        rating: show.rating ? Number(show.rating) : undefined,
+        year: show.startYear || show.releaseYear || undefined,
+        status: show.status === 'Ongoing' ? 'Ongoing' : 'Completed',
+        type: 'show',
+        genres: Array.isArray(show.tags) ? show.tags : [],
+        totalSeasons: seasons.length,
+        totalEpisodes,
+        seasons,
+        sourceUrl: `${KARTOONS_BASE_URL}/show/${cleanId}`,
+      };
+
+      await scraperCache.set(cacheKey, fullShow, SCRAPER_TTL.SHOW_DETAILS);
+      return fullShow;
+    } catch (err: any) {
+      console.warn(`[KartoonsScraper] Error fetching show ${cleanId}:`, err.message);
+      // Clean fallback object
+      return {
+        id: cleanId,
+        slug: this.slugify(cleanId),
+        title: cleanId,
+        description: '',
+        poster: '',
+        banner: '',
+        status: 'Completed',
+        type: 'show',
+        genres: ['Animation'],
+        totalSeasons: 1,
+        totalEpisodes: 1,
+        seasons: [
+          {
+            seasonId: 'season_1',
+            seasonNumber: 1,
+            title: 'Season 1',
+            episodes: [
+              {
+                episodeId: `${cleanId}_1`,
+                episodeNumber: 1,
+                title: 'Episode 1',
+                detailUrl: `${KARTOONS_BASE_URL}/watch/show/${cleanId}/season/1/episode/1`,
+                servers: this.buildInitialServerOptions(cleanId, 1, 1, `${cleanId}_1`),
+              },
+            ],
+          },
+        ],
+        sourceUrl: `${KARTOONS_BASE_URL}/show/${cleanId}`,
+      };
     }
-
-    const show = showRes.data;
-    const rawSeasons: any[] = show.seasons || [];
-
-    // Concurrently fetch all episodes for each season
-    const seasons: ICartoonSeason[] = await Promise.all(
-      rawSeasons.map(async (season, index) => {
-        const seasonId = season._id || season.id || `season_${index + 1}`;
-        const seasonNumber = season.seasonNumber ?? index + 1;
-        let episodes: ICartoonEpisode[] = [];
-
-        try {
-          const epRes = await this.executeWithRetry<{ success: boolean; data: any[] }>(
-            `${KARTOONS_API_BASE}/shows/${cleanId}/season/${seasonId}/all-episodes`
-          );
-
-          if (epRes?.success && Array.isArray(epRes.data)) {
-            episodes = epRes.data.map((ep, epIndex) => {
-              const epId = ep._id || ep.id;
-              const epNum = ep.episodeNumber ?? epIndex + 1;
-
-              // Pre-populate multi-server embed options
-              const servers = this.buildInitialServerOptions(cleanId, seasonNumber, epNum, epId);
-
-              return {
-                episodeId: epId,
-                episodeNumber: epNum,
-                title: ep.title || `Episode ${epNum}`,
-                duration: ep.duration ? `${ep.duration} min` : undefined,
-                thumbnail: ep.image || show.image || '',
-                detailUrl: `${KARTOONS_BASE_URL}/watch/show/${cleanId}/season/${seasonNumber}/episode/${epNum}`,
-                servers,
-              };
-            });
-          }
-        } catch {
-          // If all-episodes endpoint is rate-limited, read embedded episodes if present
-          if (Array.isArray(season.episodes)) {
-            episodes = season.episodes.map((ep: any, epIndex: number) => {
-              const epId = ep._id || ep.id || `${cleanId}_${seasonNumber}_${epIndex + 1}`;
-              const epNum = ep.episodeNumber ?? epIndex + 1;
-              const servers = this.buildInitialServerOptions(cleanId, seasonNumber, epNum, epId);
-
-              return {
-                episodeId: epId,
-                episodeNumber: epNum,
-                title: ep.title || `Episode ${epNum}`,
-                duration: ep.duration ? `${ep.duration} min` : undefined,
-                thumbnail: ep.image || show.image || '',
-                detailUrl: `${KARTOONS_BASE_URL}/watch/show/${cleanId}/season/${seasonNumber}/episode/${epNum}`,
-                servers,
-              };
-            });
-          }
-        }
-
-        return {
-          seasonId,
-          seasonNumber,
-          title: season.title || `Season ${seasonNumber}`,
-          episodes,
-        };
-      })
-    );
-
-    const totalEpisodes = seasons.reduce((acc, s) => acc + s.episodes.length, 0);
-
-    const fullShow: ScrapedShowItem = {
-      id: show._id || cleanId,
-      slug: this.slugify(show.title || cleanId),
-      title: show.title || 'Untitled Cartoon',
-      description: show.description || '',
-      poster: show.image || '',
-      banner: show.coverImage || show.image || '',
-      rating: show.rating ? Number(show.rating) : undefined,
-      year: show.startYear || show.releaseYear || undefined,
-      status: show.status === 'Ongoing' ? 'Ongoing' : 'Completed',
-      type: 'show',
-      genres: Array.isArray(show.tags) ? show.tags : [],
-      totalSeasons: seasons.length,
-      totalEpisodes,
-      seasons,
-      sourceUrl: `${KARTOONS_BASE_URL}/show/${cleanId}`,
-    };
-
-    await scraperCache.set(cacheKey, fullShow, SCRAPER_TTL.SHOW_DETAILS);
-    return fullShow;
   }
 
   /**
@@ -537,7 +611,7 @@ export class KartoonsScraperEngine {
     const servers: ICartoonServer[] = [];
 
     try {
-      // 1. Check PoW challenge & decrypt direct stream links
+      // 1. Check PoW challenge & decrypt direct stream links across API mirrors
       const powChallengeRes = await this.executeWithRetry<{
         success: boolean;
         data: { enabled: boolean; nonce: string; bits: number };
@@ -554,14 +628,14 @@ export class KartoonsScraperEngine {
         }
       }
 
-      // Fetch decrypted links
-      const linksRes = await axios.get<{ success: boolean; data: any[] }>(
+      // Fetch decrypted links with 10s timeout
+      const linksRes = await this.executeWithRetry<{ success: boolean; data: any[] }>(
         `${KARTOONS_API_BASE}/shows/episode/${episodeId}/links`,
-        { headers: requestHeaders, timeout: 8000 }
+        { headers: requestHeaders, timeout: 10000 }
       );
 
-      if (linksRes.data?.success && Array.isArray(linksRes.data.data)) {
-        linksRes.data.data.forEach((item, index) => {
+      if (linksRes?.success && Array.isArray(linksRes.data)) {
+        linksRes.data.forEach((item: any, index: number) => {
           let directUrl: string | null = null;
           if (item.link) {
             directUrl = this.decryptStreamLink(item.link);
@@ -582,7 +656,7 @@ export class KartoonsScraperEngine {
         });
       }
     } catch {
-      // Direct decryption blocked by Cloudflare; continue with embed server options
+      // Direct decryption blocked by Cloudflare or mirror error; continue with embed server options
     }
 
     // Add safe iframe embed player fallbacks

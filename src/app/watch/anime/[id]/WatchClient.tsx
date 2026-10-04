@@ -73,16 +73,21 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             key={mediaKey}
             ref={iframeRef}
             src={src}
-            className={`w-full h-full border-0 bg-black ${
-                isFocusMode ? "rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"
-            }`}
-            allow="fullscreen; autoplay; encrypted-media; picture-in-picture; web-share"
-            allowFullScreen
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
+            className="absolute inset-0 w-full h-full border-0 bg-black"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen={true}
             referrerPolicy="origin"
             onLoad={onLoad}
             onError={onError}
         />
+    );
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.mediaKey === nextProps.mediaKey &&
+        prevProps.src === nextProps.src &&
+        prevProps.playerLoaded === nextProps.playerLoaded &&
+        prevProps.isFocusMode === nextProps.isFocusMode
     );
 });
 
@@ -517,23 +522,39 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const handleAutoFallback = useCallback(() => {
         if (!selectedServer || servers.length === 0) return;
 
-        // Prevent infinite fallback rotation loops (max 3 auto rotations per episode/mode)
-        if (fallbackCountRef.current >= 3) {
-            console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (3). Stopping auto-switch.`);
+        // Prevent infinite fallback rotation loops once all servers in list have been tried
+        if (fallbackCountRef.current >= servers.length) {
+            console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (${servers.length}). Stopping auto-switch.`);
             setError("All attempted streaming servers failed for this episode. Please try selecting a mirror below.");
             return;
         }
 
         fallbackCountRef.current += 1;
-        console.warn(`[ToonPlayer Fallback] Server ${selectedServer} timed out or failed (Attempt ${fallbackCountRef.current}). Initiating rotation...`);
+        console.warn(`[ToonPlayer Fallback] Server ${selectedServer} timed out or failed (Attempt ${fallbackCountRef.current}/${servers.length}). Initiating rotation...`);
 
         setFailedServers(prev => {
             const next = new Set(prev);
             next.add(selectedServer);
             ServerHealthManager.blacklistServer(selectedServer);
 
-            // Find next server in the list that hasn't failed yet
-            const nextServer = servers.find(s => !next.has(s.serverId) && s.serverId !== selectedServer);
+            // Find next server in the list that hasn't failed yet, advancing forward from current index
+            const currentIndex = servers.findIndex(s => s.serverId === selectedServer);
+            let nextServer = null;
+
+            for (let i = currentIndex + 1; i < servers.length; i++) {
+                if (!next.has(servers[i].serverId) && servers[i].serverId !== selectedServer) {
+                    nextServer = servers[i];
+                    break;
+                }
+            }
+            if (!nextServer) {
+                for (let i = 0; i < currentIndex; i++) {
+                    if (!next.has(servers[i].serverId) && servers[i].serverId !== selectedServer) {
+                        nextServer = servers[i];
+                        break;
+                    }
+                }
+            }
 
             if (nextServer) {
                 setLoadingStatus(`Switching to backup server: ${nextServer.serverName}...`);
@@ -546,7 +567,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         fontWeight: "bold"
                     }
                 });
-                setTimeout(() => setSelectedServer(nextServer.serverId), 50);
+                manualServerRef.current = nextServer.serverId;
+                setSelectedServer(nextServer.serverId);
             } else {
                 setError("All streaming servers failed for this episode. Please try another episode or mirror.");
             }
@@ -1084,18 +1106,34 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 
                 if (serverWithUrl.isEmergency) {
                     if (currentSeq !== sourceSeqRef.current) return;
-                    setSourceUrl(serverWithUrl.getUrl());
+                    const emergencyUrl = serverWithUrl.getUrl?.();
+                    if (!emergencyUrl || typeof emergencyUrl !== 'string' || emergencyUrl.trim() === '') {
+                        console.warn('[WatchPage] Emergency server returned empty URL. Auto-switching...');
+                        handleAutoFallback();
+                        return;
+                    }
+                    setSourceUrl(emergencyUrl);
                 } else {
                     if (!tmdbId || tmdbId === "0") {
                         if (currentSeq !== sourceSeqRef.current) return;
-                        setError("TMDB Metadata missing for this title. Try a native server.");
-                        processingRef.current = null;
+                        console.warn('[WatchPage] TMDB Metadata missing for this title. Auto-switching to next server...');
+                        handleAutoFallback();
                         return;
                     }
                     const isMovie = show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1 || isMovieContent(show);
-                    const iframeUrl = isMovie 
-                        ? serverWithUrl.getUrl("movie", tmdbId)
-                        : serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                    let iframeUrl = "";
+                    try {
+                        iframeUrl = isMovie 
+                            ? serverWithUrl.getUrl("movie", tmdbId)
+                            : serverWithUrl.getUrl("tv", tmdbId, 1, parseInt(String(currentEp) || "1"));
+                    } catch (e) {
+                        iframeUrl = "";
+                    }
+                    if (!iframeUrl || typeof iframeUrl !== 'string' || iframeUrl.trim() === "") {
+                        console.warn('[WatchPage] Empty embed URL from server. Auto-switching...');
+                        handleAutoFallback();
+                        return;
+                    }
                     if (currentSeq !== sourceSeqRef.current) return;
                     setSourceUrl(iframeUrl);
                 }
@@ -1161,9 +1199,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 if (links && Array.isArray(links) && links.length > 0) {
                     const hlsIndex = links.findIndex((l: any) => l.hls || l.isM3U8 || l.type === 'hls');
                     const selected = hlsIndex !== -1 ? links[hlsIndex] : links[0];
-                    const rawUrl = selected.url || selected.link;
-                    if (!rawUrl || typeof rawUrl !== 'string') {
-                        throw new Error('Invalid source URL received');
+                    const rawUrl = selected?.url || selected?.link;
+                    if (!rawUrl || typeof rawUrl !== 'string' || rawUrl.trim() === '') {
+                        console.warn('[WatchPage] Invalid or empty source URL received. Auto-switching to next server...');
+                        handleAutoFallback();
+                        return;
                     }
                     const absoluteUrl = rawUrl.startsWith('http')
                         ? rawUrl
@@ -1272,12 +1312,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 <div className="pt-14 md:pt-16 px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
                     {/* Fallback Player */}
-                    <div className="w-full aspect-video bg-black md:rounded-lg overflow-hidden border border-border-color relative shadow-2xl">
+                    <div className="relative w-full aspect-video bg-black overflow-hidden md:rounded-lg border border-border-color shadow-2xl">
                         <iframe
                             src={getProxiedEmbedUrl(fallbackEmbedUrl)}
                             className="absolute inset-0 w-full h-full border-0 bg-black rounded-none md:rounded-lg"
-                            allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
-                            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            allowFullScreen={true}
                             referrerPolicy="origin"
                             onLoad={(e: any) => {
                                 try {
@@ -1340,7 +1381,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
     const renderPlayer = () => {
         return (
-            <div className={`w-full ${isFocusMode ? "h-[100dvh] rounded-none" : "aspect-video min-h-[220px] sm:min-h-[360px] md:min-h-[480px] rounded-none sm:rounded-xl md:rounded-2xl"} bg-black overflow-hidden border-0 sm:border border-border-color relative shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+            <div className={`relative w-full aspect-video bg-black overflow-hidden ${isFocusMode ? "!h-[100dvh] !aspect-auto rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"} border-0 sm:border border-border-color shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">

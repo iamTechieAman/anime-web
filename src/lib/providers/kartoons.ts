@@ -15,6 +15,7 @@ import { getUA } from '../user-agents';
  *
  * Includes:
  * - Anti-bot headers & rotating User-Agents
+ * - Dynamic domain / mirror auto-switching failover
  * - In-Memory TTL Cache (15-30 mins) with Redis compatibility hook
  * - Proof-of-Work (PoW) SHA-256 solver
  * - AES-256-CBC link decryptor
@@ -22,8 +23,20 @@ import { getUA } from '../user-agents';
  * ============================================================================
  */
 
-export const KARTOONS_BASE_URL = 'https://kartoons.to';
-export const KARTOONS_API_BASE = 'https://api.kartoons.to/api';
+export const KARTOONS_MIRRORS = [
+  'https://kartoons.to',
+  'https://kartoons.co',
+  'https://kartoons.net',
+];
+
+export const KARTOONS_API_MIRRORS = [
+  'https://api.kartoons.to/api',
+  'https://api.kartoons.co/api',
+  'https://api.kartoons.net/api',
+];
+
+export const KARTOONS_BASE_URL = KARTOONS_MIRRORS[0];
+export const KARTOONS_API_BASE = KARTOONS_API_MIRRORS[0];
 const AES_SECRET_KEY = 'bca9e0df1a5abb32906ca3f63ac04cef';
 
 // ============================================================================
@@ -138,7 +151,7 @@ export const CACHE_TTL = {
 };
 
 // ============================================================================
-// Header Generator & HTTP Helpers
+// Header Generator & Dynamic HTTP Helpers
 // ============================================================================
 
 export function getBrowserHeaders(customReferer?: string): Record<string, string> {
@@ -146,9 +159,53 @@ export function getBrowserHeaders(customReferer?: string): Record<string, string
     'User-Agent': getUA(),
     'Referer': customReferer || `${KARTOONS_BASE_URL}/`,
     'Origin': KARTOONS_BASE_URL,
-    'Accept': 'application/json, text/plain, */*',
+    'Accept': 'application/json, text/plain, text/html, */*',
     'Accept-Language': 'en-US,en;q=0.9',
   };
+}
+
+/**
+ * Executes network requests across mirrors with automatic failover and 10s timeout.
+ */
+export async function requestWithMirrorFailover<T>(
+  endpointOrUrl: string,
+  options: AxiosRequestConfig = {},
+  type: 'api' | 'web' = 'api'
+): Promise<T> {
+  const mirrors = type === 'api' ? KARTOONS_API_MIRRORS : KARTOONS_MIRRORS;
+  const errors: string[] = [];
+
+  let path = endpointOrUrl;
+  for (const m of (type === 'api' ? KARTOONS_API_MIRRORS : KARTOONS_MIRRORS)) {
+    if (path.startsWith(m)) {
+      path = path.slice(m.length);
+      break;
+    }
+  }
+  if (!path.startsWith('/')) path = `/${path}`;
+
+  for (const mirror of mirrors) {
+    const fullUrl = `${mirror}${path}`;
+    try {
+      const response = await axios({
+        url: fullUrl,
+        timeout: 10000, // Strict 10-second timeout
+        ...options,
+        headers: {
+          ...getBrowserHeaders(options.headers?.Referer as string || `${mirror}/`),
+          'Origin': mirror,
+          ...(options.headers || {}),
+        },
+      });
+      if (response.data !== undefined) {
+        return response.data;
+      }
+    } catch (err: any) {
+      errors.push(`${mirror}: ${err.message || 'Error'}`);
+    }
+  }
+
+  throw new Error(`[Kartoons] All mirrors failed for "${endpointOrUrl}": ${errors.join(' | ')}`);
 }
 
 async function requestWithRetry<T>(
@@ -156,30 +213,8 @@ async function requestWithRetry<T>(
   options: AxiosRequestConfig = {},
   retries = 1
 ): Promise<T> {
-  let lastError: any;
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const response = await axios({
-        url,
-        timeout: 25000,
-        ...options,
-        headers: {
-          ...getBrowserHeaders(options.headers?.Referer as string),
-          ...(options.headers || {}),
-        },
-      });
-      return response.data;
-    } catch (err: any) {
-      lastError = err;
-      if (err.response?.status === 403 || err.response?.status === 404) {
-        throw err;
-      }
-      if (i < retries) {
-        await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
-      }
-    }
-  }
-  throw lastError;
+  const isApi = url.includes('/api') || KARTOONS_API_MIRRORS.some(m => url.startsWith(m));
+  return requestWithMirrorFailover<T>(url, options, isApi ? 'api' : 'web');
 }
 
 // ============================================================================
@@ -268,7 +303,7 @@ export async function getHomeCartoons(): Promise<{
   if (cached) return cached;
 
   try {
-    // 1. Fetch featured shows and movies via the backend REST API
+    // 1. Fetch featured shows and movies via the backend REST API across mirrors
     const [featuredShowsRes, featuredMoviesRes] = await Promise.allSettled([
       requestWithRetry<{ success: boolean; data: any[] }>(`${KARTOONS_API_BASE}/shows/featured`),
       requestWithRetry<{ success: boolean; data: any[] }>(`${KARTOONS_API_BASE}/movies/featured`),
@@ -308,28 +343,29 @@ export async function getHomeCartoons(): Promise<{
     const formattedFeatured = featuredShows.map((s) => mapItem(s, 'show'));
     const formattedMovies = featuredMovies.map((m) => mapItem(m, 'movie'));
 
-    const result = {
-      featured: formattedFeatured,
-      movies: formattedMovies,
-      categories: Array.from(allCategories),
-    };
-
-    // Cache results for 30 minutes
-    kartoonsCache.set(cacheKey, result, CACHE_TTL.HOME);
-    return result;
+    if (formattedFeatured.length > 0 || formattedMovies.length > 0) {
+      const result = {
+        featured: formattedFeatured,
+        movies: formattedMovies,
+        categories: Array.from(allCategories),
+      };
+      kartoonsCache.set(cacheKey, result, CACHE_TTL.HOME);
+      return result;
+    }
+    throw new Error('API returned empty home data, switching to HTML scraping');
   } catch (apiError: any) {
-    // Fallback: Scrape the HTML page via Cheerio
+    // Fallback: Scrape the HTML page via Cheerio across mirrors
     try {
-      const html = await requestWithRetry<string>(`${KARTOONS_BASE_URL}/home`, {
+      const html = await requestWithMirrorFailover<string>('/home', {
         headers: { Accept: 'text/html,application/xhtml+xml' },
-      });
+      }, 'web');
       const $ = cheerio.load(html);
 
       const scrapedItems: CartoonItem[] = [];
-      $('a[href*="/show/"], a[href*="/movie/"]').each((_, el) => {
-        const href = $(el).attr('href') || '';
-        const title = $(el).find('h3, h2, .title, p').first().text().trim() || $(el).attr('title') || '';
-        const img = $(el).find('img').attr('src') || $(el).find('img').attr('data-src') || '';
+      $('a[href*="/show/"], a[href*="/movie/"], .film-item, .card, .cartoon-card').each((_, el) => {
+        const href = $(el).attr('href') || $(el).find('a').first().attr('href') || '';
+        const title = $(el).find('h3, h2, .title, p, .name').first().text().trim() || $(el).attr('title') || '';
+        const img = $(el).find('img').attr('data-src') || $(el).find('img').attr('src') || '';
         const idMatch = href.match(/\/(show|movie)\/([a-zA-Z0-9_-]+)/);
         if (idMatch && title) {
           scrapedItems.push({
@@ -352,8 +388,12 @@ export async function getHomeCartoons(): Promise<{
 
       kartoonsCache.set(cacheKey, fallbackResult, CACHE_TTL.HOME);
       return fallbackResult;
-    } catch (cheerioError) {
-      throw new Error(`Failed to scrape home catalog: ${apiError.message}`);
+    } catch {
+      return {
+        featured: [],
+        movies: [],
+        categories: ['Animation', 'Action', 'Adventure', 'Comedy', 'Family'],
+      };
     }
   }
 }
@@ -409,10 +449,46 @@ export async function searchCartoons(query: string): Promise<CartoonItem[]> {
       })),
     ];
 
-    kartoonsCache.set(cacheKey, results, CACHE_TTL.SEARCH);
-    return results;
-  } catch (error: any) {
-    throw new Error(`Failed to search cartoons for "${query}": ${error.message}`);
+    if (results.length > 0) {
+      kartoonsCache.set(cacheKey, results, CACHE_TTL.SEARCH);
+      return results;
+    }
+  } catch (err: any) {
+    console.warn('[Kartoons] API search failed, attempting HTML fallback:', err.message);
+  }
+
+  // Fallback HTML search via Cheerio
+  try {
+    const encoded = encodeURIComponent(cleanQuery);
+    const html = await requestWithMirrorFailover<string>(`/search?q=${encoded}`, {
+      headers: { Accept: 'text/html' }
+    }, 'web');
+    const $ = cheerio.load(html);
+    const scrapedResults: CartoonItem[] = [];
+
+    $('a[href*="/show/"], a[href*="/movie/"], .film-item, .card').each((_, el) => {
+      const href = $(el).attr('href') || $(el).find('a').first().attr('href') || '';
+      const title = $(el).find('h3, h2, .title, p').first().text().trim() || $(el).attr('title') || '';
+      const img = $(el).find('img').attr('data-src') || $(el).find('img').attr('src') || '';
+      const idMatch = href.match(/\/(show|movie)\/([a-zA-Z0-9_-]+)/);
+
+      if (idMatch && title) {
+        scrapedResults.push({
+          id: idMatch[2],
+          title,
+          description: '',
+          poster: img,
+          banner: img,
+          type: idMatch[1] === 'movie' ? 'movie' : 'show',
+          detailUrl: href.startsWith('http') ? href : `${KARTOONS_BASE_URL}${href}`,
+        });
+      }
+    });
+
+    kartoonsCache.set(cacheKey, scrapedResults, CACHE_TTL.SEARCH);
+    return scrapedResults;
+  } catch {
+    return [];
   }
 }
 
@@ -421,7 +497,6 @@ export async function searchCartoons(query: string): Promise<CartoonItem[]> {
  * Fetches cartoon details, season listings, and complete episode trees.
  */
 export async function getCartoonEpisodes(detailUrlOrId: string): Promise<CartoonDetails> {
-  // Extract clean ID from URL or bare ID
   const cleanId = detailUrlOrId.includes('/')
     ? detailUrlOrId.split('/').filter(Boolean).pop()!
     : detailUrlOrId.trim();
@@ -509,7 +584,34 @@ export async function getCartoonEpisodes(detailUrlOrId: string): Promise<Cartoon
     kartoonsCache.set(cacheKey, result, CACHE_TTL.DETAILS);
     return result;
   } catch (error: any) {
-    throw new Error(`Failed to fetch cartoon episodes for "${detailUrlOrId}": ${error.message}`);
+    console.warn(`[Kartoons] Failed to fetch cartoon episodes for "${detailUrlOrId}":`, error.message);
+    // Return clean fallback structure instead of crashing
+    return {
+      id: cleanId,
+      title: cleanId,
+      description: '',
+      poster: '',
+      banner: '',
+      type: 'show',
+      detailUrl: `${KARTOONS_BASE_URL}/show/${cleanId}`,
+      totalSeasons: 1,
+      totalEpisodes: 1,
+      seasons: [
+        {
+          seasonId: 'season_1',
+          seasonNumber: 1,
+          title: 'Season 1',
+          episodes: [
+            {
+              id: `${cleanId}_1`,
+              episodeNumber: 1,
+              title: 'Episode 1',
+              detailUrl: `${KARTOONS_BASE_URL}/watch/show/${cleanId}/season/1/episode/1`,
+            },
+          ],
+        },
+      ],
+    };
   }
 }
 
@@ -526,7 +628,6 @@ export async function getStreamSource(
     episodeNumber?: number;
   }
 ): Promise<StreamResponse> {
-  // Extract clean episode ID
   const episodeId = episodeUrlOrId.includes('/')
     ? episodeUrlOrId.split('/').filter(Boolean).pop()!
     : episodeUrlOrId.trim();
@@ -540,7 +641,7 @@ export async function getStreamSource(
     : `${KARTOONS_BASE_URL}/player?episode=${episodeId}`;
 
   try {
-    // Step 1: Query Proof-of-Work Challenge
+    // Step 1: Query Proof-of-Work Challenge across API mirrors
     const powChallengeRes = await requestWithRetry<{
       success: boolean;
       data: { enabled: boolean; nonce: string; bits: number; algo: string };
@@ -557,19 +658,17 @@ export async function getStreamSource(
       }
     }
 
-    // Step 2: Fetch stream links with PoW headers
-    const linksRes = await axios.get<{ success: boolean; data: any[] }>(
-      `${KARTOONS_API_BASE}/shows/episode/${episodeId}/links`,
-      {
-        headers: requestHeaders,
-        timeout: 8000,
-      }
+    // Step 2: Fetch stream links with 10s timeout
+    const linksRes = await requestWithMirrorFailover<{ success: boolean; data: any[] }>(
+      `/shows/episode/${episodeId}/links`,
+      { headers: requestHeaders, timeout: 10000 },
+      'api'
     );
 
-    if (linksRes.data?.success && Array.isArray(linksRes.data.data) && linksRes.data.data.length > 0) {
+    if (linksRes?.success && Array.isArray(linksRes.data) && linksRes.data.length > 0) {
       const sources: StreamSource[] = [];
 
-      for (const item of linksRes.data.data) {
+      for (const item of linksRes.data) {
         let streamUrl: string | null = null;
         if (item.link) {
           streamUrl = decryptStreamUrl(item.link);
@@ -663,42 +762,57 @@ export class KartoonsProvider implements AnimeProvider {
   };
 
   async search(query: string): Promise<AnimeSearchResult[]> {
-    const results = await searchCartoons(query);
-    return results.map((item) => ({
-      id: item.id,
-      title: item.title,
-      image: item.poster || item.banner,
-      releaseDate: item.year ? String(item.year) : undefined,
-      provider: 'kartoons',
-      type: item.type,
-    }));
+    try {
+      const results = await searchCartoons(query);
+      return results.map((item) => ({
+        id: item.id,
+        title: item.title,
+        image: item.poster || item.banner,
+        releaseDate: item.year ? String(item.year) : undefined,
+        provider: 'kartoons',
+        type: item.type,
+      }));
+    } catch {
+      return [];
+    }
   }
 
   async getInfo(id: string): Promise<AnimeDetails> {
-    const details = await getCartoonEpisodes(id);
-    const episodes = details.seasons.flatMap((season) =>
-      season.episodes.map((ep) => ({
-        id: ep.id,
-        number: ep.episodeNumber,
-        title: ep.title,
-      }))
-    );
+    try {
+      const details = await getCartoonEpisodes(id);
+      const episodes = details.seasons.flatMap((season) =>
+        season.episodes.map((ep) => ({
+          id: ep.id,
+          number: ep.episodeNumber,
+          title: ep.title,
+        }))
+      );
 
-    return {
-      id: details.id,
-      title: details.title,
-      image: details.poster || details.banner,
-      description: details.description,
-      genres: details.tags,
-      totalEpisodes: details.totalEpisodes,
-      episodes,
-      status: details.status,
-      type: details.type,
-      availableEpisodes: {
-        sub: details.totalEpisodes,
-        dub: details.totalEpisodes,
-      },
-    };
+      return {
+        id: details.id,
+        title: details.title,
+        image: details.poster || details.banner,
+        description: details.description,
+        genres: details.tags,
+        totalEpisodes: details.totalEpisodes,
+        episodes,
+        status: details.status,
+        type: details.type,
+        availableEpisodes: {
+          sub: details.totalEpisodes,
+          dub: details.totalEpisodes,
+        },
+      };
+    } catch (err: any) {
+      return {
+        id,
+        title: id,
+        image: '',
+        description: '',
+        totalEpisodes: 1,
+        episodes: [{ id, number: 1, title: 'Episode 1' }],
+      };
+    }
   }
 
   async getSources(
@@ -707,32 +821,47 @@ export class KartoonsProvider implements AnimeProvider {
     mode: 'sub' | 'dub' | 'raw',
     _serverId?: string
   ): Promise<VideoSource[]> {
-    const stream = await getStreamSource(episodeId);
-    return stream.sources.map((src) => ({
-      url: src.url,
-      isM3U8: src.isM3U8,
-      quality: src.quality,
-      isIframe: src.type === 'embed',
-      server: src.server,
-      type: mode,
-      providerId: 'kartoons',
-    }));
+    try {
+      const stream = await getStreamSource(episodeId);
+      return stream.sources.map((src) => ({
+        url: src.url,
+        isM3U8: src.isM3U8,
+        quality: src.quality,
+        isIframe: src.type === 'embed',
+        server: src.server,
+        type: mode,
+        providerId: 'kartoons',
+      }));
+    } catch {
+      return [{
+        url: `${KARTOONS_BASE_URL}/player?episode=${episodeId}`,
+        isM3U8: false,
+        quality: 'auto',
+        isIframe: true,
+        server: 'Kartoons Player (Embed)',
+        type: mode,
+        providerId: 'kartoons',
+      }];
+    }
   }
 
   async getTrending(): Promise<AnimeSearchResult[]> {
-    const home = await getHomeCartoons();
-    return home.featured.map((item) => ({
-      id: item.id,
-      title: item.title,
-      image: item.poster || item.banner,
-      releaseDate: item.year ? String(item.year) : undefined,
-      provider: 'kartoons',
-      type: item.type,
-    }));
+    try {
+      const home = await getHomeCartoons();
+      return home.featured.map((item) => ({
+        id: item.id,
+        title: item.title,
+        image: item.poster || item.banner,
+        releaseDate: item.year ? String(item.year) : undefined,
+        provider: 'kartoons',
+        type: item.type,
+      }));
+    } catch {
+      return [];
+    }
   }
 
   async getPopular(): Promise<AnimeSearchResult[]> {
     return this.getTrending();
   }
 }
-

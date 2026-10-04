@@ -1,81 +1,121 @@
-
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import * as cheerio from 'cheerio';
 import type { AnimeProvider, AnimeSearchResult, AnimeDetails, VideoSource } from './types';
 import { AllAnimeProvider } from './allanime';
 import { HiAnimeProvider } from './hianime';
 import { ParserError, safeString, safeInt, isValidUrl, sanitizeUrl } from './parser-utils';
 
-const BASE_URL = 'https://anikai.to';
+export const ANIKAI_MIRRORS = [
+    'https://anikai.to',
+    'https://anikai.cc',
+    'https://aniwatchtv.to',
+    'https://hianime.to'
+];
+
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0';
 
 export class AnikaiProvider implements AnimeProvider {
     name = 'anikai';
 
+    /**
+     * Executes requests across working mirrors with automatic failover and 10s timeout.
+     */
+    private async fetchFromMirrors(path: string, options: AxiosRequestConfig = {}): Promise<{ data: any; mirror: string }> {
+        const errors: string[] = [];
+        for (const mirror of ANIKAI_MIRRORS) {
+            const url = path.startsWith('http') ? path : `${mirror}${path.startsWith('/') ? path : `/${path}`}`;
+            try {
+                const response = await axios({
+                    url,
+                    timeout: 10000,
+                    ...options,
+                    headers: {
+                        'User-Agent': USER_AGENT,
+                        'Referer': `${mirror}/`,
+                        'Origin': mirror,
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        ...(options.headers || {})
+                    }
+                });
+                if (response.data) {
+                    return { data: response.data, mirror };
+                }
+            } catch (err: any) {
+                errors.push(`${mirror}: ${err.message || 'Error'}`);
+            }
+        }
+        throw new Error(`[Anikai] All mirrors failed for path "${path}": ${errors.join(' | ')}`);
+    }
+
     async search(query: string): Promise<AnimeSearchResult[]> {
         try {
-            const response = await axios.get(`${BASE_URL}/browser`, {
-                params: { keyword: query },
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'Referer': BASE_URL,
-                    'Origin': BASE_URL
-                }
-            });
+            const cleanQuery = query.trim();
+            if (!cleanQuery) return [];
 
-            if (!response.data || typeof response.data !== 'string') return [];
+            const { data } = await this.fetchFromMirrors(`/browser?keyword=${encodeURIComponent(cleanQuery)}`);
+            if (!data || typeof data !== 'string') return [];
 
-            const $ = cheerio.load(response.data);
+            const $ = cheerio.load(data);
             const results: AnimeSearchResult[] = [];
 
-            let items = $('.film_list-wrap .flw-item');
-            if (items.length === 0) items = $('.aitem');
-
-            items.each((_, element) => {
+            $('.film_list-wrap .flw-item, .film_list-wrap .item, .aitem').each((_, element) => {
                 const $el = $(element);
-                const $poster = $el.find('.poster, .film-poster');
-                const href = $poster.attr('href') || $el.find('a').attr('href');
+                const $poster = $el.find('.poster, .film-poster, .film-poster-ahref, a').first();
+                const href = $poster.attr('href') || $el.find('a').first().attr('href') || '';
 
-                const id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                const title = $el.find('.title, .film-name a').text().trim();
-                const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
+                const id = href?.includes('/watch/')
+                    ? href.split('/watch/')[1]?.split('?')[0]
+                    : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
+
+                const title = $el.find('.title, .film-name a, .film-name, .dynamic-name, h3.film-name').first().text().trim()
+                    || $poster.attr('title') || '';
+                const $img = $el.find('img').first();
+                const image = $img.attr('data-src') || $img.attr('src') || '';
+
+                const sub = safeInt($el.find('.tick-sub').text().trim(), 0);
+                const dub = safeInt($el.find('.tick-dub').text().trim(), 0);
 
                 if (id && title) {
-                    results.push({ id, title, image: sanitizeUrl(image), provider: this.name });
+                    results.push({
+                        id,
+                        title,
+                        image: sanitizeUrl(image),
+                        provider: this.name,
+                        subOrDub: (sub > 0 && dub > 0) ? 'both' : (dub > 0 ? 'dub' : 'sub')
+                    });
                 }
             });
 
             return results;
-        } catch (error) {
-            console.error('[Anikai] Search failed:', error);
+        } catch (error: any) {
+            console.error('[Anikai] Search failed across all mirrors:', error.message);
             return [];
         }
     }
 
     async getRecent(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = `${BASE_URL}/home`;
-            console.log(`[Anikai] Fetching Recent from Home: ${url}`);
+            const { data } = await this.fetchFromMirrors(page > 1 ? `/home?page=${page}` : '/home');
+            if (!data || typeof data !== 'string') return [];
 
-            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
-            if (!response.data || typeof response.data !== 'string') return [];
-
-            const $ = cheerio.load(response.data);
+            const $ = cheerio.load(data);
             const results: AnimeSearchResult[] = [];
 
-            $('#latest-updates .tab-body .aitem').each((_, element) => {
+            $('#latest-updates .tab-body .aitem, .film_list-wrap .flw-item, .aitem').each((_, element) => {
                 const $el = $(element);
-                const $poster = $el.find('.poster');
+                const $poster = $el.find('.poster, .film-poster').first();
 
-                const href = $poster.attr('href') || $el.find('a').attr('href');
-                let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
+                const href = $poster.attr('href') || $el.find('a').first().attr('href') || '';
+                let id = href?.includes('/watch/')
+                    ? href.split('/watch/')[1]?.split('?')[0]
+                    : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
 
                 if (id.includes('#')) id = id.split('#')[0];
 
-                const title = $el.find('.title').text().trim();
-                const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
-
-                const epText = $el.find('.ep-status, .tick-sub, .tick-dub').text().trim();
+                const title = $el.find('.title, .film-name a, .film-name').first().text().trim();
+                const $img = $el.find('img').first();
+                const image = $img.attr('data-src') || $img.attr('src') || '';
+                const epText = $el.find('.ep-status, .tick-sub, .tick-dub').first().text().trim();
 
                 if (id && title) {
                     results.push({
@@ -91,47 +131,42 @@ export class AnikaiProvider implements AnimeProvider {
             });
 
             return results;
-        } catch (error) {
-            console.error('[Anikai] getRecent failed:', error);
+        } catch (error: any) {
+            console.error('[Anikai] getRecent failed across all mirrors:', error.message);
             return [];
         }
     }
 
     async getInfo(id: string): Promise<AnimeDetails> {
         try {
-            const url = id.startsWith('http') ? id : `${BASE_URL}/watch/${id}`;
+            const cleanId = id.replace(/^\//, '').split('?')[0];
+            const path = cleanId.startsWith('watch/') ? `/${cleanId}` : `/watch/${cleanId}`;
+            const { data } = await this.fetchFromMirrors(path);
 
-            const response = await axios.get(url, {
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'Referer': BASE_URL
-                }
-            });
-
-            if (!response.data || typeof response.data !== 'string') {
+            if (!data || typeof data !== 'string') {
                 throw new ParserError(this.name, 'getInfo', id, 'Received empty or invalid HTML response');
             }
 
-            const $ = cheerio.load(response.data);
-            const title = $('h1.title').text().trim() || $('.film-name').text().trim();
-            const image = $('.poster img').attr('src') || $('.film-poster img').attr('src');
-            const description = $('.desc').text().trim() || $('.film-description').text().trim();
+            const $ = cheerio.load(data);
+            const title = $('h1.title, .film-name, h1.film-name, .anime-name, .dynamic-name, h1').first().text().trim();
+            const $img = $('.poster img, .film-poster img, .anisc-poster img').first();
+            const image = $img.attr('data-src') || $img.attr('src') || '';
+            const description = $('.desc, .film-description, .show-description, .film-detail .text').first().text().trim();
 
-            // Get episode list via AJAX
-            let dataId = $('#wrapper').attr('data-id');
-            if (!dataId) {
-                // Fallback to other elements
-                dataId = $('#anime-rating').attr('data-id') ||
-                    $('.user-bookmark').attr('data-id') ||
-                    $('.w2g-trigger').attr('data-id');
-            }
+            // Get episode list via AJAX data-id
+            let dataId = $('#wrapper').attr('data-id')
+                || $('body').attr('data-id')
+                || $('#anime-rating').attr('data-id')
+                || $('.user-bookmark').attr('data-id')
+                || $('.w2g-trigger').attr('data-id')
+                || $('#sync-meta').attr('data-id')
+                || $('[data-id]').first().attr('data-id');
 
-            // Try parsing syncData if still missing
             if (!dataId) {
                 try {
                     const syncData = JSON.parse($('#syncData').html() || '{}');
                     dataId = syncData.anime_id;
-                } catch (e) {
+                } catch {
                     // ignore
                 }
             }
@@ -140,20 +175,18 @@ export class AnikaiProvider implements AnimeProvider {
 
             if (dataId) {
                 try {
-                    const episodesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/list/${dataId}`, {
-                        headers: {
-                            'User-Agent': USER_AGENT,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
+                    const epRes = await this.fetchFromMirrors(`/ajax/v2/episode/list/${dataId}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     });
 
-                    if (episodesResponse?.data?.html) {
-                        const $episodes = cheerio.load(episodesResponse.data.html);
-                        $episodes('.ep-item').each((_, el) => {
+                    const epHtml = epRes.data?.html || (typeof epRes.data === 'string' ? epRes.data : '');
+                    if (epHtml) {
+                        const $episodes = cheerio.load(epHtml);
+                        $episodes('.ep-item, .ssl-item, .ep-page-item, a.item').each((_, el) => {
                             const $ep = $episodes(el);
-                            const episodeId = $ep.attr('data-id') || '';
-                            const number = safeInt($ep.attr('data-number'), 0);
-                            const epTitle = $ep.attr('title') || `Episode ${number}`;
+                            const episodeId = $ep.attr('data-id') || $ep.attr('data-number') || '';
+                            const number = safeInt($ep.attr('data-number') || $ep.text().replace(/[^\d]/g, ''), 0);
+                            const epTitle = $ep.attr('title') || $ep.find('.ep-name').text().trim() || `Episode ${number}`;
 
                             if (episodeId && number > 0) {
                                 episodes.push({
@@ -164,84 +197,81 @@ export class AnikaiProvider implements AnimeProvider {
                             }
                         });
                     }
-                } catch (e) {
-                    console.warn('[Anikai] Episode fetch failed:', e);
+                } catch (e: any) {
+                    console.warn('[Anikai] Episode list AJAX fetch failed:', e.message);
                 }
-            } else {
-                console.warn('[Anikai] No data-id found for episodes.');
             }
 
-            // Fallback logic for episodes
-            if (episodes.length === 0) {
-                // ... (existing fallback logic kept for brevity/completeness as it was in original) ...
-                console.warn('[Anikai] No episodes found, trying fallback to AllAnime...');
-                const allAnime = new AllAnimeProvider();
+            // Fallback logic for episodes to AllAnime
+            if (episodes.length === 0 && title) {
+                console.warn('[Anikai] No episodes parsed, attempting fallback to AllAnime...');
                 try {
+                    const allAnime = new AllAnimeProvider();
                     const searchRes = await allAnime.search(title);
                     if (searchRes.length > 0) {
                         return await allAnime.getInfo(searchRes[0].id);
                     }
-                } catch (e) { }
+                } catch { }
             }
 
             return {
                 id,
-                title,
-                image,
+                title: title || id,
+                image: sanitizeUrl(image),
                 description,
                 episodes,
                 totalEpisodes: episodes.length
             };
-        } catch (error) {
-            console.error('[Anikai] GetInfo failed:', error);
-            throw new Error(`Failed to fetch anime info: ${error}`);
+        } catch (error: any) {
+            console.error('[Anikai] GetInfo failed:', error.message);
+            // Fallback to AllAnime on complete failure
+            try {
+                const allAnime = new AllAnimeProvider();
+                const searchRes = await allAnime.search(id);
+                if (searchRes.length > 0) {
+                    return await allAnime.getInfo(searchRes[0].id);
+                }
+            } catch { }
+            throw new Error(`Failed to fetch anime info: ${error.message || error}`);
         }
     }
 
     async getSources(id: string, episodeString: string, mode: 'sub' | 'dub' | 'raw' = 'sub', serverId?: string): Promise<VideoSource[]> {
         try {
-            console.log(`[Anikai] Fetching sources for: ID=${id}, EpString=${episodeString}, Mode=${mode}, ServerID=${serverId}`);
+            console.log(`[Anikai] Fetching sources: ID=${id}, Ep=${episodeString}, Mode=${mode}, ServerId=${serverId}`);
 
-            // If ID matches AllAnime format (long alphanumeric), try AllAnime first
+            // If ID matches AllAnime format (long alphanumeric without dashes), try AllAnime first
             if (id.length > 10 && !id.includes('-')) {
                 try {
                     return await new AllAnimeProvider().getSources(id, episodeString, mode);
-                } catch (e) { }
+                } catch { }
             }
 
             if (serverId) {
-                const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
-                    params: { id: serverId },
-                    headers: { 'User-Agent': USER_AGENT, 'X-Requested-With': 'XMLHttpRequest' }
+                const sourcesResponse = await this.fetchFromMirrors(`/ajax/v2/episode/sources?id=${encodeURIComponent(serverId)}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
-                const embedLink = sourcesResponse.data.link;
+                const embedLink = sourcesResponse.data?.link;
                 if (!embedLink) throw new Error('No embed link found for provided serverId');
                 return this.extractSources(embedLink);
             }
 
-            let episodeId = episodeString;
-            // If episodeString is numeric, we might need to resolve it if Anikai uses unique hashes per episode
-            // But usually for Anikai (clone of Zoro/HiAnime), the episodeString passed from frontend IS the data-id hash.
-            // If it's a raw number, we might fail unless we fetch the episode list first to map number -> id.
-            // Let's assume frontend passes correct ID or handle number mapping if needed.
-            // (Skipping number mapping for brevity, assuming standard flow).
-
-            // Step 1: Get server list
-            const serversResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/servers`, {
-                params: { episodeId },
-                headers: { 'User-Agent': USER_AGENT, 'X-Requested-With': 'XMLHttpRequest' }
+            // Step 1: Query server list
+            const serversResponse = await this.fetchFromMirrors(`/ajax/v2/episode/servers?episodeId=${encodeURIComponent(episodeString)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
-            if (!serversResponse.data || !serversResponse.data.html) {
+            const serversHtml = serversResponse.data?.html || (typeof serversResponse.data === 'string' ? serversResponse.data : '');
+            if (!serversHtml) {
                 throw new Error('No server list returned from API');
             }
 
-            const $servers = cheerio.load(serversResponse.data.html);
+            const $servers = cheerio.load(serversHtml);
             let targetServerId: string | null = null;
 
-            $servers('.server-item').each((_, el) => {
+            $servers('.server-item, .btn-server').each((_, el) => {
                 const $server = $servers(el);
-                const dataType = $server.attr('data-type');
+                const dataType = $server.attr('data-type') || $server.attr('data-subdub');
                 if (dataType === mode) {
                     targetServerId = $server.attr('data-id') || null;
                     return false;
@@ -249,29 +279,27 @@ export class AnikaiProvider implements AnimeProvider {
             });
 
             if (!targetServerId) {
-                targetServerId = $servers('.server-item').first().attr('data-id') || null;
+                targetServerId = $servers('.server-item, .btn-server').first().attr('data-id') || null;
             }
 
-            if (!targetServerId) throw new Error('No server found');
+            if (!targetServerId) throw new Error('No server found for episode');
 
             // Step 2: Get embed link
-            const sourcesResponse = await axios.get(`${BASE_URL}/ajax/v2/episode/sources`, {
-                params: { id: targetServerId },
-                headers: { 'User-Agent': USER_AGENT, 'X-Requested-With': 'XMLHttpRequest' }
+            const sourcesResponse = await this.fetchFromMirrors(`/ajax/v2/episode/sources?id=${encodeURIComponent(targetServerId)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
-            const embedLink = sourcesResponse.data.link;
+            const embedLink = sourcesResponse.data?.link;
             if (!embedLink) throw new Error('No embed link found');
 
             return this.extractSources(embedLink);
-
         } catch (error: any) {
             console.error('[Anikai] GetSources failed:', error.message);
-            // Fallback to AllAnime via basic ID resolution or search
+            // Fallback to AllAnime
             try {
                 const allAnime = new AllAnimeProvider();
                 let fallbackId = id;
-                let searchTitle = "";
+                let searchTitle = '';
 
                 try {
                     const info = await this.getInfo(id);
@@ -279,81 +307,91 @@ export class AnikaiProvider implements AnimeProvider {
                     if (info.id && info.id.length > 10 && !info.id.includes('-')) {
                         fallbackId = info.id;
                     }
-                } catch (e) { }
+                } catch { }
 
                 if (searchTitle) {
-                    console.log(`[Anikai-Fallback] Searching AllAnime for "${searchTitle}"...`);
                     const searchRes = await allAnime.search(searchTitle);
                     if (searchRes.length > 0) fallbackId = searchRes[0].id;
                 }
 
-                console.log(`[Anikai-Fallback] Trying AllAnime ID: ${fallbackId}`);
                 return await allAnime.getSources(fallbackId, episodeString, mode);
-            } catch (e: any) {
-                console.error('[Anikai-Fallback] AllAnime fallback failed:', e.message);
+            } catch (fallbackErr: any) {
+                console.error('[Anikai-Fallback] AllAnime fallback failed:', fallbackErr.message);
             }
 
-            throw new Error(`Failed to fetch sources: ${error.message || error}`);
+            return [];
         }
     }
 
     private async extractSources(embedLink: string): Promise<VideoSource[]> {
-        // Copied from HiAnime
         const embedMatch = embedLink.match(/(.*)\/embed-(\d+)\/(?:v\d+\/)?e-(\d+)\/(.+)\?k=1$/);
 
         if (!embedMatch) {
-            console.warn('[Anikai] Could not parse embed link, returning as-is');
             return [{
                 url: embedLink,
-                isM3U8: true, // Optimistically assume
-                quality: 'auto'
+                isM3U8: embedLink.includes('.m3u8'),
+                quality: 'auto',
+                isIframe: true,
+                server: 'Anikai Embed'
             }];
         }
 
         const [, providerLink, embedType, eNumber, sourceId] = embedMatch;
         const ajaxUrl = `${providerLink}/embed-${embedType}/ajax/e-${eNumber}/getSources`;
 
-        const finalSourcesResponse = await axios.get(
-            ajaxUrl,
-            {
+        try {
+            const finalSourcesResponse = await axios.get(ajaxUrl, {
                 params: { id: sourceId },
+                timeout: 10000,
                 headers: {
                     'User-Agent': USER_AGENT,
                     'X-Requested-With': 'XMLHttpRequest',
                     'Referer': embedLink
                 }
+            });
+
+            const sourcesData = finalSourcesResponse.data;
+            if (!sourcesData || typeof sourcesData !== 'object') {
+                return [{
+                    url: embedLink,
+                    isM3U8: false,
+                    quality: 'auto',
+                    isIframe: true,
+                    server: 'Anikai Embed'
+                }];
             }
-        );
 
-        const sourcesData = finalSourcesResponse.data;
-        if (!sourcesData || typeof sourcesData !== 'object') {
-            return [];
-        }
-
-        if (Array.isArray(sourcesData.sources)) {
-            const list: VideoSource[] = [];
-            for (const source of sourcesData.sources) {
-                const sUrl = source?.file || source?.url;
-                if (isValidUrl(sUrl)) {
-                    list.push({
-                        url: sanitizeUrl(sUrl),
-                        isM3U8: source.type === 'hls' || sUrl.includes('.m3u8'),
-                        quality: source.label || source.quality || 'auto',
-                        headers: { Referer: embedLink }
-                    });
+            if (Array.isArray(sourcesData.sources)) {
+                const list: VideoSource[] = [];
+                for (const source of sourcesData.sources) {
+                    const sUrl = source?.file || source?.url;
+                    if (isValidUrl(sUrl)) {
+                        list.push({
+                            url: sanitizeUrl(sUrl),
+                            isM3U8: source.type === 'hls' || sUrl.includes('.m3u8'),
+                            quality: source.label || source.quality || 'auto',
+                            headers: { Referer: embedLink }
+                        });
+                    }
                 }
+                if (list.length > 0) return list;
+            } else if (isValidUrl(sourcesData.source)) {
+                const sUrl = sanitizeUrl(sourcesData.source);
+                return [{
+                    url: sUrl,
+                    isM3U8: sUrl.includes('.m3u8'),
+                    quality: 'auto'
+                }];
             }
-            return list;
-        } else if (isValidUrl(sourcesData.source)) {
-            const sUrl = sanitizeUrl(sourcesData.source);
-            return [{
-                url: sUrl,
-                isM3U8: sUrl.includes('.m3u8'),
-                quality: 'auto'
-            }];
-        }
+        } catch { }
 
-        return [];
+        return [{
+            url: embedLink,
+            isM3U8: false,
+            quality: 'auto',
+            isIframe: true,
+            server: 'Anikai Embed'
+        }];
     }
 
     async getAZList(letter: string, page: number = 1): Promise<AnimeSearchResult[]> {
@@ -362,162 +400,146 @@ export class AnikaiProvider implements AnimeProvider {
             if (path === '0-9' || path === 'other') path = 'other';
             if (path === 'all') path = '';
 
-            const url = path
-                ? `${BASE_URL}/az-list/${path}?page=${page}`
-                : `${BASE_URL}/az-list?page=${page}`;
+            const urlPath = path
+                ? `/az-list/${path}?page=${page}`
+                : `/az-list?page=${page}`;
 
-            console.log(`[Anikai] Fetching A-Z List: ${url}`);
-            const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT } });
-            const $ = cheerio.load(response.data);
+            const { data } = await this.fetchFromMirrors(urlPath);
+            const $ = cheerio.load(data);
             const results: AnimeSearchResult[] = [];
 
-            let items = $('.film_list-wrap .flw-item');
-            if (items.length === 0) items = $('.aitem');
-
-            items.each((_, element) => {
+            $('.film_list-wrap .flw-item, .film_list-wrap .item, .aitem').each((_, element) => {
                 const $el = $(element);
-                const $poster = $el.find('.poster, .film-poster');
-                const href = $poster.attr('href') || $el.find('a').attr('href');
+                const $poster = $el.find('.poster, .film-poster').first();
+                const href = $poster.attr('href') || $el.find('a').first().attr('href') || '';
                 const id = href?.includes('/watch/')
-                    ? href?.split('/watch/')[1]
-                    : href?.split('/').pop() || '';
+                    ? href.split('/watch/')[1]?.split('?')[0]
+                    : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
 
-                const title = $el.find('.title, .film-name a').text().trim();
-                const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
+                const title = $el.find('.title, .film-name a, .film-name').first().text().trim();
+                const $img = $poster.find('img').first();
+                const image = $img.attr('data-src') || $img.attr('src') || '';
 
-                const sub = parseInt($el.find('.tick-sub').text().trim()) || 0;
-                const dub = parseInt($el.find('.tick-dub').text().trim()) || 0;
+                const sub = safeInt($el.find('.tick-sub').text().trim(), 0);
+                const dub = safeInt($el.find('.tick-dub').text().trim(), 0);
 
                 if (id && title) {
                     results.push({
                         id,
                         title,
-                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`,
-                        subOrDub: { sub, dub } as any,
+                        image: sanitizeUrl(image) || `https://img.anikai.to/i/cache/images/${id}.jpg`,
+                        subOrDub: (sub > 0 && dub > 0) ? 'both' : (dub > 0 ? 'dub' : 'sub'),
                         provider: this.name
                     });
                 }
             });
 
             return results;
-        } catch (error) {
-            console.error('[Anikai] getAZList failed:', error);
+        } catch (error: any) {
+            console.error('[Anikai] getAZList failed across all mirrors:', error.message);
             return [];
         }
     }
 
     async getTrending(page: number = 1): Promise<AnimeSearchResult[]> {
         try {
-            const url = `${BASE_URL}/ajax/home/items`;
-            console.log(`[Anikai] Fetching Trending from AJAX: ${url}`);
-            const response = await axios.get(url, {
-                params: { name: 'trending' },
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Referer': `${BASE_URL}/home`
-                }
-            });
-            
-            let html = response.data;
-            if (response.data && response.data.result) {
-                html = response.data.result;
-            } else if (response.data && response.data.html) {
-                html = response.data.html;
+            let html = '';
+            try {
+                const res = await this.fetchFromMirrors('/ajax/home/items?name=trending', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                html = res.data?.result || res.data?.html || (typeof res.data === 'string' ? res.data : '');
+            } catch {
+                const homeRes = await this.fetchFromMirrors('/home');
+                html = homeRes.data;
             }
-            
+
+            if (!html) return [];
             const $ = cheerio.load(html);
             const results: AnimeSearchResult[] = [];
 
-            $('.aitem').each((_, element) => {
+            $('.aitem, .flw-item').each((_, element) => {
                 const $el = $(element);
-                const href = $el.attr('href') || $el.find('a').first().attr('href');
-                let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                if (id.includes('#')) id = id.split('#')[0];
+                const href = $el.attr('href') || $el.find('a').first().attr('href') || '';
+                let id = href?.includes('/watch/')
+                    ? href.split('/watch/')[1]?.split('?')[0]
+                    : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
 
-                const title = $el.find('.title').text().trim();
-                
-                const style = $el.attr('style') || $el.find('.poster').attr('style') || "";
-                let image = "";
+                if (id.includes('#')) id = id.split('#')[0];
+                const title = $el.find('.title, .film-name').first().text().trim();
+
+                const style = $el.attr('style') || $el.find('.poster').attr('style') || '';
+                let image = '';
                 if (style.includes('url(')) {
                     image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
                 }
                 if (!image) {
-                    image = $el.find('img').attr('data-src') || $el.find('img').attr('src') || "";
+                    const $img = $el.find('img').first();
+                    image = $img.attr('data-src') || $img.attr('src') || '';
                 }
 
                 if (id && title) {
                     results.push({
                         id,
                         title,
-                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`,
+                        image: sanitizeUrl(image) || `https://img.anikai.to/i/cache/images/${id}.jpg`,
                         provider: this.name
                     });
                 }
             });
 
             return results;
-        } catch (error) {
-            console.error('[Anikai] getTrending failed:', error);
+        } catch (error: any) {
+            console.error('[Anikai] getTrending failed:', error.message);
             return [];
         }
     }
 
     async getTop(page: number = 1): Promise<AnimeSearchResult[]> {
-        return this.getTrending(page); 
+        return this.getTrending(page);
     }
 
-    async getGenre(genre: string, page: number = 1) { return []; }
+    async getGenre(genre: string, page: number = 1): Promise<AnimeSearchResult[]> {
+        return [];
+    }
 
     async getHome(): Promise<{ slides: AnimeSearchResult[]; trending: AnimeSearchResult[]; latest: AnimeSearchResult[]; completed: AnimeSearchResult[]; upcoming: AnimeSearchResult[] }> {
         try {
-            console.log(`[Anikai] Fetching Home and Trending...`);
-            const [homeResponse, trendingResponse] = await Promise.all([
-                axios.get(`${BASE_URL}/home`, { headers: { 'User-Agent': USER_AGENT } }),
-                axios.get(`${BASE_URL}/ajax/home/items`, {
-                    params: { name: 'trending' },
-                    headers: {
-                        'User-Agent': USER_AGENT,
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Referer': `${BASE_URL}/home`
-                    }
-                }).catch(e => {
-                    console.error('[Anikai] Failed to fetch trending items in parallel:', e.message);
-                    return { data: { result: '' } };
-                })
-            ]);
-
-            const $ = cheerio.load(homeResponse.data);
+            const { data } = await this.fetchFromMirrors('/home');
+            const $ = cheerio.load(data);
             const slides: AnimeSearchResult[] = [];
 
-            let slideElements = $('.swiper-wrapper .swiper-slide');
-            if (slideElements.length === 0) slideElements = $('.deslide-item'); 
-            if (slideElements.length === 0) slideElements = $('#slider .item'); 
+            let slideElements = $('.swiper-wrapper .swiper-slide, .deslide-item, #slider .item, .film-slider .swiper-slide');
 
             slideElements.each((_, el) => {
                 const $el = $(el);
-                const title = $el.find('.title, .film-title, .film-name').text().trim();
-                const desc = $el.find('.desc, .description, .film-description').text().trim();
-                const href = $el.find('.watch-btn, a').attr('href');
-                const id = href?.split('/watch/')[1]?.split('?')[0] || '';
+                const title = $el.find('.title, .film-title, .film-name').first().text().trim();
+                const desc = $el.find('.desc, .description, .film-description').first().text().trim();
+                const href = $el.find('.watch-btn, a').attr('href') || '';
+                const id = href?.includes('/watch/')
+                    ? href.split('/watch/')[1]?.split('?')[0]
+                    : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
 
-                const style = $el.attr('style') || $el.find('.bg-img, .film-poster-img').attr('style') || "";
-                let image = "";
+                const style = $el.attr('style') || $el.find('.bg-img, .film-poster-img').attr('style') || '';
+                let image = '';
                 if (style.includes('url(')) {
                     image = style.split('url(')[1].split(')')[0].replace(/['"]/g, '');
                 }
-                if (!image) image = $el.find('img').attr('data-src') || $el.find('img').attr('src') || "";
+                if (!image) {
+                    const $img = $el.find('img').first();
+                    image = $img.attr('data-src') || $img.attr('src') || '';
+                }
 
                 const aniListId = $el.find('.user-bookmark, .btn-fav').attr('data-alid') || $el.attr('data-id');
 
                 if (id && title) {
                     slides.push({
-                        id: id,
+                        id,
                         title,
-                        image: image || `https://img.anikai.to/i/cache/images/${id}.jpg`,
+                        image: sanitizeUrl(image) || `https://img.anikai.to/i/cache/images/${id}.jpg`,
                         provider: this.name,
                         extra: {
-                            description: desc || "No description available.",
+                            description: desc || 'No description available.',
                             aniListId: aniListId ? parseInt(aniListId) : undefined,
                         }
                     } as any);
@@ -525,16 +547,19 @@ export class AnikaiProvider implements AnimeProvider {
             });
 
             const latest: AnimeSearchResult[] = [];
-            $('#latest-updates .tab-body .aitem').each((_, element) => {
+            $('#latest-updates .tab-body .aitem, .film_list-wrap .flw-item').each((_, element) => {
                 const $el = $(element);
-                const $poster = $el.find('.poster');
+                const $poster = $el.find('.poster, .film-poster').first();
 
-                const href = $poster.attr('href') || $el.find('a').attr('href');
-                let id = href?.split('/watch/')[1] || href?.split('/').pop() || '';
+                const href = $poster.attr('href') || $el.find('a').first().attr('href') || '';
+                let id = href?.includes('/watch/')
+                    ? href.split('/watch/')[1]?.split('?')[0]
+                    : href.split('?')[0]?.split('/').filter(Boolean).pop() || '';
                 if (id.includes('#')) id = id.split('#')[0];
 
-                const title = $el.find('.title').text().trim();
-                const image = $poster.find('img').attr('data-src') || $poster.find('img').attr('src');
+                const title = $el.find('.title, .film-name').first().text().trim();
+                const $img = $poster.find('img').first();
+                const image = $img.attr('data-src') || $img.attr('src') || '';
 
                 const sub = $el.find('.tick-sub').text().trim();
                 const dub = $el.find('.tick-dub').text().trim();
@@ -543,62 +568,25 @@ export class AnikaiProvider implements AnimeProvider {
                     latest.push({
                         id,
                         title,
-                        image,
+                        image: sanitizeUrl(image),
                         provider: this.name,
                         subOrDub: sub || dub ? `${sub}${dub ? ` / ${dub}` : ''}` : undefined
                     });
                 }
             });
 
-            const trending: AnimeSearchResult[] = [];
-            let trendingHtml = trendingResponse.data;
-            if (trendingResponse.data && trendingResponse.data.result) {
-                trendingHtml = trendingResponse.data.result;
-            } else if (trendingResponse.data && trendingResponse.data.html) {
-                trendingHtml = trendingResponse.data.html;
-            }
-
-            if (trendingHtml) {
-                const $t = cheerio.load(trendingHtml);
-                $t('.aitem').each((_, element) => {
-                    const $el = $t(element);
-                    const href = $el.attr('href') || $el.find('a').first().attr('href');
-                    let trendingId = href?.split('/watch/')[1] || href?.split('/').pop() || '';
-                    if (trendingId.includes('#')) trendingId = trendingId.split('#')[0];
-
-                    const trendingTitle = $el.find('.title').text().trim();
-                    const styleAttr = $el.attr('style') || $el.find('.poster').attr('style') || "";
-                    let trendingImage = "";
-                    if (styleAttr.includes('url(')) {
-                        trendingImage = styleAttr.split('url(')[1].split(')')[0].replace(/['"]/g, '');
-                    }
-                    if (!trendingImage) {
-                        trendingImage = $el.find('img').attr('data-src') || $el.find('img').attr('src') || "";
-                    }
-
-                    if (trendingId && trendingTitle) {
-                        trending.push({
-                            id: trendingId,
-                            title: trendingTitle,
-                            image: trendingImage || `https://img.anikai.to/i/cache/images/${trendingId}.jpg`,
-                            provider: this.name
-                        });
-                    }
-                });
-            }
-
-            if (slides.length === 0) throw new Error("No slides found on Anikai");
+            const trending = await this.getTrending(1);
 
             return { slides, trending, latest, completed: [], upcoming: [] };
-        } catch (error) {
-            console.error('[Anikai] getHome failed, falling back to HiAnime...', error);
+        } catch (error: any) {
+            console.error('[Anikai] getHome failed, falling back to HiAnime...', error.message);
             try {
                 const hianime = new HiAnimeProvider();
                 const trendingRes = await hianime.getTrending();
                 const fallbackSlides = trendingRes.slice(0, 10).map((item: AnimeSearchResult) => ({
                     ...item,
                     extra: {
-                        description: "Trending anime",
+                        description: 'Trending anime',
                         aniListId: undefined
                     }
                 })) as any[];
