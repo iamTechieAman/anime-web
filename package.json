@@ -19,7 +19,6 @@
     "@capacitor/core": "^8.0.1",
     "@clerk/nextjs": "^7.4.1",
     "@ducanh2912/next-pwa": "^10.2.9",
-    "@next/swc-darwin-arm64": "^16.3.4",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "@vidstack/react": "1.12.12",
