@@ -307,7 +307,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
         } isolate bg-[var(--bg-main)]`}>
           {/* Subtle global ambient glow */}
           <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-t from-accent/[0.04] to-transparent pointer-events-none z-0" />
-          <ErrorBoundary>
+          <ErrorBoundary resetKey={pathname ?? undefined}>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="flex flex-col items-center gap-4">
