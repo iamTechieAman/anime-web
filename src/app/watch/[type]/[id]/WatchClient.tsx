@@ -1494,8 +1494,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                         // DO NOT OVERWRITE initialType = anime with movie/tv just because TMDB resolved it as such.
                         // This prevents the UI from suddenly breaking out of the Anime player layout.
                     } else {
-                        setSourceError(true);
-                        // Minimal details if TMDB match fails
+                        // Minimal details if TMDB match fails — player still plays via anime servers
                         setDetails({
                             id: 0,
                             name: show.name,
@@ -1877,26 +1876,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         </div>
                     )}
 
-                    {/* Source Error Overlay */}
-                    {sourceError && !isAnimeServer && (
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 text-center">
-                            <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
-                                <X className="w-6 h-6 text-red-400" />
-                            </div>
-                            <h3 className="text-base font-bold mb-1 text-white">Server Unavailable</h3>
-                            <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">Try a different server below</p>
-                            <div className="flex gap-2 flex-wrap justify-center">
-                                <button onClick={() => { setSourceError(false); setReloadCount(prev => prev + 1); }}
-                                    className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
-                                    <RefreshCw className="w-3.5 h-3.5" /> Retry
-                                </button>
-                                <button onClick={handleAutoFallback}
-                                    className="px-4 py-2 bg-white/10 border border-white/10 text-white rounded-lg font-bold text-xs transition-all flex items-center gap-1.5">
-                                    <Zap className="w-3.5 h-3.5" /> Next Server
-                                </button>
-                            </div>
-                        </div>
-                    )}
+
 
                     {/* IFRAME — only render when we have a confirmed non-empty URL */}
                     {embedUrl && embedUrl.trim() !== "" ? (
