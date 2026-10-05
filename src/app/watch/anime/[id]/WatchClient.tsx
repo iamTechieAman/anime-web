@@ -518,41 +518,34 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const fallbackCountRef = useRef<number>(0);
     const previousValidSourceRef = useRef<any>(null);
     
-    // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
+    // Automatic Provider Fallback Engine (Intelligent Circular Rotation)
     const handleAutoFallback = useCallback(() => {
-        if (!selectedServer || servers.length === 0) return;
-
-        // Prevent infinite fallback rotation loops once all servers in list have been tried
-        if (fallbackCountRef.current >= servers.length) {
-            console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (${servers.length}). Stopping auto-switch.`);
-            setError("All attempted streaming servers failed for this episode. Please try selecting a mirror below.");
-            return;
-        }
-
-        fallbackCountRef.current += 1;
-        console.warn(`[ToonPlayer Fallback] Server ${selectedServer} timed out or failed (Attempt ${fallbackCountRef.current}/${servers.length}). Initiating rotation...`);
+        if (!selectedServer || !servers || servers.length === 0) return;
 
         setFailedServers(prev => {
-            const next = new Set(prev);
-            next.add(selectedServer);
+            const nextFailed = new Set(prev);
+            nextFailed.add(selectedServer);
             ServerHealthManager.blacklistServer(selectedServer);
 
-            // Find next server in the list that hasn't failed yet, advancing forward from current index
+            // Show error screen ONLY if every single server in the available servers list has failed
+            const allFailed = servers.every(s => nextFailed.has(s.serverId));
+            if (allFailed || nextFailed.size >= servers.length) {
+                console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (${servers.length}). Stopping auto-switch.`);
+                setError("Source Temporarily Unavailable. The player encountered an issue across all servers.");
+                return nextFailed;
+            }
+
+            // Circular transition: nextIndex = (currentIndex + 1) % servers.length
             const currentIndex = servers.findIndex(s => s.serverId === selectedServer);
+            const startIdx = currentIndex >= 0 ? currentIndex : 0;
             let nextServer = null;
 
-            for (let i = currentIndex + 1; i < servers.length; i++) {
-                if (!next.has(servers[i].serverId) && servers[i].serverId !== selectedServer) {
-                    nextServer = servers[i];
+            for (let i = 1; i <= servers.length; i++) {
+                const nextIndex = (startIdx + i) % servers.length;
+                const candidate = servers[nextIndex];
+                if (candidate && !nextFailed.has(candidate.serverId)) {
+                    nextServer = candidate;
                     break;
-                }
-            }
-            if (!nextServer) {
-                for (let i = 0; i < currentIndex; i++) {
-                    if (!next.has(servers[i].serverId) && servers[i].serverId !== selectedServer) {
-                        nextServer = servers[i];
-                        break;
-                    }
                 }
             }
 
@@ -568,13 +561,27 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     }
                 });
                 manualServerRef.current = nextServer.serverId;
+                // Update selected server -> UI button highlight updates automatically
                 setSelectedServer(nextServer.serverId);
             } else {
-                setError("All streaming servers failed for this episode. Please try another episode or mirror.");
+                setError("Source Temporarily Unavailable. The player encountered an issue across all servers.");
             }
-            return next;
+            return nextFailed;
         });
     }, [selectedServer, servers]);
+
+    const handleResetAndRetryAllServers = useCallback(() => {
+        fallbackCountRef.current = 0;
+        setFailedServers(new Set());
+        setError(null);
+        if (servers && servers.length > 0) {
+            const firstServer = servers[0];
+            setLoadingStatus(`Connecting to ${firstServer.serverName || 'Server 1'}...`);
+            manualServerRef.current = firstServer.serverId;
+            setSelectedServer(firstServer.serverId);
+            toast.success(`Reset server tracker — trying ${firstServer.serverName || 'Server 1'}...`, { icon: '🔄' });
+        }
+    }, [servers]);
 
     // Helper to match server names to live API health scores
     const getHealthScoreForServer = (serverName: string, scoresMap: Record<string, number>): number => {

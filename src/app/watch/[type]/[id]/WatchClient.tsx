@@ -1275,64 +1275,81 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     const fallbackCountRef = useRef<number>(0);
 
-    // Automatic Provider Fallback Engine (Intelligent Rotation & Health Recovery)
+    // Automatic Provider Fallback Engine (Intelligent Circular Rotation)
     const handleAutoFallback = useCallback(() => {
         if (!activeServer) return;
         
         const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
-        
-        // Prevent infinite fallback rotation loops once all servers in list have been tried
-        if (fallbackCountRef.current >= listToUse.length) {
-            console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted. Stopping auto-switch.`);
+        if (!listToUse || listToUse.length === 0) {
             setSourceError(true);
             return;
         }
 
-        fallbackCountRef.current += 1;
-        console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) timed out or failed (Attempt ${fallbackCountRef.current}/${listToUse.length}). Initiating rotation...`);
-        
         setFailedServers(prev => {
-            const next = new Set(prev);
-            next.add(activeServer.id);
+            const nextFailed = new Set(prev);
+            nextFailed.add(activeServer.id);
             ServerHealthManager.blacklistServer(activeServer.id);
-            
-            // Find next server in the list that hasn't failed yet, advancing forward from current index
+
+            // Show error screen ONLY if every single server in the available servers list has failed
+            const allFailed = listToUse.every(s => nextFailed.has(s.id));
+            if (allFailed || nextFailed.size >= listToUse.length) {
+                console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted. Displaying fallback UI.`);
+                setSourceError(true);
+                return nextFailed;
+            }
+
+            // Circular transition: nextIndex = (currentIndex + 1) % servers.length
             const currentIndex = listToUse.findIndex(s => s.id === activeServer.id);
+            const startIdx = currentIndex >= 0 ? currentIndex : 0;
             let nextServer = null;
 
-            for (let i = currentIndex + 1; i < listToUse.length; i++) {
-                if (!next.has(listToUse[i].id) && listToUse[i].id !== activeServer.id) {
-                    nextServer = listToUse[i];
+            for (let i = 1; i <= listToUse.length; i++) {
+                const nextIndex = (startIdx + i) % listToUse.length;
+                const candidate = listToUse[nextIndex];
+                if (candidate && !nextFailed.has(candidate.id)) {
+                    nextServer = candidate;
                     break;
-                }
-            }
-            if (!nextServer) {
-                for (let i = 0; i < currentIndex; i++) {
-                    if (!next.has(listToUse[i].id) && listToUse[i].id !== activeServer.id) {
-                        nextServer = listToUse[i];
-                        break;
-                    }
                 }
             }
 
             if (nextServer) {
+                console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) failed. Auto-switching to next server: ${nextServer.name} (${nextServer.id})`);
                 setLoadingStatus(`Switching to backup server: ${nextServer.name}...`);
                 if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
                 manualServerRef.current = nextServer.id;
+                setPlayerLoaded(false);
+                setSourceError(false);
+                // Update active server state -> UI button highlight updates automatically
                 setActiveServer(nextServer);
             } else {
                 setSourceError(true);
             }
-            return next;
+            return nextFailed;
         });
     }, [activeServer, currentMediaTypeServers, isAnimeServer]);
 
-    // Automatic background health checks and timeout rotations have been removed for improved stability and UX.
+    // Manual "Retry All Servers" handler: resets failed servers tracker and retries Server 1
+    const handleResetAndRetryAllServers = useCallback(() => {
+        fallbackCountRef.current = 0;
+        setFailedServers(new Set());
+        setSourceError(false);
+        setPlayerLoaded(false);
+        const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
+        const firstServer = (listToUse && listToUse.length > 0) ? listToUse[0] : SERVERS[0];
+        setLoadingStatus(`Connecting to ${firstServer.name}...`);
+        manualServerRef.current = firstServer.id;
+        setActiveServer(firstServer);
+        toast.success(`Reset server tracker — trying ${firstServer.name}...`, { icon: '🔄' });
+    }, [isAnimeServer, currentMediaTypeServers]);
 
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
         fallbackCountRef.current = 0;
-        setFailedServers(new Set());
+        setFailedServers(prev => {
+            const next = new Set(prev);
+            next.delete(server.id);
+            return next;
+        });
         setSourceError(false);
         setPlayerLoaded(false);
         setLoadingStatus(`Connecting to ${server.name}...`);
@@ -1906,16 +1923,23 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                             }}
                         />
                     ) : sourceError ? (
-                        // Only show the hard error UI after ALL servers have been exhausted
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 text-center">
-                            <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+                        // Only show the fallback screen when every single server in the available servers list has been tried and failed
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 text-center">
+                            <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
                                 <X className="w-6 h-6 text-red-400" />
                             </div>
-                            <h3 className="text-base font-bold mb-1 text-white">All Sources Exhausted</h3>
-                            <p className="text-zinc-500 text-xs mb-5 max-w-[260px]">No servers could produce a stream for this content. Try again later.</p>
-                            <button onClick={() => { setSourceError(false); setReloadCount(prev => prev + 1); }} className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm text-white rounded-lg font-bold text-xs flex items-center gap-1.5">
-                                <RefreshCw className="w-3.5 h-3.5" /> Retry
-                            </button>
+                            <h3 className="text-base sm:text-lg font-bold mb-1 text-white">Source Temporarily Unavailable</h3>
+                            <p className="text-zinc-400 text-xs mb-5 max-w-[320px] leading-relaxed">
+                                The player encountered an issue across all available servers. This usually fixes itself — try resetting and retrying all servers.
+                            </p>
+                            <div className="flex gap-3 flex-wrap justify-center">
+                                <button
+                                    onClick={handleResetAndRetryAllServers}
+                                    className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-accent/25"
+                                >
+                                    <RefreshCw className="w-3.5 h-3.5" /> Retry All Servers
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         // URL is being resolved — show a spinner, NOT an error
