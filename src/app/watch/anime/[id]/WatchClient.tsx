@@ -888,7 +888,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const controller = new AbortController();
         const fetchData = async () => {
             setLoadingShow(true);
+            setShow(null);
             setShowError(null);
+            setTmdbId(null);
+            setSourceUrl(null);
             
             try {
                 // Kick off episodes fetch

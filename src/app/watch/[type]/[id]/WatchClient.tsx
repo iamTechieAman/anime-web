@@ -353,9 +353,7 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             onLoad={onLoad}
         />
     );
-}, (prevProps, nextProps) => {
-    return prevProps.src === nextProps.src && prevProps.playerLoaded === nextProps.playerLoaded;
-});
+}, (prevProps, nextProps) => prevProps.src === nextProps.src);
 
 interface MovieDetails {
     id: number;
@@ -1248,29 +1246,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
     }, [type]);
 
-    // Switch active server if media type changes (e.g., UCR resolves movie -> tv)
-    useEffect(() => {
-        if (!activeServer || !activeServer.type) return;
-        if (activeServer.type !== type) {
-            // Find a server of the new type with the same name or similar serverId prefix
-            const matchingServer = serversList.find(s => 
-                s.type === type && 
-                (s.name === activeServer.name || s.id.replace(/_movie|_tv|_anime/, '') === activeServer.id.replace(/_movie|_tv|_anime/, ''))
-            );
-            if (matchingServer) {
-                console.log(`[ToonPlayer] Switching active server from ${activeServer.id} to ${matchingServer.id} due to media type resolution to ${type}`);
-                console.log(`[GlobalClickDebugger] 🎬 PLAYER INITIALIZED ID (TMDB - Matching): ${id} on Server: ${matchingServer.id}`);
-                setActiveServer(matchingServer);
-            } else {
-                // Fallback to first server of the new type
-                const firstOfNewType = serversList.find(s => s.type === type);
-                if (firstOfNewType) {
-                    console.log(`[GlobalClickDebugger] 🎬 PLAYER INITIALIZED ID (TMDB - FirstType): ${id} on Server: ${firstOfNewType.id}`);
-                    setActiveServer(firstOfNewType);
-                }
-            }
-        }
-    }, [type, serversList]);
+
 
     const fallbackCountRef = useRef<number>(0);
 
@@ -1387,7 +1363,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         activeRequestRef.current = String(id);
 
         const fetchData = async () => {
+            // Synchronously reset previous media state to prevent race conditions & stale URL rendering
             setLoading(true);
+            setDetails(null);
+            setAnimeData(null);
+            setTmdbIdForAnime(null);
+            setSourceError(false);
+            setPlayerLoaded(false);
             try {
                 if (initialType === "anime" || initialType === "cartoon") {
                     // 1. Fetch Anime/Cartoon Episodes/Metadata
@@ -1737,22 +1719,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
         : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
 
-    // Automatically fall back if selected server returns an empty embed URL.
-    // Guarded unconditionally at top level to ensure strict compliance with React Rules of Hooks (Error #310 prevention).
-    const emptyUrlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    useEffect(() => {
-        if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current);
-        if (activeServer && (!embedUrl || embedUrl.trim() === "") && !sourceError) {
-            // Debounce 800 ms — let the server URL compute before switching
-            emptyUrlTimerRef.current = setTimeout(() => {
-                if (!embedUrl || embedUrl.trim() === "") {
-                    console.warn(`[ToonPlayer] Server ${activeServer.name} still produced empty embed URL after debounce. Auto-switching...`);
-                    handleAutoFallback();
-                }
-            }, 800);
-        }
-        return () => { if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current); };
-    }, [activeServer, embedUrl, sourceError, handleAutoFallback]);
+
 
     if (loading && !details && !animeData) {
         return (
