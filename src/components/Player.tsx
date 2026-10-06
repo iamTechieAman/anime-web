@@ -16,7 +16,46 @@ export interface PlayerProps {
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
 }
 
-export default function Player({
+export const VideoEmbed = React.memo(function VideoEmbed({
+  url,
+  title = "ToonPlayer Stream",
+  className = "w-full h-full border-0",
+  onLoad,
+  onError,
+  iframeRef,
+}: {
+  url: string;
+  title?: string;
+  className?: string;
+  onLoad?: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
+  onError?: () => void;
+  iframeRef?: React.RefObject<HTMLIFrameElement | null>;
+}) {
+  useEffect(() => {
+    if (url) {
+      console.log("[DEBUG] Playing URL:", url);
+    }
+  }, [url]);
+
+  return (
+    <div className="relative w-full aspect-video bg-black overflow-hidden rounded-xl">
+      <iframe
+        key={url}
+        ref={iframeRef}
+        src={url}
+        className={className}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowFullScreen
+        referrerPolicy="origin"
+        title={title}
+        onLoad={onLoad}
+        onError={onError}
+      />
+    </div>
+  );
+}, (prev, next) => prev.url === next.url);
+
+export const Player = React.memo(function Player({
   currentServerUrl,
   isLoading = false,
   sourceError = false,
@@ -78,18 +117,27 @@ export default function Player({
     );
   }
 
-  // Clean iframe player with NO sandbox attribute
+  // Clean iframe player with stable key based on currentServerUrl
   return (
     <iframe
+      key={currentServerUrl}
       ref={iframeRef}
       src={currentServerUrl || ""}
       className={className}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
       allowFullScreen
-      referrerPolicy="no-referrer"
+      referrerPolicy="origin"
       title={title}
       onLoad={onLoad}
       onError={onError}
     />
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.currentServerUrl === nextProps.currentServerUrl &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.sourceError === nextProps.sourceError
+  );
+});
+
+export default Player;

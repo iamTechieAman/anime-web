@@ -339,7 +339,7 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
 
     return (
         <iframe
-            key={mediaKey}
+            key={src}
             ref={iframeRef}
             src={src}
             className={`absolute inset-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
@@ -347,20 +347,14 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             }`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen={true}
-            referrerPolicy="no-referrer"
+            referrerPolicy="origin"
             title={title}
             onError={onError}
             onLoad={onLoad}
         />
     );
 }, (prevProps, nextProps) => {
-    return (
-        prevProps.mediaKey === nextProps.mediaKey &&
-        prevProps.src === nextProps.src &&
-        prevProps.playerLoaded === nextProps.playerLoaded &&
-        prevProps.isFocusMode === nextProps.isFocusMode &&
-        prevProps.title === nextProps.title
-    );
+    return prevProps.src === nextProps.src && prevProps.playerLoaded === nextProps.playerLoaded;
 });
 
 interface MovieDetails {

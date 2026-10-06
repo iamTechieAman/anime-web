@@ -76,24 +76,19 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
 
     return (
         <iframe
-            key={mediaKey}
+            key={src}
             ref={iframeRef}
             src={src}
             className="absolute inset-0 w-full h-full border-0 bg-black"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen={true}
-            referrerPolicy="no-referrer"
+            referrerPolicy="origin"
             onLoad={onLoad}
             onError={onError}
         />
     );
 }, (prevProps, nextProps) => {
-    return (
-        prevProps.mediaKey === nextProps.mediaKey &&
-        prevProps.src === nextProps.src &&
-        prevProps.playerLoaded === nextProps.playerLoaded &&
-        prevProps.isFocusMode === nextProps.isFocusMode
-    );
+    return prevProps.src === nextProps.src && prevProps.playerLoaded === nextProps.playerLoaded;
 });
 
 function cleanString(str: any): string | null {
