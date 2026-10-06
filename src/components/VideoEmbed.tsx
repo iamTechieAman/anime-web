@@ -60,7 +60,7 @@ export function isValidEmbedUrl(url: string): boolean {
 export const VideoEmbed = React.memo(function VideoEmbed({
   url,
   title = "ToonPlayer Stream",
-  className = "w-full h-full border-0",
+  className = "absolute top-0 left-0 w-full h-full border-0",
   onLoad,
   onError,
   iframeRef,
@@ -71,9 +71,20 @@ export const VideoEmbed = React.memo(function VideoEmbed({
     }
   }, [url]);
 
+  // Fallback for Empty/Null URLs
+  if (!url || url.trim() === "") {
+    return (
+      <div className="relative w-full aspect-video min-h-[250px] md:min-h-[500px] bg-black rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        <p className="text-white/70 text-xs font-semibold uppercase tracking-wider animate-pulse">Loading server...</p>
+      </div>
+    );
+  }
+
+  // Security Guard: Block full website execution inside iframe
   if (!isValidEmbedUrl(url)) {
     return (
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-center p-4">
+      <div className="relative w-full aspect-video min-h-[250px] md:min-h-[500px] bg-black rounded-xl overflow-hidden flex flex-col items-center justify-center bg-black/95 text-center p-4">
         <div className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs mb-1">
           Invalid Stream Source Protected
         </div>
@@ -85,14 +96,14 @@ export const VideoEmbed = React.memo(function VideoEmbed({
   }
 
   return (
-    <div className="relative w-full aspect-video bg-black overflow-hidden rounded-xl">
+    <div className="relative w-full aspect-video min-h-[250px] md:min-h-[500px] bg-black rounded-xl overflow-hidden">
       <iframe
         key={url}
         ref={iframeRef}
         src={url}
         className={className}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-        allowFullScreen
+        allowFullScreen={true}
         referrerPolicy="origin"
         title={title}
         onLoad={onLoad}
