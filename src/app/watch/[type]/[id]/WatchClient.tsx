@@ -469,6 +469,15 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [episodeSearch, setEpisodeSearch] = useState("");
     const [episodeLayoutMode, setEpisodeLayoutMode] = useState<"list" | "grid">("list");
     const [showEpisodesDrawer, setShowEpisodesDrawer] = useState(false);
+    const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
+    const [serversList, setServersList] = useState<any[]>(SERVERS);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
+    const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
+    const [playerLoaded, setPlayerLoaded] = useState(false);
+    const [sourceError, setSourceError] = useState(false);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState("Initializing Stream");
     const [autoPlayNext, setAutoPlayNext] = useState<boolean>(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('toonplayer_autoplay_next');
@@ -786,8 +795,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
 
     // User Settings Support
-    const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
-    const [serversList, setServersList] = useState<any[]>(SERVERS);
     const currentMediaTypeServers = useMemo(() => {
         const filtered = typeof type === "string"
             ? serversList.filter(s => {
@@ -798,13 +805,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             : serversList;
         return ServerHealthManager.filterAndSortServers(filtered, 'id');
     }, [type, serversList]);
-    const [showScrollTop, setShowScrollTop] = useState(false);
-    const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
-    const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
-    const [playerLoaded, setPlayerLoaded] = useState(false);
-    const [sourceError, setSourceError] = useState(false);
-    const [showDownloadModal, setShowDownloadModal] = useState(false);
-    const [loadingStatus, setLoadingStatus] = useState("Initializing Stream");
 
     // Watchlist
     const inWatchlist = isInWatchlist(id);

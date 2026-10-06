@@ -355,6 +355,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const paramProvider = rawParamProvider === 'hi' ? 'hianime' : rawParamProvider === 'aw' ? 'aniwatch' : rawParamProvider;
     const provider = idProvider || paramProvider || undefined;
 
+    const { history, addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
+    const { profiles, activeProfileId } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId);
+    const isGuestProfile = activeProfile?.type === 'guest';
+    const fallbackCountRef = useRef<number>(0);
+    const previousValidSourceRef = useRef<any>(null);
+
     const [show, setShow] = useState<ShowData | null>(null);
 
     const initialEp = searchParams?.get('ep') || "1";
@@ -516,13 +523,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
     };
 
-    const { history, addToHistory, getHistoryItem, addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatch();
-    const { profiles, activeProfileId } = useUserStore();
-    const activeProfile = profiles.find(p => p.id === activeProfileId);
-    const isGuestProfile = activeProfile?.type === 'guest';
-    const fallbackCountRef = useRef<number>(0);
-    const previousValidSourceRef = useRef<any>(null);
-    
     // Automatic Provider Fallback Engine (Intelligent Circular Rotation)
     const handleAutoFallback = useCallback(() => {
         if (!selectedServer || !servers || servers.length === 0) return;
