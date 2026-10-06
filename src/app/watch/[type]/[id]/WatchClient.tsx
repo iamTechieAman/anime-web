@@ -1729,6 +1729,37 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
     // Intentionally limit deps — only write history when the user actually switches ep/season
     }, [selectedSeason, selectedEpisode, type, id]);
 
+    // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
+    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
+    
+    // Auto-detect and resolve media classification
+    let resolvedMediaType = type;
+    if (details && (details as any).resolvedType) {
+        resolvedMediaType = (details as any).resolvedType;
+    } else if (type === "cartoon" || type === "anime") {
+        resolvedMediaType = "tv";
+    }
+    const embedUrl = isAnimeServer 
+        ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
+        : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
+
+    // Automatically fall back if selected server returns an empty embed URL.
+    // Guarded unconditionally at top level to ensure strict compliance with React Rules of Hooks (Error #310 prevention).
+    const emptyUrlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current);
+        if (activeServer && (!embedUrl || embedUrl.trim() === "") && !sourceError) {
+            // Debounce 800 ms — let the server URL compute before switching
+            emptyUrlTimerRef.current = setTimeout(() => {
+                if (!embedUrl || embedUrl.trim() === "") {
+                    console.warn(`[ToonPlayer] Server ${activeServer.name} still produced empty embed URL after debounce. Auto-switching...`);
+                    handleAutoFallback();
+                }
+            }, 800);
+        }
+        return () => { if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current); };
+    }, [activeServer, embedUrl, sourceError, handleAutoFallback]);
+
     if (loading && !details && !animeData) {
         return (
             <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-[calc(72px+env(safe-area-inset-top)+16px)] px-4 sm:px-6 md:px-8 max-w-[1800px] mx-auto">
@@ -1754,7 +1785,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         // Show a minimal player page instead of "Content Not Found"
         const fallbackTitle = type === 'tv' ? 'TV Show' : type === 'anime' ? 'Anime' : type === 'cartoon' ? 'Cartoon' : 'Movie';
         const fallbackId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
-        const embedUrl = SERVERS[0].getUrl(
+        const fallbackEmbedUrl = SERVERS[0].getUrl(
             (details && (details as any).resolvedType) ? (details as any).resolvedType : ((type === "anime" || type === "cartoon") ? "tv" : type), 
             fallbackId, 
             1, 
@@ -1777,7 +1808,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         <div className="w-full">
                             <div className="relative w-full aspect-video bg-black overflow-hidden">
                                 <iframe 
-                                    src={getProxiedEmbedUrl(embedUrl)} 
+                                    src={getProxiedEmbedUrl(fallbackEmbedUrl)} 
                                     className="absolute inset-0 w-full h-full border-0 bg-black rounded-b-xl" 
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                                     allowFullScreen={true}
@@ -1804,37 +1835,6 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
     const matchPercent = Math.round((details?.vote_average || 0) * 10);
     const director = details?.crew?.find((c: any) => c.job === "Director");
     const isUpcoming = details?.release_date && new Date(details?.release_date || "") > new Date();
-
-    // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
-    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
-    
-    // Auto-detect and resolve media classification
-    let resolvedMediaType = type;
-    if (details && (details as any).resolvedType) {
-        resolvedMediaType = (details as any).resolvedType;
-    } else if (type === "cartoon" || type === "anime") {
-        resolvedMediaType = "tv";
-    }
-    const embedUrl = isAnimeServer 
-        ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
-        : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
-
-    // Automatically fall back if selected server returns an empty embed URL.
-    // Guard with playerLoaded guard — only trigger AFTER the server has had time to produce a URL.
-    const emptyUrlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    useEffect(() => {
-        if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current);
-        if (activeServer && (!embedUrl || embedUrl.trim() === "") && !sourceError) {
-            // Debounce 800 ms — let the server URL compute before switching
-            emptyUrlTimerRef.current = setTimeout(() => {
-                if (!embedUrl || embedUrl.trim() === "") {
-                    console.warn(`[ToonPlayer] Server ${activeServer.name} still produced empty embed URL after debounce. Auto-switching...`);
-                    handleAutoFallback();
-                }
-            }, 800);
-        }
-        return () => { if (emptyUrlTimerRef.current) clearTimeout(emptyUrlTimerRef.current); };
-    }, [activeServer, embedUrl, sourceError, handleAutoFallback]);
 
     const renderPlayer = () => {
         return (
