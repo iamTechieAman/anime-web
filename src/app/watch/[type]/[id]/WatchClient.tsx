@@ -310,6 +310,8 @@ const getProxiedEmbedUrl = (rawUrl: string) => {
     return rawUrl;
 };
 
+import { isValidEmbedUrl } from "@/components/VideoEmbed";
+
 interface VideoIframeProps {
     src: string;
     mediaKey: string;
@@ -336,6 +338,19 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             console.log("[DEBUG] Playing URL:", src);
         }
     }, [src]);
+
+    if (!isValidEmbedUrl(src)) {
+        return (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-center p-4">
+                <div className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs mb-1">
+                    Invalid Stream Source Protected
+                </div>
+                <p className="text-zinc-500 text-[11px] max-w-xs leading-relaxed">
+                    Raw website URL blocked from iframe execution.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <iframe
