@@ -65,8 +65,10 @@ export const animeCache = new AnimeCache();
 // TTL constants (ms)
 export const TTL = {
     ANILIST_META: 60 * 60 * 1000,   // 60 min
-    EPISODE_LIST: 30 * 60 * 1000,   // 30 min
-    SOURCES:       5 * 60 * 1000,   //  5 min
+    TMDB_DETAILS: 30 * 60 * 1000,   // 30 min (catalog details)
+    EPISODE_LIST: 30 * 60 * 1000,   // 30 min (episode list)
+    EMBED_URL:    10 * 60 * 1000,   // 10 min (scraped stream/embed links)
+    SOURCES:       5 * 60 * 1000,   //  5 min (CDN video sources)
     PROVIDER_HEALTH: 10 * 60 * 1000, // 10 min
     JIKAN_META:   120 * 60 * 1000,  // 2 hours
 } as const;
@@ -74,8 +76,11 @@ export const TTL = {
 // Cache key builders
 export const cacheKey = {
     anilist: (id: string) => `al:${id}`,
+    tmdbDetails: (id: string, type: string) => `tmdb:details:${type}:${id}`,
+    tmdbSeason: (id: string, season: string) => `tmdb:season:${id}:${season}`,
     episodes: (animeId: string, provider: string) => `ep:${provider}:${animeId}`,
     sources: (animeId: string, ep: string, mode: string) => `src:${animeId}:${ep}:${mode}`,
+    scrapedEmbed: (provider: string, id: string, s?: string, e?: string) => `embed:${provider}:${id}:s${s || 1}:e${e || 1}`,
     jikan: (malId: string) => `jk:${malId}`,
     search: (query: string, provider: string) => `s:${provider}:${query.toLowerCase().trim()}`,
 } as const;

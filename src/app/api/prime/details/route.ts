@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchWithTimeout } from "@/utils/fetchWithTimeout";
+import { animeCache, TTL, cacheKey } from "@/lib/anime-cache";
 
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
@@ -59,6 +60,15 @@ export async function GET(request: Request) {
 
         // Normalize hintType: strictly 'movie' or 'tv'
         const hintType: "movie" | "tv" = (rawType === "tv" || rawType === "series" || rawType === "show") ? "tv" : "movie";
+        const cKey = cacheKey.tmdbDetails(id, hintType);
+
+        // Instant Cache Hit (0.01s load time)
+        const cached = animeCache.get(cKey);
+        if (cached) {
+            return NextResponse.json(cached, {
+                headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200', 'X-Cache': 'HIT' }
+            });
+        }
 
         // Resolve content type
         let { type, detailsData: details } = await resolveContentType(id, hintType);
@@ -140,7 +150,7 @@ export async function GET(request: Request) {
             }
         }
 
-        return NextResponse.json({
+        const finalPayload = {
             ...details,
             resolvedType: type,
             cast: credits.cast?.slice(0, 30) || [],
@@ -150,8 +160,13 @@ export async function GET(request: Request) {
             recommendations: smartRecommendations.slice(0, 12),
             keywords,
             watch_providers: watchProviders,
-        }, {
-            headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' }
+        };
+
+        // Cache for 30 minutes in memory
+        animeCache.set(cKey, finalPayload, TTL.TMDB_DETAILS);
+
+        return NextResponse.json(finalPayload, {
+            headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200', 'X-Cache': 'MISS' }
         });
     } catch (error: any) {
         console.error("Details API error:", error?.message || error);

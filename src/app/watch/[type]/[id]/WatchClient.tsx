@@ -2334,7 +2334,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                     <div data-watch-poster className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[200px] lg:w-[220px] relative mx-auto lg:mx-0">
                                         {details?.poster_path && (
                                             <div className="relative group aspect-[2/3] w-full">
-                                                <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-border-color transition-transform group-hover:scale-[1.02] will-change-transform"  />
+                                                <Image src={`${IMG_BASE}/w500${details.poster_path}`} alt={title} fill priority={true} sizes="(max-width: 768px) 50vw, 30vw" className="object-cover rounded-2xl shadow-2xl border border-border-color transition-transform group-hover:scale-[1.02] will-change-transform" />
                                                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </div>
                                         )}
