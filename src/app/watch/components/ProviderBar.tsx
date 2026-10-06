@@ -65,19 +65,19 @@ const ProviderBar = memo(function ProviderBar({
     if (!activeServer) return null;
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c0d14]/95 backdrop-blur-2xl shadow-[0_16px_48px_rgba(0,0,0,0.65)] w-full transition-all">
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl w-full transition-all">
             {/* Top Bar: Stream Info & Active Status + Quick Player Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.02] px-5 py-3.5">
                 <div className="flex items-center gap-2.5 min-w-0">
                     <span className="relative flex h-2.5 w-2.5 shrink-0">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
                     </span>
-                    <p className="truncate text-xs sm:text-sm font-medium text-zinc-300">
-                        <span className="text-zinc-500 font-normal hidden sm:inline">Streaming: </span>
-                        <span className="font-bold text-white tracking-tight">{title}</span>
+                    <p className="truncate text-xs sm:text-sm font-medium text-white/80 tracking-tight">
+                        <span className="text-white/40 font-normal hidden sm:inline">Streaming: </span>
+                        <span className="font-semibold text-white">{title}</span>
                         {resolvedMediaType !== 'movie' && (
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-white/[0.06] text-accent border border-white/[0.08]">
+                            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-white/90 border border-white/10">
                                 S{selectedSeason} · E{selectedEpisode}
                             </span>
                         )}
@@ -92,15 +92,15 @@ const ProviderBar = memo(function ProviderBar({
                             type="button"
                             onClick={() => onToggleAutoPlayNext(!autoPlayNext)}
                             title={autoPlayNext ? "Auto-Play Next Episode is ON" : "Auto-Play Next Episode is OFF"}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ease-out border cursor-pointer select-none active:scale-95 ${
                                 autoPlayNext
-                                    ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
-                                    : "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-zinc-200"
+                                    ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                                    : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10"
                             }`}
                         >
                             <Zap className={`w-3.5 h-3.5 ${autoPlayNext ? "fill-current text-emerald-400" : ""}`} />
                             <span className="hidden md:inline">Auto-Next</span>
-                            <div className={`w-6 h-3.5 rounded-full transition-colors relative flex items-center px-0.5 ${autoPlayNext ? "bg-emerald-500" : "bg-zinc-700"}`}>
+                            <div className={`w-6 h-3.5 rounded-full transition-colors relative flex items-center px-0.5 ${autoPlayNext ? "bg-emerald-500" : "bg-white/20"}`}>
                                 <div className={`w-2.5 h-2.5 rounded-full bg-white transition-transform ${autoPlayNext ? "translate-x-2.5" : "translate-x-0"}`} />
                             </div>
                         </button>
@@ -112,10 +112,10 @@ const ProviderBar = memo(function ProviderBar({
                             type="button"
                             onClick={onToggleTheatre}
                             title={isTheatreMode ? "Exit Theater Mode" : "Cinema Theater Mode"}
-                            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none ${
+                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ease-out border cursor-pointer select-none active:scale-95 ${
                                 isTheatreMode
-                                    ? "bg-accent/20 border-accent/40 text-white shadow-[0_0_12px_var(--accent-glow)]"
-                                    : "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                                    ? "bg-white text-black border-white shadow-lg shadow-white/10 scale-[1.02]"
+                                    : "bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10"
                             }`}
                         >
                             <MonitorPlay className="w-3.5 h-3.5" />
@@ -129,10 +129,10 @@ const ProviderBar = memo(function ProviderBar({
                             type="button"
                             onClick={onToggleFocus}
                             title="Distraction-Free Focus Mode"
-                            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none ${
+                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ease-out border cursor-pointer select-none active:scale-95 ${
                                 isFocusMode
                                     ? "bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
-                                    : "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                                    : "bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10"
                             }`}
                         >
                             <Eye className="w-3.5 h-3.5" />
@@ -146,20 +146,20 @@ const ProviderBar = memo(function ProviderBar({
                             type="button"
                             onClick={onReloadPlayer}
                             title="Reload Stream / Refresh Player"
-                            className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-400 hover:text-white transition-all cursor-pointer"
+                            className="p-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition-all duration-300 ease-out active:scale-95 cursor-pointer"
                         >
                             <RotateCcw className="w-3.5 h-3.5" />
                         </button>
                     )}
 
                     {/* Active Server Badge */}
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/15 border border-accent/30 text-accent shadow-[0_0_12px_var(--accent-glow)]">
-                        <Server className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white shadow-sm">
+                        <Server className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white/80" />
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                             {activeServer.name.replace(/Toon Player\s*/i, '')}
                         </span>
                         {activeServer.badge && (
-                            <span className="text-[9px] font-black uppercase tracking-widest bg-accent text-white px-1.5 py-0.2 rounded">
+                            <span className="text-[9px] font-bold uppercase tracking-widest bg-white text-black px-1.5 py-0.2 rounded-full">
                                 {activeServer.badge}
                             </span>
                         )}
@@ -167,16 +167,16 @@ const ProviderBar = memo(function ProviderBar({
                 </div>
             </div>
 
-            {/* Server Selector Tabs (Sleek Modern Pills) */}
+            {/* Server Selector Tabs (iOS Segmented Control Pills) */}
             <div
                 className="overflow-x-auto scrollbar-none snap-x snap-mandatory w-full max-w-full touch-pan-x scroll-smooth"
                 style={{
                     WebkitOverflowScrolling: 'touch',
                 }}
             >
-                <div className="flex items-center gap-2 sm:gap-2.5 min-w-max px-3 sm:px-4 py-3">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-zinc-500 mr-1 hidden sm:inline-flex items-center gap-1 select-none">
-                        <Sparkles className="w-3 h-3 text-accent" /> Servers:
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-max px-4 py-3">
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-white/40 mr-1 hidden sm:inline-flex items-center gap-1 select-none">
+                        <Sparkles className="w-3 h-3 text-white/70" /> Servers:
                     </span>
                     {servers.map((server: any, idx: number) => {
                         const isActive = activeServer.id === server.id;
@@ -187,21 +187,21 @@ const ProviderBar = memo(function ProviderBar({
                                 onClick={() => onSelectServer(server)}
                                 disabled={isFailed && !isActive}
                                 title={isFailed ? `${server.name} — unavailable` : `Switch to ${server.name}`}
-                                className={`group relative flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-200 snap-center cursor-pointer select-none active:scale-95 ${
+                                className={`group relative flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-300 ease-out snap-center cursor-pointer select-none active:scale-95 ${
                                     isActive
-                                        ? 'border-accent bg-accent/20 text-white shadow-[0_0_16px_var(--accent-glow)] ring-1 ring-accent/50 scale-[1.02]'
+                                        ? 'bg-white text-black border-white shadow-lg shadow-white/10 scale-[1.02]'
                                         : isFailed
-                                            ? 'cursor-not-allowed border-rose-500/20 bg-rose-500/5 text-rose-300/40 line-through'
-                                            : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
+                                            ? 'cursor-not-allowed border-rose-500/20 bg-rose-500/10 text-rose-300/40 line-through'
+                                            : 'border-white/10 bg-white/[0.04] text-white/70 hover:border-white/20 hover:bg-white/10 hover:text-white'
                                 }`}
                             >
                                 <span className="flex items-center">
                                     {isActive ? (
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-accent animate-pulse" />
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-black" />
                                     ) : isFailed ? (
                                         <AlertCircle className="h-3.5 w-3.5 text-rose-400" />
                                     ) : (
-                                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-500 group-hover:bg-zinc-300 transition-colors" />
+                                        <span className="h-1.5 w-1.5 rounded-full bg-white/40 group-hover:bg-white/80 transition-colors" />
                                     )}
                                 </span>
                                 
@@ -211,12 +211,12 @@ const ProviderBar = memo(function ProviderBar({
 
                                 {server.badge && (
                                     <span
-                                        className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                                        className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                                             isActive
-                                                ? 'bg-accent/30 text-white border border-accent/40'
+                                                ? 'bg-black/10 text-black border border-black/20'
                                                 : isFailed
                                                     ? 'bg-transparent text-rose-400/40'
-                                                    : 'bg-white/[0.06] text-zinc-400 border border-white/[0.06] group-hover:text-zinc-200'
+                                                    : 'bg-white/10 text-white/60 border border-white/10 group-hover:text-white'
                                         }`}
                                     >
                                         {server.badge}
@@ -224,7 +224,7 @@ const ProviderBar = memo(function ProviderBar({
                                 )}
 
                                 {idx === 0 && !server.badge && (
-                                    <span className="rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${isActive ? 'bg-black/10 text-black' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
                                         Primary
                                     </span>
                                 )}

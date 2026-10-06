@@ -87,42 +87,42 @@ export const GridSkeleton = memo(function GridSkeleton({ count = 12 }: { count?:
 // --- Details Skeleton (for watch pages) ---
 export const DetailsSkeleton = memo(function DetailsSkeleton() {
     return (
-        <div className="min-h-dvh bg-[#0B0C10] text-white pt-16 pb-12 px-4 sm:px-6 md:px-8">
+        <div className="min-h-dvh bg-[#000000] text-white/90 pt-16 pb-12 px-4 sm:px-6 md:px-8 font-sans tracking-tight">
             <div className="max-w-[1600px] mx-auto space-y-6">
                 {/* Title Skeleton */}
                 <div className="flex items-center justify-between gap-4">
                     <div className="space-y-2">
-                        <div className="h-7 w-64 sm:w-96 bg-zinc-800/60 animate-pulse rounded-lg" />
-                        <div className="h-4 w-36 bg-zinc-800/40 animate-pulse rounded-md" />
+                        <div className="h-7 w-64 sm:w-96 bg-white/10 animate-pulse rounded-full" />
+                        <div className="h-4 w-36 bg-white/5 animate-pulse rounded-full" />
                     </div>
-                    <div className="h-8 w-24 bg-zinc-800/40 animate-pulse rounded-full hidden sm:block" />
+                    <div className="h-8 w-24 bg-white/10 animate-pulse rounded-full hidden sm:block" />
                 </div>
 
                 {/* Player & Sidebar Grid Skeleton */}
                 <div className="grid grid-cols-1 lg:grid-cols-[74%_minmax(0,26%)] gap-6 items-start">
                     {/* Player Column */}
                     <div className="space-y-4 w-full">
-                        <div className="aspect-video w-full max-w-[1600px] mx-auto rounded-xl overflow-hidden bg-zinc-900/90 animate-pulse border border-white/5 shadow-2xl flex flex-col items-center justify-center gap-3">
-                            <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                                <div className="w-0 h-0 border-y-[8px] border-y-transparent border-l-[14px] border-l-white/20 ml-1" />
+                        <div className="aspect-video w-full max-w-[1600px] mx-auto rounded-[32px] overflow-hidden bg-white/5 animate-pulse ring-1 ring-white/10 shadow-2xl flex flex-col items-center justify-center gap-3">
+                            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-md">
+                                <div className="w-0 h-0 border-y-[8px] border-y-transparent border-l-[14px] border-l-white/60 ml-1" />
                             </div>
-                            <div className="h-3.5 w-36 rounded-full bg-zinc-800/70 animate-pulse" />
+                            <div className="h-3.5 w-36 rounded-full bg-white/10 animate-pulse" />
                         </div>
 
                         {/* Server Pills Bar Skeleton */}
-                        <div className="h-14 w-full rounded-xl bg-white/[0.03] border border-white/[0.06] p-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none">
-                            <div className="h-8 w-24 bg-zinc-800/60 animate-pulse rounded-full shrink-0" />
-                            <div className="h-8 w-28 bg-zinc-800/60 animate-pulse rounded-full shrink-0" />
-                            <div className="h-8 w-24 bg-zinc-800/60 animate-pulse rounded-full shrink-0" />
-                            <div className="h-8 w-32 bg-zinc-800/60 animate-pulse rounded-full shrink-0" />
+                        <div className="h-14 w-full rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl p-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none">
+                            <div className="h-8 w-24 bg-white/10 animate-pulse rounded-full shrink-0" />
+                            <div className="h-8 w-28 bg-white/10 animate-pulse rounded-full shrink-0" />
+                            <div className="h-8 w-24 bg-white/10 animate-pulse rounded-full shrink-0" />
+                            <div className="h-8 w-32 bg-white/10 animate-pulse rounded-full shrink-0" />
                         </div>
                     </div>
 
                     {/* Episodes Sidebar Skeleton (Desktop) */}
-                    <div className="hidden lg:flex flex-col w-full h-[600px] rounded-xl bg-white/[0.02] border border-white/[0.05] p-5 space-y-4">
+                    <div className="hidden lg:flex flex-col w-full h-[600px] rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl p-5 space-y-4">
                         <div className="flex items-center justify-between">
-                            <div className="h-6 w-28 bg-zinc-800/60 animate-pulse rounded-md" />
-                            <div className="h-6 w-16 bg-zinc-800/40 animate-pulse rounded-md" />
+                            <div className="h-6 w-28 bg-white/10 animate-pulse rounded-full" />
+                            <div className="h-6 w-16 bg-white/5 animate-pulse rounded-full" />
                         </div>
                         <EpisodeListSkeleton mode="list" count={6} />
                     </div>
@@ -198,7 +198,7 @@ export const EpisodeListSkeleton = memo(function EpisodeListSkeleton({
                 {Array.from({ length: count }).map((_, i) => (
                     <div
                         key={i}
-                        className="h-10 rounded-xl shimmer-card bg-zinc-900 border border-white/5"
+                        className="h-10 rounded-2xl animate-pulse bg-white/5 border border-white/10"
                     />
                 ))}
             </div>
@@ -210,14 +210,14 @@ export const EpisodeListSkeleton = memo(function EpisodeListSkeleton({
             {Array.from({ length: count }).map((_, i) => (
                 <div
                     key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.04] bg-[#12131A]/60"
+                    className="flex items-center gap-3.5 p-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-2xl"
                 >
-                    <div className="w-24 h-14 rounded-lg shimmer-card bg-zinc-900 shrink-0" />
+                    <div className="w-24 h-14 rounded-xl animate-pulse bg-white/10 shrink-0" />
                     <div className="flex-1 space-y-2">
-                        <div className="h-3.5 rounded w-3/4 shimmer-card bg-zinc-900" />
+                        <div className="h-3.5 rounded-full w-3/4 animate-pulse bg-white/10" />
                         <div className="flex items-center gap-2">
-                            <div className="h-2.5 rounded w-16 shimmer-card bg-zinc-900" />
-                            <div className="h-2.5 rounded w-12 shimmer-card bg-zinc-900" />
+                            <div className="h-2.5 rounded-full w-16 animate-pulse bg-white/5" />
+                            <div className="h-2.5 rounded-full w-12 animate-pulse bg-white/5" />
                         </div>
                     </div>
                 </div>
