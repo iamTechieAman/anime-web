@@ -694,20 +694,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         };
         window.addEventListener("scroll", toggleVisibility);
 
-        const handleMessage = (e: MessageEvent) => {
-            const isEndEvent = e.data && (
-                e.data.type === "videoEnd" || 
-                e.data.event === "ended" || 
-                e.data === "video_ended" ||
-                e.data.type === "player_ended"
-            );
-
-            // Use ref to avoid stale closure
-            if (isEndEvent && handleVideoEndedRef.current) {
-                (handleVideoEndedRef.current as Function)();
-            }
-        };
-
         // Click outside to close dropdown
         const handleClickOutside = (e: MouseEvent) => {
             if (serverRef.current && !serverRef.current.contains(e.target as Node)) {
@@ -715,13 +701,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        window.addEventListener("message", handleMessage);
         
         return () => {
             window.removeEventListener("profileUpdated", loadSettings);
             window.removeEventListener("scroll", toggleVisibility);
             document.removeEventListener('mousedown', handleClickOutside);
-            window.removeEventListener("message", handleMessage);
         };
     }, []);
 
@@ -799,13 +783,40 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         handleVideoEndedRef.current = handleVideoEnded;
     });
 
-    // Listen for events from proxy iframe
+    // Refs for tracking playback progress without triggering re-renders of the player
+    const currentTimeRef = useRef<number>(0);
+    const durationRef = useRef<number>(0);
+
+    // Listen for events from proxy iframe or third-party embeds (e.g. VidLink)
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
-            if (e.data?.type === 'VIDEO_ENDED') {
+            if (!e.data) return;
+
+            // 1. VidLink / progress ticks - NEVER trigger React state
+            if (e.data.type === 'MEDIA_DATA' || e.data.event === 'timeupdate' || e.data.type === 'timeupdate') {
+                const ct = e.data.data?.currentTime ?? e.data.currentTime;
+                const dur = e.data.data?.duration ?? e.data.duration;
+                if (typeof ct === 'number') currentTimeRef.current = ct;
+                if (typeof dur === 'number') durationRef.current = dur;
+                return;
+            }
+
+            // 2. Video ended event
+            const isEndEvent = (
+                e.data.type === "videoEnd" || 
+                e.data.event === "ended" || 
+                e.data === "video_ended" ||
+                e.data.type === "player_ended" ||
+                e.data.type === 'VIDEO_ENDED'
+            );
+            if (isEndEvent) {
                 if (handleVideoEndedRef.current) handleVideoEndedRef.current();
-            } else if (e.data?.type === 'VIDEO_SOURCE_FOUND' && e.data.source) {
-                setRawVideoSource(e.data.source);
+                return;
+            }
+
+            // 3. Raw video source (only set if actually different)
+            if (e.data.type === 'VIDEO_SOURCE_FOUND' && e.data.source) {
+                setRawVideoSource(prev => (prev !== e.data.source ? e.data.source : prev));
             }
         };
         window.addEventListener('message', handleMessage);
@@ -1329,18 +1340,6 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                             allowFullScreen={true}
                             referrerPolicy="no-referrer"
-                            onLoad={(e: any) => {
-                                try {
-                                    const iframe = e.target as HTMLIFrameElement;
-                                    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-                                    if (doc) {
-                                        const text = doc.body?.innerText || '';
-                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway') || text.includes('Server Not Responding')) {
-                                            console.warn('[ToonPlayer] Proxy error detected inside fallback iframe. Triggering autoscan...');
-                                        }
-                                    }
-                                } catch (err) {}
-                            }}
                         />
                     </div>
 

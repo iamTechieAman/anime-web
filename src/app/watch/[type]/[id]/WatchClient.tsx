@@ -314,21 +314,15 @@ import { isValidEmbedUrl } from "@/components/VideoEmbed";
 
 interface VideoIframeProps {
     src: string;
-    mediaKey: string;
-    title: string;
-    playerLoaded: boolean;
-    isFocusMode?: boolean;
-    onLoad: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
-    onError: () => void;
+    title?: string;
+    onLoad?: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
+    onError?: () => void;
     iframeRef?: React.RefObject<HTMLIFrameElement | null>;
 }
 
 const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
     src,
-    mediaKey,
-    title,
-    playerLoaded,
-    isFocusMode,
+    title = "ToonPlayer Stream",
     onLoad,
     onError,
     iframeRef,
@@ -370,9 +364,7 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
                 key={src}
                 ref={iframeRef}
                 src={src}
-                className={`absolute inset-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
-                    playerLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className="absolute inset-0 w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen={true}
                 referrerPolicy="origin"
@@ -875,13 +867,33 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         handleVideoEndedRef.current = handleVideoEnded;
     });
 
-    // Listen for events from proxy iframe
+    // Refs for tracking playback progress without triggering re-renders of the player
+    const currentTimeRef = useRef<number>(0);
+    const durationRef = useRef<number>(0);
+
+    // Listen for events from proxy iframe or third-party embeds (e.g. VidLink)
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
-            if (e.data?.type === 'VIDEO_ENDED') {
+            if (!e.data) return;
+
+            // 1. VidLink / player progress ticks - NEVER trigger React state here
+            if (e.data.type === 'MEDIA_DATA' || e.data.event === 'timeupdate' || e.data.type === 'timeupdate') {
+                const ct = e.data.data?.currentTime ?? e.data.currentTime;
+                const dur = e.data.data?.duration ?? e.data.duration;
+                if (typeof ct === 'number') currentTimeRef.current = ct;
+                if (typeof dur === 'number') durationRef.current = dur;
+                return;
+            }
+
+            // 2. Video ended event
+            if (e.data.type === 'VIDEO_ENDED' || e.data.event === 'ended' || e.data.type === 'videoEnd') {
                 if (handleVideoEndedRef.current) handleVideoEndedRef.current();
-            } else if (e.data?.type === 'VIDEO_SOURCE_FOUND' && e.data.source) {
-                setRawVideoSource(e.data.source);
+                return;
+            }
+
+            // 3. Raw video source for Casting (only set if actually different)
+            if (e.data.type === 'VIDEO_SOURCE_FOUND' && e.data.source) {
+                setRawVideoSource(prev => (prev !== e.data.source ? e.data.source : prev));
             }
         };
         window.addEventListener('message', handleMessage);
@@ -1736,28 +1748,43 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
     const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
-    
+
     // Auto-detect and resolve media classification
-    let resolvedMediaType = type;
-    if (details && (details as any).resolvedType) {
-        resolvedMediaType = (details as any).resolvedType;
-    } else if (type === "cartoon" || type === "anime") {
-        resolvedMediaType = "tv";
-    }
-    const rawEmbedUrl = isAnimeServer 
-        ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
-        : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
+    const resolvedMediaType = useMemo(() => {
+        if (details && (details as any).resolvedType) {
+            return (details as any).resolvedType;
+        }
+        if (type === "cartoon" || type === "anime") {
+            return "tv";
+        }
+        return type;
+    }, [details, type]);
+    
+    // Dedicated state for the active server player URL
+    const [currentServerUrl, setCurrentServerUrl] = useState<string>("");
 
-    const [resolvedScrapedUrl, setResolvedScrapedUrl] = useState<string | null>(null);
-
+    // Effect that sets currentServerUrl strictly on tmdbId/activeId, season, episode, or server change
     useEffect(() => {
-        if (rawEmbedUrl.startsWith('/api/scrape/')) {
-            setResolvedScrapedUrl(null);
+        if (!activeId) return;
+
+        const serverToUse = activeServer || SERVERS[0];
+        const rawUrl = isAnimeServer 
+            ? (serverToUse as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
+            : serverToUse?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
+
+        if (!rawUrl) {
+            setCurrentServerUrl(prev => (prev !== "" ? "" : prev));
+            return;
+        }
+
+        if (rawUrl.startsWith('/api/scrape/')) {
             const controller = new AbortController();
-            axios.get(rawEmbedUrl, { signal: controller.signal })
+            axios.get(rawUrl, { signal: controller.signal })
                 .then(res => {
                     if (res.data?.success && res.data?.embedUrl) {
-                        setResolvedScrapedUrl(res.data.embedUrl);
+                        const newUrl = getProxiedEmbedUrl(res.data.embedUrl);
+                        // Prevent duplicate state setting
+                        setCurrentServerUrl(prevUrl => (prevUrl !== newUrl ? newUrl : prevUrl));
                     } else {
                         console.warn('[Scraper API] Extract failed, switching server...');
                         handleAutoFallback();
@@ -1771,11 +1798,12 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                 });
             return () => controller.abort();
         } else {
-            setResolvedScrapedUrl(null);
+            const newUrl = getProxiedEmbedUrl(rawUrl);
+            // Prevent duplicate state setting
+            setCurrentServerUrl(prevUrl => (prevUrl !== newUrl ? newUrl : prevUrl));
         }
-    }, [rawEmbedUrl]);
-
-    const embedUrl = rawEmbedUrl.startsWith('/api/scrape/') ? (resolvedScrapedUrl || "") : rawEmbedUrl;
+    // Only re-run when content ID, season, episode, or active server ID explicitly change
+    }, [activeId, selectedSeason, selectedEpisode, activeServer?.id, mode]);
 
 
 
@@ -1902,27 +1930,13 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
 
                     {/* IFRAME — only render when we have a confirmed non-empty URL */}
-                    {embedUrl && embedUrl.trim() !== "" ? (
+                    {currentServerUrl && currentServerUrl.trim() !== "" ? (
                         <VideoIframeEmbed
-                            mediaKey={`${activeServer?.id || 'server'}-${type}-${activeId}-s${selectedSeason}-e${selectedEpisode}-${mode}-${reloadCount}`}
-                            src={getProxiedEmbedUrl(embedUrl)}
+                            src={currentServerUrl}
                             title={`${title} - ToonPlayer`}
-                            playerLoaded={playerLoaded}
-                            isFocusMode={isFocusMode}
                             onError={handleAutoFallback}
-                            onLoad={(e) => {
+                            onLoad={() => {
                                 setPlayerLoaded(true);
-                                try {
-                                    const iframe = e.target as HTMLIFrameElement;
-                                    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-                                    if (doc) {
-                                        const text = doc.body?.innerText || '';
-                                        if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway') || text.includes('Server Not Responding') || text.includes('⚠️')) {
-                                            console.warn('[ToonPlayer] Proxy/404 error detected inside iframe. Triggering auto fallback...');
-                                            handleAutoFallback();
-                                        }
-                                    }
-                                } catch (_) {}
                             }}
                         />
                     ) : sourceError ? (
