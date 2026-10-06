@@ -166,10 +166,9 @@ const SERVERS = [
         id: 'kartoons',
         name: 'Kartoons Direct',
         badge: 'Toon Player',
+        requiresScrape: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://kartoons.to/watch/show/${id}/season/${s || 1}/episode/${e || 1}`
-                : `https://kartoons.to/movie/${id}`,
+            `/api/scrape/kartoons?showId=${id}&s=${s || 1}&e=${e || 1}&type=${type}`,
     },
 ];
 
@@ -206,8 +205,9 @@ const ANIME_SERVERS = [
         id: "kartoons_toon",
         name: "Kartoons Toon",
         badge: "Toon Hub",
+        requiresScrape: true,
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            `https://kartoons.to/watch/show/${id}/season/1/episode/${ep}`
+            `/api/scrape/kartoons?showId=${id}&e=${ep}&type=show`,
     },
 ];
 
@@ -1715,9 +1715,38 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
     } else if (type === "cartoon" || type === "anime") {
         resolvedMediaType = "tv";
     }
-    const embedUrl = isAnimeServer 
+    const rawEmbedUrl = isAnimeServer 
         ? (activeServer as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
         : activeServer?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
+
+    const [resolvedScrapedUrl, setResolvedScrapedUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (rawEmbedUrl.startsWith('/api/scrape/')) {
+            setResolvedScrapedUrl(null);
+            const controller = new AbortController();
+            axios.get(rawEmbedUrl, { signal: controller.signal })
+                .then(res => {
+                    if (res.data?.success && res.data?.embedUrl) {
+                        setResolvedScrapedUrl(res.data.embedUrl);
+                    } else {
+                        console.warn('[Scraper API] Extract failed, switching server...');
+                        handleAutoFallback();
+                    }
+                })
+                .catch(err => {
+                    if (!axios.isCancel(err)) {
+                        console.warn('[Scraper API] Error during scrape, switching server:', err.message);
+                        handleAutoFallback();
+                    }
+                });
+            return () => controller.abort();
+        } else {
+            setResolvedScrapedUrl(null);
+        }
+    }, [rawEmbedUrl]);
+
+    const embedUrl = rawEmbedUrl.startsWith('/api/scrape/') ? (resolvedScrapedUrl || "") : rawEmbedUrl;
 
 
 
