@@ -191,7 +191,8 @@ function serveFallbackIframe(targetUrl: string) {
         <!-- Wrap in embed proxy to bypass sameorigin / X-Frame-Options blocks -->
         <iframe 
             src="${proxiedUrl.replace(/"/g, '&quot;')}" 
-            allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen
             referrerpolicy="no-referrer"
         ></iframe>
 

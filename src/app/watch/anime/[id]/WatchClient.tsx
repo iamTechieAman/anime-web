@@ -68,16 +68,21 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
     onError,
     iframeRef,
 }: VideoIframeProps) {
+    useEffect(() => {
+        if (src) {
+            console.log("[DEBUG] Playing URL:", src);
+        }
+    }, [src]);
+
     return (
         <iframe
             key={mediaKey}
             ref={iframeRef}
             src={src}
             className="absolute inset-0 w-full h-full border-0 bg-black"
-            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation allow-top-navigation-by-user-activation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen={true}
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="no-referrer"
             onLoad={onLoad}
             onError={onError}
         />
@@ -1323,10 +1328,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <iframe
                             src={getProxiedEmbedUrl(fallbackEmbedUrl)}
                             className="absolute inset-0 w-full h-full border-0 bg-black rounded-none md:rounded-lg"
-                            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                             allowFullScreen={true}
-                            referrerPolicy="origin"
+                            referrerPolicy="no-referrer"
                             onLoad={(e: any) => {
                                 try {
                                     const iframe = e.target as HTMLIFrameElement;

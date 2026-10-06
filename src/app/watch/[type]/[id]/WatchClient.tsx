@@ -331,6 +331,12 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
     onError,
     iframeRef,
 }: VideoIframeProps) {
+    useEffect(() => {
+        if (src) {
+            console.log("[DEBUG] Playing URL:", src);
+        }
+    }, [src]);
+
     return (
         <iframe
             key={mediaKey}
@@ -339,10 +345,9 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             className={`absolute inset-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
                 playerLoaded ? "opacity-100" : "opacity-0"
             }`}
-            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation allow-top-navigation-by-user-activation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen={true}
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="no-referrer"
             title={title}
             onError={onError}
             onLoad={onLoad}
@@ -1774,10 +1779,9 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                 <iframe 
                                     src={getProxiedEmbedUrl(embedUrl)} 
                                     className="absolute inset-0 w-full h-full border-0 bg-black rounded-b-xl" 
-                                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                                     allowFullScreen={true}
-                                    referrerPolicy="origin" 
+                                    referrerPolicy="no-referrer" 
                                 />
                             </div>
                         </div>
