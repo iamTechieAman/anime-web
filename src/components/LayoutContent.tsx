@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import Header from "@/components/Header";
 import MobileNav from "@/components/MobileNav";
@@ -16,6 +16,7 @@ import ProfileGate from "@/components/ProfileGate";
 import { useUserStore, Profile, getAvatarUrl, isDefaultAvatar } from "@/store/userStore";
 import OpeningAnimation from "@/components/OpeningAnimation";
 import { useUser } from "@clerk/nextjs";
+import { updateClerkMetadata } from "@/lib/clerk";
 
 
 const RandomizerModal = dynamic(() => import("@/components/RandomizerModal"), { ssr: false });
@@ -30,11 +31,13 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const [hasHydrated, setHasHydrated] = useState(false);
   const { user, isLoaded } = useUser();
   const [synced, setSynced] = useState(false);
+  const lastSyncedProfilesRef = useRef<string>("");
 
   // Reset synced state on user changes (logout/login switch)
   useEffect(() => {
     if (isLoaded && !user && synced) {
       setSynced(false);
+      lastSyncedProfilesRef.current = "";
     }
   }, [isLoaded, user, synced]);
 
@@ -81,8 +84,10 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       // Save merged profiles to Clerk metadata if different
       const clerkProfilesStr = JSON.stringify(clerkProfiles || []);
       const mergedProfilesStr = JSON.stringify(mergedProfiles);
+      lastSyncedProfilesRef.current = mergedProfilesStr;
+
       if (clerkProfilesStr !== mergedProfilesStr) {
-        user.update({
+        updateClerkMetadata(user, {
           unsafeMetadata: {
             ...user.unsafeMetadata,
             profiles: mergedProfiles
@@ -96,23 +101,31 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
   // Keep Clerk unsafeMetadata in sync with subsequent Zustand profile changes
   useEffect(() => {
-    if (isLoaded && user && synced) {
-      const clerkProfiles = user.unsafeMetadata?.profiles as Profile[] | undefined;
-      const clerkProfilesStr = JSON.stringify(clerkProfiles || []);
-      const localProfilesStr = JSON.stringify(profiles);
-      
-      if (clerkProfilesStr !== localProfilesStr) {
-        const t = setTimeout(() => {
-          user.update({
-            unsafeMetadata: {
-              ...user.unsafeMetadata,
-              profiles: profiles
-            }
-          }).catch(err => console.error("Error syncing profiles to Clerk:", err));
-        }, 1000);
-        return () => clearTimeout(t);
-      }
+    if (!isLoaded || !user || !synced) return;
+
+    const localProfilesStr = JSON.stringify(profiles);
+    const clerkProfilesStr = JSON.stringify(user.unsafeMetadata?.profiles || []);
+
+    // Equality check: avoid sending duplicate updates if data hasn't changed or matches ref
+    if (localProfilesStr === lastSyncedProfilesRef.current || localProfilesStr === clerkProfilesStr) {
+      lastSyncedProfilesRef.current = localProfilesStr;
+      return;
     }
+
+    const t = setTimeout(() => {
+      lastSyncedProfilesRef.current = localProfilesStr;
+      updateClerkMetadata(user, {
+        unsafeMetadata: {
+          ...user.unsafeMetadata,
+          profiles: profiles
+        }
+      }).catch(err => {
+        console.error("Error syncing profiles to Clerk:", err);
+        lastSyncedProfilesRef.current = "";
+      });
+    }, 1000);
+
+    return () => clearTimeout(t);
   }, [profiles, user, isLoaded, synced]);
   
   useEffect(() => {
