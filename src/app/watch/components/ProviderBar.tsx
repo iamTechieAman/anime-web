@@ -167,16 +167,14 @@ const ProviderBar = memo(function ProviderBar({
                 </div>
             </div>
 
-            {/* Server Selector Tabs (Sleek Pills) */}
+            {/* Server Selector Tabs (Sleek Modern Pills) */}
             <div
-                className="overflow-x-auto scrollbar-none snap-x snap-mandatory w-full scroll-smooth"
+                className="overflow-x-auto scrollbar-none snap-x snap-mandatory w-full max-w-full touch-pan-x scroll-smooth"
                 style={{
                     WebkitOverflowScrolling: 'touch',
-                    maskImage: 'linear-gradient(to right, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%)',
                 }}
             >
-                <div className="flex items-center gap-2.5 min-w-max px-4 py-3">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-max px-3 sm:px-4 py-3">
                     <span className="text-[10px] uppercase font-black tracking-widest text-zinc-500 mr-1 hidden sm:inline-flex items-center gap-1 select-none">
                         <Sparkles className="w-3 h-3 text-accent" /> Servers:
                     </span>
@@ -189,9 +187,9 @@ const ProviderBar = memo(function ProviderBar({
                                 onClick={() => onSelectServer(server)}
                                 disabled={isFailed && !isActive}
                                 title={isFailed ? `${server.name} — unavailable` : `Switch to ${server.name}`}
-                                className={`group relative flex shrink-0 items-center gap-2 rounded-xl border px-3.5 sm:px-4 py-2 text-xs font-bold transition-all duration-200 snap-center cursor-pointer select-none active:scale-95 ${
+                                className={`group relative flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-200 snap-center cursor-pointer select-none active:scale-95 ${
                                     isActive
-                                        ? 'border-accent bg-gradient-to-r from-accent to-accent-warm text-white shadow-[0_0_16px_var(--accent-glow)] scale-[1.02]'
+                                        ? 'border-accent bg-accent/20 text-white shadow-[0_0_16px_var(--accent-glow)] ring-1 ring-accent/50 scale-[1.02]'
                                         : isFailed
                                             ? 'cursor-not-allowed border-rose-500/20 bg-rose-500/5 text-rose-300/40 line-through'
                                             : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
@@ -199,7 +197,7 @@ const ProviderBar = memo(function ProviderBar({
                             >
                                 <span className="flex items-center">
                                     {isActive ? (
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-white animate-pulse" />
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-accent animate-pulse" />
                                     ) : isFailed ? (
                                         <AlertCircle className="h-3.5 w-3.5 text-rose-400" />
                                     ) : (
@@ -213,9 +211,9 @@ const ProviderBar = memo(function ProviderBar({
 
                                 {server.badge && (
                                     <span
-                                        className={`rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                                        className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
                                             isActive
-                                                ? 'bg-black/30 text-white border border-white/20'
+                                                ? 'bg-accent/30 text-white border border-accent/40'
                                                 : isFailed
                                                     ? 'bg-transparent text-rose-400/40'
                                                     : 'bg-white/[0.06] text-zinc-400 border border-white/[0.06] group-hover:text-zinc-200'
@@ -226,7 +224,7 @@ const ProviderBar = memo(function ProviderBar({
                                 )}
 
                                 {idx === 0 && !server.badge && (
-                                    <span className="rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-white/[0.06] text-emerald-400">
+                                    <span className="rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                                         Primary
                                     </span>
                                 )}

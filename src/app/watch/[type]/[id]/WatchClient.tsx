@@ -18,7 +18,7 @@ import CommentsSection from "@/components/CommentsSection";
 import dynamic from "next/dynamic";
 import MovieHero from "../../components/MovieHero";
 import ProviderBar from "../../components/ProviderBar";
-import { EpisodeListSkeleton, PlayerContainerSkeleton } from "@/components/SkeletonLoader";
+import { EpisodeListSkeleton, PlayerContainerSkeleton, DetailsSkeleton } from "@/components/SkeletonLoader";
 import { useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
 
@@ -1805,9 +1805,9 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className={`relative w-full aspect-video bg-black overflow-hidden ${
-                        isFocusMode ? "!h-[100dvh] !aspect-auto rounded-none" : "rounded-none sm:rounded-[24px]"
-                    } shadow-none sm:shadow-[0_8px_32px_rgba(0,0,0,0.6)]`}
+                    className={`aspect-video w-full max-w-[1600px] mx-auto rounded-xl overflow-hidden shadow-2xl bg-black relative ${
+                        isFocusMode ? "!h-[100dvh] !max-w-none !aspect-auto rounded-none" : ""
+                    }`}
                 >
                     {/* Loading State */}
                     {!playerLoaded && (
@@ -2162,9 +2162,13 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         );
     };
 
+    if (loading) {
+        return <DetailsSkeleton />;
+    }
+
     return (
         <>
-        <div className="relative isolate min-h-dvh overflow-x-clip bg-bg-main text-[var(--text-main)]">
+        <div className="relative isolate min-h-dvh overflow-x-clip bg-[#0B0C10] text-[var(--text-main)]">
             {!isFocusMode && (
                 <div className={`fixed top-0 left-0 right-0 z-[100] min-h-[calc(60px+env(safe-area-inset-top))] md:min-h-[calc(72px+env(safe-area-inset-top))] pt-[calc(env(safe-area-inset-top)+8px)] md:pt-[calc(env(safe-area-inset-top)+12px)] lg:pt-[calc(env(safe-area-inset-top)+16px)] bg-bg-main/98 backdrop-blur-3xl shadow-lg border-b border-white/10 flex items-center px-4 md:px-6 gap-3 transition-all duration-[250ms] ease-apple will-change-transform ${
                     isHeaderScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
