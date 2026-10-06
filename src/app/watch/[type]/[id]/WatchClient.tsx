@@ -339,43 +339,48 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
         }
     }, [src]);
 
-    if (!src || src.trim() === "") {
+    if (!src || !src.trim()) {
         return (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black gap-3">
-                <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                <p className="text-white/70 text-xs font-semibold uppercase tracking-wider animate-pulse">Loading server...</p>
+            <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center text-white/50">
+                    Loading player...
+                </div>
             </div>
         );
     }
 
     if (!isValidEmbedUrl(src)) {
         return (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 text-center p-4">
-                <div className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs mb-1">
-                    Invalid Stream Source Protected
+            <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 text-center p-4 z-20">
+                    <div className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs mb-1">
+                        Invalid Stream Source Protected
+                    </div>
+                    <p className="text-zinc-500 text-[11px] max-w-xs leading-relaxed">
+                        Raw website URL blocked from iframe execution.
+                    </p>
                 </div>
-                <p className="text-zinc-500 text-[11px] max-w-xs leading-relaxed">
-                    Raw website URL blocked from iframe execution.
-                </p>
             </div>
         );
     }
 
     return (
-        <iframe
-            key={src}
-            ref={iframeRef}
-            src={src}
-            className={`absolute top-0 left-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
-                playerLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            allowFullScreen={true}
-            referrerPolicy="origin"
-            title={title}
-            onError={onError}
-            onLoad={onLoad}
-        />
+        <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
+            <iframe
+                key={src}
+                ref={iframeRef}
+                src={src}
+                className={`absolute inset-0 w-full h-full border-0 bg-black transition-opacity duration-200 ${
+                    playerLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen={true}
+                referrerPolicy="origin"
+                title={title}
+                onError={onError}
+                onLoad={onLoad}
+            />
+        </div>
     );
 }, (prevProps, nextProps) => prevProps.src === nextProps.src);
 

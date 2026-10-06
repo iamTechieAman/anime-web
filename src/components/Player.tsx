@@ -19,7 +19,7 @@ export interface PlayerProps {
 export const VideoEmbed = React.memo(function VideoEmbed({
   url,
   title = "ToonPlayer Stream",
-  className = "w-full h-full border-0",
+  className = "absolute inset-0 w-full h-full border-0",
   onLoad,
   onError,
   iframeRef,
@@ -37,15 +37,25 @@ export const VideoEmbed = React.memo(function VideoEmbed({
     }
   }, [url]);
 
+  if (!url || !url.trim()) {
+    return (
+      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center text-white/50">
+          Loading player...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative w-full aspect-video bg-black overflow-hidden rounded-xl">
+    <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
       <iframe
         key={url}
         ref={iframeRef}
         src={url}
         className={className}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-        allowFullScreen
+        allowFullScreen={true}
         referrerPolicy="origin"
         title={title}
         onLoad={onLoad}
@@ -63,7 +73,7 @@ export const Player = React.memo(function Player({
   onRetryAll,
   onLoad,
   onError,
-  className = "w-full h-full border-0",
+  className = "absolute inset-0 w-full h-full border-0",
   title = "ToonPlayer Stream",
   iframeRef,
 }: PlayerProps) {
@@ -76,18 +86,8 @@ export const Player = React.memo(function Player({
   // If loading is true or URL is pending (and no explicit error), show dark loading spinner/skeleton
   if (isLoading || (!currentServerUrl && !sourceError)) {
     return (
-      <div className="relative w-full aspect-video bg-black flex flex-col items-center justify-center gap-4 text-white">
-        <div className="relative flex items-center justify-center">
-          <div className="absolute w-20 h-20 rounded-full border border-blue-500/20 animate-ping" />
-          <div className="w-14 h-14 rounded-full border-[3px] border-blue-500/20 border-t-blue-500 animate-spin" />
-          <Play className="absolute w-5 h-5 text-blue-500" />
-        </div>
-        <p className="text-white text-xs font-black uppercase tracking-[0.2em] animate-pulse">
-          Connecting to server…
-        </p>
-        <p className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider">
-          {activeServerName}
-        </p>
+      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden flex flex-col items-center justify-center text-white/50">
+        Loading player...
       </div>
     );
   }
@@ -95,7 +95,7 @@ export const Player = React.memo(function Player({
   // Only show the error fallback if the API explicitly returned an error or all servers were tried
   if (sourceError && !currentServerUrl) {
     return (
-      <div className="relative w-full aspect-video bg-black flex flex-col items-center justify-center p-6 text-center">
+      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden flex flex-col items-center justify-center p-6 text-center">
         <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
           <X className="w-6 h-6 text-red-400" />
         </div>
@@ -119,18 +119,20 @@ export const Player = React.memo(function Player({
 
   // Clean iframe player with stable key based on currentServerUrl
   return (
-    <iframe
-      key={currentServerUrl}
-      ref={iframeRef}
-      src={currentServerUrl || ""}
-      className={className}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-      allowFullScreen
-      referrerPolicy="origin"
-      title={title}
-      onLoad={onLoad}
-      onError={onError}
-    />
+    <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
+      <iframe
+        key={currentServerUrl}
+        ref={iframeRef}
+        src={currentServerUrl || ""}
+        className={className}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowFullScreen={true}
+        referrerPolicy="origin"
+        title={title}
+        onLoad={onLoad}
+        onError={onError}
+      />
+    </div>
   );
 }, (prevProps, nextProps) => {
   return (
