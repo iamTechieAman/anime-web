@@ -223,6 +223,11 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ClerkProvider
+          signInUrl="/login"
+          signUpUrl="/register"
+          signInFallbackRedirectUrl="/"
+          signUpFallbackRedirectUrl="/"
+          telemetry={false}
           appearance={{
             variables: {
               /* Brand */

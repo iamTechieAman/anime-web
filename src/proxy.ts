@@ -19,58 +19,16 @@ const BLOCKED_UAS = [
     'harvest', 'emailcollector', 'linkextractor',
 ];
 
-// Explicit public routes that must NEVER trigger auth redirects or 401 challenges
-const isPublicRoute = createRouteMatcher([
-    '/',
-    '/search(.*)',
-    '/watch(.*)',
-    '/anime(.*)',
-    '/cartoon(.*)',
-    '/movies(.*)',
-    '/tv(.*)',
-    '/trending(.*)',
-    '/top-rated(.*)',
-    '/browse(.*)',
-    '/genres(.*)',
-    '/genre(.*)',
-    '/az-list(.*)',
-    '/discover(.*)',
-    '/randomize(.*)',
-    '/history(.*)',
-    '/watchlist(.*)',
-    '/data(.*)',
-    '/login(.*)',
-    '/register(.*)',
-    '/sign-in(.*)',
-    '/sign-up(.*)',
-    '/about(.*)',
-    '/privacy(.*)',
-    '/terms(.*)',
-    '/contact(.*)',
-    '/manifest(.*)',
-    '/robots.txt',
-    '/sitemap.xml',
-    // Public APIs — search, content catalogs, servers, scrapers, proxies, etc.
-    '/api/search(.*)',
-    '/api/prime(.*)',
-    '/api/anime(.*)',
-    '/api/cartoon(.*)',
-    '/api/proxy(.*)',
-    '/api/discover(.*)',
-    '/api/trending(.*)',
-    '/api/random(.*)',
-    '/api/health(.*)',
-    '/api/download(.*)',
-    '/api/auth(.*)',
-    '/api/servers(.*)',
-    '/api/sources(.*)',
-    '/api/source(.*)',
-    '/api/cinevo(.*)',
-    '/api/scrape(.*)',
-    '/api/stream(.*)',
-    '/api/resolve-embed(.*)',
-    '/api/user/me',
-    '/api/cron(.*)',
+// Explicit private user routes that require authentication
+// All browsing, streaming, searching, catalog APIs, settings, and watch pages are 100% public and free!
+const isProtectedRoute = createRouteMatcher([
+    '/profile(.*)',
+    '/account(.*)',
+    '/admin(.*)',
+    '/dashboard(.*)',
+    '/api/user/profile(.*)',
+    '/api/user/update(.*)',
+    '/api/user/delete(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, request: any) => {
@@ -98,10 +56,8 @@ export default clerkMiddleware(async (auth, request: any) => {
         );
     }
 
-    // Route Guard Audit:
-    // If the route is public, strictly bypass route guards (never redirect or 401)
-    if (!isPublicRoute(request)) {
-        // Protected API routes: return JSON 401 instead of redirecting to login page
+    // Only apply authentication to explicitly protected routes
+    if (isProtectedRoute(request)) {
         if (request.nextUrl.pathname.startsWith('/api/')) {
             const { userId } = await auth();
             if (!userId) {
@@ -111,8 +67,10 @@ export default clerkMiddleware(async (auth, request: any) => {
                 );
             }
         } else {
-            // Protected Web Pages: apply Clerk auth protection
-            await auth.protect();
+            // Keep auth redirects internal to our domain — never redirect cross-origin to Clerk dev domains
+            await auth.protect({
+                unauthenticatedUrl: new URL('/login', request.url).toString(),
+            });
         }
     }
 
