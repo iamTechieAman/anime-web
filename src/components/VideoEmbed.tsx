@@ -13,48 +13,63 @@ export interface VideoEmbedProps {
 
 export function isValidEmbedUrl(url: string): boolean {
     if (!url || typeof url !== "string") return false;
+    const trimmed = url.trim();
+    if (!trimmed) return false;
 
-    // Block known full website raw paths
+    // Block dangerous non-web URI protocols
+    const lower = trimmed.toLowerCase();
     if (
-        url.includes("/watch/show/") ||
-        url.includes("/watch/movie/") ||
-        url.includes("/watch/cartoon/") ||
-        url.includes("/watch/anime/") ||
-        url.includes("/season/") ||
-        url.includes("/episode/") ||
-        url.includes("/show/")
+        lower.startsWith("javascript:") ||
+        lower.startsWith("data:") ||
+        lower.startsWith("vbscript:") ||
+        lower.startsWith("file:")
     ) {
-        if (!url.startsWith("/api/proxy/embed") && !url.startsWith("/api/scrape/")) {
-            return false;
-        }
+        return false;
     }
 
-    // Validate allowed embed indicators
-    return (
-        url.startsWith("/api/proxy/embed") ||
-        url.startsWith("/api/scrape/") ||
-        url.includes("/e/") ||
-        url.includes("/embed/") ||
-        url.includes("/v/") ||
-        url.includes("?type=") ||
-        url.includes("?video_id=") ||
-        url.includes("/playere.php") ||
-        url.includes("vidlink.pro") ||
-        url.includes("peachify.top") ||
-        url.includes("autoembed.co") ||
-        url.includes("embed.su") ||
-        url.includes("nontongo.win") ||
-        url.includes("vidfast.pro") ||
-        url.includes("vidsrc.me") ||
-        url.includes("vidsrc.pro") ||
-        url.includes("vidsrc.to") ||
-        url.includes("vidsrc.cc") ||
-        url.includes("cineby.pro") ||
-        url.includes("rivestream.xyz") ||
-        url.includes("cinemaos.to") ||
-        url.includes(".m3u8") ||
-        url.includes(".mp4")
-    );
+    // Always allow internal API endpoints (stream proxy, scrape, etc.)
+    if (trimmed.startsWith("/api/")) {
+        return true;
+    }
+
+    try {
+        // Prevent recursive self-nesting of internal app pages
+        if (trimmed.startsWith("/")) {
+            if (
+                trimmed.startsWith("/watch") ||
+                trimmed.startsWith("/anime") ||
+                trimmed.startsWith("/movies") ||
+                trimmed.startsWith("/tv") ||
+                trimmed.startsWith("/browse") ||
+                trimmed.startsWith("/cartoon")
+            ) {
+                return false;
+            }
+            return true;
+        }
+
+        const parsed = new URL(trimmed);
+
+        // Ensure HTTP or HTTPS protocol
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            return false;
+        }
+
+        // Prevent self-nesting if hostname is our own site pointing to website routes
+        const host = parsed.hostname.toLowerCase();
+        const path = parsed.pathname.toLowerCase();
+        if (
+            (host === "toonplayer.in" || host === "www.toonplayer.in" || host.includes("toonplayer")) &&
+            (path.startsWith("/watch") || path.startsWith("/anime") || path.startsWith("/browse"))
+        ) {
+            return false;
+        }
+
+        // All valid external streaming servers, embed providers, and video hosts are allowed!
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export const VideoEmbed = React.memo(function VideoEmbed({
