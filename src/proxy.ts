@@ -30,9 +30,15 @@ const isPublicRoute = createRouteMatcher([
     '/tv(.*)',
     '/trending(.*)',
     '/top-rated(.*)',
+    '/browse(.*)',
     '/genres(.*)',
+    '/genre(.*)',
     '/az-list(.*)',
     '/discover(.*)',
+    '/randomize(.*)',
+    '/history(.*)',
+    '/watchlist(.*)',
+    '/data(.*)',
     '/login(.*)',
     '/register(.*)',
     '/sign-in(.*)',
@@ -44,7 +50,7 @@ const isPublicRoute = createRouteMatcher([
     '/manifest(.*)',
     '/robots.txt',
     '/sitemap.xml',
-    // Public APIs — search, content catalogs, scrapers, proxies, etc.
+    // Public APIs — search, content catalogs, servers, scrapers, proxies, etc.
     '/api/search(.*)',
     '/api/prime(.*)',
     '/api/anime(.*)',
@@ -56,6 +62,15 @@ const isPublicRoute = createRouteMatcher([
     '/api/health(.*)',
     '/api/download(.*)',
     '/api/auth(.*)',
+    '/api/servers(.*)',
+    '/api/sources(.*)',
+    '/api/source(.*)',
+    '/api/cinevo(.*)',
+    '/api/scrape(.*)',
+    '/api/stream(.*)',
+    '/api/resolve-embed(.*)',
+    '/api/user/me',
+    '/api/cron(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, request: any) => {
@@ -122,7 +137,7 @@ export default clerkMiddleware(async (auth, request: any) => {
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/((?!_next|[^?]*\\.(?:html?|css|js|json|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
     // Always run for Clerk-specific frontend API routes

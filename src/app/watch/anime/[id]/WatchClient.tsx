@@ -182,14 +182,6 @@ const EpisodeButton = React.memo(function EpisodeButton({
 
 const MOVIE_SERVERS = [
     {
-        id: 'peachify',
-        name: 'Toon Player VIP',
-        badge: 'Multi-Audio',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
-    },
-    {
         id: 'vidcore',
         name: 'Toon Player Core',
         badge: 'Core HD',
@@ -204,6 +196,14 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}` : `https://embedmaster.link/movie/${id}`,
+    },
+    {
+        id: 'peachify',
+        name: 'Toon Player VIP',
+        badge: 'Multi-Audio',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
     },
     {
         id: 'vidfast',

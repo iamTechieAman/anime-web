@@ -21,14 +21,6 @@ export async function GET(request: Request) {
         // Generate embed URLs for all servers — verified from Onoflix collection
         const servers = [
             {
-                id: "peachify",
-                name: "ToonPlayer VIP",
-                badge: "Multi-Audio",
-                url: isMovie
-                    ? `https://peachify.top/?type=movie&id=${id}&autoplay=1`
-                    : `https://peachify.top/?type=tv&id=${id}&s=${season}&e=${episode}&autoplay=1`,
-            },
-            {
                 id: "vidcore",
                 name: "Toon Player Core",
                 badge: "Core HD",
@@ -43,6 +35,14 @@ export async function GET(request: Request) {
                 url: isMovie
                     ? `https://embedmaster.link/movie/${id}`
                     : `https://embedmaster.link/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "peachify",
+                name: "ToonPlayer VIP",
+                badge: "Multi-Audio",
+                url: isMovie
+                    ? `https://peachify.top/?type=movie&id=${id}&autoplay=1`
+                    : `https://peachify.top/?type=tv&id=${id}&s=${season}&e=${episode}&autoplay=1`,
             },
             {
                 id: "vidfast",
