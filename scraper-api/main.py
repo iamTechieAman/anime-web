@@ -2,6 +2,8 @@ from fastapi import FastAPI, Query, HTTPException
 from typing import Optional, List
 from scrapers import (
     scrape_onoflix_search, 
+    scrape_onoflix_info,
+    scrape_onoflix_source,
     scrape_watchanimeworld, 
     scrape_watchanimeworld_az,
     scrape_watchanimeworld_info, 
@@ -38,6 +40,14 @@ def source_universal(id: str, site: str):
 @app.get("/search/onoflix")
 def search_onoflix(q: str):
     return scrape_onoflix_search(q)
+
+@app.get("/info/onoflix")
+def info_onoflix(id: str, type: str = "series"):
+    return scrape_onoflix_info(id, type)
+
+@app.get("/source/onoflix")
+def source_onoflix(id: str, type: str = "movie"):
+    return scrape_onoflix_source(id, type)
 
 @app.get("/search/watchanimeworld")
 def search_wa(q: str):

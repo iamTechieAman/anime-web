@@ -18,14 +18,22 @@ export async function GET(request: Request) {
 
         const isMovie = type === "movie";
 
-        // Generate download links from multiple download providers
+        // Generate download links from multiple verified download providers
         const downloadLinks = [
             {
-                name: "VidSrc Download",
+                name: "Peachify VIP Download",
                 url: isMovie
-                    ? `https://dl.vidsrc.vip/movie/${id}`
-                    : `https://dl.vidsrc.vip/tv/${id}/${season}/${episode}`,
+                    ? `https://dl.peachify.top/movie/${id}`
+                    : `https://dl.peachify.top/tv/${id}/${season}/${episode}`,
                 quality: "Multi-Quality",
+                type: "direct"
+            },
+            {
+                name: "VidFast Stream",
+                url: isMovie
+                    ? `https://vidfast.pro/movie/${id}?autoPlay=true`
+                    : `https://vidfast.pro/tv/${id}/${season}/${episode}?autoPlay=true`,
+                quality: "HD",
                 type: "direct"
             },
             {
@@ -34,14 +42,6 @@ export async function GET(request: Request) {
                     ? `https://www.2embed.cc/embed/${id}`
                     : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
                 quality: "HD",
-                type: "embed"
-            },
-            {
-                name: "VidBinge Download",
-                url: isMovie
-                    ? `https://vidbinge.com/embed/movie/${id}`
-                    : `https://vidbinge.com/embed/tv/${id}/${season}/${episode}`,
-                quality: "4K/HD",
                 type: "embed"
             }
         ];

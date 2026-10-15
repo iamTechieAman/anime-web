@@ -18,111 +18,119 @@ export async function GET(request: Request) {
 
         const isMovie = type === "movie";
 
-        // Generate embed URLs for all servers — same as cinevo.site
+        // Generate embed URLs for all servers — verified from Onoflix collection
         const servers = [
-            {
-                id: "vidlink",
-                name: "VidLink Pro",
-                badge: "Auto-Next",
-                url: isMovie
-                    ? `https://vidlink.pro/movie/${id}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`
-                    : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=3b82f6&secondaryColor=1e3a5f&autoplay=true&title=false`,
-            },
-            {
-                id: "autoembed",
-                name: "AutoEmbed Pro",
-                badge: "HD",
-                url: isMovie
-                    ? `https://player.autoembed.cc/embed/movie/${id}`
-                    : `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`,
-            },
-            {
-                id: "vidsrc_cc",
-                name: "VidSrc",
-                badge: "Stable",
-                url: isMovie
-                    ? `https://vidsrc.cc/v2/embed/movie/${id}`
-                    : `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`,
-            },
-            {
-                id: "embedsu",
-                name: "2Embed",
-                badge: "Multi-Quality",
-                url: isMovie
-                    ? `https://www.2embed.cc/embed/${id}`
-                    : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
-            },
-            {
-                id: "multiembed",
-                name: "MultiEmbed",
-                badge: "Reliable",
-                url: isMovie
-                    ? `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`
-                    : `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`,
-            },
-            {
-                id: "smashy",
-                name: "SmashyStream",
-                badge: "Fast",
-                url: isMovie
-                    ? `https://embed.smashystream.com/playere.php?tmdb=${id}`
-                    : `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`,
-            },
-            {
-                id: "2embed",
-                name: "2Embed",
-                badge: null,
-                url: isMovie
-                    ? `https://www.2embed.cc/embed/${id}`
-                    : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
-            },
-            {
-                id: "vidsrc_net",
-                name: "VidSrc.net",
-                badge: "Backup",
-                url: isMovie
-                    ? `https://vidsrc.net/embed/movie/${id}`
-                    : `https://vidsrc.net/embed/tv/${id}/${season}/${episode}`,
-            },
-            {
-                id: "cineby",
-                name: "CineBy",
-                badge: "Fast",
-                url: isMovie
-                    ? `https://www.cineby.gd/embed/movie?tmdb=${id}`
-                    : `https://www.cineby.gd/embed/tv?tmdb=${id}&s=${season}&e=${episode}`,
-            },
-            {
-                id: "vidbinge",
-                name: "VidBinge",
-                badge: "4K",
-                url: isMovie
-                    ? `https://vidbinge.com/embed/movie/${id}`
-                    : `https://vidbinge.com/embed/tv/${id}/${season}/${episode}`,
-            },
             {
                 id: "peachify",
                 name: "ToonPlayer VIP",
                 badge: "Multi-Audio",
                 url: isMovie
-                    ? `https://peachify.top/?type=movie&id=${id}`
-                    : `https://peachify.top/?type=tv&id=${id}&s=${season}&e=${episode}`,
+                    ? `https://peachify.top/?type=movie&id=${id}&autoplay=1`
+                    : `https://peachify.top/?type=tv&id=${id}&s=${season}&e=${episode}&autoplay=1`,
             },
             {
-                id: "nontongo",
-                name: "NontonGo",
-                badge: null,
+                id: "vidcore",
+                name: "Toon Player Core",
+                badge: "Core HD",
                 url: isMovie
-                    ? `https://www.nontongo.win/embed/movie/${id}`
-                    : `https://www.nontongo.win/embed/tv/${id}/${season}/${episode}`,
+                    ? `https://vidcore.net/movie/${id}`
+                    : `https://vidcore.net/tv/${id}/${season}/${episode}`,
             },
             {
-                id: "rivestream",
-                name: "RiveStream",
+                id: "embedmaster",
+                name: "Toon Player Master",
+                badge: "Master",
+                url: isMovie
+                    ? `https://embedmaster.link/movie/${id}`
+                    : `https://embedmaster.link/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "vidfast",
+                name: "Toon Player Fast",
+                badge: "Auto-Next",
+                url: isMovie
+                    ? `https://vidfast.pro/movie/${id}?autoPlay=true&title=true&poster=true`
+                    : `https://vidfast.pro/tv/${id}/${season}/${episode}?autoPlay=true&title=true&poster=true&nextButton=true`,
+            },
+            {
+                id: "vidnest",
+                name: "Toon Player Nest",
+                badge: "Ultra",
+                url: isMovie
+                    ? `https://vidnest.fun/movie/${id}`
+                    : `https://vidnest.fun/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "vidlink",
+                name: "Toon Player Link",
+                badge: "VidLink",
+                url: isMovie
+                    ? `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`
+                    : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=7C3AED&title=false&autoplay=true`,
+            },
+            {
+                id: "vidrock",
+                name: "Toon Player Rock",
+                badge: "Stable",
+                url: isMovie
+                    ? `https://vidrock.net/movie/${id}`
+                    : `https://vidrock.net/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "vidking",
+                name: "Toon Player King",
+                badge: "Cinema",
+                url: isMovie
+                    ? `https://www.vidking.net/embed/movie/${id}`
+                    : `https://www.vidking.net/embed/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "vixsrc",
+                name: "Toon Player Vix",
                 badge: "HD",
                 url: isMovie
-                    ? `https://rivestream.org/embed?type=movie&id=${id}`
-                    : `https://rivestream.org/embed?type=tv&id=${id}&s=${season}&e=${episode}`,
+                    ? `https://vixsrc.to/movie/${id}`
+                    : `https://vixsrc.to/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "videasy",
+                name: "Toon Player Easy",
+                badge: "Stream",
+                url: isMovie
+                    ? `https://player.videasy.net/movie/${id}`
+                    : `https://player.videasy.net/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "vidsrc_embed_ru",
+                name: "Toon Player VidSrc",
+                badge: "VidSrc",
+                url: isMovie
+                    ? `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`
+                    : `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1&ds_lang=en`,
+            },
+            {
+                id: "smashy",
+                name: "Toon Player Smashy",
+                badge: "Multi-Host",
+                url: isMovie
+                    ? `https://player.smashystream.com/movie/${id}`
+                    : `https://player.smashystream.com/show/${id}/${season}/${episode}`,
+            },
+            {
+                id: "vidora",
+                name: "Toon Player Vidora",
+                badge: "Alt",
+                url: isMovie
+                    ? `https://vidora.su/movie/${id}`
+                    : `https://vidora.su/tv/${id}/${season}/${episode}`,
+            },
+            {
+                id: "movies111",
+                name: "Toon 111",
+                badge: "Mirror",
+                url: isMovie
+                    ? `https://111movies.com/movie/${id}`
+                    : `https://111movies.com/tv/${id}/${season}/${episode}`,
             },
         ];
 

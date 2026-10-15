@@ -58,6 +58,11 @@ android/
 toonplayer-vercel/
 vercel_setup_script.sh
 
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
 # scratch
 scratch/
-
