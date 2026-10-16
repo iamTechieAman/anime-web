@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProvider, type ProviderName } from '@/lib/providers';
 import { animeCache, cacheKey, TTL } from '@/lib/anime-cache';
+import { cleanBaseTitle, detectLanguageVariant } from '@/lib/catalog/unified-normalizer';
 
 /**
  * GET /api/search/anime
@@ -75,17 +76,29 @@ export async function GET(request: NextRequest) {
 
     const allResults = (await Promise.all(searchTasks)).flat();
 
-    // Deduplicate by normalized title
+    // Deduplicate by normalized base title (merging sub/dub variants)
     const seen = new Map<string, any>();
     for (const item of allResults) {
-        const key = normalizeTitle(item.title || '');
+        const cleanTitle = cleanBaseTitle(item.title || '');
+        const key = normalizeTitle(cleanTitle);
         if (!key) continue;
+
+        const lang = detectLanguageVariant(item.title || '');
+
         if (!seen.has(key)) {
-            seen.set(key, { ...item, _sources: [item._source] });
+            seen.set(key, {
+                ...item,
+                title: cleanTitle,
+                hasSub: lang.isSub,
+                hasDub: lang.isDub,
+                _sources: [item._source],
+            });
         } else {
-            // Merge: combine sources, prefer item with image
+            // Merge: combine sources, aggregate language modes, prefer item with image
             const existing = seen.get(key);
             existing._sources = [...new Set([...existing._sources, item._source])];
+            if (lang.isSub) existing.hasSub = true;
+            if (lang.isDub) existing.hasDub = true;
             if (!existing.image && item.image) existing.image = item.image;
         }
     }

@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { TwoEmbedProvider } from "@/lib/providers/twoembed";
+import {
+    deduplicateCatalogItems,
+    cleanBaseTitle,
+    type UnifiedCatalogItem,
+} from "@/lib/catalog/unified-normalizer";
 
+const twoEmbed = new TwoEmbedProvider();
 const ANILIST_URL = 'https://graphql.anilist.co';
 const TMDB_SEARCH_URL = 'https://api.themoviedb.org/3/search/multi';
 const TMDB_API_KEY = process.env.TMDB_API_KEY || "522103f166160100778c1995804369a4"; // Fallback to provided key if missing
@@ -55,49 +61,92 @@ export async function GET(request: Request) {
             ).then(res => res.json())
         ]);
 
-        const results: any[] = [];
+        const rawCatalogItems: UnifiedCatalogItem[] = [];
 
-        // Process AniList Results
+        // 1. Process AniList Anime Results (Verified Authoritative Anime Source)
         if (anilistRes.status === 'fulfilled') {
             const anime = anilistRes.value.data?.Page?.media || [];
             anime.forEach((item: any) => {
-                results.push({
-                    id: item.id,
-                    title: item.title.english || item.title.romaji,
+                const authoritativeTitle = item.title.english || item.title.romaji || item.title.native || 'Anime';
+                rawCatalogItems.push({
+                    id: String(item.id),
+                    canonicalId: `anime:al:${item.id}`,
+                    title: cleanBaseTitle(authoritativeTitle),
                     altTitles: [item.title.english, item.title.romaji, item.title.native, ...(item.synonyms || [])].filter(Boolean),
                     image: item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || "",
                     type: 'anime',
-                    year: item.seasonYear,
+                    year: item.seasonYear ? String(item.seasonYear) : null,
                     format: item.format,
                     href: `/watch/anime/${item.id}`,
-                    rating: item.averageScore ? (item.averageScore / 10).toFixed(1) : null
+                    rating: item.averageScore ? (item.averageScore / 10).toFixed(1) : null,
+                    provider: 'anilist',
+                    anilist_id: item.id,
                 });
             });
         }
 
-        // Process TMDB Results
+        // 2. Process Primary TMDB Movie & TV Results
+        let hasMovieOrTvResults = false;
         if (tmdbRes.status === 'fulfilled') {
             const movies = tmdbRes.value.results || [];
             movies.slice(0, 10).forEach((item: any) => {
-                // Skip persons and items with undefined media_type
                 if (!item.media_type || item.media_type === 'person') return;
                 
                 const mediaType = item.media_type === 'movie' ? 'movie' : 'tv';
-                results.push({
-                    id: item.id,
-                    title: item.title || item.name,
+                hasMovieOrTvResults = true;
+                rawCatalogItems.push({
+                    id: String(item.id),
+                    canonicalId: `${mediaType}:tmdb:${item.id}`,
+                    title: cleanBaseTitle(item.title || item.name || 'Untitled'),
+                    overview: item.overview || '',
                     image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
                     type: mediaType,
-                    year: (item.release_date || item.first_air_date || '').split('-')[0],
+                    year: (item.release_date || item.first_air_date || '').split('-')[0] || null,
                     format: item.media_type.toUpperCase(),
                     href: `/watch/${mediaType}/${item.id}`,
-                    rating: item.vote_average ? item.vote_average.toFixed(1) : null
+                    rating: item.vote_average ? item.vote_average.toFixed(1) : null,
+                    provider: 'tmdb',
+                    tmdb_id: item.id,
                 });
             });
         }
 
-        // Sort by relevance (Normalized Title distance)
-        const sortedResults = results.sort((a, b) => {
+        // 3. Optional 2Embed Metadata Provider Fallback for Movies and TV
+        if (!hasMovieOrTvResults) {
+            try {
+                const [twoEmbedMovies, twoEmbedTv] = await Promise.all([
+                    twoEmbed.searchMovies(query, 1).catch(() => []),
+                    twoEmbed.searchTv(query, 1).catch(() => []),
+                ]);
+
+                [...twoEmbedMovies, ...twoEmbedTv].slice(0, 10).forEach(item => {
+                    const cleanId = String(item.tmdb_id || item.imdb_id || item.id);
+                    rawCatalogItems.push({
+                        id: cleanId,
+                        canonicalId: `${item.media_type}:twoembed:${cleanId}`,
+                        title: cleanBaseTitle(item.title || item.name || 'Untitled'),
+                        overview: item.overview || '',
+                        image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : (item.poster || null),
+                        type: item.media_type,
+                        year: item.year ? String(item.year) : (item.release_date || item.first_air_date || '').split('-')[0] || null,
+                        format: item.media_type.toUpperCase(),
+                        href: `/watch/${item.media_type}/${cleanId}`,
+                        rating: null,
+                        provider: 'twoembed',
+                        tmdb_id: item.tmdb_id || null,
+                        imdb_id: item.imdb_id || null,
+                    });
+                });
+            } catch (twoEmbedErr: any) {
+                console.warn("[UnifiedSearch] 2Embed fallback search bypassed:", twoEmbedErr?.message);
+            }
+        }
+
+        // 4. Deduplicate across variants and providers
+        const deduplicated = deduplicateCatalogItems(rawCatalogItems);
+
+        // 5. Sort by relevance (Normalized Title distance)
+        const sortedResults = deduplicated.sort((a, b) => {
             const aTitle = (a.title || "").toLowerCase();
             const bTitle = (b.title || "").toLowerCase();
             const q = query.toLowerCase();

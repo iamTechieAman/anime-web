@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { detectMediaType } from "@/utils/mediaType";
+import { cleanBaseTitle } from "@/lib/catalog/unified-normalizer";
 
 export interface UnifiedContent {
     id: string;
@@ -23,6 +24,8 @@ export interface UnifiedContent {
     aniListId?: string;
     provider?: string;
     seasons?: any[];
+    tmdb_id?: number | null;
+    imdb_id?: string | null;
 }
 
 export interface ResolverResult {
@@ -107,14 +110,20 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                         throw new Error("CONTENT_MISMATCH");
                     }
 
+                    const displayTitle = show.name && !/^\d+$/.test(show.name)
+                        ? cleanBaseTitle(show.name)
+                        : (show.englishName && !/^\d+$/.test(show.englishName)
+                            ? cleanBaseTitle(show.englishName)
+                            : (show.title ? cleanBaseTitle(show.title) : 'Anime'));
+
                     unified = {
                         id,
                         type: "anime",
-                        title: show.name || show.englishName,
-                        description: show.description,
-                        poster: show.thumbnail || show.image,
-                        backdrop: show.thumbnail || show.image,
-                        year: "",
+                        title: displayTitle,
+                        description: show.description || '',
+                        poster: show.thumbnail || show.image || '',
+                        backdrop: show.thumbnail || show.image || '',
+                        year: show.year || '',
                         rating: 0,
                         genres: [],
                         cast: [],
@@ -127,16 +136,16 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                         provider: show.provider || provider
                     };
                 } else {
-                    // Fetch TMDB Metadata
+                    // Fetch TMDB / 2Embed Metadata
                     const res = await axios.get(`/api/prime/details?id=${encodeURIComponent(id)}&type=${encodeURIComponent(typeToFetch)}`, { signal: controller.signal });
                     if (controller.signal.aborted || currentSeq !== seqRef.current) return;
                     
                     const data = res.data;
-                    if (!data) throw new Error("No TMDB data received");
+                    if (!data) throw new Error("No data received from prime details");
 
                     // Validate ID
-                    if (String(data.id) !== String(id)) {
-                        console.error('[UniversalResolver] ID Mismatch', { requested: id, received: data.id });
+                    if (String(data.id) !== String(id) && (!data.tmdb_id || String(data.tmdb_id) !== String(id))) {
+                        console.error('[UniversalResolver] ID Mismatch', { requested: id, received: data.id, tmdb: data.tmdb_id });
                         throw new Error("CONTENT_MISMATCH");
                     }
 
@@ -146,18 +155,21 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                     unified = {
                         id,
                         type: detected,
-                        title: data.title || data.name,
-                        description: data.overview,
-                        poster: data.poster_path,
-                        backdrop: data.backdrop_path,
-                        year: (data.release_date || data.first_air_date || "").slice(0, 4),
-                        rating: data.vote_average,
+                        title: cleanBaseTitle(data.title || data.name || 'Untitled'),
+                        description: data.overview || '',
+                        poster: data.poster_path || data.poster || '',
+                        backdrop: data.backdrop_path || data.backdrop || '',
+                        year: (data.release_date || data.first_air_date || data.year || "").toString().slice(0, 4),
+                        rating: data.vote_average || 0,
                         genres: data.genres || [],
                         cast: data.cast || [],
-                        runtime: data.runtime || 0,
+                        runtime: data.runtime || data.episode_runtime || 0,
                         trailer: data.trailer,
                         isAnime: detected === "anime",
-                        seasons: data.seasons || []
+                        seasons: data.seasons || [],
+                        tmdb_id: data.tmdb_id || (typeof data.id === 'number' ? data.id : null),
+                        imdb_id: data.imdb_id || null,
+                        provider: data.provider || 'tmdb',
                     };
                 }
 

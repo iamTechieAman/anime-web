@@ -12,7 +12,9 @@ import {
 } from "@/lib/seo/schema-builder";
 
 import WatchClient from "./WatchClient";
+import { TwoEmbedProvider } from "@/lib/providers/twoembed";
 
+const twoEmbed = new TwoEmbedProvider();
 const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.toonplayer.in';
 
@@ -58,7 +60,36 @@ async function fetchContentDetails(type: string, id: string) {
         console.warn(`[SEO] Failed to fetch TMDB details for ${type}/${id}:`, e);
     }
 
-    // Fallback if TMDB fails or for custom cartoon IDs
+    // Optional 2Embed metadata fallback for movie/tv
+    if (type === 'movie' || type === 'tv') {
+        try {
+            const twoEmbedData = type === 'tv'
+                ? await twoEmbed.getTvDetails({ tmdbId: cleanId, imdbId: cleanId.startsWith('tt') ? cleanId : undefined })
+                : await twoEmbed.getMovieDetails({ tmdbId: cleanId, imdbId: cleanId.startsWith('tt') ? cleanId : undefined });
+
+            if (twoEmbedData && twoEmbedData.title) {
+                return {
+                    title: twoEmbedData.title,
+                    overview: twoEmbedData.overview || '',
+                    poster: twoEmbedData.poster || (twoEmbedData.poster_path ? `https://image.tmdb.org/t/p/w500${twoEmbedData.poster_path}` : `${SITE_URL}/icon.png`),
+                    backdrop: twoEmbedData.backdrop || undefined,
+                    year: (twoEmbedData.release_date || twoEmbedData.first_air_date || twoEmbedData.year || '').toString().slice(0, 4),
+                    rating: twoEmbedData.vote_average || 8.0,
+                    ratingCount: 100,
+                    genres: twoEmbedData.genres || ['Action', 'Drama'],
+                    runtime: (twoEmbedData as any).runtime || 24,
+                    numberOfSeasons: (twoEmbedData as any).number_of_seasons || 1,
+                    numberOfEpisodes: (twoEmbedData as any).number_of_episodes || 12,
+                    director: twoEmbedData.crew?.[0],
+                    actors: twoEmbedData.cast?.slice(0, 8) || [],
+                };
+            }
+        } catch (twoEmbedErr) {
+            console.warn(`[SEO] 2Embed details fallback failed for ${type}/${id}:`, twoEmbedErr);
+        }
+    }
+
+    // Fallback if TMDB & 2Embed fail or for custom cartoon IDs
     return {
         title: type === 'cartoon' ? 'Cartoon Show' : type === 'anime' ? 'Anime Series' : type === 'movie' ? 'Movie' : 'TV Show',
         overview: `Watch full episodes and movies online in HD on ToonPlayer.`,

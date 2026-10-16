@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
+import { TwoEmbedProvider } from '@/lib/providers/twoembed';
+import {
+    deduplicateCatalogItems,
+    cleanBaseTitle,
+    type UnifiedCatalogItem,
+} from '@/lib/catalog/unified-normalizer';
 
+const twoEmbed = new TwoEmbedProvider();
 const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
 const ANILIST_URL = 'https://graphql.anilist.co';
 
@@ -21,7 +28,8 @@ async function fetchCatalog() {
         return cachedCatalog;
     }
 
-    const catalog: any[] = [];
+    const catalog: UnifiedCatalogItem[] = [];
+    let hasMovieOrTv = false;
 
     try {
         // Fetch trending from TMDB with a strict 3000ms timeout
@@ -37,20 +45,57 @@ async function fetchCatalog() {
         if (tmdbData.results) {
             tmdbData.results.forEach((item: any) => {
                 if (item.media_type === 'person') return;
+                hasMovieOrTv = true;
+                const mediaType = item.media_type === 'movie' ? 'movie' : 'tv';
                 catalog.push({
-                    id: item.id,
-                    title: item.title || item.name,
+                    id: String(item.id),
+                    canonicalId: `${mediaType}:tmdb:${item.id}`,
+                    title: cleanBaseTitle(item.title || item.name || 'Untitled'),
+                    overview: item.overview || '',
                     image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : null,
-                    type: item.media_type === 'movie' ? 'movie' : 'tv',
-                    year: (item.release_date || item.first_air_date || '').split('-')[0],
+                    type: mediaType,
+                    year: (item.release_date || item.first_air_date || '').split('-')[0] || null,
                     format: item.media_type.toUpperCase(),
                     href: `/watch/${item.media_type}/${item.id}`,
-                    rating: item.vote_average ? item.vote_average.toFixed(1) : null
+                    rating: item.vote_average ? item.vote_average.toFixed(1) : null,
+                    provider: 'tmdb',
+                    tmdb_id: item.id,
                 });
             });
         }
     } catch (e: any) {
         console.error('[Catalog API] TMDB fetch failed or timed out:', e.message);
+    }
+
+    // Optional 2Embed Fallback for trending movies/TV if TMDB failed
+    if (!hasMovieOrTv) {
+        try {
+            const [twoEmbedMovies, twoEmbedTv] = await Promise.all([
+                twoEmbed.getTrendingMovies('day', 1).catch(() => []),
+                twoEmbed.getTrendingTv('day', 1).catch(() => []),
+            ]);
+
+            [...twoEmbedMovies, ...twoEmbedTv].forEach(item => {
+                const cleanId = String(item.tmdb_id || item.imdb_id || item.id);
+                catalog.push({
+                    id: cleanId,
+                    canonicalId: `${item.media_type}:twoembed:${cleanId}`,
+                    title: cleanBaseTitle(item.title || item.name || 'Untitled'),
+                    overview: item.overview || '',
+                    image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : (item.poster || null),
+                    type: item.media_type,
+                    year: item.year ? String(item.year) : (item.release_date || item.first_air_date || '').split('-')[0] || null,
+                    format: item.media_type.toUpperCase(),
+                    href: `/watch/${item.media_type}/${cleanId}`,
+                    rating: null,
+                    provider: 'twoembed',
+                    tmdb_id: item.tmdb_id || null,
+                    imdb_id: item.imdb_id || null,
+                });
+            });
+        } catch (twoEmbedErr: any) {
+            console.warn('[Catalog API] 2Embed fallback bypassed:', twoEmbedErr?.message);
+        }
     }
 
     try {
@@ -70,16 +115,20 @@ async function fetchCatalog() {
 
         if (animeData.data?.Page?.media) {
             animeData.data.Page.media.forEach((item: any) => {
+                const authoritativeTitle = item.title.english || item.title.romaji || item.title.native || 'Anime';
                 catalog.push({
-                    id: item.id,
-                    title: item.title.english || item.title.romaji || item.title.native,
+                    id: String(item.id),
+                    canonicalId: `anime:al:${item.id}`,
+                    title: cleanBaseTitle(authoritativeTitle),
                     altTitles: [item.title.english, item.title.romaji, item.title.native].filter(Boolean),
                     image: item.coverImage?.medium || "",
                     type: 'anime',
-                    year: item.seasonYear,
+                    year: item.seasonYear ? String(item.seasonYear) : null,
                     format: item.format,
                     href: `/watch/anime/${item.id}`,
-                    rating: item.averageScore ? (item.averageScore / 10).toFixed(1) : null
+                    rating: item.averageScore ? (item.averageScore / 10).toFixed(1) : null,
+                    provider: 'anilist',
+                    anilist_id: item.id,
                 });
             });
         }
@@ -87,9 +136,11 @@ async function fetchCatalog() {
         console.error('[Catalog API] AniList fetch failed:', e);
     }
 
-    cachedCatalog = catalog.map(item => ({
+    // Deduplicate cross-provider & variant entries
+    const deduplicated = deduplicateCatalogItems(catalog);
+
+    cachedCatalog = deduplicated.map(item => ({
         ...item,
-        // Pre-normalize for faster searching
         _searchTitle: item.title.toLowerCase().trim()
     }));
     cacheTimestamp = now;

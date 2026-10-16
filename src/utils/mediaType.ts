@@ -59,8 +59,8 @@ export function detectMediaType(item: any): CanonicalMediaType {
 
     // 0. Explicit prefix checks on ID (Highest Reliability)
     const rawId = String(item.id || item._id || item.showId || "");
-    if (rawId.startsWith("tmdb:movie:")) return "movie";
-    if (rawId.startsWith("tmdb:tv:")) return "tv";
+    if (rawId.startsWith("tmdb:movie:") || rawId.startsWith("twoembed:movie:")) return "movie";
+    if (rawId.startsWith("tmdb:tv:") || rawId.startsWith("twoembed:tv:")) return "tv";
     if (rawId.startsWith("hi:") || rawId.startsWith("aw:") || rawId.startsWith("anikai:") || rawId.startsWith("anilist:")) {
         return "anime";
     }
@@ -80,7 +80,7 @@ export function detectMediaType(item: any): CanonicalMediaType {
 
     // 2. Anime Provider check
     const provider = (item.provider || rawId.split(":")?.[0] || "").toLowerCase();
-    if (provider && ["hianime", "aniwatch", "allanime", "hianime_fallback", "anikai", "aniwave", "aniwatchtv", "cinevo", "consumet", "gogoanime", "animepahe", "jikan", "hi", "aw"].includes(provider)) {
+    if (provider && provider !== "twoembed" && provider !== "tmdb" && ["hianime", "aniwatch", "allanime", "hianime_fallback", "anikai", "aniwave", "aniwatchtv", "cinevo", "consumet", "gogoanime", "animepahe", "jikan", "hi", "aw"].includes(provider)) {
         return "anime";
     }
 
@@ -152,7 +152,7 @@ export function getCanonicalWatchHref(item: any, seasonNum?: number, episodeNum?
     const mediaType = detectMediaType(item);
     let finalId = String(item.id || item._id || item.showId || "");
 
-    if (finalId.startsWith("tmdb:")) {
+    if (finalId.startsWith("tmdb:") || finalId.startsWith("twoembed:")) {
         const parts = finalId.split(":");
         finalId = parts[2] || parts[1];
     }
