@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ServerHealthManager } from "@/utils/ServerHealthManager";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search, Film, Tag, Trophy, Tv, MonitorPlay, Info, Layers, ChevronUp as ChevronUpIcon, Volume2, VolumeX } from "lucide-react";
+import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search, Film, Tag, Trophy, Tv, MonitorPlay, Info, Layers, ChevronUp as ChevronUpIcon, Volume2, VolumeX, Minimize2, Maximize2 } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
 import toast from "react-hot-toast";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -334,6 +334,7 @@ import { isValidEmbedUrl } from "@/components/VideoEmbed";
 interface VideoIframeProps {
     src: string;
     title?: string;
+    reloadKey?: number;
     onLoad?: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
     onError?: () => void;
     iframeRef?: React.RefObject<HTMLIFrameElement | null>;
@@ -342,6 +343,7 @@ interface VideoIframeProps {
 const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
     src,
     title = "ToonPlayer Stream",
+    reloadKey = 0,
     onLoad,
     onError,
     iframeRef,
@@ -378,9 +380,9 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
     }
 
     return (
-        <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
+        <div className="relative w-full h-full bg-black rounded-2xl overflow-hidden">
             <iframe
-                key={src}
+                key={`${src}-${reloadKey}`}
                 ref={iframeRef}
                 src={src}
                 className="absolute inset-0 w-full h-full border-0"
@@ -393,7 +395,7 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
             />
         </div>
     );
-}, (prevProps, nextProps) => prevProps.src === nextProps.src);
+}, (prevProps, nextProps) => prevProps.src === nextProps.src && prevProps.reloadKey === nextProps.reloadKey);
 
 interface MovieDetails {
     id: number;
@@ -531,62 +533,90 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const selectedSeasonRef = useRef(selectedSeason);
     const playerContainerRef = useRef<HTMLDivElement>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
+    const [showFsControls, setShowFsControls] = useState(true);
+    const fsControlsTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Cross-browser fullscreen toggle supporting container, webkit, and iOS
+    const handlePointerMoveFs = useCallback(() => {
+        setShowFsControls(true);
+        if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current);
+        fsControlsTimerRef.current = setTimeout(() => {
+            setShowFsControls(false);
+        }, 3500);
+    }, []);
+
+    const exitFullscreen = useCallback(async () => {
+        const doc = document as any;
+        if (isPseudoFullscreen) {
+            setIsPseudoFullscreen(false);
+            setIsFullscreen(false);
+            return;
+        }
+        try {
+            if (doc.exitFullscreen) await doc.exitFullscreen();
+            else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+            else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
+            else if (doc.msExitFullscreen) await doc.msExitFullscreen();
+        } catch (err) {
+            console.warn('[Fullscreen] Exit failed:', err);
+        }
+        setIsFullscreen(false);
+        setIsPseudoFullscreen(false);
+    }, [isPseudoFullscreen]);
+
+    // Cross-browser fullscreen toggle supporting container, webkit, and iOS pseudo-fullscreen fallback
     const toggleFullscreen = useCallback(async () => {
         const doc = document as any;
-        const isFS = Boolean(
-            doc.fullscreenElement ||
-            doc.webkitFullscreenElement ||
-            doc.mozFullScreenElement ||
-            doc.msFullscreenElement
-        );
+        const fsEl = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
 
-        if (isFS) {
-            try {
-                if (doc.exitFullscreen) await doc.exitFullscreen();
-                else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
-                else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
-                else if (doc.msExitFullscreen) await doc.msExitFullscreen();
-            } catch (err) {
-                console.warn('[Fullscreen] Exit failed:', err);
-            }
-        } else {
-            const target = playerContainerRef.current as any;
-            if (!target) return;
-
-            try {
-                if (target.requestFullscreen) {
-                    await target.requestFullscreen();
-                } else if (target.webkitRequestFullscreen) {
-                    await target.webkitRequestFullscreen();
-                } else if (target.mozRequestFullScreen) {
-                    await target.mozRequestFullScreen();
-                } else if (target.msRequestFullscreen) {
-                    await target.msRequestFullscreen();
-                } else {
-                    const videoEl = target.querySelector('video') as any;
-                    if (videoEl && videoEl.webkitEnterFullscreen) {
-                        videoEl.webkitEnterFullscreen();
-                    }
-                }
-            } catch (err) {
-                console.warn('[Fullscreen] Fullscreen request rejected or unavailable:', err);
-            }
+        if (fsEl || isPseudoFullscreen) {
+            await exitFullscreen();
+            return;
         }
-    }, []);
+
+        const target = playerContainerRef.current as any;
+        if (!target) return;
+
+        try {
+            if (target.requestFullscreen) {
+                await target.requestFullscreen();
+                setIsFullscreen(true);
+            } else if (target.webkitRequestFullscreen) {
+                await target.webkitRequestFullscreen();
+                setIsFullscreen(true);
+            } else if (target.mozRequestFullScreen) {
+                await target.mozRequestFullScreen();
+                setIsFullscreen(true);
+            } else if (target.msRequestFullscreen) {
+                await target.msRequestFullscreen();
+                setIsFullscreen(true);
+            } else {
+                // Fallback for iOS Safari / devices without div.requestFullscreen
+                setIsPseudoFullscreen(true);
+                setIsFullscreen(true);
+            }
+        } catch (err) {
+            console.warn('[Fullscreen] Native requestFullscreen rejected or unavailable, falling back to pseudo-fullscreen:', err);
+            setIsPseudoFullscreen(true);
+            setIsFullscreen(true);
+        }
+    }, [isPseudoFullscreen, exitFullscreen]);
 
     // Fullscreen change listener across browsers
     useEffect(() => {
         const onFSChange = () => {
             const doc = document as any;
+            const fsEl = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
             const isFS = Boolean(
-                doc.fullscreenElement ||
-                doc.webkitFullscreenElement ||
-                doc.mozFullScreenElement ||
-                doc.msFullscreenElement
+                fsEl && (
+                    fsEl === playerContainerRef.current || 
+                    playerContainerRef.current?.contains(fsEl)
+                )
             );
             setIsFullscreen(isFS);
+            if (!isFS) {
+                setIsPseudoFullscreen(false);
+            }
         };
 
         document.addEventListener('fullscreenchange', onFSChange);
@@ -602,18 +632,23 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         };
     }, []);
 
-    // Keyboard shortcut for fullscreen (f)
+    // Keyboard shortcut for fullscreen (f) and Escape key to exit
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
             if (e.key === 'f' || e.key === 'F') {
                 e.preventDefault();
                 toggleFullscreen();
+            } else if (e.key === 'Escape') {
+                if (isPseudoFullscreen || isFullscreen) {
+                    e.preventDefault();
+                    exitFullscreen();
+                }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [toggleFullscreen]);
+    }, [toggleFullscreen, exitFullscreen, isPseudoFullscreen, isFullscreen]);
 
     useEffect(() => { selectedEpisodeRef.current = selectedEpisode; }, [selectedEpisode]);
     useEffect(() => { selectedSeasonRef.current = selectedSeason; }, [selectedSeason]);
@@ -2079,13 +2114,78 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                 {/* ── VIDEO CONTAINER ── */}
                 <motion.div
                     ref={playerContainerRef}
+                    onPointerMove={handlePointerMoveFs}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     className={`relative w-full aspect-video rounded-[32px] overflow-hidden bg-black/50 ring-1 ring-white/10 shadow-2xl ${
+                        isPseudoFullscreen ? "toonplayer-pseudo-fullscreen" :
                         isFocusMode ? "!h-[100dvh] !max-w-none !aspect-auto rounded-none" : "max-w-[1600px] mx-auto"
                     }`}
                 >
+                    {/* Fullscreen Floating Controls */}
+                    {(isFullscreen || isPseudoFullscreen) && (
+                        <div 
+                            className={`absolute top-0 left-0 right-0 z-[60] p-4 sm:p-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between gap-4 transition-opacity duration-300 ${
+                                showFsControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                            }`}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center gap-3 min-w-0">
+                                <h2 className="text-white font-black text-sm sm:text-base truncate drop-shadow-md">
+                                    {title}
+                                </h2>
+                                {resolvedMediaType !== 'movie' && (
+                                    <span className="text-xs text-white/80 font-semibold px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur-md shrink-0">
+                                        S{selectedSeason} · E{selectedEpisode}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                {resolvedMediaType !== 'movie' && (
+                                    <>
+                                        <button
+                                            onClick={handlePrevEpisode}
+                                            disabled={!hasPrevEpisode()}
+                                            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:pointer-events-none text-white backdrop-blur-md transition-all cursor-pointer"
+                                            title="Previous Episode"
+                                            aria-label="Previous Episode"
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={handleNextEpisode}
+                                            disabled={!hasNextEpisode()}
+                                            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:pointer-events-none text-white backdrop-blur-md transition-all cursor-pointer"
+                                            title="Next Episode"
+                                            aria-label="Next Episode"
+                                        >
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    onClick={() => setReloadCount(c => c + 1)}
+                                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all cursor-pointer"
+                                    title="Reload Stream"
+                                    aria-label="Reload Stream"
+                                >
+                                    <RefreshCw className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={toggleFullscreen}
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs backdrop-blur-md transition-all cursor-pointer shadow-lg"
+                                    title="Exit Fullscreen (Esc or f)"
+                                    aria-label="Exit Fullscreen"
+                                >
+                                    <Minimize2 className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Exit</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Loading State */}
                     {!playerLoaded && (
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black gap-4">
@@ -2118,12 +2218,11 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         </div>
                     )}
 
-
-
                     {/* IFRAME — only render when we have a confirmed non-empty URL */}
                     {currentServerUrl && currentServerUrl.trim() !== "" ? (
                         <VideoIframeEmbed
                             src={currentServerUrl}
+                            reloadKey={reloadCount}
                             title={`${title} - ToonPlayer`}
                             onError={handleAutoFallback}
                             onLoad={() => {
@@ -2286,21 +2385,17 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                             <button
                                 onClick={toggleFullscreen}
                                 className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all cursor-pointer ${
-                                    isFullscreen
-                                        ? 'bg-purple-600/20 border-purple-500 text-purple-300'
+                                    isFullscreen || isPseudoFullscreen
+                                        ? 'bg-accent/20 border-accent text-accent shadow-[0_0_8px_var(--accent-glow)]'
                                         : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
                                 }`}
-                                title={isFullscreen ? "Exit Fullscreen (f)" : "Enter Fullscreen (f)"}
-                                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                                title={isFullscreen || isPseudoFullscreen ? "Exit Fullscreen (Esc or f)" : "Enter Fullscreen (f)"}
+                                aria-label={isFullscreen || isPseudoFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                             >
-                                {isFullscreen ? (
-                                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                                    </svg>
+                                {isFullscreen || isPseudoFullscreen ? (
+                                    <Minimize2 className="w-3.5 h-3.5" />
                                 ) : (
-                                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                                    </svg>
+                                    <Maximize2 className="w-3.5 h-3.5" />
                                 )}
                             </button>
                         </div>

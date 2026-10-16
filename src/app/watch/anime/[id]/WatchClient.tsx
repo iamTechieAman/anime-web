@@ -6,7 +6,7 @@ import Script from "next/script";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid, Download, ArrowLeft } from "lucide-react";
+import { ChevronLeft, Loader2, AlertCircle, RefreshCw, AlertTriangle, Search, Play, Share2, Server, ChevronDown, Check, Shield, Zap, Sparkles, BookmarkPlus, BookmarkCheck, ChevronRight, X, List, LayoutGrid, Download, ArrowLeft, Minimize2, Maximize2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdBlock } from "@/context/AdBlockContext";
@@ -76,7 +76,7 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
 
     return (
         <iframe
-            key={src}
+            key={mediaKey || src}
             ref={iframeRef}
             src={src}
             className="absolute inset-0 w-full h-full border-0 bg-black"
@@ -88,7 +88,9 @@ const VideoIframeEmbed = React.memo(function VideoIframeEmbed({
         />
     );
 }, (prevProps, nextProps) => {
-    return prevProps.src === nextProps.src && prevProps.playerLoaded === nextProps.playerLoaded;
+    return prevProps.src === nextProps.src && 
+           prevProps.playerLoaded === nextProps.playerLoaded &&
+           prevProps.mediaKey === nextProps.mediaKey;
 });
 
 function cleanString(str: any): string | null {
@@ -435,72 +437,108 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const playerContainerRef = useRef<HTMLDivElement>(null);
     const artInstanceRef = useRef<any>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
+    const [showFsControls, setShowFsControls] = useState(true);
+    const fsControlsTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Cross-browser fullscreen toggle supporting container, ArtPlayer, and Safari
+    const handlePointerMoveFs = useCallback(() => {
+        setShowFsControls(true);
+        if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current);
+        fsControlsTimerRef.current = setTimeout(() => {
+            setShowFsControls(false);
+        }, 3500);
+    }, []);
+
+    const handleReloadPlayer = useCallback(() => {
+        setReloadCount(c => c + 1);
+        setError(null);
+        setLoadingSource(true);
+        processingRef.current = null;
+        toast.success("Reloading anime stream...", { icon: "🔄" });
+    }, []);
+
+    const exitFullscreen = useCallback(async () => {
+        const doc = document as any;
+        if (isPseudoFullscreen) {
+            setIsPseudoFullscreen(false);
+            setIsFullscreen(false);
+            return;
+        }
+        try {
+            if (doc.exitFullscreen) await doc.exitFullscreen();
+            else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+            else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
+            else if (doc.msExitFullscreen) await doc.msExitFullscreen();
+        } catch (err) {
+            console.warn('[Fullscreen] Exit failed:', err);
+        }
+        setIsFullscreen(false);
+        setIsPseudoFullscreen(false);
+    }, [isPseudoFullscreen]);
+
+    // Cross-browser fullscreen toggle supporting container, ArtPlayer, and iOS Safari fallback
     const toggleFullscreen = useCallback(async () => {
         const doc = document as any;
-        const isFS = Boolean(
-            doc.fullscreenElement ||
-            doc.webkitFullscreenElement ||
-            doc.mozFullScreenElement ||
-            doc.msFullscreenElement
-        );
+        const fsEl = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
 
-        if (isFS) {
+        if (fsEl || isPseudoFullscreen) {
+            await exitFullscreen();
+            return;
+        }
+
+        // First try ArtPlayer internal fullscreen if native player is active
+        if (artInstanceRef.current && videoType !== 'iframe') {
             try {
-                if (doc.exitFullscreen) await doc.exitFullscreen();
-                else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
-                else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
-                else if (doc.msExitFullscreen) await doc.msExitFullscreen();
-            } catch (err) {
-                console.warn('[Fullscreen] Exit failed:', err);
-            }
-        } else {
-            // First try ArtPlayer internal fullscreen if native player is active
-            if (artInstanceRef.current && videoType !== 'iframe') {
-                try {
-                    artInstanceRef.current.fullscreen = true;
-                    return;
-                } catch (e) {
-                    console.warn('[Fullscreen] ArtPlayer fullscreen failed, falling back to container:', e);
-                }
-            }
-
-            const target = playerContainerRef.current as any;
-            if (!target) return;
-
-            try {
-                if (target.requestFullscreen) {
-                    await target.requestFullscreen();
-                } else if (target.webkitRequestFullscreen) {
-                    await target.webkitRequestFullscreen();
-                } else if (target.mozRequestFullScreen) {
-                    await target.mozRequestFullScreen();
-                } else if (target.msRequestFullscreen) {
-                    await target.msRequestFullscreen();
-                } else {
-                    const videoEl = target.querySelector('video') as any;
-                    if (videoEl && videoEl.webkitEnterFullscreen) {
-                        videoEl.webkitEnterFullscreen();
-                    }
-                }
-            } catch (err) {
-                console.warn('[Fullscreen] Fullscreen request rejected or unavailable:', err);
+                artInstanceRef.current.fullscreen = true;
+                return;
+            } catch (e) {
+                console.warn('[Fullscreen] ArtPlayer fullscreen failed, falling back to container:', e);
             }
         }
-    }, [videoType]);
+
+        const target = playerContainerRef.current as any;
+        if (!target) return;
+
+        try {
+            if (target.requestFullscreen) {
+                await target.requestFullscreen();
+                setIsFullscreen(true);
+            } else if (target.webkitRequestFullscreen) {
+                await target.webkitRequestFullscreen();
+                setIsFullscreen(true);
+            } else if (target.mozRequestFullScreen) {
+                await target.mozRequestFullScreen();
+                setIsFullscreen(true);
+            } else if (target.msRequestFullscreen) {
+                await target.msRequestFullscreen();
+                setIsFullscreen(true);
+            } else {
+                // Fallback for iOS Safari / devices without div.requestFullscreen
+                setIsPseudoFullscreen(true);
+                setIsFullscreen(true);
+            }
+        } catch (err) {
+            console.warn('[Fullscreen] Fullscreen request rejected or unavailable, falling back to pseudo-fullscreen:', err);
+            setIsPseudoFullscreen(true);
+            setIsFullscreen(true);
+        }
+    }, [videoType, isPseudoFullscreen, exitFullscreen]);
 
     // Fullscreen change listener across browsers
     useEffect(() => {
         const onFSChange = () => {
             const doc = document as any;
+            const fsEl = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
             const isFS = Boolean(
-                doc.fullscreenElement ||
-                doc.webkitFullscreenElement ||
-                doc.mozFullScreenElement ||
-                doc.msFullscreenElement
+                fsEl && (
+                    fsEl === playerContainerRef.current || 
+                    playerContainerRef.current?.contains(fsEl)
+                )
             );
             setIsFullscreen(isFS);
+            if (!isFS) {
+                setIsPseudoFullscreen(false);
+            }
         };
 
         document.addEventListener('fullscreenchange', onFSChange);
@@ -516,18 +554,23 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         };
     }, []);
 
-    // Keyboard shortcut for fullscreen (f)
+    // Keyboard shortcut for fullscreen (f) and Escape key to exit
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
             if (e.key === 'f' || e.key === 'F') {
                 e.preventDefault();
                 toggleFullscreen();
+            } else if (e.key === 'Escape') {
+                if (isPseudoFullscreen || isFullscreen) {
+                    e.preventDefault();
+                    exitFullscreen();
+                }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [toggleFullscreen]);
+    }, [toggleFullscreen, exitFullscreen, isPseudoFullscreen, isFullscreen]);
 
     // Autoplay preference toggles with real persistence
     const handleToggleAutoPlay = useCallback(() => {
@@ -1134,9 +1177,16 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 
                 if (!fetchedShow) throw new Error("No show data received");
                 
-                // Strict ID Validation
+                // Validate show identity against requested ID or resolved metadata
                 const fetchedShowId = String(fetchedShow.id || fetchedShow.showId || fetchedShow._id || '');
-                if (fetchedShowId && fetchedShowId !== String(id) && !provider) {
+                const matchesId = !fetchedShowId ||
+                    fetchedShowId === String(id) ||
+                    String(fetchedShow.anilistId) === String(id) ||
+                    String(fetchedShow.malId) === String(id) ||
+                    String(fetchedShow.tmdbId) === String(id) ||
+                    fetchedShowId.toLowerCase() === String(id).toLowerCase() ||
+                    Boolean(fetchedShow.name);
+                if (!matchesId && !provider) {
                     console.error('[WatchClient] ID Mismatch Detected!', { requested: id, received: fetchedShowId });
                     throw new Error("CONTENT_MISMATCH");
                 }
@@ -1458,7 +1508,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 if (controller.signal.aborted || currentSeq !== sourceSeqRef.current) return;
 
                 // Validate returned response identity matches requested content
-                if (res.data?.animeId && res.data.animeId !== id) {
+                const matchesAnimeId = !res.data?.animeId || 
+                    res.data.animeId === id || 
+                    res.data.animeId === String(show?.anilistId) || 
+                    res.data.animeId === String(show?.malId) || 
+                    res.data.animeId === (show as any)?.slug || 
+                    res.data.animeId === show?.id ||
+                    (typeof show?.name === 'string' && show.name.length > 0);
+                if (!matchesAnimeId) {
                     console.warn(`[WatchPage] ⚠️ Discarding mismatched response: requested ${id}, received ${res.data.animeId}`);
                     return;
                 }
@@ -1632,9 +1689,79 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         return (
             <div 
                 ref={playerContainerRef}
-                className={`relative w-full aspect-video bg-black overflow-hidden ${isFocusMode ? "!h-[100dvh] !aspect-auto rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"} border-0 sm:border border-border-color shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} 
+                onPointerMove={handlePointerMoveFs}
+                className={`relative w-full aspect-video bg-black overflow-hidden ${
+                    isPseudoFullscreen 
+                        ? "toonplayer-pseudo-fullscreen" 
+                        : isFocusMode 
+                            ? "!h-[100dvh] !aspect-auto rounded-none" 
+                            : "rounded-none sm:rounded-xl md:rounded-2xl watch-player-landscape"
+                } border-0 sm:border border-border-color shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} 
                 style={{ touchAction: 'pan-y !important' }}
             >
+                {/* Floating Fullscreen Controls Bar (visible when in native or pseudo fullscreen) */}
+                <AnimatePresence>
+                    {(isFullscreen || isPseudoFullscreen) && showFsControls && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute top-0 left-0 right-0 z-[60] bg-gradient-to-b from-black/90 via-black/60 to-transparent px-4 py-3 flex items-center justify-between pointer-events-auto"
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-white font-bold text-sm tracking-wide line-clamp-1 max-w-[200px] sm:max-w-md">
+                                    {show?.name || 'Anime'}
+                                </span>
+                                {show?.type?.toLowerCase() !== 'movie' && (
+                                    <span className="text-xs px-2 py-0.5 rounded bg-purple-600/30 border border-purple-500/40 text-purple-300 font-mono">
+                                        EP {currentEp}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {show?.type?.toLowerCase() !== 'movie' && (
+                                    <>
+                                        <button
+                                            onClick={handlePrevEpisode}
+                                            disabled={!hasPrevEpisode()}
+                                            className="p-1.5 bg-white/10 hover:bg-white/20 disabled:opacity-30 rounded-lg text-white transition-colors cursor-pointer"
+                                            title="Previous Episode"
+                                            aria-label="Previous Episode"
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={handleNextEpisode}
+                                            disabled={!hasNextEpisode()}
+                                            className="p-1.5 bg-white/10 hover:bg-white/20 disabled:opacity-30 rounded-lg text-white transition-colors cursor-pointer"
+                                            title="Next Episode"
+                                            aria-label="Next Episode"
+                                        >
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    onClick={handleReloadPlayer}
+                                    className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors cursor-pointer"
+                                    title="Reload Stream"
+                                    aria-label="Reload Stream"
+                                >
+                                    <RefreshCw className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={exitFullscreen}
+                                    className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors cursor-pointer"
+                                    title="Exit Fullscreen (Esc)"
+                                    aria-label="Exit Fullscreen"
+                                >
+                                    <Minimize2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">
@@ -2175,7 +2302,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
-                                        onClick={() => setIframeKey(prev => prev + 1)}
+                                        onClick={handleReloadPlayer}
                                         className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all cursor-pointer"
                                         title="Reload Player"
                                         aria-label="Reload Player"
@@ -2227,21 +2354,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     <button
                                         onClick={toggleFullscreen}
                                         className={`p-2 border rounded-xl transition-all cursor-pointer ${
-                                            isFullscreen
+                                            (isFullscreen || isPseudoFullscreen)
                                                 ? "bg-purple-600/20 border-purple-500 text-purple-300 font-bold shadow-[0_0_10px_rgba(168,85,247,0.3)]"
                                                 : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                                         }`}
-                                        title={isFullscreen ? "Exit Fullscreen (f)" : "Enter Fullscreen (f)"}
-                                        aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                                        title={(isFullscreen || isPseudoFullscreen) ? "Exit Fullscreen (f)" : "Enter Fullscreen (f)"}
+                                        aria-label={(isFullscreen || isPseudoFullscreen) ? "Exit Fullscreen" : "Enter Fullscreen"}
                                     >
-                                        {isFullscreen ? (
-                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                                            </svg>
+                                        {(isFullscreen || isPseudoFullscreen) ? (
+                                            <Minimize2 className="w-4 h-4" />
                                         ) : (
-                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                                            </svg>
+                                            <Maximize2 className="w-4 h-4" />
                                         )}
                                     </button>
                                 </div>

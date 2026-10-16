@@ -8,6 +8,7 @@ export interface PlayerProps {
   isLoading?: boolean;
   sourceError?: boolean;
   activeServerName?: string;
+  reloadKey?: number;
   onRetryAll?: () => void;
   onLoad?: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
   onError?: () => void;
@@ -20,6 +21,7 @@ export const VideoEmbed = React.memo(function VideoEmbed({
   url,
   title = "ToonPlayer Stream",
   className = "absolute inset-0 w-full h-full border-0",
+  reloadKey = 0,
   onLoad,
   onError,
   iframeRef,
@@ -27,6 +29,7 @@ export const VideoEmbed = React.memo(function VideoEmbed({
   url: string;
   title?: string;
   className?: string;
+  reloadKey?: number;
   onLoad?: (e: React.SyntheticEvent<HTMLIFrameElement>) => void;
   onError?: () => void;
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
@@ -50,7 +53,7 @@ export const VideoEmbed = React.memo(function VideoEmbed({
   return (
     <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
       <iframe
-        key={url}
+        key={`${url}-${reloadKey}`}
         ref={iframeRef}
         src={url}
         className={className}
@@ -63,13 +66,14 @@ export const VideoEmbed = React.memo(function VideoEmbed({
       />
     </div>
   );
-}, (prev, next) => prev.url === next.url);
+}, (prev, next) => prev.url === next.url && prev.reloadKey === next.reloadKey);
 
 export const Player = React.memo(function Player({
   currentServerUrl,
   isLoading = false,
   sourceError = false,
   activeServerName = "Server",
+  reloadKey = 0,
   onRetryAll,
   onLoad,
   onError,
@@ -117,11 +121,11 @@ export const Player = React.memo(function Player({
     );
   }
 
-  // Clean iframe player with stable key based on currentServerUrl
+  // Clean iframe player with stable key based on currentServerUrl and reloadKey
   return (
     <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
       <iframe
-        key={currentServerUrl}
+        key={`${currentServerUrl}-${reloadKey}`}
         ref={iframeRef}
         src={currentServerUrl || ""}
         className={className}
@@ -138,7 +142,8 @@ export const Player = React.memo(function Player({
   return (
     prevProps.currentServerUrl === nextProps.currentServerUrl &&
     prevProps.isLoading === nextProps.isLoading &&
-    prevProps.sourceError === nextProps.sourceError
+    prevProps.sourceError === nextProps.sourceError &&
+    prevProps.reloadKey === nextProps.reloadKey
   );
 });
 

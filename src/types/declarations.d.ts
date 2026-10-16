@@ -237,6 +237,10 @@ declare module 'lucide-react' {
     export const Target: LucideIcon;
     export const Rocket: LucideIcon;
     export const Map: LucideIcon;
+    export const Maximize: LucideIcon;
+    export const Maximize2: LucideIcon;
+    export const Minimize: LucideIcon;
+    export const Minimize2: LucideIcon;
 }
 
 declare module 'date-fns' {

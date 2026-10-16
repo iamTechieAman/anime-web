@@ -2417,3 +2417,60 @@ textarea:focus-visible {
 .ease-apple {
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* ──────────────────────────────────────────────────────────
+   CROSS-BROWSER FULLSCREEN & RESPONSIVE PLAYBACK STYLES
+   ────────────────────────────────────────────────────────── */
+:fullscreen,
+:-webkit-full-screen,
+:-moz-full-screen,
+:-ms-fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  background: #000000 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* Pseudo-fullscreen fallback for iOS Safari where div.requestFullscreen is unsupported */
+.toonplayer-pseudo-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100dvw !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  z-index: 99999 !important;
+  background: #000000 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Mobile landscape cinematic docking (height <= 520px) */
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 1024px) {
+  .watch-player-landscape {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100dvw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    z-index: 90 !important;
+    border-radius: 0 !important;
+  }
+}
