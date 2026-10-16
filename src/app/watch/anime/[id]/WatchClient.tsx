@@ -1303,11 +1303,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 setServers(allServers);
                 setServersKey(`${currentEp}-${mode}`);
 
-                // Pick first available server immediately
+                // Pick first available server immediately if none selected or current invalid
                 if (allServers.length > 0) {
-                    const currentExists = allServers.find((s: any) => s.serverId === selectedServer);
-                    if (!currentExists && manualServerRef.current !== selectedServer) {
-                        const newServer = nativeServers[0]?.serverId || allServers[0].serverId;
+                    const currentValid = allServers.some((s: any) => s.serverId === selectedServer);
+                    const manualValid = manualServerRef.current && allServers.some((s: any) => s.serverId === manualServerRef.current);
+                    
+                    if (!currentValid) {
+                        const newServer = (manualValid ? manualServerRef.current : (nativeServers[0]?.serverId || allServers[0].serverId)) as string;
                         console.log(`[GlobalClickDebugger] 🎬 PLAYER INITIALIZED ID (Anime): ${id} on Server: ${newServer}`);
                         setSelectedServer(newServer);
                     }
@@ -1320,7 +1322,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 const fallbackList = [...emergencyEmbeds, ...movieServersList];
                 setServers(fallbackList);
                 setServersKey(`${currentEp}-${mode}`);
-                if (fallbackList.length > 0 && !selectedServer) {
+                if (fallbackList.length > 0 && (!selectedServer || !fallbackList.some(s => s.serverId === selectedServer))) {
                     setSelectedServer(fallbackList[0].serverId);
                 }
             } finally {
