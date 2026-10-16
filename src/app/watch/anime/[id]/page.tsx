@@ -19,18 +19,46 @@ interface PageProps {
 
 async function fetchAnimeShow(id: string) {
     try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
         const res = await fetchWithTimeout(
-            fetch(`${SITE_URL}/api/anime/episodes?id=${encodeURIComponent(id)}`, {
+            fetch(`${baseUrl}/api/anime/episodes?id=${encodeURIComponent(id)}`, {
                 next: { revalidate: 3600 },
             }),
             3000
         );
         if (res.ok) {
             const data = await res.json();
-            return data.show || null;
+            if (data.show && data.show.name && !/^\d+$/.test(data.show.name)) {
+                return data.show;
+            }
         }
     } catch (e) {
-        console.warn(`[SEO] Failed to fetch anime metadata for ${id}:`, e);
+        console.warn(`[SEO] Failed to fetch anime metadata via API for ${id}:`, e);
+    }
+
+    // Direct AniList fallback for numeric IDs
+    if (/^\d+$/.test(id)) {
+        try {
+            const query = `query ($id: Int) { Media (id: $id, type: ANIME) { title { english userPreferred romaji } description coverImage { large } } }`;
+            const res = await fetch('https://graphql.anilist.co', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables: { id: parseInt(id, 10) } }),
+                signal: AbortSignal.timeout(3000),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const media = data?.data?.Media;
+                if (media) {
+                    const realTitle = media.title?.english || media.title?.userPreferred || media.title?.romaji || 'Anime';
+                    return {
+                        name: realTitle,
+                        description: media.description || '',
+                        thumbnail: media.coverImage?.large || '',
+                    };
+                }
+            }
+        } catch (_) {}
     }
     return null;
 }
@@ -43,7 +71,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     const show = await fetchAnimeShow(id);
 
     if (!show) {
-        const fallbackTitle = decodeURIComponent(id).replace(/[-_]/g, ' ');
+        const isNumeric = /^\d+$/.test(id);
+        const fallbackTitle = isNumeric ? 'Anime' : decodeURIComponent(id).replace(/[-_]/g, ' ');
         const fallbackUrl = episodeNum
             ? `${SITE_URL}/watch/anime/${id}?ep=${episodeNum}`
             : `${SITE_URL}/watch/anime/${id}`;

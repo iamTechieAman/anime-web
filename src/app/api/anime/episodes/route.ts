@@ -1,20 +1,31 @@
 import { NextResponse } from "next/server";
 import { AnimeProviderManager } from "@/lib/providers/AnimeProviderManager";
+import { ProviderName } from "@/lib/providers";
+import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
 
 export const revalidate = 1800;
 
 // Helper to query AniList GraphQL for metadata and search title
 async function fetchAniListMetadata(anilistId: number) {
+    const cKey = cacheKey.anilistMeta(anilistId.toString());
+    const cached = animeCache.get<any>(cKey);
+    if (cached) return cached;
+
     const query = `
     query ($id: Int) {
       Media (id: $id, type: ANIME) {
+        id
         idMal
         title {
           english
           romaji
           userPreferred
+          native
         }
         description
+        episodes
+        status
+        format
         coverImage {
           extraLarge
           large
@@ -28,10 +39,14 @@ async function fetchAniListMetadata(anilistId: number) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query, variables: { id: anilistId } }),
-            signal: AbortSignal.timeout(4000)
+            signal: AbortSignal.timeout(5000)
         });
         const data = await res.json();
-        return data?.data?.Media || null;
+        const media = data?.data?.Media || null;
+        if (media) {
+            animeCache.set(cKey, media, TTL.ANILIST_META);
+        }
+        return media;
     } catch (err) {
         console.error(`[Episodes Route] AniList GraphQL fetch failed:`, err);
         return null;
@@ -50,8 +65,6 @@ function cleanSearchTitle(title: string): string {
         .replace(/\s+/g, " ") // Collapse spaces
         .trim();
 }
-
-import { ProviderName } from "@/lib/providers";
 
 function normalizeProvider(name?: string | null): ProviderName | undefined {
     if (!name) return undefined;
@@ -93,73 +106,91 @@ export async function GET(request: Request) {
 
     try {
         if (isNumeric) {
-            // 1. Try Consumet first for AniList IDs
-            try {
-                info = await AnimeProviderManager.getInfo(id, preferredProvider || 'consumet');
-            } catch (err: any) {
-                console.warn(`[Episodes] Consumet failed for AniList ID ${id}: ${err.message}. Trying HiAnime mapping fallback...`);
+            const anilistNum = parseInt(id, 10);
+            aniListMeta = await fetchAniListMetadata(anilistNum);
+
+            // 1. If we have real AniList metadata, use its authentic titles to search for provider episodes
+            if (aniListMeta) {
+                try {
+                    const primaryTitle = cleanSearchTitle(aniListMeta.title?.english || aniListMeta.title?.romaji || '');
+                    if (primaryTitle) {
+                        const searchPromise = async () => {
+                            const searchResults = await AnimeProviderManager.search(primaryTitle);
+                            if (searchResults && searchResults.length > 0) {
+                                const matchedId = searchResults[0].id;
+                                const matchedProvider = (searchResults[0] as any).providerId || 'hianime';
+                                const fetchedInfo = await AnimeProviderManager.getInfo(matchedId, matchedProvider);
+                                if (fetchedInfo && Array.isArray(fetchedInfo.episodes) && fetchedInfo.episodes.length > 0) {
+                                    return fetchedInfo;
+                                }
+                            }
+                            return null;
+                        };
+
+                        info = await Promise.race([
+                            searchPromise(),
+                            new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500))
+                        ]);
+                        if (info) fallbackUsed = true;
+                    }
+                } catch (searchErr) {
+                    console.warn(`[Episodes] Provider search skipped/failed:`, searchErr);
+                }
             }
 
-            // 2. Fallback to AniList GraphQL -> HiAnime search mapping if Consumet failed
-            if (!info) {
-                aniListMeta = await fetchAniListMetadata(parseInt(id));
+            // 2. If provider search did not yield real episodes, construct authoritative episode list from AniList
+            if (!info || !Array.isArray(info.episodes) || info.episodes.length === 0) {
                 if (aniListMeta) {
-                    const searchTitles = [
-                        aniListMeta.title.english,
-                        aniListMeta.title.userPreferred,
-                        aniListMeta.title.romaji
-                    ].filter(Boolean) as string[];
+                    const realName = aniListMeta.title?.english || aniListMeta.title?.userPreferred || aniListMeta.title?.romaji || 'Unknown Anime';
+                    const episodeCount = aniListMeta.episodes && aniListMeta.episodes > 0 ? aniListMeta.episodes : 12;
+                    const defaultImg = aniListMeta.bannerImage || aniListMeta.coverImage?.extraLarge || aniListMeta.coverImage?.large || "";
 
-                    for (const title of searchTitles) {
-                        const cleaned = cleanSearchTitle(title);
-                        console.log(`[Episodes] Searching HiAnime for title: "${cleaned}" (original: "${title}")`);
-                        const searchResults = await AnimeProviderManager.search(cleaned);
-                        if (searchResults && searchResults.length > 0) {
-                            const matchedId = searchResults[0].id;
-                            console.log(`[Episodes] Found HiAnime match! ID: ${matchedId}`);
-                            info = await AnimeProviderManager.getInfo(matchedId, 'hianime');
-                            if (info) {
-                                fallbackUsed = true;
-                                break;
-                            }
-                        }
-                    }
+                    const episodesList = Array.from({ length: episodeCount }, (_, i) => ({
+                        id: `${id}?ep=${i + 1}`,
+                        number: i + 1,
+                        title: `Episode ${i + 1}`,
+                        image: defaultImg,
+                        description: `Episode ${i + 1} of ${realName}`,
+                        isFiller: false,
+                        hasDub: true
+                    }));
+
+                    const show = {
+                        id: id,
+                        showId: id,
+                        _id: id,
+                        name: realName,
+                        title: realName,
+                        englishName: aniListMeta.title?.english || realName,
+                        romajiName: aniListMeta.title?.romaji || null,
+                        nativeName: aniListMeta.title?.native || null,
+                        thumbnail: aniListMeta.coverImage?.extraLarge || aniListMeta.coverImage?.large || defaultImg,
+                        bannerImage: aniListMeta.bannerImage || "",
+                        anilistId: anilistNum,
+                        malId: aniListMeta.idMal || null,
+                        description: aniListMeta.description || "",
+                        totalEpisodes: episodeCount,
+                        format: aniListMeta.format || "TV",
+                        status: aniListMeta.status || "FINISHED",
+                        availableEpisodesDetail: {
+                            sub: episodesList,
+                            dub: episodesList
+                        },
+                        provider: 'anilist',
+                    };
+
+                    console.log(`[Episodes] Successfully resolved ${episodeCount} episodes via AniList for "${realName}" (MAL: ${aniListMeta.idMal})`);
+                    return NextResponse.json({ show });
                 }
+
+                return NextResponse.json({ error: "Anime not found via providers" }, { status: 404 });
             }
         } else {
             // Non-numeric ID: Query preferred provider or default to hianime
             info = await AnimeProviderManager.getInfo(id, preferredProvider || 'hianime');
         }
 
-        if (!info) {
-            // As a last-resort safety net, if AniList resolved but scraper returned nothing, create mock episodes list so page doesn't hang
-            if (isNumeric && aniListMeta) {
-                const mockEpisodes = Array.from({ length: 12 }, (_, i) => ({
-                    id: `${id}?ep=${i + 1}`,
-                    number: i + 1,
-                    title: `Episode ${i + 1}`,
-                    image: aniListMeta.coverImage?.extraLarge || aniListMeta.coverImage?.large || "",
-                    description: `Episode ${i + 1} of ${aniListMeta.title.english || aniListMeta.title.userPreferred}`,
-                }));
-                const show = {
-                    id: id,
-                    showId: id,
-                    _id: id,
-                    name: aniListMeta.title.english || aniListMeta.title.userPreferred || 'Unknown',
-                    englishName: aniListMeta.title.english || null,
-                    romajiName: aniListMeta.title.romaji || null,
-                    thumbnail: aniListMeta.coverImage?.extraLarge || aniListMeta.coverImage?.large || "",
-                    anilistId: parseInt(id),
-                    malId: aniListMeta.idMal || null,
-                    description: aniListMeta.description || "",
-                    availableEpisodesDetail: { 
-                        sub: mockEpisodes, 
-                        dub: mockEpisodes 
-                    },
-                    provider: preferredProvider || 'hianime_fallback',
-                };
-                return NextResponse.json({ show });
-            }
+        if (!info || !Array.isArray(info.episodes) || info.episodes.length === 0) {
             return NextResponse.json({ error: "Anime not found via providers" }, { status: 404 });
         }
 
@@ -170,24 +201,28 @@ export async function GET(request: Request) {
             title: ep.title,
             image: ep.image || (aniListMeta?.coverImage?.extraLarge || aniListMeta?.coverImage?.large || info.image || ""),
             description: ep.description || `Episode ${ep.number} of ${info.title}`,
-            isFiller: ep.isFiller,
-            hasDub: ep.hasDub,
+            isFiller: ep.isFiller || false,
+            hasDub: ep.hasDub ?? true,
         }));
+
+        const resolvedName = aniListMeta?.title?.english || aniListMeta?.title?.userPreferred || info.title || 'Unknown Anime';
 
         const show = {
             id: id,
             showId: id,
-            _id: id, // Stay consistent across all consumers
-            name: info.title || aniListMeta?.title?.english || aniListMeta?.title?.userPreferred || 'Unknown',
+            _id: id,
+            name: resolvedName,
+            title: resolvedName,
             englishName: aniListMeta?.title?.english || info.title || null,
             romajiName: aniListMeta?.title?.romaji || info.romajiName || null,
             thumbnail: aniListMeta?.coverImage?.extraLarge || aniListMeta?.coverImage?.large || info.image || "",
-            anilistId: isNumeric ? parseInt(id) : (info.anilistId || null),
+            bannerImage: aniListMeta?.bannerImage || "",
+            anilistId: isNumeric ? parseInt(id, 10) : (info.anilistId || null),
             malId: aniListMeta?.idMal || info.malId || null,
             description: info.description || aniListMeta?.description || "",
+            totalEpisodes: info.totalEpisodes || episodesList.length,
             availableEpisodesDetail: { 
                 sub: episodesList, 
-                // Pass same list to dub
                 dub: episodesList
             },
             provider: fallbackUsed ? 'hianime' : (preferredProvider || info.provider || 'consumet'),

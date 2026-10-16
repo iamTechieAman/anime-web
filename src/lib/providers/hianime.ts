@@ -146,26 +146,8 @@ export class HiAnimeProvider implements AnimeProvider {
                 otherNames: seasons.map((s: any) => s.title).filter(Boolean)
             };
         } catch (error) {
-            console.error('[HiAnime] GetInfo failed, returning fallback metadata:', error);
-            // Graceful fallback to prevent watch page load crash
-            const fallbackTitle = id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-            const mockEpisodes = Array.from({ length: 24 }, (_, i) => ({
-                id: `${id}?ep=${i + 1}`,
-                number: i + 1,
-                title: `Episode ${i + 1}`
-            }));
-            return {
-                id,
-                title: fallbackTitle,
-                image: '/placeholder.jpg',
-                description: 'Metadata retrieval from primary provider failed. Streaming remains active via fallback servers.',
-                episodes: mockEpisodes,
-                totalEpisodes: 24,
-                availableEpisodes: { sub: 24, dub: 24 },
-                type: 'TV',
-                status: 'Releasing',
-                otherNames: []
-            };
+            console.error('[HiAnime] GetInfo failed:', error);
+            throw error;
         }
     }
 

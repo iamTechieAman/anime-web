@@ -89,7 +89,6 @@ export async function GET(request: Request) {
             ]);
         } catch (resolverErr: any) {
             console.warn(`[SourceRoute] ⚠️ Resolver warning for ${cleanId} ep ${cleanEp}:`, resolverErr?.message || resolverErr);
-            // Fallback to empty sources resolution instead of throwing
             resolution = {
                 sources: [],
                 providerResults: [],
@@ -97,6 +96,20 @@ export async function GET(request: Request) {
                 tier: 4,
                 errorSummary: resolverErr?.message || "Timeout/Partial Failure"
             };
+        }
+
+        // If scrapers returned 0 sources (or timed out), immediately invoke guaranteed multi-embed fallbacks
+        if (!resolution || !resolution.sources || resolution.sources.length === 0) {
+            console.log(`[SourceRoute] ⚡ No direct scraper sources, generating embed fallbacks for ${cleanId} ep ${cleanEp}`);
+            const embedFallback = await AnimeProviderManager.generateEmbedFallbacks(cleanId, cleanEp, mode, parsedMalId);
+            if (embedFallback && embedFallback.sources && embedFallback.sources.length > 0) {
+                resolution = {
+                    sources: embedFallback.sources,
+                    providerResults: embedFallback.results,
+                    resolvedBy: ["embed-fallback"],
+                    tier: 4,
+                };
+            }
         }
 
         // STEP 4: NORMALIZE & ENFORCE FALLBACK EMBED URLS

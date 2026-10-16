@@ -1,6 +1,7 @@
 import { AnimeProvider, ProviderName, AnimeSearchResult, AnimeDetails, VideoSource, ProviderCapabilities, ProviderResult, ProviderError, ProviderErrorCode, ProviderSourceResult, ProviderSourceStatus, SourceResolution } from './types';
 import { getProvider } from './index';
 import { providerHealth, ProviderHealthStatus, ProviderOperationType } from '../provider-health';
+import { animeCache, cacheKey } from '../anime-cache';
 
 // Capability configuration for all known providers
 export const PROVIDER_CAPABILITIES: Record<ProviderName, ProviderCapabilities> = {
@@ -940,7 +941,7 @@ export class AnimeProviderManager {
     /**
      * Generate Tier 4 embed fallback sources from MAL ID.
      */
-    private static async generateEmbedFallbacks(
+    public static async generateEmbedFallbacks(
         cleanId: string,
         cleanEp: string,
         mode: 'sub' | 'dub' | 'raw',
@@ -953,37 +954,42 @@ export class AnimeProviderManager {
         try {
             let finalMalId = fallbackMalId;
 
-            // If cleanId looks numeric, try it as AniList ID → resolve MAL ID
+            // If cleanId is numeric and we don't have fallbackMalId, look up cache or AniList GraphQL
             if (!finalMalId && /^\d+$/.test(cleanId)) {
-                finalMalId = parseInt(cleanId, 10);
+                try {
+                    const cachedMeta = animeCache.get<any>(cacheKey.anilistMeta(cleanId));
+                    if (cachedMeta?.idMal) {
+                        finalMalId = cachedMeta.idMal;
+                    } else {
+                        const query = `query ($id: Int) { Media (id: $id, type: ANIME) { idMal } }`;
+                        const res = await Promise.race([
+                            fetch('https://graphql.anilist.co', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ query, variables: { id: parseInt(cleanId, 10) } }),
+                                signal: AbortSignal.timeout(3000),
+                            }),
+                            new Promise<Response>((_, reject) => setTimeout(() => reject(new Error('AniList GraphQL Timeout')), 3000)),
+                        ]);
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data?.data?.Media?.idMal) finalMalId = data.data.Media.idMal;
+                        }
+                    }
+                } catch (_) {}
             }
 
-            // Last resort: look up via getInfo
-            if (!finalMalId) {
+            // Last resort: look up via getInfo if cleanId is a slug
+            if (!finalMalId && !/^\d+$/.test(cleanId)) {
                 try {
                     const info = await this.getInfo(cleanId);
                     if (info?.malId) finalMalId = info.malId;
                 } catch (_) {}
             }
 
-            // Try AniList GraphQL to resolve MAL ID if we still only have AniList ID
+            // If still no MAL ID found and cleanId is numeric, use cleanId as last fallback
             if (!finalMalId && /^\d+$/.test(cleanId)) {
-                try {
-                    const query = `query ($id: Int) { Media (id: $id, type: ANIME) { idMal } }`;
-                    const res = await Promise.race([
-                        fetch('https://graphql.anilist.co', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ query, variables: { id: parseInt(cleanId, 10) } }),
-                            signal: AbortSignal.timeout(3000),
-                        }),
-                        new Promise<Response>((_, reject) => setTimeout(() => reject(new Error('AniList GraphQL Timeout')), 3000)),
-                    ]);
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data?.data?.Media?.idMal) finalMalId = data.data.Media.idMal;
-                    }
-                } catch (_) {}
+                finalMalId = parseInt(cleanId, 10);
             }
 
             if (!finalMalId) {

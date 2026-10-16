@@ -76,6 +76,7 @@ export const TTL = {
 // Cache key builders
 export const cacheKey = {
     anilist: (id: string) => `al:${id}`,
+    anilistMeta: (id: string) => `al:meta:${id}`,
     tmdbDetails: (id: string, type: string) => `tmdb:details:${type}:${id}`,
     tmdbSeason: (id: string, season: string) => `tmdb:season:${id}:${season}`,
     episodes: (animeId: string, provider: string) => `ep:${provider}:${animeId}`,

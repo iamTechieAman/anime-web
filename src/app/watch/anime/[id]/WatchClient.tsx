@@ -1238,36 +1238,42 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
         const emergencyEmbeds: any[] = [];
         
-        if (numericAnilistId) {
-            emergencyEmbeds.push({
-                serverId: "emergency_vidsrc",
-                serverName: "VidSrc Anime",
-                type: mode,
-                badge: "Anime",
-                isMovieServer: true,
-                isEmergency: true,
-                getUrl: () => `https://vidsrc.to/embed/anime/${numericAnilistId}/${currentEp}`
-            });
-            emergencyEmbeds.push({
-                serverId: "emergency_vidsrc_me",
-                serverName: "VidSrc Me",
-                type: mode,
-                badge: "Backup",
-                isMovieServer: true,
-                isEmergency: true,
-                getUrl: () => `https://vidsrc.me/embed/anime?anilist=${numericAnilistId}&episode=${currentEp}`
-            });
-        }
-
         if (numericMalId) {
             emergencyEmbeds.push({
+                serverId: "emergency_autoembed",
+                serverName: "AutoEmbed",
+                type: mode,
+                badge: "Fast HD",
+                isMovieServer: true,
+                isEmergency: true,
+                getUrl: () => `https://player.autoembed.cc/embed/anime/${numericMalId}/${currentEp}`
+            });
+            emergencyEmbeds.push({
+                serverId: "emergency_vidsrc_cc",
+                serverName: "VidSrc CC",
+                type: mode,
+                badge: "VidSrc",
+                isMovieServer: true,
+                isEmergency: true,
+                getUrl: () => `https://vidsrc.cc/v2/embed/anime/${numericMalId}/${currentEp}`
+            });
+            emergencyEmbeds.push({
                 serverId: "emergency_mal",
-                serverName: "MAL Stream",
+                serverName: "VidSrc Me",
                 type: mode,
                 badge: "MAL",
                 isMovieServer: true,
                 isEmergency: true,
                 getUrl: () => `https://vidsrc.me/embed/anime?mal=${numericMalId}&episode=${currentEp}`
+            });
+            emergencyEmbeds.push({
+                serverId: "emergency_vidsrc_to",
+                serverName: "VidSrc TO",
+                type: mode,
+                badge: "Backup",
+                isMovieServer: true,
+                isEmergency: true,
+                getUrl: () => `https://vidsrc.to/embed/anime/${numericMalId}/${currentEp}`
             });
         }
 
@@ -1291,8 +1297,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     nativeServers = res.data.servers;
                 }
                 
-                // ALWAYS include movie servers — they are the guaranteed fallback
-                const allServersRaw = [...nativeServers, ...movieServersList, ...emergencyEmbeds];
+                // ALWAYS include emergency anime embeds and movie servers — guaranteed fallbacks
+                const allServersRaw = [...nativeServers, ...emergencyEmbeds, ...movieServersList];
                 const allServers = ServerHealthManager.filterAndSortServers(allServersRaw, 'serverId');
                 setServers(allServers);
                 setServersKey(`${currentEp}-${mode}`);
@@ -1311,7 +1317,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             } catch (err: any) {
                 if (axios.isCancel(err)) return;
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
-                const fallbackList = [...movieServersList, ...emergencyEmbeds];
+                const fallbackList = [...emergencyEmbeds, ...movieServersList];
                 setServers(fallbackList);
                 setServersKey(`${currentEp}-${mode}`);
                 if (fallbackList.length > 0 && !selectedServer) {
@@ -1875,8 +1881,53 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </AnimatePresence>
                     </div>
                 ) : (
-                    <div className="absolute inset-0 text-[var(--text-muted)] text-sm flex flex-col items-center justify-center gap-3">
-                        <p>Initializing...</p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center p-6 bg-black/70 backdrop-blur-sm z-30">
+                        {loadingServers || loadingSource ? (
+                            <>
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-accent/20 blur-xl rounded-full scale-150 animate-pulse" />
+                                    <Loader2 className="w-10 h-10 animate-spin text-accent relative z-10" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-white text-base tracking-wide uppercase">Connecting to Stream</p>
+                                    <p className="text-xs text-white/50 mt-1">{loadingStatus || "Resolving playback server..."}</p>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <AlertTriangle className="w-10 h-10 text-amber-400/80" />
+                                <div className="max-w-md">
+                                    <p className="font-bold text-white text-base">Select a Playback Server</p>
+                                    <p className="text-xs text-white/60 mt-1">Please select an available stream server below or tap Retry to reload.</p>
+                                </div>
+                                <div className="flex flex-wrap justify-center gap-2 mt-2 max-w-sm">
+                                    {servers.slice(0, 3).map((srv) => (
+                                        <button
+                                            key={srv.serverId}
+                                            onClick={() => {
+                                                manualServerRef.current = srv.serverId;
+                                                setSelectedServer(srv.serverId);
+                                            }}
+                                            className="px-3.5 py-1.5 bg-accent/20 border border-accent/40 hover:bg-accent/30 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+                                        >
+                                            <Play className="w-3 h-3 fill-current" /> {srv.serverName}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => {
+                                            const firstSrv = servers[0]?.serverId;
+                                            if (firstSrv) {
+                                                manualServerRef.current = firstSrv;
+                                                setSelectedServer(firstSrv);
+                                            }
+                                        }}
+                                        className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+                                    >
+                                        <RefreshCw className="w-3 h-3" /> Retry Stream
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
