@@ -10,12 +10,14 @@ import { useMobileUI } from "@/context/MobileUIContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { useAdBlock } from "@/context/AdBlockContext";
 import { formatDistanceToNow } from 'date-fns';
-import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser, useClerk } from "@clerk/nextjs";
 import Logo from "@/components/Logo";
 import Fuse from "fuse.js";
 import CustomProfileMenu from "@/components/CustomProfileMenu";
 import Image from "next/image";
 import { useUserStore } from "@/store/userStore";
+import { isClerkConfigured } from "@/lib/clerkConfig";
+import toast from "react-hot-toast";
 
 const GENRES = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Drama","Family","Fantasy","History","Horror","Music","Mystery","Romance","Science Fiction","Thriller","War","Western"];
 const FORMATS = ["TV","Movie","OVA","ONA","Special"];
@@ -38,15 +40,16 @@ export default function Header() {
   const { activeProfileId } = useUserStore();
 
   const isCurrentCategory = (item: typeof CATEGORY_ITEMS[0]) => {
-    if (!pathname) return false;
+    if (pathname !== "/browse") return false;
     const type = searchParams?.get("type");
     const genreId = searchParams?.get("genre_id");
     const sortBy = searchParams?.get("sort_by");
+    const isTrending = (searchParams?.get("trending") === "true") || (Boolean(sortBy?.includes("popularity")) && !genreId && (!type || type === "all"));
 
-    if (item.key === "anime") return pathname === "/browse" && type === "anime";
-    if (item.key === "cartoons") return pathname === "/browse" && (genreId === "16" || type === "cartoon");
-    if (item.key === "movies") return pathname === "/browse" && type === "movie";
-    if (item.key === "trending") return pathname === "/browse" && Boolean(sortBy?.includes("popularity"));
+    if (item.key === "anime") return type === "anime";
+    if (item.key === "cartoons") return genreId === "16" || type === "cartoon";
+    if (item.key === "trending") return isTrending;
+    if (item.key === "movies") return type === "movie" && !isTrending;
     return false;
   };
 
@@ -77,7 +80,31 @@ export default function Header() {
   const { setShowProfileSettings } = useMobileUI();
   const { isAdBlockEnabled, toggleAdBlock } = useAdBlock();
   const { isLoaded: isUserLoaded, isSignedIn } = useUser();
+  const { openSignIn } = useClerk();
   const [isMounted, setIsMounted] = useState(false);
+
+  const handleLoginClick = () => {
+    if (!isClerkConfigured()) {
+      toast("Account login is currently unavailable in this environment. You can continue browsing as a guest.", {
+        icon: "ℹ️",
+        duration: 5000,
+        style: { background: "#1c1c24", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }
+      });
+      return;
+    }
+    try {
+      if (openSignIn) {
+        openSignIn({
+          fallbackRedirectUrl: window.location.pathname || "/",
+          signUpFallbackRedirectUrl: window.location.pathname || "/",
+        });
+      } else {
+        router.push("/login", { scroll: false });
+      }
+    } catch {
+      router.push("/login", { scroll: false });
+    }
+  };
   const [globalCatalog, setGlobalCatalog] = useState<any[]>([]);
   const fuseRef = useRef<Fuse<any>|null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -217,17 +244,32 @@ export default function Header() {
     setShowFilters(false);
   };
 
+  const [isSidebarPinned, setIsSidebarPinned] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("toonplayer_sidebar_pinned") === "true") {
+        setIsSidebarPinned(true);
+      }
+    } catch {}
+    const onPin = (e: any) => setIsSidebarPinned(Boolean(e.detail));
+    window.addEventListener("sidebarPinnedChange", onPin);
+    return () => window.removeEventListener("sidebarPinnedChange", onPin);
+  }, []);
+
   const isWatchPage = pathname?.startsWith('/watch');
-  const showSidebar = deviceMode==="pc" && !isWatchPage;
+  const showSidebar = !isWatchPage;
   if (isWatchPage) return null;
+
+  const headerLeftClass = showSidebar 
+    ? (isSidebarPinned ? "left-0 md:left-[260px]" : "left-0 md:left-[72px]")
+    : "left-0";
 
   return (
     <>
-    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] md:pt-4 pb-0 h-[72px] flex items-center px-3 sm:px-4 md:px-5 transition-all duration-[250ms] ease-apple ${
-      showSidebar ? "left-0 md:left-[80px]" : "left-0"
-    } ${isScrolled
-      ? "bg-[rgba(8,8,12,0.72)] backdrop-blur-[24px] border-b border-white/[0.05]"
-      : "bg-gradient-to-b from-[rgba(5,5,7,0.9)] to-transparent border-b border-transparent"
+    <header className={`fixed top-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] md:pt-0 pb-0 h-[72px] flex items-center px-3 sm:px-4 md:px-6 transition-all duration-[250ms] ease-apple ${headerLeftClass} ${isScrolled
+      ? "bg-[rgba(8,8,12,0.88)] backdrop-blur-[24px] border-b border-white/[0.06] shadow-lg shadow-black/40"
+      : "bg-gradient-to-b from-[rgba(5,5,7,0.92)] to-transparent border-b border-transparent"
     }`}>
 
       <AnimatePresence>
@@ -242,13 +284,13 @@ export default function Header() {
         
         {/* Left Section - Logo */}
         <div className={`flex items-center shrink-0 ${showSidebar ? "md:hidden" : "md:w-[40px] overflow-visible"}`}>
-          <Link href="/" scroll={false} className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none will-change-transform"  onClick={clearSearch} aria-label="ToonPlayer Home">
-            <div className="w-8 h-8 shrink-0 relative hide-scrollbar" style={{filter:"drop-shadow(0 0 8px rgba(249,115,22,0.5))"}}>
+          <Link href="/" scroll={false} className="flex items-center gap-2 shrink-0 active:scale-95 transition-transform select-none will-change-transform" onClick={clearSearch} aria-label="ToonPlayer Home">
+            <div className="w-8 h-8 shrink-0 relative hide-scrollbar" style={{filter:"drop-shadow(0 0 10px rgba(229,9,20,0.5))"}}>
               <Logo />
             </div>
-            <span className="flex flex-col leading-none md:hidden lg:flex">
-              <span className="text-[14px] sm:text-[15px] font-black tracking-tight text-white" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Toon</span>
-              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent-warm" style={{fontFamily:"var(--font-sora,'Sora',sans-serif)",lineHeight:1}}>Player</span>
+            <span className="flex flex-col leading-none md:hidden lg:flex font-sora">
+              <span className="text-[14px] sm:text-[15px] font-black tracking-tight text-white leading-none">Toon</span>
+              <span className="text-[14px] sm:text-[15px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent-warm leading-none">Player</span>
             </span>
           </Link>
         </div>
@@ -264,7 +306,7 @@ export default function Header() {
                 scroll={false}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 select-none whitespace-nowrap ${
                   isActive
-                    ? "bg-gradient-to-r from-accent to-accent-warm text-white shadow-[0_0_12px_var(--accent-glow)] scale-[1.02]"
+                    ? "bg-gradient-to-r from-accent to-accent-warm text-white shadow-[0_0_14px_var(--accent-glow)] scale-[1.02]"
                     : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
                 }`}
               >
@@ -286,18 +328,19 @@ export default function Header() {
 
         {/* Center Section - PC Search Bar */}
         {deviceMode==="pc" && (
-          <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[280px] lg:min-w-[500px] max-w-[900px]">
+          <div className="flex-1 mx-6 hidden md:flex items-center justify-center min-w-[280px] lg:min-w-[480px] max-w-[850px]">
             <button 
               onClick={() => window.dispatchEvent(new Event("openCommandPalette"))}
-              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.04] border border-white/[0.07] rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-[250ms] ease-apple text-left outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="pointer-events-auto w-full flex items-center relative h-10 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-accent/40 rounded-full transition-all duration-[250ms] ease-apple text-left outline-none focus-visible:ring-2 focus-visible:ring-accent group/search shadow-inner"
+              aria-label="Open search command palette"
             >
-              <div className="flex-1 flex items-center min-w-0 pl-4 pr-2 h-full gap-2">
-                <Search className="w-4 h-4 text-zinc-500 shrink-0" />
-                <span className="text-[13px] text-zinc-500 font-medium flex-1 truncate">
-                  Search movies, anime, actors, genres...
+              <div className="flex-1 flex items-center min-w-0 pl-4 pr-3 h-full gap-2.5">
+                <Search className="w-4 h-4 text-zinc-400 group-hover/search:text-accent transition-colors shrink-0" />
+                <span className="text-[13px] text-zinc-400 group-hover/search:text-zinc-300 font-medium flex-1 truncate transition-colors">
+                  Search movies, anime, series, genres...
                 </span>
-                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[10px] text-zinc-400 font-bold select-none">
-                  <span>Ctrl</span><span>K</span>
+                <kbd className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 bg-white/5 border border-white/10 rounded-full text-[10px] text-zinc-400 font-bold select-none group-hover/search:border-accent/30 transition-colors">
+                  <span>⌘</span><span>K</span>
                 </kbd>
               </div>
             </button>
@@ -351,66 +394,88 @@ export default function Header() {
 
           {/* AdBlock */}
           {isMounted && (
-            <button onClick={toggleAdBlock} title={isAdBlockEnabled?"AdBlock ON":"AdBlock OFF"}
-              className={`hidden sm:flex items-center justify-center w-9 h-9 rounded-full border transition-all ${isAdBlockEnabled?'bg-green-500/10 border-green-500/20 text-green-400':'bg-white/[0.04] border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>
+            <button 
+              onClick={toggleAdBlock} 
+              title={isAdBlockEnabled ? "AdBlock ON" : "AdBlock OFF"}
+              aria-label={isAdBlockEnabled ? "AdBlock is ON, click to turn OFF" : "AdBlock is OFF, click to turn ON"}
+              className={`hidden sm:flex items-center justify-center w-9 h-9 rounded-full border transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer ${isAdBlockEnabled ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-white/[0.04] border-white/[0.07] text-zinc-400 hover:text-white'}`}
+            >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {isAdBlockEnabled?<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/>:<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="4" y1="4" x2="20" y2="20"/></>}
+                {isAdBlockEnabled ? <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/> : <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="4" y1="4" x2="20" y2="20"/></>}
               </svg>
             </button>
           )}
 
           {/* Notifications */}
           <div ref={notifRef} className="relative hidden sm:block hide-scrollbar">
-            <button aria-label="Notifications"
-              onClick={()=>{if(!showNotifications){setShowNotifications(true);markAllAsRead();}else setShowNotifications(false);setShowFilters(false);setShowProfileDropdown(false);}}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${showNotifications?'bg-accent/10 border-accent/20 text-accent':'bg-white/[0.04] border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>
+            <button 
+              aria-label="View notifications"
+              onClick={() => {
+                if (!showNotifications) {
+                  setShowNotifications(true);
+                  markAllAsRead();
+                } else {
+                  setShowNotifications(false);
+                }
+                setShowFilters(false);
+                setShowProfileDropdown(false);
+              }}
+              className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer ${showNotifications ? 'bg-accent/15 border-accent/30 text-accent' : 'bg-white/[0.04] border-white/[0.07] text-zinc-400 hover:text-white'}`}
+            >
               <div className="relative hide-scrollbar">
                 <Bell className="w-4 h-4"/>
-                {isMounted&&unreadCount>0&&<span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-overlay)] animate-pulse"/>}
+                {isMounted && unreadCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-overlay)] animate-pulse"/>}
               </div>
             </button>
             <AnimatePresence>
               {showNotifications && (
                 <motion.div initial={{opacity:0,y:8,scale:0.95}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:8,scale:0.95}}
-                  className="absolute top-full right-4 md:-right-2 mt-2 w-[90vw] md:w-[320px] max-w-[320px] bg-[#111113] border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-50">
+                  className="absolute top-full right-4 md:-right-2 mt-2 w-[90vw] md:w-[320px] max-w-[320px] bg-[#111218]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-50">
                   <div className="p-3.5 border-b border-border-color bg-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm">Notifications</span>
-                      {unreadCount>0&&<span className="px-1.5 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-black">{unreadCount}</span>}
+                      <span className="font-bold text-sm text-white">Notifications</span>
+                      {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-black">{unreadCount}</span>}
                     </div>
-                    <button onClick={()=>markAllAsRead()} className="text-[10px] uppercase tracking-widest text-accent font-black">Mark read</button>
+                    <button onClick={() => markAllAsRead()} className="text-[11px] uppercase tracking-wider text-accent font-black hover:underline cursor-pointer">Mark read</button>
                   </div>
                   <div className="max-h-[340px] overflow-y-auto hide-scrollbar">
-                    {notifications.length>0?(
+                    {notifications.length > 0 ? (
                       <div className="divide-y divide-border-color">
-                        {notifications.map((n:any)=>{
-                          const meta:Record<string,{label:string,color:string}>={episodes:{label:'New Episode',color:'text-accent bg-accent/10'},trending:{label:'Trending',color:'text-red-400 bg-red-500/10'},recommendations:{label:'AI Pick',color:'text-cyan-400 bg-cyan-500/10'},watchlist:{label:'Watchlist',color:'text-blue-400 bg-blue-500/10'},community:{label:'Community',color:'text-green-400 bg-green-500/10'},system:{label:'System',color:'text-zinc-400 bg-zinc-500/10'}};
-                          const m=meta[n.category]||meta['system'];
+                        {notifications.map((n: any) => {
+                          const meta: Record<string,{label:string,color:string}> = {
+                            episodes: {label:'New Episode', color:'text-accent bg-accent/10'},
+                            trending: {label:'Trending', color:'text-red-400 bg-red-500/10'},
+                            recommendations: {label:'AI Pick', color:'text-cyan-400 bg-cyan-500/10'},
+                            watchlist: {label:'Watchlist', color:'text-blue-400 bg-blue-500/10'},
+                            community: {label:'Community', color:'text-green-400 bg-green-500/10'},
+                            system: {label:'System', color:'text-zinc-400 bg-zinc-500/10'}
+                          };
+                          const m = meta[n.category] || meta['system'];
                           return (
-                            <div key={n.id} className={`p-3.5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read?'bg-accent/5':''}`} onClick={()=>{markAsRead(n.id);if(n.link)router.push(n.link, { scroll: false });}}>
-                              {!n.read&&<div className="absolute left-0 top-0 bottom-0 w-0.5 bg-accent rounded-r"/>}
+                            <div key={n.id} className={`p-3.5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read ? 'bg-accent/5' : ''}`} onClick={() => { markAsRead(n.id); if (n.link) router.push(n.link, { scroll: false }); }}>
+                              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-accent rounded-r"/>}
                               <div className="flex justify-between items-start mb-1 gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-wider ${m.color}`}>{m.label}</span>
-                                  <h5 className="text-xs font-bold text-white leading-tight mt-0.5 line-clamp-1">{n.title}</h5>
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${m.color}`}>{m.label}</span>
+                                  <h5 className="text-xs font-bold text-white leading-tight mt-1 line-clamp-1">{n.title}</h5>
                                 </div>
-                                <span className="text-[9px] text-[var(--text-muted)] whitespace-nowrap shrink-0">{formatDistanceToNow(n.timestamp,{addSuffix:true}).replace('about ','')}</span>
+                                <span className="text-[10px] text-zinc-500 whitespace-nowrap shrink-0">{formatDistanceToNow(n.timestamp,{addSuffix:true}).replace('about ','')}</span>
                               </div>
-                              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-2">{n.message}</p>
+                              <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">{n.message}</p>
                             </div>
                           );
                         })}
                       </div>
-                    ):(
+                    ) : (
                       <div className="p-8 text-center">
                         <Bell className="w-8 h-8 text-white/10 mx-auto mb-3"/>
-                        <p className="text-sm text-white/50">No notifications</p>
+                        <p className="text-xs text-zinc-400 font-medium">No notifications</p>
                       </div>
                     )}
                   </div>
                   <div className="border-t border-border-color flex divide-x divide-border-color">
-                    <button onClick={()=>{setShowNotifications(false);window.dispatchEvent(new Event("openSettingsModal"));}} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-accent font-black hover:bg-accent/5 transition-all">⚙ Manage</button>
-                    {notifications.length>0&&<button onClick={clearNotifications} className="flex-1 py-2.5 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-black hover:bg-red-500/10 hover:text-red-400 transition-all">Clear All</button>}
+                    <button onClick={() => { setShowNotifications(false); window.dispatchEvent(new Event("openSettingsModal")); }} className="flex-1 py-2.5 text-xs uppercase tracking-wider text-accent font-bold hover:bg-accent/5 transition-all cursor-pointer">⚙ Manage</button>
+                    {notifications.length > 0 && <button onClick={clearNotifications} className="flex-1 py-2.5 text-xs uppercase tracking-wider text-zinc-400 font-bold hover:bg-red-500/10 hover:text-red-400 transition-all cursor-pointer">Clear All</button>}
                   </div>
                 </motion.div>
               )}
@@ -418,18 +483,23 @@ export default function Header() {
           </div>
 
           {/* Auth */}
-          <div className="flex items-center pl-2">
+          <div className="flex items-center gap-2 pl-2">
             {(!isUserLoaded || !isMounted) && <div className="w-16 sm:w-20 h-9 rounded-xl bg-white/[0.05] animate-pulse"/>}
-            {isUserLoaded && isMounted && !activeProfileId && (
-              <button 
-                onClick={() => window.dispatchEvent(new Event("openLoginModal"))}
-                className="h-9 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-accent to-accent-secondary text-white hover:opacity-90 active:scale-95 transition-all font-black text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap"
-              >
-                <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
-              </button>
-            )}
-            {isUserLoaded && isMounted && activeProfileId && (
-              <CustomProfileMenu />
+            {isUserLoaded && isMounted && (
+              <>
+                {!isSignedIn && (
+                  <button 
+                    onClick={handleLoginClick}
+                    className="h-9 px-3.5 sm:px-4 rounded-xl bg-gradient-to-r from-accent to-accent-secondary text-white hover:opacity-90 active:scale-95 transition-all font-bold text-xs flex items-center gap-1.5 shadow-[0_4px_16px_var(--accent-glow)] cursor-pointer whitespace-nowrap"
+                    aria-label="Sign in"
+                  >
+                    <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
+                  </button>
+                )}
+                {activeProfileId && (
+                  <CustomProfileMenu />
+                )}
+              </>
             )}
           </div>
         </div>

@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { useMobileUI } from "@/context/MobileUIContext";
 import UserAvatar from "./UserAvatar";
 import { useUserStore } from "@/store/userStore";
+import { isClerkConfigured } from "@/lib/clerkConfig";
+import toast from "react-hot-toast";
 
 interface CustomProfileMenuProps {
   buttonClassName?: string;
@@ -40,19 +42,50 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
 
   const showFullMenu = !!activeProfile;
 
-  const handleSignOut = () => {
-    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
-    signOut(() => {
-      useUserStore.getState().setActiveProfile(null);
-      if (typeof window !== "undefined") {
-        window.sessionStorage.removeItem("toonplayer-session-active");
-        window.sessionStorage.removeItem("toonplayer_active_profile_id");
-        window.sessionStorage.setItem("toonplayer-explicit-switch", "true");
-        document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        window.dispatchEvent(new Event("userLogout"));
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (_) {}
+    try {
+      if (typeof signOut === 'function') {
+        await signOut();
       }
-      router.push("/", { scroll: false });
-    });
+    } catch (e) {
+      console.warn('[ProfileMenu] Clerk signOut error:', e);
+    }
+    useUserStore.getState().setActiveProfile('profile-guest');
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem("toonplayer-session-active");
+      window.sessionStorage.removeItem("toonplayer_active_profile_id");
+      window.sessionStorage.setItem("toonplayer-explicit-switch", "true");
+      document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      window.dispatchEvent(new Event("userLogout"));
+    }
+    router.push("/", { scroll: false });
+  };
+
+  const handleSignIn = () => {
+    setIsOpen(false);
+    if (!isClerkConfigured()) {
+      toast("Account login is currently unavailable in this environment. You can continue browsing as a guest.", {
+        icon: "ℹ️",
+        duration: 5000,
+        style: { background: "#1c1c24", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }
+      });
+      return;
+    }
+    try {
+      if (openSignIn) {
+        openSignIn({
+          fallbackRedirectUrl: window.location.pathname || "/",
+          signUpFallbackRedirectUrl: window.location.pathname || "/",
+        });
+      } else {
+        router.push("/login", { scroll: false });
+      }
+    } catch {
+      router.push("/login", { scroll: false });
+    }
   };
 
   const menuItems = showFullMenu ? [
@@ -62,10 +95,10 @@ export default function CustomProfileMenu({ buttonClassName = "" }: CustomProfil
     { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
     user 
       ? { label: "Sign Out", icon: LogOut, action: handleSignOut, color: "text-red-400" }
-      : { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
+      : { label: "Login / Sign In", icon: LogOut, action: handleSignIn, color: "text-green-400" },
   ] : [
     { label: "Switch Profile", icon: User, action: () => window.dispatchEvent(new Event("openProfileGate")), color: "text-purple-400" },
-    { label: "Login / Sign In", icon: LogOut, action: () => window.dispatchEvent(new Event("openLoginModal")), color: "text-green-400" },
+    { label: "Login / Sign In", icon: LogOut, action: handleSignIn, color: "text-green-400" },
   ];
 
   const updateMenuPosition = useCallback(() => {

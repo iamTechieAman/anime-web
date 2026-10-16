@@ -294,23 +294,42 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
 
   
+  const [isSidebarPinned, setIsSidebarPinned] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("toonplayer_sidebar_pinned") === "true") {
+        setIsSidebarPinned(true);
+      }
+    } catch {}
+    const onPin = (e: any) => setIsSidebarPinned(Boolean(e.detail));
+    window.addEventListener("sidebarPinnedChange", onPin);
+    return () => window.removeEventListener("sidebarPinnedChange", onPin);
+  }, []);
+
   const showSidebar = !isWatchPage;
   // Only activate profile gate after client has mounted and store has hydrated with no active profile
   const isProfileGateActive = mounted && hasHydrated && !activeProfileId;
 
+  const contentPlClass = showSidebar 
+    ? (isSidebarPinned ? "pl-0 md:pl-[260px]" : "pl-0 md:pl-[72px]")
+    : "pl-0";
+
   return (
     <div className="min-h-dvh bg-bg-main text-[var(--text-main)] w-full m-0 p-0 relative max-w-full overflow-x-hidden">
       <OpeningAnimation />
-      {showSidebar && <DesktopSidebar />}
+      {showSidebar && (
+        <Suspense fallback={<aside className="fixed left-0 top-0 bottom-0 w-[72px] hidden md:block bg-[#0c0d12]/95 border-r border-white/[0.06]" />}>
+          <DesktopSidebar />
+        </Suspense>
+      )}
       
       <Suspense fallback={<div className="h-14 md:h-16 w-full skeleton-shine animate-pulse" />}>
         <Header />
       </Suspense>
 
       {/* Content area: adaptive padding based on sidebar visibility */}
-      <div className={`flex flex-col min-h-dvh relative max-w-full overflow-x-hidden ${
-        showSidebar ? "pl-0 md:pl-[80px]" : "pl-0"
-      } transition-[padding,opacity] duration-[200ms] ease-out ${isWatchPage ? 'theme-dark watch-page' : ''} ${
+      <div className={`flex flex-col min-h-dvh relative max-w-full overflow-x-hidden ${contentPlClass} transition-[padding,opacity] duration-[250ms] ease-apple ${isWatchPage ? 'theme-dark watch-page' : ''} ${
         isProfileGateActive ? 'select-none pointer-events-none opacity-0 invisible' : 'opacity-100'
       }`}>
 

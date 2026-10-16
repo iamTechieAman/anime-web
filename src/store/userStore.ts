@@ -175,7 +175,7 @@ export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       profiles: defaultProfiles,
-      activeProfileId: null,
+      activeProfileId: 'profile-guest',
       history: {},
       watchlist: {},
       settings: {},

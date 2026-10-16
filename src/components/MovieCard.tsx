@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
-import { Play, Star, Flame, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { Play, Star, Flame, ChevronLeft, ChevronRight, Clock, Film } from "lucide-react";
 import React from "react";
 import Image from "next/image";
 import { useUserStore, isKidsFriendly } from "@/store/userStore";
@@ -113,9 +113,21 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             loading="lazy"
                         />
                     ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950 flex flex-col items-center justify-center gap-2 z-[1]">
-                            <span className="text-3xl font-black text-zinc-700">{title.charAt(0)}</span>
-                            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest px-3 text-center line-clamp-2">{title}</span>
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black flex flex-col items-center justify-between p-3.5 z-[1] border border-white/5 text-center">
+                            <div className="w-full flex justify-end">
+                                <span className="text-[8px] font-black uppercase tracking-wider text-accent bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
+                                    {routeType}
+                                </span>
+                            </div>
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 group-hover:text-accent group-hover:scale-110 transition-all shadow-inner">
+                                    <Film className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-bold text-zinc-300 line-clamp-2 leading-tight px-1 font-sora">
+                                    {title}
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-semibold text-zinc-500">{year || "HD"}</span>
                         </div>
                     )}
 
@@ -201,13 +213,13 @@ export const MovieGrid = memo(function MovieGrid({ items, type = "movie" }: { it
     const isKidsMode = activeProfile?.isKids || false;
     const itemsList = Array.isArray(items) ? items : [];
     const filteredItems = isKidsMode ? itemsList.filter(item => item && isKidsFriendly(item)) : itemsList;
-
     const validItems = filteredItems.filter(item => item && (item.poster_path || item.backdrop_path || item.image));
+
     return (
-        <div className="responsive-grid">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4 md:gap-5 w-full">
             {validItems.map((item, idx) => (
                 <div key={`${item.id}-${idx}`} className="w-full">
-                    <MovieCard item={item} type={item.media_type || type} isFeatured={idx === 0} />
+                    <MovieCard item={item} type={item.media_type || type} />
                 </div>
             ))}
         </div>
@@ -273,12 +285,10 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
             {/* Prev arrow */}
             <button
                 onClick={() => scroll('left')}
-                aria-label="Scroll left"
-                className={`absolute left-0 top-0 bottom-[52px] z-20 w-10 flex items-center justify-center bg-gradient-to-r from-[#09090B]/90 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 ${canScrollLeft ? '' : 'pointer-events-none !opacity-0'}`}
+                aria-label="Scroll carousel left"
+                className={`absolute left-2 top-[38%] -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-zinc-900/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-2xl opacity-0 group-hover/row:opacity-100 transition-all duration-200 hover:scale-110 hover:border-accent/60 hover:bg-zinc-800 cursor-pointer ${canScrollLeft ? '' : 'pointer-events-none !opacity-0'}`}
             >
-                <div className="w-8 h-8 rounded-full bg-zinc-800/80 border border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-700 transition-colors">
-                    <ChevronLeft className="w-4 h-4 text-white" />
-                </div>
+                <ChevronLeft className="w-5 h-5 text-white" />
             </button>
 
             {/* Scrollable row */}
@@ -296,12 +306,10 @@ export const MovieRow = memo(function MovieRow({ items, type = "movie", title, i
             {/* Next arrow */}
             <button
                 onClick={() => scroll('right')}
-                aria-label="Scroll right"
-                className={`absolute right-0 top-0 bottom-[52px] z-20 w-10 flex items-center justify-center bg-gradient-to-l from-[#09090B]/90 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 ${canScrollRight ? '' : 'pointer-events-none !opacity-0'}`}
+                aria-label="Scroll carousel right"
+                className={`absolute right-2 top-[38%] -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-zinc-900/90 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-2xl opacity-0 group-hover/row:opacity-100 transition-all duration-200 hover:scale-110 hover:border-accent/60 hover:bg-zinc-800 cursor-pointer ${canScrollRight ? '' : 'pointer-events-none !opacity-0'}`}
             >
-                <div className="w-8 h-8 rounded-full bg-zinc-800/80 border border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-700 transition-colors">
-                    <ChevronRight className="w-4 h-4 text-white" />
-                </div>
+                <ChevronRight className="w-5 h-5 text-white" />
             </button>
         </div>
     );

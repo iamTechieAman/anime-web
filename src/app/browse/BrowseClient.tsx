@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
     Compass, Film, Tv, X, SlidersHorizontal, 
-    ArrowUpDown, Globe, Calendar, RefreshCw, Loader2, Sparkles 
+    ArrowUpDown, Globe, Calendar, Loader2, Sparkles, TrendingUp
 } from "lucide-react";
 import { MovieCard, type MovieItem } from "@/components/MovieCard";
 import { GridSkeleton } from "@/components/SkeletonLoader";
@@ -18,11 +18,13 @@ const GENRES = [
     { name: "Animation", id: "16" },
     { name: "Comedy", id: "35" },
     { name: "Crime", id: "80" },
+    { name: "Documentary", id: "99" },
     { name: "Drama", id: "18" },
     { name: "Family", id: "10751" },
     { name: "Fantasy", id: "14" },
     { name: "History", id: "36" },
     { name: "Horror", id: "27" },
+    { name: "Music", id: "10402" },
     { name: "Mystery", id: "9648" },
     { name: "Romance", id: "10749" },
     { name: "Sci-Fi", id: "878" },
@@ -80,7 +82,12 @@ export default function BrowseClient() {
     // Read filters directly from searchParams (single source of truth)
     const rawType = searchParams.get("type");
     const mediaType: "movie" | "tv" | "anime" = rawType === "anime" ? "anime" : (rawType === "tv" ? "tv" : "movie");
-    const selectedGenre = searchParams.get("genre_id") || "";
+    const rawGenre = searchParams.get("genre_id") || searchParams.get("genre") || "";
+    const selectedGenre = useMemo(() => {
+        if (!rawGenre) return "";
+        const matched = GENRES.find(g => g.id === rawGenre || g.name.toLowerCase() === rawGenre.toLowerCase());
+        return matched ? matched.id : rawGenre;
+    }, [rawGenre]);
     const selectedNetwork = searchParams.get("network_id") || "";
     const selectedYear = searchParams.get("year") || "";
     const selectedLanguage = searchParams.get("language") || "";
@@ -88,26 +95,49 @@ export default function BrowseClient() {
     const selectedSort = searchParams.get("sort_by") || "popularity.desc";
     const selectedLetter = searchParams.get("letter") || "";
 
+    // Route-aware page identity computations
+    const isTrending = Boolean(
+        searchParams.get("trending") === "true" ||
+        searchParams.get("sort") === "trending" ||
+        (selectedSort === "popularity.desc" && !selectedGenre && !selectedNetwork && !selectedYear && !selectedLetter && !rawType)
+    );
+    const isUpcoming = selectedSort === "primary_release_date.desc";
+
+    const currentGenreObj = useMemo(() => GENRES.find(g => g.id === selectedGenre), [selectedGenre]);
+    const currentNetworkObj = useMemo(() => NETWORKS.find(n => n.id === selectedNetwork), [selectedNetwork]);
+    const currentLanguageObj = useMemo(() => LANGUAGES.find(l => l.code === selectedLanguage), [selectedLanguage]);
+
     const [items, setItems] = useState<MovieItem[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const [totalResults, setTotalResults] = useState(0);
+    const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
     const observerTarget = useRef<HTMLDivElement>(null);
     const isFetchingRef = useRef(false);
+    const pageRef = useRef(1);
+    const totalPagesRef = useRef(1);
 
-    // Lock body scrolling when filter drawer is open
+    pageRef.current = page;
+    totalPagesRef.current = totalPages;
+
+    // Lock body scrolling when filter drawer is open & handle Escape key
     useEffect(() => {
         if (showFilters) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "";
         }
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && showFilters) setShowFilters(false);
+        };
+        window.addEventListener("keydown", handleKeyDown);
         return () => {
             document.body.style.overflow = "";
+            window.removeEventListener("keydown", handleKeyDown);
         };
     }, [showFilters]);
 
@@ -129,42 +159,12 @@ export default function BrowseClient() {
         router.replace(`/browse?${params.toString()}`, { scroll: false });
     }, [searchParams, router]);
 
-    const handleReset = () => {
+    const handleReset = useCallback(() => {
         const params = new URLSearchParams();
-        params.set("type", mediaType); // Keep current media type
+        if (rawType) params.set("type", rawType);
         params.set("country", "US");
         router.replace(`/browse?${params.toString()}`, { scroll: false });
-    };
-
-    // Load filters on mount if URL parameters are not set
-    useEffect(() => {
-        if (typeof window !== "undefined" && !searchParams.toString()) {
-            const saved = localStorage.getItem("toonplayer_browse_filters");
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    const params = new URLSearchParams();
-                    if (parsed.mediaType) params.set("type", parsed.mediaType);
-                    if (parsed.selectedGenre) params.set("genre_id", parsed.selectedGenre);
-                    if (parsed.selectedNetwork) params.set("network_id", parsed.selectedNetwork);
-                    if (parsed.selectedYear) params.set("year", parsed.selectedYear);
-                    if (parsed.selectedLanguage) params.set("language", parsed.selectedLanguage);
-                    if (parsed.selectedCountry) params.set("country", parsed.selectedCountry);
-                    if (parsed.selectedSort) params.set("sort_by", parsed.selectedSort);
-                    if (parsed.selectedLetter) params.set("letter", parsed.selectedLetter);
-                    router.replace(`/browse?${params.toString()}`, { scroll: false });
-                } catch(e) {}
-            }
-        }
-    }, [searchParams, router]);
-
-    // Save filters to localStorage whenever searchParams change
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const filters = { mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter };
-            localStorage.setItem("toonplayer_browse_filters", JSON.stringify(filters));
-        }
-    }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter]);
+    }, [rawType, router]);
 
     // Fetch catalog helper
     const fetchCatalog = useCallback(async (pageNum: number, isAppend: boolean) => {
@@ -178,6 +178,7 @@ export default function BrowseClient() {
             let combinedResults: MovieItem[] = [];
             let currentPageNum = pageNum;
             let currentTotalPages = 1;
+            let currentTotalResults = 0;
             let attempts = 0;
             const maxAttempts = 5; // Guard against infinite looping
 
@@ -201,8 +202,9 @@ export default function BrowseClient() {
                 if (selectedLanguage && !isAnime) params.set("with_original_language", selectedLanguage);
 
                 const res = await axios.get(`/api/prime/discover?${params.toString()}`);
-                let fetchedResults = res.data.results || [];
+                let fetchedResults: MovieItem[] = res.data.results || [];
                 currentTotalPages = res.data.total_pages || 1;
+                currentTotalResults = res.data.total_results || 0;
 
                 // Client-side kids filter
                 if (isKidsMode) {
@@ -232,23 +234,36 @@ export default function BrowseClient() {
 
             setPage(currentPageNum);
             setTotalPages(currentTotalPages);
+            setTotalResults(currentTotalResults || combinedResults.length);
 
             if (isAppend) {
                 setItems(prev => {
-                    const combined = [...prev, ...combinedResults];
-                    const seen = new Set();
-                    return combined.filter(item => {
-                        if (seen.has(item.id)) return false;
-                        seen.add(item.id);
-                        return true;
-                    });
+                    const seen = new Set(prev.map(i => String(i.id)));
+                    const appended: MovieItem[] = [];
+                    for (const item of combinedResults) {
+                        if (!item || !item.id) continue;
+                        const key = String(item.id);
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            appended.push(item);
+                        }
+                    }
+                    return [...prev, ...appended];
                 });
             } else {
-                setItems(combinedResults);
+                const seen = new Set<string>();
+                const deduplicated = combinedResults.filter(item => {
+                    if (!item || !item.id) return false;
+                    const key = String(item.id);
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+                setItems(deduplicated);
             }
         } catch (err: any) {
             console.error("Browse loading failed:", err);
-            setError("Failed to load catalog content. Please try again.");
+            setError("Failed to load catalog content. Please check your connection and try again.");
         } finally {
             setLoading(false);
             setLoadingMore(false);
@@ -256,37 +271,38 @@ export default function BrowseClient() {
         }
     }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter, isKidsMode]);
 
-    // Fetch initial results on change
+    // Fetch initial results on filter change
     useEffect(() => {
         setPage(1);
         fetchCatalog(1, false);
     }, [mediaType, selectedGenre, selectedNetwork, selectedYear, selectedLanguage, selectedCountry, selectedSort, selectedLetter, isKidsMode, fetchCatalog]);
 
+    const hasMore = page < totalPages;
+
     // Handle Infinite Scroll
     useEffect(() => {
+        if (!hasMore || loading || loadingMore || error) return;
+
         const observer = new IntersectionObserver(
             entries => {
                 if (entries[0].isIntersecting && !isFetchingRef.current) {
-                    setPage(prevPage => {
-                        const nextPage = prevPage + 1;
-                        if (nextPage <= totalPages) {
-                            if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-                                window.requestIdleCallback(() => {
-                                    fetchCatalog(nextPage, true);
-                                });
-                            } else {
-                                setTimeout(() => {
-                                    fetchCatalog(nextPage, true);
-                                }, 50);
-                            }
+                    const nextPage = pageRef.current + 1;
+                    if (nextPage <= totalPagesRef.current) {
+                        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+                            window.requestIdleCallback(() => {
+                                fetchCatalog(nextPage, true);
+                            });
+                        } else {
+                            setTimeout(() => {
+                                fetchCatalog(nextPage, true);
+                            }, 50);
                         }
-                        return prevPage;
-                    });
+                    }
                 }
             },
             { 
-                threshold: 0.3,
-                rootMargin: "300px"
+                threshold: 0.1,
+                rootMargin: "250px"
             }
         );
 
@@ -297,32 +313,69 @@ export default function BrowseClient() {
             if (target) observer.unobserve(target);
             observer.disconnect();
         };
-    }, [totalPages, fetchCatalog]);
+    }, [hasMore, loading, loadingMore, error, fetchCatalog]);
+
+    // Determine heading text and icon based on route intent
+    let PageIcon = Compass;
+    let pageTitlePrefix = "Browse";
+    let pageTitleHighlight = `${mediaType === "anime" ? "Anime" : mediaType === "tv" ? "TV Series" : "Movies"} Catalog`;
+    let pageSubtitle = `Explore dynamic ${mediaType === "anime" ? "anime" : mediaType === "tv" ? "television series" : "movie"} collections with high-speed streaming and refined filters.`;
+
+    if (isTrending) {
+        PageIcon = TrendingUp;
+        pageTitlePrefix = "Trending";
+        pageTitleHighlight = "Now";
+        pageSubtitle = "Discover the most popular movies, television series, and anime trending right now.";
+    } else if (isUpcoming) {
+        PageIcon = Calendar;
+        pageTitlePrefix = "Upcoming";
+        pageTitleHighlight = "Releases";
+        pageSubtitle = "Anticipated new titles, premiere schedules, and future broadcast dates.";
+    } else if (currentGenreObj) {
+        PageIcon = SlidersHorizontal;
+        pageTitlePrefix = currentGenreObj.name;
+        pageTitleHighlight = "Catalog";
+        pageSubtitle = `Top rated and popular ${currentGenreObj.name.toLowerCase()} titles available for streaming.`;
+    } else if (currentNetworkObj) {
+        PageIcon = Tv;
+        pageTitlePrefix = currentNetworkObj.name;
+        pageTitleHighlight = "Collection";
+        pageSubtitle = `Stream the highest rated and newly released content on ${currentNetworkObj.name}.`;
+    } else if (selectedLetter) {
+        PageIcon = Compass;
+        pageTitlePrefix = `Letter "${selectedLetter.toUpperCase()}"`;
+        pageTitleHighlight = "Index";
+        pageSubtitle = `Alphabetical listing of catalog titles starting with "${selectedLetter.toUpperCase()}".`;
+    }
+
+    const hasActiveFilters = Boolean(
+        selectedGenre || selectedNetwork || selectedYear || selectedLanguage || selectedLetter || (selectedSort !== "popularity.desc" && !isTrending)
+    );
 
     return (
-        <div className="flex-1 w-full bg-[#050505] pt-6 pb-12 px-4 md:px-8 flex flex-col">
-            <div className="max-w-[1800px] mx-auto w-full flex-1 flex flex-col space-y-8">
+        <div className="flex-1 w-full bg-bg-main pt-6 pb-16 px-4 sm:px-6 md:px-8 flex flex-col min-h-[75vh]">
+            <div className="max-w-[1800px] mx-auto w-full flex-1 flex flex-col space-y-6">
                 
                 {/* Sticky Header Bar */}
-                <div className="sticky top-14 md:top-16 z-30 bg-[#050505]/95 backdrop-blur-md py-4 border-b border-white/5">
+                <div className="sticky top-[72px] z-30 bg-bg-main/95 backdrop-blur-md py-4 border-b border-white/5">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <h1 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3">
-                                <Compass className="w-8 h-8 text-accent shrink-0 animate-pulse" />
-                                Browse <span className="bg-gradient-to-r from-accent to-accent-secondary bg-clip-text text-transparent">Catalog</span>
+                                <PageIcon className="w-8 h-8 text-accent shrink-0 animate-pulse" />
+                                <span>{pageTitlePrefix}</span> <span className="bg-gradient-to-r from-accent to-accent-secondary bg-clip-text text-transparent">{pageTitleHighlight}</span>
                             </h1>
                             <p className="text-zinc-400 mt-2 font-medium text-sm">
-                                Explore dynamic catalog collections with infinite scrolling and premium filtering.
+                                {pageSubtitle}
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                             <div className="bg-[#12131A] border border-white/5 p-1 rounded-xl flex gap-1">
                                 <button
                                     onClick={() => setFilterParam("type", "movie")}
                                     className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "movie" 
-                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg shadow-accent/20" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
@@ -333,7 +386,7 @@ export default function BrowseClient() {
                                     onClick={() => setFilterParam("type", "tv")}
                                     className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "tv" 
-                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg shadow-accent/20" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
@@ -344,7 +397,7 @@ export default function BrowseClient() {
                                     onClick={() => setFilterParam("type", "anime")}
                                     className={`px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                                         mediaType === "anime" 
-                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg" 
+                                            ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-lg shadow-accent/20" 
                                             : "bg-white/5 border border-white/10 text-zinc-400 hover:text-white"
                                     }`}
                                 >
@@ -357,18 +410,23 @@ export default function BrowseClient() {
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={`flex items-center gap-2 h-11 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer ${
                                     showFilters 
-                                        ? "bg-accent/10 border border-accent/30 text-accent shadow-[0_0_15px_var(--accent-glow)]" 
+                                        ? "bg-accent/15 border-accent/40 text-accent shadow-[0_0_15px_var(--accent-glow)]" 
+                                        : hasActiveFilters
+                                        ? "bg-accent/10 border-accent/30 text-white"
                                         : "bg-[#12131A] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                 }`}
                             >
                                 <SlidersHorizontal className="w-4 h-4" />
                                 Filters
+                                {hasActiveFilters && (
+                                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse ml-0.5" />
+                                )}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Sliding Glassmorphic Filter Drawer Overlay */}
+                {/* Sliding Filter Drawer Overlay */}
                 <AnimatePresence>
                     {showFilters && (
                         <>
@@ -378,7 +436,7 @@ export default function BrowseClient() {
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setShowFilters(false)}
-                                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
                             />
 
                             {/* Drawer Panel */}
@@ -404,6 +462,7 @@ export default function BrowseClient() {
                                         </button>
                                         <button
                                             onClick={() => setShowFilters(false)}
+                                            aria-label="Close filters drawer"
                                             className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-all cursor-pointer"
                                         >
                                             <X className="w-4 h-4" />
@@ -417,10 +476,10 @@ export default function BrowseClient() {
                                     {/* Content type */}
                                     <div className="space-y-2.5">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Content Type</span>
-                                        <div className="grid grid-cols-2 gap-2 bg-[#08080B] p-1 rounded-xl border border-white/5">
+                                        <div className="grid grid-cols-3 gap-2 bg-[#08080B] p-1 rounded-xl border border-white/5">
                                             <button
                                                 onClick={() => setFilterParam("type", "movie")}
-                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                                     mediaType === "movie"
                                                         ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-md"
                                                         : "text-zinc-400 hover:text-white"
@@ -431,14 +490,25 @@ export default function BrowseClient() {
                                             </button>
                                             <button
                                                 onClick={() => setFilterParam("type", "tv")}
-                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                                     mediaType === "tv"
                                                         ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-md"
                                                         : "text-zinc-400 hover:text-white"
                                                 }`}
                                             >
                                                 <Tv className="w-3.5 h-3.5" />
-                                                TV Shows
+                                                Series
+                                            </button>
+                                            <button
+                                                onClick={() => setFilterParam("type", "anime")}
+                                                className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                                    mediaType === "anime"
+                                                        ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-md"
+                                                        : "text-zinc-400 hover:text-white"
+                                                }`}
+                                            >
+                                                <Sparkles className="w-3.5 h-3.5" />
+                                                Anime
                                             </button>
                                         </div>
                                     </div>
@@ -475,7 +545,7 @@ export default function BrowseClient() {
                                                 onClick={() => setFilterParam("year", "")}
                                                 className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                                     selectedYear === ""
-                                                        ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                         : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                 }`}
                                             >
@@ -487,7 +557,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("year", selectedYear === yr ? "" : yr)}
                                                     className={`px-4 py-2 border rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                                                         selectedYear === yr
-                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -507,7 +577,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("genre_id", selectedGenre === g.id ? "" : g.id)}
                                                     className={`px-3.5 py-2 border rounded-full text-xs font-bold transition-all cursor-pointer ${
                                                         selectedGenre === g.id
-                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -527,7 +597,7 @@ export default function BrowseClient() {
                                                 onClick={() => setFilterParam("language", "")}
                                                 className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                     selectedLanguage === ""
-                                                        ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                        ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                         : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                 }`}
                                             >
@@ -539,7 +609,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("language", selectedLanguage === lang.code ? "" : lang.code)}
                                                     className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                         selectedLanguage === lang.code
-                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -561,7 +631,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("country", selectedCountry === c.code ? "" : c.code)}
                                                     className={`px-3.5 py-1.5 border rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                                         selectedCountry === c.code
-                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -583,7 +653,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("network_id", selectedNetwork === net.id ? "" : net.id)}
                                                     className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                                                         selectedNetwork === net.id
-                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm text-white border-transparent shadow-[0_0_12px_var(--accent-glow)]"
                                                             : "bg-[#08080B] border-white/5 text-zinc-400 hover:text-white hover:border-white/10"
                                                     }`}
                                                 >
@@ -604,7 +674,7 @@ export default function BrowseClient() {
                                                     onClick={() => setFilterParam("letter", selectedLetter === letter ? "" : letter)}
                                                     className={`h-9 rounded-lg text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
                                                         selectedLetter === letter
-                                                            ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-[0_0_10px_var(--accent-glow)]"
+                                                            ? "bg-gradient-to-r from-accent to-accent-warm text-white shadow-[0_0_10px_var(--accent-glow)]"
                                                             : "bg-[#08080B] text-zinc-400 hover:text-white hover:bg-white/5 border border-white/5"
                                                     }`}
                                                 >
@@ -615,69 +685,175 @@ export default function BrowseClient() {
                                     </div>
 
                                 </div>
+
+                                {/* Drawer Footer */}
+                                <div className="p-4 border-t border-white/10 bg-[#0B0B0F]/95 flex items-center gap-3">
+                                    <button
+                                        onClick={handleReset}
+                                        className="flex-1 py-3 text-xs font-bold uppercase tracking-wider text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all cursor-pointer"
+                                    >
+                                        Reset All
+                                    </button>
+                                    <button
+                                        onClick={() => setShowFilters(false)}
+                                        className="flex-1 py-3 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-accent to-accent-secondary rounded-xl shadow-lg transition-all cursor-pointer"
+                                    >
+                                        Apply Filters
+                                    </button>
+                                </div>
                             </motion.div>
                         </>
                     )}
                 </AnimatePresence>
 
-                {/* Sub-header status bar */}
-                <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                    <p className="text-sm text-zinc-400 font-semibold">
-                        Found <span className="text-white font-extrabold">{items.length}</span> titles matching filters
-                    </p>
+                {/* Sub-header status bar & Active Filters */}
+                <div className="space-y-3 border-b border-white/5 pb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium">
+                            <span>Showing</span>
+                            <span className="text-white font-black bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                                {items.length.toLocaleString()}
+                            </span>
+                            {totalResults > items.length && (
+                                <>
+                                    <span>of</span>
+                                    <span className="text-white font-extrabold">{totalResults.toLocaleString()}</span>
+                                </>
+                            )}
+                            <span>titles</span>
+                        </div>
+                    </div>
+
+                    {/* Active Filter Badges */}
+                    {hasActiveFilters && (
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <span className="text-xs font-semibold text-zinc-400 mr-1">Active:</span>
+                            {currentGenreObj && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-white">
+                                    Genre: {currentGenreObj.name}
+                                    <button onClick={() => setFilterParam("genre_id", "")} aria-label="Remove genre filter" className="hover:text-accent transition-colors cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+                                </span>
+                            )}
+                            {currentNetworkObj && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-white">
+                                    Network: {currentNetworkObj.name}
+                                    <button onClick={() => setFilterParam("network_id", "")} aria-label="Remove network filter" className="hover:text-accent transition-colors cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+                                </span>
+                            )}
+                            {selectedYear && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-white">
+                                    Year: {selectedYear}
+                                    <button onClick={() => setFilterParam("year", "")} aria-label="Remove year filter" className="hover:text-accent transition-colors cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+                                </span>
+                            )}
+                            {currentLanguageObj && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-white">
+                                    Language: {currentLanguageObj.name}
+                                    <button onClick={() => setFilterParam("language", "")} aria-label="Remove language filter" className="hover:text-accent transition-colors cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+                                </span>
+                            )}
+                            {selectedLetter && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-white">
+                                    Letter: {selectedLetter.toUpperCase()}
+                                    <button onClick={() => setFilterParam("letter", "")} aria-label="Remove letter filter" className="hover:text-accent transition-colors cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+                                </span>
+                            )}
+                            {selectedSort !== "popularity.desc" && !isTrending && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-white">
+                                    Sort: {SORT_OPTIONS.find(s => s.value === selectedSort)?.label || selectedSort}
+                                    <button onClick={() => setFilterParam("sort_by", "popularity.desc")} aria-label="Reset sort" className="hover:text-accent transition-colors cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+                                </span>
+                            )}
+                            <button
+                                onClick={handleReset}
+                                className="text-xs font-bold text-accent hover:underline ml-1 cursor-pointer"
+                            >
+                                Clear All
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Main Results Display */}
                 {loading ? (
-                    <GridSkeleton count={16} />
+                    <GridSkeleton count={14} />
                 ) : error ? (
-                    <div className="py-20 flex flex-col items-center justify-center text-center">
-                        <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mb-4 border border-red-500/20 text-red-500">
+                    <div className="py-24 flex flex-col items-center justify-center text-center flex-1 min-h-[40vh]">
+                        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-4 shadow-inner">
                             <X className="w-8 h-8" />
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2">Something went wrong</h3>
-                        <p className="text-zinc-500 text-sm mb-6">{error}</p>
+                        <p className="text-zinc-400 text-sm max-w-md mb-6 leading-relaxed">{error}</p>
                         <button
                             onClick={() => fetchCatalog(1, false)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-accent to-accent-secondary text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all cursor-pointer"
+                            className="px-6 py-2.5 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-warm text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-lg shadow-accent/20 cursor-pointer"
                         >
                             Retry Loading
                         </button>
                     </div>
                 ) : items.length === 0 ? (
-                    <div className="py-24 flex flex-col items-center justify-center text-center opacity-60 flex-1">
-                        <Compass className="w-16 h-16 text-zinc-500 mb-4 animate-bounce" />
-                        <h3 className="text-lg font-bold text-white">No content matching filters</h3>
-                        <p className="text-zinc-500 text-sm mt-1">Try resetting genres, networks, or alphabetical parameters.</p>
-                        <button
-                            onClick={handleReset}
-                            className="mt-6 px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-black uppercase tracking-wider text-white border border-white/10 transition-all cursor-pointer"
-                        >
-                            Clear Filters
-                        </button>
+                    <div className="py-24 flex flex-col items-center justify-center text-center flex-1 min-h-[40vh]">
+                        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 mb-4 shadow-inner">
+                            <Compass className="w-8 h-8 text-accent animate-pulse" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">No content matching filters</h3>
+                        <p className="text-zinc-400 text-sm max-w-md mb-6 leading-relaxed">
+                            We couldn&apos;t find any {mediaType === "anime" ? "anime" : mediaType === "tv" ? "TV series" : "movies"} matching your selected criteria.
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={handleReset}
+                                className="px-6 py-2.5 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-warm text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-accent/20 cursor-pointer"
+                            >
+                                Clear All Filters
+                            </button>
+                            <button
+                                onClick={() => router.push("/browse?sort_by=popularity.desc", { scroll: false })}
+                                className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                            >
+                                Browse Trending
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div className="flex-1 flex flex-col justify-between">
-                        <div className="responsive-grid">
+                        {/* Consistent, responsive poster grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4 md:gap-5 w-full">
                             {items.map((item) => (
-                                <div key={item.id} className="w-full">
+                                <div key={`${item.id}-${item.media_type || mediaType}`} className="w-full">
                                     <MovieCard item={item} type={item.media_type || mediaType} />
                                 </div>
                             ))}
                         </div>
 
-                        {/* Infinite scroll target trigger / status pill */}
-                        <div ref={observerTarget} className="w-full flex flex-col items-center justify-center mt-12 mb-8 min-h-[50px]">
-                            {loadingMore ? (
-                                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest bg-bg-elevated/50 border border-white/5 px-5 py-2.5 rounded-full shadow-lg backdrop-blur-md">
-                                    <Loader2 className="w-4 h-4 animate-spin text-accent" />
-                                    Loading More Hits...
+                        {/* Infinite scroll sentinel & loader in standard content flow */}
+                        <div className="w-full mt-10">
+                            {hasMore && !loading && !error && (
+                                <div ref={observerTarget} className="h-10 w-full pointer-events-none" aria-hidden="true" />
+                            )}
+
+                            {loadingMore && (
+                                <div className="w-full flex items-center justify-center py-8">
+                                    <div className="flex items-center gap-3 text-zinc-300 text-xs font-bold uppercase tracking-widest bg-[#12131A]/90 border border-white/10 px-6 py-3 rounded-full shadow-xl backdrop-blur-md">
+                                        <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                                        Loading more titles...
+                                    </div>
                                 </div>
-                            ) : page >= totalPages && items.length > 0 ? (
-                                <div className="text-zinc-500 text-[10px] font-black uppercase tracking-widest bg-[#12131A] border border-white/5 px-6 py-2.5 rounded-full shadow-md">
-                                    End of Catalog
+                            )}
+
+                            {!hasMore && items.length > 0 && !loading && (
+                                <div className="w-full flex flex-col items-center justify-center py-12 border-t border-white/5 mt-10 mb-4 text-center">
+                                    <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 mb-2">
+                                        <Compass className="w-4 h-4" />
+                                    </div>
+                                    <p className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
+                                        End of Catalog
+                                    </p>
+                                    <p className="text-zinc-600 text-xs mt-0.5">
+                                        Showing all {items.length.toLocaleString()} available titles
+                                    </p>
                                 </div>
-                            ) : null}
+                            )}
                         </div>
                     </div>
                 )}

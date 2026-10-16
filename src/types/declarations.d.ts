@@ -190,6 +190,7 @@ declare module 'lucide-react' {
     export const Copyright: LucideIcon;
     export const Send: LucideIcon;
     export const MessageSquare: LucideIcon;
+    export const Copy: LucideIcon;
     export const Shuffle: LucideIcon;
     export const Award: LucideIcon;
     export const Building2: LucideIcon;

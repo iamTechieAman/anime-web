@@ -1,8 +1,9 @@
 "use client";
 
 import {
-  useState, useEffect, useRef, useCallback, useMemo
+  useState, useEffect, useRef, useCallback, useMemo, Suspense
 } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Bookmark, Trash2, Play, Search, X, LayoutGrid, List,
   FolderPlus, Tag, ArrowUpDown, Plus, GripVertical,
@@ -65,14 +66,14 @@ function EmptyState() {
       </p>
       <div className="flex items-center gap-3">
         <Link
-          href="/"
+          href="/browse"
           scroll={false}
           className="px-6 py-3 bg-gradient-to-r from-accent to-accent-secondary text-white rounded-2xl text-sm font-black hover:shadow-[0_0_35px_var(--accent-glow)] transition-all duration-[250ms] hover:scale-105 active:scale-95"
         >
           Browse Catalog
         </Link>
         <Link
-          href="/ai"
+          href="/discover"
           scroll={false}
           className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl text-sm font-bold transition-all duration-[250ms] hover:scale-105 active:scale-95"
         >
@@ -328,9 +329,9 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
       )}
 
       {/* Thumbnail */}
-      <div className="w-12 h-[68px] rounded-xl overflow-hidden bg-black/40 shrink-0">
+      <div className="relative w-12 sm:w-14 h-[68px] sm:h-[80px] rounded-xl overflow-hidden bg-black/40 shrink-0 select-none">
         {entry.poster
-          ? <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="80px" className="object-cover" />
+          ? <Image src={entry.poster} alt={entry.title || "Poster"} fill sizes="(max-width: 640px) 48px, 56px" className="object-cover" />
           : <div className="w-full h-full flex items-center justify-center"><Film className="w-4 h-4 text-zinc-700" /></div>
         }
       </div>
@@ -392,22 +393,31 @@ function ListRow({ entry, collections, onRemove, onUpdateCollection, onAddTag, o
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-export default function WatchlistPage() {
+// ─── Main Page Content ────────────────────────────────────────────────────────
+function WatchlistContent() {
   const {
     watchlist, removeFromWatchlist,
     updateWatchlistItem, reorderWatchlist,
     customCollections, addCollection, removeCollection,
   } = useWatch();
 
+  const searchParams = useSearchParams();
+  const collectionParam = searchParams.get("collection");
+
   const [localItems, setLocalItems] = useState<WatchlistItem[]>([]);
   const [search, setSearch]         = useState("");
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [viewMode, setViewMode]     = useState<ViewMode>("grid");
   const [sortBy, setSortBy]         = useState<SortMode>("date");
-  const [activeCollection, setActiveCollection] = useState("All");
+  const [activeCollection, setActiveCollection] = useState(collectionParam || "All");
   const [activeTag, setActiveTag]   = useState<string | null>(null);
   const [isDragMode, setIsDragMode] = useState(false);
+
+  useEffect(() => {
+    if (collectionParam) {
+      setActiveCollection(collectionParam);
+    }
+  }, [collectionParam]);
 
   // New collection form
   const [showAddFolder, setShowAddFolder] = useState(false);
@@ -493,6 +503,7 @@ export default function WatchlistPage() {
   }, [localItems, updateWatchlistItem]);
 
   const handleRemove = useCallback((id: string) => {
+    setLocalItems(prev => prev.filter(i => i.id !== id));
     removeFromWatchlist(id);
     toast.success("Removed from watchlist");
   }, [removeFromWatchlist]);
@@ -531,11 +542,11 @@ export default function WatchlistPage() {
   const filterLabels = { all: "All", anime: "Anime", movie: "Movies", tv: "TV" } as const;
 
   return (
-    <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pb-24 md:pb-10">
+    <div className="min-h-dvh bg-bg-main text-[var(--text-main)] pb-24 md:pb-10">
 
       {/* ── Sticky Toolbar ───────────────────────────────────────── */}
-      <div className="sticky top-[56px] md:top-[64px] z-40 bg-bg-main/95 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-3 space-y-3">
+      <div className="sticky top-[72px] z-30 bg-bg-main/95 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-3 space-y-3">
 
           {/* Row 1: Title + View controls */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -544,9 +555,11 @@ export default function WatchlistPage() {
                 <Bookmark className="w-5 h-5 text-accent" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-xl font-black font-sora tracking-tight text-white">My Watchlist</h1>
+                <h1 className="text-xl font-black font-sora tracking-tight text-white">
+                  {activeCollection === "Favorites" ? "Favorites" : "My Watchlist"}
+                </h1>
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                  {watchlist.length} title{watchlist.length !== 1 ? "s" : ""} saved
+                  {filtered.length} of {watchlist.length} saved
                 </p>
               </div>
             </div>
@@ -757,7 +770,7 @@ export default function WatchlistPage() {
       </div>
 
       {/* ── Content ─────────────────────────────────────────────── */}
-      <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-8">
         {watchlist.length === 0 ? (
           <EmptyState />
         ) : sorted.length === 0 ? (
@@ -855,6 +868,18 @@ export default function WatchlistPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
+  );
+}
+
+export default function WatchlistPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[75vh] w-full bg-bg-main flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <WatchlistContent />
+    </Suspense>
   );
 }

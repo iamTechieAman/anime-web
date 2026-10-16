@@ -58,9 +58,9 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
     }, [letter, page, activeTab]);
 
     return (
-        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] font-sans">
+        <div className="min-h-dvh bg-bg-main text-[var(--text-main)] font-sans">
             {/* Navbar */}
-            <div className="sticky top-[60px] md:top-[64px] z-30 px-4 py-3 bg-[var(--bg-overlay)] backdrop-blur-xl border-b border-border-color">
+            <div className="sticky top-[72px] z-30 px-4 sm:px-6 md:px-8 py-3 bg-bg-main/95 backdrop-blur-xl border-b border-border-color">
                 <div className="w-full flex items-center gap-4">
                     <Link scroll={false} href="/" className="p-2 hover:bg-white/10 rounded-full transition-colors">
                         <ArrowLeft className="w-5 h-5 text-zinc-400" />
@@ -197,6 +197,6 @@ export default function AZListPage({ params }: { params: Promise<{ letter: strin
                     )}
                 </AnimatePresence>
             </div>
-        </main>
+        </div>
     );
 }

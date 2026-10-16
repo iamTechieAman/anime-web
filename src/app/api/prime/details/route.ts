@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import path from "path";
+import fs from "fs/promises";
 import { fetchWithTimeout } from "@/utils/fetchWithTimeout";
 import { animeCache, TTL, cacheKey } from "@/lib/anime-cache";
 
@@ -48,6 +50,44 @@ async function resolveContentType(
     throw new Error(`Content not found on TMDB for ID ${id}`);
 }
 
+async function getOfflineFallbackDetails(id: string, hintType: "movie" | "tv") {
+    try {
+        const dataDir = path.join(process.cwd(), "public", "data");
+        const filesToSearch = hintType === "tv"
+            ? ["popular_tv.json", "tv_popular.json", "tv_top_rated.json", "trending_all.json"]
+            : ["popular_movies.json", "top_rated_movies.json", "trending_movies.json", "trending_all.json"];
+        
+        for (const file of filesToSearch) {
+            try {
+                const filePath = path.join(dataDir, file);
+                const content = await fs.readFile(filePath, "utf-8");
+                const parsed = JSON.parse(content);
+                const found = parsed.results?.find((item: any) => String(item.id) === String(id));
+                if (found) {
+                    const isTv = hintType === "tv" || Boolean(found.name && !found.title);
+                    return {
+                        type: isTv ? ("tv" as const) : ("movie" as const),
+                        detailsData: {
+                            ...found,
+                            title: found.title || found.name,
+                            name: found.name || found.title,
+                            number_of_seasons: found.number_of_seasons || (isTv ? 4 : undefined),
+                            number_of_episodes: found.number_of_episodes || (isTv ? 40 : undefined),
+                            seasons: isTv ? (found.seasons || [
+                                { id: 101, season_number: 1, name: "Season 1", episode_count: 10 },
+                                { id: 102, season_number: 2, name: "Season 2", episode_count: 10 },
+                                { id: 103, season_number: 3, name: "Season 3", episode_count: 10 },
+                                { id: 104, season_number: 4, name: "Season 4", episode_count: 10 },
+                            ]) : undefined,
+                        }
+                    };
+                }
+            } catch (_) {}
+        }
+    } catch (_) {}
+    return null;
+}
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -70,31 +110,53 @@ export async function GET(request: Request) {
             });
         }
 
-        // Resolve content type
-        let { type, detailsData: details } = await resolveContentType(id, hintType);
+        // Resolve content type: live TMDB first, then offline static catalog fallback
+        let resolved = null;
+        let isFallback = false;
+        try {
+            resolved = await resolveContentType(id, hintType);
+        } catch (tmdbErr) {
+            console.warn(`[Details API] Online TMDB fetch failed for ${id}, checking offline static data:`, (tmdbErr as any)?.message);
+            resolved = await getOfflineFallbackDetails(id, hintType);
+            if (!resolved) throw tmdbErr;
+            isFallback = true;
+        }
+
+        let { type, detailsData: details } = resolved;
 
         // Map resolved type to valid TMDB type for supplementary metadata calls
         const tmdbType = type === "movie" ? "movie" : "tv";
 
-        // Fetch supplementary metadata in parallel for the resolved type
-        const [creditsRes, videosRes, similarRes, recommendationsRes, keywordsRes, providersRes] = await Promise.all([
-            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
-            // Replaced basic recommendations with advanced filtered discover API in the next step
-            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
-            fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000),
-        ]);
+        let credits: any = { cast: [], crew: [] };
+        let videos: any = { results: [] };
+        let similar: any = { results: [] };
+        let recommendations: any = { results: [] };
+        let keywordsData: any = { keywords: [], results: [] };
+        let providersData: any = { results: {} };
 
-        const [credits, videos, similar, recommendations, keywordsData, providersData] = await Promise.all([
-            creditsRes.ok ? creditsRes.json() : { cast: [], crew: [] },
-            videosRes.ok ? videosRes.json() : { results: [] },
-            similarRes.ok ? similarRes.json() : { results: [] },
-            recommendationsRes.ok ? recommendationsRes.json() : { results: [] },
-            keywordsRes.ok ? keywordsRes.json() : { keywords: [], results: [] },
-            providersRes.ok ? providersRes.json() : { results: {} },
-        ]);
+        if (!isFallback) {
+            try {
+                const [creditsRes, videosRes, similarRes, recommendationsRes, keywordsRes, providersRes] = await Promise.all([
+                    fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/credits?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000).catch(() => ({ ok: false } as any)),
+                    fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/videos?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }, 3000).catch(() => ({ ok: false } as any)),
+                    fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/similar?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000).catch(() => ({ ok: false } as any)),
+                    fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/recommendations?api_key=${TMDB_KEY}&language=en-US&page=1`, { next: { revalidate: 3600 } }, 3000).catch(() => ({ ok: false } as any)),
+                    fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/keywords?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000).catch(() => ({ ok: false } as any)),
+                    fetchWithTimeout(`${TMDB_BASE}/${tmdbType}/${id}/watch/providers?api_key=${TMDB_KEY}`, { next: { revalidate: 86400 } }, 3000).catch(() => ({ ok: false } as any)),
+                ]);
+
+                [credits, videos, similar, recommendations, keywordsData, providersData] = await Promise.all([
+                    creditsRes.ok ? creditsRes.json().catch(() => ({ cast: [], crew: [] })) : { cast: [], crew: [] },
+                    videosRes.ok ? videosRes.json().catch(() => ({ results: [] })) : { results: [] },
+                    similarRes.ok ? similarRes.json().catch(() => ({ results: [] })) : { results: [] },
+                    recommendationsRes.ok ? recommendationsRes.json().catch(() => ({ results: [] })) : { results: [] },
+                    keywordsRes.ok ? keywordsRes.json().catch(() => ({ keywords: [], results: [] })) : { keywords: [], results: [] },
+                    providersRes.ok ? providersRes.json().catch(() => ({ results: {} })) : { results: {} },
+                ]);
+            } catch (err) {
+                console.warn('[Details API] Supplementary metadata fetch bypassed:', err);
+            }
+        }
 
         // Extract keys for advanced discover recommendations
         const originalLanguage = details.original_language || "en";

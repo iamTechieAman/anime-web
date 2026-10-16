@@ -6,7 +6,7 @@ import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, CheckCircle, ChevronDown, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
+import { Calendar, CheckCircle, ChevronDown, ChevronRight, ChevronUp, Clock, Film, Flame, Heart, History, Info, Laugh, LogOut, Play, Popcorn, Search, Skull, SlidersHorizontal, Sparkles, Star, Swords, TrendingUp, Tv, User, X, Zap } from "lucide-react";
 import { MovieGrid, type MovieItem } from "@/components/MovieCard";
 import { AnimeGrid, type Show } from "@/components/AnimeCard";
 import useSWR from 'swr';
@@ -14,7 +14,10 @@ import type { ProviderSlug } from "@/components/ProviderBar";
 import { detectMediaType } from "@/utils/mediaType";
 import dynamic from "next/dynamic";
 
-const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { ssr: false, loading: () => <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] min-h-[340px] sm:min-h-[420px] md:min-h-[480px] bg-bg-elevated animate-pulse w-full" /> });
+const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { 
+    ssr: false, 
+    loading: () => <div className="h-[62vh] sm:h-[68vh] md:h-[76vh] min-h-[460px] sm:min-h-[520px] md:min-h-[580px] max-h-[820px] bg-[#0d0d12] animate-pulse w-full border-b border-white/5" /> 
+});
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
 const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(mod => mod.AnimeCardHorizontal), { ssr: false });
@@ -127,11 +130,21 @@ const TOP_COLLECTIONS = [
 
 const TopCollectionsRow = () => {
     return (
-        <section className="mb-8 md:mb-12 w-full overflow-hidden">
-            <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                <Sparkles className="w-4 h-4 text-accent" />
-                <h2 className="text-base md:text-lg font-black font-sora tracking-tight text-white">Curated Collections</h2>
+        <section className="mb-10 md:mb-14 w-full overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                    <Sparkles className="w-4 h-4 text-accent" />
+                    <h2 className="text-base sm:text-lg md:text-xl font-black font-sora tracking-tight text-white">Curated Collections</h2>
+                </div>
+                <Link
+                    href="/genres"
+                    scroll={false}
+                    className="group/link flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors py-1 px-2.5 rounded-lg hover:bg-white/5"
+                >
+                    <span>View All Collections</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover/link:text-accent group-hover/link:translate-x-0.5 transition-all" />
+                </Link>
             </div>
             <div className="w-full">
                 <div className="flex items-center gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2">
@@ -288,14 +301,34 @@ export default function MoviesPage() {
     useEffect(() => { if (Array.isArray(movieUpcoming?.results)) setNowPlaying(movieUpcoming.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [movieUpcoming]);
     useEffect(() => { if (Array.isArray(moviePeople?.results)) setTrendingPeople(moviePeople.results.filter((i: any) => i && i.profile_path).slice(0, 6)); }, [moviePeople]);
 
-    // Pre-compute smart recommendations once when trending/popular loads to prevent CLS/re-shuffling
+    // Pre-compute smart recommendations ensuring deduplication against top trending and popular titles
     useEffect(() => {
-        if (trending.length > 0 && popular.length > 0) {
-            const combined = [...trending.slice(2, 6), ...popular.slice(2, 6)];
-            const shuffled = combined.sort(() => Math.random() - 0.5);
-            setRecommendedItems(shuffled);
+        if (popular.length > 0 || topRated.length > 0) {
+            const trendingIds = new Set(trending.slice(0, 10).map(i => String(i.id)));
+            const popularIds = new Set(popular.slice(0, 8).map(i => String(i.id)));
+
+            const candidates = [
+                ...popular.slice(8, 20),
+                ...topRated.slice(2, 12),
+                ...nowPlaying.slice(4, 12)
+            ].filter(item => item && !trendingIds.has(String(item.id)) && !popularIds.has(String(item.id)));
+
+            // Deduplicate candidates among themselves
+            const seen = new Set<string>();
+            const unique = candidates.filter(item => {
+                const id = String(item.id);
+                if (seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
+
+            if (unique.length > 0) {
+                setRecommendedItems(unique.slice(0, 12));
+            } else if (popular.length > 6) {
+                setRecommendedItems(popular.slice(6, 16));
+            }
         }
-    }, [trending, popular]);
+    }, [trending, popular, topRated, nowPlaying]);
 
     // Switch loading state when changing tab if target data is not loaded yet
     useEffect(() => {
@@ -627,18 +660,18 @@ export default function MoviesPage() {
 
                                 {/* Trending row for active provider */}
                                 {activeProvider !== "all" && providerData[activeProvider]?.trending?.length > 0 && (
-                                    <section className="mb-4 relative">
+                                    <section className="mb-8 md:mb-10 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-accent" isFeatured />
+                                        <SectionHeader icon={Sparkles} title={`Trending on ${providerData[activeProvider].label}`} color="text-accent" isFeatured viewAllHref="/browse?sort=trending" />
                                         <LazySection><MovieRow items={providerData[activeProvider].trending} title={`${activeProvider}-trending`} isLarge /></LazySection>
                                     </section>
                                 )}
 
                                 {/* Smart Recommendations (only when no provider active) */}
                                 {activeProvider === "all" && activeTab !== "anime" && recommendedItems.length > 0 && (
-                                    <section className="mb-8 md:mb-12 relative">
+                                    <section className="mb-10 md:mb-14 relative">
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
-                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-accent" isFeatured />
+                                        <SectionHeader icon={Sparkles} title="Smart Recommendations For You" color="text-accent" isFeatured viewAllHref="/browse?sort=popularity.desc" badge="Personalized" />
                                         <LazySection>
                                             <MovieRow 
                                                 items={recommendedItems} 
@@ -655,20 +688,20 @@ export default function MoviesPage() {
                                 )}
                                 
                                 {deviceMode === "tv" ? (
-                                    <div className="space-y-6 md:space-y-8">
+                                    <div className="space-y-8 md:space-y-12">
                                         <section className="relative">
                                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
-                                            <SectionHeader icon={Tv} title="Featured Toons" color="text-accent" isFeatured />
+                                            <SectionHeader icon={Tv} title="Featured Toons" color="text-accent" isFeatured viewAllHref="/browse?type=tv&genre=16" />
                                             <LazySection><MovieRow items={CARTOONS_DATA} title="tv-featured-toons" isLarge /></LazySection>
                                         </section>
                                         
                                         <section className="relative">
-                                            <SectionHeader icon={Flame} title="New Releases" color="text-accent-warm" />
+                                            <SectionHeader icon={Flame} title="New Releases" color="text-accent-warm" viewAllHref="/browse?sort=release_date" />
                                             <LazySection><MovieRow items={[...CARTOONS_DATA, ...trending.slice(0, 5)]} title="tv-new-releases" /></LazySection>
                                         </section>
 
                                         <section className="relative">
-                                            <SectionHeader icon={Play} title="Game-Streaming Highlights" color="text-accent-secondary" isFeatured />
+                                            <SectionHeader icon={Play} title="Game-Streaming Highlights" color="text-accent-secondary" isFeatured viewAllHref="/browse?type=movie" />
                                             <LazySection><MovieRow items={GAMING_STREAMS_DATA} title="tv-gaming-highlights" /></LazySection>
                                         </section>
                                     </div>
@@ -677,19 +710,19 @@ export default function MoviesPage() {
                                     {activeTab === "movies" && (
                                     <div
                                         key={`movies-${activeProvider}`}
-                                        className="space-y-8 md:space-y-12"
+                                        className="space-y-10 md:space-y-14"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
                                                 {providerData[activeProvider].movies?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-accent" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Movies`} color="text-accent" isFeatured viewAllHref="/browse?type=movie" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-movies`} isLarge /></LazySection>
                                                     </section>
                                                 )}
                                                 {providerData[activeProvider].topRated?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated" color="text-accent-warm" />
+                                                        <SectionHeader icon={Star} title="Top Rated" color="text-accent-warm" viewAllHref="/browse?type=movie&sort=top_rated" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !i.name)} type="movie" title={`${activeProvider}-toprated`} /></LazySection>
                                                     </section>
                                                 )}
@@ -698,25 +731,25 @@ export default function MoviesPage() {
                                             <>
                                                 {((loading && trending.filter(m => detectMediaType(m) === 'movie').length === 0) || trending.filter(m => detectMediaType(m) === 'movie').length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title="Trending Movies" color="text-accent" isFeatured />
+                                                        <SectionHeader icon={Flame} title="Trending Movies" color="text-accent" isFeatured viewAllHref="/browse?type=movie&sort=trending" />
                                                         {trending.filter(m => detectMediaType(m) === 'movie').length > 0 ? <LazySection><MovieRow items={trending.filter(m => detectMediaType(m) === 'movie')} title="movie-trending" isLarge /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && popular.length === 0) || popular.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Film} title="Popular Movies" color="text-accent" />
+                                                        <SectionHeader icon={Film} title="Popular Movies" color="text-accent" viewAllHref="/browse?type=movie" />
                                                         {popular.length > 0 ? <LazySection><MovieRow items={popular} type="movie" title="movies-popular" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && nowPlaying.length === 0) || nowPlaying.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-accent-warm" />
+                                                        <SectionHeader icon={Popcorn} title="Now Playing in Theaters" color="text-accent-warm" viewAllHref="/browse?type=movie&sort=release_date" />
                                                         {nowPlaying.length > 0 ? <LazySection><MovieRow items={nowPlaying} type="movie" title="now-playing" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && topRated.length === 0) || topRated.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated Movies" color="text-accent-warm" isFeatured />
+                                                        <SectionHeader icon={Star} title="Top Rated Movies" color="text-accent-warm" isFeatured viewAllHref="/browse?type=movie&sort=top_rated" />
                                                         {topRated.length > 0 ? <LazySection><MovieGrid items={topRated} type="movie" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
@@ -725,7 +758,7 @@ export default function MoviesPage() {
                                                     if ((loading && !items) || (items && items.length > 0)) {
                                                         return (
                                                             <section key={genre.title} id={`genre-${genre.genreId}`}>
-                                                                <SectionHeader icon={genre.icon} title={genre.title} color="text-accent" />
+                                                                <SectionHeader icon={genre.icon} title={genre.title} color="text-accent" viewAllHref={`/browse?type=movie&genre=${genre.genreId}`} />
                                                                 {items && items.length > 0 ? (
                                                                     <LazySection><MovieRow items={items} type={genre.type} title={genre.title} /></LazySection>
                                                                 ) : (
@@ -744,19 +777,19 @@ export default function MoviesPage() {
                                 {activeTab === "tv" && (
                                     <div
                                         key={`tv-${activeProvider}`}
-                                        className="space-y-8 md:space-y-12"
+                                        className="space-y-10 md:space-y-14"
                                     >
                                         {activeProvider !== "all" && providerData[activeProvider] ? (
                                             <>
                                                 {providerData[activeProvider].tv?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-accent" isFeatured />
+                                                        <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} Series`} color="text-accent" isFeatured viewAllHref="/browse?type=tv" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-tv`} isLarge /></LazySection>
                                                     </section>
                                                 )}
                                                 {providerData[activeProvider].topRated?.filter((i:any) => !!i.name).length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-accent-warm" />
+                                                        <SectionHeader icon={Star} title="Top Rated Shows" color="text-accent-warm" viewAllHref="/browse?type=tv&sort=top_rated" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].topRated.filter((i:any) => !!i.name)} type="tv" title={`${activeProvider}-toprated-tv`} /></LazySection>
                                                     </section>
                                                 )}
@@ -765,19 +798,19 @@ export default function MoviesPage() {
                                             <>
                                                 {((loading && trending.filter(m => detectMediaType(m) === 'tv').length === 0) || trending.filter(m => detectMediaType(m) === 'tv').length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title="Trending TV Shows" color="text-accent" isFeatured />
+                                                        <SectionHeader icon={Flame} title="Trending TV Shows" color="text-accent" isFeatured viewAllHref="/browse?type=tv&sort=trending" />
                                                         {trending.filter(m => detectMediaType(m) === 'tv').length > 0 ? <LazySection><MovieRow items={trending.filter(m => detectMediaType(m) === 'tv')} title="tv-trending" isLarge /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Tv} title="Popular TV Shows" color="text-accent" />
+                                                        <SectionHeader icon={Tv} title="Popular TV Shows" color="text-accent" viewAllHref="/browse?type=tv" />
                                                         {tvPopular.length > 0 ? <LazySection><MovieRow items={tvPopular} type="tv" title="tv-popular" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
                                                 {((loading && tvTopRated.length === 0) || tvTopRated.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-accent-warm" isFeatured />
+                                                        <SectionHeader icon={Star} title="Top Rated TV Shows" color="text-accent-warm" isFeatured viewAllHref="/browse?type=tv&sort=top_rated" />
                                                         {tvTopRated.length > 0 ? <LazySection><MovieGrid items={tvTopRated} type="tv" /></LazySection> : <RowSkeleton />}
                                                     </section>
                                                 )}
@@ -786,7 +819,7 @@ export default function MoviesPage() {
                                                     if ((loading && !items) || (items && items.length > 0)) {
                                                         return (
                                                             <section key={net.title} id={`network-${net.networkId}`}>
-                                                                <SectionHeader icon={Tv} title={net.title} color="text-white" brandColor={net.brandColor} />
+                                                                <SectionHeader icon={Tv} title={net.title} color="text-white" brandColor={net.brandColor} viewAllHref="/browse?type=tv" />
                                                                 {items && items.length > 0 ? (
                                                                     <LazySection><MovieRow items={items} type="tv" title={net.title} isLarge={idx === 1 || idx === 5} /></LazySection>
                                                                 ) : (
@@ -805,18 +838,18 @@ export default function MoviesPage() {
                                 {activeTab === "anime" && (
                                     <div
                                         key={`anime-${activeProvider}`}
-                                        className="space-y-8 md:space-y-12 mt-4"
+                                        className="space-y-10 md:space-y-14 mt-4"
                                     >
                                         {/* Provider anime content (Crunchyroll / ToonPlayer Originals) */}
                                         {activeProvider !== "all" && providerData[activeProvider]?.isAnime && providerData[activeProvider].tv?.length > 0 ? (
                                             <>
                                                 <section>
-                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-accent" isFeatured />
+                                                    <SectionHeader icon={Flame} title={`${providerData[activeProvider].label} — Top Anime`} color="text-accent" isFeatured viewAllHref="/browse?type=anime" />
                                                     <LazySection><MovieRow items={providerData[activeProvider].tv} type="tv" title={`${activeProvider}-anime`} isLarge /></LazySection>
                                                 </section>
                                                 {providerData[activeProvider].movies?.length > 0 && (
                                                     <section>
-                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-accent-secondary" />
+                                                        <SectionHeader icon={Sparkles} title="Anime Movies" color="text-accent-secondary" viewAllHref="/browse?type=anime" />
                                                         <LazySection><MovieRow items={providerData[activeProvider].movies} type="movie" title={`${activeProvider}-anime-movies`} /></LazySection>
                                                     </section>
                                                 )}
@@ -825,9 +858,9 @@ export default function MoviesPage() {
                                             <>
                                                 {((loading && animeTrending.length === 0) || animeTrending.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Flame} title="Trending Anime" color="text-accent" isFeatured />
+                                                        <SectionHeader icon={Flame} title="Trending Anime" color="text-accent" isFeatured viewAllHref="/browse?type=anime&sort=trending" />
                                                         {animeTrending.length > 0 ? (
-                                                            <LazySection>
+                                                             <LazySection>
                                                                 <MovieRow
                                                                     items={animeTrending.map((item: any) => ({
                                                                         id: item.id || item._id,
@@ -846,7 +879,7 @@ export default function MoviesPage() {
                                                 )}
                                                 {((loading && animeLatest.length === 0) || animeLatest.length > 0) && (
                                                     <section>
-                                                        <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-accent" />
+                                                        <SectionHeader icon={Sparkles} title="Recently Released Anime" color="text-accent" viewAllHref="/browse?type=anime" />
                                                         {animeLatest.length > 0 ? (
                                                             <LazySection>
                                                                 <MovieRow
@@ -872,14 +905,14 @@ export default function MoviesPage() {
                                 {activeTab === "toons" && (
                                     <div
                                         key={`toons-${activeProvider}`}
-                                        className="space-y-8 md:space-y-12"
+                                        className="space-y-10 md:space-y-14"
                                     >
                                         <section>
-                                            <SectionHeader icon={Tv} title="Featured PC Toons" color="text-accent" isFeatured />
+                                            <SectionHeader icon={Tv} title="Featured PC Toons" color="text-accent" isFeatured viewAllHref="/browse?type=tv&genre=16" />
                                             <LazySection><MovieRow items={CARTOONS_DATA} title="featured-pc-toons" isLarge /></LazySection>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Sparkles} title="Latest Animated Releases" color="text-accent-warm" />
+                                            <SectionHeader icon={Sparkles} title="Latest Animated Releases" color="text-accent-warm" viewAllHref="/browse?type=tv&genre=16" />
                                             <LazySection><MovieGrid items={CARTOONS_DATA} type="tv" /></LazySection>
                                         </section>
                                     </div>
@@ -888,36 +921,36 @@ export default function MoviesPage() {
                                 {activeTab === "gaming" && (
                                     <div
                                         key={`gaming-${activeProvider}`}
-                                        className="space-y-8 md:space-y-12"
+                                        className="space-y-10 md:space-y-14"
                                     >
                                         <section>
-                                            <SectionHeader icon={Play} title="Live Streaming Highlights" color="text-accent" isFeatured />
+                                            <SectionHeader icon={Play} title="Live Streaming Highlights" color="text-accent" isFeatured viewAllHref="/browse?type=movie" />
                                             <LazySection><MovieRow items={GAMING_STREAMS_DATA} title="live-streaming-highlights" isLarge /></LazySection>
                                         </section>
                                         <section>
-                                            <SectionHeader icon={Sparkles} title="Popular Gaming Hub Channels" color="text-accent-secondary" />
+                                            <SectionHeader icon={Sparkles} title="Popular Gaming Hub Channels" color="text-accent-secondary" viewAllHref="/browse?type=movie" />
                                             <LazySection><MovieGrid items={GAMING_STREAMS_DATA} type="movie" /></LazySection>
                                         </section>
                                     </div>
                                 )}
 
                                 {activeTab === "trending" && (
-                                    <div className="space-y-8 md:space-y-12">
+                                    <div className="space-y-10 md:space-y-14">
                                         {((loading && trending.length === 0) || trending.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={TrendingUp} title="Global Trending" color="text-accent" isFeatured />
+                                                <SectionHeader icon={TrendingUp} title="Global Trending" color="text-accent" isFeatured viewAllHref="/browse?sort=trending" />
                                                 {trending.length > 0 ? <MovieRow items={trending} title="global-trending" isLarge /> : <RowSkeleton />}
                                             </section>
                                         )}
                                         {((loading && popular.length === 0) || popular.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-accent-secondary" />
+                                                <SectionHeader icon={Sparkles} title="Most Popular Today" color="text-accent-secondary" viewAllHref="/browse?type=movie" />
                                                 {popular.length > 0 ? <MovieRow items={popular} type="movie" title="movies-popular-trending" /> : <RowSkeleton />}
                                             </section>
                                         )}
                                         {((loading && tvPopular.length === 0) || tvPopular.length > 0) && (
                                             <section>
-                                                <SectionHeader icon={Tv} title="Trending Series" color="text-accent" />
+                                                <SectionHeader icon={Tv} title="Trending Series" color="text-accent" viewAllHref="/browse?type=tv" />
                                                 {tvPopular.length > 0 ? <MovieRow items={tvPopular} type="tv" title="tv-popular-trending" /> : <RowSkeleton />}
                                             </section>
                                         )}
@@ -1120,23 +1153,61 @@ export default function MoviesPage() {
 }
 
 // Section Header Component — memoized to avoid re-renders on tab/provider changes
-const SectionHeader = memo(function SectionHeader({ icon: Icon, title, color, brandColor, isFeatured = false }: { icon: any; title: string; color: string; brandColor?: string; isFeatured?: boolean }) {
+const SectionHeader = memo(function SectionHeader({ 
+    icon: Icon, 
+    title, 
+    color, 
+    brandColor, 
+    isFeatured = false,
+    viewAllHref,
+    badge,
+    subtitle
+}: { 
+    icon: any; 
+    title: string; 
+    color?: string; 
+    brandColor?: string; 
+    isFeatured?: boolean;
+    viewAllHref?: string;
+    badge?: string;
+    subtitle?: string;
+}) {
     return (
-        <div className="flex items-end gap-2.5 md:gap-3 mb-3 md:mb-4 text-[var(--text-main)] transition-all">
-            {isFeatured ? (
-                <div className="w-1.5 h-8 bg-gradient-to-t from-accent to-accent-secondary rounded-full shadow-[0_0_15px_var(--accent-glow)]" />
-            ) : (
-                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-            )}
-            <div className="flex flex-col">
-                <div className="flex items-center gap-2 md:gap-3">
-                    <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-[18px] h-[18px] md:w-5 md:h-5'} text-accent drop-shadow-md`} />
-                    <h2 className={`${isFeatured ? 'text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base md:text-lg font-black tracking-tight font-sora'} ${brandColor || 'text-white'}`}>{title}</h2>
-                </div>
-                {isFeatured && (
-                    <p className="text-[9px] md:text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mt-0.5 ml-0.5 opacity-75">Featured Collection</p>
+        <div className="flex items-center justify-between mb-3.5 md:mb-4 text-[var(--text-main)] transition-all">
+            <div className="flex items-center gap-2.5 md:gap-3">
+                {isFeatured ? (
+                    <div className="w-1.5 h-7 md:h-8 bg-gradient-to-t from-accent to-accent-secondary rounded-full shadow-[0_0_15px_var(--accent-glow)]" />
+                ) : (
+                    <div className="w-1.5 h-5 md:h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
                 )}
+                <div className="flex flex-col">
+                    <div className="flex items-center gap-2 md:gap-2.5">
+                        <Icon className={`${isFeatured ? 'w-5 h-5 md:w-6 md:h-6' : 'w-4 h-4 md:w-5 md:h-5'} text-accent drop-shadow-md`} />
+                        <h2 className={`${isFeatured ? 'text-lg sm:text-xl md:text-2xl font-black tracking-tight drop-shadow-sm font-sora' : 'text-base sm:text-lg md:text-xl font-black tracking-tight font-sora'} ${brandColor || 'text-white'}`}>{title}</h2>
+                        {badge && (
+                            <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-white/10 text-white border border-white/10">
+                                {badge}
+                            </span>
+                        )}
+                    </div>
+                    {subtitle ? (
+                        <p className="text-[10px] md:text-xs text-[var(--text-muted)] font-medium mt-0.5">{subtitle}</p>
+                    ) : isFeatured ? (
+                        <p className="text-[9px] md:text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mt-0.5 opacity-75">Featured Collection</p>
+                    ) : null}
+                </div>
             </div>
+
+            {viewAllHref && (
+                <Link
+                    href={viewAllHref}
+                    scroll={false}
+                    className="group/link flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white transition-colors py-1 px-2.5 rounded-lg hover:bg-white/5 shrink-0"
+                >
+                    <span className="hidden sm:inline">View All</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover/link:text-accent group-hover/link:translate-x-0.5 transition-all" />
+                </Link>
+            )}
         </div>
     );
 });

@@ -199,6 +199,18 @@ export default function ProfileGate() {
           transition={{ duration: isMobile ? 0.25 : 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-start md:justify-center overflow-y-auto p-6 md:p-8 bg-bg-main hide-scrollbar"
         >
+          <button
+            onClick={() => {
+              if (!activeProfileId) {
+                setActiveProfile('profile-guest');
+              }
+              setShowGate(false);
+            }}
+            className="absolute top-6 right-6 p-2.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer z-50"
+            aria-label="Close and continue as guest"
+          >
+            <X className="w-6 h-6" />
+          </button>
           <motion.div
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: selectedId ? 0 : 1, scale: selectedId ? (isMobile ? 1.15 : 1.5) : 1 }}

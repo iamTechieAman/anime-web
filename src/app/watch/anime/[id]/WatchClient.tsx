@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useRef, useCallback } from "react";
+import { useState, useEffect, use, useRef, useCallback, useMemo } from "react";
 import React from "react";
 import Script from "next/script";
 import axios from "axios";
@@ -96,6 +96,25 @@ function cleanString(str: any): string | null {
     const s = String(str).trim();
     if (/^(unknown|undefined|null|no image|no img|no_image|no_img|placeholder|none)$/i.test(s)) return null;
     return s;
+}
+
+/** Robust numerical episode sorting */
+export function sortEpisodes(eps: any[]): any[] {
+    if (!Array.isArray(eps)) return [];
+    return [...eps].sort((a, b) => {
+        const getNum = (item: any) => {
+            if (typeof item === 'object' && item !== null) {
+                if (item.number !== undefined && item.number !== null && !isNaN(Number(item.number))) {
+                    return Number(item.number);
+                }
+                const parsedId = parseFloat(String(item.id).replace(/[^0-9.]/g, ''));
+                return !isNaN(parsedId) ? parsedId : 0;
+            }
+            const parsed = parseFloat(String(item).replace(/[^0-9.]/g, ''));
+            return !isNaN(parsed) ? parsed : 0;
+        };
+        return getNum(a) - getNum(b);
+    });
 }
 
 /** Memoized episode button to prevent full list re-render on every currentEp change */
@@ -360,7 +379,17 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [epFilter, setEpFilter] = useState("");
     const [reloadCount, setReloadCount] = useState(0);
 
+    const [showNextOverlay, setShowNextOverlay] = useState(false);
+    const [nextCountdown, setNextCountdown] = useState(5);
+    const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const isAdvancingRef = useRef(false);
+
     const handleSelectEpisode = useCallback((ep: string) => {
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        setShowNextOverlay(false);
+        setSourceUrl(null);
+        setLoadingSource(true);
+        setError(null);
         setCurrentEp(ep);
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -370,7 +399,26 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
     }, [router]);
 
-    const availableEps = show?.availableEpisodesDetail?.[mode] || [];
+    const availableEps: any[] = useMemo(() => {
+        const raw = show?.availableEpisodesDetail?.[mode] || [];
+        return sortEpisodes(raw);
+    }, [show?.availableEpisodesDetail, mode]);
+
+    const currentEpItem = useMemo(() => {
+        return availableEps.find((e: any) =>
+            typeof e === 'object' ? String(e.number || e.id) === String(currentEp) : String(e) === String(currentEp)
+        );
+    }, [availableEps, currentEp]);
+
+    const currentEpTitle = useMemo(() => {
+        if (currentEpItem && typeof currentEpItem === 'object' && currentEpItem.title) {
+            const t = String(currentEpItem.title).trim();
+            if (t.toLowerCase() !== `episode ${currentEp}` && t.toLowerCase() !== `ep ${currentEp}`) {
+                return t;
+            }
+        }
+        return null;
+    }, [currentEpItem, currentEp]);
 
     const [sourceUrl, setSourceUrl] = useState<string | null>(null);
     const [videoType, setVideoType] = useState<string>("auto");
@@ -378,14 +426,144 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [isValidating, setIsValidating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Auto-play and Auto-next always enabled
+    // Auto-play and Auto-next preferences
     const [autoPlay, setAutoPlay] = useState(true);
     const [autoNext, setAutoNext] = useState(true);
-    const [showNextOverlay, setShowNextOverlay] = useState(false);
-    const [nextCountdown, setNextCountdown] = useState(5);
-    const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const manualServerRef = useRef<string | null>(null);
     const sourceSeqRef = useRef<number>(0);
+    const playerContainerRef = useRef<HTMLDivElement>(null);
+    const artInstanceRef = useRef<any>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Cross-browser fullscreen toggle supporting container, ArtPlayer, and Safari
+    const toggleFullscreen = useCallback(async () => {
+        const doc = document as any;
+        const isFS = Boolean(
+            doc.fullscreenElement ||
+            doc.webkitFullscreenElement ||
+            doc.mozFullScreenElement ||
+            doc.msFullscreenElement
+        );
+
+        if (isFS) {
+            try {
+                if (doc.exitFullscreen) await doc.exitFullscreen();
+                else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+                else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
+                else if (doc.msExitFullscreen) await doc.msExitFullscreen();
+            } catch (err) {
+                console.warn('[Fullscreen] Exit failed:', err);
+            }
+        } else {
+            // First try ArtPlayer internal fullscreen if native player is active
+            if (artInstanceRef.current && videoType !== 'iframe') {
+                try {
+                    artInstanceRef.current.fullscreen = true;
+                    return;
+                } catch (e) {
+                    console.warn('[Fullscreen] ArtPlayer fullscreen failed, falling back to container:', e);
+                }
+            }
+
+            const target = playerContainerRef.current as any;
+            if (!target) return;
+
+            try {
+                if (target.requestFullscreen) {
+                    await target.requestFullscreen();
+                } else if (target.webkitRequestFullscreen) {
+                    await target.webkitRequestFullscreen();
+                } else if (target.mozRequestFullScreen) {
+                    await target.mozRequestFullScreen();
+                } else if (target.msRequestFullscreen) {
+                    await target.msRequestFullscreen();
+                } else {
+                    const videoEl = target.querySelector('video') as any;
+                    if (videoEl && videoEl.webkitEnterFullscreen) {
+                        videoEl.webkitEnterFullscreen();
+                    }
+                }
+            } catch (err) {
+                console.warn('[Fullscreen] Fullscreen request rejected or unavailable:', err);
+            }
+        }
+    }, [videoType]);
+
+    // Fullscreen change listener across browsers
+    useEffect(() => {
+        const onFSChange = () => {
+            const doc = document as any;
+            const isFS = Boolean(
+                doc.fullscreenElement ||
+                doc.webkitFullscreenElement ||
+                doc.mozFullScreenElement ||
+                doc.msFullscreenElement
+            );
+            setIsFullscreen(isFS);
+        };
+
+        document.addEventListener('fullscreenchange', onFSChange);
+        document.addEventListener('webkitfullscreenchange', onFSChange);
+        document.addEventListener('mozfullscreenchange', onFSChange);
+        document.addEventListener('MSFullscreenChange', onFSChange);
+
+        return () => {
+            document.removeEventListener('fullscreenchange', onFSChange);
+            document.removeEventListener('webkitfullscreenchange', onFSChange);
+            document.removeEventListener('mozfullscreenchange', onFSChange);
+            document.removeEventListener('MSFullscreenChange', onFSChange);
+        };
+    }, []);
+
+    // Keyboard shortcut for fullscreen (f)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [toggleFullscreen]);
+
+    // Autoplay preference toggles with real persistence
+    const handleToggleAutoPlay = useCallback(() => {
+        setAutoPlay(prev => {
+            const nextVal = !prev;
+            try {
+                localStorage.setItem('toonplayer_autoplay', String(nextVal));
+                const s = localStorage.getItem('toonplayer_settings');
+                const current = s ? JSON.parse(s) : {};
+                localStorage.setItem('toonplayer_settings', JSON.stringify({ ...current, autoplay: nextVal }));
+                window.dispatchEvent(new Event('profileUpdated'));
+            } catch (_) {}
+            toast(nextVal ? "Autoplay Enabled" : "Autoplay Disabled", {
+                icon: nextVal ? "▶️" : "⏸️",
+                duration: 2000
+            });
+            return nextVal;
+        });
+    }, []);
+
+    const handleToggleAutoNext = useCallback(() => {
+        setAutoNext(prev => {
+            const nextVal = !prev;
+            try {
+                localStorage.setItem('toonplayer_autonext', String(nextVal));
+                const s = localStorage.getItem('toonplayer_settings');
+                const current = s ? JSON.parse(s) : {};
+                localStorage.setItem('toonplayer_settings', JSON.stringify({ ...current, autoNext: nextVal }));
+                window.dispatchEvent(new Event('profileUpdated'));
+            } catch (_) {}
+            toast(nextVal ? "Auto-Next Episode Enabled" : "Auto-Next Episode Disabled", {
+                icon: nextVal ? "⏭️" : "⏹️",
+                duration: 2000
+            });
+            return nextVal;
+        });
+    }, []);
 
     // Sync URL when episode or mode changes without triggering page reload
     useEffect(() => {
@@ -480,35 +658,75 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showEpisodesDrawer, setShowEpisodesDrawer] = useState(false);
 
-    const hasNextEpisode = () => {
-        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
+    // Dynamic document.title update
+    useEffect(() => {
+        if (show?.name) {
+            document.title = `Watch ${show.name} - Episode ${currentEp}${currentEpTitle ? `: ${currentEpTitle}` : ''} | ToonPlayer`;
+        }
+    }, [show?.name, currentEp, currentEpTitle]);
+
+    // Save to watch history immediately when episode changes
+    useEffect(() => {
+        if (!show || !currentEp) return;
+        try {
+            addToHistory({
+                id: `${fullId}-${currentEp}`,
+                showId: fullId,
+                type: 'anime',
+                title: show?.name || 'Unknown',
+                poster: (currentEpItem && typeof currentEpItem === 'object' && currentEpItem.image) || show?.thumbnail || ((show as any)?.image) || '',
+                episodeId: currentEp,
+                episodeNumber: Number(currentEp) || 1,
+                currentTime: 0,
+                duration: 0,
+                providerId: provider || undefined,
+                serverId: selectedServer || undefined
+            });
+        } catch (_) {}
+    }, [fullId, currentEp, show, currentEpItem, provider, selectedServer, addToHistory]);
+
+    // Reset advancing guard when episode changes
+    useEffect(() => {
+        isAdvancingRef.current = false;
+    }, [currentEp]);
+
+    const hasNextEpisode = useCallback(() => {
+        const currentIdx = availableEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         return currentIdx !== -1 && currentIdx + 1 < availableEps.length;
-    };
+    }, [availableEps, currentEp]);
 
-    const hasPrevEpisode = () => {
-        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
+    const hasPrevEpisode = useCallback(() => {
+        const currentIdx = availableEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         return currentIdx > 0;
-    };
+    }, [availableEps, currentEp]);
 
-    const handleNextEpisode = () => {
-        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
+    const handleNextEpisode = useCallback(() => {
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        setShowNextOverlay(false);
+
+        const currentIdx = availableEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         if (currentIdx !== -1 && currentIdx + 1 < availableEps.length) {
             const nextItem = availableEps[currentIdx + 1];
             const nextEp = typeof nextItem === 'object' ? String(nextItem.number || nextItem.id) : String(nextItem);
-            setCurrentEp(nextEp);
+            handleSelectEpisode(nextEp);
             toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
+        } else {
+            toast("You have reached the final episode.", { icon: "🏁" });
         }
-    };
+    }, [availableEps, currentEp, handleSelectEpisode]);
 
-    const handlePrevEpisode = () => {
-        const currentIdx = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
+    const handlePrevEpisode = useCallback(() => {
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        setShowNextOverlay(false);
+
+        const currentIdx = availableEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         if (currentIdx > 0) {
             const prevItem = availableEps[currentIdx - 1];
             const prevEp = typeof prevItem === 'object' ? String(prevItem.number || prevItem.id) : String(prevItem);
-            setCurrentEp(prevEp);
+            handleSelectEpisode(prevEp);
             toast.success(`Now playing Episode ${prevEp}`, { icon: '▶️' });
         }
-    };
+    }, [availableEps, currentEp, handleSelectEpisode]);
 
     // Automatic Provider Fallback Engine (Intelligent Circular Rotation)
     const handleAutoFallback = useCallback(() => {
@@ -524,6 +742,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             if (allFailed || nextFailed.size >= servers.length) {
                 console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (${servers.length}). Stopping auto-switch.`);
                 setError("Source Temporarily Unavailable. The player encountered an issue across all servers.");
+                setLoadingSource(false);
+                processingRef.current = null;
                 return nextFailed;
             }
 
@@ -542,6 +762,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
 
             if (nextServer) {
+                processingRef.current = null;
                 setLoadingStatus(`Switching to backup server: ${nextServer.serverName}...`);
                 toast.error(`Server failed. Auto-switching to ${nextServer.serverName}...`, {
                     icon: "🔄",
@@ -557,6 +778,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 setSelectedServer(nextServer.serverId);
             } else {
                 setError("Source Temporarily Unavailable. The player encountered an issue across all servers.");
+                setLoadingSource(false);
+                processingRef.current = null;
             }
             return nextFailed;
         });
@@ -917,7 +1140,15 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     throw new Error("CONTENT_MISMATCH");
                 }
                 
-                console.log(`[GlobalClickDebugger] 🌐 API FETCHED ID (Anime): ${fetchedShow.id || fetchedShow.showId || fetchedShow._id}`);
+                // Ensure episodes are strictly sorted numerically
+                if (fetchedShow.availableEpisodesDetail) {
+                    if (Array.isArray(fetchedShow.availableEpisodesDetail.sub)) {
+                        fetchedShow.availableEpisodesDetail.sub = sortEpisodes(fetchedShow.availableEpisodesDetail.sub);
+                    }
+                    if (Array.isArray(fetchedShow.availableEpisodesDetail.dub)) {
+                        fetchedShow.availableEpisodesDetail.dub = sortEpisodes(fetchedShow.availableEpisodesDetail.dub);
+                    }
+                }
                 
                 setShow(fetchedShow);
 
@@ -1260,16 +1491,28 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         };
 
         fetchSource();
-        return () => controller.abort();
+        return () => {
+            controller.abort();
+            if (processingRef.current === key) {
+                processingRef.current = null;
+            }
+        };
     }, [id, currentEp, mode, show, selectedServer, provider, servers, serversKey, tmdbId]);
 
-    const handleVideoEnded = () => {
-        if (!autoNext) return;
+    const handleVideoEnded = useCallback(() => {
+        if (!autoNext) {
+            console.log('[WatchPage] Video ended, auto-next is disabled.');
+            return;
+        }
+        if (isAdvancingRef.current) return;
+        if (loadingSource || loadingServers) {
+            console.warn('[WatchPage] Ignoring ended event while source is loading.');
+            return;
+        }
         
-        const availableEps = show?.availableEpisodesDetail?.[mode] || [];
-        const currentIndex = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
+        const currentIdx = availableEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
         
-        if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
+        if (currentIdx !== -1 && currentIdx + 1 < availableEps.length) {
             // Trigger Netflix-style countdown overlay
             if (showNextOverlay) return;
             
@@ -1283,10 +1526,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     if (prev <= 1) {
                         if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
                         setShowNextOverlay(false);
-                        
-                        const nextEp = (typeof availableEps[currentIndex + 1] === 'object' ? String(availableEps[currentIndex + 1].number||availableEps[currentIndex + 1].id) : String(availableEps[currentIndex + 1]));
-                        setCurrentEp(String(nextEp));
-                        toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
+                        isAdvancingRef.current = true;
+                        handleNextEpisode();
                         return 0;
                     }
                     return prev - 1;
@@ -1295,7 +1536,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         } else {
             toast("You have reached the latest available episode.", { icon: "✅" });
         }
-    };
+    }, [autoNext, availableEps, currentEp, showNextOverlay, loadingSource, loadingServers, handleNextEpisode]);
 
 
     if (loadingShow) {
@@ -1309,7 +1550,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         const fallbackEmbedUrl2 = `https://vidsrc.to/embed/anime/${id}/1`;
         
         return (
-            <main className="bg-bg-main text-[var(--text-main)]">
+            <div className="bg-bg-main text-[var(--text-main)]">
                 {/* Navbar */}
                 <nav className={`fixed top-0 left-0 right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)] transition-transform ${isHeaderScrolled ? '-translate-y-full' : 'translate-y-0'}`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
@@ -1376,12 +1617,16 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
     const renderPlayer = () => {
         return (
-            <div className={`relative w-full aspect-video bg-black overflow-hidden ${isFocusMode ? "!h-[100dvh] !aspect-auto rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"} border-0 sm:border border-border-color shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} style={{ touchAction: 'pan-y !important' }}>
+            <div 
+                ref={playerContainerRef}
+                className={`relative w-full aspect-video bg-black overflow-hidden ${isFocusMode ? "!h-[100dvh] !aspect-auto rounded-none" : "rounded-none sm:rounded-xl md:rounded-2xl"} border-0 sm:border border-border-color shadow-none sm:shadow-2xl touch-pan-y ${dimLights ? 'z-[48]' : 'z-20'}`} 
+                style={{ touchAction: 'pan-y !important' }}
+            >
                 {loadingSource ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black/60 backdrop-blur-md z-50">
                         <div className="relative">
@@ -1506,10 +1751,15 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                             </>
                         ) : (
                             <ArtPlayer
-                                key={`${id}-${currentEp}`}
+                                key={`${id}-${currentEp}-${selectedServer}-${sourceUrl || ''}`}
+                                getInstance={(art) => {
+                                    artInstanceRef.current = art;
+                                }}
                                 option={{
                                     url: sourceUrl,
                                     type: videoType,
+                                    poster: (currentEpItem && typeof currentEpItem === 'object' && currentEpItem.image) || show?.thumbnail || ((show as any)?.image) || '',
+                                    title: `${show?.name || 'Anime'} - Episode ${currentEp}${currentEpTitle ? `: ${currentEpTitle}` : ''}`,
                                 }}
                                 initialTime={getHistoryItem(`${fullId}-${currentEp}`)?.currentTime || 0}
                                 onTimeUpdate={(currentTime: number, duration: number) => {
@@ -1518,7 +1768,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                         showId: fullId,
                                         type: 'anime',
                                         title: show?.name || 'Unknown',
-                                        poster: show?.thumbnail || ((show as any)?.image) || '',
+                                        poster: (currentEpItem && typeof currentEpItem === 'object' && currentEpItem.image) || show?.thumbnail || ((show as any)?.image) || '',
                                         episodeId: currentEp,
                                         episodeNumber: Number(currentEp) || 1,
                                         currentTime,
@@ -1530,8 +1780,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     });
                                 }}
                                 onEnded={handleVideoEnded}
-                                onError={() => {
-                                    console.warn('[ToonPlayer] ArtPlayer playback error. Triggering auto fallback...');
+                                onNext={handleNextEpisode}
+                                hasNext={hasNextEpisode()}
+                                onError={(err: any) => {
+                                    console.warn('[ToonPlayer] ArtPlayer playback error. Triggering auto fallback...', err);
                                     handleAutoFallback();
                                 }}
                                 autoPlay={autoPlay}
@@ -1581,10 +1833,20 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             </div>
                                         </div>
                                         
-                                        <h3 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">Up Next</h3>
-                                        <p className="text-[var(--text-muted)] text-xs font-bold mb-6">
-                                            Episode {availableEps[availableEps.indexOf(currentEp) + 1] || 'Next'}
-                                        </p>
+                                        {(() => {
+                                            const currentIdx = availableEps.map((e: any) => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
+                                            const nextItem = currentIdx !== -1 && currentIdx + 1 < availableEps.length ? availableEps[currentIdx + 1] : null;
+                                            const nextEpNum = nextItem ? (typeof nextItem === 'object' ? String(nextItem.number || nextItem.id) : String(nextItem)) : 'Next';
+                                            const nextEpTitle = nextItem && typeof nextItem === 'object' && nextItem.title ? nextItem.title : null;
+                                            return (
+                                                <>
+                                                    <h3 className="text-xl font-black text-white mb-1 uppercase tracking-tighter">Up Next</h3>
+                                                    <p className="text-[var(--text-muted)] text-xs font-bold mb-6">
+                                                        Episode {nextEpNum}{nextEpTitle ? `: ${nextEpTitle}` : ''}
+                                                    </p>
+                                                </>
+                                            );
+                                        })()}
                                         
                                         <div className="flex items-center gap-2 justify-center">
                                             <button 
@@ -1592,7 +1854,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                     if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
                                                     setShowNextOverlay(false);
                                                 }}
-                                                className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs transition-all"
+                                                className="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs transition-all cursor-pointer"
                                             >
                                                 Cancel
                                             </button>
@@ -1600,13 +1862,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 onClick={() => {
                                                     if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
                                                     setShowNextOverlay(false);
-                                                    const currentIndex = availableEps.map(e => typeof e === 'object' ? String(e.number||e.id) : String(e)).indexOf(String(currentEp));
-                                                    if (currentIndex !== -1 && currentIndex + 1 < availableEps.length) {
-                                                        const nextEp = (typeof availableEps[currentIndex + 1] === 'object' ? String(availableEps[currentIndex + 1].number||availableEps[currentIndex + 1].id) : String(availableEps[currentIndex + 1]));
-                                                        setCurrentEp(String(nextEp));
-                                                    }
+                                                    handleNextEpisode();
                                                 }}
-                                                className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg font-black text-xs transition-all flex items-center gap-1.5"
+                                                className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer"
                                             >
                                                 Play Now <Play className="w-3.5 h-3.5 fill-current" />
                                             </button>
@@ -1627,7 +1885,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
     if (!show) {
         return (
-            <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-[calc(60px+env(safe-area-inset-top)+16px)] md:pt-[calc(72px+env(safe-area-inset-top)+16px)] w-full max-w-[1800px] mx-auto pb-8 px-4 sm:px-6 md:px-8">
+            <div className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-[calc(60px+env(safe-area-inset-top)+16px)] md:pt-[calc(72px+env(safe-area-inset-top)+16px)] w-full max-w-[1800px] mx-auto pb-8 px-4 sm:px-6 md:px-8">
                 <div className="w-64 h-8 bg-zinc-800/60 rounded-xl animate-pulse mb-4" />
                 <div className="grid grid-cols-1 xl:grid-cols-[74%_minmax(0,26%)] gap-6 items-start">
                     <div className="w-full aspect-video min-h-[220px] sm:min-h-[360px] md:min-h-[480px] bg-zinc-900/80 rounded-2xl animate-pulse flex items-center justify-center border border-white/5">
@@ -1635,7 +1893,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     </div>
                     <div className="hidden xl:block w-full h-[600px] bg-zinc-900/40 rounded-2xl animate-pulse border border-white/5" />
                 </div>
-            </main>
+            </div>
         );
     }
 
@@ -1762,8 +2020,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 </h1>
                                 {/* Episode Info (Compact) */}
                                 {episodes.length > 1 ? (
-                                    <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
-                                        Episode {currentEp} <span className="text-zinc-600">·</span> {mode.toUpperCase()}
+                                    <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5 truncate">
+                                        Episode {currentEp}{currentEpTitle ? `: ${currentEpTitle}` : ''} <span className="text-zinc-600">·</span> {mode.toUpperCase()}
                                     </p>
                                 ) : (
                                     <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
@@ -1786,9 +2044,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         <div className="w-full min-w-0 touch-pan-y bg-white/[0.02] backdrop-blur-md p-0 rounded-none sm:rounded-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.45)] border-0 sm:border border-white/[0.05] overflow-hidden">
                             {!isTheatreMode && <div className="mb-0">{renderPlayer()}</div>}
 
-                            {/* Control Bar (Prev/Next/Theatre/Focus/Reload/Dim) */}
-                            <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-4 flex-wrap select-none shadow-md mb-4">
-                                <div className="flex items-center gap-2">
+                            {/* Control Bar (Prev/Next/Autoplay/AutoNext/Theatre/Focus/Reload/Dim/Fullscreen) */}
+                            <div className="flex items-center justify-between px-4 py-3 bg-[#111113]/90 border border-white/5 rounded-2xl mt-4 gap-3 flex-wrap select-none shadow-md mb-4">
+                                <div className="flex items-center gap-2 flex-wrap">
                                     {episodes.length > 1 ? (
                                         <>
                                             <button
@@ -1796,6 +2054,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 disabled={!hasPrevEpisode()}
                                                 className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200 cursor-pointer"
                                                 title="Previous Episode"
+                                                aria-label="Previous Episode"
                                             ><ChevronLeft className="w-4 h-4" /></button>
                                             <span className="text-xs font-semibold text-zinc-400 min-w-[70px] text-center">
                                                 EP {currentEp}
@@ -1805,6 +2064,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 disabled={!hasNextEpisode()}
                                                 className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 border border-white/10 rounded-xl text-white transition-all duration-200 cursor-pointer"
                                                 title="Next Episode"
+                                                aria-label="Next Episode"
                                             ><ChevronRight className="w-4 h-4" /></button>
                                         </>
                                     ) : (
@@ -1812,24 +2072,73 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             Anime Movie
                                         </span>
                                     )}
+
+                                    <div className="h-4 w-[1px] bg-white/10 mx-1 hidden sm:block" />
+
+                                    {/* Real Autoplay Preference Toggle */}
+                                    <button
+                                        onClick={handleToggleAutoPlay}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                                            autoPlay 
+                                                ? "bg-purple-600/20 border-purple-500/40 text-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.2)]" 
+                                                : "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10"
+                                        }`}
+                                        title={`Autoplay is ${autoPlay ? 'ON' : 'OFF'} — click to toggle`}
+                                        aria-label={`Toggle Autoplay (currently ${autoPlay ? 'enabled' : 'disabled'})`}
+                                        aria-pressed={autoPlay}
+                                    >
+                                        <Play className={`w-3.5 h-3.5 ${autoPlay ? 'fill-current text-purple-400' : 'text-zinc-500'}`} />
+                                        <span>Autoplay</span>
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                                            autoPlay ? "bg-purple-500/30 text-purple-200" : "bg-white/10 text-zinc-500"
+                                        }`}>
+                                            {autoPlay ? "ON" : "OFF"}
+                                        </span>
+                                    </button>
+
+                                    {/* Real Auto-Next Preference Toggle */}
+                                    <button
+                                        onClick={handleToggleAutoNext}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                                            autoNext 
+                                                ? "bg-purple-600/20 border-purple-500/40 text-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.2)]" 
+                                                : "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10"
+                                        }`}
+                                        title={`Auto-Next is ${autoNext ? 'ON' : 'OFF'} — click to toggle`}
+                                        aria-label={`Toggle Auto-Next (currently ${autoNext ? 'enabled' : 'disabled'})`}
+                                        aria-pressed={autoNext}
+                                    >
+                                        <svg className={`w-3.5 h-3.5 ${autoNext ? 'text-purple-400' : 'text-zinc-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <polygon points="5 4 15 12 5 20 5 4" />
+                                            <line x1="19" y1="5" x2="19" y2="19" />
+                                        </svg>
+                                        <span>Auto-Next</span>
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                                            autoNext ? "bg-purple-500/30 text-purple-200" : "bg-white/10 text-zinc-500"
+                                        }`}>
+                                            {autoNext ? "ON" : "OFF"}
+                                        </span>
+                                    </button>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setIframeKey(prev => prev + 1)}
-                                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all"
+                                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all cursor-pointer"
                                         title="Reload Player"
+                                        aria-label="Reload Player"
                                     ><RefreshCw className="w-4 h-4" /></button>
                                     <button
                                         onClick={() => {
                                             setIsTheatreMode(!isTheatreMode);
                                             if (isFocusMode) setIsFocusMode(false);
                                         }}
-                                        className={`p-2 border rounded-xl transition-all ${
+                                        className={`p-2 border rounded-xl transition-all cursor-pointer ${
                                             isTheatreMode 
                                                 ? "bg-accent/20 border-accent text-accent font-bold shadow-[0_0_10px_var(--accent-glow)]" 
                                                 : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                                         }`}
                                         title="Theatre Mode"
+                                        aria-label="Toggle Theatre Mode"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                             <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -1841,23 +2150,46 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             setIsFocusMode(!isFocusMode);
                                             if (isTheatreMode) setIsTheatreMode(false);
                                         }}
-                                        className={`p-2 border rounded-xl transition-all ${
+                                        className={`p-2 border rounded-xl transition-all cursor-pointer ${
                                             isFocusMode 
                                                 ? "bg-accent/20 border-accent text-accent font-bold shadow-[0_0_10px_var(--accent-glow)]" 
                                                 : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                                         }`}
                                         title="Cinematic Focus Mode"
+                                        aria-label="Toggle Cinematic Focus Mode"
                                     ><Shield className="w-4 h-4" /></button>
                                     <button 
                                         onClick={() => setDimLights(!dimLights)}
-                                        className={`p-2 border rounded-xl transition-all ${
+                                        className={`p-2 border rounded-xl transition-all cursor-pointer ${
                                             dimLights 
                                                 ? "bg-amber-500/20 border-amber-500 text-amber-500 font-bold" 
                                                 : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
                                         }`}
                                         title="Toggle Cinema Light Effect"
+                                        aria-label="Toggle Cinema Lights"
                                     >
                                         <Zap className="w-4 h-4" />
+                                    </button>
+                                    {/* Fullscreen Button */}
+                                    <button
+                                        onClick={toggleFullscreen}
+                                        className={`p-2 border rounded-xl transition-all cursor-pointer ${
+                                            isFullscreen
+                                                ? "bg-purple-600/20 border-purple-500 text-purple-300 font-bold shadow-[0_0_10px_rgba(168,85,247,0.3)]"
+                                                : "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                        }`}
+                                        title={isFullscreen ? "Exit Fullscreen (f)" : "Enter Fullscreen (f)"}
+                                        aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                                    >
+                                        {isFullscreen ? (
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -2315,25 +2647,28 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 if (episodeLayoutMode === "grid") {
                                     return (
                                         <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-1.5 p-1">
-                                            {filteredEpisodes.map((ep) => (
-                                                <button 
-                                                    key={ep} 
-                                                    onClick={() => {
-                                                        handleSelectEpisode(String(typeof ep === 'object' ? (ep.number||ep.id) : ep));
-                                                        setShowEpisodesDrawer(false);
-                                                    }} 
-                                                    className={`py-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer ${String(currentEp) === String(typeof ep === 'object' ? (ep.number||ep.id) : ep) ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
-                                                >
-                                                    {typeof ep === 'object' ? (ep.number||ep.id) : ep}
-                                                </button>
-                                            ))}
+                                            {filteredEpisodes.map((ep) => {
+                                                const epNumStr = String(typeof ep === 'object' ? (ep.number||ep.id) : ep);
+                                                return (
+                                                    <button 
+                                                        key={epNumStr} 
+                                                        onClick={() => {
+                                                            handleSelectEpisode(epNumStr);
+                                                            setShowEpisodesDrawer(false);
+                                                        }} 
+                                                        className={`py-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer ${String(currentEp) === epNumStr ? 'border-accent bg-accent/15 text-accent shadow-[0_0_8px_var(--accent-glow)] font-black' : 'border-border-color bg-[#08080B] text-zinc-400 hover:text-white'}`}
+                                                    >
+                                                        {typeof ep === 'object' ? (ep.number||ep.id) : ep}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     );
                                 }
 
                                 return filteredEpisodes.map((ep) => (
                                     <EpisodeButton
-                                        key={ep}
+                                        key={typeof ep === 'object' ? String(ep.id || ep.number) : String(ep)}
                                         ep={ep}
                                         currentEp={currentEp}
                                         onClick={() => {

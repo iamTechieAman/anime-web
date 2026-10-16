@@ -44,7 +44,7 @@ export default function GenrePage() {
     const capitalizedGenre = genre ? genre.charAt(0).toUpperCase() + genre.slice(1) : "";
 
     return (
-        <main className="min-h-dvh pt-24 pb-12 px-4 md:px-8">
+        <div className="min-h-dvh pt-6 pb-12 px-4 sm:px-6 md:px-8">
             <div className="max-w-[2000px] mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -53,7 +53,7 @@ export default function GenrePage() {
                             <ChevronLeft className="w-4 h-4" /> Back Home
                         </Link>
                         <h1 className="text-3xl md:text-4xl font-black font-sora text-white">
-                             Genre: <span className="text-[#FF5722]">{capitalizedGenre}</span>
+                             Genre: <span className="text-accent">{capitalizedGenre}</span>
                         </h1>
                         <p className="text-[var(--text-muted)] text-sm mt-2">
                             Browsing all {capitalizedGenre} anime titles available.
@@ -105,6 +105,6 @@ export default function GenrePage() {
                     </div>
                 )}
             </div>
-        </main>
+        </div>
     );
 }

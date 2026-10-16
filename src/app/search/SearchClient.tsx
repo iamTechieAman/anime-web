@@ -63,7 +63,7 @@ class SearchErrorBoundary extends Component<SearchErrorBoundaryProps, SearchErro
                     </p>
                     <button
                         onClick={this.handleRetry}
-                        className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                        className="px-6 py-2.5 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-warm active:scale-95 text-white font-bold rounded-xl transition-all shadow-lg shadow-accent/20 cursor-pointer text-xs uppercase tracking-wider"
                     >
                         Try Again
                     </button>
@@ -267,7 +267,7 @@ function MovieSearchContent() {
         : "Discover Content";
 
     return (
-        <main className="min-h-dvh pt-6 pb-24 px-4 md:px-8 w-full bg-bg-main">
+        <div className="min-h-dvh pt-6 pb-24 px-4 sm:px-6 md:px-8 w-full bg-bg-main">
             {/* Search Header & Input */}
             <motion.div 
                 initial={{ opacity: 0, y: -16 }}
@@ -284,17 +284,17 @@ function MovieSearchContent() {
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             placeholder="Search anime, movies, cartoons, genres..."
-                            className="w-full h-12 md:h-14 pl-12 pr-24 bg-bg-card border border-border-color focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl text-[var(--text-main)] placeholder-[var(--text-muted)] text-sm md:text-base outline-none transition-all shadow-inner"
+                            className="w-full h-12 md:h-14 pl-12 pr-24 bg-bg-card border border-white/10 focus:border-accent focus:ring-2 focus:ring-accent/20 rounded-2xl text-[var(--text-main)] placeholder-[var(--text-muted)] text-sm md:text-base outline-none transition-all shadow-inner"
                         />
                         <div className="absolute right-3.5 flex items-center gap-1.5">
                             {loading && (
-                                <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mr-1" />
+                                <div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin mr-1" />
                             )}
                             {searchInput && (
                                 <button
                                     onClick={handleClearInput}
                                     aria-label="Clear search input"
-                                    className="p-1.5 text-[var(--text-muted)] hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                    className="p-1.5 text-[var(--text-muted)] hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -302,9 +302,9 @@ function MovieSearchContent() {
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
                                 aria-label="Toggle filters"
-                                className={`p-2 rounded-xl transition-all ${
+                                className={`p-2 rounded-xl transition-all cursor-pointer ${
                                     showFilters || selectedGenre
-                                        ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
+                                        ? "bg-gradient-to-r from-accent to-accent-secondary text-white shadow-md shadow-accent/20"
                                         : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
                                 }`}
                             >
@@ -323,7 +323,7 @@ function MovieSearchContent() {
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden mb-6"
                         >
-                            <div className="bg-bg-card border border-border-color rounded-2xl p-4 space-y-4">
+                            <div className="bg-bg-card border border-white/10 rounded-2xl p-4 space-y-4">
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
@@ -332,7 +332,7 @@ function MovieSearchContent() {
                                         {selectedGenre && (
                                             <button
                                                 onClick={() => setSelectedGenre("")}
-                                                className="text-xs text-blue-400 hover:underline"
+                                                className="text-xs text-accent hover:underline cursor-pointer"
                                             >
                                                 Clear
                                             </button>
@@ -343,10 +343,10 @@ function MovieSearchContent() {
                                             <button
                                                 key={g}
                                                 onClick={() => handleGenreSelect(g)}
-                                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                                                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
                                                     selectedGenre === g 
-                                                        ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20" 
-                                                        : "bg-bg-main border border-border-color text-[var(--text-muted)] hover:border-blue-500/40 hover:text-white"
+                                                        ? "bg-gradient-to-r from-accent to-accent-warm text-white shadow-lg shadow-accent/20" 
+                                                        : "bg-bg-main border border-white/10 text-[var(--text-muted)] hover:border-accent/40 hover:text-white"
                                                 }`}
                                             >
                                                 {g}
@@ -366,10 +366,10 @@ function MovieSearchContent() {
                             <button
                                 key={g}
                                 onClick={() => handleGenreSelect(g)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all active:scale-95 ${
+                                className={`px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition-all active:scale-95 cursor-pointer ${
                                     selectedGenre === g 
-                                        ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20" 
-                                        : "bg-bg-card border border-border-color text-[var(--text-muted)] hover:text-white hover:border-blue-500/50"
+                                        ? "bg-gradient-to-r from-accent to-accent-warm text-white shadow-lg shadow-accent/20" 
+                                        : "bg-bg-card border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-accent/40"
                                 }`}
                             >
                                 {g}
@@ -421,14 +421,14 @@ function MovieSearchContent() {
                         <div className="flex items-center gap-3">
                             <button 
                                 onClick={() => performSearch()}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-warm active:scale-95 text-white font-bold rounded-xl transition-all shadow-lg shadow-accent/20 cursor-pointer text-xs uppercase tracking-wider"
                             >
                                 <RefreshCw className="w-4 h-4" />
                                 <span>Try Again</span>
                             </button>
                             <button
                                 onClick={handleClearAll}
-                                className="px-5 py-2.5 bg-bg-card border border-border-color hover:border-white/20 text-[var(--text-main)] font-bold rounded-xl transition-colors active:scale-95"
+                                className="px-5 py-2.5 bg-bg-card border border-white/10 hover:border-white/20 text-[var(--text-main)] font-bold rounded-xl transition-colors active:scale-95 cursor-pointer text-xs uppercase tracking-wider"
                             >
                                 Reset Search
                             </button>
@@ -453,7 +453,7 @@ function MovieSearchContent() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex flex-col items-center justify-center text-center py-16 px-4"
                     >
-                        <div className="w-20 h-20 bg-bg-card rounded-3xl flex items-center justify-center mb-6 border border-border-color shadow-xl">
+                        <div className="w-20 h-20 bg-bg-card rounded-3xl flex items-center justify-center mb-6 border border-white/10 shadow-xl">
                             <Search className="w-9 h-9 text-[var(--text-muted)] opacity-60" />
                         </div>
                         <h2 className="text-xl md:text-2xl font-black mb-2 text-[var(--text-main)]">
@@ -471,7 +471,7 @@ function MovieSearchContent() {
                                 <button
                                     key={g}
                                     onClick={() => handleGenreSelect(g)}
-                                    className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-bg-card border border-border-color text-[var(--text-muted)] hover:text-white hover:border-blue-500/40 hover:bg-blue-500/10 transition-all active:scale-95"
+                                    className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-bg-card border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-accent/40 hover:bg-accent/10 transition-all active:scale-95 cursor-pointer"
                                 >
                                     {g}
                                 </button>
@@ -479,7 +479,7 @@ function MovieSearchContent() {
                         </div>
                         <button
                             onClick={handleClearAll}
-                            className="text-xs text-blue-400 hover:underline font-bold"
+                            className="text-xs text-accent hover:underline font-bold cursor-pointer"
                         >
                             Clear all filters
                         </button>
@@ -491,7 +491,7 @@ function MovieSearchContent() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex flex-col items-center justify-center text-center py-20 px-4"
                     >
-                        <div className="w-20 h-20 bg-gradient-to-tr from-accent/20 to-blue-500/20 rounded-3xl flex items-center justify-center mb-6 border border-white/10 shadow-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-tr from-accent/20 to-purple-500/20 rounded-3xl flex items-center justify-center mb-6 border border-white/10 shadow-2xl">
                             <Sparkles className="w-9 h-9 text-accent" />
                         </div>
                         <h2 className="text-2xl md:text-3xl font-black mb-3 text-[var(--text-main)]">
@@ -509,7 +509,7 @@ function MovieSearchContent() {
                                     <button
                                         key={g}
                                         onClick={() => handleGenreSelect(g)}
-                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-bg-card border border-border-color text-[var(--text-muted)] hover:text-white hover:border-blue-500/50 hover:bg-blue-500/10 transition-all active:scale-95"
+                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-bg-card border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-accent/50 hover:bg-accent/10 transition-all active:scale-95 cursor-pointer"
                                     >
                                         {g}
                                     </button>
@@ -519,7 +519,7 @@ function MovieSearchContent() {
                     </motion.div>
                 )}
             </div>
-        </main>
+        </div>
     );
 }
 

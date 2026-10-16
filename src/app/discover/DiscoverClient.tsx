@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Sparkles, Loader2, Search, ArrowLeft, Send, X, History, Mic, AlertTriangle } from "lucide-react";
+import { 
+    Sparkles, Loader2, Search, ArrowLeft, Send, X, 
+    History, Mic, AlertTriangle, RefreshCw, Compass, Check
+} from "lucide-react";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -16,24 +19,26 @@ interface Message {
     results?: any[];
     loading?: boolean;
     loadingProgressText?: string;
+    error?: boolean;
+    failedPrompt?: string;
 }
 
 const SUGGESTIONS = [
-    { text: "Cyberpunk", desc: "Neon aesthetics, cybernetics & deep futures", emoji: "🌌", gradient: "from-indigo-600/20 to-purple-600/5 hover:border-indigo-500/50 hover:shadow-indigo-500/5" },
-    { text: "Sad anime", desc: "Emotional stories and beautiful tearjerkers", emoji: "🌧️", gradient: "from-rose-600/20 to-pink-600/5 hover:border-rose-500/50 hover:shadow-rose-500/5" },
-    { text: "Studio Ghibli", desc: "Magical adventures & cozy comforting aesthetics", emoji: "🌳", gradient: "from-emerald-600/20 to-teal-600/5 hover:border-emerald-500/50 hover:shadow-emerald-500/5" },
-    { text: "Mind bending", desc: "Psychological thrillers, plot twists & mystery", emoji: "🧠", gradient: "from-blue-600/20 to-cyan-600/5 hover:border-blue-500/50 hover:shadow-blue-500/5" },
-    { text: "Kdrama", desc: "Acclaimed Korean romances & comforting comedies", emoji: "🇰🇷", gradient: "from-amber-600/20 to-accent-warm/5 hover:border-amber-500/50 hover:shadow-amber-500/5" },
-    { text: "Hidden gems", desc: "Acclaimed but obscure films & series to discover", emoji: "💎", gradient: "from-violet-600/20 to-fuchsia-600/5 hover:border-violet-500/50 hover:shadow-violet-500/5" },
+    { text: "Cyberpunk", desc: "Neon aesthetics, high-tech dystopian futures, and cybernetics", emoji: "🌌" },
+    { text: "Sad anime", desc: "Bittersweet romances, emotional drama, and heartfelt tearjerkers", emoji: "🌧️" },
+    { text: "Studio Ghibli", desc: "Magical adventures, cozy nostalgic vibes, and lush animation", emoji: "🌳" },
+    { text: "Mind bending", desc: "Psychological thrillers, reality shifts, and shocking plot twists", emoji: "🧠" },
+    { text: "Kdrama", desc: "Acclaimed Korean romances, gripping suspense, and heartfelt series", emoji: "🇰🇷" },
+    { text: "Hidden gems", desc: "Critically acclaimed but overlooked cinematic treasures to explore", emoji: "💎" },
 ];
 
 const MOODS = [
-    { name: "Chill ☕", query: "cozy slow burn" },
-    { name: "Hyped ⚡", query: "action hype adrenaline" },
-    { name: "Melancholic 🌧️", query: "sad emotional tearjerker" },
-    { name: "Adventurous 🗺️", query: "epic adventure fantasy journey" },
+    { name: "Chill ☕", query: "cozy relaxing feel-good" },
+    { name: "Hyped ⚡", query: "action adrenaline fast paced" },
+    { name: "Melancholic 🌧️", query: "sad emotional drama tearjerker" },
+    { name: "Adventurous 🗺️", query: "epic adventure fantasy quest" },
     { name: "Terrified 💀", query: "scary horror psychological suspense" },
-    { name: "Intrigued 🧠", query: "mind bending thriller mystery" },
+    { name: "Intrigued 🧠", query: "mind bending mystery thriller" },
 ];
 
 const PLACEHOLDERS = [
@@ -48,12 +53,54 @@ const PLACEHOLDERS = [
 export default function DiscoverClient() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const prompt = searchParams?.get("prompt") || "";
+    const promptParam = searchParams?.get("prompt") || "";
 
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [history, setHistory] = useState<string[]>([]);
+    const [selectedMood, setSelectedMood] = useState<string | null>(null);
+    const [isQuerying, setIsQuerying] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const chatEndRef = useRef<HTMLDivElement>(null);
+
+    // Voice search integration
+    const {
+        isListening,
+        recordingFallbackActive,
+        isTranscribing,
+        errorMsg,
+        startListening,
+        stopListening
+    } = useVoiceSearch((text) => {
+        if (text && text.trim()) {
+            setInput(text);
+            handleNewSearch(text);
+        }
+    });
+
+    const [isVoiceSupported, setIsVoiceSupported] = useState(false);
+
+    useEffect(() => {
+        setIsVoiceSupported(
+            typeof window !== "undefined" && (
+                "SpeechRecognition" in window || 
+                "webkitSpeechRecognition" in window || 
+                Boolean(navigator?.mediaDevices?.getUserMedia)
+            )
+        );
+    }, []);
+
+    const toggleVoice = () => {
+        if (!isVoiceSupported) {
+            toast.error("Voice input is not supported in this browser.", { id: "voice-unsupported" });
+            return;
+        }
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
+    };
 
     // Cleanup interval on unmount
     useEffect(() => {
@@ -62,31 +109,6 @@ export default function DiscoverClient() {
         };
     }, []);
 
-    const chatEndRef = useRef<HTMLDivElement>(null);
-
-    const {
-        isListening,
-        recordingFallbackActive,
-        isTranscribing,
-        errorMsg,
-        permissionStatus,
-        diagnostics,
-        startListening,
-        stopListening,
-        runDiagnostics
-    } = useVoiceSearch((text) => {
-        setInput(text);
-        handleNewSearch(text);
-    });
-
-    const toggleVoice = () => {
-        if (isListening) {
-            stopListening();
-        } else {
-            startListening();
-        }
-    };
-    
     // Placeholder Typing Effect
     const [placeholderText, setPlaceholderText] = useState("");
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -101,16 +123,16 @@ export default function DiscoverClient() {
             timer = setTimeout(() => {
                 setPlaceholderText(currentSentence.substring(0, charIndex - 1));
                 setCharIndex(prev => prev - 1);
-            }, 30);
+            }, 25);
         } else {
             timer = setTimeout(() => {
                 setPlaceholderText(currentSentence.substring(0, charIndex + 1));
                 setCharIndex(prev => prev + 1);
-            }, 60);
+            }, 50);
         }
 
         if (!isDeleting && charIndex === currentSentence.length) {
-            timer = setTimeout(() => setIsDeleting(true), 1500);
+            timer = setTimeout(() => setIsDeleting(true), 2000);
         } else if (isDeleting && charIndex === 0) {
             setIsDeleting(false);
             setPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length);
@@ -119,7 +141,7 @@ export default function DiscoverClient() {
         return () => clearTimeout(timer);
     }, [charIndex, isDeleting, placeholderIndex]);
 
-    // Load recent history
+    // Load recent prompt history from localStorage
     useEffect(() => {
         if (typeof window !== "undefined") {
             const saved = localStorage.getItem("toonplayer_ai_prompt_history");
@@ -131,7 +153,23 @@ export default function DiscoverClient() {
         }
     }, []);
 
-    // Speech recognition was removed and replaced with useVoiceSearch hook
+    const savePromptToHistory = (promptText: string) => {
+        setHistory(prev => {
+            const updated = [promptText, ...prev.filter(p => p !== promptText)].slice(0, 8);
+            if (typeof window !== "undefined") {
+                localStorage.setItem("toonplayer_ai_prompt_history", JSON.stringify(updated));
+            }
+            return updated;
+        });
+    };
+
+    const clearHistory = () => {
+        setHistory([]);
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("toonplayer_ai_prompt_history");
+        }
+        toast.success("Prompt history cleared");
+    };
 
     const scrollToBottom = () => {
         if (chatEndRef.current) {
@@ -139,91 +177,83 @@ export default function DiscoverClient() {
         }
     };
 
-    // Auto scroll when message thread changes
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    const savePromptToHistory = (promptText: string) => {
-        setHistory(prev => {
-            const updated = [promptText, ...prev.filter(p => p !== promptText)].slice(0, 10);
-            localStorage.setItem("toonplayer_ai_prompt_history", JSON.stringify(updated));
-            return updated;
-        });
-    };
+    // Perform AI search recommendation
+    const handleNewSearch = useCallback(async (queryText: string) => {
+        const trimmed = queryText.trim();
+        if (!trimmed || isQuerying) return;
 
-    const clearHistory = () => {
-        setHistory([]);
-        localStorage.removeItem("toonplayer_ai_prompt_history");
-        toast.success("AI search history cleared!");
-    };
+        setIsQuerying(true);
 
-    const handleNewSearch = async (queryText: string) => {
-        if (!queryText.trim()) return;
-
-        // 1. Add user message
         const userMsgId = String(Date.now());
         const userMessage: Message = {
             id: userMsgId,
             role: "user",
-            content: queryText
+            content: trimmed
         };
 
-        // 2. Add assistant message (loading state)
         const assistantMsgId = String(Date.now() + 1);
         const assistantMessage: Message = {
             id: assistantMsgId,
             role: "assistant",
             content: "",
             loading: true,
-            loadingProgressText: "Deconstructing prompt context..."
+            loadingProgressText: "Analyzing search intent..."
         };
 
-        // Context check: combine past messages for chat memory
-        const pastUserPrompts = messages
-            .filter(m => m.role === "user")
-            .map(m => m.content);
-        const combinedPrompt = [...pastUserPrompts, queryText].join(" ");
-
-        // Append to state
         setMessages(prev => [...prev, userMessage, assistantMessage]);
-        setInput(""); // Clear input
-
-        // Save history
-        savePromptToHistory(queryText);
-        
-        // Auto scroll
+        savePromptToHistory(trimmed);
         setTimeout(scrollToBottom, 50);
 
-        // Progress loading texts
         const progressSteps = [
-            "Analyzing semantic intent...",
-            "Retrieving TMDB genre mappings...",
-            "Mapping query context keywords...",
-            "Interrogating catalog databases...",
-            "Hydrating poster references...",
+            "Analyzing search intent...",
+            "Retrieving catalog mappings...",
+            "Querying streaming databases...",
             "Formatting recommendations..."
         ];
-        
+
         let stepIdx = 0;
+        if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = setInterval(() => {
-            if (stepIdx < progressSteps.length) {
+            stepIdx = (stepIdx + 1) % progressSteps.length;
+            setMessages(prev => prev.map(m => 
+                m.id === assistantMsgId ? { ...m, loadingProgressText: progressSteps[stepIdx] } : m
+            ));
+        }, 800);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+        try {
+            const res = await axios.get("/api/discover", { 
+                params: { prompt: trimmed },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (intervalRef.current) clearInterval(intervalRef.current);
+
+            // If backend returned an error in payload
+            if (res.data?.error && (!res.data?.results || res.data.results.length === 0)) {
                 setMessages(prev => prev.map(m => {
                     if (m.id === assistantMsgId) {
-                        return { ...m, loadingProgressText: progressSteps[stepIdx] };
+                        return {
+                            ...m,
+                            loading: false,
+                            content: res.data.error || "Could not retrieve recommendations. Please retry.",
+                            error: true,
+                            failedPrompt: trimmed,
+                            results: []
+                        };
                     }
                     return m;
                 }));
-                stepIdx++;
-                scrollToBottom();
+                return;
             }
-        }, 700);
 
-        try {
-            const res = await axios.get("/api/discover", { params: { prompt: combinedPrompt } });
             const searchResults = res.data.results || [];
-
-            if (intervalRef.current) clearInterval(intervalRef.current);
 
             setMessages(prev => prev.map(m => {
                 if (m.id === assistantMsgId) {
@@ -231,88 +261,121 @@ export default function DiscoverClient() {
                         ...m,
                         loading: false,
                         content: searchResults.length > 0 
-                            ? `Here are the top matches I discovered for "${queryText}":`
-                            : `I couldn't find any recommendations matching "${queryText}". Try broadening your prompt or checking your spelling.`,
+                            ? `Here are the top recommendations discovered for "${trimmed}":`
+                            : `No matching titles found for "${trimmed}". Try exploring broader keywords or different themes.`,
                         results: searchResults
                     };
                 }
                 return m;
             }));
-            
-            setTimeout(scrollToBottom, 200);
 
-        } catch (err) {
-            console.error("AI Discover search failed:", err);
+            // Clear input after search has been dispatched successfully
+            setInput("");
+            setSelectedMood(null);
+            setTimeout(scrollToBottom, 150);
+        } catch (err: any) {
+            clearTimeout(timeoutId);
             if (intervalRef.current) clearInterval(intervalRef.current);
+            console.error("AI Discover search failed:", err);
+
+            const isTimeout = err.name === "AbortError" || axios.isCancel(err);
+            const errorDesc = isTimeout
+                ? "The discovery request timed out. Please try again."
+                : "Encountered an issue querying recommendations. Please retry.";
 
             setMessages(prev => prev.map(m => {
                 if (m.id === assistantMsgId) {
                     return {
                         ...m,
                         loading: false,
-                        content: "I encountered an error querying the catalog indexes. Please try again."
+                        content: errorDesc,
+                        error: true,
+                        failedPrompt: trimmed,
+                        results: []
                     };
                 }
                 return m;
             }));
-            setTimeout(scrollToBottom, 200);
+            setTimeout(scrollToBottom, 150);
+        } finally {
+            setIsQuerying(false);
         }
-    };
+    }, [isQuerying]);
 
-    // Load initial prompt from URL
+    // Initial prompt from URL deep link
     useEffect(() => {
-        if (prompt && messages.length === 0) {
-            handleNewSearch(prompt);
+        if (promptParam && messages.length === 0) {
+            handleNewSearch(promptParam);
         }
-    }, [prompt, messages.length]);
+    }, [promptParam, messages.length, handleNewSearch]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleNewSearch(input);
+        const trimmed = input.trim();
+        if (!trimmed) {
+            toast.error("Please enter a query or select a suggestion first.", { id: "empty-search-toast" });
+            return;
+        }
+        handleNewSearch(trimmed);
     };
 
-    const handleSuggestionClick = (text: string) => {
-        handleNewSearch(text);
-    };
-
-    const handleClearChat = () => {
+    const handleClearConsole = () => {
         setMessages([]);
         setInput("");
+        setSelectedMood(null);
         router.replace("/discover", { scroll: false });
     };
 
-    const handleMoodClick = (moodText: string, query: string) => {
-        setInput(prev => {
-            const trimmed = prev.trim();
-            return trimmed ? `${trimmed} in a ${query} mood` : `${moodText} mood: ${query}`;
-        });
-        toast.success(`Appended mood: ${moodText}`);
+    const handleMoodClick = (mood: typeof MOODS[0]) => {
+        if (selectedMood === mood.name) {
+            setSelectedMood(null);
+            const current = input.trim();
+            if (current === mood.query) {
+                setInput("");
+            } else {
+                setInput(current.replace(mood.query, "").trim());
+            }
+        } else {
+            setSelectedMood(mood.name);
+            const current = input.trim();
+            if (!current) {
+                setInput(mood.query);
+            } else if (!current.toLowerCase().includes(mood.query.toLowerCase())) {
+                setInput(`${current} ${mood.query}`);
+            }
+        }
     };
 
     return (
-        <div className="flex-1 w-full bg-[#050505] pt-6 pb-12 px-4 md:px-8 flex flex-col min-h-[calc(100dvh-4rem)]">
-            <div className="max-w-[1800px] mx-auto w-full flex-1 flex flex-col">
+        <div className="flex-1 w-full bg-bg-main pt-6 pb-16 px-4 md:px-8 flex flex-col min-h-[75vh]">
+            <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col">
                 
                 {/* Header Row */}
-                <div className="border-b border-white/5 pb-4 mb-6 flex items-center justify-between">
+                <div className="border-b border-white/5 pb-4 mb-6 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-500">
-                            <Sparkles className="w-5 h-5 animate-pulse" />
+                        <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                            <Sparkles className="w-5 h-5" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-black text-white tracking-tight font-sora">
-                                AI Discovery <span className="text-xs bg-pink-500/15 text-pink-500 px-2 py-0.5 rounded-full border border-pink-500/20 uppercase tracking-widest font-black font-mono ml-2">Console</span>
-                            </h1>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Conversational Movie & Anime Agent</p>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight font-sora">
+                                    AI Discovery
+                                </h1>
+                                <span className="text-[10px] bg-pink-500/15 text-pink-400 px-2 py-0.5 rounded-full border border-pink-500/30 uppercase tracking-widest font-black font-mono">
+                                    Console
+                                </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400 font-medium">Conversational Movie, TV Series & Anime Finder</p>
                         </div>
                     </div>
                     
                     {messages.length > 0 && (
                         <button 
-                            onClick={handleClearChat}
-                            className="flex items-center gap-2 text-zinc-400 hover:text-white font-black transition-colors text-[10px] uppercase tracking-wider py-2 px-4 bg-white/5 border border-white/5 hover:border-white/10 rounded-xl cursor-pointer"
+                            onClick={handleClearConsole}
+                            className="flex items-center gap-1.5 text-zinc-400 hover:text-white font-bold transition-all text-xs uppercase tracking-wider py-2 px-3.5 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl cursor-pointer"
                         >
-                            <ArrowLeft className="w-3.5 h-3.5" /> Clear Console
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                            <span>New Search</span>
                         </button>
                     )}
                 </div>
@@ -322,155 +385,157 @@ export default function DiscoverClient() {
                         // Welcome Screen Dashboard
                         <motion.div 
                             key="welcome-dashboard"
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="max-w-4xl mx-auto w-full py-6 flex-1 flex flex-col justify-center space-y-8"
+                            exit={{ opacity: 0, y: -12 }}
+                            transition={{ duration: 0.2 }}
+                            className="max-w-4xl mx-auto w-full py-6 sm:py-10 flex-1 flex flex-col justify-center space-y-8"
                         >
                             <div className="text-center space-y-3">
-                                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter leading-tight font-sora">
-                                    What are you in the <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">mood to stream?</span>
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight font-sora">
+                                    What are you in the <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-400">mood to stream?</span>
                                 </h2>
-                                <p className="text-zinc-400 font-semibold text-sm max-w-xl mx-auto">
-                                    Talk to ToonPlayer AI. Ask for genres, vibes, years, or descriptions. I will scan movie platforms and anime servers to find matches.
+                                <p className="text-zinc-400 font-medium text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+                                    Describe your ideal watch — genres, themes, visual aesthetics, or storylines. ToonPlayer AI searches our indexed catalog to find matches.
                                 </p>
                             </div>
 
-                            {/* Search bar console */}
-                            <div className="max-w-2xl mx-auto w-full">
-                                <form onSubmit={handleSubmit} className="relative">
-                                    <div className="relative flex items-center bg-[#12131A] border border-white/5 focus-within:border-pink-500/40 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.15)] rounded-2xl p-2 transition-all duration-[250ms] backdrop-blur-md">
+                            {/* Search Composer Container */}
+                            <div className="max-w-2xl mx-auto w-full space-y-3">
+                                <form onSubmit={handleSubmit} className="relative w-full">
+                                    <div className={`relative flex items-center bg-[#101118]/90 border rounded-2xl p-2 transition-all duration-200 backdrop-blur-md ${
+                                        isQuerying 
+                                            ? "border-pink-500/30 shadow-[0_0_20px_rgba(236,72,153,0.12)] opacity-90"
+                                            : "border-white/[0.08] focus-within:border-pink-500/50 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.18)]"
+                                    }`}>
+                                        <div className="pl-3 pr-2 text-zinc-500">
+                                            <Search className="w-5 h-5 text-zinc-400" />
+                                        </div>
                                         <input 
                                             type="text"
                                             value={input}
                                             onChange={(e) => setInput(e.target.value)}
-                                            placeholder={placeholderText || "Describe your ideal watch..."}
-                                            className="w-full bg-transparent pl-4 pr-24 py-3.5 text-sm md:text-base text-white outline-none focus-visible:ring-2 focus-visible:ring-pink-500 rounded-2xl placeholder-white/20 font-bold"
+                                            disabled={isQuerying}
+                                            placeholder={placeholderText || "Describe what you'd like to watch..."}
+                                            className="w-full bg-transparent py-3 pr-24 text-sm md:text-base text-white outline-none placeholder-zinc-500 font-medium disabled:opacity-60"
                                         />
                                         <div className="absolute right-2 flex items-center gap-1.5">
-                                            {/* Mic icon voice search */}
+                                            {input.trim() && !isQuerying && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setInput("")}
+                                                    className="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
+                                                    aria-label="Clear input"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            )}
+
                                             <button
                                                 type="button"
                                                 onClick={toggleVoice}
-                                                className={`p-2.5 rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${
+                                                disabled={!isVoiceSupported || isQuerying}
+                                                title={!isVoiceSupported ? "Voice search unavailable in this browser" : isListening ? "Stop voice listening" : "Search with voice"}
+                                                aria-label={!isVoiceSupported ? "Voice search unavailable" : isListening ? "Stop voice listening" : "Start voice search"}
+                                                className={`p-2.5 rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500 disabled:opacity-30 disabled:cursor-not-allowed ${
                                                     isListening 
-                                                        ? "bg-red-500/15 border-red-500/30 text-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.3)]" 
-                                                        : "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                                                        ? "bg-red-500/15 border-red-500/40 text-red-400 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.3)]" 
+                                                        : "bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/10"
                                                 }`}
-                                                title="Voice Search"
-                                                aria-label="Voice Search"
                                             >
-                                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                                                    <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8" />
-                                                </svg>
+                                                {isTranscribing ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin text-pink-400" />
+                                                ) : (
+                                                    <Mic className="w-4 h-4" />
+                                                )}
                                             </button>
+
                                             <button 
                                                 type="submit"
-                                                disabled={!input.trim()}
-                                                className="w-10 h-10 rounded-xl bg-pink-600 hover:bg-pink-500 disabled:opacity-30 text-white transition-all flex items-center justify-center cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-pink-600/15 outline-none focus-visible:ring-2 focus-visible:ring-white"
-                                                aria-label="Send Query"
+                                                disabled={!input.trim() || isQuerying}
+                                                className="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-500 hover:to-pink-400 disabled:opacity-30 disabled:hover:from-pink-600 disabled:hover:to-pink-500 text-white transition-all flex items-center justify-center cursor-pointer disabled:cursor-not-allowed shadow-md shadow-pink-600/20 active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                                aria-label="Submit search"
                                             >
-                                                <Send className="w-4 h-4" />
+                                                {isQuerying ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Send className="w-4 h-4" />
+                                                )}
                                             </button>
                                         </div>
                                     </div>
                                 </form>
 
-                                {errorMsg && (
-                                    <div className="mt-4 p-4 rounded-xl bg-red-950/20 border border-red-500/20 text-left max-w-2xl mx-auto w-full transition-all">
-                                        <div className="flex items-start gap-3">
-                                            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                                            <div className="flex-1 space-y-2">
-                                                <h4 className="text-sm font-black text-white">Voice Search Diagnostics</h4>
-                                                <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
-                                                    {errorMsg === "not-allowed" && "Microphone permission is blocked. Please allow microphone access in your browser settings and try again."}
-                                                    {errorMsg === "transcription-key-missing" && "Voice recording completed! However, the translation service is currently offline. Please type your prompt."}
-                                                    {errorMsg === "no-speech" && "No speech was detected. Please make sure your mic is plugged in and speak clearly."}
-                                                    {errorMsg !== "not-allowed" && errorMsg !== "transcription-key-missing" && errorMsg !== "no-speech" && `Voice error details: ${errorMsg}. Swapping to standard search.`}
-                                                </p>
-                                                
-                                                <div className="flex flex-wrap gap-2 pt-1.5">
-                                                    <button
-                                                        type="button"
-                                                        onClick={startListening}
-                                                        className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-white transition-all cursor-pointer border border-white/5"
-                                                    >
-                                                        Retry Voice Search
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={async () => {
-                                                            const rep = await runDiagnostics();
-                                                            toast.success(`Diag: Mic=${rep.hasAudioInput ? 'Yes' : 'No'}, Secure=${rep.secureContext ? 'Yes' : 'No'}`);
-                                                        }}
-                                                        className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-zinc-400 hover:text-white transition-all cursor-pointer border border-white/5"
-                                                    >
-                                                        Test Microphone
-                                                    </button>
-                                                </div>
-
-                                                {diagnostics && (
-                                                    <div className="text-[10px] text-zinc-500 font-mono pt-2 border-t border-white/5 mt-2 space-y-0.5">
-                                                        <div>Browser: {diagnostics.browserName}</div>
-                                                        <div>Secure context: {diagnostics.secureContext ? "Yes ✅" : "No ❌"}</div>
-                                                        <div>Input devices found: {diagnostics.hasAudioInput ? "Yes ✅" : "No ❌"}</div>
-                                                        <div>Permissions Policy: {diagnostics.permissionsPolicyOk ? "Allowed ✅" : "Blocked ❌"}</div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                
                                 {/* Mood tags horizontal selector */}
-                                <div className="mt-4 flex flex-wrap items-center gap-2 justify-center">
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 mr-1">Vibe:</span>
-                                    {MOODS.map(mood => (
-                                        <button
-                                            key={mood.name}
-                                            onClick={() => handleMoodClick(mood.name, mood.query)}
-                                            className="text-[10px] font-bold text-zinc-400 bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/5 hover:border-pink-500/20 hover:text-white transition-all cursor-pointer"
-                                        >
-                                            {mood.name}
-                                        </button>
-                                    ))}
+                                <div className="flex flex-wrap items-center gap-1.5 justify-center pt-2">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mr-1">Mood:</span>
+                                    {MOODS.map(mood => {
+                                        const isSelected = selectedMood === mood.name;
+                                        return (
+                                            <button
+                                                key={mood.name}
+                                                type="button"
+                                                onClick={() => handleMoodClick(mood)}
+                                                className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all duration-200 cursor-pointer select-none flex items-center gap-1 ${
+                                                    isSelected 
+                                                        ? "bg-pink-500/20 text-pink-300 border-pink-500/50 shadow-[0_0_12px_rgba(236,72,153,0.25)] scale-[1.02]"
+                                                        : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border-white/[0.08]"
+                                                }`}
+                                            >
+                                                <span>{mood.name}</span>
+                                                {isSelected && <Check className="w-3 h-3 text-pink-400" />}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
-                            {/* Prompt cards grid */}
-                            <div className="space-y-4 pt-4">
-                                <span className="text-xs font-black text-zinc-500 uppercase tracking-widest block text-center">Prompt Suggestions</span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto w-full">
+                            {/* Standardized Suggestion Cards */}
+                            <div className="space-y-4 pt-2">
+                                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block text-center">
+                                    Suggested Prompts
+                                </span>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 max-w-4xl mx-auto w-full">
                                     {SUGGESTIONS.map((sug) => (
                                         <button
                                             key={sug.text}
-                                            onClick={() => handleSuggestionClick(sug.text)}
-                                            className={`group p-5 rounded-2xl border border-white/5 backdrop-blur-md text-left flex flex-col justify-between transition-all duration-[250ms] bg-gradient-to-br ${sug.gradient} hover:shadow-lg hover:-translate-y-0.5 cursor-pointer`}
+                                            type="button"
+                                            onClick={() => {
+                                                setInput(sug.text);
+                                                handleNewSearch(sug.text);
+                                            }}
+                                            disabled={isQuerying}
+                                            className="group p-4 sm:p-5 rounded-2xl border border-white/[0.08] bg-[#0c0d12]/90 hover:border-pink-500/40 hover:bg-pink-500/[0.03] backdrop-blur-md text-left flex flex-col justify-between h-[120px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(236,72,153,0.12)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
                                         >
-                                            <div className="flex items-center justify-between w-full mb-3">
-                                                <span className="text-2xl">{sug.emoji}</span>
-                                                <Sparkles className="w-4 h-4 text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-base group-hover:scale-105 transition-transform">
+                                                    {sug.emoji}
+                                                </div>
+                                                <Sparkles className="w-4 h-4 text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </div>
                                             <div>
-                                                <h3 className="text-sm font-black text-white tracking-tight">{sug.text}</h3>
-                                                <p className="text-[11px] text-zinc-400 mt-1 font-semibold group-hover:text-white/80 transition-colors line-clamp-2 leading-relaxed">{sug.desc}</p>
+                                                <h3 className="text-sm font-bold text-white group-hover:text-pink-300 transition-colors tracking-tight font-sora">
+                                                    {sug.text}
+                                                </h3>
+                                                <p className="text-[11px] text-zinc-400 mt-0.5 font-normal group-hover:text-zinc-300 transition-colors line-clamp-1 leading-normal">
+                                                    {sug.desc}
+                                                </p>
                                             </div>
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Recent Searches / History */}
+                            {/* Recent Prompts History */}
                             {history.length > 0 && (
                                 <div className="max-w-2xl mx-auto w-full border-t border-white/5 pt-6 space-y-3">
                                     <div className="flex items-center justify-between text-zinc-500">
-                                        <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-zinc-400">
                                             <History className="w-3.5 h-3.5" /> Recent Prompts
                                         </span>
                                         <button 
                                             onClick={clearHistory}
-                                            className="text-[9px] uppercase font-black hover:text-white transition-colors cursor-pointer"
+                                            className="text-[10px] uppercase font-bold text-zinc-500 hover:text-white transition-colors cursor-pointer"
                                         >
                                             Clear History
                                         </button>
@@ -479,8 +544,13 @@ export default function DiscoverClient() {
                                         {history.map((hPrompt, i) => (
                                             <button
                                                 key={`${hPrompt}-${i}`}
-                                                onClick={() => handleSuggestionClick(hPrompt)}
-                                                className="text-xs font-bold text-zinc-400 bg-[#12131A] hover:bg-white/5 border border-white/5 rounded-xl px-3.5 py-2 hover:text-white transition-all cursor-pointer truncate max-w-[200px]"
+                                                type="button"
+                                                onClick={() => {
+                                                    setInput(hPrompt);
+                                                    handleNewSearch(hPrompt);
+                                                }}
+                                                disabled={isQuerying}
+                                                className="text-xs font-medium text-zinc-400 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-pink-500/30 rounded-xl px-3 py-1.5 hover:text-white transition-all cursor-pointer truncate max-w-[220px]"
                                                 title={hPrompt}
                                             >
                                                 {hPrompt}
@@ -493,52 +563,70 @@ export default function DiscoverClient() {
                         </motion.div>
                     ) : (
                         // Conversational Chat Screen
-                        <div className="flex-1 flex flex-col justify-between max-w-4xl mx-auto w-full space-y-6 pb-24">
+                        <div className="flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full space-y-8 pb-10">
                             
-                            {/* Scrollable messages history container */}
+                            {/* Scrollable messages thread */}
                             <div className="flex-1 flex flex-col space-y-8">
                                 {messages.map((msg) => (
                                     <div key={msg.id} className="w-full flex flex-col">
                                         {msg.role === "user" ? (
                                             /* User Prompt Bubble */
                                             <div className="flex justify-end w-full">
-                                                <div className="max-w-[85%] bg-gradient-to-tr from-pink-600 to-purple-600 text-white rounded-2xl rounded-tr-sm px-5 py-3.5 shadow-xl">
-                                                    <p className="text-sm md:text-base font-bold leading-relaxed">{msg.content}</p>
+                                                <div className="max-w-[85%] bg-gradient-to-r from-pink-600/90 to-purple-600/90 text-white rounded-2xl rounded-tr-sm px-5 py-3 shadow-lg border border-pink-500/20">
+                                                    <p className="text-sm md:text-base font-semibold leading-relaxed">{msg.content}</p>
                                                 </div>
                                             </div>
                                         ) : (
                                             /* Assistant Response Bubble */
-                                            <div className="flex flex-col space-y-4 w-full">
+                                            <div className="flex flex-col space-y-3.5 w-full">
                                                 <div className="flex items-center gap-2 text-zinc-500 border-b border-white/5 pb-2">
-                                                    <div className="w-6 h-6 rounded-full bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-[10px] font-black text-pink-500">
-                                                        AI
+                                                    <div className="w-6 h-6 rounded-full bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-[10px] font-bold text-pink-400">
+                                                        <Sparkles className="w-3.5 h-3.5" />
                                                     </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest">ToonPlayer Assistant Recommendation</span>
+                                                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">ToonPlayer AI Recommendation</span>
                                                 </div>
                                                 
                                                 {msg.loading ? (
                                                     /* Dynamic Loading Progress logs */
-                                                    <div className="bg-[#12131A]/40 border border-white/5 rounded-2xl p-6 flex items-center gap-4 max-w-md shadow-md animate-pulse">
-                                                        <Loader2 className="w-5 h-5 text-pink-500 animate-spin" />
-                                                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{msg.loadingProgressText}</span>
+                                                    <div className="bg-[#101118]/80 border border-white/10 rounded-2xl p-5 flex items-center gap-3.5 max-w-md shadow-md backdrop-blur-md">
+                                                        <Loader2 className="w-5 h-5 text-pink-400 animate-spin shrink-0" />
+                                                        <span className="text-xs font-semibold text-zinc-300 tracking-wide">{msg.loadingProgressText}</span>
+                                                    </div>
+                                                ) : msg.error ? (
+                                                    /* Error State UI with Retry Action */
+                                                    <div className="p-5 rounded-2xl bg-red-950/20 border border-red-500/20 flex flex-col items-start gap-3 max-w-md">
+                                                        <div className="flex items-center gap-2 text-red-400 text-xs font-bold">
+                                                            <AlertTriangle className="w-4 h-4" />
+                                                            <span>Recommendation Request Failed</span>
+                                                        </div>
+                                                        <p className="text-xs text-zinc-400 leading-relaxed">{msg.content}</p>
+                                                        {msg.failedPrompt && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleNewSearch(msg.failedPrompt!)}
+                                                                className="px-4 py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center gap-1.5 transition-all cursor-pointer"
+                                                            >
+                                                                <RefreshCw className="w-3.5 h-3.5" /> Retry Search
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 ) : (
                                                     /* Loaded card results list */
-                                                    <div className="space-y-6">
-                                                        <p className="text-sm text-zinc-300 font-semibold leading-relaxed">{msg.content}</p>
+                                                    <div className="space-y-4">
+                                                        <p className="text-sm text-zinc-300 font-medium leading-relaxed">{msg.content}</p>
                                                         {msg.results && msg.results.length > 0 ? (
-                                                            <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-[250ms]">
+                                                            <div className="pt-2">
                                                                 <MovieGrid items={msg.results} />
                                                             </div>
                                                         ) : (
                                                             /* Empty Results */
-                                                            !msg.loading && (
-                                                                <div className="py-12 bg-[#12131A]/20 border border-white/5 rounded-2xl flex flex-col items-center justify-center text-center opacity-65">
-                                                                    <Search className="w-10 h-10 text-zinc-600 mb-3" />
-                                                                    <h4 className="text-sm font-bold text-white">No items found matching the prompt</h4>
-                                                                    <p className="text-xs text-zinc-500 mt-1 max-w-xs leading-relaxed">Try typing general keywords, simpler phrases, or select a different mood pill.</p>
-                                                                </div>
-                                                            )
+                                                            <div className="py-10 bg-[#101118]/60 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-center p-6">
+                                                                <Compass className="w-8 h-8 text-zinc-600 mb-2" />
+                                                                <h4 className="text-sm font-bold text-white">No matching titles discovered</h4>
+                                                                <p className="text-xs text-zinc-500 mt-1 max-w-xs leading-relaxed">
+                                                                    Try searching for simpler keywords, broad genres like &quot;sci-fi&quot; or &quot;anime&quot;, or select one of the suggested mood vibes below.
+                                                                </p>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 )}
@@ -550,110 +638,93 @@ export default function DiscoverClient() {
                             </div>
 
                             {/* Sticky bottom input panel */}
-                            <div className="sticky bottom-0 bg-[#050505]/95 backdrop-blur-md border-t border-white/5 py-4 z-20">
-                                <div className="flex flex-col gap-3">
+                            <div className="sticky bottom-0 bg-bg-main/95 backdrop-blur-md border-t border-white/5 pt-3 pb-2 z-20">
+                                <div className="flex flex-col gap-2.5 max-w-3xl mx-auto w-full">
                                     
                                     {/* Mood tags inline while in chat view */}
-                                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                        <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 flex items-center shrink-0">Add vibe:</span>
-                                        {MOODS.map(mood => (
-                                            <button
-                                                key={mood.name}
-                                                onClick={() => handleMoodClick(mood.name, mood.query)}
-                                                className="text-[10px] font-bold text-zinc-400 bg-[#12131A] hover:bg-white/5 px-2.5 py-1 rounded-full border border-white/5 hover:border-pink-500/20 hover:text-white transition-all shrink-0 cursor-pointer"
-                                            >
-                                                {mood.name}
-                                            </button>
-                                        ))}
+                                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none items-center">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 shrink-0 mr-1">Vibe:</span>
+                                        {MOODS.map(mood => {
+                                            const isSelected = selectedMood === mood.name;
+                                            return (
+                                                <button
+                                                    key={mood.name}
+                                                    type="button"
+                                                    onClick={() => handleMoodClick(mood)}
+                                                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
+                                                        isSelected 
+                                                            ? "bg-pink-500/20 text-pink-300 border-pink-500/50 shadow-[0_0_10px_rgba(236,72,153,0.2)]"
+                                                            : "bg-white/[0.04] text-zinc-400 hover:text-white border-white/[0.06]"
+                                                    }`}
+                                                >
+                                                    <span>{mood.name}</span>
+                                                    {isSelected && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
 
                                     {/* Chat Form */}
-                                    <form onSubmit={handleSubmit} className="relative">
-                                        <div className="relative flex items-center bg-[#12131A] border border-white/5 focus-within:border-pink-500/40 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.15)] rounded-2xl p-2 transition-all duration-[250ms] backdrop-blur-md">
+                                    <form onSubmit={handleSubmit} className="relative w-full">
+                                        <div className={`relative flex items-center bg-[#101118]/90 border rounded-2xl p-2 transition-all duration-200 backdrop-blur-md ${
+                                            isQuerying 
+                                                ? "border-pink-500/30 shadow-[0_0_20px_rgba(236,72,153,0.12)] opacity-90"
+                                                : "border-white/[0.08] focus-within:border-pink-500/50 focus-within:shadow-[0_0_24px_rgba(236,72,153,0.18)]"
+                                        }`}>
                                             <input 
                                                 type="text"
                                                 value={input}
                                                 onChange={(e) => setInput(e.target.value)}
-                                                placeholder={placeholderText || "Send message to AI..."}
-                                                className="w-full bg-transparent pl-4 pr-24 py-3 text-sm md:text-base text-white outline-none placeholder-white/20 font-bold"
+                                                disabled={isQuerying}
+                                                placeholder={placeholderText || "Send follow-up request..."}
+                                                className="w-full bg-transparent pl-3 pr-24 py-2.5 text-sm md:text-base text-white outline-none placeholder-zinc-500 font-medium disabled:opacity-60"
                                             />
                                             <div className="absolute right-2 flex items-center gap-1.5">
-                                                {/* Mic icon voice search */}
+                                                {input.trim() && !isQuerying && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setInput("")}
+                                                        className="p-1.5 text-zinc-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                                                        aria-label="Clear input"
+                                                    >
+                                                        <X className="w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
+
                                                 <button
                                                     type="button"
                                                     onClick={toggleVoice}
-                                                    className={`p-2.5 rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500 ${
+                                                    disabled={!isVoiceSupported || isQuerying}
+                                                    title={!isVoiceSupported ? "Voice search unavailable in this browser" : isListening ? "Stop listening" : "Search with voice"}
+                                                    aria-label="Toggle voice search"
+                                                    className={`p-2 rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-pink-500 disabled:opacity-30 disabled:cursor-not-allowed ${
                                                         isListening 
-                                                            ? recordingFallbackActive 
-                                                                ? "bg-blue-500/15 border-blue-500/30 text-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.3)]"
-                                                                : "bg-red-500/15 border-red-500/30 text-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.3)]"
-                                                            : "bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
+                                                            ? "bg-red-500/15 border-red-500/40 text-red-400 animate-pulse" 
+                                                            : "bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:text-white"
                                                     }`}
-                                                    title="Voice Search"
-                                                    aria-label="Voice Search"
                                                 >
                                                     {isTranscribing ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin text-pink-500" />
+                                                        <Loader2 className="w-4 h-4 animate-spin text-pink-400" />
                                                     ) : (
                                                         <Mic className="w-4 h-4" />
                                                     )}
                                                 </button>
+
                                                 <button 
                                                     type="submit"
-                                                    disabled={!input.trim()}
-                                                    className="w-10 h-10 rounded-xl bg-pink-600 hover:bg-pink-500 disabled:opacity-30 text-white transition-all flex items-center justify-center cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-pink-600/15"
+                                                    disabled={!input.trim() || isQuerying}
+                                                    className="w-9 h-9 rounded-xl bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-500 hover:to-pink-400 disabled:opacity-30 text-white transition-all flex items-center justify-center cursor-pointer disabled:cursor-not-allowed shadow-md shadow-pink-600/20 active:scale-95"
+                                                    aria-label="Send query"
                                                 >
-                                                    <Send className="w-4 h-4" />
+                                                    {isQuerying ? (
+                                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                    ) : (
+                                                        <Send className="w-3.5 h-3.5" />
+                                                    )}
                                                 </button>
                                             </div>
                                         </div>
                                     </form>
-
-                                    {errorMsg && (
-                                        <div className="mt-3 p-4 rounded-xl bg-red-950/20 border border-red-500/20 text-left w-full transition-all">
-                                            <div className="flex items-start gap-3">
-                                                <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                                                <div className="flex-1 space-y-2">
-                                                    <h4 className="text-sm font-black text-white">Voice Search Diagnostics</h4>
-                                                    <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
-                                                        {errorMsg === "not-allowed" && "Microphone permission is blocked. Please allow microphone access in your browser settings and try again."}
-                                                        {errorMsg === "transcription-key-missing" && "Voice recording completed! However, the translation service is currently offline. Please type your prompt."}
-                                                        {errorMsg === "no-speech" && "No speech was detected. Please make sure your mic is plugged in and speak clearly."}
-                                                        {errorMsg !== "not-allowed" && errorMsg !== "transcription-key-missing" && errorMsg !== "no-speech" && `Voice error details: ${errorMsg}. Swapping to standard search.`}
-                                                    </p>
-                                                    
-                                                    <div className="flex flex-wrap gap-2 pt-1.5">
-                                                        <button
-                                                            type="button"
-                                                            onClick={startListening}
-                                                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-white transition-all cursor-pointer border border-white/5"
-                                                        >
-                                                            Retry Voice Search
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={async () => {
-                                                                const rep = await runDiagnostics();
-                                                                toast.success(`Diag: Mic=${rep.hasAudioInput ? 'Yes' : 'No'}, Secure=${rep.secureContext ? 'Yes' : 'No'}`);
-                                                            }}
-                                                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase text-zinc-400 hover:text-white transition-all cursor-pointer border border-white/5"
-                                                        >
-                                                            Test Microphone
-                                                        </button>
-                                                    </div>
-
-                                                    {diagnostics && (
-                                                        <div className="text-[10px] text-zinc-500 font-mono pt-2 border-t border-white/5 mt-2 space-y-0.5">
-                                                            <div>Browser: {diagnostics.browserName}</div>
-                                                            <div>Secure context: {diagnostics.secureContext ? "Yes ✅" : "No ❌"}</div>
-                                                            <div>Input devices found: {diagnostics.hasAudioInput ? "Yes ✅" : "No ❌"}</div>
-                                                            <div>Permissions Policy: {diagnostics.permissionsPolicyOk ? "Allowed ✅" : "Blocked ❌"}</div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
 
                                 </div>
                             </div>

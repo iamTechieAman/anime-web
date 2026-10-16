@@ -9,6 +9,11 @@ import axios from "axios";
 import Fuse from "fuse.js";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { useUserStore } from "@/store/userStore";
+import { isClerkConfigured } from "@/lib/clerkConfig";
+import toast from "react-hot-toast";
+import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 
 const quickLinks = [
     { name: "Discover AI ✨", href: "/discover", icon: Compass, color: "from-accent to-accent-secondary" },
@@ -26,6 +31,58 @@ export default function MobileModals() {
     const [autoNext, setAutoNext] = useState(true);
     const [isDiscoverMode, setIsDiscoverMode] = useState(false);
     const [logoError, setLogoError] = useState(false);
+
+    const { user, isLoaded: userLoaded, isSignedIn } = useUser();
+    const { openSignIn, signOut } = useClerk();
+    const { profiles, activeProfileId, setActiveProfile } = useUserStore();
+    const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles.find(p => p.id === 'profile-guest') || profiles[0];
+
+    const handleMobileLogin = () => {
+        setMenuOpen(false);
+        if (!isClerkConfigured()) {
+            toast("Account login is currently unavailable in this environment. You can continue browsing as a guest.", {
+                icon: "ℹ️",
+                duration: 5000,
+                style: { background: "#1c1c24", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }
+            });
+            return;
+        }
+        try {
+            if (openSignIn) {
+                openSignIn({
+                    fallbackRedirectUrl: window.location.pathname || "/",
+                    signUpFallbackRedirectUrl: window.location.pathname || "/",
+                });
+            } else {
+                router.push("/login", { scroll: false });
+            }
+        } catch {
+            router.push("/login", { scroll: false });
+        }
+    };
+
+    const handleMobileSignOut = async () => {
+        setMenuOpen(false);
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (_) {}
+        try {
+            if (typeof signOut === 'function') {
+                await signOut();
+            }
+        } catch (e) {
+            console.warn('[MobileModals] Clerk signOut error:', e);
+        }
+        setActiveProfile('profile-guest');
+        if (typeof window !== "undefined") {
+            window.sessionStorage.removeItem("toonplayer-session-active");
+            window.sessionStorage.removeItem("toonplayer_active_profile_id");
+            window.sessionStorage.setItem("toonplayer-explicit-switch", "true");
+            document.cookie = "toonplayer_active_profile_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            window.dispatchEvent(new Event("userLogout"));
+        }
+        router.push("/", { scroll: false });
+    };
 
     const [searchQuery, setSearchQuery] = useState("");
     const debouncedQuery = useDebounce(searchQuery, 200);
@@ -157,17 +214,18 @@ export default function MobileModals() {
         return () => controller.abort();
     }, [debouncedQuery, fuse]);
 
-    // Close search overlay on Escape
+    // Close search overlay and menu drawer on Escape
     useEffect(() => {
-        if (!isSearchOpen) return;
+        if (!isSearchOpen && !isMenuOpen) return;
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 setSearchOpen(false);
+                setMenuOpen(false);
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isSearchOpen, setSearchOpen]);
+    }, [isSearchOpen, isMenuOpen, setSearchOpen, setMenuOpen]);
 
     // Reset search on open state change
     useEffect(() => {
@@ -241,6 +299,53 @@ export default function MobileModals() {
                                     >
                                         <X className="w-5 h-5 text-[var(--text-main)]" />
                                     </button>
+                                </div>
+
+                                {/* Account / Authentication Status */}
+                                <div className="mb-6 p-4 rounded-xl border border-white/10 bg-white/[0.03]">
+                                    {isSignedIn && user ? (
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-accent/20 border border-accent/40 shrink-0">
+                                                    {user.imageUrl ? (
+                                                        <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">
+                                                            {user.firstName?.[0] || "U"}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-bold text-white truncate">{user.fullName || user.username || "Account"}</p>
+                                                    <p className="text-[10px] text-zinc-400 truncate">{user.primaryEmailAddress?.emailAddress || "Signed in"}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={handleMobileSignOut}
+                                                className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                                            >
+                                                Sign Out
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0 text-purple-300 font-bold text-sm">
+                                                    G
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-bold text-white truncate">Guest Mode</p>
+                                                    <p className="text-[10px] text-zinc-400 truncate">Browsing freely</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={handleMobileLogin}
+                                                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-accent to-accent-secondary text-white text-xs font-bold shadow-md shadow-accent/20 transition-all shrink-0 cursor-pointer active:scale-95"
+                                            >
+                                                Login
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Quick Links */}

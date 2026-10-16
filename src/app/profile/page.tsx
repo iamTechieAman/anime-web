@@ -90,8 +90,8 @@ export default function ProfilePage() {
     const displayAvatar = user.imageUrl || `https://api.dicebear.com/9.x/avataaars/png?seed=${displayName}`;
 
     return (
-        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pb-24 pt-6">
-            <div className="max-w-4xl mx-auto px-4 md:px-8">
+        <div className="min-h-dvh bg-bg-main text-[var(--text-main)] pb-24 pt-6">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
                 
                 {/* Profile Header */}
                 <div className="flex items-center gap-6 mb-12 p-6 bg-bg-card rounded-2xl border border-border-color">
@@ -165,6 +165,6 @@ export default function ProfilePage() {
 
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

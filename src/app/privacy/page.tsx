@@ -28,7 +28,7 @@ export default function PrivacyPage() {
     ];
 
     return (
-        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
+        <div className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 sm:px-6 md:px-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="text-center space-y-4">
@@ -84,6 +84,6 @@ export default function PrivacyPage() {
                     <p className="text-xs text-[var(--text-muted)]">If you have any questions regarding this policy, please contact us at <span className="text-white font-bold">privacy@toonplayer.in</span></p>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

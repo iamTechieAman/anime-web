@@ -266,6 +266,26 @@ function renderMarkdown(text: string): React.ReactNode {
     });
 }
 
+function sortEpisodes(eps: any[]): any[] {
+    if (!Array.isArray(eps)) return [];
+    return [...eps].sort((a, b) => {
+        const getNum = (item: any) => {
+            if (typeof item === 'object' && item !== null) {
+                if (item.episode_number !== undefined && item.episode_number !== null && !isNaN(Number(item.episode_number))) {
+                    return Number(item.episode_number);
+                }
+                if (item.number !== undefined && item.number !== null && !isNaN(Number(item.number))) {
+                    return Number(item.number);
+                }
+                const parsedId = parseFloat(String(item.id).replace(/[^0-9.]/g, ''));
+                return !isNaN(parsedId) ? parsedId : 0;
+            }
+            const parsed = parseFloat(String(item).replace(/[^0-9.]/g, ''));
+            return !isNaN(parsed) ? parsed : 0;
+        };
+        return getNum(a) - getNum(b);
+    });
+}
 
 const getProxiedEmbedUrl = (rawUrl: string) => {
     if (!rawUrl) return "";
@@ -501,10 +521,118 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // Refs to always get current episode/season inside callbacks without stale closures
     const selectedEpisodeRef = useRef(selectedEpisode);
     const selectedSeasonRef = useRef(selectedSeason);
+    const playerContainerRef = useRef<HTMLDivElement>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Cross-browser fullscreen toggle supporting container, webkit, and iOS
+    const toggleFullscreen = useCallback(async () => {
+        const doc = document as any;
+        const isFS = Boolean(
+            doc.fullscreenElement ||
+            doc.webkitFullscreenElement ||
+            doc.mozFullScreenElement ||
+            doc.msFullscreenElement
+        );
+
+        if (isFS) {
+            try {
+                if (doc.exitFullscreen) await doc.exitFullscreen();
+                else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+                else if (doc.mozCancelFullScreen) await doc.mozCancelFullScreen();
+                else if (doc.msExitFullscreen) await doc.msExitFullscreen();
+            } catch (err) {
+                console.warn('[Fullscreen] Exit failed:', err);
+            }
+        } else {
+            const target = playerContainerRef.current as any;
+            if (!target) return;
+
+            try {
+                if (target.requestFullscreen) {
+                    await target.requestFullscreen();
+                } else if (target.webkitRequestFullscreen) {
+                    await target.webkitRequestFullscreen();
+                } else if (target.mozRequestFullScreen) {
+                    await target.mozRequestFullScreen();
+                } else if (target.msRequestFullscreen) {
+                    await target.msRequestFullscreen();
+                } else {
+                    const videoEl = target.querySelector('video') as any;
+                    if (videoEl && videoEl.webkitEnterFullscreen) {
+                        videoEl.webkitEnterFullscreen();
+                    }
+                }
+            } catch (err) {
+                console.warn('[Fullscreen] Fullscreen request rejected or unavailable:', err);
+            }
+        }
+    }, []);
+
+    // Fullscreen change listener across browsers
+    useEffect(() => {
+        const onFSChange = () => {
+            const doc = document as any;
+            const isFS = Boolean(
+                doc.fullscreenElement ||
+                doc.webkitFullscreenElement ||
+                doc.mozFullScreenElement ||
+                doc.msFullscreenElement
+            );
+            setIsFullscreen(isFS);
+        };
+
+        document.addEventListener('fullscreenchange', onFSChange);
+        document.addEventListener('webkitfullscreenchange', onFSChange);
+        document.addEventListener('mozfullscreenchange', onFSChange);
+        document.addEventListener('MSFullscreenChange', onFSChange);
+
+        return () => {
+            document.removeEventListener('fullscreenchange', onFSChange);
+            document.removeEventListener('webkitfullscreenchange', onFSChange);
+            document.removeEventListener('mozfullscreenchange', onFSChange);
+            document.removeEventListener('MSFullscreenChange', onFSChange);
+        };
+    }, []);
+
+    // Keyboard shortcut for fullscreen (f)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [toggleFullscreen]);
+
     useEffect(() => { selectedEpisodeRef.current = selectedEpisode; }, [selectedEpisode]);
     useEffect(() => { selectedSeasonRef.current = selectedSeason; }, [selectedSeason]);
 
+    const [showNextOverlay, setShowNextOverlay] = useState(false);
+    const [nextCountdown, setNextCountdown] = useState(5);
+    const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const isAdvancingRef = useRef(false);
+
+    useEffect(() => {
+        isAdvancingRef.current = false;
+    }, [selectedSeason, selectedEpisode]);
+
+    // Auto-detect and resolve media classification
+    const resolvedMediaType = useMemo(() => {
+        if (details && (details as any).resolvedType) {
+            return (details as any).resolvedType;
+        }
+        if (type === "cartoon" || type === "anime") {
+            return "tv";
+        }
+        return type;
+    }, [details, type]);
+
     const handleSelectEpisode = useCallback((epNum: number, sNum?: number) => {
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        setShowNextOverlay(false);
         const seasonToUse = sNum !== undefined ? sNum : selectedSeasonRef.current;
         setSelectedEpisode(epNum);
         if (sNum !== undefined && sNum !== selectedSeasonRef.current) {
@@ -518,6 +646,168 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             router.replace(newUrl, { scroll: false });
         }
     }, [router]);
+
+    const hasNextEpisode = useCallback(() => {
+        if (type === 'movie' || resolvedMediaType === 'movie') return false;
+        if (type === 'anime') {
+            const currentIdx = episodes.findIndex((e: any) => {
+                const epNum = typeof e === 'object' ? String(e.number || e.id) : String(e);
+                return epNum === String(selectedEpisode);
+            });
+            return currentIdx !== -1 && currentIdx + 1 < episodes.length;
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) return true;
+        
+        // At the end of the current season: check if next season exists
+        const validSeasons = (details?.seasons || [])
+            .filter((s: any) => (s.season_number ?? 0) > 0)
+            .sort((a: any, b: any) => a.season_number - b.season_number);
+        const nextSeason = validSeasons.find((s: any) => s.season_number > selectedSeason);
+        return Boolean(nextSeason);
+    }, [type, resolvedMediaType, episodes, selectedEpisode, details?.seasons, selectedSeason]);
+
+    const hasPrevEpisode = useCallback(() => {
+        if (type === 'movie' || resolvedMediaType === 'movie') return false;
+        if (type === 'anime') {
+            const currentIdx = episodes.findIndex((e: any) => {
+                const epNum = typeof e === 'object' ? String(e.number || e.id) : String(e);
+                return epNum === String(selectedEpisode);
+            });
+            return currentIdx > 0;
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx > 0) return true;
+        
+        // If at first episode of current season, check if a previous season exists
+        const validSeasons = (details?.seasons || [])
+            .filter((s: any) => (s.season_number ?? 0) > 0)
+            .sort((a: any, b: any) => a.season_number - b.season_number);
+        const prevSeason = [...validSeasons].reverse().find((s: any) => s.season_number < selectedSeason);
+        return Boolean(prevSeason);
+    }, [type, resolvedMediaType, episodes, selectedEpisode, details?.seasons, selectedSeason]);
+
+    const handleNextEpisode = useCallback(() => {
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        setShowNextOverlay(false);
+
+        if (type === 'anime') {
+            const currentIdx = episodes.findIndex((e: any) => {
+                const epNum = typeof e === 'object' ? String(e.number || e.id) : String(e);
+                return epNum === String(selectedEpisode);
+            });
+            if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
+                const nextItem = episodes[currentIdx + 1];
+                const nextEp = typeof nextItem === 'object' ? (Number(nextItem.number || nextItem.id) || 1) : (Number(nextItem) || 1);
+                handleSelectEpisode(nextEp);
+                toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
+            } else {
+                toast("You have reached the final episode.", { icon: "🏁" });
+            }
+            return;
+        }
+
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
+            const nextEp = episodes[currentIdx + 1].episode_number;
+            handleSelectEpisode(nextEp, selectedSeason);
+            toast.success(`Now playing S${selectedSeason} E${nextEp}`, { icon: '▶️' });
+            return;
+        }
+
+        // Season transition
+        const validSeasons = (details?.seasons || [])
+            .filter((s: any) => (s.season_number ?? 0) > 0)
+            .sort((a: any, b: any) => a.season_number - b.season_number);
+        const nextSeason = validSeasons.find((s: any) => s.season_number > selectedSeason);
+        if (nextSeason) {
+            handleSelectEpisode(1, nextSeason.season_number);
+            toast.success(`Advancing to Season ${nextSeason.season_number} Episode 1`, { icon: '⏭️' });
+        } else {
+            toast("You have reached the series finale.", { icon: "🏁" });
+        }
+    }, [type, episodes, selectedEpisode, selectedSeason, details?.seasons, handleSelectEpisode]);
+
+    const handlePrevEpisode = useCallback(() => {
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        setShowNextOverlay(false);
+
+        if (type === 'anime') {
+            const currentIdx = episodes.findIndex((e: any) => {
+                const epNum = typeof e === 'object' ? String(e.number || e.id) : String(e);
+                return epNum === String(selectedEpisode);
+            });
+            if (currentIdx > 0) {
+                const prevItem = episodes[currentIdx - 1];
+                const prevEp = typeof prevItem === 'object' ? (Number(prevItem.number || prevItem.id) || 1) : (Number(prevItem) || 1);
+                handleSelectEpisode(prevEp);
+                toast.success(`Now playing Episode ${prevEp}`, { icon: '▶️' });
+            }
+            return;
+        }
+
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx > 0) {
+            const prevEp = episodes[currentIdx - 1].episode_number;
+            handleSelectEpisode(prevEp, selectedSeason);
+            toast.success(`Now playing S${selectedSeason} E${prevEp}`, { icon: '▶️' });
+            return;
+        }
+
+        // Prior season transition
+        const validSeasons = (details?.seasons || [])
+            .filter((s: any) => (s.season_number ?? 0) > 0)
+            .sort((a: any, b: any) => a.season_number - b.season_number);
+        const prevSeason = [...validSeasons].reverse().find((s: any) => s.season_number < selectedSeason);
+        if (prevSeason) {
+            const lastEp = prevSeason.episode_count || 1;
+            handleSelectEpisode(lastEp, prevSeason.season_number);
+            toast.success(`Returning to Season ${prevSeason.season_number} Episode ${lastEp}`, { icon: '⏮️' });
+        }
+    }, [type, episodes, selectedEpisode, selectedSeason, details?.seasons, handleSelectEpisode]);
+
+    const getNextEpisodeLabel = useCallback(() => {
+        if (type === 'anime') {
+            const currentIdx = episodes.findIndex((e: any) => {
+                const epNum = typeof e === 'object' ? String(e.number || e.id) : String(e);
+                return epNum === String(selectedEpisode);
+            });
+            if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
+                const nextItem = episodes[currentIdx + 1];
+                const epNum = typeof nextItem === 'object' ? String(nextItem.number || nextItem.id) : String(nextItem);
+                const epTitle = typeof nextItem === 'object' && nextItem.title ? `: ${nextItem.title}` : '';
+                return `Episode ${epNum}${epTitle}`;
+            }
+            return 'Final Episode';
+        }
+        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
+        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
+            const nextEp = episodes[currentIdx + 1];
+            return `S${selectedSeason} E${nextEp.episode_number}${nextEp.name ? `: ${nextEp.name}` : ''}`;
+        }
+        const validSeasons = (details?.seasons || [])
+            .filter((s: any) => (s.season_number ?? 0) > 0)
+            .sort((a: any, b: any) => a.season_number - b.season_number);
+        const nextSeason = validSeasons.find((s: any) => s.season_number > selectedSeason);
+        if (nextSeason) {
+            return `Season ${nextSeason.season_number} Episode 1`;
+        }
+        return 'Series Finale';
+    }, [type, episodes, selectedEpisode, selectedSeason, details?.seasons]);
+
+    // Dynamic document.title update
+    useEffect(() => {
+        const titleStr = details?.name || details?.title || animeData?.name;
+        if (titleStr) {
+            if (type === 'movie' || resolvedMediaType === 'movie') {
+                document.title = `Watch ${titleStr} | ToonPlayer`;
+            } else if (type === 'anime') {
+                document.title = `Watch ${titleStr} - Episode ${selectedEpisode} | ToonPlayer`;
+            } else {
+                document.title = `Watch ${titleStr} - Season ${selectedSeason} Episode ${selectedEpisode} | ToonPlayer`;
+            }
+        }
+    }, [details, animeData, type, resolvedMediaType, selectedSeason, selectedEpisode]);
 
     const isAnimeServer = useMemo(() =>
         type === 'anime' || (activeServer ? (activeServer.type === 'anime' || ANIME_SERVERS.some(s => s.id === activeServer.id)) : false),
@@ -570,10 +860,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         }
     };
 
-    // Netflix-style Auto Next States
-    const [showNextOverlay, setShowNextOverlay] = useState(false);
-    const [nextCountdown, setNextCountdown] = useState(5);
-    const nextIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const manualServerRef = useRef<string | null>(null);
     const activeRequestRef = useRef<string | null>(null);
 
@@ -818,40 +1104,40 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     }, [details]);
 
 
-    // TV and Cartoon Auto-Next logic
+    // TV, Cartoon, and Anime Auto-Next logic
     const handleVideoEnded = useCallback(() => {
         if (!autoPlayNext) return;
-        if (type !== 'tv' && type !== 'cartoon') return;  // Include cartoon in auto-next
-        if (episodes.length === 0) return;
-        
-        const currentIndex = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-        
-        if (currentIndex !== -1 && currentIndex + 1 < episodes.length) {
-            if (showNextOverlay) return;
-            
-            setShowNextOverlay(true);
-            setNextCountdown(5);
-            
-            if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-            
-            nextIntervalRef.current = setInterval(() => {
-                setNextCountdown(prev => {
-                    if (prev <= 1) {
-                        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                        setShowNextOverlay(false);
-                        
-                        const nextEp = episodes[currentIndex + 1].episode_number;
-                        setSelectedEpisode(nextEp);
-                        toast.success(`Now playing Episode ${nextEp}`, { icon: '▶️' });
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        } else {
-            toast("You have reached the latest available episode.", { icon: "✅" });
+        if (type !== 'tv' && type !== 'cartoon' && type !== 'anime') return;
+        if (isAdvancingRef.current) return;
+        if (loadingEpisodes) {
+            console.warn('[Watch] Ignoring ended event while episodes are loading');
+            return;
         }
-    }, [autoPlayNext, type, episodes, selectedEpisode, showNextOverlay]);
+        if (!hasNextEpisode()) {
+            toast("You have reached the final episode.", { icon: "🏁" });
+            return;
+        }
+        
+        if (showNextOverlay) return;
+        
+        setShowNextOverlay(true);
+        setNextCountdown(5);
+        
+        if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+        
+        nextIntervalRef.current = setInterval(() => {
+            setNextCountdown(prev => {
+                if (prev <= 1) {
+                    if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
+                    setShowNextOverlay(false);
+                    isAdvancingRef.current = true;
+                    handleNextEpisode();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    }, [autoPlayNext, type, loadingEpisodes, hasNextEpisode, handleNextEpisode, showNextOverlay]);
 
     const handleVideoEndedRef = useRef<Function | null>(null);
     useEffect(() => {
@@ -977,93 +1263,6 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     };
     // Auto Server Selection State
 
-
-    const hasNextEpisode = () => {
-        if (type === 'movie') return false;
-        if (type === 'anime') {
-            const currentIdx = episodes.indexOf(String(selectedEpisode));
-            return currentIdx !== -1 && currentIdx + 1 < episodes.length;
-        }
-        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) return true;
-        const currentSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason);
-        const nextSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason + 1);
-        if (currentSeasonData && selectedEpisode >= currentSeasonData.episode_count && nextSeasonData) return true;
-        return false;
-    };
-
-    const hasPrevEpisode = () => {
-        if (type === 'movie') return false;
-        if (type === 'anime') {
-            const currentIdx = episodes.indexOf(String(selectedEpisode));
-            return currentIdx > 0;
-        }
-        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-        if (currentIdx > 0) return true;
-        if (selectedSeason > 1) {
-            const prevSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason - 1);
-            if (prevSeasonData) return true;
-        }
-        return false;
-    };
-
-    const handleNextEpisode = () => {
-        if (type === 'anime') {
-            const currentIdx = episodes.indexOf(String(selectedEpisode));
-            if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
-                const nextEp = episodes[currentIdx + 1];
-                setSelectedEpisode(parseInt(nextEp) || (selectedEpisode + 1));
-            }
-            return;
-        }
-        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-        let nextEp = selectedEpisode + 1;
-        let nextSeason = selectedSeason;
-        if (currentIdx !== -1 && currentIdx + 1 < episodes.length) {
-            nextEp = episodes[currentIdx + 1].episode_number;
-        } else {
-            const currentSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason);
-            if (currentSeasonData && selectedEpisode >= currentSeasonData.episode_count) {
-                nextSeason += 1;
-                nextEp = 1;
-            }
-        }
-        setSelectedEpisode(nextEp);
-        setSelectedSeason(nextSeason);
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set("s", nextSeason.toString());
-        newUrl.searchParams.set("e", nextEp.toString());
-        router.push(newUrl.pathname + newUrl.search, { scroll: false });
-    };
-
-    const handlePrevEpisode = () => {
-        if (type === 'anime') {
-            const currentIdx = episodes.indexOf(String(selectedEpisode));
-            if (currentIdx > 0) {
-                const prevEp = episodes[currentIdx - 1];
-                setSelectedEpisode(parseInt(prevEp) || (selectedEpisode - 1));
-            }
-            return;
-        }
-        const currentIdx = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-        let prevEp = selectedEpisode - 1;
-        let prevSeason = selectedSeason;
-        if (currentIdx > 0) {
-            prevEp = episodes[currentIdx - 1].episode_number;
-        } else if (selectedSeason > 1) {
-            const prevSeasonData = details?.seasons?.find(s => s.season_number === selectedSeason - 1);
-            if (prevSeasonData) {
-                prevSeason -= 1;
-                prevEp = prevSeasonData.episode_count || 1;
-            }
-        }
-        setSelectedEpisode(prevEp);
-        setSelectedSeason(prevSeason);
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set("s", prevSeason.toString());
-        newUrl.searchParams.set("e", prevEp.toString());
-        router.push(newUrl.pathname + newUrl.search, { scroll: false });
-    };
 
     // Read query parameters or history on load — use ref flag to run ONCE only
     const historyRestoredRef = useRef(false);
@@ -1700,12 +1899,15 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         return () => controller.abort();
     }, [type, id, selectedSeason, details]);
 
-    // Update anime episodes when mode (sub/dub) changes
     useEffect(() => {
         if (type === "anime" && animeData) {
-            const eps = animeData.availableEpisodesDetail?.[mode] || [];
+            const rawEps = animeData.availableEpisodesDetail?.[mode] || [];
+            const eps = sortEpisodes(rawEps);
             setEpisodes(eps);
-            if (eps.length > 0) setSelectedEpisode(parseInt(eps[0]) || 1);
+            if (eps.length > 0) {
+                const firstEpNum = typeof eps[0] === 'object' ? (Number(eps[0].number || eps[0].id) || 1) : (parseInt(eps[0]) || 1);
+                setSelectedEpisode(firstEpNum);
+            }
         }
     }, [type, animeData, mode]);
 
@@ -1739,17 +1941,6 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
     // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
     const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
-
-    // Auto-detect and resolve media classification
-    const resolvedMediaType = useMemo(() => {
-        if (details && (details as any).resolvedType) {
-            return (details as any).resolvedType;
-        }
-        if (type === "cartoon" || type === "anime") {
-            return "tv";
-        }
-        return type;
-    }, [details, type]);
     
     // Dedicated state for the active server player URL
     const [currentServerUrl, setCurrentServerUrl] = useState<string>("");
@@ -1800,7 +1991,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
     if (loading && !details && !animeData) {
         return (
-            <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-[calc(72px+env(safe-area-inset-top)+16px)] px-4 sm:px-6 md:px-8 max-w-[1800px] mx-auto">
+            <div className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-[calc(72px+env(safe-area-inset-top)+16px)] px-4 sm:px-6 md:px-8 max-w-[1800px] mx-auto">
                 <div className="flex items-center justify-between mb-4">
                     <div className="h-8 w-64 rounded-xl shimmer-card bg-zinc-900 border border-white/5" />
                     <div className="h-8 w-28 rounded-xl shimmer-card bg-zinc-900 border border-white/5" />
@@ -1815,7 +2006,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         <EpisodeListSkeleton mode="list" count={5} />
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
 
@@ -1830,7 +2021,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
             1
         );
         return (
-            <main className="bg-bg-main text-[var(--text-main)]">
+            <div className="bg-bg-main text-[var(--text-main)]">
                 <div className="fixed top-0 left-0 right-0 z-50 h-[90px] md:h-[110px] lg:h-[140px] bg-bg-main/90 backdrop-blur-md border-b border-border-color flex items-center justify-center pt-[env(safe-area-inset-top)]">
                     <Link href="/" scroll={false} className="absolute top-[24px] left-[24px] z-50 p-3 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-md border border-white/10 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors group shrink-0">
                         <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform will-change-transform"  />
@@ -1864,7 +2055,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
 
@@ -1879,6 +2070,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
             <div className="relative w-full z-20">
                 {/* ── VIDEO CONTAINER ── */}
                 <motion.div
+                    ref={playerContainerRef}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -1984,20 +2176,16 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                         </div>
                                     </div>
                                     <h3 className="text-lg font-black text-white mb-1 uppercase tracking-tight">Up Next</h3>
-                                    <p className="text-zinc-400 text-xs font-medium mb-6">Episode {selectedEpisode + 1}</p>
+                                    <p className="text-zinc-400 text-xs font-medium mb-6">{getNextEpisodeLabel()}</p>
                                     <div className="flex items-center gap-2 justify-center">
                                         <button onClick={() => { if (nextIntervalRef.current) clearInterval(nextIntervalRef.current); setShowNextOverlay(false); }}
-                                            className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all">Cancel</button>
+                                            className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all cursor-pointer">Cancel</button>
                                         <button onClick={() => {
                                             if (nextIntervalRef.current) clearInterval(nextIntervalRef.current);
-                                            setNextCountdown(0); setShowNextOverlay(false);
-                                            const ci = episodes.findIndex((e: any) => e.episode_number === selectedEpisode);
-                                            let ne = selectedEpisode + 1, ns = selectedSeason;
-                                            if (ci !== -1 && ci + 1 < episodes.length) { ne = episodes[ci + 1].episode_number; }
-                                            const csData = details?.seasons?.find(s => s.season_number === selectedSeason);
-                                            if (csData && ne > csData.episode_count) { ns += 1; ne = 1; }
-                                            handleSelectEpisode(ne, ns);
-                                        }} className="px-6 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-1.5">
+                                            setNextCountdown(0);
+                                            setShowNextOverlay(false);
+                                            handleNextEpisode();
+                                        }} className="px-6 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl font-black text-sm transition-all flex items-center gap-1.5 cursor-pointer">
                                             <Play className="w-4 h-4 fill-current" /> Play Now
                                         </button>
                                     </div>
@@ -2014,16 +2202,18 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         {(type !== 'movie' && resolvedMediaType !== 'movie') ? (
                             <div className="flex items-center gap-1.5">
                                 <button onClick={handlePrevEpisode} disabled={!hasPrevEpisode()}
-                                    className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all cursor-pointer"
-                                    title="Previous Episode">
+                                    className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 disabled:hover:bg-white/[0.06] disabled:cursor-not-allowed border border-white/[0.08] rounded-lg text-white transition-all cursor-pointer"
+                                    title={hasPrevEpisode() ? "Previous Episode" : "No previous episode"}
+                                    aria-label="Previous Episode">
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
                                 <span className="text-xs font-bold text-zinc-400 px-2 min-w-[56px] text-center">
-                                    {`S${selectedSeason}E${selectedEpisode}`}
+                                    {type === 'anime' ? `EP ${selectedEpisode}` : `S${selectedSeason}E${selectedEpisode}`}
                                 </span>
                                 <button onClick={handleNextEpisode} disabled={!hasNextEpisode()}
-                                    className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 border border-white/[0.08] rounded-lg text-white transition-all cursor-pointer"
-                                    title="Next Episode">
+                                    className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-30 disabled:hover:bg-white/[0.06] disabled:cursor-not-allowed border border-white/[0.08] rounded-lg text-white transition-all cursor-pointer"
+                                    title={hasNextEpisode() ? "Next Episode" : "No next episode"}
+                                    aria-label="Next Episode">
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
@@ -2034,24 +2224,76 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                 </span>
                             </div>
                         )}
-                        {/* View Controls */}
-                        <div className="flex items-center gap-1.5">
+                        {/* View & Playback Controls */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            {/* Auto-Next Toggle */}
+                            {type !== 'movie' && (
+                                <button
+                                    onClick={() => handleToggleAutoPlayNext(!autoPlayNext)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+                                        autoPlayNext
+                                            ? 'bg-purple-600/20 border-purple-500/40 text-purple-300'
+                                            : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                    }`}
+                                    title={`Auto-Next is ${autoPlayNext ? 'ON' : 'OFF'}`}
+                                    aria-label={`Toggle Auto-Next (currently ${autoPlayNext ? 'enabled' : 'disabled'})`}
+                                    aria-pressed={autoPlayNext}
+                                >
+                                    <svg className={`w-3.5 h-3.5 ${autoPlayNext ? 'text-purple-400' : 'text-zinc-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polygon points="5 4 15 12 5 20 5 4" />
+                                        <line x1="19" y1="5" x2="19" y2="19" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Auto-Next</span>
+                                    <span className={`text-[10px] px-1 py-0.2 rounded font-mono font-bold ${
+                                        autoPlayNext ? 'bg-purple-500/30 text-purple-200' : 'bg-white/10 text-zinc-500'
+                                    }`}>
+                                        {autoPlayNext ? 'ON' : 'OFF'}
+                                    </span>
+                                </button>
+                            )}
+
                             <button onClick={() => setReloadCount(prev => prev + 1)}
                                 className="w-8 h-8 flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] rounded-lg text-zinc-400 hover:text-white transition-all cursor-pointer"
-                                title="Reload">
+                                title="Reload"
+                                aria-label="Reload Player">
                                 <RefreshCw className="w-3.5 h-3.5" />
                             </button>
                             <button onClick={() => { setIsTheatreMode(!isTheatreMode); if (isFocusMode) setIsFocusMode(false); }}
-                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
+                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all cursor-pointer ${
                                     isTheatreMode ? 'bg-accent/20 border-accent text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
-                                }`} title="Theatre Mode">
+                                }`} 
+                                title="Theatre Mode"
+                                aria-label="Toggle Theatre Mode">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
                             </button>
                             <button onClick={() => { setIsFocusMode(!isFocusMode); if (isTheatreMode) setIsTheatreMode(false); }}
-                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all ${
+                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all cursor-pointer ${
                                     isFocusMode ? 'bg-accent/20 border-accent text-accent' : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
-                                }`} title="Focus Mode">
+                                }`} 
+                                title="Focus Mode"
+                                aria-label="Toggle Focus Mode">
                                 <Shield className="w-3.5 h-3.5" />
+                            </button>
+                            {/* Fullscreen Button */}
+                            <button
+                                onClick={toggleFullscreen}
+                                className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-all cursor-pointer ${
+                                    isFullscreen
+                                        ? 'bg-purple-600/20 border-purple-500 text-purple-300'
+                                        : 'bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white'
+                                }`}
+                                title={isFullscreen ? "Exit Fullscreen (f)" : "Enter Fullscreen (f)"}
+                                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                            >
+                                {isFullscreen ? (
+                                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                                    </svg>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -2286,9 +2528,18 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                         <h1 className="text-xl sm:text-2xl md:text-3xl font-black font-sora tracking-tight truncate leading-tight flex items-center gap-2">
                                             {title}
                                         </h1>
-                                        {((type === 'tv' || type === 'cartoon') && resolvedMediaType !== 'movie') && (
-                                            <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
-                                                Season {selectedSeason} <span className="text-zinc-600">·</span> Episode {selectedEpisode}
+                                        {((type === 'tv' || type === 'cartoon' || type === 'anime') && resolvedMediaType !== 'movie') && (
+                                            <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider mt-0.5 truncate">
+                                                {type === 'anime'
+                                                    ? `Episode ${selectedEpisode}${(() => {
+                                                        const epObj = episodes.find((e: any) => (typeof e === 'object' ? String(e.number || e.id) : String(e)) === String(selectedEpisode));
+                                                        return epObj && typeof epObj === 'object' && epObj.title && epObj.title.toLowerCase() !== `episode ${selectedEpisode}` ? `: ${epObj.title}` : '';
+                                                    })()}`
+                                                    : `Season ${selectedSeason} · Episode ${selectedEpisode}${(() => {
+                                                        const epObj = episodes.find((e: any) => e.episode_number === selectedEpisode);
+                                                        return epObj?.name && epObj.name.toLowerCase() !== `episode ${selectedEpisode}` ? `: ${epObj.name}` : '';
+                                                    })()}`
+                                                }
                                             </p>
                                         )}
                                     </div>

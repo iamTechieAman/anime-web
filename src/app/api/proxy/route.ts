@@ -57,11 +57,11 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        const referer = getReferer(targetUrl, refererOverride);
         let response = null;
         let lastError = null;
         for (let attempt = 0; attempt < 2; attempt++) {
             try {
-                const referer = getReferer(targetUrl, refererOverride);
                 const headers = new Headers();
                 headers.set("User-Agent", attempt === 0 ? getUA() : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                 headers.set("Referer", referer);
@@ -145,6 +145,7 @@ export async function GET(request: NextRequest) {
             const basePath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf("/") + 1);
 
             const lines = text.split("\n");
+            const refererParam = referer ? `&referer=${encodeURIComponent(referer)}` : "";
             const modifiedLines = lines.map(line => {
                 // Check if the line contains a URI attribute (common in EXT-X-MEDIA, EXT-X-I-FRAME-STREAM-INF, EXT-X-KEY)
                 const uriMatch = line.match(/URI="([^"]+)"/);
@@ -156,7 +157,7 @@ export async function GET(request: NextRequest) {
                             absoluteUri = new URL(originalUri, basePath).toString();
                         } catch (e) { }
                     }
-                    const proxiedUri = `${request.nextUrl.origin}/api/proxy?url=${encodeURIComponent(absoluteUri)}`;
+                    const proxiedUri = `${request.nextUrl.origin}/api/proxy?url=${encodeURIComponent(absoluteUri)}${refererParam}`;
                     return line.replace(originalUri, proxiedUri);
                 }
 
@@ -178,7 +179,7 @@ export async function GET(request: NextRequest) {
                 }
 
                 // Proxy it
-                return `${request.nextUrl.origin}/api/proxy?url=${encodeURIComponent(fullUrl)}`;
+                return `${request.nextUrl.origin}/api/proxy?url=${encodeURIComponent(fullUrl)}${refererParam}`;
             });
 
             const modifiedText = modifiedLines.join("\n");

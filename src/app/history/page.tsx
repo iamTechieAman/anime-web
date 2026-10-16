@@ -190,7 +190,7 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       transition={{ duration: 0.2, delay: index * 0.02 }}
       className={`group flex items-stretch rounded-2xl bg-bg-card border transition-all duration-[250ms] overflow-hidden ${
         isSelected
-          ? "border-accent shadow-[0_0_20px_var(--accent-glow)]"
+          ? "border-accent shadow-[0_0_20px_var(--accent-glow)] bg-accent/[0.03]"
           : "border-border-color hover:border-accent/30 hover:shadow-[0_4px_30px_-8px_var(--accent-glow)] hover:-translate-y-0.5"
       }`}
     >
@@ -198,8 +198,14 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       {isSelectMode && (
         <button
           onClick={onSelect}
-          className="px-4 flex items-center justify-center bg-white/3 border-r border-white/5 cursor-pointer text-zinc-400 hover:text-accent transition-colors shrink-0"
-          aria-label={isSelected ? "Deselect" : "Select"}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onSelect();
+            }
+          }}
+          className="px-4 flex items-center justify-center bg-white/3 border-r border-white/5 cursor-pointer text-zinc-400 hover:text-accent transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          aria-label={isSelected ? `Deselect ${entry.title}` : `Select ${entry.title}`}
         >
           <motion.div animate={{ scale: isSelected ? 1.1 : 1 }} transition={{ duration: 0.15 }}>
             {isSelected
@@ -223,13 +229,13 @@ function HistoryCard({ entry, isSelectMode, isSelected, onSelect, onRemove, inde
       />
 
       {/* Thumbnail */}
-      <div className="relative w-24 md:w-36 shrink-0 bg-black/40 overflow-hidden select-none">
+      <div className="relative w-28 sm:w-36 min-h-[96px] sm:min-h-[110px] shrink-0 bg-black/40 overflow-hidden select-none">
         {entry.poster ? (
           <Image
             src={entry.poster}
             alt={entry.title || "Poster"}
             fill
-            sizes="(max-width: 768px) 96px, 144px"
+            sizes="(max-width: 768px) 112px, 144px"
             className="object-cover transition-transform duration-[250ms] group-hover:scale-105 will-change-transform" 
           />
         ) : (
@@ -406,17 +412,24 @@ export default function HistoryPage() {
       (t) => (
         <div className="flex flex-col gap-2">
           <p className="text-sm font-bold text-white">Clear entire watch history?</p>
-          <p className="text-xs text-zinc-400">This cannot be undone.</p>
+          <p className="text-xs text-zinc-400">All progress and history records will be removed permanently.</p>
           <div className="flex items-center gap-2 mt-1">
             <button
-              onClick={() => { clearHistory(); toast.dismiss(t.id); toast.success("Watch history cleared"); }}
-              className="flex-1 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-black rounded-lg transition-all"
+              onClick={() => {
+                clearHistory();
+                toast.dismiss(t.id);
+                toast.success("Watch history cleared");
+              }}
+              className="flex-1 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-black rounded-lg transition-all cursor-pointer"
             >
               Clear All
             </button>
             <button
-              onClick={() => toast.dismiss(t.id)}
-              className="flex-1 py-1.5 bg-white/10 text-white text-xs font-bold rounded-lg hover:bg-white/20 transition-all"
+              onClick={() => {
+                toast.dismiss(t.id);
+                toast("Action cancelled", { icon: "ℹ️" });
+              }}
+              className="flex-1 py-1.5 bg-white/10 text-white text-xs font-bold rounded-lg hover:bg-white/20 transition-all cursor-pointer"
             >
               Cancel
             </button>
@@ -429,10 +442,40 @@ export default function HistoryPage() {
 
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.length === 0) return;
-    bulkRemoveFromHistory(selectedIds);
-    toast.success(`Removed ${selectedIds.length} item${selectedIds.length > 1 ? "s" : ""}`);
-    setSelectedIds([]);
-    setIsSelectMode(false);
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-bold text-white">
+            Remove {selectedIds.length} item{selectedIds.length > 1 ? "s" : ""} from history?
+          </p>
+          <p className="text-xs text-zinc-400">Selected watch history records will be permanently removed.</p>
+          <div className="flex items-center gap-2 mt-1">
+            <button
+              onClick={() => {
+                bulkRemoveFromHistory(selectedIds);
+                toast.dismiss(t.id);
+                toast.success(`Removed ${selectedIds.length} item${selectedIds.length > 1 ? "s" : ""}`);
+                setSelectedIds([]);
+                setIsSelectMode(false);
+              }}
+              className="flex-1 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-black rounded-lg transition-all cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                toast("Bulk delete cancelled", { icon: "ℹ️" });
+              }}
+              className="flex-1 py-1.5 bg-white/10 text-white text-xs font-bold rounded-lg hover:bg-white/20 transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: 10000, style: { background: "#18181B", border: "1px solid rgba(255,255,255,0.1)" } }
+    );
   }, [selectedIds, bulkRemoveFromHistory]);
 
   const handleExport = useCallback(() => {
@@ -474,11 +517,11 @@ export default function HistoryPage() {
   const groupLabels: Record<GroupMode, string> = { day: "Day", week: "Week", month: "Month" };
 
   return (
-    <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pb-24 md:pb-10">
+    <div className="flex-1 w-full bg-bg-main text-[var(--text-main)] pb-24 md:pb-10">
 
       {/* ── Sticky Toolbar ───────────────────────────────────────── */}
-      <div className="sticky top-[56px] md:top-[64px] z-40 bg-bg-main/95 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-3 space-y-3">
+      <div className="sticky top-[72px] z-40 bg-bg-main/95 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-3 space-y-3">
 
           {/* Row 1: Title + Actions */}
           <div className="flex items-center justify-between gap-3">
@@ -489,7 +532,11 @@ export default function HistoryPage() {
               <div className="min-w-0">
                 <h1 className="text-xl font-black font-sora tracking-tight text-white">Watch History</h1>
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                  {history.length} title{history.length !== 1 ? "s" : ""} watched
+                  {isSelectMode ? (
+                    <span className="text-accent">{selectedIds.length} of {filtered.length} selected</span>
+                  ) : (
+                    <span>{history.length} title{history.length !== 1 ? "s" : ""} watched</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -613,7 +660,7 @@ export default function HistoryPage() {
       </div>
 
       {/* ── Content ─────────────────────────────────────────────── */}
-      <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 py-8">
         {history.length === 0 ? (
           <EmptyState />
         ) : filtered.length === 0 ? (
@@ -739,6 +786,6 @@ export default function HistoryPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

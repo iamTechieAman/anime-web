@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSignIn, useUser } from "@clerk/nextjs";
+import { useSignIn, useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { Play, X, User, Check } from "lucide-react";
+import { Play, X, User, Check, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ModalPortal from "./ModalPortal";
 import { useUserStore } from "@/store/userStore";
+import { isClerkConfigured } from "@/lib/clerkConfig";
 
 const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null }) => {
   const [error, setError] = useState(false);
@@ -68,7 +69,41 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }
   }, [isOpen]);
 
+  const { openSignIn } = useClerk();
+
+  const handleClerkFullSignIn = () => {
+    onClose();
+    if (!isClerkConfigured()) {
+      toast("Account login is currently unavailable in this environment. You can continue browsing freely as a guest.", {
+        icon: "ℹ️",
+        duration: 5000,
+        style: { background: "#1c1c24", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }
+      });
+      return;
+    }
+    try {
+      if (openSignIn) {
+        openSignIn({
+          fallbackRedirectUrl: window.location.pathname || "/",
+          signUpFallbackRedirectUrl: window.location.pathname || "/",
+        });
+      } else {
+        router.push("/login", { scroll: false });
+      }
+    } catch {
+      router.push("/login", { scroll: false });
+    }
+  };
+
   const handleOAuth = (strategy: "oauth_google" | "oauth_github" | "oauth_discord") => {
+    if (!isClerkConfigured()) {
+      toast("Authentication service is not configured in this environment. You can continue as Guest.", {
+        icon: "ℹ️",
+        duration: 5000,
+        style: { background: "#1c1c24", color: "#fff", border: "1px solid rgba(255,255,255,0.1)" }
+      });
+      return;
+    }
     if (!signInLoaded) {
       toast.error("Authentication engine is loading. Please try again.");
       return;
@@ -168,6 +203,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               >
                 <img src="https://www.google.com/favicon.ico" alt="Google" className="w-[18px] h-[18px] object-contain" decoding="async" />
                 Continue with Google
+              </button>
+
+              <button
+                onClick={handleClerkFullSignIn}
+                className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-white rounded-xl font-bold transition-all active:scale-95 cursor-pointer text-sm"
+              >
+                <Mail className="w-4 h-4 text-accent" />
+                Sign In with Email / Password
               </button>
 
               <div className="relative py-3">

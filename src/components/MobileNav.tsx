@@ -141,14 +141,14 @@ export default function MobileNav() {
                                     }`}
                                 />
                                 {item.badge && item.badge > 0 && (
-                                    <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] flex items-center justify-center bg-gradient-to-tr from-accent to-accent-secondary text-white text-[8px] font-black rounded-full px-0.5 shadow-[0_0_8px_var(--accent-glow)]">
+                                    <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] flex items-center justify-center bg-gradient-to-tr from-accent to-accent-secondary text-white text-[9px] font-black rounded-full px-1 shadow-[0_0_8px_var(--accent-glow)]">
                                         {item.badge > 9 ? "9+" : item.badge}
                                     </span>
                                 )}
                             </div>
                             <span
-                                className={`text-[10px] font-bold tracking-tight transition-all duration-200 ${
-                                    item.active ? "opacity-100 text-white font-extrabold" : "opacity-70"
+                                className={`text-[11px] font-bold tracking-tight transition-all duration-200 ${
+                                    item.active ? "opacity-100 text-white font-extrabold" : "opacity-80"
                                 }`}
                             >
                                 {item.label}

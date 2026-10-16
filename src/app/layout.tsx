@@ -12,6 +12,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { AdBlockProvider } from "@/context/AdBlockContext";
 import { ClerkProvider } from "@clerk/nextjs";
+import { getClerkPublishableKey } from "@/lib/clerkConfig";
 import { safeJsonLd } from "@/lib/sanitizer";
 
 
@@ -223,6 +224,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ClerkProvider
+          publishableKey={getClerkPublishableKey()}
           signInUrl="/login"
           signUpUrl="/register"
           signInFallbackRedirectUrl="/"

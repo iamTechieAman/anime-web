@@ -67,7 +67,60 @@ export async function GET(request: Request) {
             headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400' }
         });
     } catch (error: any) {
-        console.error("Search API error:", error);
-        return NextResponse.json({ error: "Failed to search" }, { status: 500 });
+        console.error("Search API error:", error?.message || error);
+
+        // Fallback search over local pre-rendered datasets
+        try {
+            const fs = await import("fs/promises");
+            const path = await import("path");
+            const { searchParams } = new URL(request.url);
+            const query = (searchParams.get("q") || searchParams.get("query") || "").trim().toLowerCase();
+
+            const fallbackFiles = ["popular_movies.json", "tv_popular.json", "trending_movies.json", "genre_animation.json"];
+            const allItems: any[] = [];
+            const seenIds = new Set<string | number>();
+
+            for (const file of fallbackFiles) {
+                try {
+                    const filePath = path.join(process.cwd(), "public", "data", file);
+                    const fileContent = await fs.readFile(filePath, "utf-8");
+                    const parsed = JSON.parse(fileContent);
+                    const list = parsed.results || [];
+                    for (const item of list) {
+                        if (!seenIds.has(item.id)) {
+                            seenIds.add(item.id);
+                            allItems.push(item);
+                        }
+                    }
+                } catch {
+                    // continue
+                }
+            }
+
+            let matches = allItems;
+            if (query) {
+                matches = allItems.filter(item => {
+                    const title = (item.title || item.name || "").toLowerCase();
+                    const overview = (item.overview || "").toLowerCase();
+                    return title.includes(query) || overview.includes(query);
+                });
+            }
+
+            return NextResponse.json({
+                results: matches.slice(0, 20).map(item => ({
+                    ...item,
+                    id: item.id,
+                    media_type: item.media_type || (item.title ? "movie" : "tv")
+                })),
+                page: 1,
+                total_pages: 1,
+                total_results: matches.length,
+                fromFallback: true
+            }, {
+                headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400' }
+            });
+        } catch (fallbackError) {
+            return NextResponse.json({ results: [], page: 1, total_pages: 0, total_results: 0 });
+        }
     }
 }

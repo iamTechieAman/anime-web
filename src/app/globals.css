@@ -96,6 +96,10 @@ img {
   --accent-glow: rgba(229, 9, 20, 0.35);
   --accent-warm: #E50914;
 
+  /* AI Discovery Accent */
+  --accent-ai: #EC4899;
+  --accent-ai-glow: rgba(236, 72, 153, 0.35);
+
   --secondary: #66fcf1;
   --secondary-glow: rgba(102, 252, 241, 0.25);
   --danger: #EF4444;
@@ -1683,11 +1687,17 @@ main, .relative.z-10 {
   overflow-x: auto !important;
   scroll-snap-type: x mandatory !important;
   scroll-behavior: smooth !important;
+  overscroll-behavior-x: contain !important;
   -webkit-overflow-scrolling: touch !important;
-  gap: 12px !important;
-  padding: 20px 4px 24px 4px !important;
-  margin: -12px 0 !important;
+  gap: 14px !important;
+  padding: 12px 16px 20px 16px !important;
   scrollbar-width: none !important; /* Firefox */
+}
+
+@media (min-width: 768px) {
+  .netflix-row {
+    padding: 12px 28px 24px 28px !important;
+  }
 }
 
 .netflix-row::-webkit-scrollbar {
@@ -1950,12 +1960,6 @@ main, .relative.z-10 {
   }
 }
 
-@media (min-width: 768px) {
-  .peer\/sidebar:hover ~ div nav {
-    left: 240px !important;
-  }
-}
-
 
 /* ═══════════════════════════════════════════════════════════
    TOONPLAYER — COMPREHENSIVE MULTI-DEVICE RESPONSIVE SYSTEM
@@ -2157,21 +2161,6 @@ main, .relative.z-10 {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
     gap: 14px !important;
   }
-
-  /* Show sidebar at compressed width */
-  aside {
-    width: 64px !important;
-  }
-
-  /* Content area offset for compact sidebar */
-  .md\:pl-\[72px\] {
-    padding-left: 64px !important;
-  }
-
-  /* Header offset */
-  nav.fixed {
-    left: 64px !important;
-  }
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -2192,11 +2181,6 @@ main, .relative.z-10 {
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
-  }
-
-  /* Sidebar: standard 72px collapsed */
-  aside {
-    width: 72px !important;
   }
 }
 
@@ -2234,33 +2218,10 @@ main, .relative.z-10 {
     justify-content: stretch;
   }
 
-  /* Bigger sidebar for TV */
-  aside {
-    width: 88px !important;
-  }
-  aside:hover {
-    width: 260px !important;
-  }
-
-  /* Larger sidebar icons and text */
-  aside svg {
-    width: 26px !important;
-    height: 26px !important;
-  }
-  aside span {
-    font-size: 14px !important;
-  }
-
   /* Header for TV: taller, larger elements */
-  nav.fixed,
   header.fixed {
     height: 80px !important;
     font-size: 1.1rem !important;
-  }
-
-  /* Navigation offset for bigger sidebar */
-  nav.fixed.md\:left-\[72px\] {
-    left: 88px !important;
   }
 
   /* Bigger heading scales for TV */

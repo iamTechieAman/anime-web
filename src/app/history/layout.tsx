@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "History | ToonPlayer",
-    description: "ToonPlayer - History page.",
+    title: "Watch History | ToonPlayer",
+    description: "Track your watched movies, TV series, and anime with progress resume.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

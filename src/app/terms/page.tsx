@@ -16,6 +16,11 @@ export default function TermsPage() {
             content: "We respect the intellectual property rights of others. If you believe that your copyrighted work has been linked without authorization, please contact the hosting provider directly for removal from their servers. Once removed from the source, the link will automatically become unavailable on ToonPlayer."
         },
         {
+            title: "DMCA & Takedown Policy",
+            icon: ShieldAlert,
+            content: "ToonPlayer respects intellectual property rights and complies with 17 U.S.C. § 512 and the DMCA. Because ToonPlayer does not store or host video files, copyright owners should contact third-party file hosts directly for permanent file deletion. However, upon receiving a formal takedown notice with specific URLs and authorization sent to contact@toonplayer.in, we will promptly de-index and remove referencing links."
+        },
+        {
             title: "Fair Use",
             icon: Scale,
             content: "This platform is intended for personal, non-commercial use only. We provide a unified interface for users to search public resources. Users are responsible for complying with local regulations regarding content access in their jurisdiction."
@@ -28,7 +33,7 @@ export default function TermsPage() {
     ];
 
     return (
-        <main className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 md:px-8">
+        <div className="min-h-dvh bg-bg-main text-[var(--text-main)] pt-6 pb-20 px-4 sm:px-6 md:px-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 {/* Header */}
                 <div className="text-center space-y-4">
@@ -84,6 +89,6 @@ export default function TermsPage() {
                     <p className="text-xs text-[var(--text-muted)]">By accessing ToonPlayer, you agree to these terms. Last updated: April 2026.</p>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

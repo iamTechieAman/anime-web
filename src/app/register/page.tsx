@@ -1,101 +1,107 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { User, Mail, Lock, Sparkles, ArrowRight } from "lucide-react";
+import { useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SignUp, useUser } from "@clerk/nextjs";
+import { Play, ArrowRight, ShieldAlert, Sparkles } from "lucide-react";
 import Link from "next/link";
-import axios from "axios";
-import toast from "react-hot-toast";
+import { isClerkConfigured } from "@/lib/clerkConfig";
+import { useUserStore } from "@/store/userStore";
 
-export default function RegisterPage() {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-  const [loading, setLoading] = useState(false);
+function RegisterContent() {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+  const { setActiveProfile } = useUserStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect_url") || "/";
+  const hasClerk = isClerkConfigured();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await axios.post("/api/auth/register", formData);
-      toast.success("Account created! Please login.");
-      router.push("/login", { scroll: false });
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Registration failed");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (userLoaded && isSignedIn) {
+      router.push(redirectUrl, { scroll: false });
     }
+  }, [userLoaded, isSignedIn, redirectUrl, router]);
+
+  const handleContinueAsGuest = () => {
+    setActiveProfile("profile-guest");
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("toonplayer-session-active", "true");
+      window.dispatchEvent(new Event("profileUpdated"));
+    }
+    router.push(redirectUrl, { scroll: false });
   };
 
   return (
-    <main className="min-h-dvh flex items-center justify-center p-4 bg-bg-main">
-      <div className="w-full max-w-md bg-bg-card/30 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_20px_50px_-20px_var(--accent-glow)]">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mb-4 border border-accent/30">
-            <Sparkles className="w-8 h-8 text-accent" />
+    <div className="relative min-h-dvh flex flex-col items-center justify-center p-4 overflow-hidden bg-[#09090b]">
+      {/* Cinematic ambient background glow */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-accent-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Brand Header */}
+      <div className="flex flex-col items-center mb-6 z-10">
+        <Link href="/" scroll={false} className="flex items-center gap-2.5 group">
+          <div className="w-12 h-12 rounded-2xl bg-accent/15 border border-accent/25 flex items-center justify-center shadow-[0_0_24px_var(--accent-glow)] group-hover:scale-105 transition-transform">
+            <Play className="w-6 h-6 text-accent fill-current translate-x-0.5" />
           </div>
-          <h1 className="text-2xl font-black font-sora text-white">Join ToonPlayer</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Start your cinematic journey</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest ml-1">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-              <input
-                type="text"
-                required
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-accent outline-none transition-all"
-                placeholder="Ex. John Doe"
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest ml-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-              <input
-                type="email"
-                required
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-accent outline-none transition-all"
-                placeholder="john@example.com"
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest ml-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-              <input
-                type="password"
-                required
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-accent outline-none transition-all"
-                placeholder="••••••••"
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <button
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:bg-accent-secondary py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 group shadow-lg shadow-accent/20 text-white"
-          >
-            {loading ? "Creating Account..." : "Create Account"}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform will-change-transform"  />
-          </button>
-        </form>
-
-        <div className="mt-8 pt-6 border-t border-white/5 text-center">
-          <p className="text-sm text-[var(--text-muted)]">
-            Already have an account?{" "}
-            <Link scroll={false} href="/login" className="text-accent font-bold hover:underline">Sign In</Link>
-          </p>
-        </div>
+          <span className="text-2xl font-black font-sora text-white tracking-tight">
+            Toon<span className="text-accent">Player</span>
+          </span>
+        </Link>
+        <p className="text-xs text-zinc-400 mt-2 font-medium">Free HD Anime & Movie Streaming</p>
       </div>
-    </main>
+
+      {/* Main Authentication Card */}
+      <div className="relative z-10 w-full max-w-[460px] flex flex-col items-center">
+        {hasClerk ? (
+          <div className="w-full flex flex-col items-center">
+            <SignUp 
+              routing="path" 
+              path="/register" 
+              signInUrl="/login"
+              fallbackRedirectUrl={redirectUrl}
+            />
+
+            {/* Guest Browsing Action */}
+            <div className="mt-6 text-center w-full">
+              <button
+                type="button"
+                onClick={handleContinueAsGuest}
+                className="w-full py-3 px-4 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06] text-zinc-300 hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <span>Continue Browsing as Guest</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full bg-[#121217] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4 text-amber-400">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+
+            <h2 className="text-lg font-bold text-white mb-2">Registration Unavailable</h2>
+            <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+              Account creation is currently unavailable in this environment. You can freely explore the full catalog, watch anime and movies, and use AI discovery in Guest Mode.
+            </p>
+
+            <button
+              onClick={handleContinueAsGuest}
+              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-accent to-accent-secondary hover:opacity-90 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_20px_var(--accent-glow)] transition-all cursor-pointer active:scale-95"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Continue in Guest Mode</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh flex items-center justify-center bg-[#09090b] text-zinc-500 text-xs">Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

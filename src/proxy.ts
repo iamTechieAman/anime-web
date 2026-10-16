@@ -31,7 +31,7 @@ const isProtectedRoute = createRouteMatcher([
     '/api/user/delete(.*)',
 ]);
 
-export default clerkMiddleware(async (auth, request: any) => {
+const clerkHandler = clerkMiddleware(async (auth, request: any) => {
     const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
     // Allow requests with empty user agents from internal Next.js prefetching
@@ -91,6 +91,45 @@ export default clerkMiddleware(async (auth, request: any) => {
 
     return response;
 });
+
+export default async function middleware(request: any, event: any) {
+    try {
+        return await clerkHandler(request, event);
+    } catch (err: any) {
+        console.warn("[Auth Middleware] Clerk middleware unavailable, operating in guest mode:", err?.message);
+        
+        const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+        const isAllowedBot = ALLOWED_BOTS.some(bot => userAgent.includes(bot));
+        if (!isAllowedBot && userAgent && BLOCKED_UAS.some(ua => userAgent.includes(ua))) {
+            return new NextResponse(
+                JSON.stringify({ error: 'Access denied.', message: 'Automated scraping is not permitted.' }),
+                { status: 403, headers: { 'content-type': 'application/json' } }
+            );
+        }
+
+        if (isProtectedRoute(request)) {
+            if (request.nextUrl.pathname.startsWith('/api/')) {
+                return new NextResponse(
+                    JSON.stringify({ error: 'Unauthorized', message: 'Authentication required' }),
+                    { status: 401, headers: { 'content-type': 'application/json' } }
+                );
+            }
+            return NextResponse.redirect(new URL('/login?error=auth_unavailable', request.url));
+        }
+
+        const response = NextResponse.next();
+        response.headers.set('X-Content-Type-Options', 'nosniff');
+        response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+        response.headers.set('X-XSS-Protection', '1; mode=block');
+        response.headers.set('X-DNS-Prefetch-Control', 'on');
+        response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        response.headers.set('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
+        if (process.env.NODE_ENV === 'production') {
+            response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+        }
+        return response;
+    }
+}
 
 export const config = {
   matcher: [

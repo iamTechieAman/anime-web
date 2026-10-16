@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useWatch } from "@/context/WatchContext";
-import { Play, Clock, X } from "lucide-react";
+import { Play, Clock, X, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { detectMediaType } from "@/utils/mediaType";
@@ -74,11 +74,21 @@ export default function ContinueWatchingRow() {
     };
 
     return (
-        <section className="mb-8 w-full overflow-hidden">
-            <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-5 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
-                <Clock className="w-4 h-4 text-accent" />
-                <h2 className="text-base md:text-lg font-black font-sora tracking-tight text-white">Continue Watching</h2>
+        <section className="mb-10 w-full overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-6 bg-accent rounded-full shadow-[0_0_10px_var(--accent-glow)]" />
+                    <Clock className="w-4 h-4 text-accent" />
+                    <h2 className="text-base md:text-lg font-black font-sora tracking-tight text-white">Continue Watching</h2>
+                </div>
+                <Link
+                    href="/history"
+                    scroll={false}
+                    className="group/link flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors py-1 px-2.5 rounded-lg hover:bg-white/5"
+                >
+                    <span>View All History</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover/link:text-accent group-hover/link:translate-x-0.5 transition-all" />
+                </Link>
             </div>
             
             <div className="w-full">
