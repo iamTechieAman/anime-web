@@ -3,7 +3,9 @@ import path from "path";
 import fs from "fs/promises";
 import { fetchWithTimeout } from "@/utils/fetchWithTimeout";
 import { animeCache, TTL, cacheKey } from "@/lib/anime-cache";
+import { TwoEmbedProvider } from "@/lib/providers/twoembed";
 
+const twoEmbed = new TwoEmbedProvider();
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TVMAZE_BASE = "https://api.tvmaze.com";
@@ -116,8 +118,35 @@ export async function GET(request: Request) {
         try {
             resolved = await resolveContentType(id, hintType);
         } catch (tmdbErr) {
-            console.warn(`[Details API] Online TMDB fetch failed for ${id}, checking offline static data:`, (tmdbErr as any)?.message);
-            resolved = await getOfflineFallbackDetails(id, hintType);
+            console.warn(`[Details API] Online TMDB fetch failed for ${id}, checking optional 2Embed provider:`, (tmdbErr as any)?.message);
+            // 1. Try verified 2Embed metadata provider
+            try {
+                const twoEmbedData = hintType === "tv"
+                    ? await twoEmbed.getTvDetails({ tmdbId: id })
+                    : await twoEmbed.getMovieDetails({ tmdbId: id });
+
+                if (twoEmbedData) {
+                    resolved = {
+                        type: twoEmbedData.media_type,
+                        detailsData: {
+                            ...twoEmbedData,
+                            number_of_seasons: (twoEmbedData as any).number_of_seasons,
+                            number_of_episodes: (twoEmbedData as any).number_of_episodes,
+                            seasons: (twoEmbedData as any).seasons,
+                        }
+                    };
+                    isFallback = true;
+                }
+            } catch (twoEmbedErr) {
+                console.warn(`[Details API] 2Embed metadata fetch failed for ${id}:`, (twoEmbedErr as any)?.message);
+            }
+
+            // 2. If 2Embed unavailable or empty, fall back to offline static catalog
+            if (!resolved) {
+                console.warn(`[Details API] Checking offline static catalog for ${id}`);
+                resolved = await getOfflineFallbackDetails(id, hintType);
+            }
+
             if (!resolved) throw tmdbErr;
             isFallback = true;
         }
@@ -212,13 +241,34 @@ export async function GET(request: Request) {
             }
         }
 
+        let finalTrailer = trailer ? { key: trailer.key, name: trailer.name, site: trailer.site } : null;
+        if (!finalTrailer && typeof details.trailer === 'string') {
+            const ytMatch = details.trailer.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (ytMatch) {
+                finalTrailer = { key: ytMatch[1], name: "Official Trailer", site: "YouTube" };
+            }
+        }
+
+        const normalizedCast = credits.cast?.length
+            ? credits.cast.slice(0, 30)
+            : (Array.isArray(details.cast) ? details.cast.slice(0, 30).map((c: any) => typeof c === 'string' ? { name: c, character: '' } : c) : []);
+
+        const normalizedCrew = credits.crew?.length
+            ? credits.crew.slice(0, 10)
+            : (Array.isArray(details.crew) ? details.crew.slice(0, 10).map((c: any) => typeof c === 'string' ? { name: c, job: 'Crew' } : c) : []);
+
+        const normalizedSimilar = (similar.results?.length
+            ? similar.results
+            : (Array.isArray(details.similar) ? details.similar : [])
+        ).slice(0, 12);
+
         const finalPayload = {
             ...details,
             resolvedType: type,
-            cast: credits.cast?.slice(0, 30) || [],
-            crew: credits.crew?.slice(0, 10) || [],
-            trailer: trailer ? { key: trailer.key, name: trailer.name, site: trailer.site } : null,
-            similar: similar.results?.slice(0, 12) || [],
+            cast: normalizedCast,
+            crew: normalizedCrew,
+            trailer: finalTrailer,
+            similar: normalizedSimilar,
             recommendations: smartRecommendations.slice(0, 12),
             keywords,
             watch_providers: watchProviders,

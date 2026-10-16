@@ -11,6 +11,7 @@ import { JikanProvider } from './jikan';
 import { AnimePaheProvider } from './animepahe';
 import { GogoanimeProvider } from './gogoanime';
 import { KartoonsProvider } from './kartoons';
+import { TwoEmbedProvider } from './twoembed';
 import type { AnimeProvider, ProviderName } from './types';
 
 export type { ProviderName } from './types';
@@ -29,6 +30,7 @@ const providers = new Map<ProviderName, AnimeProvider>([
     ['animepahe', new AnimePaheProvider()],
     ['gogoanime', new GogoanimeProvider()],
     ['kartoons', new KartoonsProvider()],
+    ['twoembed', new TwoEmbedProvider()],
 ]);
 
 export function getProvider(name: ProviderName): AnimeProvider {
@@ -43,5 +45,6 @@ export function getAllProviders(): AnimeProvider[] {
     return Array.from(providers.values());
 }
 
-export { AllAnimeProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, CinEvoProvider, AniwaveProvider, AniwatchTVProvider, JikanProvider, AnimePaheProvider, GogoanimeProvider, KartoonsProvider };
+export { AllAnimeProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, CinEvoProvider, AniwaveProvider, AniwatchTVProvider, JikanProvider, AnimePaheProvider, GogoanimeProvider, KartoonsProvider, TwoEmbedProvider };
 export * from './types';
+

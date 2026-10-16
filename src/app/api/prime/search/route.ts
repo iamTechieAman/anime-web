@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { fetchWithTimeout } from "@/utils/fetchWithTimeout";
+import { TwoEmbedProvider } from "@/lib/providers/twoembed";
 
+const twoEmbed = new TwoEmbedProvider();
 const TMDB_KEY = "a46c50a0ccb1bafe2b15665df7fad7e1";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
@@ -69,7 +71,45 @@ export async function GET(request: Request) {
     } catch (error: any) {
         console.error("Search API error:", error?.message || error);
 
-        // Fallback search over local pre-rendered datasets
+        // 1. Optional 2Embed search fallback
+        try {
+            const { searchParams } = new URL(request.url);
+            const query = (searchParams.get("q") || searchParams.get("query") || "").trim();
+            if (query) {
+                const [twoEmbedMovies, twoEmbedTv] = await Promise.all([
+                    twoEmbed.searchMovies(query).catch(() => []),
+                    twoEmbed.searchTv(query).catch(() => []),
+                ]);
+
+                const combined = [...twoEmbedMovies, ...twoEmbedTv];
+                if (combined.length > 0) {
+                    return NextResponse.json({
+                        results: combined.slice(0, 20).map(item => ({
+                            id: item.tmdb_id || item.imdb_id || item.id,
+                            tmdb_id: item.tmdb_id,
+                            imdb_id: item.imdb_id,
+                            title: item.title,
+                            name: item.name,
+                            overview: item.overview,
+                            poster_path: item.poster_path,
+                            backdrop_path: item.backdrop_path,
+                            media_type: item.media_type,
+                            provider: 'twoembed',
+                        })),
+                        page: 1,
+                        total_pages: 1,
+                        total_results: combined.length,
+                        fromProvider: 'twoembed',
+                    }, {
+                        headers: { 'Cache-Control': 's-maxage=1800, stale-while-revalidate=86400' }
+                    });
+                }
+            }
+        } catch (twoEmbedErr: any) {
+            console.warn("[Search API] 2Embed search fallback failed:", twoEmbedErr?.message);
+        }
+
+        // 2. Fallback search over local pre-rendered datasets
         try {
             const fs = await import("fs/promises");
             const path = await import("path");

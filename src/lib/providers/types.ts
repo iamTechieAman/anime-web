@@ -167,7 +167,7 @@ export type ProviderName =
     | 'allanime' | 'hianime' | 'anikai' | 'aniwatch'
     | 'consumet' | 'vidsrc' | 'cinevo' | 'aniwave'
     | 'aniwatchtv' | 'jikan' | 'animepahe' | 'gogoanime'
-    | 'kartoons';
+    | 'kartoons' | 'twoembed';
 
 export interface AnimeProvider {
     name: string;
@@ -279,3 +279,67 @@ export interface SourceResolution {
     tier: 1 | 2 | 3 | 4;
     errorSummary?: string;
 }
+
+/**
+ * 2Embed Normalized Content Contracts
+ */
+export interface TwoEmbedNormalizedMedia {
+    id: string; // internal / canonical string
+    tmdb_id?: number | null;
+    imdb_id?: string | null;
+    provider: 'twoembed';
+    provider_id: string;
+    media_type: 'movie' | 'tv';
+    title: string;
+    name?: string;
+    overview: string;
+    release_date?: string;
+    first_air_date?: string;
+    poster_path?: string | null;
+    backdrop_path?: string | null;
+    poster?: string;
+    backdrop?: string;
+    vote_average?: number;
+    year?: number | string;
+    genres?: string[];
+    cast?: string[];
+    crew?: string[];
+    trailer?: string | null;
+}
+
+export interface TwoEmbedNormalizedMovie extends TwoEmbedNormalizedMedia {
+    media_type: 'movie';
+    runtime?: number;
+}
+
+export interface TwoEmbedNormalizedTv extends TwoEmbedNormalizedMedia {
+    media_type: 'tv';
+    last_air_date?: string;
+    number_of_seasons?: number;
+    number_of_episodes?: number;
+    seasons?: Array<{
+        season_number: number;
+        episode_count: number;
+        name?: string;
+        poster_path?: string | null;
+    }>;
+}
+
+export interface TwoEmbedNormalizedEpisode {
+    id: number;
+    episode_number: number;
+    season_number: number;
+    name: string;
+    overview: string;
+    air_date?: string;
+    still_path?: string | null;
+    still?: string | null;
+}
+
+export interface TwoEmbedNormalizedSeason {
+    id: number | string;
+    season_number: number;
+    name: string;
+    episodes: TwoEmbedNormalizedEpisode[];
+}
+

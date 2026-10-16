@@ -66,6 +66,7 @@ export const animeCache = new AnimeCache();
 export const TTL = {
     ANILIST_META: 60 * 60 * 1000,   // 60 min
     TMDB_DETAILS: 30 * 60 * 1000,   // 30 min (catalog details)
+    TWOEMBED_META: 30 * 60 * 1000,  // 30 min (2Embed metadata)
     EPISODE_LIST: 30 * 60 * 1000,   // 30 min (episode list)
     EMBED_URL:    10 * 60 * 1000,   // 10 min (scraped stream/embed links)
     SOURCES:       5 * 60 * 1000,   //  5 min (CDN video sources)
@@ -79,6 +80,7 @@ export const cacheKey = {
     anilistMeta: (id: string) => `al:meta:${id}`,
     tmdbDetails: (id: string, type: string) => `tmdb:details:${type}:${id}`,
     tmdbSeason: (id: string, season: string) => `tmdb:season:${id}:${season}`,
+    twoembed: (endpoint: string, id: string, extra?: string) => `twoembed:${endpoint}:${id}${extra ? `:${extra}` : ''}`,
     episodes: (animeId: string, provider: string) => `ep:${provider}:${animeId}`,
     sources: (animeId: string, ep: string, mode: string) => `src:${animeId}:${ep}:${mode}`,
     scrapedEmbed: (provider: string, id: string, s?: string, e?: string) => `embed:${provider}:${id}:s${s || 1}:e${e || 1}`,

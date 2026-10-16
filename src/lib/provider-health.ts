@@ -72,6 +72,7 @@ const DEFAULT_PROVIDERS: { name: string; category: 'metadata' | 'stream'; endpoi
     { name: 'TMDB API', category: 'metadata', endpoint: 'https://api.themoviedb.org/3' },
     { name: 'AniList API', category: 'metadata', endpoint: 'https://graphql.anilist.co' },
     { name: 'Jikan API', category: 'metadata', endpoint: 'https://api.jikan.moe/v4/status' },
+    { name: '2Embed API', category: 'metadata', endpoint: 'https://api.2embed.cc' },
     { name: 'VidSrc ME', category: 'stream', endpoint: 'https://vidsrc.me' },
     { name: 'VidSrc TO', category: 'stream', endpoint: 'https://vidsrc.to' },
     { name: 'SuperEmbed', category: 'stream', endpoint: 'https://multiembed.com.co' },

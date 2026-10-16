@@ -148,6 +148,17 @@ export const PROVIDER_CAPABILITIES: Record<ProviderName, ProviderCapabilities> =
         supportsDub: true,
         supportsRaw: false,
     },
+    twoembed: {
+        supportsSearch: true,
+        supportsDetails: true,
+        supportsEpisodes: true,
+        supportsSources: false,
+        supportsMovies: true,
+        supportsSeries: true,
+        supportsSub: false,
+        supportsDub: false,
+        supportsRaw: false,
+    },
 };
 
 // Priority list for fallback
