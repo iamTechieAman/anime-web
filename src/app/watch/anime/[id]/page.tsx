@@ -39,7 +39,7 @@ async function fetchAnimeShow(id: string) {
     // Direct AniList fallback for numeric IDs
     if (/^\d+$/.test(id)) {
         try {
-            const query = `query ($id: Int) { Media (id: $id, type: ANIME) { title { english userPreferred romaji } description coverImage { large } } }`;
+            const query = `query ($id: Int) { Media (id: $id) { title { english userPreferred romaji } description coverImage { large } } }`;
             const res = await fetch('https://graphql.anilist.co', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -163,8 +163,9 @@ export default async function WatchPage({ params, searchParams }: PageProps) {
     const { ep, episode } = await searchParams;
     const episodeNum = ep || episode ? parseInt(ep || episode || '1', 10) : 1;
 
+    const isNumeric = /^\d+$/.test(id);
     const show = await fetchAnimeShow(id);
-    const showTitle = show?.name || decodeURIComponent(id).replace(/[-_]/g, ' ');
+    const showTitle = (show?.name && !/^\d+$/.test(show.name)) ? show.name : (isNumeric ? 'Anime Series' : decodeURIComponent(id).replace(/[-_]/g, ' '));
     const showDesc = show?.description || `Watch ${showTitle} online in HD for free on ToonPlayer.`;
     const image = show?.thumbnail || `${SITE_URL}/icon.png`;
 

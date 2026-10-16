@@ -5,6 +5,10 @@ import { animeCache, cacheKey, TTL } from "@/lib/anime-cache";
 
 export const revalidate = 1800;
 
+import { fetchWithTimeout } from "@/lib/utils/fetch";
+
+const TMDB_KEY = process.env.TMDB_API_KEY || '522103f166160100778c1995804369a4';
+
 // Helper to query AniList GraphQL for metadata and search title
 async function fetchAniListMetadata(anilistId: number) {
     const cKey = cacheKey.anilistMeta(anilistId.toString());
@@ -13,7 +17,7 @@ async function fetchAniListMetadata(anilistId: number) {
 
     const query = `
     query ($id: Int) {
-      Media (id: $id, type: ANIME) {
+      Media (id: $id) {
         id
         idMal
         title {
@@ -26,6 +30,7 @@ async function fetchAniListMetadata(anilistId: number) {
         episodes
         status
         format
+        type
         coverImage {
           extraLarge
           large
@@ -182,6 +187,106 @@ export async function GET(request: Request) {
                     console.log(`[Episodes] Successfully resolved ${episodeCount} episodes via AniList for "${realName}" (MAL: ${aniListMeta.idMal})`);
                     return NextResponse.json({ show });
                 }
+
+                // 3. Fallback to TMDB for numeric IDs (Cartoons, TV Shows, Anime cataloged via TMDB)
+                try {
+                    const tmdbTvRes = await fetchWithTimeout(
+                        fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+                        3000
+                    );
+                    if (tmdbTvRes.ok) {
+                        const tmdbData = await tmdbTvRes.json();
+                        if (tmdbData && tmdbData.name) {
+                            const realName = tmdbData.name;
+                            const episodeCount = tmdbData.number_of_episodes || (tmdbData.seasons?.[0]?.episode_count) || 12;
+                            const defaultImg = tmdbData.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` : "";
+                            const bannerImg = tmdbData.backdrop_path ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}` : defaultImg;
+                            const episodesList = Array.from({ length: episodeCount }, (_, i) => ({
+                                id: `${id}?ep=${i + 1}`,
+                                number: i + 1,
+                                title: `Episode ${i + 1}`,
+                                image: defaultImg,
+                                description: `Episode ${i + 1} of ${realName}`,
+                                isFiller: false,
+                                hasDub: true
+                            }));
+                            const show = {
+                                id: id,
+                                showId: id,
+                                _id: id,
+                                name: realName,
+                                title: realName,
+                                englishName: realName,
+                                romajiName: null,
+                                nativeName: tmdbData.original_name || null,
+                                thumbnail: defaultImg,
+                                bannerImage: bannerImg,
+                                anilistId: null,
+                                malId: null,
+                                tmdbId: tmdbData.id,
+                                description: tmdbData.overview || "",
+                                totalEpisodes: episodeCount,
+                                format: "TV",
+                                status: tmdbData.status || "FINISHED",
+                                availableEpisodesDetail: {
+                                    sub: episodesList,
+                                    dub: episodesList
+                                },
+                                provider: 'tmdb',
+                            };
+                            return NextResponse.json({ show });
+                        }
+                    }
+                } catch (_) {}
+
+                try {
+                    const tmdbMovieRes = await fetchWithTimeout(
+                        fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_KEY}&language=en-US`, { next: { revalidate: 3600 } }),
+                        3000
+                    );
+                    if (tmdbMovieRes.ok) {
+                        const tmdbData = await tmdbMovieRes.json();
+                        if (tmdbData && tmdbData.title) {
+                            const realName = tmdbData.title;
+                            const defaultImg = tmdbData.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` : "";
+                            const bannerImg = tmdbData.backdrop_path ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}` : defaultImg;
+                            const episodesList = [{
+                                id: `${id}?ep=1`,
+                                number: 1,
+                                title: realName,
+                                image: defaultImg,
+                                description: tmdbData.overview || `Watch ${realName} online in HD`,
+                                isFiller: false,
+                                hasDub: true
+                            }];
+                            const show = {
+                                id: id,
+                                showId: id,
+                                _id: id,
+                                name: realName,
+                                title: realName,
+                                englishName: realName,
+                                romajiName: null,
+                                nativeName: tmdbData.original_title || null,
+                                thumbnail: defaultImg,
+                                bannerImage: bannerImg,
+                                anilistId: null,
+                                malId: null,
+                                tmdbId: tmdbData.id,
+                                description: tmdbData.overview || "",
+                                totalEpisodes: 1,
+                                format: "MOVIE",
+                                status: tmdbData.status || "FINISHED",
+                                availableEpisodesDetail: {
+                                    sub: episodesList,
+                                    dub: episodesList
+                                },
+                                provider: 'tmdb',
+                            };
+                            return NextResponse.json({ show });
+                        }
+                    }
+                } catch (_) {}
 
                 return NextResponse.json({ error: "Anime not found via providers" }, { status: 404 });
             }

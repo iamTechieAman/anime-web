@@ -369,6 +369,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const previousValidSourceRef = useRef<any>(null);
 
     const [show, setShow] = useState<ShowData | null>(null);
+    const [showReloadKey, setShowReloadKey] = useState(0);
 
     const initialEp = searchParams?.get('ep') || "1";
     const initialModeParam = searchParams?.get('mode') as "sub" | "dub" | null;
@@ -1186,14 +1187,33 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     manualServerRef.current = historyItem.serverId;
                 }
 
-                // Parallelly fetch TMDB ID if name is available
-                if (fetchedShow.name) {
+                // Parallelly resolve TMDB ID for shared server support
+                if (fetchedShow.tmdbId) {
+                    setTmdbId(String(fetchedShow.tmdbId));
+                } else if (fetchedShow.name) {
+                    const clean = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
                     let sanitizedName = fetchedShow.name.split('\n')[0].trim().substring(0, 50).replace(/[^a-zA-Z0-9 ':!,-]/g, '').trim();
+                    const isMovie = fetchedShow.type?.toLowerCase() === 'movie' || fetchedShow.totalEpisodes === 1 || fetchedShow.format === 'MOVIE';
+                    const targetType = isMovie ? 'movie' : 'tv';
+
                     axios.get(`/api/prime/search?q=${encodeURIComponent(sanitizedName)}`, { signal: controller.signal })
                         .then(tmdbRes => {
                             if (controller.signal.aborted) return;
-                            const results = tmdbRes.data.results;
-                            setTmdbId(results && results.length > 0 ? results[0].id.toString() : "0");
+                            const results = tmdbRes.data.results || [];
+                            if (results.length > 0) {
+                                const cleanSearch = clean(sanitizedName);
+                                const exactMatch = results.find((r: any) =>
+                                    r.media_type === targetType && (
+                                        clean(r.name || r.title || '') === cleanSearch ||
+                                        clean(r.original_name || r.original_title || '') === cleanSearch
+                                    )
+                                );
+                                const typeMatch = exactMatch || results.find((r: any) => r.media_type === targetType);
+                                const fallbackMatch = typeMatch || results[0];
+                                setTmdbId(fallbackMatch ? fallbackMatch.id.toString() : "0");
+                            } else {
+                                setTmdbId("0");
+                            }
                         })
                         .catch((err) => {
                             if (!axios.isCancel(err)) setTmdbId("0");
@@ -1213,7 +1233,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
         fetchData();
         return () => controller.abort();
-    }, [id, provider]);
+    }, [id, provider, showReloadKey]);
 
     // Fetch Servers when Episode/Mode Changes
     useEffect(() => {
@@ -1552,77 +1572,57 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     }
 
     if (showError) {
-        // Instead of dead-end error, show a fallback embed player
-        const animeTitle = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        const fallbackEmbedUrl = `https://vidsrc.me/embed/anime?anilist=${id}&episode=1`;
-        const fallbackEmbedUrl2 = `https://vidsrc.to/embed/anime/${id}/1`;
-        
+        const isNumeric = /^\d+$/.test(id);
+        const displayTitle = (!isNumeric && id) ? id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : "Anime Series";
+
         return (
-            <div className="bg-bg-main text-[var(--text-main)]">
+            <div className="min-h-screen bg-bg-main text-[var(--text-main)] flex flex-col">
                 {/* Navbar */}
-                <nav className={`fixed top-0 left-0 right-0 z-50 h-14 md:h-16 bg-black/50 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)] transition-transform ${isHeaderScrolled ? '-translate-y-full' : 'translate-y-0'}`}>
+                <nav className={`fixed top-0 left-0 right-0 z-50 h-14 md:h-16 bg-black/60 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-6 gap-3 pt-[env(safe-area-inset-top)] transition-transform ${isHeaderScrolled ? '-translate-y-full' : 'translate-y-0'}`}>
                     <Link href="/" scroll={false} className="shrink-0 flex items-center justify-center w-10 h-10 bg-white/[0.05] hover:bg-white/10 rounded-full border border-white/10 text-zinc-400 hover:text-white transition-all group">
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform will-change-transform"  />
+                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform will-change-transform" />
                     </Link>
                     <div className="flex-1 min-w-0">
                         <h2 className="font-black text-sm md:text-base lg:text-lg leading-tight text-white truncate tracking-tight">
-                            {animeTitle}
+                            {displayTitle}
                         </h2>
-                        <p className="text-[10px] md:text-xs text-zinc-500 font-medium tracking-widest uppercase">Anime · Episode {currentEp}</p>
+                        <p className="text-[10px] md:text-xs text-zinc-500 font-medium tracking-widest uppercase">Stream Details</p>
                     </div>
                 </nav>
 
-                <div className="pt-14 md:pt-16 px-0 sm:px-4 md:px-6 lg:px-8 max-w-[1920px] mx-auto w-full">
-                    {/* Fallback Player */}
-                    <div className="relative w-full aspect-video bg-black overflow-hidden md:rounded-lg border border-border-color shadow-2xl">
-                        <iframe
-                            src={getProxiedEmbedUrl(fallbackEmbedUrl)}
-                            className="absolute inset-0 w-full h-full border-0 bg-black rounded-none md:rounded-lg"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                            allowFullScreen={true}
-                            referrerPolicy="no-referrer"
-                        />
+                <div className="flex-1 flex flex-col items-center justify-center px-4 py-24 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-6 shadow-xl">
+                        <AlertCircle className="w-8 h-8" />
                     </div>
-
-                    {/* Info + Alternative Servers */}
-                    <div className="px-4 py-6">
-                        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
-                            <p className="text-yellow-400 text-sm font-medium">⚠️ Native servers unavailable. Playing via fallback embed servers.</p>
-                        </div>
-                        
-                        <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">Try Other Servers</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {(() => {
-                                const isMovieShow = show?.type?.toLowerCase() === 'movie' || show?.totalEpisodes === 1 || isMovieContent(show);
-                                return [
-                                    { name: "VidSrc Me", url: fallbackEmbedUrl },
-                                    { name: "VidSrc.to", url: fallbackEmbedUrl2 },
-                                    { name: "Peachify", url: isMovieShow ? `https://peachify.top/?type=movie&id=${id}` : `https://peachify.top/?type=tv&id=${id}&s=1&e=1` },
-                                    { name: "VidLink", url: isMovieShow ? `https://vidlink.pro/movie/${id}?autoplay=true` : `https://vidlink.pro/tv/${id}/1/1?autoplay=true` },
-                                ].map(server => (
-                                    <a key={server.name} href={server.url} target="_blank" rel="noopener" className="px-4 py-2 bg-bg-card border border-border-color rounded-lg text-xs font-medium hover:bg-border-color transition-colors">
-                                        {server.name}
-                                    </a>
-                                ));
-                            })()}
-                        </div>
-
-                        <div className="mt-8 flex flex-col gap-3">
-                            <Link 
-                                href="/"
-                                scroll={false}
-                                className="w-full max-w-xs py-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-                            >
-                                <ChevronLeft className="w-4 h-4" /> Return Home
-                            </Link>
-                            <Link 
-                                href="/search"
-                                scroll={false}
-                                className="w-full max-w-xs py-3 border border-border-color hover:bg-bg-card text-[var(--text-main)] rounded-xl font-bold transition-all flex items-center justify-center gap-2"
-                            >
-                                <Search className="w-4 h-4" /> Try Searching
-                            </Link>
-                        </div>
+                    <h1 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight">Content Temporarily Unavailable</h1>
+                    <p className="text-sm text-zinc-400 max-w-md mb-8 leading-relaxed">
+                        {showError || "We could not resolve streaming sources for this title. It may be currently offline or cataloged under an alternative provider."}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-3 w-full max-w-md">
+                        <button
+                            onClick={() => {
+                                setShowError(null);
+                                setLoadingShow(true);
+                                setShowReloadKey(k => k + 1);
+                            }}
+                            className="px-6 py-3 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg cursor-pointer"
+                        >
+                            <RefreshCw className="w-4 h-4" /> Retry Connection
+                        </button>
+                        <Link
+                            href="/search"
+                            scroll={false}
+                            className="px-6 py-3 bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer"
+                        >
+                            <Search className="w-4 h-4" /> Search Catalog
+                        </Link>
+                        <Link
+                            href="/"
+                            scroll={false}
+                            className="px-6 py-3 bg-transparent hover:bg-white/5 border border-white/5 text-zinc-400 hover:text-white rounded-xl font-bold transition-all cursor-pointer"
+                        >
+                            Return Home
+                        </Link>
                     </div>
                 </div>
             </div>

@@ -114,7 +114,7 @@ export function useContentResolver(rawId: string, providedType?: string, provide
                         ? cleanBaseTitle(show.name)
                         : (show.englishName && !/^\d+$/.test(show.englishName)
                             ? cleanBaseTitle(show.englishName)
-                            : (show.title ? cleanBaseTitle(show.title) : 'Anime'));
+                            : (show.title && !/^\d+$/.test(show.title) ? cleanBaseTitle(show.title) : 'Anime Series'));
 
                     unified = {
                         id,

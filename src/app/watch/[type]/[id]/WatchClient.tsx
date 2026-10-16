@@ -169,28 +169,36 @@ const ANIME_SERVERS = [
         name: "Toon4K",
         badge: "4K",
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId ? `https://vidlink.pro/tv/${tmdbId}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true` : `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+            tmdbId 
+                ? `https://vidlink.pro/tv/${tmdbId}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true` 
+                : `https://player.autoembed.cc/embed/anime/${id}/${ep}`
     },
     {
-        id: "vidsrc_anime",
-        name: "VidSrc",
-        badge: "Sub",
+        id: "vidcore_anime",
+        name: "Toon Player Core",
+        badge: "Core HD",
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId ? `https://vidsrc.to/embed/tv/${tmdbId}/1/${ep}` : `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+            tmdbId 
+                ? `https://vidcore.net/tv/${tmdbId}/1/${ep}` 
+                : `https://vidsrc.cc/v2/embed/anime/${id}/${ep}`
+    },
+    {
+        id: "peachify_anime",
+        name: "Toon Player VIP",
+        badge: "Multi-Audio",
+        getUrl: (id: string, ep: number, tmdbId: string | null) =>
+            tmdbId 
+                ? `https://peachify.top/?type=tv&id=${tmdbId}&s=1&e=${ep}&autoplay=1` 
+                : `https://vidsrc.to/embed/anime/${id}/${ep}`
     },
     {
         id: "vidsrc_pro_anime",
         name: "VidSrc Pro",
         badge: "HD",
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId ? `https://vidsrc.pro/embed/tv/${tmdbId}/1/${ep}?autoplay=1` : `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
-    },
-    {
-        id: "vidsrc_me_anime",
-        name: "VidSrc Alt",
-        badge: "Dub",
-        getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            `https://vidsrc.me/embed/anime?anilist=${id}&episode=${ep}`
+            tmdbId 
+                ? `https://vidsrc.pro/embed/tv/${tmdbId}/1/${ep}?autoplay=1` 
+                : `https://vidsrc.me/embed/anime?mal=${id}&episode=${ep}`
     },
     {
         id: "kartoons_toon",
