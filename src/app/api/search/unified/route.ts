@@ -140,6 +140,42 @@ export async function GET(request: Request) {
             } catch (twoEmbedErr: any) {
                 console.warn("[UnifiedSearch] 2Embed fallback search bypassed:", twoEmbedErr?.message);
             }
+
+            // Fallback to local pre-rendered datasets if external network is unavailable
+            try {
+                const fs = await import("fs/promises");
+                const path = await import("path");
+                const fallbackFiles = ["tv_top_rated.json", "tv_popular.json", "popular_movies.json", "top_rated_movies.json", "trending_movies.json", "trending_all.json"];
+                const qLower = query.toLowerCase();
+
+                for (const file of fallbackFiles) {
+                    try {
+                        const filePath = path.join(process.cwd(), "public", "data", file);
+                        const fileContent = await fs.readFile(filePath, "utf-8");
+                        const parsed = JSON.parse(fileContent);
+                        const list = parsed.results || [];
+                        for (const item of list) {
+                            const name = item.title || item.name || item.original_name || item.original_title || '';
+                            if (name.toLowerCase().includes(qLower)) {
+                                const mediaType = (item.media_type === 'movie' || (!item.media_type && item.title)) ? 'movie' : 'tv';
+                                rawCatalogItems.push({
+                                    id: String(item.id),
+                                    canonicalId: `${mediaType}:tmdb:${item.id}`,
+                                    title: cleanBaseTitle(name),
+                                    image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : (item.poster || ""),
+                                    type: mediaType,
+                                    year: (item.release_date || item.first_air_date || '').slice(0, 4) || null,
+                                    format: mediaType.toUpperCase(),
+                                    href: `/watch/${mediaType}/${item.id}`,
+                                    rating: item.vote_average ? item.vote_average.toFixed(1) : null,
+                                    provider: 'tmdb',
+                                    tmdb_id: item.id,
+                                });
+                            }
+                        }
+                    } catch (_) {}
+                }
+            } catch (_) {}
         }
 
         // 4. Deduplicate across variants and providers
