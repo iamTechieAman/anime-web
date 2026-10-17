@@ -26,7 +26,8 @@ import { useUserStore } from "@/store/userStore";
 import { 
     type ContentType, 
     deduplicateServersByCanonicalId, 
-    getCanonicalProviderId 
+    getCanonicalProviderId,
+    parseServerPlaybackParams
 } from "@/lib/providers/registry";
 
 const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
@@ -40,10 +41,16 @@ const SERVERS = [
         name: 'Toon Player Link',
         badge: 'VidLink',
         qualityScore: 105,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
-                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            if (type === 'anime') {
+                const targetId = tmdbId || id;
+                return `https://vidlink.pro/tv/${targetId}/1/${episode}?primaryColor=7C3AED&title=false&autoplay=true`;
+            }
+            return type === 'tv'
+                ? `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=7C3AED&title=false&autoplay=true`
+                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`;
+        },
     },
     {
         id: 'vidnest',
@@ -51,10 +58,12 @@ const SERVERS = [
         name: 'Toon Player Nest',
         badge: 'Ultra',
         qualityScore: 104,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidnest.fun/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vidnest.fun/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return (type === 'tv' || type === 'anime')
+                ? `https://vidnest.fun/tv/${id}/${season}/${episode}`
+                : `https://vidnest.fun/movie/${id}`;
+        },
     },
     {
         id: 'vidcore',
@@ -62,10 +71,17 @@ const SERVERS = [
         name: 'Toon Player Core',
         badge: 'Core HD',
         qualityScore: 103,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidcore.io/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vidcore.io/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            if (type === 'anime') {
+                return tmdbId 
+                    ? `https://vidcore.io/tv/${tmdbId}/1/${episode}` 
+                    : `https://vidsrc.cc/v2/embed/anime/${id}/${episode}`;
+            }
+            return type === 'tv'
+                ? `https://vidcore.io/tv/${id}/${season}/${episode}`
+                : `https://vidcore.io/movie/${id}`;
+        },
     },
     {
         id: 'embedmaster',
@@ -73,10 +89,12 @@ const SERVERS = [
         name: 'Toon Player Master',
         badge: 'Master',
         qualityScore: 102,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}`
-                : `https://embedmaster.link/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return (type === 'tv' || type === 'anime')
+                ? `https://embedmaster.link/tv/${id}/${season}/${episode}`
+                : `https://embedmaster.link/movie/${id}`;
+        },
     },
     {
         id: 'vidrock',
@@ -84,10 +102,12 @@ const SERVERS = [
         name: 'Toon Player Rock',
         badge: 'Stable',
         qualityScore: 99,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidrock.net/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vidrock.net/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return (type === 'tv' || type === 'anime')
+                ? `https://vidrock.net/tv/${id}/${season}/${episode}`
+                : `https://vidrock.net/movie/${id}`;
+        },
     },
     {
         id: 'vidfast',
@@ -95,10 +115,12 @@ const SERVERS = [
         name: 'Toon Player Fast',
         badge: 'Auto-Next',
         qualityScore: 101,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidfast.vc/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true`
-                : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return (type === 'tv' || type === 'anime')
+                ? `https://vidfast.vc/tv/${id}/${season}/${episode}?autoPlay=true&title=true&poster=true&nextButton=true`
+                : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`;
+        },
     },
     {
         id: 'smashystream',
@@ -106,10 +128,12 @@ const SERVERS = [
         name: 'Toon Player Smashy',
         badge: 'Multi-Host',
         qualityScore: 95,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://player.smashystream.com/show/${id}/${s || 1}/${e || 1}`
-                : `https://player.smashystream.com/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return (type === 'tv' || type === 'anime')
+                ? `https://player.smashystream.com/show/${id}/${season}/${episode}`
+                : `https://player.smashystream.com/movie/${id}`;
+        },
     },
     {
         id: 'vidsrc_embed_ru',
@@ -117,10 +141,17 @@ const SERVERS = [
         name: 'Toon Player VidSrc',
         badge: 'VidSrc',
         qualityScore: 94,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=1&ds_lang=en`
-                : `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            if (type === 'anime') {
+                return tmdbId 
+                    ? `https://vidsrc-embed.ru/embed/tv?tmdb=${tmdbId}&season=1&episode=${episode}&autoplay=1&ds_lang=en` 
+                    : `https://vidsrc.me/embed/anime?mal=${id}&episode=${episode}`;
+            }
+            return type === 'tv'
+                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1&ds_lang=en`
+                : `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`;
+        },
     },
     // Kartoons Direct: dedicated cartoon scraper server exclusively available when media type is cartoon
     {
@@ -131,8 +162,10 @@ const SERVERS = [
         requiresScrape: true,
         type: 'cartoon',
         qualityScore: 100,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            `/api/scrape/kartoons?showId=${id}&s=${s || 1}&e=${e || 1}&type=${type}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'cartoon');
+            return `/api/scrape/kartoons?showId=${id}&s=${season}&e=${episode}&type=${type}`;
+        },
     },
 ];
 
@@ -143,10 +176,13 @@ const ANIME_SERVERS = [
         name: "Toon4K",
         badge: "4K",
         qualityScore: 105,
-        getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId 
-                ? `https://vidlink.pro/tv/${tmdbId}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true` 
-                : `https://player.autoembed.cc/embed/anime/${id}/${ep}`
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { id, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'anime');
+            const targetTmdb = tmdbId || (/^\d+$/.test(id) ? id : null);
+            return targetTmdb 
+                ? `https://vidlink.pro/tv/${targetTmdb}/1/${episode}?primaryColor=3b82f6&title=false&autoplay=true` 
+                : `https://player.autoembed.cc/embed/anime/${id}/${episode}`;
+        }
     },
     {
         id: "vidcore",
@@ -154,10 +190,13 @@ const ANIME_SERVERS = [
         name: "Toon Player Core",
         badge: "Core HD",
         qualityScore: 103,
-        getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId 
-                ? `https://vidcore.io/tv/${tmdbId}/1/${ep}` 
-                : `https://vidsrc.cc/v2/embed/anime/${id}/${ep}`
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { id, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'anime');
+            const targetTmdb = tmdbId || (/^\d+$/.test(id) ? id : null);
+            return targetTmdb 
+                ? `https://vidcore.io/tv/${targetTmdb}/1/${episode}` 
+                : `https://vidsrc.cc/v2/embed/anime/${id}/${episode}`;
+        }
     },
     {
         id: "vidsrc_embed_ru",
@@ -165,10 +204,13 @@ const ANIME_SERVERS = [
         name: "VidSrc Pro",
         badge: "HD",
         qualityScore: 94,
-        getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId 
-                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${tmdbId}&season=1&episode=${ep}&autoplay=1&ds_lang=en` 
-                : `https://vidsrc.me/embed/anime?mal=${id}&episode=${ep}`
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { id, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'anime');
+            const targetTmdb = tmdbId || (/^\d+$/.test(id) ? id : null);
+            return targetTmdb 
+                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${targetTmdb}&season=1&episode=${episode}&autoplay=1&ds_lang=en` 
+                : `https://vidsrc.me/embed/anime?mal=${id}&episode=${episode}`;
+        }
     },
     {
         id: "kartoons",
@@ -178,8 +220,10 @@ const ANIME_SERVERS = [
         requiresScrape: true,
         type: 'cartoon',
         qualityScore: 100,
-        getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            `/api/scrape/kartoons?showId=${id}&e=${ep}&type=show`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { id, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'cartoon');
+            return `/api/scrape/kartoons?showId=${id}&e=${episode}&type=show`;
+        },
     },
 ];
 
@@ -831,9 +875,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         }
     }, [details, animeData, type, resolvedMediaType, selectedSeason, selectedEpisode]);
 
+    const isAnime = useMemo(() =>
+        type === 'anime' || (details && (details as any).resolvedType === 'anime'),
+        [type, details]
+    );
+
     const isAnimeServer = useMemo(() =>
-        type === 'anime' || (activeServer ? (activeServer.type === 'anime' || ANIME_SERVERS.some(s => s.id === activeServer.id)) : false),
-        [type, activeServer]
+        isAnime && (activeServer ? (activeServer.type === 'anime' || ANIME_SERVERS.some(s => s.id === activeServer.id)) : false),
+        [isAnime, activeServer]
     );
 
     // Cast & Auto-Next state
@@ -1437,23 +1486,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                                 badge: srv.badge,
                                 type: srv.type,
                                 qualityScore: srv.qualityScore,
-                                getUrl: (param1: string, param2: string, s?: number, e?: number) => {
-                                    if (srv.type === 'anime' || type === 'anime') {
-                                        return srv.urlTemplate
-                                            .replace('{id}', param1)
-                                            .replace('{e}', String(param2 || 1));
-                                    }
-                                    const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
-                                    if (isAnimeCall) {
-                                        return srv.urlTemplate
-                                            .replace('{id}', param1)
-                                            .replace('{s}', '1')
-                                            .replace('{e}', String(param2 || 1));
-                                    }
+                                getUrl: (param1: any, param2?: any, s?: any, e?: any) => {
+                                    const defaultType = type === 'anime' ? 'anime' : (resolvedMediaType === 'tv' || type === 'tv' ? 'tv' : 'movie');
+                                    const parsed = parseServerPlaybackParams(param1, param2, s, e, defaultType);
                                     return srv.urlTemplate
-                                        .replace('{id}', param2)
-                                        .replace('{s}', String(s || 1))
-                                        .replace('{e}', String(e || 1));
+                                        .replace('{id}', parsed.id)
+                                        .replace('{s}', String(parsed.season || 1))
+                                        .replace('{e}', String(parsed.episode || 1));
                                 }
                             };
                         });
@@ -1506,7 +1545,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         if (!activeServer) return;
         
         const contentKey = `${type}:${activeId}`;
-        const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
+        const listToUse = isAnime ? ANIME_SERVERS : currentMediaTypeServers;
 
         let stateToSet: PlayerPlaybackState = 'unavailable';
         let failureMsg = `All available streaming servers failed for this title.`;
@@ -1598,7 +1637,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             }
             return nextFailed;
         });
-    }, [activeServer, currentMediaTypeServers, isAnimeServer, type, id, activeId]);
+    }, [activeServer, currentMediaTypeServers, isAnime, type, id, activeId]);
 
     // Manual "Retry All Servers" handler: resets failed servers tracker and retries Server 1
     const handleResetAndRetryAllServers = useCallback(() => {
@@ -1608,14 +1647,14 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setCustomErrorMessage(null);
         setPlaybackState('resolving');
         setPlayerLoaded(false);
-        const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
+        const listToUse = isAnime ? ANIME_SERVERS : currentMediaTypeServers;
         const firstServer = (listToUse && listToUse.length > 0) ? listToUse[0] : SERVERS[0];
         setLoadingStatus(`Connecting to ${firstServer.name}...`);
         manualServerRef.current = firstServer.id;
         setActiveServer(firstServer);
         setReloadCount(c => c + 1);
         toast.success(`Reset server tracker — trying ${firstServer.name}...`, { icon: '🔄' });
-    }, [isAnimeServer, currentMediaTypeServers]);
+    }, [isAnime, currentMediaTypeServers]);
 
     // Manual Server Select
     const handleManualServerSelect = useCallback((server: any) => {
@@ -2029,8 +2068,9 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
         setPlayerLoaded(false);
 
         const serverToUse = activeServer || SERVERS[0];
-        const rawUrl = isAnimeServer 
-            ? (serverToUse as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
+        const rawUrl = isAnime 
+            ? (serverToUse as any)?.getUrl?.('anime', animeData?.aniListId || animeData?._id || id, selectedSeason, selectedEpisode, tmdbIdForAnime)
+              || (serverToUse as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
             : serverToUse?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
 
         if (!rawUrl) {
@@ -2489,8 +2529,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
     const renderTheaterEpisodes = () => {
         if (type === 'movie' || resolvedMediaType === 'movie') return null;
-        if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
-        if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
+        if (!isAnime && (!details?.seasons || details.seasons.length === 0)) return null;
+        if (isAnime && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
 
         return (
             <div className="w-full rounded-2xl overflow-hidden bg-[#12141d]/80 backdrop-blur-xl border border-white/[0.08] p-4 sm:p-6 shadow-xl">
@@ -2501,8 +2541,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
     const renderEpisodesSidebar = () => {
         if (type === 'movie' || resolvedMediaType === 'movie') return null;
-        if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
-        if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
+        if (!isAnime && (!details?.seasons || details.seasons.length === 0)) return null;
+        if (isAnime && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
             <div className="hidden lg:flex flex-col w-full h-[calc(100dvh-120px)] sticky top-[90px] rounded-[22px] overflow-hidden bg-white/[0.02] backdrop-blur-md border border-white/[0.05] shadow-[0_10px_40px_rgba(0,0,0,0.45)]">
@@ -2517,8 +2557,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
 
     const renderMobileEpisodes = () => {
         if (type === 'movie' || resolvedMediaType === 'movie') return null;
-        if (!isAnimeServer && (!details?.seasons || details.seasons.length === 0)) return null;
-        if (isAnimeServer && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
+        if (!isAnime && (!details?.seasons || details.seasons.length === 0)) return null;
+        if (isAnime && (!animeData?.availableEpisodesDetail || !episodes || episodes.length === 0)) return null;
         
         return (
             <>

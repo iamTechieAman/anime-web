@@ -24,7 +24,8 @@ import CrossOriginEmbedNotice from "@/components/player/CrossOriginEmbedNotice";
 import { 
     type ContentType, 
     deduplicateServersByCanonicalId, 
-    getCanonicalProviderId 
+    getCanonicalProviderId,
+    parseServerPlaybackParams
 } from "@/lib/providers/registry";
 
 // Using ArtPlayer for robust playback
@@ -218,8 +219,11 @@ const MOVIE_SERVERS = [
         badge: 'VidLink',
         isMovieServer: true,
         qualityScore: 105,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            const targetId = tmdbId || id;
+            return type === 'tv' ? `https://vidlink.pro/tv/${targetId}/${season}/${episode}?primaryColor=7C3AED&title=false&autoplay=true` : `https://vidlink.pro/movie/${targetId}?primaryColor=7C3AED&title=false&autoplay=true`;
+        },
     },
     {
         id: 'vidnest',
@@ -230,8 +234,10 @@ const MOVIE_SERVERS = [
         badge: 'Ultra',
         isMovieServer: true,
         qualityScore: 104,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidnest.fun/tv/${id}/${s || 1}/${e || 1}` : `https://vidnest.fun/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return type === 'tv' ? `https://vidnest.fun/tv/${id}/${season}/${episode}` : `https://vidnest.fun/movie/${id}`;
+        },
     },
     {
         id: 'vidcore',
@@ -242,8 +248,11 @@ const MOVIE_SERVERS = [
         badge: 'Core HD',
         isMovieServer: true,
         qualityScore: 103,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidcore.io/tv/${id}/${s || 1}/${e || 1}` : `https://vidcore.io/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            const targetId = tmdbId || id;
+            return type === 'tv' ? `https://vidcore.io/tv/${targetId}/${season}/${episode}` : `https://vidcore.io/movie/${targetId}`;
+        },
     },
     {
         id: 'embedmaster',
@@ -254,8 +263,10 @@ const MOVIE_SERVERS = [
         badge: 'Master',
         isMovieServer: true,
         qualityScore: 102,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}` : `https://embedmaster.link/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return type === 'tv' ? `https://embedmaster.link/tv/${id}/${season}/${episode}` : `https://embedmaster.link/movie/${id}`;
+        },
     },
     {
         id: 'vidrock',
@@ -266,8 +277,10 @@ const MOVIE_SERVERS = [
         badge: 'Stable',
         isMovieServer: true,
         qualityScore: 99,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidrock.net/tv/${id}/${s || 1}/${e || 1}` : `https://vidrock.net/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return type === 'tv' ? `https://vidrock.net/tv/${id}/${season}/${episode}` : `https://vidrock.net/movie/${id}`;
+        },
     },
     {
         id: 'vidfast',
@@ -278,8 +291,10 @@ const MOVIE_SERVERS = [
         badge: 'Auto-Next',
         isMovieServer: true,
         qualityScore: 101,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidfast.vc/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true` : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return type === 'tv' ? `https://vidfast.vc/tv/${id}/${season}/${episode}?autoPlay=true&title=true&poster=true&nextButton=true` : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`;
+        },
     },
     {
         id: 'vidsrc_embed_ru',
@@ -290,8 +305,11 @@ const MOVIE_SERVERS = [
         badge: 'VidSrc',
         isMovieServer: true,
         qualityScore: 94,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=1&ds_lang=en` : `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode, tmdbId } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            const targetId = tmdbId || id;
+            return type === 'tv' ? `https://vidsrc-embed.ru/embed/tv?tmdb=${targetId}&season=${season}&episode=${episode}&autoplay=1&ds_lang=en` : `https://vidsrc-embed.ru/embed/movie?tmdb=${targetId}&autoplay=1&ds_lang=en`;
+        },
     },
     {
         id: 'smashystream',
@@ -302,8 +320,10 @@ const MOVIE_SERVERS = [
         badge: 'Multi-Host',
         isMovieServer: true,
         qualityScore: 95,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://player.smashystream.com/show/${id}/${s || 1}/${e || 1}` : `https://player.smashystream.com/movie/${id}`,
+        getUrl: (p1: any, p2?: any, p3?: any, p4?: any) => {
+            const { type, id, season, episode } = parseServerPlaybackParams(p1, p2, p3, p4, 'tv');
+            return type === 'tv' ? `https://player.smashystream.com/show/${id}/${season}/${episode}` : `https://player.smashystream.com/movie/${id}`;
+        },
     },
 ];
 
@@ -907,23 +927,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 badge: srv.badge,
                                 type: srv.type,
                                 isMovieServer: true,
-                                getUrl: (param1: string, param2: string, s?: number, e?: number) => {
-                                    if (srv.type === 'anime') {
-                                        return srv.urlTemplate
-                                            .replace('{id}', param1)
-                                            .replace('{e}', String(param2 || 1));
-                                    }
-                                    const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
-                                    if (isAnimeCall) {
-                                        return srv.urlTemplate
-                                            .replace('{id}', param1)
-                                            .replace('{s}', '1')
-                                            .replace('{e}', String(param2 || 1));
-                                    }
+                                getUrl: (param1: any, param2?: any, s?: any, e?: any) => {
+                                    const parsed = parseServerPlaybackParams(param1, param2, s, e, 'tv');
                                     return srv.urlTemplate
-                                        .replace('{id}', param2)
-                                        .replace('{s}', String(s || 1))
-                                        .replace('{e}', String(e || 1));
+                                        .replace('{id}', parsed.id)
+                                        .replace('{s}', String(parsed.season || 1))
+                                        .replace('{e}', String(parsed.episode || 1));
                                 }
                             };
                         });

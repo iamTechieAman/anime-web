@@ -338,6 +338,58 @@ export function getCanonicalProvidersForType(type: ContentType): CanonicalProvid
 }
 
 /**
+ * Uniform server playback parameter parser that protects against parameter inversion
+ * (e.g. Content ID passed in param 1 when caller expected (type, id, s, e) or vice-versa).
+ */
+export function parseServerPlaybackParams(
+    arg1: any,
+    arg2?: any,
+    arg3?: any,
+    arg4?: any,
+    defaultType: ContentType = 'tv'
+) {
+    const isExplicitType = typeof arg1 === 'string' && (arg1 === 'movie' || arg1 === 'tv' || arg1 === 'cartoon' || arg1 === 'anime');
+    
+    if (isExplicitType) {
+        const mediaType = arg1 as ContentType;
+        const contentId = String(arg2 || '');
+        const sNum = typeof arg3 === 'number' ? arg3 : (parseInt(String(arg3 || 1), 10) || 1);
+        const eNum = typeof arg4 === 'number' ? arg4 : (parseInt(String(arg4 || 1), 10) || 1);
+        return {
+            type: mediaType,
+            id: contentId,
+            season: sNum,
+            episode: eNum,
+            tmdbId: (typeof arg4 === 'string' && arg4 && !/^\d+$/.test(arg4)) ? arg4 : null,
+        };
+    }
+
+    // arg1 is NOT a media type keyword — arg1 IS the content ID (e.g. "213375", "550", "naruto")
+    const contentId = String(arg1 || '');
+    // arg2 is episode or season
+    const epNum = typeof arg2 === 'number' ? arg2 : (parseInt(String(arg2 || 1), 10) || 1);
+    let sNum = 1;
+    let tmdbId: string | null = null;
+    if (typeof arg3 === 'number') {
+        sNum = arg3;
+    } else if (typeof arg3 === 'string' && arg3 && arg3 !== 'null') {
+        if (/^\d+$/.test(arg3) && arg3.length > 3) {
+            tmdbId = arg3;
+        } else {
+            sNum = parseInt(arg3, 10) || 1;
+        }
+    }
+
+    return {
+        type: defaultType,
+        id: contentId,
+        season: sNum,
+        episode: epNum,
+        tmdbId,
+    };
+}
+
+/**
  * Convert any server-like object or canonical provider into a NormalizedServer
  * with unified identity and polymorphically safe getUrl method.
  */
@@ -371,35 +423,13 @@ export function createNormalizedServer(
         getUrl: (p1?: any, p2?: any, p3?: any, p4?: any) => {
             // Priority 1: Use canonical provider resolveUrl if available
             if (canonical) {
-                // If called with signature getUrl(type, id, season, episode)
-                if (typeof p1 === 'string' && (p1 === 'movie' || p1 === 'tv' || p1 === 'cartoon' || p1 === 'anime')) {
-                    return canonical.resolveUrl({
-                        type: p1 as ContentType,
-                        id: String(p2 || defaultId),
-                        season: p3 !== undefined ? Number(p3) : defaultS,
-                        episode: p4 !== undefined ? Number(p4) : defaultE,
-                        tmdbId: tmdbId || null,
-                    });
-                }
-                // If called with signature getUrl(animeId, episode, tmdbId)
-                if (targetType === 'anime' || p1 !== undefined) {
-                    const animeId = typeof p1 === 'string' ? p1 : defaultId;
-                    const ep = typeof p2 === 'number' ? p2 : defaultE;
-                    const animeTmdb = typeof p3 === 'string' ? p3 : (tmdbId || null);
-                    return canonical.resolveUrl({
-                        type: 'anime',
-                        id: animeId,
-                        episode: ep,
-                        tmdbId: animeTmdb,
-                    });
-                }
-                // Fallback default signature
+                const parsed = parseServerPlaybackParams(p1, p2, p3, p4, targetType);
                 return canonical.resolveUrl({
-                    type: targetType,
-                    id: defaultId,
-                    season: defaultS,
-                    episode: defaultE,
-                    tmdbId: tmdbId || null,
+                    type: parsed.type,
+                    id: parsed.id || defaultId,
+                    season: parsed.season || defaultS,
+                    episode: parsed.episode || defaultE,
+                    tmdbId: parsed.tmdbId || tmdbId || null,
                 });
             }
 
