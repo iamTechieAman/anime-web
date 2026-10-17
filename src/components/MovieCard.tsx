@@ -44,20 +44,8 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 // === MOVIE CARD — Onoflix-inspired ContentCard design ===
 export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatured = false }: { item: MovieItem; type?: string; isFeatured?: boolean }) {
     const [imgError, setImgError] = useState(false);
-    const [liveViewers, setLiveViewers] = useState(item.liveViewers);
-
-    // Fluctuating live viewer count
-    useEffect(() => {
-        if (!item.liveViewers) return;
-        const interval = setInterval(() => {
-            setLiveViewers((prev) => {
-                if (!prev) return prev;
-                const change = Math.floor(Math.random() * 201) - 100;
-                return Math.max(100, prev + change);
-            });
-        }, 10000);
-        return () => clearInterval(interval);
-    }, [item.liveViewers]);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const liveViewers = item.liveViewers;
 
     const title = item.title || item.name || "Untitled";
     const releaseDate = item.release_date || item.first_air_date;
@@ -96,8 +84,8 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                 {/* === Poster Container === */}
                 <div className="relative w-full overflow-hidden rounded-[18px] bg-bg-elevated shadow-md group-hover:shadow-[var(--shadow-glow-primary)] transition-shadow duration-[250ms]" style={{ aspectRatio: '2/3' }}>
                     
-                    {/* Shimmer skeleton while image loads */}
-                    <div className="absolute inset-0 shimmer-card" />
+                    {/* Shimmer skeleton while image loads — removed once loaded to save GPU cycles */}
+                    {!isLoaded && <div className="absolute inset-0 shimmer-card" />}
 
                     {/* Poster Image */}
                     {(posterSrc && !imgError) ? (
@@ -106,10 +94,11 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
                             alt={`${title} (${year})`}
                             fill
                             sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 20vw, 14vw"
-                            className="object-cover transition-transform duration-[250ms] ease-apple group-hover:scale-[1.02] relative z-[1] will-change-transform" 
+                            className={`object-cover transition-all duration-[250ms] ease-apple group-hover:scale-[1.02] relative z-[1] will-change-transform ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
                             placeholder="blur"
                             blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
-                            onError={() => setImgError(true)}
+                            onError={() => { setImgError(true); setIsLoaded(true); }}
+                            onLoad={() => setIsLoaded(true)}
                             loading="lazy"
                         />
                     ) : (

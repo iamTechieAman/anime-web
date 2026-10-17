@@ -872,16 +872,23 @@ p, .text-body {
 
 .skeleton-hero {
   width: 100%;
-  height: 50vh;
-  min-height: 340px;
+  height: 62vh;
+  min-height: 460px;
+  max-height: 820px;
   background-color: var(--bg-card);
-  border-radius: 1rem;
-  border: 1px solid var(--border-color);
+  border-radius: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+@media (min-width: 640px) {
+  .skeleton-hero {
+    height: 68vh;
+    min-height: 520px;
+  }
 }
 @media (min-width: 768px) {
   .skeleton-hero {
-    height: 70vh;
-    min-height: 480px;
+    height: 76vh;
+    min-height: 580px;
   }
 }
 
@@ -2395,8 +2402,14 @@ main, .relative.z-10 {
   .animate-pulse,
   .animate-bounce,
   .skeleton-shine,
-  .shimmer::after {
+  .shimmer::after,
+  .shimmer-card,
+  .shimmer-card::after,
+  .skeleton-hero::after,
+  .skeleton-card .skeleton-poster,
+  .pulse-glow {
     animation: none !important;
+    background-image: none !important;
   }
 }
 

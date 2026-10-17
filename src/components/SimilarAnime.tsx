@@ -116,9 +116,15 @@ export default function SimilarAnime({ currentShowId, showName }: { currentShowI
 
                 {/* Content Container */}
                 {loading ? (
-                    <div className="flex gap-3 overflow-hidden py-4">
+                    <div className="netflix-row overflow-hidden py-2">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px] aspect-[2/3] bg-white/5 rounded-xl animate-pulse border border-border-color shrink-0" />
+                            <div key={i} className="netflix-card-snap w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px] shrink-0">
+                                <div className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shimmer-card bg-zinc-900 border border-white/5 mb-2.5 shadow-md" />
+                                <div className="px-0.5 space-y-1.5">
+                                    <div className="h-3.5 rounded-md w-4/5 shimmer-card bg-zinc-900" />
+                                    <div className="h-2.5 rounded-md w-1/2 shimmer-card bg-zinc-900" />
+                                </div>
+                            </div>
                         ))}
                     </div>
                 ) : (

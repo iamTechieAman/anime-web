@@ -63,6 +63,7 @@ function resolveImage(show: Show): string | null {
 
 const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Show; isBanner?: boolean }) {
     const [imgError, setImgError] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     const showId = show._id || show.id;
     const isTmdbContent = showId?.startsWith('tmdb:');
@@ -93,16 +94,18 @@ const AnimeCard = memo(function AnimeCard({ show, isBanner = false }: { show: Sh
                     {/* Poster */}
                     {(imageSrc && !imgError) ? (
                         <div className="relative w-full h-full overflow-hidden">
+                            {!isLoaded && <div className="absolute inset-0 shimmer-card" />}
                             <Image
                                 src={imageSrc}
                                 alt={title}
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
-                                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform" 
+                                className={`object-cover transition-all duration-500 ease-out group-hover:scale-105 will-change-transform ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
                                 placeholder="blur"
                                 blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzIiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjQiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                                 loading="lazy"
-                                onError={() => setImgError(true)}
+                                onLoad={() => setIsLoaded(true)}
+                                onError={() => { setImgError(true); setIsLoaded(true); }}
                             />
                         </div>
                     ) : (

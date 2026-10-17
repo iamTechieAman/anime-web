@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { RowSkeleton } from "@/components/SkeletonLoader";
 
 interface LazySectionProps {
     children: React.ReactNode;
     height?: string;
+    fallback?: React.ReactNode;
 }
 
-export default function LazySection({ children, height = "260px" }: LazySectionProps) {
+export default function LazySection({ children, height = "260px", fallback }: LazySectionProps) {
     const [isVisible, setIsVisible] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -23,7 +25,7 @@ export default function LazySection({ children, height = "260px" }: LazySectionP
                 }
             },
             { 
-                rootMargin: "300px 0px", // Trigger loading slightly before it enters the viewport
+                rootMargin: "350px 0px", // Trigger loading before it enters the viewport
                 threshold: 0.01 
             }
         );
@@ -34,11 +36,7 @@ export default function LazySection({ children, height = "260px" }: LazySectionP
 
     return (
         <div ref={ref} style={{ minHeight: isVisible ? "auto" : height }} className="w-full">
-            {isVisible ? children : (
-                <div className="w-full h-[200px] flex items-center justify-center bg-[#12131A]/10 rounded-2xl animate-pulse">
-                    <div className="w-12 h-12 rounded-full border-2 border-white/5 border-t-accent/40 animate-spin" />
-                </div>
-            )}
+            {isVisible ? children : (fallback || <RowSkeleton count={6} />)}
         </div>
     );
 }

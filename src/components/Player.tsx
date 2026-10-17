@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Play, RefreshCw, X } from "lucide-react";
+import { Play, RefreshCw, X, Loader2 } from "lucide-react";
 
 export interface PlayerProps {
   currentServerUrl?: string | null;
@@ -42,10 +42,12 @@ export const VideoEmbed = React.memo(function VideoEmbed({
 
   if (!url || !url.trim()) {
     return (
-      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center text-white/50">
-          Loading player...
+      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3">
+        <div className="absolute inset-0 shimmer-card opacity-20 pointer-events-none" />
+        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center relative z-10">
+          <Loader2 className="w-5 h-5 text-accent animate-spin" />
         </div>
+        <p className="text-xs font-bold text-zinc-400 tracking-wide uppercase relative z-10">Initializing Stream...</p>
       </div>
     );
   }
@@ -90,8 +92,17 @@ export const Player = React.memo(function Player({
   // If loading is true or URL is pending (and no explicit error), show dark loading spinner/skeleton
   if (isLoading || (!currentServerUrl && !sourceError)) {
     return (
-      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden flex flex-col items-center justify-center text-white/50">
-        Loading player...
+      <div className="relative w-full aspect-video min-h-[250px] bg-black rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3.5">
+        <div className="absolute inset-0 shimmer-card opacity-20 pointer-events-none" />
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl backdrop-blur-md">
+            <Loader2 className="w-6 h-6 text-accent animate-spin" />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-xs font-extrabold text-white tracking-wide uppercase">Connecting to {activeServerName}...</p>
+            <p className="text-[10px] text-zinc-500 font-medium">Securing high-speed playback stream</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -112,7 +123,7 @@ export const Player = React.memo(function Player({
         {onRetryAll && (
           <button
             onClick={onRetryAll}
-            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-blue-500/25"
+            className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-accent/25"
           >
             <RefreshCw className="w-3.5 h-3.5" /> Retry All Servers
           </button>
@@ -138,13 +149,12 @@ export const Player = React.memo(function Player({
       />
     </div>
   );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.currentServerUrl === nextProps.currentServerUrl &&
-    prevProps.isLoading === nextProps.isLoading &&
-    prevProps.sourceError === nextProps.sourceError &&
-    prevProps.reloadKey === nextProps.reloadKey
-  );
-});
+}, (prev, next) => (
+  prev.currentServerUrl === next.currentServerUrl &&
+  prev.isLoading === next.isLoading &&
+  prev.sourceError === next.sourceError &&
+  prev.activeServerName === next.activeServerName &&
+  prev.reloadKey === next.reloadKey
+));
 
 export default Player;

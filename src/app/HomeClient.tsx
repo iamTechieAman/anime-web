@@ -16,7 +16,7 @@ import dynamic from "next/dynamic";
 
 const HeroCarousel = dynamic(() => import("@/components/HeroCarousel"), { 
     ssr: false, 
-    loading: () => <div className="h-[62vh] sm:h-[68vh] md:h-[76vh] min-h-[460px] sm:min-h-[520px] md:min-h-[580px] max-h-[820px] bg-[#0d0d12] animate-pulse w-full border-b border-white/5" /> 
+    loading: () => <HeroSkeleton /> 
 });
 const MovieRow = dynamic(() => import("@/components/MovieCard").then(mod => mod.MovieRow), { ssr: false });
 
@@ -24,6 +24,7 @@ const AnimeCardHorizontal = dynamic(() => import("@/components/AnimeCard").then(
 const ContinueWatchingRow = dynamic(() => import("@/components/ContinueWatchingRow"), { ssr: false });
 const ProviderBar = dynamic(() => import("@/components/ProviderBar"), { ssr: false });
 import LazySection from "@/components/LazySection";
+import { RowSkeleton, HeroSkeleton } from "@/components/SkeletonLoader";
 
 // CineVibe-style category sections with TMDB genre IDs
 const GENRE_ROWS = [
@@ -1208,23 +1209,6 @@ const SectionHeader = memo(function SectionHeader({
                     <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover/link:text-accent group-hover/link:translate-x-0.5 transition-all" />
                 </Link>
             )}
-        </div>
-    );
-});
-
-// Row Skeleton for Anime — memoized (static, never changes)
-const RowSkeleton = memo(function RowSkeleton() {
-    return (
-        <div className="netflix-row px-0">
-            {[...Array(8)].map((_, i) => (
-                <div key={i} className="netflix-card-snap w-[140px] sm:w-[160px] md:w-[200px] lg:w-[220px] shrink-0">
-                    <div className="relative w-full aspect-[2/3] rounded-xl bg-white/5 overflow-hidden skeleton-shine mb-2 animate-pulse" />
-                    <div className="space-y-2 px-0.5 animate-pulse">
-                        <div className="h-3.5 bg-white/5 rounded w-4/5" />
-                        <div className="h-2.5 bg-white/5 rounded w-1/2" />
-                    </div>
-                </div>
-            ))}
         </div>
     );
 });
