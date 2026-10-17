@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { 
@@ -17,6 +17,9 @@ export default function DesktopSidebar() {
     const searchParams = useSearchParams();
     const { setShowProfileSettings } = useMobileUI();
     const [isPinned, setIsPinned] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const enterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         try {
@@ -35,6 +38,33 @@ export default function DesktopSidebar() {
             return next;
         });
     };
+
+    const handlePointerEnter = useCallback(() => {
+        if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
+        enterTimeoutRef.current = setTimeout(() => {
+            setIsHovered(true);
+        }, 130);
+    }, []);
+
+    const handlePointerLeave = useCallback(() => {
+        if (enterTimeoutRef.current) clearTimeout(enterTimeoutRef.current);
+        leaveTimeoutRef.current = setTimeout(() => {
+            setIsHovered(false);
+        }, 200);
+    }, []);
+
+    // Escape key closes unpinned expansion
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && !isPinned && isHovered) {
+                setIsHovered(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isPinned, isHovered]);
+
+    const isExpanded = isPinned || isHovered;
 
     const sortBy = searchParams?.get("sort_by");
     const genreId = searchParams?.get("genre_id");
@@ -67,27 +97,46 @@ export default function DesktopSidebar() {
 
     const isItemActive = (item: typeof sections[0]) => {
         if (!item.href) return false;
-        if (item.name === "Home") return pathname === "/";
+        if (item.name === "Home") return pathname === "/" && !searchParams?.get("sort_by") && !searchParams?.get("genre_id");
         if (item.name === "Trending") return isTrendingRoute;
         if (item.name === "Upcoming") return isUpcomingRoute;
-        if (item.name === "Browse") return pathname === "/browse" && !isTrendingRoute && !isUpcomingRoute;
+        if (item.name === "Browse") return pathname === "/browse" && !isTrendingRoute && !isUpcomingRoute && !genreId;
+        if (item.name === "Genres") return pathname === "/genres" || pathname?.startsWith("/genre/") || (pathname === "/browse" && Boolean(genreId));
+        if (item.name === "AI Discovery") return pathname === "/discover";
+        if (item.name === "History") return pathname === "/history";
+        if (item.name === "Favorites") return pathname === "/watchlist";
         return pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
     };
 
     return (
-        <div className={`peer/sidebar group fixed left-0 top-0 bottom-0 ${isPinned ? 'w-[260px]' : 'w-[72px]'} hidden md:block z-[60] hide-scrollbar transition-all duration-[250ms]`}>
-            <aside className={`absolute left-0 top-0 bottom-0 w-[260px] ${
-                isPinned 
-                    ? '[clip-path:inset(0_0_0_0)]' 
-                    : '[clip-path:inset(0_188px_0_0)] group-hover:[clip-path:inset(0_0_0_0)] group-focus-within:[clip-path:inset(0_0_0_0)]'
-            } transition-all duration-[250ms] ease-apple bg-[#0c0d12]/95 backdrop-blur-[24px] border-r border-white/[0.06] flex flex-col py-5 shadow-2xl hide-scrollbar`}>
+        <div 
+            className={`peer/sidebar fixed left-0 top-0 bottom-0 ${isExpanded ? 'w-[260px]' : 'w-[72px]'} hidden md:block z-[60] hide-scrollbar transition-all duration-[250ms]`}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+            onFocus={() => setIsHovered(true)}
+            onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setIsHovered(false);
+                }
+            }}
+        >
+            <aside 
+                role="navigation"
+                aria-label="Main Navigation"
+                aria-expanded={isExpanded}
+                className={`absolute left-0 top-0 bottom-0 w-[260px] ${
+                    isExpanded 
+                        ? '[clip-path:inset(0_0_0_0)]' 
+                        : '[clip-path:inset(0_188px_0_0)]'
+                } transition-all duration-[250ms] ease-apple bg-[#0c0d12]/95 backdrop-blur-[24px] border-r border-white/[0.06] flex flex-col py-5 shadow-2xl hide-scrollbar`}
+            >
                 {/* Branded Logo & Pin Toggle */}
                 <div className="mb-6 shrink-0 flex items-center justify-between h-11 w-full px-3.5 transition-all duration-[250ms] relative hide-scrollbar">
                     <Link scroll={false} href="/" className="flex items-center gap-3 active:scale-95 transition-all shrink-0" aria-label="ToonPlayer Home">
                         <div className="w-10 h-10 flex items-center justify-center shrink-0 relative hide-scrollbar" style={{ filter: "drop-shadow(0 0 10px rgba(229,9,20,0.5))" }}>
                             <Logo />
                         </div>
-                        <span className={`text-sm font-black tracking-tight text-white uppercase ${isPinned ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'} transition-opacity duration-[250ms] whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent`}>
+                        <span className={`text-sm font-black tracking-tight text-white uppercase ${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-[250ms] whitespace-nowrap bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent`}>
                             Toon<span className="text-accent">Player</span>
                         </span>
                     </Link>
@@ -97,7 +146,7 @@ export default function DesktopSidebar() {
                         onClick={togglePin}
                         title={isPinned ? "Unpin sidebar" : "Pin sidebar open"}
                         aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar open"}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-all cursor-pointer ${isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer ${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                     >
                         {isPinned ? <PinOff className="w-3.5 h-3.5 text-accent" /> : <Pin className="w-3.5 h-3.5" />}
                     </button>
@@ -109,10 +158,10 @@ export default function DesktopSidebar() {
                     const isActive = isItemActive(item);
                     const Icon = item.icon;
                     const isAI = (item as any).isAI;
-                    const cssClass = `relative flex items-center h-10 px-0 group-hover:px-2.5 rounded-xl transition-all duration-200 group/item w-full text-left cursor-pointer hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                    const cssClass = `relative flex items-center h-10 ${isExpanded ? 'px-2.5' : 'px-0'} rounded-xl transition-all duration-200 group/item w-full text-left cursor-pointer hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                         isActive 
-                            ? "bg-white/[0.06] text-white" 
-                            : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
+                            ? "bg-white/[0.08] text-white shadow-sm" 
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
                     }`;
 
                     const content = (
@@ -141,14 +190,16 @@ export default function DesktopSidebar() {
                             </div>
 
                             {/* Label */}
-                            <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-[250ms] ${isAI ? 'text-pink-200' : ''}`}>
+                            <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-[250ms] ${isAI ? 'text-pink-200' : ''}`}>
                                 {item.name}
                             </span>
 
-                            {/* Tooltip (Strictly hidden when sidebar expands) */}
-                            <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:!opacity-0 group-hover:!pointer-events-none z-50 shadow-2xl">
-                                {item.tooltip}
-                            </div>
+                            {/* Tooltip (Strictly hidden when sidebar is expanded) */}
+                            {!isExpanded && (
+                                <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 z-50 shadow-2xl">
+                                    {item.tooltip}
+                                </div>
+                            )}
                         </>
                     );
 
@@ -174,20 +225,33 @@ export default function DesktopSidebar() {
                     href="/settings"
                     scroll={false}
                     aria-label="Settings"
-                    className="relative flex items-center h-10 px-0 group-hover:px-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.03] transition-all duration-200 group/item w-full text-left hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className={`relative flex items-center h-10 ${isExpanded ? 'px-2.5' : 'px-0'} rounded-xl transition-all duration-200 group/item w-full text-left hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                        pathname === "/settings"
+                            ? "bg-white/[0.08] text-white shadow-sm"
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                    }`}
                 >
+                    {pathname === "/settings" && (
+                        <motion.div 
+                            layoutId="activeGlow"
+                            className="absolute left-0 w-[3px] h-6 bg-gradient-to-b from-accent to-accent-warm rounded-r-full shadow-[var(--shadow-glow-primary)]"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                    )}
                     <div className="flex items-center justify-center shrink-0 w-11 h-10">
                         <Settings 
-                            className="w-[18px] h-[18px] transition-all duration-[250ms] group-hover/item:scale-115 group-hover/item:text-white" 
+                            className={`w-[18px] h-[18px] transition-all duration-[250ms] ${pathname === "/settings" ? "text-accent drop-shadow-[0_0_8px_var(--accent-glow)] scale-110" : "group-hover/item:scale-115 group-hover/item:text-white"}`} 
                             strokeWidth={2.2}
                         />
                     </div>
-                    <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-[250ms]`}>
+                    <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-[250ms]`}>
                         Settings
                     </span>
-                    <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:!opacity-0 group-hover:!pointer-events-none z-50 shadow-2xl">
-                        Settings
-                    </div>
+                    {!isExpanded && (
+                        <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 z-50 shadow-2xl">
+                            Settings
+                        </div>
+                    )}
                 </Link>
 
                 {/* Support Link */}
@@ -195,20 +259,33 @@ export default function DesktopSidebar() {
                     href="/contact"
                     scroll={false}
                     aria-label="Contact Support"
-                    className="relative flex items-center h-10 px-0 group-hover:px-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.03] transition-all duration-200 group/item hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className={`relative flex items-center h-10 ${isExpanded ? 'px-2.5' : 'px-0'} rounded-xl transition-all duration-200 group/item hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                        pathname === "/contact"
+                            ? "bg-white/[0.08] text-white shadow-sm"
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                    }`}
                 >
+                    {pathname === "/contact" && (
+                        <motion.div 
+                            layoutId="activeGlow"
+                            className="absolute left-0 w-[3px] h-6 bg-gradient-to-b from-accent to-accent-warm rounded-r-full shadow-[var(--shadow-glow-primary)]"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                    )}
                     <div className="flex items-center justify-center shrink-0 w-11 h-10">
                         <HelpCircle 
-                            className="w-[18px] h-[18px] transition-all duration-[250ms] group-hover/item:scale-115 group-hover/item:text-white" 
+                            className={`w-[18px] h-[18px] transition-all duration-[250ms] ${pathname === "/contact" ? "text-accent drop-shadow-[0_0_8px_var(--accent-glow)] scale-110" : "group-hover/item:scale-115 group-hover/item:text-white"}`} 
                             strokeWidth={2.2}
                         />
                     </div>
-                    <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-[250ms]`}>
+                    <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-[250ms]`}>
                         Support
                     </span>
-                    <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:!opacity-0 group-hover:!pointer-events-none z-50 shadow-2xl">
-                        Contact Support
-                    </div>
+                    {!isExpanded && (
+                        <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 z-50 shadow-2xl">
+                            Contact Support
+                        </div>
+                    )}
                 </Link>
 
                 {/* Github Link */}
@@ -217,7 +294,7 @@ export default function DesktopSidebar() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="GitHub Repository"
-                    className="relative flex items-center h-10 px-0 group-hover:px-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.03] transition-all duration-200 group/item hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className={`relative flex items-center h-10 ${isExpanded ? 'px-2.5' : 'px-0'} rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-all duration-200 group/item hide-scrollbar outline-none focus-visible:ring-2 focus-visible:ring-accent`}
                 >
                     <div className="flex items-center justify-center shrink-0 w-11 h-10">
                         <Github 
@@ -225,20 +302,21 @@ export default function DesktopSidebar() {
                             strokeWidth={2.2}
                         />
                     </div>
-                    <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-[250ms]`}>
+                    <span className={`ml-2 text-xs font-semibold tracking-wide whitespace-nowrap ${isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-[250ms]`}>
                         GitHub
                     </span>
-                    <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 group-hover:!opacity-0 group-hover:!pointer-events-none z-50 shadow-2xl">
-                        GitHub Repository
-                    </div>
+                    {!isExpanded && (
+                        <div className="absolute left-[74px] px-3 py-1.5 bg-[#12141D] border border-white/10 rounded-lg text-white text-[11px] font-bold tracking-wide whitespace-nowrap opacity-0 pointer-events-none transition-all duration-150 translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-2 z-50 shadow-2xl">
+                            GitHub Repository
+                        </div>
+                    )}
                 </a>
             </div>
 
             {/* Version Badge */}
             <div className="mt-4 px-4 py-2 pointer-events-none shrink-0 flex items-center justify-start h-7 overflow-hidden hide-scrollbar">
                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest transition-opacity duration-[250ms]">
-                    <span className={isPinned ? 'hidden' : 'group-hover:hidden'}>V5.0</span>
-                    <span className={isPinned ? 'inline' : 'hidden group-hover:inline'}>ToonPlayer V5.0</span>
+                    <span>{isExpanded ? 'ToonPlayer V5.0' : 'V5.0'}</span>
                 </span>
             </div>
         </aside>

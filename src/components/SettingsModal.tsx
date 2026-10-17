@@ -49,6 +49,8 @@ function ToggleSwitch({ value, onChange, color = "bg-accent" }: { value: boolean
     return (
         <button
             type="button"
+            role="switch"
+            aria-checked={value}
             onClick={() => onChange(!value)}
             className={`w-11 h-6 rounded-full p-0.5 transition-colors shrink-0 ${value ? color : 'bg-zinc-700'} cursor-pointer`}
         >

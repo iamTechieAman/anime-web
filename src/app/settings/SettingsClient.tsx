@@ -44,8 +44,10 @@ function ToggleSwitch({ value, onChange, color = "bg-accent" }: { value: boolean
     return (
         <button
             type="button"
+            role="switch"
+            aria-checked={value}
             onClick={() => onChange(!value)}
-            className={`w-12 h-6 rounded-full p-1 transition-colors shrink-0 ${value ? color : 'bg-zinc-700'}`}
+            className={`w-12 h-6 rounded-full p-1 transition-colors shrink-0 ${value ? color : 'bg-zinc-700'} cursor-pointer`}
         >
             <motion.div
                 className="w-4 h-4 rounded-full bg-white shadow-md animate-none"

@@ -240,10 +240,26 @@ export default function MobileModals() {
 
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setMenuOpen(false);
+                setSearchOpen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+
         return () => {
             document.body.style.overflow = previousOverflow;
+            window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [isMenuOpen, isSearchOpen]);
+    }, [isMenuOpen, isSearchOpen, setMenuOpen, setSearchOpen]);
+
+    // Close modals on route change / successful navigation
+    useEffect(() => {
+        setMenuOpen(false);
+        setSearchOpen(false);
+    }, [pathname, setMenuOpen, setSearchOpen]);
 
     const saveSearch = (q: string) => {
         if (!q.trim()) return;
@@ -618,7 +634,7 @@ export default function MobileModals() {
                                                 {suggestions.map((item) => (
                                                     <Link
                                                         key={`${item.type}-${item.id}`}
-                                                        href={item.href || `/watch/${item.type}/${item.id}`}
+                                                        href={item.href || (item.type === 'anime' ? `/watch/anime/${encodeURIComponent(item.id)}?ep=1` : item.type === 'tv' ? `/watch/tv/${encodeURIComponent(item.id)}?s=1&e=1` : `/watch/movie/${encodeURIComponent(item.id)}`)}
                                                         scroll={false}
                                                         onClick={() => {
                                                             setSearchOpen(false);

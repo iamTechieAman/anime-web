@@ -25,6 +25,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     const [activeIndex, setActiveIndex] = useState(-1);
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [pinnedSearches, setPinnedSearches] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -83,7 +84,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     type: "result",
                     title: item.title,
                     action: () => {
-                        router.push(item.href, { scroll: false });
+                        const targetHref = item.href || (
+                            item.type === 'movie' 
+                                ? `/watch/movie/${encodeURIComponent(item.id)}`
+                                : item.type === 'tv'
+                                    ? `/watch/tv/${encodeURIComponent(item.id)}?s=1&e=1`
+                                    : `/watch/anime/${encodeURIComponent(item.id)}?ep=1`
+                        );
+                        router.push(targetHref, { scroll: false });
                         saveSearch(item.title);
                         onClose();
                     }
@@ -188,11 +196,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     useEffect(() => {
         if (!debouncedQuery.trim() || debouncedQuery.length < 2) {
             setResults([]);
+            setSearchError(null);
             return;
         }
 
         const controller = new AbortController();
         setLoading(true);
+        setSearchError(null);
         axios.get(`/api/search/unified?q=${encodeURIComponent(debouncedQuery)}`, {
             signal: controller.signal
         })
@@ -202,6 +212,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             })
             .catch((err) => {
                 if (axios.isCancel(err) || err.name === 'CanceledError') return;
+                setSearchError("Failed to fetch search results. Please check your connection.");
             })
             .finally(() => {
                 if (!controller.signal.aborted) {
@@ -411,7 +422,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                                                 role="option"
                                                 aria-selected={isSelected}
                                                 key={`${item.id}-${item.type}-${idx}`}
-                                                onClick={() => { router.push(item.href, { scroll: false }); saveSearch(item.title); onClose(); }}
+                                                onClick={() => { 
+                                                    const targetHref = item.href || (
+                                                        item.type === 'movie' 
+                                                            ? `/watch/movie/${encodeURIComponent(item.id)}`
+                                                            : item.type === 'tv'
+                                                                ? `/watch/tv/${encodeURIComponent(item.id)}?s=1&e=1`
+                                                                : `/watch/anime/${encodeURIComponent(item.id)}?ep=1`
+                                                    );
+                                                    router.push(targetHref, { scroll: false }); 
+                                                    saveSearch(item.title); 
+                                                    onClose(); 
+                                                }}
                                                 onMouseEnter={() => setActiveIndex(actualIdx)}
                                                 className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-left transition-all ${
                                                     isSelected ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-[var(--accent-glow)]" : "text-zinc-300 hover:bg-white/5"
@@ -445,8 +467,29 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             </div>
                         )}
 
+                        {/* Search error state */}
+                        {!loading && searchError && (
+                            <div className="py-8 text-center text-red-400 text-xs font-medium px-4">
+                                <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-red-400/80" />
+                                <p>{searchError}</p>
+                                <button
+                                    onClick={() => {
+                                        setSearchError(null);
+                                        setLoading(true);
+                                        axios.get(`/api/search/unified?q=${encodeURIComponent(debouncedQuery)}`)
+                                            .then(r => setResults((r.data.results || []).slice(0, 10)))
+                                            .catch(() => setSearchError("Failed to fetch search results."))
+                                            .finally(() => setLoading(false));
+                                    }}
+                                    className="mt-3 px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-colors"
+                                >
+                                    Retry Search
+                                </button>
+                            </div>
+                        )}
+
                         {/* Empty search results state */}
-                        {!loading && query.trim().length >= 2 && results.length === 0 && (
+                        {!loading && !searchError && query.trim().length >= 2 && results.length === 0 && (
                             <div className="py-12 text-center text-zinc-500 text-xs font-medium">
                                 No results found for &ldquo;<span className="text-white font-bold">{query}</span>&rdquo;
                             </div>

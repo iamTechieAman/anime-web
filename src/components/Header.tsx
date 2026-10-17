@@ -358,12 +358,12 @@ export default function Header() {
                 </div>
                 <div className="relative flex items-center p-2 bg-white/[0.04] border border-white/10 rounded-2xl focus-within:border-accent/50 transition-all">
                   <Search className="w-6 h-6 text-zinc-400 ml-3 shrink-0"/>
-                  <input type="text" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} onKeyDown={(e) => { if (e.key === "Enter" && searchQuery.length >= 2) { if (suggestions.length > 0) { router.push(suggestions[0].href || `/watch/${suggestions[0].type}/${suggestions[0].id}`, { scroll: false }); setIsTvSearchOpen(false); saveRecent(suggestions[0].title); } else { handleSearch(null, searchQuery); setIsTvSearchOpen(false); } } }} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
+                  <input type="text" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setActiveIndex(-1);}} onKeyDown={(e) => { if (e.key === "Enter" && searchQuery.length >= 2) { if (suggestions.length > 0) { const s0 = suggestions[0]; const target = s0.href || (s0.type === 'anime' ? `/watch/anime/${encodeURIComponent(s0.id)}?ep=1` : s0.type === 'tv' ? `/watch/tv/${encodeURIComponent(s0.id)}?s=1&e=1` : `/watch/movie/${encodeURIComponent(s0.id)}`); router.push(target, { scroll: false }); setIsTvSearchOpen(false); saveRecent(s0.title); } else { handleSearch(null, searchQuery); setIsTvSearchOpen(false); } } }} placeholder="Search..." className="w-full bg-transparent border-0 focus:outline-none text-lg px-4 text-white placeholder-zinc-500 font-bold"/>
                   {searchQuery&&<button onClick={()=>setSearchQuery("")} className="p-2"><X className="w-5 h-5 text-zinc-400"/></button>}
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto space-y-2 hide-scrollbar">
                   {suggestions.length>0?suggestions.map((item:any,i:number)=>(
-                    <Link key={`${item.type}-${item.id}`} href={item.href||`/watch/${item.type}/${item.id}`} scroll={false} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
+                    <Link key={`${item.type}-${item.id}`} href={item.href || (item.type === 'anime' ? `/watch/anime/${encodeURIComponent(item.id)}?ep=1` : item.type === 'tv' ? `/watch/tv/${encodeURIComponent(item.id)}?s=1&e=1` : `/watch/movie/${encodeURIComponent(item.id)}`)} scroll={false} onClick={()=>{setIsTvSearchOpen(false);saveRecent(item.title);}}
                       className={`flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/10 border border-white/5 transition-all ${activeIndex===i?'border-accent':''}`}>
                       <div className="w-12 h-16 relative overflow-hidden rounded-xl bg-bg-elevated shrink-0">{item.image&&<Image src={item.image} alt="" fill sizes="48px" className="object-cover"/>}</div>
                       <div className="flex-1 min-w-0">
@@ -496,9 +496,7 @@ export default function Header() {
                     <LogIn className="w-3.5 h-3.5 shrink-0"/><span>Login</span>
                   </button>
                 )}
-                {activeProfileId && (
-                  <CustomProfileMenu />
-                )}
+                <CustomProfileMenu />
               </>
             )}
           </div>
