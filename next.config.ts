@@ -137,10 +137,30 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Headers', value: '*' },
         ],
       },
+      {
+        source: '/manifest.webmanifest',
+        headers: [
+          { key: 'Content-Type', value: 'application/manifest+json; charset=utf-8' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          { key: 'Content-Type', value: 'application/manifest+json; charset=utf-8' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
     ];
   },
   async rewrites() {
     return [
+      {
+        source: '/manifest.json',
+        destination: '/manifest.webmanifest',
+      },
       {
         source: '/anime',
         destination: '/browse?type=tv&language=ja',

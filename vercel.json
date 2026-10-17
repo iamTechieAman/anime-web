@@ -50,6 +50,40 @@
                     "value": "public, s-maxage=3600, stale-while-revalidate=86400"
                 }
             ]
+        },
+        {
+            "source": "/manifest.webmanifest",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/manifest+json; charset=utf-8"
+                },
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, stale-while-revalidate=604800"
+                }
+            ]
+        },
+        {
+            "source": "/manifest.json",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/manifest+json; charset=utf-8"
+                },
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, stale-while-revalidate=604800"
+                }
+            ]
         }
     ]
 }

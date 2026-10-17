@@ -106,7 +106,6 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
-  manifest: '/manifest.json',
 };
 
 
@@ -225,7 +224,6 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://vidlink.pro" />
         <link rel="dns-prefetch" href="https://vidsrc.me" />
 
-        <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#050505" />
