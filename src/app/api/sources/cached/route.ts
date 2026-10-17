@@ -8,8 +8,8 @@ const FALLBACK_SOURCES = [
         id: "source-0",
         name: "Toon Player Core",
         badge: "Core HD",
-        movieUrl: "https://vidcore.net/movie/{id}",
-        tvUrl: "https://vidcore.net/tv/{id}/{season}/{episode}",
+        movieUrl: "https://vidcore.io/movie/{id}",
+        tvUrl: "https://vidcore.io/tv/{id}/{season}/{episode}",
         featured: true,
         priority: 0,
         enabled: true,
@@ -39,8 +39,8 @@ const FALLBACK_SOURCES = [
         id: "source-3",
         name: "Toon Player Fast",
         badge: "Auto-Next",
-        movieUrl: "https://vidfast.pro/movie/{id}?autoPlay=true&title=true&poster=true",
-        tvUrl: "https://vidfast.pro/tv/{id}/{season}/{episode}?autoPlay=true&title=true&poster=true&nextButton=true",
+        movieUrl: "https://vidfast.vc/movie/{id}?autoPlay=true&title=true&poster=true",
+        tvUrl: "https://vidfast.vc/tv/{id}/{season}/{episode}?autoPlay=true&title=true&poster=true&nextButton=true",
         featured: true,
         priority: 3,
         enabled: true,
@@ -184,8 +184,19 @@ export async function GET() {
         const sources = (data.sources || []).map((s: any) => {
             const rawKey = (s.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
             const brandedName = BRANDING_MAP[rawKey] || `Toon Player ${s.name}`;
+
+            // Normalize legacy upstream domains to active working hosts
+            const movieUrl = (s.movieUrl || "")
+                .replace("vidcore.net", "vidcore.io")
+                .replace("vidfast.pro", "vidfast.vc");
+            const tvUrl = (s.tvUrl || "")
+                .replace("vidcore.net", "vidcore.io")
+                .replace("vidfast.pro", "vidfast.vc");
+
             return {
                 ...s,
+                movieUrl,
+                tvUrl,
                 name: brandedName,
                 originalName: s.name,
             };

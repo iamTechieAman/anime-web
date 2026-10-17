@@ -25,8 +25,8 @@ export async function GET(request: Request) {
                 name: "Toon Player Core",
                 badge: "Core HD",
                 url: isMovie
-                    ? `https://vidcore.net/movie/${id}`
-                    : `https://vidcore.net/tv/${id}/${season}/${episode}`,
+                    ? `https://vidcore.io/movie/${id}`
+                    : `https://vidcore.io/tv/${id}/${season}/${episode}`,
             },
             {
                 id: "embedmaster",
@@ -49,8 +49,8 @@ export async function GET(request: Request) {
                 name: "Toon Player Fast",
                 badge: "Auto-Next",
                 url: isMovie
-                    ? `https://vidfast.pro/movie/${id}?autoPlay=true&title=true&poster=true`
-                    : `https://vidfast.pro/tv/${id}/${season}/${episode}?autoPlay=true&title=true&poster=true&nextButton=true`,
+                    ? `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`
+                    : `https://vidfast.vc/tv/${id}/${season}/${episode}?autoPlay=true&title=true&poster=true&nextButton=true`,
             },
             {
                 id: "vidnest",

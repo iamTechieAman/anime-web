@@ -47,4 +47,5 @@ export function getAllProviders(): AnimeProvider[] {
 
 export { AllAnimeProvider, HiAnimeProvider, AnikaiProvider, AniWatchProvider, ConsumetProvider, VidSrcProvider, CinEvoProvider, AniwaveProvider, AniwatchTVProvider, JikanProvider, AnimePaheProvider, GogoanimeProvider, KartoonsProvider, TwoEmbedProvider };
 export * from './types';
+export * from './registry';
 

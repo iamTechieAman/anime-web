@@ -21,6 +21,11 @@ import { isMovieContent } from "@/utils/mediaType";
 import { DetailsSkeleton, EpisodeListSkeleton } from "@/components/SkeletonLoader";
 import PlayerStatusOverlay, { type PlayerPlaybackState } from "@/components/player/PlayerStatusOverlay";
 import CrossOriginEmbedNotice from "@/components/player/CrossOriginEmbedNotice";
+import { 
+    type ContentType, 
+    deduplicateServersByCanonicalId, 
+    getCanonicalProviderId 
+} from "@/lib/providers/registry";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -206,66 +211,97 @@ const EpisodeButton = React.memo(function EpisodeButton({
 const MOVIE_SERVERS = [
     {
         id: 'vidlink',
+        serverId: 'vidlink',
+        canonicalId: 'vidlink',
         name: 'Toon Player Link',
+        serverName: 'Toon Player Link',
         badge: 'VidLink',
         isMovieServer: true,
+        qualityScore: 105,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
     },
     {
         id: 'vidnest',
+        serverId: 'vidnest',
+        canonicalId: 'vidnest',
         name: 'Toon Player Nest',
+        serverName: 'Toon Player Nest',
         badge: 'Ultra',
         isMovieServer: true,
+        qualityScore: 104,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidnest.fun/tv/${id}/${s || 1}/${e || 1}` : `https://vidnest.fun/movie/${id}`,
     },
     {
         id: 'vidcore',
+        serverId: 'vidcore',
+        canonicalId: 'vidcore',
         name: 'Toon Player Core',
+        serverName: 'Toon Player Core',
         badge: 'Core HD',
         isMovieServer: true,
+        qualityScore: 103,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidcore.io/tv/${id}/${s || 1}/${e || 1}` : `https://vidcore.io/movie/${id}`,
     },
     {
         id: 'embedmaster',
+        serverId: 'embedmaster',
+        canonicalId: 'embedmaster',
         name: 'Toon Player Master',
+        serverName: 'Toon Player Master',
         badge: 'Master',
         isMovieServer: true,
+        qualityScore: 102,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}` : `https://embedmaster.link/movie/${id}`,
     },
     {
         id: 'vidrock',
+        serverId: 'vidrock',
+        canonicalId: 'vidrock',
         name: 'Toon Player Rock',
+        serverName: 'Toon Player Rock',
         badge: 'Stable',
         isMovieServer: true,
+        qualityScore: 99,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidrock.net/tv/${id}/${s || 1}/${e || 1}` : `https://vidrock.net/movie/${id}`,
     },
     {
         id: 'vidfast',
+        serverId: 'vidfast',
+        canonicalId: 'vidfast',
         name: 'Toon Player Fast',
+        serverName: 'Toon Player Fast',
         badge: 'Auto-Next',
         isMovieServer: true,
+        qualityScore: 101,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidfast.vc/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true` : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`,
     },
-
     {
         id: 'vidsrc_embed_ru',
+        serverId: 'vidsrc_embed_ru',
+        canonicalId: 'vidsrc_embed_ru',
         name: 'Toon Player VidSrc',
+        serverName: 'Toon Player VidSrc',
         badge: 'VidSrc',
         isMovieServer: true,
+        qualityScore: 94,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=1&ds_lang=en` : `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`,
     },
     {
         id: 'smashystream',
+        serverId: 'smashystream',
+        canonicalId: 'smashystream',
         name: 'Toon Player Smashy',
+        serverName: 'Toon Player Smashy',
         badge: 'Multi-Host',
         isMovieServer: true,
+        qualityScore: 95,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://player.smashystream.com/show/${id}/${s || 1}/${e || 1}` : `https://player.smashystream.com/movie/${id}`,
     },
@@ -856,57 +892,49 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     useEffect(() => {
         const loadDynamicFallbackServers = async () => {
             try {
-                let fetchedServers = [];
+                let fetchedServers: any[] = [];
                 try {
                     const res = await axios.get('/api/servers?type=movie');
                     if (res.data && res.data.servers && res.data.servers.length > 0) {
-                        fetchedServers = res.data.servers.map((srv: any) => ({
-                            id: srv.serverId,
-                            name: srv.name,
-                            badge: srv.badge,
-                            type: srv.type,
-                            isMovieServer: true,
-                            getUrl: (param1: string, param2: string, s?: number, e?: number) => {
-                                if (srv.type === 'anime') {
+                        fetchedServers = res.data.servers.map((srv: any) => {
+                            const canonicalId = srv.canonicalId || getCanonicalProviderId(srv.serverId || srv.id);
+                            return {
+                                id: canonicalId,
+                                serverId: srv.serverId || canonicalId,
+                                canonicalId,
+                                name: srv.name,
+                                serverName: srv.name,
+                                badge: srv.badge,
+                                type: srv.type,
+                                isMovieServer: true,
+                                getUrl: (param1: string, param2: string, s?: number, e?: number) => {
+                                    if (srv.type === 'anime') {
+                                        return srv.urlTemplate
+                                            .replace('{id}', param1)
+                                            .replace('{e}', String(param2 || 1));
+                                    }
+                                    const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
+                                    if (isAnimeCall) {
+                                        return srv.urlTemplate
+                                            .replace('{id}', param1)
+                                            .replace('{s}', '1')
+                                            .replace('{e}', String(param2 || 1));
+                                    }
                                     return srv.urlTemplate
-                                        .replace('{id}', param1)
-                                        .replace('{e}', String(param2 || 1));
+                                        .replace('{id}', param2)
+                                        .replace('{s}', String(s || 1))
+                                        .replace('{e}', String(e || 1));
                                 }
-                                const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
-                                if (isAnimeCall) {
-                                    return srv.urlTemplate
-                                        .replace('{id}', param1)
-                                        .replace('{s}', '1')
-                                        .replace('{e}', String(param2 || 1));
-                                }
-                                return srv.urlTemplate
-                                    .replace('{id}', param2)
-                                    .replace('{s}', String(s || 1))
-                                    .replace('{e}', String(e || 1));
-                            }
-                        }));
+                            };
+                        });
                     }
                 } catch (err) {
                     console.error('Failed to fetch dynamic fallback servers in anime, using hardcoded', err);
                 }
 
-                if (fetchedServers.length > 0) {
-                    let baseServers = [...fetchedServers];
-                    MOVIE_SERVERS.forEach((hc: any) => {
-                        const exists = fetchedServers.some((fs: any) => 
-                            fs.id === hc.id || 
-                            fs.id.startsWith(hc.id) ||
-                            fs.name.toLowerCase().includes(hc.name.toLowerCase()) ||
-                            hc.name.toLowerCase().includes(fs.name.toLowerCase())
-                        );
-                        if (!exists) {
-                            baseServers.push(hc);
-                        }
-                    });
-                    setDynamicMovieServers(baseServers);
-                } else {
-                    setDynamicMovieServers([...MOVIE_SERVERS]);
-                }
+                const combined = [...fetchedServers, ...MOVIE_SERVERS];
+                const dedupedMovieServers = deduplicateServersByCanonicalId(combined);
+                setDynamicMovieServers(dedupedMovieServers);
             } catch (e) {
                 console.error("Failed to initialize dynamic movie servers in anime WatchClient:", e);
             }
@@ -1286,10 +1314,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         // ALWAYS include movie servers — they are the guaranteed fallback
         const movieServersList = dynamicMovieServers.map((ms: any) => ({
             serverId: ms.id,
+            canonicalId: ms.canonicalId || getCanonicalProviderId(ms.id),
             serverName: ms.name,
             type: mode,
             badge: ms.badge,
             isMovieServer: true,
+            qualityScore: ms.qualityScore || 90,
             getUrl: ms.getUrl
         }));
 
@@ -1303,38 +1333,46 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         if (numericMalId) {
             emergencyEmbeds.push({
                 serverId: "emergency_autoembed",
+                canonicalId: "autoembed",
                 serverName: "AutoEmbed",
                 type: mode,
                 badge: "Fast HD",
                 isMovieServer: true,
                 isEmergency: true,
+                qualityScore: 100,
                 getUrl: () => `https://player.autoembed.cc/embed/anime/${numericMalId}/${currentEp}`
             });
             emergencyEmbeds.push({
                 serverId: "emergency_vidsrc_cc",
+                canonicalId: "vidsrc_cc",
                 serverName: "VidSrc CC",
                 type: mode,
                 badge: "VidSrc",
                 isMovieServer: true,
                 isEmergency: true,
+                qualityScore: 99,
                 getUrl: () => `https://vidsrc.cc/v2/embed/anime/${numericMalId}/${currentEp}`
             });
             emergencyEmbeds.push({
                 serverId: "emergency_mal",
+                canonicalId: "vidsrc_me",
                 serverName: "VidSrc Me",
                 type: mode,
                 badge: "MAL",
                 isMovieServer: true,
                 isEmergency: true,
+                qualityScore: 98,
                 getUrl: () => `https://vidsrc.me/embed/anime?mal=${numericMalId}&episode=${currentEp}`
             });
             emergencyEmbeds.push({
                 serverId: "emergency_vidsrc_to",
+                canonicalId: "vidsrc_to",
                 serverName: "VidSrc TO",
                 type: mode,
                 badge: "Backup",
                 isMovieServer: true,
                 isEmergency: true,
+                qualityScore: 97,
                 getUrl: () => `https://vidsrc.to/embed/anime/${numericMalId}/${currentEp}`
             });
         }
@@ -1359,8 +1397,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     nativeServers = res.data.servers;
                 }
                 
-                // ALWAYS include emergency anime embeds and movie servers — guaranteed fallbacks
-                const allServersRaw = [...nativeServers, ...emergencyEmbeds, ...movieServersList];
+                // ALWAYS include emergency anime embeds and valid movie servers — guaranteed fallbacks, deduplicated by canonical provider
+                const validMovieServers = (tmdbId && tmdbId !== "0") ? movieServersList : [];
+                const combinedAnimeServers = [...nativeServers, ...emergencyEmbeds, ...validMovieServers];
+                const allServersRaw = deduplicateServersByCanonicalId(combinedAnimeServers, 'anime');
                 const contentKey = `anime:${id}:${currentEp}`;
                 const allServers = ServerHealthManager.filterAndSortServers(allServersRaw, 'serverId', contentKey);
                 setServers(allServers);
@@ -1368,8 +1408,14 @@ export default function WatchClient({ id: fullId }: { id: string }) {
 
                 // Pick first available server immediately if none selected or current invalid
                 if (allServers.length > 0) {
-                    const currentValid = allServers.some((s: any) => s.serverId === selectedServer);
-                    const manualValid = manualServerRef.current && allServers.some((s: any) => s.serverId === manualServerRef.current);
+                    const currentValid = allServers.some((s: any) => 
+                        s.serverId === selectedServer || 
+                        (s.canonicalId && selectedServer && getCanonicalProviderId(selectedServer) === s.canonicalId)
+                    );
+                    const manualValid = manualServerRef.current && allServers.some((s: any) => 
+                        s.serverId === manualServerRef.current || 
+                        (s.canonicalId && getCanonicalProviderId(manualServerRef.current) === s.canonicalId)
+                    );
                     
                     if (!currentValid) {
                         const newServer = (manualValid ? manualServerRef.current : (nativeServers[0]?.serverId || allServers[0].serverId)) as string;
@@ -1383,10 +1429,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 if (axios.isCancel(err)) return;
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
                 const contentKey = `anime:${id}:${currentEp}`;
-                const fallbackList = ServerHealthManager.filterAndSortServers([...emergencyEmbeds, ...movieServersList], 'serverId', contentKey);
+                const validMovieServersFallback = (tmdbId && tmdbId !== "0") ? movieServersList : [];
+                const combinedFallback = deduplicateServersByCanonicalId([...emergencyEmbeds, ...validMovieServersFallback], 'anime');
+                const fallbackList = ServerHealthManager.filterAndSortServers(combinedFallback, 'serverId', contentKey);
                 setServers(fallbackList);
                 setServersKey(`${currentEp}-${mode}`);
-                if (fallbackList.length > 0 && (!selectedServer || !fallbackList.some(s => s.serverId === selectedServer))) {
+                if (fallbackList.length > 0 && (!selectedServer || !fallbackList.some(s => s.serverId === selectedServer || (s.canonicalId && getCanonicalProviderId(selectedServer) === s.canonicalId)))) {
                     setSelectedServer(fallbackList[0].serverId);
                 }
             } finally {
@@ -1542,12 +1590,10 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         setSourceUrl(proxiedUrl);
                         setVideoType(isM3U8 ? "m3u8" : "mp4");
                     } else {
-                        let referer = "";
-                        try { referer = new URL(absoluteUrl).origin; } catch(_) {}
-                        const proxiedUrl = `/api/proxy/embed?url=${encodeURIComponent(absoluteUrl)}&referer=${encodeURIComponent(referer)}`;
-                        console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (Anime IFrame): ${id} -> ${proxiedUrl}`);
+                        const embedUrl = getProxiedEmbedUrl(absoluteUrl);
+                        console.log(`[GlobalClickDebugger] 📡 STREAM URL GENERATED FOR ID (Anime IFrame): ${id} -> ${embedUrl}`);
                         if (currentSeq !== sourceSeqRef.current) return;
-                        setSourceUrl(proxiedUrl);
+                        setSourceUrl(embedUrl);
                         setVideoType("iframe");
                     }
                 } else {

@@ -23,6 +23,11 @@ import PlayerStatusOverlay, { type PlayerPlaybackState } from "@/components/play
 import CrossOriginEmbedNotice from "@/components/player/CrossOriginEmbedNotice";
 import { useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
+import { 
+    type ContentType, 
+    deduplicateServersByCanonicalId, 
+    getCanonicalProviderId 
+} from "@/lib/providers/registry";
 
 const DownloadModal = dynamic(() => import("@/components/DownloadModal"), { ssr: false });
 
@@ -31,8 +36,10 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 const SERVERS = [
     {
         id: 'vidlink',
+        canonicalId: 'vidlink',
         name: 'Toon Player Link',
         badge: 'VidLink',
+        qualityScore: 105,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
@@ -40,8 +47,10 @@ const SERVERS = [
     },
     {
         id: 'vidnest',
+        canonicalId: 'vidnest',
         name: 'Toon Player Nest',
         badge: 'Ultra',
+        qualityScore: 104,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://vidnest.fun/tv/${id}/${s || 1}/${e || 1}`
@@ -49,8 +58,10 @@ const SERVERS = [
     },
     {
         id: 'vidcore',
+        canonicalId: 'vidcore',
         name: 'Toon Player Core',
         badge: 'Core HD',
+        qualityScore: 103,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://vidcore.io/tv/${id}/${s || 1}/${e || 1}`
@@ -58,8 +69,10 @@ const SERVERS = [
     },
     {
         id: 'embedmaster',
+        canonicalId: 'embedmaster',
         name: 'Toon Player Master',
         badge: 'Master',
+        qualityScore: 102,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}`
@@ -67,8 +80,10 @@ const SERVERS = [
     },
     {
         id: 'vidrock',
+        canonicalId: 'vidrock',
         name: 'Toon Player Rock',
         badge: 'Stable',
+        qualityScore: 99,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://vidrock.net/tv/${id}/${s || 1}/${e || 1}`
@@ -76,8 +91,10 @@ const SERVERS = [
     },
     {
         id: 'vidfast',
+        canonicalId: 'vidfast',
         name: 'Toon Player Fast',
         badge: 'Auto-Next',
+        qualityScore: 101,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://vidfast.vc/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true`
@@ -85,8 +102,10 @@ const SERVERS = [
     },
     {
         id: 'smashystream',
+        canonicalId: 'smashystream',
         name: 'Toon Player Smashy',
         badge: 'Multi-Host',
+        qualityScore: 95,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://player.smashystream.com/show/${id}/${s || 1}/${e || 1}`
@@ -94,8 +113,10 @@ const SERVERS = [
     },
     {
         id: 'vidsrc_embed_ru',
+        canonicalId: 'vidsrc_embed_ru',
         name: 'Toon Player VidSrc',
         badge: 'VidSrc',
+        qualityScore: 94,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
                 ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=1&ds_lang=en`
@@ -104,10 +125,12 @@ const SERVERS = [
     // Kartoons Direct: dedicated cartoon scraper server exclusively available when media type is cartoon
     {
         id: 'kartoons',
+        canonicalId: 'kartoons',
         name: 'Kartoons Direct',
         badge: 'Toon Player',
         requiresScrape: true,
         type: 'cartoon',
+        qualityScore: 100,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             `/api/scrape/kartoons?showId=${id}&s=${s || 1}&e=${e || 1}&type=${type}`,
     },
@@ -115,37 +138,46 @@ const SERVERS = [
 
 const ANIME_SERVERS = [
     {
-        id: "toon4k_anime",
+        id: "vidlink",
+        canonicalId: "vidlink",
         name: "Toon4K",
         badge: "4K",
+        qualityScore: 105,
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
             tmdbId 
                 ? `https://vidlink.pro/tv/${tmdbId}/1/${ep}?primaryColor=3b82f6&title=false&autoplay=true` 
                 : `https://player.autoembed.cc/embed/anime/${id}/${ep}`
     },
     {
-        id: "vidcore_anime",
+        id: "vidcore",
+        canonicalId: "vidcore",
         name: "Toon Player Core",
         badge: "Core HD",
+        qualityScore: 103,
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
             tmdbId 
                 ? `https://vidcore.io/tv/${tmdbId}/1/${ep}` 
                 : `https://vidsrc.cc/v2/embed/anime/${id}/${ep}`
     },
     {
-        id: "vidsrc_pro_anime",
+        id: "vidsrc_embed_ru",
+        canonicalId: "vidsrc_embed_ru",
         name: "VidSrc Pro",
         badge: "HD",
+        qualityScore: 94,
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
             tmdbId 
-                ? `https://vidsrc.pro/embed/tv/${tmdbId}/1/${ep}?autoplay=1` 
+                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${tmdbId}&season=1&episode=${ep}&autoplay=1&ds_lang=en` 
                 : `https://vidsrc.me/embed/anime?mal=${id}&episode=${ep}`
     },
     {
-        id: "kartoons_toon",
+        id: "kartoons",
+        canonicalId: "kartoons",
         name: "Kartoons Toon",
         badge: "Toon Hub",
         requiresScrape: true,
+        type: 'cartoon',
+        qualityScore: 100,
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
             `/api/scrape/kartoons?showId=${id}&e=${ep}&type=show`,
     },
@@ -1077,16 +1109,16 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     // User Settings Support
     const currentMediaTypeServers = useMemo(() => {
         const contentKey = `${type}:${id}`;
-        const filtered = typeof type === "string"
-            ? serversList.filter(s => {
-                if (s.type === 'cartoon') return type === 'cartoon';
-                if (!s.type) return true;
-                const targetType = (type === "cartoon") ? "tv" : type;
-                return s.type === targetType;
-            })
-            : serversList;
-        return ServerHealthManager.filterAndSortServers(filtered, 'id', contentKey);
-    }, [type, id, serversList]);
+        const targetContentType: ContentType = (type === 'cartoon')
+            ? 'cartoon'
+            : (type === 'anime')
+                ? 'anime'
+                : (resolvedMediaType === 'tv' || type === 'tv')
+                    ? 'tv'
+                    : 'movie';
+        const deduped = deduplicateServersByCanonicalId(serversList, targetContentType);
+        return ServerHealthManager.filterAndSortServers(deduped, 'id', contentKey);
+    }, [type, id, resolvedMediaType, serversList]);
 
     // Watchlist
     const inWatchlist = isInWatchlist(id);
@@ -1390,66 +1422,62 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
                 
                 // Fetch dynamic servers from MongoDB
-                let fetchedServers = [];
+                let fetchedServers: any[] = [];
                 try {
-                    const reqType = type === 'anime' ? 'anime' : 'movie';
+                    const reqType = type === 'anime' ? 'anime' : (type === 'cartoon' ? 'tv' : type);
                     const res = await axios.get(`/api/servers?type=${reqType}`);
                     if (res.data && res.data.servers && res.data.servers.length > 0) {
-                        fetchedServers = res.data.servers.map((srv: any) => ({
-                            id: srv.serverId,
-                            name: srv.name,
-                            badge: srv.badge,
-                            type: srv.type,
-                            getUrl: (param1: string, param2: string, s?: number, e?: number) => {
-                                if (srv.type === 'anime' || type === 'anime') {
+                        fetchedServers = res.data.servers.map((srv: any) => {
+                            const canonicalId = srv.canonicalId || getCanonicalProviderId(srv.serverId || srv.id);
+                            return {
+                                id: canonicalId,
+                                serverId: srv.serverId || canonicalId,
+                                canonicalId,
+                                name: srv.name,
+                                badge: srv.badge,
+                                type: srv.type,
+                                qualityScore: srv.qualityScore,
+                                getUrl: (param1: string, param2: string, s?: number, e?: number) => {
+                                    if (srv.type === 'anime' || type === 'anime') {
+                                        return srv.urlTemplate
+                                            .replace('{id}', param1)
+                                            .replace('{e}', String(param2 || 1));
+                                    }
+                                    const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
+                                    if (isAnimeCall) {
+                                        return srv.urlTemplate
+                                            .replace('{id}', param1)
+                                            .replace('{s}', '1')
+                                            .replace('{e}', String(param2 || 1));
+                                    }
                                     return srv.urlTemplate
-                                        .replace('{id}', param1)
-                                        .replace('{e}', String(param2 || 1));
+                                        .replace('{id}', param2)
+                                        .replace('{s}', String(s || 1))
+                                        .replace('{e}', String(e || 1));
                                 }
-                                const isAnimeCall = (param1 !== 'tv' && param1 !== 'movie' && s === undefined && e === undefined);
-                                if (isAnimeCall) {
-                                    return srv.urlTemplate
-                                        .replace('{id}', param1)
-                                        .replace('{s}', '1')
-                                        .replace('{e}', String(param2 || 1));
-                                }
-                                return srv.urlTemplate
-                                    .replace('{id}', param2)
-                                    .replace('{s}', String(s || 1))
-                                    .replace('{e}', String(e || 1));
-                            }
-                        }));
+                            };
+                        });
                     }
                 } catch (err) {
                     console.error('Failed to fetch servers, using fallback', err);
                 }
 
-                // Combine DB servers and hardcoded fallbacks to ensure no servers are ever missing
-                let baseServers = [];
-                const hardcodedList = type === 'anime' ? ANIME_SERVERS : SERVERS;
-                if (fetchedServers.length > 0) {
-                    baseServers = [...fetchedServers];
-                    hardcodedList.forEach((hc: any) => {
-                        const exists = fetchedServers.some((fs: any) => 
-                            fs.id === hc.id || 
-                            fs.id.startsWith(hc.id) ||
-                            fs.name.toLowerCase().includes(hc.name.toLowerCase()) ||
-                            hc.name.toLowerCase().includes(fs.name.toLowerCase())
-                        );
-                        if (!exists) {
-                            baseServers.push(hc);
-                        }
-                    });
-                } else {
-                    baseServers = [...hardcodedList];
-                }
+                // Combine DB servers and hardcoded fallbacks, deduplicating strictly by canonical ID
+                const targetContentType: ContentType = (type === 'cartoon')
+                    ? 'cartoon'
+                    : (type === 'anime')
+                        ? 'anime'
+                        : (resolvedMediaType === 'tv' || type === 'tv')
+                            ? 'tv'
+                            : 'movie';
 
-                // Keep original order from SERVERS array (do not re-sort; priority is defined in SERVERS const)
-                setServersList([...baseServers]);
+                const hardcodedList = type === 'anime' ? ANIME_SERVERS : SERVERS;
+                const baseServers = deduplicateServersByCanonicalId([...fetchedServers, ...hardcodedList], targetContentType);
+
+                // Keep original canonical order
+                setServersList(baseServers);
                 if (isFirstLoadRef.current) {
-                    const targetType = (type === "cartoon") ? "tv" : type;
-                    const filtered = baseServers.filter((s: any) => !s.type || s.type === targetType);
-                    setActiveServer(filtered[0] || baseServers[0]);
+                    setActiveServer(baseServers[0] || SERVERS[0]);
                     isFirstLoadRef.current = false;
                 }
             } catch (e) {
@@ -1504,11 +1532,22 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
         setFailedServers(prev => {
             const nextFailed = new Set(prev);
-            nextFailed.add(activeServer.id);
-            ServerHealthManager.recordFailure(activeServer.id, reason, contentKey);
+            const activeId = activeServer.id;
+            const activeCanon = activeServer.canonicalId || getCanonicalProviderId(activeId);
+            nextFailed.add(activeId);
+            if (activeCanon) nextFailed.add(activeCanon);
+            ServerHealthManager.recordFailure(activeId, reason, contentKey);
+
+            const isServerFailed = (s: any) => {
+                if (!s) return true;
+                const sid = s.id;
+                const sc = s.canonicalId || getCanonicalProviderId(sid);
+                const srvId = s.serverId;
+                return nextFailed.has(sid) || (sc && nextFailed.has(sc)) || (srvId && nextFailed.has(srvId));
+            };
 
             // Show error screen ONLY if every single server in the available servers list has failed
-            const allFailed = listToUse.every(s => nextFailed.has(s.id));
+            const allFailed = listToUse.every(isServerFailed);
             if (allFailed || nextFailed.size >= listToUse.length) {
                 console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted for ${contentKey}. Displaying fallback UI.`);
                 setSourceError(true);
@@ -1517,7 +1556,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             }
 
             // Circular transition: nextIndex = (currentIndex + 1) % servers.length
-            const currentIndex = listToUse.findIndex(s => s.id === activeServer.id);
+            const currentIndex = listToUse.findIndex(s => s.id === activeServer.id || (activeCanon && s.canonicalId === activeCanon));
             const startIdx = currentIndex >= 0 ? currentIndex : 0;
             let nextServer = null;
 
@@ -1525,7 +1564,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             for (let i = 1; i <= listToUse.length; i++) {
                 const nextIndex = (startIdx + i) % listToUse.length;
                 const candidate = listToUse[nextIndex];
-                if (candidate && !nextFailed.has(candidate.id) && ServerHealthManager.isAvailable(candidate.id, contentKey)) {
+                if (candidate && !isServerFailed(candidate) && ServerHealthManager.isAvailable(candidate.id, contentKey)) {
                     nextServer = candidate;
                     break;
                 }
@@ -1536,7 +1575,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 for (let i = 1; i <= listToUse.length; i++) {
                     const nextIndex = (startIdx + i) % listToUse.length;
                     const candidate = listToUse[nextIndex];
-                    if (candidate && !nextFailed.has(candidate.id)) {
+                    if (candidate && !isServerFailed(candidate)) {
                         nextServer = candidate;
                         break;
                     }
@@ -2132,10 +2171,10 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className={`relative w-full aspect-video rounded-[32px] overflow-hidden bg-black/50 ring-1 ring-white/10 shadow-2xl ${
+                    className={`relative w-full aspect-video rounded-none sm:rounded-2xl md:rounded-[32px] overflow-hidden bg-black/50 ring-0 sm:ring-1 ring-white/10 shadow-2xl ${
                         isPseudoFullscreen ? "toonplayer-pseudo-fullscreen" :
                         isFocusMode ? "!h-[100dvh] !max-w-none !aspect-auto rounded-none" : "max-w-[1600px] mx-auto"
-                    }`}
+                    } watch-player-landscape`}
                 >
                     {/* Fullscreen Floating Controls */}
                     {(isFullscreen || isPseudoFullscreen) && (

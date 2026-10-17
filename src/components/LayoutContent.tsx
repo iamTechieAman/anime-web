@@ -157,6 +157,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
       if (activeId) {
         setActiveProfile(activeId);
+      } else {
+        // Auto-assign guest profile to guarantee seamless public visitor access
+        setActiveProfile('profile-guest');
       }
     }
     
@@ -308,8 +311,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   }, []);
 
   const showSidebar = !isWatchPage;
-  // Only activate profile gate after client has mounted and store has hydrated with no active profile
-  const isProfileGateActive = mounted && hasHydrated && !activeProfileId;
+  // Only activate profile gate if explicitly triggered by the user, never intercepting public guest visitors or watch pages
+  const isExplicitSwitch = typeof window !== "undefined" && window.sessionStorage.getItem("toonplayer-explicit-switch") === "true";
+  const isProfileGateActive = mounted && hasHydrated && !activeProfileId && isExplicitSwitch && !isWatchPage;
 
   const contentPlClass = showSidebar 
     ? (isSidebarPinned ? "pl-0 md:pl-[260px]" : "pl-0 md:pl-[72px]")

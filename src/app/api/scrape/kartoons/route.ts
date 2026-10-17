@@ -41,14 +41,14 @@ export async function GET(request: NextRequest) {
 
     // DIAGNOSTIC 1: Content Type & Identifier Check
     // Kartoons Direct exclusively indexes cartoon and anime titles by custom IDs/slugs.
-    // TMDB numeric IDs (e.g. 550, 1399) or non-cartoon types are not present in the Kartoons catalog.
+    // TMDB numeric IDs (e.g. 550, 1399) are not present in the Kartoons catalog.
     const isPureNumericTmdbId = /^\d{1,7}$/.test(showId.trim());
-    if (type === "movie" || isPureNumericTmdbId) {
+    if (isPureNumericTmdbId) {
       return NextResponse.json({
         success: false,
         code: "UNSUPPORTED_CONTENT",
         unsupported: true,
-        error: "Kartoons Direct only indexes cartoon & anime series with canonical slugs. Numeric TMDB identifiers are not supported by this provider.",
+        error: "Kartoons Direct only indexes cartoon & anime titles with canonical IDs or slugs. Numeric TMDB identifiers are not supported by this provider.",
         provider: "kartoons",
         showId
       }, { status: 422 });
@@ -111,8 +111,10 @@ export async function GET(request: NextRequest) {
 
     // STRATEGY 2: Legitimate Kartoons Player URL Builder
     if (!resolvedEmbedUrl) {
-      // Build canonical Kartoons player URL
-      resolvedEmbedUrl = `${KARTOONS_BASE_URL}/watch/show/${encodeURIComponent(showId)}/season/${seasonNum}/episode/${episodeNum}`;
+      // Build canonical Kartoons player URL (supporting both movies and multi-season shows)
+      resolvedEmbedUrl = type === "movie"
+        ? `${KARTOONS_BASE_URL}/watch/movie/${encodeURIComponent(showId)}`
+        : `${KARTOONS_BASE_URL}/watch/show/${encodeURIComponent(showId)}/season/${seasonNum}/episode/${episodeNum}`;
     }
 
     // Return validated result

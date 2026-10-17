@@ -122,8 +122,22 @@ export async function GET(request: Request) {
                         const searchPromise = async () => {
                             const searchResults = await AnimeProviderManager.search(primaryTitle);
                             if (searchResults && searchResults.length > 0) {
-                                const matchedId = searchResults[0].id;
-                                const matchedProvider = (searchResults[0] as any).providerId || 'hianime';
+                                // Match against authentic AniList titles to ensure correct anime identity
+                                const candidateTitles = [
+                                    aniListMeta.title?.english,
+                                    aniListMeta.title?.romaji,
+                                    aniListMeta.title?.userPreferred,
+                                    primaryTitle
+                                ].filter(Boolean).map((t: string) => cleanSearchTitle(t).toLowerCase());
+
+                                const normalizedMatch = searchResults.find((r: any) => {
+                                    const rTitle = cleanSearchTitle(r.title || '').toLowerCase();
+                                    return candidateTitles.some((ct: string) => rTitle === ct || rTitle.startsWith(ct) || ct.startsWith(rTitle));
+                                });
+
+                                const matchedResult = normalizedMatch || searchResults[0];
+                                const matchedId = matchedResult.id;
+                                const matchedProvider = (matchedResult as any).providerId || 'hianime';
                                 const fetchedInfo = await AnimeProviderManager.getInfo(matchedId, matchedProvider);
                                 if (fetchedInfo && Array.isArray(fetchedInfo.episodes) && fetchedInfo.episodes.length > 0) {
                                     return fetchedInfo;
@@ -299,18 +313,18 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Anime not found via providers" }, { status: 404 });
         }
 
+        const resolvedName = aniListMeta?.title?.english || aniListMeta?.title?.userPreferred || info.title || 'Unknown Anime';
+
         // Map the episodes list to the standard format
         const episodesList = info.episodes.map((ep: any) => ({
             id: ep.id,
             number: ep.number,
             title: ep.title,
             image: ep.image || (aniListMeta?.coverImage?.extraLarge || aniListMeta?.coverImage?.large || info.image || ""),
-            description: ep.description || `Episode ${ep.number} of ${info.title}`,
+            description: ep.description || `Episode ${ep.number} of ${resolvedName}`,
             isFiller: ep.isFiller || false,
             hasDub: ep.hasDub ?? true,
         }));
-
-        const resolvedName = aniListMeta?.title?.english || aniListMeta?.title?.userPreferred || info.title || 'Unknown Anime';
 
         const show = {
             id: id,

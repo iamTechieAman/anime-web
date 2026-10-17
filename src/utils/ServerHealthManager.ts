@@ -1,5 +1,7 @@
 "use client";
 
+import { getCanonicalProviderId } from "@/lib/providers/registry";
+
 export type ProviderHealthState =
     | 'unknown'
     | 'checking'
@@ -56,6 +58,10 @@ class ServerHealthManagerClass {
     ) {
         if (!serverId) return;
 
+        const canonicalId = getCanonicalProviderId(serverId);
+        const idsToUpdate = new Set<string>([serverId]);
+        if (canonicalId) idsToUpdate.add(canonicalId);
+
         const now = Date.now();
         const prev = this.providerStates[serverId] || {
             state: 'unknown',
@@ -65,17 +71,18 @@ class ServerHealthManagerClass {
 
         const newFailureCount = prev.failureCount + 1;
 
-        // Track per-content failure
+        // Track per-content failure across raw ID and canonical ID
         if (contentKey) {
             if (!this.contentFailures[contentKey]) {
                 this.contentFailures[contentKey] = new Set();
             }
-            this.contentFailures[contentKey].add(serverId);
-
-            if (!this.serverContentFailures[serverId]) {
-                this.serverContentFailures[serverId] = new Set();
-            }
-            this.serverContentFailures[serverId].add(contentKey);
+            idsToUpdate.forEach(id => {
+                this.contentFailures[contentKey].add(id);
+                if (!this.serverContentFailures[id]) {
+                    this.serverContentFailures[id] = new Set();
+                }
+                this.serverContentFailures[id].add(contentKey);
+            });
         }
 
         let state: ProviderHealthState = 'temporarily_unavailable';
@@ -143,21 +150,27 @@ class ServerHealthManagerClass {
     public recordSuccess(serverId: string, contentKey?: string, latencyMs?: number) {
         if (!serverId) return;
 
+        const canonicalId = getCanonicalProviderId(serverId);
+        const idsToUpdate = [serverId];
+        if (canonicalId && canonicalId !== serverId) idsToUpdate.push(canonicalId);
+
         const now = Date.now();
         if (contentKey && this.contentFailures[contentKey]) {
-            this.contentFailures[contentKey].delete(serverId);
+            idsToUpdate.forEach(id => this.contentFailures[contentKey].delete(id));
         }
 
-        delete this.failureCooldowns[serverId];
-        const latency = latencyMs !== undefined ? latencyMs : 250;
-        this.healthCache[serverId] = latency;
+        idsToUpdate.forEach(id => {
+            delete this.failureCooldowns[id];
+            const latency = latencyMs !== undefined ? latencyMs : 250;
+            this.healthCache[id] = latency;
 
-        this.providerStates[serverId] = {
-            state: 'available',
-            failureCount: 0,
-            latencyMs: latency,
-            updatedAt: now
-        };
+            this.providerStates[id] = {
+                state: 'available',
+                failureCount: 0,
+                latencyMs: latency,
+                updatedAt: now
+            };
+        });
     }
 
     /**
@@ -166,21 +179,27 @@ class ServerHealthManagerClass {
     public isAvailable(serverId: string, contentKey?: string): boolean {
         if (!serverId) return false;
 
-        // 1. Check content-specific failure
-        if (contentKey && this.contentFailures[contentKey]?.has(serverId)) {
+        const canonicalId = getCanonicalProviderId(serverId);
+
+        // 1. Check content-specific failure (check both raw ID and canonical ID)
+        if (contentKey && (this.contentFailures[contentKey]?.has(serverId) || (canonicalId && this.contentFailures[contentKey]?.has(canonicalId)))) {
             return false;
         }
 
         // 2. Check global failure cooldown
-        const cooldownUntil = this.failureCooldowns[serverId];
+        const cooldownUntil = this.failureCooldowns[serverId] || (canonicalId ? this.failureCooldowns[canonicalId] : undefined);
         if (cooldownUntil) {
             if (Date.now() < cooldownUntil) {
                 return false;
             }
             // Cooldown expired — grant temporary recovery check
             delete this.failureCooldowns[serverId];
+            if (canonicalId) delete this.failureCooldowns[canonicalId];
             if (this.providerStates[serverId]) {
                 this.providerStates[serverId].state = 'unknown';
+            }
+            if (canonicalId && this.providerStates[canonicalId]) {
+                this.providerStates[canonicalId].state = 'unknown';
             }
         }
 

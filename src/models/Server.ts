@@ -2,6 +2,7 @@ import mongoose, { Document, Model } from 'mongoose';
 
 export interface IServer extends Document {
   serverId: string;
+  canonicalId?: string;
   name: string;
   badge: string;
   urlTemplate: string; // The URL string that will be evaluated
@@ -14,6 +15,7 @@ export interface IServer extends Document {
 
 const ServerSchema = new mongoose.Schema<IServer>({
   serverId: { type: String, required: true, unique: true },
+  canonicalId: { type: String, required: false },
   name: { type: String, required: true },
   badge: { type: String, required: true },
   urlTemplate: { type: String, required: true },

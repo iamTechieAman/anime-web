@@ -68,7 +68,9 @@ export const MovieCard = memo(function MovieCard({ item, type = "movie", isFeatu
         ? `/watch/anime/${encodeURIComponent(finalId)}` 
         : `/watch/${routeType}/${encodeURIComponent(finalId)}`;
 
-    const posterSrc = item.poster_path ? `${IMG_BASE}/w342${item.poster_path}` : item.image;
+    const posterSrc = item.poster_path 
+        ? (item.poster_path.startsWith('http') ? item.poster_path : `${IMG_BASE}/w342${item.poster_path}`) 
+        : item.image;
 
     return (
         <div

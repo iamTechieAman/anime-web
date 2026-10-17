@@ -13,6 +13,12 @@ import {
 
 import { PlayerPlaybackState } from "@/components/player/PlayerStatusOverlay";
 
+import { 
+    type ContentType, 
+    deduplicateServersByCanonicalId, 
+    getCanonicalProviderId 
+} from '@/lib/providers/registry';
+
 interface ProviderBarProps {
     title: string;
     type: string;
@@ -54,17 +60,22 @@ const ProviderBar = memo(function ProviderBar({
     onToggleAutoPlayNext,
     onReloadPlayer,
 }: ProviderBarProps) {
+    const targetContentType: ContentType = (type === 'cartoon')
+        ? 'cartoon'
+        : (type === 'anime')
+            ? 'anime'
+            : (resolvedMediaType === 'tv' || type === 'tv')
+                ? 'tv'
+                : 'movie';
+
     const servers = useMemo(() => {
-        const base = type === "anime"
-            ? [...animeServers, ...serversList.filter((s: any) => !s.type || s.type === 'tv')]
-            : serversList.filter((s: any) => !s.type || s.type === (type === 'cartoon' ? 'tv' : type) || s.type === 'movie' || s.type === 'tv');
-        const seen = new Set<string>();
-        return base.filter((s: any) => {
-            if (seen.has(s.id)) return false;
-            seen.add(s.id);
-            return true;
-        });
-    }, [type, animeServers, serversList]);
+        const combined = type === 'anime'
+            ? [...animeServers, ...serversList]
+            : [...serversList];
+
+        // Deduplicate strictly by canonical ID while enforcing genuine content-type capability
+        return deduplicateServersByCanonicalId(combined, targetContentType);
+    }, [type, targetContentType, animeServers, serversList]);
 
     if (!activeServer) return null;
 
@@ -183,13 +194,17 @@ const ProviderBar = memo(function ProviderBar({
                         <Sparkles className="w-3 h-3 text-white/70" /> Servers:
                     </span>
                     {servers.map((server: any, idx: number) => {
-                        const isActive = activeServer.id === server.id;
-                        const isFailed = failedServers.has(server.id);
+                        const serverCanonicalId = server.canonicalId || getCanonicalProviderId(server.id || server.serverId);
+                        const activeCanonicalId = activeServer.canonicalId || getCanonicalProviderId(activeServer.id || activeServer.serverId);
+                        const isActive = activeCanonicalId === serverCanonicalId;
+                        const isFailed = failedServers.has(server.id) || 
+                            (server.serverId && failedServers.has(server.serverId)) || 
+                            failedServers.has(serverCanonicalId);
                         const isResolving = isActive && (playbackState === 'resolving' || playbackState === 'source_ready');
 
                         return (
                             <button
-                                key={server.id}
+                                key={server.id || server.serverId || serverCanonicalId}
                                 onClick={() => onSelectServer(server)}
                                 title={isFailed ? `${server.name} — previous attempt failed. Click to retry this server.` : `Switch to ${server.name}`}
                                 className={`group relative flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-300 ease-out snap-center cursor-pointer select-none active:scale-95 ${

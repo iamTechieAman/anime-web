@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
@@ -276,6 +276,7 @@ export default function MoviesPage() {
     const { data: moviePopular } = useSWR('/api/prime?category=popular', fetcher);
     const { data: movieUpcoming } = useSWR('/api/prime?category=now_playing', fetcher);
     const { data: moviePeople } = useSWR('/api/prime/trending?type=person', fetcher);
+    const { data: kartoonsData } = useSWR('/api/cartoon', fetcher, { revalidateOnFocus: false, dedupingInterval: 300000 });
 
     // Scroll-to-top visibility
     useEffect(() => {
@@ -301,6 +302,25 @@ export default function MoviesPage() {
     useEffect(() => { if (Array.isArray(moviePopular?.results)) setPopular(moviePopular.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [moviePopular]);
     useEffect(() => { if (Array.isArray(movieUpcoming?.results)) setNowPlaying(movieUpcoming.results.filter((i: any) => i && (i.poster_path || i.backdrop_path))); }, [movieUpcoming]);
     useEffect(() => { if (Array.isArray(moviePeople?.results)) setTrendingPeople(moviePeople.results.filter((i: any) => i && i.profile_path).slice(0, 6)); }, [moviePeople]);
+
+    const liveCartoons = useMemo(() => {
+        if (kartoonsData?.shows && Array.isArray(kartoonsData.shows) && kartoonsData.shows.length > 0) {
+            return kartoonsData.shows.map((item: any) => ({
+                id: item._id,
+                title: item.name,
+                name: item.name,
+                poster_path: item.thumbnail,
+                backdrop_path: item.thumbnail,
+                image: item.thumbnail,
+                vote_average: item.rating || 8.2,
+                release_date: item.year ? String(item.year) : "2026",
+                media_type: item.type === 'movie' ? 'movie' : 'tv',
+                isLive: false,
+                viewers: "12,450"
+            }));
+        }
+        return CARTOONS_DATA;
+    }, [kartoonsData]);
 
     // Pre-compute smart recommendations ensuring deduplication against top trending and popular titles
     useEffect(() => {
@@ -693,12 +713,12 @@ export default function MoviesPage() {
                                         <section className="relative">
                                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-24 bg-accent/8 rounded-full blur-[16px] pointer-events-none" />
                                             <SectionHeader icon={Tv} title="Featured Toons" color="text-accent" isFeatured viewAllHref="/browse?type=tv&genre=16" />
-                                            <LazySection><MovieRow items={CARTOONS_DATA} title="tv-featured-toons" isLarge /></LazySection>
+                                            <LazySection><MovieRow items={liveCartoons} title="tv-featured-toons" isLarge /></LazySection>
                                         </section>
                                         
                                         <section className="relative">
                                             <SectionHeader icon={Flame} title="New Releases" color="text-accent-warm" viewAllHref="/browse?sort=release_date" />
-                                            <LazySection><MovieRow items={[...CARTOONS_DATA, ...trending.slice(0, 5)]} title="tv-new-releases" /></LazySection>
+                                            <LazySection><MovieRow items={[...liveCartoons, ...trending.slice(0, 5)]} title="tv-new-releases" /></LazySection>
                                         </section>
 
                                         <section className="relative">
@@ -910,11 +930,11 @@ export default function MoviesPage() {
                                     >
                                         <section>
                                             <SectionHeader icon={Tv} title="Featured PC Toons" color="text-accent" isFeatured viewAllHref="/browse?type=tv&genre=16" />
-                                            <LazySection><MovieRow items={CARTOONS_DATA} title="featured-pc-toons" isLarge /></LazySection>
+                                            <LazySection><MovieRow items={liveCartoons} title="featured-pc-toons" isLarge /></LazySection>
                                         </section>
                                         <section>
                                             <SectionHeader icon={Sparkles} title="Latest Animated Releases" color="text-accent-warm" viewAllHref="/browse?type=tv&genre=16" />
-                                            <LazySection><MovieGrid items={CARTOONS_DATA} type="tv" /></LazySection>
+                                            <LazySection><MovieGrid items={liveCartoons} type="tv" /></LazySection>
                                         </section>
                                     </div>
                                 )}

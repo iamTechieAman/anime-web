@@ -179,7 +179,7 @@ export default function DiscoverClient() {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages.length]);
 
     // Perform AI search recommendation
     const handleNewSearch = useCallback(async (queryText: string) => {
