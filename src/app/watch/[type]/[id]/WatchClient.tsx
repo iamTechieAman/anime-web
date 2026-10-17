@@ -2509,9 +2509,9 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     )}
                 </div>
                 <div className={`flex flex-wrap gap-y-4 gap-x-2 w-full ${!showAllCast ? 'overflow-x-auto hide-scrollbar flex-nowrap pb-2' : 'justify-start'}`}>
-                    {(showAllCast ? (details?.cast || []) : (details?.cast || []).slice(0, 15)).map((person: any) => (
+                    {(showAllCast ? (details?.cast || []) : (details?.cast || []).slice(0, 15)).map((person: any, idx: number) => (
                         <button 
-                            key={person.id} 
+                            key={`${person.id}-${person.credit_id || ''}-${idx}`} 
                             onClick={() => handleActorClick(person)}
                             className={`flex-shrink-0 text-center group focus:outline-none outline-none ${showAllCast ? 'w-[calc(25%-8px)] sm:w-[calc(16.6%-8px)] md:w-[calc(12.5%-8px)] lg:w-[calc(10%-8px)]' : 'w-[80px]'}`}
                         >
@@ -2731,9 +2731,12 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-                                            {(details?.genres || []).map((genre: any) => (
-                                                <span key={genre.id} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-full text-[10px] sm:text-xs font-bold tracking-wide text-zinc-300 hover:text-white hover:bg-white/10 transition-all">{genre.name}</span>
-                                            ))}
+                                            {(details?.genres || []).map((genre: any, idx: number) => {
+                                                const genreName = typeof genre === 'object' ? (genre.name || genre.id) : String(genre);
+                                                return (
+                                                    <span key={`${genreName}-${idx}`} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-full text-[10px] sm:text-xs font-bold tracking-wide text-zinc-300 hover:text-white hover:bg-white/10 transition-all">{genreName}</span>
+                                                );
+                                            })}
                                         </div>
                                         <div className="bg-bg-card rounded-xl border border-border-color p-4 md:p-6 mb-6 sm:mb-8">
                                             {type === "anime" && resolvedMediaType !== "movie" && episodes.length > 0 && (
@@ -2746,8 +2749,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                                         </div>
                                                     </div>
                                                     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto scrollbar-none p-1">
-                                                        {(episodes || []).map((epNum: string) => (
-                                                            <button key={epNum} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-accent/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
+                                                        {(episodes || []).map((epNum: string, idx: number) => (
+                                                            <button key={`${epNum}-${idx}`} onClick={() => setSelectedEpisode(parseInt(epNum))} className={`py-2 rounded-lg text-xs font-bold transition-all border ${selectedEpisode === parseInt(epNum) ? "bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white shadow-lg shadow-accent/30" : "bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"}`}>{epNum}</button>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -2833,9 +2836,9 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                                 <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Keywords & Themes</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {details?.keywords && details.keywords.length > 0 ? (
-                                                        details.keywords.map((kw: any) => (
-                                                            <Link key={kw.id} href={`/search?q=${encodeURIComponent(kw.name)}`} scroll={false} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
-                                                                #{kw.name}
+                                                        details.keywords.map((kw: any, idx: number) => (
+                                                            <Link key={`${kw.name || kw.id || 'kw'}-${idx}`} href={`/search?q=${encodeURIComponent(kw.name || kw)}`} scroll={false} className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold text-zinc-300 hover:text-white transition-colors">
+                                                                #{kw.name || kw}
                                                             </Link>
                                                         ))
                                                     ) : (
@@ -2871,8 +2874,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                                                 <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-2">Available Streaming Partners (US)</p>
                                                 <div className="flex flex-wrap gap-3">
                                                     {details?.watch_providers && details.watch_providers.length > 0 ? (
-                                                        details.watch_providers.map((prov: any) => (
-                                                            <div key={prov.provider_id} className="flex items-center gap-2 px-3.5 py-2 bg-[#08080B] border border-white/5 rounded-xl">
+                                                        details.watch_providers.map((prov: any, idx: number) => (
+                                                            <div key={`${prov.provider_id || prov.provider_name || 'prov'}-${idx}`} className="flex items-center gap-2 px-3.5 py-2 bg-[#08080B] border border-white/5 rounded-xl">
                                                                 <Image src={`${IMG_BASE}/w92${prov.logo_path}`} alt={prov.provider_name} width={24} height={24} className="rounded bg-zinc-800" />
                                                                 <span className="text-xs font-bold text-white">{prov.provider_name}</span>
                                                             </div>

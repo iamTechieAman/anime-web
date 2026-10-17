@@ -441,7 +441,9 @@ export default function Player({
                     theme: '#a855f7',
                     lang: 'en',
                     plugins: [
-                        artplayerPluginChromecast({}),
+                        artplayerPluginChromecast({
+                            sdk: 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'
+                        }),
                     ],
                     moreVideoAttr: {
                         crossOrigin: 'anonymous',

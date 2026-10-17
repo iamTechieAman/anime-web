@@ -123,7 +123,6 @@ export default function DesktopSidebar() {
             <aside 
                 role="navigation"
                 aria-label="Main Navigation"
-                aria-expanded={isExpanded}
                 className={`absolute left-0 top-0 bottom-0 w-[260px] ${
                     isExpanded 
                         ? '[clip-path:inset(0_0_0_0)]' 

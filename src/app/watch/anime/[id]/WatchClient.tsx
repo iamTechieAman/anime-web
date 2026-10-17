@@ -2705,12 +2705,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                             if (episodeLayoutMode === "grid") {
                                                 return (
                                                     <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-2 p-1">
-                                                        {filteredEpisodes.map((ep) => {
+                                                        {filteredEpisodes.map((ep, idx) => {
                                                             const epVal = String(typeof ep === 'object' ? (ep.number || ep.id) : ep);
                                                             const isCur = String(currentEp) === epVal;
                                                             return (
                                                                 <button 
-                                                                    key={epVal} 
+                                                                    key={`${epVal}-${idx}`} 
                                                                     onClick={() => handleSelectEpisode(epVal)} 
                                                                     className={`group relative flex flex-col items-center justify-center py-2.5 px-1 rounded-xl text-xs font-bold transition-all duration-200 border cursor-pointer ${
                                                                         isCur 
@@ -2732,9 +2732,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 );
                                             }
 
-                                            return filteredEpisodes.map((ep) => (
+                                            return filteredEpisodes.map((ep, idx) => (
                                                 <EpisodeButton
-                                                    key={typeof ep === 'object' ? (ep.number || ep.id) : ep}
+                                                    key={`${typeof ep === 'object' ? (ep.number || ep.id) : ep}-${idx}`}
                                                     ep={ep}
                                                     currentEp={currentEp}
                                                     onClick={() => handleSelectEpisode(String(typeof ep === 'object' ? (ep.number||ep.id) : ep))}
@@ -2823,11 +2823,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 if (episodeLayoutMode === "grid") {
                                     return (
                                         <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-4 gap-1.5 p-1">
-                                            {filteredEpisodes.map((ep) => {
+                                            {filteredEpisodes.map((ep, idx) => {
                                                 const epNumStr = String(typeof ep === 'object' ? (ep.number||ep.id) : ep);
                                                 return (
                                                     <button 
-                                                        key={epNumStr} 
+                                                        key={`${epNumStr}-${idx}`} 
                                                         onClick={() => {
                                                             handleSelectEpisode(epNumStr);
                                                             setShowEpisodesDrawer(false);
@@ -2842,9 +2842,9 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     );
                                 }
 
-                                return filteredEpisodes.map((ep) => (
+                                return filteredEpisodes.map((ep, idx) => (
                                     <EpisodeButton
-                                        key={typeof ep === 'object' ? String(ep.id || ep.number) : String(ep)}
+                                        key={`${typeof ep === 'object' ? String(ep.id || ep.number) : String(ep)}-${idx}`}
                                         ep={ep}
                                         currentEp={currentEp}
                                         onClick={() => {
