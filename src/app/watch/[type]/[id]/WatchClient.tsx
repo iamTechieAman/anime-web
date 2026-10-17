@@ -19,6 +19,8 @@ import dynamic from "next/dynamic";
 import MovieHero from "../../components/MovieHero";
 import ProviderBar from "../../components/ProviderBar";
 import { EpisodeListSkeleton, PlayerContainerSkeleton, DetailsSkeleton } from "@/components/SkeletonLoader";
+import PlayerStatusOverlay, { type PlayerPlaybackState } from "@/components/player/PlayerStatusOverlay";
+import CrossOriginEmbedNotice from "@/components/player/CrossOriginEmbedNotice";
 import { useUser } from "@clerk/nextjs";
 import { useUserStore } from "@/store/userStore";
 
@@ -437,6 +439,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [loadingEpisodes, setLoadingEpisodes] = useState(false);
     const [mode, setMode] = useState<"sub" | "dub">("sub");
     const [tmdbIdForAnime, setTmdbIdForAnime] = useState<string | null>(null);
+    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [isTheatreMode, setIsTheatreMode] = useState(false);
     const [episodeSearch, setEpisodeSearch] = useState("");
@@ -449,6 +452,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
     const [aggressiveSandbox, setAggressiveSandbox] = useState(true);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [sourceError, setSourceError] = useState(false);
+    const [playbackState, setPlaybackState] = useState<PlayerPlaybackState>('resolving');
+    const [lastFailureReason, setLastFailureReason] = useState<FailureReason | null>(null);
+    const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
+    const requestSeqRef = useRef<number>(0);
+    const abortControllerRef = useRef<AbortController | null>(null);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState("Initializing Stream");
     const [autoPlayNext, setAutoPlayNext] = useState<boolean>(() => {
@@ -1471,8 +1479,26 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         
         const contentKey = `${type}:${activeId}`;
         const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
+
+        let stateToSet: PlayerPlaybackState = 'unavailable';
+        let failureMsg = `All available streaming servers failed for this title.`;
+        if (reason === 'unsupported_content') {
+            stateToSet = 'unsupported';
+            failureMsg = `${activeServer.name} does not have this title in its catalog.`;
+        } else if (reason === 'embedding_rejected') {
+            stateToSet = 'blocked_by_policy';
+            failureMsg = `${activeServer.name} prohibits embedding inside external web frames.`;
+        } else if (reason === 'network_timeout') {
+            stateToSet = 'timed_out';
+            failureMsg = `Connection to ${activeServer.name} timed out.`;
+        }
+
+        setLastFailureReason(reason);
+        setCustomErrorMessage(failureMsg);
+
         if (!listToUse || listToUse.length === 0) {
             setSourceError(true);
+            setPlaybackState(stateToSet);
             return;
         }
 
@@ -1486,6 +1512,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             if (allFailed || nextFailed.size >= listToUse.length) {
                 console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted for ${contentKey}. Displaying fallback UI.`);
                 setSourceError(true);
+                setPlaybackState(stateToSet);
                 return nextFailed;
             }
 
@@ -1519,6 +1546,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             if (nextServer) {
                 console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) failed (${reason}). Auto-switching to next server: ${nextServer.name} (${nextServer.id})`);
                 setLoadingStatus(`Switching to backup server: ${nextServer.name}...`);
+                setPlaybackState('resolving');
                 if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
                 manualServerRef.current = nextServer.id;
                 setPlayerLoaded(false);
@@ -1527,22 +1555,26 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
                 setActiveServer(nextServer);
             } else {
                 setSourceError(true);
+                setPlaybackState(stateToSet);
             }
             return nextFailed;
         });
-    }, [activeServer, currentMediaTypeServers, isAnimeServer, type, id]);
+    }, [activeServer, currentMediaTypeServers, isAnimeServer, type, id, activeId]);
 
     // Manual "Retry All Servers" handler: resets failed servers tracker and retries Server 1
     const handleResetAndRetryAllServers = useCallback(() => {
         fallbackCountRef.current = 0;
         setFailedServers(new Set());
         setSourceError(false);
+        setCustomErrorMessage(null);
+        setPlaybackState('resolving');
         setPlayerLoaded(false);
         const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
         const firstServer = (listToUse && listToUse.length > 0) ? listToUse[0] : SERVERS[0];
         setLoadingStatus(`Connecting to ${firstServer.name}...`);
         manualServerRef.current = firstServer.id;
         setActiveServer(firstServer);
+        setReloadCount(c => c + 1);
         toast.success(`Reset server tracker — trying ${firstServer.name}...`, { icon: '🔄' });
     }, [isAnimeServer, currentMediaTypeServers]);
 
@@ -1555,10 +1587,13 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             return next;
         });
         setSourceError(false);
+        setCustomErrorMessage(null);
+        setPlaybackState('resolving');
         setPlayerLoaded(false);
         setLoadingStatus(`Connecting to ${server.name}...`);
         manualServerRef.current = server.id;
         setActiveServer(server);
+        setReloadCount(c => c + 1);
         if (process.env.NODE_ENV !== 'production') {
             console.log(`[GlobalContentDebugger] 📡 STREAMING: Server="${server.name}", ContentID=${id}`);
         }
@@ -1937,9 +1972,6 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
     // Intentionally limit deps — only write history when the user actually switches ep/season
     }, [selectedSeason, selectedEpisode, type, id]);
 
-    // Unified URL logic: Use tmdbIdForAnime if we're on an anime page trying a movie server
-    const activeId = (type === "anime" || type === "cartoon") ? (tmdbIdForAnime || id) : id;
-    
     // Dedicated state for the active server player URL
     const [currentServerUrl, setCurrentServerUrl] = useState<string>("");
 
@@ -1947,24 +1979,41 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
     useEffect(() => {
         if (!activeId) return;
 
+        // Abort previous in-flight scrape/fetch request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+
+        const currentSeq = ++requestSeqRef.current;
+        setPlaybackState('resolving');
+        setPlayerLoaded(false);
+
         const serverToUse = activeServer || SERVERS[0];
         const rawUrl = isAnimeServer 
             ? (serverToUse as any)?.getUrl?.(animeData?.aniListId || animeData?._id || id, selectedEpisode, tmdbIdForAnime) || ""
             : serverToUse?.getUrl?.(resolvedMediaType, activeId, selectedSeason, selectedEpisode) || "";
 
         if (!rawUrl) {
-            setCurrentServerUrl(prev => (prev !== "" ? "" : prev));
+            if (currentSeq !== requestSeqRef.current) return;
+            setCurrentServerUrl("");
+            setPlaybackState('unsupported');
+            setCustomErrorMessage(`${serverToUse.name} does not have a stream mapping for this content.`);
             return;
         }
 
         if (rawUrl.startsWith('/api/scrape/')) {
             const controller = new AbortController();
+            abortControllerRef.current = controller;
+
             axios.get(rawUrl, { signal: controller.signal })
                 .then(res => {
-                    if (res.data?.success && res.data?.embedUrl) {
-                        const newUrl = getProxiedEmbedUrl(res.data.embedUrl);
-                        // Prevent duplicate state setting
-                        setCurrentServerUrl(prevUrl => (prevUrl !== newUrl ? newUrl : prevUrl));
+                    if (currentSeq !== requestSeqRef.current) return;
+                    const streamTarget = res.data?.embedUrl || res.data?.streamUrl;
+                    if (res.data?.success && streamTarget) {
+                        const newUrl = getProxiedEmbedUrl(streamTarget);
+                        setCurrentServerUrl(newUrl);
+                        setPlaybackState('source_ready');
                     } else {
                         const reason: FailureReason = res.data?.code === 'UNSUPPORTED_CONTENT'
                             ? 'unsupported_content'
@@ -1974,6 +2023,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                     }
                 })
                 .catch(err => {
+                    if (currentSeq !== requestSeqRef.current) return;
                     if (!axios.isCancel(err)) {
                         const reason: FailureReason = err.code === 'ECONNABORTED'
                             ? 'network_timeout'
@@ -1982,14 +2032,17 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         handleAutoFallback(reason);
                     }
                 });
-            return () => controller.abort();
+
+            return () => {
+                controller.abort();
+            };
         } else {
             const newUrl = getProxiedEmbedUrl(rawUrl);
-            // Prevent duplicate state setting
-            setCurrentServerUrl(prevUrl => (prevUrl !== newUrl ? newUrl : prevUrl));
+            setCurrentServerUrl(newUrl);
+            setPlaybackState('source_ready');
         }
     // Only re-run when content ID, season, episode, or active server ID explicitly change
-    }, [activeId, selectedSeason, selectedEpisode, activeServer?.id, mode]);
+    }, [activeId, selectedSeason, selectedEpisode, activeServer?.id, mode, reloadCount]);
 
 
 
@@ -2147,22 +2200,12 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         </div>
                     )}
 
-                    {/* Loading State */}
-                    {!playerLoaded && (
-                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black gap-4">
-                            <div className="relative flex items-center justify-center">
-                                <div className="absolute w-20 h-20 rounded-full border border-accent/20 animate-ping" />
-                                <div className="w-14 h-14 rounded-full border-[3px] border-accent/20 border-t-accent animate-spin" />
-                                <Play className="absolute w-5 h-5 text-accent" />
-                            </div>
-                            <div className="text-center">
-                                <p className="text-white text-xs font-black uppercase tracking-[0.2em] animate-pulse">{loadingStatus}</p>
-                                <p className="text-zinc-600 text-[10px] font-medium mt-1 uppercase tracking-wider">{activeServer.name}</p>
-                            </div>
-                            {isUpcoming && (
-                                <span className="px-4 py-1.5 bg-accent/20 text-accent border border-accent/30 rounded-full text-[10px] font-black uppercase tracking-widest">Upcoming Release</span>
-                            )}
-                        </div>
+                    {/* Truthful Cross-Origin notice when player frame is loaded */}
+                    {currentServerUrl && (
+                        <CrossOriginEmbedNotice 
+                            serverName={activeServer?.name || "Provider"} 
+                            visible={playbackState === 'player_loaded'} 
+                        />
                     )}
 
                     {/* Upcoming Release Overlay */}
@@ -2179,8 +2222,8 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         </div>
                     )}
 
-                    {/* IFRAME — only render when we have a confirmed non-empty URL */}
-                    {currentServerUrl && currentServerUrl.trim() !== "" ? (
+                    {/* IFRAME — only render when we have a confirmed non-empty URL and not in hard error state */}
+                    {currentServerUrl && currentServerUrl.trim() !== "" && !sourceError ? (
                         <VideoIframeEmbed
                             src={currentServerUrl}
                             reloadKey={reloadCount}
@@ -2188,42 +2231,43 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                             onError={() => handleAutoFallback('embedding_rejected')}
                             onLoad={() => {
                                 setPlayerLoaded(true);
+                                setPlaybackState('player_loaded');
                                 if (activeServer?.id) {
                                     ServerHealthManager.recordSuccess(activeServer.id, `${type}:${activeId}`);
                                 }
                             }}
                         />
-                    ) : sourceError ? (
-                        // Only show the fallback screen when every single server in the available servers list has been tried and failed
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 text-center">
-                            <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                                <X className="w-6 h-6 text-red-400" />
-                            </div>
-                            <h3 className="text-base sm:text-lg font-bold mb-1 text-white">Source Temporarily Unavailable</h3>
-                            <p className="text-zinc-400 text-xs mb-5 max-w-[320px] leading-relaxed">
-                                The player encountered an issue across all available servers. This usually fixes itself — try resetting and retrying all servers.
-                            </p>
-                            <div className="flex gap-3 flex-wrap justify-center">
-                                <button
-                                    onClick={handleResetAndRetryAllServers}
-                                    className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-accent/25"
-                                >
-                                    <RefreshCw className="w-3.5 h-3.5" /> Retry All Servers
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        // URL is being resolved — show a spinner, NOT an error
-                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black gap-4">
-                            <div className="relative flex items-center justify-center">
-                                <div className="absolute w-20 h-20 rounded-full border border-accent/20 animate-ping" />
-                                <div className="w-14 h-14 rounded-full border-[3px] border-accent/20 border-t-accent animate-spin" />
-                                <Play className="absolute w-5 h-5 text-accent" />
-                            </div>
-                            <p className="text-white text-xs font-black uppercase tracking-[0.2em] animate-pulse">Connecting to server…</p>
-                            <p className="text-zinc-600 text-[10px] font-medium uppercase tracking-wider">{activeServer?.name || 'Loading'}</p>
-                        </div>
-                    )}
+                    ) : null}
+
+                    {/* Truthful Provider-Aware Status & Recovery Overlay */}
+                    <PlayerStatusOverlay
+                        state={sourceError ? playbackState : (playerLoaded ? 'player_loaded' : playbackState)}
+                        serverName={activeServer?.name || 'Server'}
+                        loadingStatus={loadingStatus}
+                        customErrorMessage={customErrorMessage || undefined}
+                        availableAlternatives={currentMediaTypeServers
+                            .filter(s => s.id !== activeServer?.id && !failedServers.has(s.id) && ServerHealthManager.isAvailable(s.id, `${type}:${activeId}`))
+                            .map(s => ({ id: s.id, name: s.name, badge: s.badge }))}
+                        onSelectAlternative={(alt) => {
+                            const found = currentMediaTypeServers.find(s => s.id === alt.id);
+                            if (found) handleManualServerSelect(found);
+                        }}
+                        onRetry={() => {
+                            setFailedServers(prev => {
+                                const next = new Set(prev);
+                                next.delete(activeServer.id);
+                                return next;
+                            });
+                            setSourceError(false);
+                            setCustomErrorMessage(null);
+                            setPlaybackState('resolving');
+                            setPlayerLoaded(false);
+                            setReloadCount(c => c + 1);
+                        }}
+                        onRetryAll={handleResetAndRetryAllServers}
+                        isUpcoming={Boolean(isUpcoming)}
+                        onBack={() => router.back()}
+                    />
 
                     {/* Auto-Next Overlay */}
                     <AnimatePresence>
@@ -2386,6 +2430,7 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                 serversList={serversList}
                 animeServers={ANIME_SERVERS}
                 onSelectServer={handleManualServerSelect}
+                playbackState={playbackState}
                 isTheatreMode={isTheatreMode}
                 onToggleTheatre={() => {
                     setIsTheatreMode(prev => !prev);

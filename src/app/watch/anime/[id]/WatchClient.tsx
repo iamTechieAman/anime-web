@@ -19,6 +19,8 @@ import { useUserStore } from "@/store/userStore";
 import { ServerHealthManager, type FailureReason } from "@/utils/ServerHealthManager";
 import { isMovieContent } from "@/utils/mediaType";
 import { DetailsSkeleton, EpisodeListSkeleton } from "@/components/SkeletonLoader";
+import PlayerStatusOverlay, { type PlayerPlaybackState } from "@/components/player/PlayerStatusOverlay";
+import CrossOriginEmbedNotice from "@/components/player/CrossOriginEmbedNotice";
 
 // Using ArtPlayer for robust playback
 const ArtPlayer = dynamic(() => import("@/components/player/ArtPlayer"), { ssr: false });
@@ -381,6 +383,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     const [loadingSource, setLoadingSource] = useState(false);
     const [isValidating, setIsValidating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [playbackState, setPlaybackState] = useState<PlayerPlaybackState>('resolving');
+    const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
 
     // Auto-play and Auto-next preferences
     const [autoPlay, setAutoPlay] = useState(true);
@@ -621,6 +625,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
     // Server State
     const [servers, setServers] = useState<any[]>([]);
     const [selectedServer, setSelectedServer] = useState<string | null>(null);
+    const selectedServerObj = useMemo(() => servers.find(s => s.serverId === selectedServer), [servers, selectedServer]);
     const [failedServers, setFailedServers] = useState<Set<string>>(new Set());
     const [audioUnlocked, setAudioUnlocked] = useState(false);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -730,6 +735,22 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         if (!selectedServer || !servers || servers.length === 0) return;
         const contentKey = `anime:${id}:${currentEp}`;
 
+        let stateToSet: PlayerPlaybackState = 'unavailable';
+        let failureMsg = `All available streaming providers failed for Episode ${currentEp}.`;
+        if (reason === 'unsupported_content') {
+            stateToSet = 'unsupported';
+            failureMsg = `This provider does not have Episode ${currentEp} in its catalog.`;
+        } else if (reason === 'embedding_rejected') {
+            stateToSet = 'blocked_by_policy';
+            failureMsg = `This provider prohibits embedding inside external web frames.`;
+        } else if (reason === 'network_timeout') {
+            stateToSet = 'timed_out';
+            failureMsg = `Connection to streaming host timed out.`;
+        }
+
+        setPlaybackState(stateToSet);
+        setCustomErrorMessage(failureMsg);
+
         setFailedServers(prev => {
             const nextFailed = new Set(prev);
             nextFailed.add(selectedServer);
@@ -739,7 +760,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             const allFailed = servers.every(s => nextFailed.has(s.serverId));
             if (allFailed || nextFailed.size >= servers.length) {
                 console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (${servers.length}). Stopping auto-switch.`);
-                setError("Source Temporarily Unavailable. All streaming providers failed for this episode.");
+                setError(failureMsg);
+                setPlaybackState(stateToSet);
                 setLoadingSource(false);
                 processingRef.current = null;
                 return nextFailed;
@@ -774,6 +796,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             if (nextServer) {
                 processingRef.current = null;
                 setLoadingStatus(`Switching to backup server: ${nextServer.serverName}...`);
+                setPlaybackState('resolving');
                 toast.error(`Server failed. Auto-switching to ${nextServer.serverName}...`, {
                     icon: "🔄",
                     style: {
@@ -787,7 +810,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 // Update selected server -> UI button highlight updates automatically
                 setSelectedServer(nextServer.serverId);
             } else {
-                setError("Source Temporarily Unavailable. The player encountered an issue across all servers.");
+                setError(failureMsg);
+                setPlaybackState(stateToSet);
                 setLoadingSource(false);
                 processingRef.current = null;
             }
@@ -799,6 +823,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         fallbackCountRef.current = 0;
         setFailedServers(new Set());
         setError(null);
+        setCustomErrorMessage(null);
+        setPlaybackState('resolving');
         if (servers && servers.length > 0) {
             const firstServer = servers[0];
             setLoadingStatus(`Connecting to ${firstServer.serverName || 'Server 1'}...`);
@@ -1746,64 +1772,45 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                         </div>
                     </div>
                 ) : error ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-4 text-red-500 p-4 md:p-8 text-center bg-bg-card/80 backdrop-blur-lg">
-                        <AlertCircle className="w-8 h-8 md:w-10 md:h-10 text-red-600/80" />
-                        <div className="max-w-md">
-                            <p className="font-bold text-[var(--text-main)] text-base md:text-lg">Stream Unavailable</p>
-                            <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1">Native sources failed. Try a movie server below.</p>
-                        </div>
-                        <div className="flex flex-wrap justify-center gap-2 w-full max-w-sm">
-                            {/* Quick switch to ToonPlayer VIP */}
-                            {servers.find(s => s.serverId === "peachify") && (
-                                <button
-                                    onClick={() => {
-                                        setError(null);
-                                        manualServerRef.current = "peachify";
-                                        setSelectedServer("peachify");
-                                    }}
-                                    className="px-4 py-2 bg-gradient-to-r from-accent to-accent-warm hover:-translate-y-[1px] hover:scale-[1.02] hover:opacity-90 text-white rounded-lg font-semibold transition-all text-sm flex items-center gap-1.5"
-                                >
-                                    <Play className="w-3.5 h-3.5 fill-current" /> ToonPlayer VIP
-                                </button>
-                            )}
-                            {/* Quick switch to FMovies */}
-                            {servers.find(s => s.serverId === "fmovies") && (
-                                <button
-                                    onClick={() => {
-                                        setError(null);
-                                        manualServerRef.current = "fmovies";
-                                        setSelectedServer("fmovies");
-                                    }}
-                                    className="px-4 py-2 bg-bg-card border border-border-color text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-accent/40"
-                                >
-                                    FMovies
-                                </button>
-                            )}
-                            <button
-                                onClick={() => {
-                                    setError(null);
-                                    setSourceUrl(null);
-                                    const firstNative = servers.find(s => !s.isMovieServer);
-                                    const nextServerId = firstNative?.serverId || servers[0]?.serverId || null;
-                                    if (nextServerId) manualServerRef.current = nextServerId;
-                                    setSelectedServer(nextServerId);
-                                }}
-                                className="px-4 py-2 bg-bg-card border border-border-color text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-accent/40 flex items-center gap-1.5"
-                            >
-                                <RefreshCw className="w-3.5 h-3.5" /> Retry All
-                            </button>
-                            
-                            {castAvailable && (
-                                <div className="flex items-center gap-2 px-4 py-2 bg-bg-card border border-border-color text-[var(--text-main)] rounded-lg font-semibold transition-all text-sm hover:border-blue-500/50">
-                                    {React.createElement('google-cast-launcher', { style: { width: '20px', height: '20px', cursor: 'pointer', display: 'block' } })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <PlayerStatusOverlay
+                        state={playbackState}
+                        serverName={selectedServerObj?.serverName || "Provider"}
+                        loadingStatus={loadingStatus}
+                        customErrorMessage={customErrorMessage || error || undefined}
+                        availableAlternatives={servers
+                            .filter(s => s.serverId !== selectedServer && !failedServers.has(s.serverId) && ServerHealthManager.isAvailable(s.serverId, `anime:${id}:${currentEp}`))
+                            .map(s => ({ id: s.serverId, name: s.serverName, badge: s.badge }))}
+                        onSelectAlternative={(alt) => {
+                            setError(null);
+                            setCustomErrorMessage(null);
+                            setPlaybackState('resolving');
+                            manualServerRef.current = alt.id;
+                            setSelectedServer(alt.id);
+                        }}
+                        onRetry={() => {
+                            if (selectedServer) {
+                                setFailedServers(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(selectedServer);
+                                    return next;
+                                });
+                            }
+                            setError(null);
+                            setCustomErrorMessage(null);
+                            setPlaybackState('resolving');
+                            setReloadCount(c => c + 1);
+                        }}
+                        onRetryAll={handleResetAndRetryAllServers}
+                        onBack={() => router.back()}
+                    />
                 ) : sourceUrl ? (
                     <div className="relative w-full h-full">
                         {videoType === "iframe" ? (
                             <>
+                                <CrossOriginEmbedNotice 
+                                    serverName={selectedServerObj?.serverName || "Provider"} 
+                                    visible={playbackState === 'player_loaded'} 
+                                />
                                 <VideoIframeEmbed
                                     mediaKey={`${selectedServer || 'server'}-${id}-ep${currentEp}-${mode}-${reloadCount}`}
                                     iframeRef={iframeRef}
@@ -1811,6 +1818,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                     isFocusMode={isFocusMode}
                                     onLoad={(e: any) => {
                                         setLoadingSource(false);
+                                        setPlaybackState('player_loaded');
                                         try {
                                             const iframe = e.target as HTMLIFrameElement;
                                             const doc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -1823,11 +1831,11 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 }
                                             }
                                             if (selectedServer) {
-                                                ServerHealthManager.recordSuccess(selectedServer);
+                                                ServerHealthManager.recordSuccess(selectedServer, `anime:${id}:${currentEp}`);
                                             }
                                         } catch (err) {
                                             if (selectedServer) {
-                                                ServerHealthManager.recordSuccess(selectedServer);
+                                                ServerHealthManager.recordSuccess(selectedServer, `anime:${id}:${currentEp}`);
                                             }
                                         }
                                     }}
@@ -1865,6 +1873,12 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                 key={`${id}-${currentEp}-${selectedServer}-${sourceUrl || ''}`}
                                 getInstance={(art) => {
                                     artInstanceRef.current = art;
+                                    art.on('play', () => {
+                                        setPlaybackState('playback_confirmed');
+                                        if (selectedServer) {
+                                            ServerHealthManager.recordSuccess(selectedServer, `anime:${id}:${currentEp}`);
+                                        }
+                                    });
                                 }}
                                 option={{
                                     url: sourceUrl,

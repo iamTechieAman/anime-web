@@ -11,6 +11,8 @@ import {
     Check,
 } from 'lucide-react';
 
+import { PlayerPlaybackState } from "@/components/player/PlayerStatusOverlay";
+
 interface ProviderBarProps {
     title: string;
     type: string;
@@ -22,6 +24,7 @@ interface ProviderBarProps {
     serversList: any[];
     animeServers: any[];
     onSelectServer: (server: any) => void;
+    playbackState?: PlayerPlaybackState;
     isTheatreMode?: boolean;
     onToggleTheatre?: () => void;
     isFocusMode?: boolean;
@@ -42,6 +45,7 @@ const ProviderBar = memo(function ProviderBar({
     serversList,
     animeServers,
     onSelectServer,
+    playbackState = 'player_loaded',
     isTheatreMode = false,
     onToggleTheatre,
     isFocusMode = false,
@@ -181,22 +185,25 @@ const ProviderBar = memo(function ProviderBar({
                     {servers.map((server: any, idx: number) => {
                         const isActive = activeServer.id === server.id;
                         const isFailed = failedServers.has(server.id);
+                        const isResolving = isActive && (playbackState === 'resolving' || playbackState === 'source_ready');
+
                         return (
                             <button
                                 key={server.id}
                                 onClick={() => onSelectServer(server)}
-                                disabled={isFailed && !isActive}
-                                title={isFailed ? `${server.name} — unavailable` : `Switch to ${server.name}`}
+                                title={isFailed ? `${server.name} — previous attempt failed. Click to retry this server.` : `Switch to ${server.name}`}
                                 className={`group relative flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-300 ease-out snap-center cursor-pointer select-none active:scale-95 ${
                                     isActive
                                         ? 'bg-white text-black border-white shadow-lg shadow-white/10 scale-[1.02]'
                                         : isFailed
-                                            ? 'cursor-not-allowed border-rose-500/20 bg-rose-500/10 text-rose-300/40 line-through'
+                                            ? 'border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 hover:border-rose-500/50'
                                             : 'border-white/10 bg-white/[0.04] text-white/70 hover:border-white/20 hover:bg-white/10 hover:text-white'
                                 }`}
                             >
                                 <span className="flex items-center">
-                                    {isActive ? (
+                                    {isResolving ? (
+                                        <div className="w-3.5 h-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+                                    ) : isActive ? (
                                         <CheckCircle2 className="h-3.5 w-3.5 text-black" />
                                     ) : isFailed ? (
                                         <AlertCircle className="h-3.5 w-3.5 text-rose-400" />
@@ -215,7 +222,7 @@ const ProviderBar = memo(function ProviderBar({
                                             isActive
                                                 ? 'bg-black/10 text-black border border-black/20'
                                                 : isFailed
-                                                    ? 'bg-transparent text-rose-400/40'
+                                                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                                                     : 'bg-white/10 text-white/60 border border-white/10 group-hover:text-white'
                                         }`}
                                     >
