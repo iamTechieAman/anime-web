@@ -13,6 +13,10 @@ export default function robots(): MetadataRoute.Robots {
           '/anime',
           '/movies',
           '/tv',
+          '/browse',
+          '/browse/*',
+          '/discover',
+          '/discover/*',
           '/trending',
           '/top-rated',
           '/genres',
@@ -27,6 +31,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
         disallow: [
           '/login',
+          '/account',
           '/profile',
           '/settings',
           '/api/',

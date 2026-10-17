@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#1A1C29" />
+      <stop offset="60%" stop-color="#0E1017" />
+      <stop offset="100%" stop-color="#07080C" />
+    </radialGradient>
+
+    <!-- Vibrant Play Brand Gradient -->
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3366" />
+      <stop offset="50%" stop-color="#FF6B35" />
+      <stop offset="100%" stop-color="#FFA800" />
+    </linearGradient>
+
+    <!-- Accent Cyan Sheen -->
+    <linearGradient id="cyanSheen" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#00A8FF" />
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#FF5500" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.8" />
+    </filter>
+
+    <filter id="borderGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#FF6B35" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Squircle Base -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGlow)" stroke="#262938" stroke-width="6" />
+
+  <!-- Inner Ambient Glow Circle -->
+  <circle cx="256" cy="256" r="180" fill="url(#brandGrad)" opacity="0.12" filter="blur(30px)" />
+
+  <!-- Iconic Brand Monogram: Stylized Dynamic 'T' + Forward Play Arrow -->
+  <g filter="url(#glow)">
+    <!-- Top Horizontal Crossbar of 'T' -->
+    <path 
+      d="M 120 136 C 120 125 129 116 140 116 L 372 116 C 383 116 392 125 392 136 L 392 176 C 392 187 383 196 372 196 L 306 196 C 298 196 292 202 292 210 L 292 376 C 292 387 283 396 272 396 L 240 396 C 229 396 220 387 220 376 L 220 210 C 220 202 214 196 206 196 L 140 196 C 129 196 120 187 120 176 Z" 
+      fill="url(#brandGrad)"
+    />
+
+    <!-- Sharp Play Blade / Dynamic Arrow Accent in the Right quadrant -->
+    <polygon 
+      points="296,210 396,276 296,342" 
+      fill="url(#brandGrad)"
+    />
+
+    <!-- Cyan Spark Core (Neon Play Center) -->
+    <polygon 
+      points="312,246 364,276 312,306" 
+      fill="url(#cyanSheen)"
+      opacity="0.95"
+    />
+  </g>
+
+  <!-- Subtle Rim Light Highlights -->
+  <rect x="22" y="22" width="468" height="234" rx="106" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2" />
+</svg>

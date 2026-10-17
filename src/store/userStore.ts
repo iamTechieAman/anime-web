@@ -96,6 +96,7 @@ const defaultSettings: UserSettings = {
 };
 
 const defaultProfiles: Profile[] = [
+  { id: 'profile-adult', name: 'Main', avatar: getAvatarUrl('Main', 'red'), type: 'adult', isKids: false, theme: 'red' },
   { id: 'profile-kids', name: 'Kids', avatar: getAvatarUrl('Kids', 'green'), type: 'kids', isKids: true, theme: 'green' },
   { id: 'profile-guest', name: 'Guest', avatar: getAvatarUrl('Guest', 'purple'), type: 'guest', isKids: false, theme: 'purple' }
 ];
@@ -354,6 +355,16 @@ export const useUserStore = create<UserState>()(
             }
             return { ...p, avatar };
           });
+          if (!state.profiles.some((p: any) => p.id === 'profile-adult')) {
+            state.profiles.unshift({
+              id: 'profile-adult',
+              name: 'Main',
+              avatar: getAvatarUrl('Main', 'red'),
+              type: 'adult',
+              isKids: false,
+              theme: 'red'
+            });
+          }
         }
         return state;
       },

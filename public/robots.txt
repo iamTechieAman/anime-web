@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /profile/
-Disallow: /settings/
-
-Sitemap: https://toonplayer.in/sitemap.xml

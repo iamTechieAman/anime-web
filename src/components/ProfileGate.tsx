@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X } from "lucide-react";
+import { Plus, X, User, LogIn } from "lucide-react";
 import { useUserStore, Profile, getRandomBitmojiUrl } from "@/store/userStore";
 
 const ProfileAvatar = ({ src, alt }: { src?: string | null, alt?: string | null }) => {
@@ -222,7 +222,8 @@ export default function ProfileGate() {
             </div>
             
             {!isCreating ? (
-              <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 lg:gap-12">
+              <>
+                <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 lg:gap-12">
                 {profiles.map((p) => {
                   const isSelected = selectedId === p.id;
                   const isFading = selectedId && !isSelected;
@@ -308,6 +309,46 @@ export default function ProfileGate() {
                   </motion.div>
                 )}
               </div>
+
+              {/* Explanatory subtitle and guest/sign-in options */}
+              <div className="mt-10 flex flex-col items-center gap-4 text-center max-w-lg px-4">
+                <p className="text-xs md:text-sm text-zinc-400">
+                  Profiles customize your watch history, recommendations, and kid-safe filtering on this device.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const guest = profiles.find(p => p.id === 'profile-guest' || p.type === 'guest') || {
+                        id: 'profile-guest',
+                        name: 'Guest',
+                        avatar: '/avatars/avatar-1.webp',
+                        type: 'guest' as const,
+                        isKids: false,
+                        theme: 'purple',
+                      };
+                      handleSelectProfile(guest);
+                    }}
+                    className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white font-medium text-xs md:text-sm transition-all border border-white/10 flex items-center gap-2 cursor-pointer"
+                  >
+                    <User className="w-4 h-4 text-zinc-300" />
+                    <span>Continue as Guest</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowGate(false);
+                      window.dispatchEvent(new Event("openLoginModal"));
+                    }}
+                    className="px-5 py-2.5 rounded-full bg-accent/20 hover:bg-accent/30 active:scale-95 text-accent-light font-medium text-xs md:text-sm transition-all border border-accent/30 flex items-center gap-2 cursor-pointer"
+                  >
+                    <LogIn className="w-4 h-4 text-accent" />
+                    <span>Sign In to Sync</span>
+                  </button>
+                </div>
+              </div>
+            </>
             ) : (
               <form onSubmit={handleCreate} className="flex flex-col items-center gap-6 max-w-md mx-auto">
                 <div className="group relative w-full">
