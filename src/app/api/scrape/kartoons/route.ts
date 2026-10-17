@@ -1,18 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
-import * as cheerio from "cheerio";
-
-const KARTOONS_MIRRORS = [
-  "https://kartoons.to",
-  "https://kartoons.co",
-  "https://kartoons.net",
-];
-
-const USER_AGENTS = [
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-];
+import connectToDatabase from "@/lib/db";
+import { CartoonCatalogModel } from "@/models/CartoonCatalog";
+import { getStreamSource, KARTOONS_BASE_URL, KARTOONS_MIRRORS } from "@/lib/providers/kartoons";
 
 /**
  * ============================================================================
@@ -21,10 +10,10 @@ const USER_AGENTS = [
  * Endpoint: /api/scrape/kartoons
  * 
  * Query Parameters:
- * - showId / id  : Show or movie identifier (e.g. 65733)
+ * - showId / id  : Cartoon identifier or slug (e.g. "doraemon-hindi", "681c812b744a1cb77f1d1787")
  * - season / s   : Season number (default: 1)
  * - episode / e  : Episode number (default: 1)
- * - type         : Media type ("show" | "movie" | "tv")
+ * - type         : Media type ("cartoon" | "show" | "movie" | "tv")
  * ============================================================================
  */
 export async function GET(request: NextRequest) {
@@ -32,112 +21,131 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     const showId = searchParams.get("showId") || searchParams.get("id");
-    const season = searchParams.get("season") || searchParams.get("s") || "1";
-    const episode = searchParams.get("episode") || searchParams.get("e") || searchParams.get("ep") || "1";
+    const seasonStr = searchParams.get("season") || searchParams.get("s") || "1";
+    const episodeStr = searchParams.get("episode") || searchParams.get("e") || searchParams.get("ep") || "1";
     const type = (searchParams.get("type") || "show").toLowerCase();
 
     if (!showId) {
       return NextResponse.json(
-        { success: false, error: "Missing required query parameter 'showId' or 'id'" },
+        { 
+          success: false, 
+          code: "INVALID_PARAMETERS",
+          error: "Missing required query parameter 'showId' or 'id'" 
+        },
         { status: 400 }
       );
     }
 
-    // Construct target paths
-    const targetPaths: string[] = [];
-    if (type === "movie") {
-      targetPaths.push(`/watch/movie/${showId}`);
-      targetPaths.push(`/movie/${showId}`);
-    } else {
-      targetPaths.push(`/watch/show/${showId}/season/${season}/episode/${episode}`);
-      targetPaths.push(`/watch/cartoon/${showId}/season/${season}/episode/${episode}`);
-      targetPaths.push(`/show/${showId}`);
+    const seasonNum = parseInt(seasonStr, 10) || 1;
+    const episodeNum = parseInt(episodeStr, 10) || 1;
+
+    // DIAGNOSTIC 1: Content Type & Identifier Check
+    // Kartoons Direct exclusively indexes cartoon and anime titles by custom IDs/slugs.
+    // TMDB numeric IDs (e.g. 550, 1399) or non-cartoon types are not present in the Kartoons catalog.
+    const isPureNumericTmdbId = /^\d{1,7}$/.test(showId.trim());
+    if (type === "movie" || isPureNumericTmdbId) {
+      return NextResponse.json({
+        success: false,
+        code: "UNSUPPORTED_CONTENT",
+        unsupported: true,
+        error: "Kartoons Direct only indexes cartoon & anime series with canonical slugs. Numeric TMDB identifiers are not supported by this provider.",
+        provider: "kartoons",
+        showId
+      }, { status: 422 });
     }
 
-    let foundEmbedUrl: string | null = null;
+    let resolvedEmbedUrl: string | null = null;
+    let resolvedSourceType: 'hls' | 'embed' = 'embed';
 
-    // Fetch server-side across Kartoons mirrors
-    for (const mirror of KARTOONS_MIRRORS) {
-      if (foundEmbedUrl) break;
+    // STRATEGY 1: Check Local CartoonCatalog Database
+    try {
+      await connectToDatabase();
+      const cartoon = await CartoonCatalogModel.findOne({
+        $or: [
+          { externalId: showId },
+          { slug: showId },
+          { _id: showId.match(/^[0-9a-fA-F]{24}$/) ? showId : null }
+        ]
+      }).lean();
 
-      for (const path of targetPaths) {
-        if (foundEmbedUrl) break;
+      if (cartoon && cartoon.seasons) {
+        const targetSeason = cartoon.seasons.find(
+          (s: any) => s.seasonNumber === seasonNum || s.title?.includes(String(seasonNum))
+        ) || cartoon.seasons[0];
 
-        const targetUrl = `${mirror}${path}`;
-        const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        if (targetSeason?.episodes) {
+          const targetEpisode = targetSeason.episodes.find(
+            (ep: any) => ep.episodeNumber === episodeNum
+          ) || targetSeason.episodes[0];
 
-        try {
-          const response = await axios.get(targetUrl, {
-            headers: {
-              "User-Agent": userAgent,
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-              "Accept-Language": "en-US,en;q=0.9",
-              "Referer": `${mirror}/`,
-            },
-            timeout: 8000,
-          });
-
-          if (!response.data || typeof response.data !== "string") continue;
-
-          const html = response.data;
-          const $ = cheerio.load(html);
-
-          // Strategy 1: Locate player iframe element
-          $("iframe#player, iframe.player, iframe[src*='embed'], iframe[src*='filemoon'], iframe[src*='stream'], iframe[src*='vidsrc'], iframe[src*='autoembed'], iframe[src]").each((_, el) => {
-            if (foundEmbedUrl) return;
-            const src = $(el).attr("src") || $(el).attr("data-src") || $(el).attr("data-player");
-            if (src && !src.includes("about:blank") && !src.startsWith("javascript:")) {
-              foundEmbedUrl = src.startsWith("//") ? `https:${src}` : src;
+          if (targetEpisode) {
+            // Check if episode has pre-scraped servers or stream link
+            const firstServer = targetEpisode.servers?.[0];
+            if (firstServer?.url) {
+              resolvedEmbedUrl = firstServer.url;
+              resolvedSourceType = firstServer.isM3U8 || firstServer.url.includes('.m3u8') ? 'hls' : 'embed';
+            } else if (targetEpisode.episodeId) {
+              // Try decrypting stream through Kartoons provider module
+              try {
+                const streamData = await getStreamSource(targetEpisode.episodeId, {
+                  showId: cartoon.externalId || showId,
+                  seasonNumber: seasonNum,
+                  episodeNumber: episodeNum,
+                });
+                if (streamData?.sources?.[0]?.url) {
+                  resolvedEmbedUrl = streamData.sources[0].url;
+                  resolvedSourceType = streamData.sources[0].isM3U8 ? 'hls' : 'embed';
+                } else if (streamData?.embedUrl) {
+                  resolvedEmbedUrl = streamData.embedUrl;
+                }
+              } catch (providerErr: any) {
+                console.warn(`[Kartoons API] getStreamSource error for ep ${targetEpisode.episodeId}:`, providerErr.message);
+              }
             }
-          });
-
-          // Strategy 2: Check data attributes on container elements
-          if (!foundEmbedUrl) {
-            $("[data-src], [data-embed], [data-player], [data-url], [data-link]").each((_, el) => {
-              if (foundEmbedUrl) return;
-              const val = $(el).attr("data-src") || $(el).attr("data-embed") || $(el).attr("data-player") || $(el).attr("data-url") || $(el).attr("data-link");
-              if (val && (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("//"))) {
-                foundEmbedUrl = val.startsWith("//") ? `https:${val}` : val;
-              }
-            });
           }
-
-          // Strategy 3: Regex scan inline script tags for video embed URLs
-          if (!foundEmbedUrl) {
-            $("script").each((_, el) => {
-              if (foundEmbedUrl) return;
-              const scriptText = $(el).html() || "";
-              const match = scriptText.match(/https?:\/\/[^\s"'<>]+\/(?:e|embed|v|player|watch)\/[^\s"'<>]+/i) ||
-                            scriptText.match(/https?:\/\/(?:filemoon|vidcloud|streamwish|vidsrc|autoembed|peachify|vidlink)[^\s"'<>]+/i);
-              if (match) {
-                foundEmbedUrl = match[0];
-              }
-            });
-          }
-        } catch (err: any) {
-          console.warn(`[Kartoons Scraper] Request to ${targetUrl} failed:`, err.message);
         }
       }
+    } catch (dbErr: any) {
+      console.warn("[Kartoons API] Database catalog query skipped:", dbErr.message);
     }
 
-    if (foundEmbedUrl) {
+    // STRATEGY 2: Legitimate Kartoons Player URL Builder
+    if (!resolvedEmbedUrl) {
+      // Build canonical Kartoons player URL
+      resolvedEmbedUrl = `${KARTOONS_BASE_URL}/watch/show/${encodeURIComponent(showId)}/season/${seasonNum}/episode/${episodeNum}`;
+    }
+
+    // Return validated result
+    if (resolvedEmbedUrl) {
       return NextResponse.json({
         success: true,
-        embedUrl: foundEmbedUrl,
+        embedUrl: resolvedEmbedUrl,
+        streamUrl: resolvedEmbedUrl,
+        sourceType: resolvedSourceType,
+        type: resolvedSourceType,
+        provider: "kartoons",
+        showId,
+        season: seasonNum,
+        episode: episodeNum
       });
     }
 
-    // Return graceful failure so frontend can fall back to alternative servers without crashing
+    // DIAGNOSTIC 2: Graceful error response with actionable failure code
     return NextResponse.json({
       success: false,
-      error: "Unable to extract Kartoons embed URL",
-    });
+      code: "EPISODE_NOT_FOUND",
+      error: `Episode ${episodeNum} of Season ${seasonNum} was not found on Kartoons Direct.`,
+      provider: "kartoons",
+      showId
+    }, { status: 404 });
 
   } catch (error: any) {
     console.error("[Kartoons Scraper API Error]:", error.message);
     return NextResponse.json({
       success: false,
-      error: error.message || "Failed to scrape Kartoons embed URL",
-    });
+      code: "PROVIDER_UNAVAILABLE",
+      error: error.message || "Kartoons Direct upstream service temporarily unavailable",
+      provider: "kartoons"
+    }, { status: 502 });
   }
 }

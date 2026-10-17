@@ -16,7 +16,7 @@ import CommentsSection from "@/components/CommentsSection";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useWatch } from "@/context/WatchContext";
 import { useUserStore } from "@/store/userStore";
-import { ServerHealthManager } from "@/utils/ServerHealthManager";
+import { ServerHealthManager, type FailureReason } from "@/utils/ServerHealthManager";
 import { isMovieContent } from "@/utils/mediaType";
 import { DetailsSkeleton, EpisodeListSkeleton } from "@/components/SkeletonLoader";
 
@@ -203,36 +203,12 @@ const EpisodeButton = React.memo(function EpisodeButton({
 
 const MOVIE_SERVERS = [
     {
-        id: 'vidcore',
-        name: 'Toon Player Core',
-        badge: 'Core HD',
+        id: 'vidlink',
+        name: 'Toon Player Link',
+        badge: 'VidLink',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidcore.net/tv/${id}/${s || 1}/${e || 1}` : `https://vidcore.net/movie/${id}`,
-    },
-    {
-        id: 'embedmaster',
-        name: 'Toon Player Master',
-        badge: 'Master',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}` : `https://embedmaster.link/movie/${id}`,
-    },
-    {
-        id: 'peachify',
-        name: 'Toon Player VIP',
-        badge: 'Multi-Audio',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1` : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
-    },
-    {
-        id: 'vidfast',
-        name: 'Toon Player Fast',
-        badge: 'Auto-Next',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true` : `https://vidfast.pro/movie/${id}?autoPlay=true&title=true&poster=true`,
+            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
     },
     {
         id: 'vidnest',
@@ -243,12 +219,20 @@ const MOVIE_SERVERS = [
             type === 'tv' ? `https://vidnest.fun/tv/${id}/${s || 1}/${e || 1}` : `https://vidnest.fun/movie/${id}`,
     },
     {
-        id: 'vidlink',
-        name: 'Toon Player Link',
-        badge: 'VidLink',
+        id: 'vidcore',
+        name: 'Toon Player Core',
+        badge: 'Core HD',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true` : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
+            type === 'tv' ? `https://vidcore.io/tv/${id}/${s || 1}/${e || 1}` : `https://vidcore.io/movie/${id}`,
+    },
+    {
+        id: 'embedmaster',
+        name: 'Toon Player Master',
+        badge: 'Master',
+        isMovieServer: true,
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv' ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}` : `https://embedmaster.link/movie/${id}`,
     },
     {
         id: 'vidrock',
@@ -259,29 +243,14 @@ const MOVIE_SERVERS = [
             type === 'tv' ? `https://vidrock.net/tv/${id}/${s || 1}/${e || 1}` : `https://vidrock.net/movie/${id}`,
     },
     {
-        id: 'vidking',
-        name: 'Toon Player King',
-        badge: 'Cinema',
+        id: 'vidfast',
+        name: 'Toon Player Fast',
+        badge: 'Auto-Next',
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://www.vidking.net/embed/tv/${id}/${s || 1}/${e || 1}` : `https://www.vidking.net/embed/movie/${id}`,
+            type === 'tv' ? `https://vidfast.vc/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true` : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`,
     },
-    {
-        id: 'vixsrc',
-        name: 'Toon Player Vix',
-        badge: 'HD',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vixsrc.to/tv/${id}/${s || 1}/${e || 1}` : `https://vixsrc.to/movie/${id}`,
-    },
-    {
-        id: 'videasy',
-        name: 'Toon Player Easy',
-        badge: 'Stream',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://player.videasy.net/tv/${id}/${s || 1}/${e || 1}` : `https://player.videasy.net/movie/${id}`,
-    },
+
     {
         id: 'vidsrc_embed_ru',
         name: 'Toon Player VidSrc',
@@ -297,22 +266,6 @@ const MOVIE_SERVERS = [
         isMovieServer: true,
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv' ? `https://player.smashystream.com/show/${id}/${s || 1}/${e || 1}` : `https://player.smashystream.com/movie/${id}`,
-    },
-    {
-        id: 'vidora',
-        name: 'Toon Player Vidora',
-        badge: 'Alt',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://vidora.su/tv/${id}/${s || 1}/${e || 1}` : `https://vidora.su/movie/${id}`,
-    },
-    {
-        id: 'movies111',
-        name: 'Toon 111',
-        badge: 'Mirror',
-        isMovieServer: true,
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv' ? `https://111movies.com/tv/${id}/${s || 1}/${e || 1}` : `https://111movies.com/movie/${id}`,
     },
 ];
 
@@ -772,26 +725,27 @@ export default function WatchClient({ id: fullId }: { id: string }) {
         }
     }, [availableEps, currentEp, handleSelectEpisode]);
 
-    // Automatic Provider Fallback Engine (Intelligent Circular Rotation)
-    const handleAutoFallback = useCallback(() => {
+    // Automatic Provider Fallback Engine (Intelligent Content-Aware Circular Rotation)
+    const handleAutoFallback = useCallback((reason: FailureReason = 'generic_failure') => {
         if (!selectedServer || !servers || servers.length === 0) return;
+        const contentKey = `anime:${id}:${currentEp}`;
 
         setFailedServers(prev => {
             const nextFailed = new Set(prev);
             nextFailed.add(selectedServer);
-            ServerHealthManager.blacklistServer(selectedServer);
+            ServerHealthManager.recordFailure(selectedServer, reason, contentKey);
 
             // Show error screen ONLY if every single server in the available servers list has failed
             const allFailed = servers.every(s => nextFailed.has(s.serverId));
             if (allFailed || nextFailed.size >= servers.length) {
                 console.warn(`[ToonPlayer Fallback] Reached max rotation attempts (${servers.length}). Stopping auto-switch.`);
-                setError("Source Temporarily Unavailable. The player encountered an issue across all servers.");
+                setError("Source Temporarily Unavailable. All streaming providers failed for this episode.");
                 setLoadingSource(false);
                 processingRef.current = null;
                 return nextFailed;
             }
 
-            // Circular transition: nextIndex = (currentIndex + 1) % servers.length
+            // Circular transition: find candidate that hasn't failed and is available for this content
             const currentIndex = servers.findIndex(s => s.serverId === selectedServer);
             const startIdx = currentIndex >= 0 ? currentIndex : 0;
             let nextServer = null;
@@ -799,9 +753,21 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             for (let i = 1; i <= servers.length; i++) {
                 const nextIndex = (startIdx + i) % servers.length;
                 const candidate = servers[nextIndex];
-                if (candidate && !nextFailed.has(candidate.serverId)) {
+                if (candidate && !nextFailed.has(candidate.serverId) && ServerHealthManager.isAvailable(candidate.serverId, contentKey)) {
                     nextServer = candidate;
                     break;
+                }
+            }
+
+            // If none are fully available, fallback to any server not yet tried in this session
+            if (!nextServer) {
+                for (let i = 1; i <= servers.length; i++) {
+                    const nextIndex = (startIdx + i) % servers.length;
+                    const candidate = servers[nextIndex];
+                    if (candidate && !nextFailed.has(candidate.serverId)) {
+                        nextServer = candidate;
+                        break;
+                    }
                 }
             }
 
@@ -827,7 +793,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             }
             return nextFailed;
         });
-    }, [selectedServer, servers]);
+    }, [selectedServer, servers, id, currentEp]);
 
     const handleResetAndRetryAllServers = useCallback(() => {
         fallbackCountRef.current = 0;
@@ -1369,7 +1335,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                 
                 // ALWAYS include emergency anime embeds and movie servers — guaranteed fallbacks
                 const allServersRaw = [...nativeServers, ...emergencyEmbeds, ...movieServersList];
-                const allServers = ServerHealthManager.filterAndSortServers(allServersRaw, 'serverId');
+                const contentKey = `anime:${id}:${currentEp}`;
+                const allServers = ServerHealthManager.filterAndSortServers(allServersRaw, 'serverId', contentKey);
                 setServers(allServers);
                 setServersKey(`${currentEp}-${mode}`);
 
@@ -1389,7 +1356,8 @@ export default function WatchClient({ id: fullId }: { id: string }) {
             } catch (err: any) {
                 if (axios.isCancel(err)) return;
                 console.error("Failed to fetch anime servers, using all fallbacks", err);
-                const fallbackList = [...emergencyEmbeds, ...movieServersList];
+                const contentKey = `anime:${id}:${currentEp}`;
+                const fallbackList = ServerHealthManager.filterAndSortServers([...emergencyEmbeds, ...movieServersList], 'serverId', contentKey);
                 setServers(fallbackList);
                 setServersKey(`${currentEp}-${mode}`);
                 if (fallbackList.length > 0 && (!selectedServer || !fallbackList.some(s => s.serverId === selectedServer))) {
@@ -1431,7 +1399,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     const emergencyUrl = serverWithUrl.getUrl?.();
                     if (!emergencyUrl || typeof emergencyUrl !== 'string' || emergencyUrl.trim() === '') {
                         console.warn('[WatchPage] Emergency server returned empty URL. Auto-switching...');
-                        handleAutoFallback();
+                        handleAutoFallback('invalid_response');
                         return;
                     }
                     setSourceUrl(emergencyUrl);
@@ -1439,7 +1407,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     if (!tmdbId || tmdbId === "0") {
                         if (currentSeq !== sourceSeqRef.current) return;
                         console.warn('[WatchPage] TMDB Metadata missing for this title. Auto-switching to next server...');
-                        handleAutoFallback();
+                        handleAutoFallback('unsupported_content');
                         return;
                     }
                     const isMovie = show.type?.toLowerCase() === 'movie' || show.totalEpisodes === 1 || isMovieContent(show);
@@ -1453,7 +1421,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     }
                     if (!iframeUrl || typeof iframeUrl !== 'string' || iframeUrl.trim() === "") {
                         console.warn('[WatchPage] Empty embed URL from server. Auto-switching...');
-                        handleAutoFallback();
+                        handleAutoFallback('invalid_response');
                         return;
                     }
                     if (currentSeq !== sourceSeqRef.current) return;
@@ -1531,7 +1499,7 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     const rawUrl = selected?.url || selected?.link;
                     if (!rawUrl || typeof rawUrl !== 'string' || rawUrl.trim() === '') {
                         console.warn('[WatchPage] Invalid or empty source URL received. Auto-switching to next server...');
-                        handleAutoFallback();
+                        handleAutoFallback('invalid_response');
                         return;
                     }
                     const absoluteUrl = rawUrl.startsWith('http')
@@ -1560,13 +1528,13 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                     // No links found — auto-switch to next server
                     console.warn('[WatchPage] No links from native server. Rotating...');
                     if (currentSeq !== sourceSeqRef.current) return;
-                    handleAutoFallback();
+                    handleAutoFallback('unsupported_content');
                 }
             } catch (err: any) {
                 if (axios.isCancel(err) || controller.signal.aborted) return;
                 if (currentSeq !== sourceSeqRef.current) return;
                 console.error('[WatchPage] Native server failed:', err.message);
-                handleAutoFallback();
+                handleAutoFallback('network_timeout');
             } finally {
                 if (currentSeq === sourceSeqRef.current) {
                     setLoadingSource(false);
@@ -1850,14 +1818,22 @@ export default function WatchClient({ id: fullId }: { id: string }) {
                                                 const text = doc.body?.innerText || '';
                                                 if (text.includes('Embed fetch failed') || text.includes('Embed proxy error') || text.includes('404 Not Found') || text.includes('502 Bad Gateway') || text.includes('Server Not Responding')) {
                                                     console.warn('[ToonPlayer] Proxy error detected inside anime iframe. Triggering autoscan fallback...');
-                                                    handleAutoFallback();
+                                                    handleAutoFallback('origin_unreachable');
+                                                    return;
                                                 }
                                             }
-                                        } catch (err) {}
+                                            if (selectedServer) {
+                                                ServerHealthManager.recordSuccess(selectedServer);
+                                            }
+                                        } catch (err) {
+                                            if (selectedServer) {
+                                                ServerHealthManager.recordSuccess(selectedServer);
+                                            }
+                                        }
                                     }}
                                     onError={() => {
                                         setError("Iframe failed to load.");
-                                        handleAutoFallback();
+                                        handleAutoFallback('embedding_rejected');
                                     }}
                                 />
                                 

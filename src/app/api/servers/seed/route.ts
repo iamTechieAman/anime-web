@@ -1,60 +1,52 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { ServerModel } from '@/models/Server';
-const INITIAL_SERVERS = [
-    // 0. Toon Player VIP (Peachify)
-    {
-        serverId: 'peachify_movie', name: 'Toon Player VIP', badge: 'Multi-Audio', type: 'movie',
-        urlTemplate: 'https://peachify.top/?type=movie&id={id}&autoplay=1', qualityScore: 105
-    },
-    {
-        serverId: 'peachify_tv', name: 'Toon Player VIP', badge: 'Multi-Audio', type: 'tv',
-        urlTemplate: 'https://peachify.top/?type=tv&id={id}&s={s}&e={e}&autoplay=1', qualityScore: 105
-    },
-    // 1. Toon Player Core (VidCore)
-    {
-        serverId: 'vidcore_movie', name: 'Toon Player Core', badge: 'Core HD', type: 'movie',
-        urlTemplate: 'https://vidcore.net/movie/{id}', qualityScore: 104
-    },
-    {
-        serverId: 'vidcore_tv', name: 'Toon Player Core', badge: 'Core HD', type: 'tv',
-        urlTemplate: 'https://vidcore.net/tv/{id}/{s}/{e}', qualityScore: 104
-    },
-    // 2. Toon Player Master (EmbedMaster)
-    {
-        serverId: 'embedmaster_movie', name: 'Toon Player Master', badge: 'Master', type: 'movie',
-        urlTemplate: 'https://embedmaster.link/movie/{id}', qualityScore: 103
-    },
-    {
-        serverId: 'embedmaster_tv', name: 'Toon Player Master', badge: 'Master', type: 'tv',
-        urlTemplate: 'https://embedmaster.link/tv/{id}/{s}/{e}', qualityScore: 103
-    },
-    // 3. Toon Player Fast (VidFast)
-    {
-        serverId: 'vidfast_movie', name: 'Toon Player Fast', badge: 'Auto-Next', type: 'movie',
-        urlTemplate: 'https://vidfast.pro/movie/{id}?autoPlay=true&title=true&poster=true', qualityScore: 102
-    },
-    {
-        serverId: 'vidfast_tv', name: 'Toon Player Fast', badge: 'Auto-Next', type: 'tv',
-        urlTemplate: 'https://vidfast.pro/tv/{id}/{s}/{e}?autoPlay=true&title=true&poster=true&nextButton=true', qualityScore: 102
-    },
-    // 4. Toon Player Nest (VidNest)
-    {
-        serverId: 'vidnest_movie', name: 'Toon Player Nest', badge: 'Ultra', type: 'movie',
-        urlTemplate: 'https://vidnest.fun/movie/{id}', qualityScore: 101
-    },
-    {
-        serverId: 'vidnest_tv', name: 'Toon Player Nest', badge: 'Ultra', type: 'tv',
-        urlTemplate: 'https://vidnest.fun/tv/{id}/{s}/{e}', qualityScore: 101
-    },
-    // 5. Toon Player Link (VidLink)
+
+export const INITIAL_SERVERS = [
+    // 1. Toon Player Link (VidLink) - Highest Reliability
     {
         serverId: 'vidlink_movie', name: 'Toon Player Link', badge: 'VidLink', type: 'movie',
-        urlTemplate: 'https://vidlink.pro/movie/{id}?primaryColor=7C3AED&title=false&autoplay=true', qualityScore: 100
+        urlTemplate: 'https://vidlink.pro/movie/{id}?primaryColor=7C3AED&title=false&autoplay=true', qualityScore: 105
     },
     {
         serverId: 'vidlink_tv', name: 'Toon Player Link', badge: 'VidLink', type: 'tv',
-        urlTemplate: 'https://vidlink.pro/tv/{id}/{s}/{e}?primaryColor=7C3AED&title=false&autoplay=true', qualityScore: 100
+        urlTemplate: 'https://vidlink.pro/tv/{id}/{s}/{e}?primaryColor=7C3AED&title=false&autoplay=true', qualityScore: 105
+    },
+    // 2. Toon Player Nest (VidNest) - High Reliability
+    {
+        serverId: 'vidnest_movie', name: 'Toon Player Nest', badge: 'Ultra', type: 'movie',
+        urlTemplate: 'https://vidnest.fun/movie/{id}', qualityScore: 104
+    },
+    {
+        serverId: 'vidnest_tv', name: 'Toon Player Nest', badge: 'Ultra', type: 'tv',
+        urlTemplate: 'https://vidnest.fun/tv/{id}/{s}/{e}', qualityScore: 104
+    },
+    // 3. Toon Player Core (VidCore) - Updated to vidcore.io
+    {
+        serverId: 'vidcore_movie', name: 'Toon Player Core', badge: 'Core HD', type: 'movie',
+        urlTemplate: 'https://vidcore.io/movie/{id}', qualityScore: 103
+    },
+    {
+        serverId: 'vidcore_tv', name: 'Toon Player Core', badge: 'Core HD', type: 'tv',
+        urlTemplate: 'https://vidcore.io/tv/{id}/{s}/{e}', qualityScore: 103
+    },
+    // 4. Toon Player Master (EmbedMaster)
+    {
+        serverId: 'embedmaster_movie', name: 'Toon Player Master', badge: 'Master', type: 'movie',
+        urlTemplate: 'https://embedmaster.link/movie/{id}', qualityScore: 102
+    },
+    {
+        serverId: 'embedmaster_tv', name: 'Toon Player Master', badge: 'Master', type: 'tv',
+        urlTemplate: 'https://embedmaster.link/tv/{id}/{s}/{e}', qualityScore: 102
+    },
+    // 5. Toon Player Fast (VidFast) - Updated to vidfast.vc
+    {
+        serverId: 'vidfast_movie', name: 'Toon Player Fast', badge: 'Auto-Next', type: 'movie',
+        urlTemplate: 'https://vidfast.vc/movie/{id}?autoPlay=true&title=true&poster=true', qualityScore: 101
+    },
+    {
+        serverId: 'vidfast_tv', name: 'Toon Player Fast', badge: 'Auto-Next', type: 'tv',
+        urlTemplate: 'https://vidfast.vc/tv/{id}/{s}/{e}?autoPlay=true&title=true&poster=true&nextButton=true', qualityScore: 101
     },
     // 6. Toon Player Rock (VidRock)
     {
@@ -82,6 +74,15 @@ const INITIAL_SERVERS = [
     {
         serverId: 'vixsrc_tv', name: 'Toon Player Vix', badge: 'HD', type: 'tv',
         urlTemplate: 'https://vixsrc.to/tv/{id}/{s}/{e}', qualityScore: 97
+    },
+    // 9. Toon Player VIP (Peachify - Mirror Fallback)
+    {
+        serverId: 'peachify_movie', name: 'Toon Player VIP', badge: 'Multi-Audio', type: 'movie',
+        urlTemplate: 'https://peachify.top/?type=movie&id={id}&autoplay=1', qualityScore: 60
+    },
+    {
+        serverId: 'peachify_tv', name: 'Toon Player VIP', badge: 'Multi-Audio', type: 'tv',
+        urlTemplate: 'https://peachify.top/?type=tv&id={id}&s={s}&e={e}&autoplay=1', qualityScore: 60
     },
     // ANIME SERVERS
     // 1. Toon4K Anime

@@ -6,7 +6,7 @@ import Script from "next/script";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ServerHealthManager } from "@/utils/ServerHealthManager";
+import { ServerHealthManager, type FailureReason } from "@/utils/ServerHealthManager";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, ArrowLeft, Star, Clock, Calendar, Globe, Users, ChevronDown, ChevronUp, X, Shield, Server, Sparkles, Share2, Heart, Zap, Loader2, Check, Download, ExternalLink, ChevronRight, ChevronLeft, RefreshCw, LayoutGrid, List, Search, Film, Tag, Trophy, Tv, MonitorPlay, Info, Layers, ChevronUp as ChevronUpIcon, Volume2, VolumeX, Minimize2, Maximize2 } from "lucide-react";
 import { MovieRow, type MovieItem } from "@/components/MovieCard";
@@ -28,40 +28,13 @@ const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const SERVERS = [
     {
-        id: 'vidcore',
-        name: 'Toon Player Core',
-        badge: 'Core HD',
+        id: 'vidlink',
+        name: 'Toon Player Link',
+        badge: 'VidLink',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
-                ? `https://vidcore.net/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vidcore.net/movie/${id}`,
-    },
-    {
-        id: 'embedmaster',
-        name: 'Toon Player Master',
-        badge: 'Master',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}`
-                : `https://embedmaster.link/movie/${id}`,
-    },
-    {
-        id: 'peachify',
-        name: 'Toon Player VIP',
-        badge: 'Multi-Audio',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://peachify.top/?type=tv&id=${id}&s=${s || 1}&e=${e || 1}&autoplay=1`
-                : `https://peachify.top/?type=movie&id=${id}&autoplay=1`,
-    },
-    {
-        id: 'vidfast',
-        name: 'Toon Player Fast',
-        badge: 'Auto-Next',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidfast.pro/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true`
-                : `https://vidfast.pro/movie/${id}?autoPlay=true&title=true&poster=true`,
+                ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
+                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
     },
     {
         id: 'vidnest',
@@ -73,13 +46,22 @@ const SERVERS = [
                 : `https://vidnest.fun/movie/${id}`,
     },
     {
-        id: 'vidlink',
-        name: 'Toon Player Link',
-        badge: 'VidLink',
+        id: 'vidcore',
+        name: 'Toon Player Core',
+        badge: 'Core HD',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
-                ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}?primaryColor=7C3AED&title=false&autoplay=true`
-                : `https://vidlink.pro/movie/${id}?primaryColor=7C3AED&title=false&autoplay=true`,
+                ? `https://vidcore.io/tv/${id}/${s || 1}/${e || 1}`
+                : `https://vidcore.io/movie/${id}`,
+    },
+    {
+        id: 'embedmaster',
+        name: 'Toon Player Master',
+        badge: 'Master',
+        getUrl: (type: string, id: string, s?: number, e?: number) =>
+            type === 'tv'
+                ? `https://embedmaster.link/tv/${id}/${s || 1}/${e || 1}`
+                : `https://embedmaster.link/movie/${id}`,
     },
     {
         id: 'vidrock',
@@ -91,40 +73,13 @@ const SERVERS = [
                 : `https://vidrock.net/movie/${id}`,
     },
     {
-        id: 'vidking',
-        name: 'Toon Player King',
-        badge: 'Cinema',
+        id: 'vidfast',
+        name: 'Toon Player Fast',
+        badge: 'Auto-Next',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
-                ? `https://www.vidking.net/embed/tv/${id}/${s || 1}/${e || 1}`
-                : `https://www.vidking.net/embed/movie/${id}`,
-    },
-    {
-        id: 'vixsrc',
-        name: 'Toon Player Vix',
-        badge: 'HD',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vixsrc.to/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vixsrc.to/movie/${id}`,
-    },
-    {
-        id: 'videasy',
-        name: 'Toon Player Easy',
-        badge: 'Stream',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://player.videasy.net/tv/${id}/${s || 1}/${e || 1}`
-                : `https://player.videasy.net/movie/${id}`,
-    },
-    {
-        id: 'vidsrc_embed_ru',
-        name: 'Toon Player VidSrc',
-        badge: 'VidSrc',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=1&ds_lang=en`
-                : `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`,
+                ? `https://vidfast.vc/tv/${id}/${s || 1}/${e || 1}?autoPlay=true&title=true&poster=true&nextButton=true`
+                : `https://vidfast.vc/movie/${id}?autoPlay=true&title=true&poster=true`,
     },
     {
         id: 'smashystream',
@@ -136,28 +91,21 @@ const SERVERS = [
                 : `https://player.smashystream.com/movie/${id}`,
     },
     {
-        id: 'vidora',
-        name: 'Toon Player Vidora',
-        badge: 'Alt',
+        id: 'vidsrc_embed_ru',
+        name: 'Toon Player VidSrc',
+        badge: 'VidSrc',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             type === 'tv'
-                ? `https://vidora.su/tv/${id}/${s || 1}/${e || 1}`
-                : `https://vidora.su/movie/${id}`,
+                ? `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}&autoplay=1&ds_lang=en`
+                : `https://vidsrc-embed.ru/embed/movie?tmdb=${id}&autoplay=1&ds_lang=en`,
     },
-    {
-        id: 'movies111',
-        name: 'Toon 111',
-        badge: 'Mirror',
-        getUrl: (type: string, id: string, s?: number, e?: number) =>
-            type === 'tv'
-                ? `https://111movies.com/tv/${id}/${s || 1}/${e || 1}`
-                : `https://111movies.com/movie/${id}`,
-    },
+    // Kartoons Direct: dedicated cartoon scraper server exclusively available when media type is cartoon
     {
         id: 'kartoons',
         name: 'Kartoons Direct',
         badge: 'Toon Player',
         requiresScrape: true,
+        type: 'cartoon',
         getUrl: (type: string, id: string, s?: number, e?: number) =>
             `/api/scrape/kartoons?showId=${id}&s=${s || 1}&e=${e || 1}&type=${type}`,
     },
@@ -179,17 +127,8 @@ const ANIME_SERVERS = [
         badge: "Core HD",
         getUrl: (id: string, ep: number, tmdbId: string | null) =>
             tmdbId 
-                ? `https://vidcore.net/tv/${tmdbId}/1/${ep}` 
+                ? `https://vidcore.io/tv/${tmdbId}/1/${ep}` 
                 : `https://vidsrc.cc/v2/embed/anime/${id}/${ep}`
-    },
-    {
-        id: "peachify_anime",
-        name: "Toon Player VIP",
-        badge: "Multi-Audio",
-        getUrl: (id: string, ep: number, tmdbId: string | null) =>
-            tmdbId 
-                ? `https://peachify.top/?type=tv&id=${tmdbId}&s=1&e=${ep}&autoplay=1` 
-                : `https://vidsrc.to/embed/anime/${id}/${ep}`
     },
     {
         id: "vidsrc_pro_anime",
@@ -1129,15 +1068,17 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     // User Settings Support
     const currentMediaTypeServers = useMemo(() => {
+        const contentKey = `${type}:${id}`;
         const filtered = typeof type === "string"
             ? serversList.filter(s => {
+                if (s.type === 'cartoon') return type === 'cartoon';
                 if (!s.type) return true;
                 const targetType = (type === "cartoon") ? "tv" : type;
                 return s.type === targetType;
             })
             : serversList;
-        return ServerHealthManager.filterAndSortServers(filtered, 'id');
-    }, [type, serversList]);
+        return ServerHealthManager.filterAndSortServers(filtered, 'id', contentKey);
+    }, [type, id, serversList]);
 
     // Watchlist
     const inWatchlist = isInWatchlist(id);
@@ -1524,10 +1465,11 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
 
     const fallbackCountRef = useRef<number>(0);
 
-    // Automatic Provider Fallback Engine (Intelligent Circular Rotation)
-    const handleAutoFallback = useCallback(() => {
+    // Automatic Provider Fallback Engine (Intelligent Content-Aware Rotation)
+    const handleAutoFallback = useCallback((reason: FailureReason = 'generic_failure') => {
         if (!activeServer) return;
         
+        const contentKey = `${type}:${activeId}`;
         const listToUse = isAnimeServer ? ANIME_SERVERS : currentMediaTypeServers;
         if (!listToUse || listToUse.length === 0) {
             setSourceError(true);
@@ -1537,12 +1479,12 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
         setFailedServers(prev => {
             const nextFailed = new Set(prev);
             nextFailed.add(activeServer.id);
-            ServerHealthManager.blacklistServer(activeServer.id);
+            ServerHealthManager.recordFailure(activeServer.id, reason, contentKey);
 
             // Show error screen ONLY if every single server in the available servers list has failed
             const allFailed = listToUse.every(s => nextFailed.has(s.id));
             if (allFailed || nextFailed.size >= listToUse.length) {
-                console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted. Displaying fallback UI.`);
+                console.warn(`[ToonPlayer Fallback] All ${listToUse.length} servers exhausted for ${contentKey}. Displaying fallback UI.`);
                 setSourceError(true);
                 return nextFailed;
             }
@@ -1552,17 +1494,30 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             const startIdx = currentIndex >= 0 ? currentIndex : 0;
             let nextServer = null;
 
+            // First pass: try candidates that are not failed and verified available for this content
             for (let i = 1; i <= listToUse.length; i++) {
                 const nextIndex = (startIdx + i) % listToUse.length;
                 const candidate = listToUse[nextIndex];
-                if (candidate && !nextFailed.has(candidate.id)) {
+                if (candidate && !nextFailed.has(candidate.id) && ServerHealthManager.isAvailable(candidate.id, contentKey)) {
                     nextServer = candidate;
                     break;
                 }
             }
 
+            // Second pass fallback: any candidate not yet attempted
+            if (!nextServer) {
+                for (let i = 1; i <= listToUse.length; i++) {
+                    const nextIndex = (startIdx + i) % listToUse.length;
+                    const candidate = listToUse[nextIndex];
+                    if (candidate && !nextFailed.has(candidate.id)) {
+                        nextServer = candidate;
+                        break;
+                    }
+                }
+            }
+
             if (nextServer) {
-                console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) failed. Auto-switching to next server: ${nextServer.name} (${nextServer.id})`);
+                console.warn(`[ToonPlayer Fallback] Server ${activeServer.name} (${activeServer.id}) failed (${reason}). Auto-switching to next server: ${nextServer.name} (${nextServer.id})`);
                 setLoadingStatus(`Switching to backup server: ${nextServer.name}...`);
                 if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
                 manualServerRef.current = nextServer.id;
@@ -1575,7 +1530,7 @@ export default function WatchClient({ type: initialType, id: encodedRawId }: { t
             }
             return nextFailed;
         });
-    }, [activeServer, currentMediaTypeServers, isAnimeServer]);
+    }, [activeServer, currentMediaTypeServers, isAnimeServer, type, id]);
 
     // Manual "Retry All Servers" handler: resets failed servers tracker and retries Server 1
     const handleResetAndRetryAllServers = useCallback(() => {
@@ -2011,14 +1966,20 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                         // Prevent duplicate state setting
                         setCurrentServerUrl(prevUrl => (prevUrl !== newUrl ? newUrl : prevUrl));
                     } else {
-                        console.warn('[Scraper API] Extract failed, switching server...');
-                        handleAutoFallback();
+                        const reason: FailureReason = res.data?.code === 'UNSUPPORTED_CONTENT'
+                            ? 'unsupported_content'
+                            : 'scraper_extraction_error';
+                        console.warn(`[Scraper API] Extract failed (${reason}), switching server...`);
+                        handleAutoFallback(reason);
                     }
                 })
                 .catch(err => {
                     if (!axios.isCancel(err)) {
+                        const reason: FailureReason = err.code === 'ECONNABORTED'
+                            ? 'network_timeout'
+                            : 'generic_failure';
                         console.warn('[Scraper API] Error during scrape, switching server:', err.message);
-                        handleAutoFallback();
+                        handleAutoFallback(reason);
                     }
                 });
             return () => controller.abort();
@@ -2224,9 +2185,12 @@ const seasonCacheMap = new Map<string, EpisodeInfo[]>();
                             src={currentServerUrl}
                             reloadKey={reloadCount}
                             title={`${title} - ToonPlayer`}
-                            onError={handleAutoFallback}
+                            onError={() => handleAutoFallback('embedding_rejected')}
                             onLoad={() => {
                                 setPlayerLoaded(true);
+                                if (activeServer?.id) {
+                                    ServerHealthManager.recordSuccess(activeServer.id, `${type}:${activeId}`);
+                                }
                             }}
                         />
                     ) : sourceError ? (
